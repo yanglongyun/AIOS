@@ -4,16 +4,14 @@ set -euo pipefail
 # One-click install for Linux (Ubuntu/Debian) and macOS
 # Usage:
 #   bash scripts/install.sh
-#   curl -fsSL https://your-domain/install.sh | bash
 
 REPO_URL="${REPO_URL:-https://github.com/valueriver/aios.git}"
 APP_NAME="${APP_NAME:-aios}"
-LOCAL_PORT="${LOCAL_PORT:-3000}"
-APPS_PORT="${APPS_PORT:-3001}"
+LOCAL_PORT="${LOCAL_PORT:-9700}"
+APPS_PORT="${APPS_PORT:-9701}"
 
 PLATFORM="$(uname -s)"
 
-# 平台默认安装目录
 if [ "$PLATFORM" = "Darwin" ]; then
   APP_DIR="${APP_DIR:-$HOME/aios}"
 else
@@ -22,33 +20,18 @@ fi
 
 # ── 1. 安装系统依赖 ──────────────────────────────────────
 
-echo "[1/6] Check dependencies..."
+echo "[1/5] Check dependencies..."
 
 if [ "$PLATFORM" = "Darwin" ]; then
-  # macOS：没有 brew 就先装 brew
   if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Apple Silicon 路径
     [ -f /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
-
-  # 装 git
-  if ! command -v git >/dev/null 2>&1; then
-    echo "Installing git..."
-    brew install git
-  fi
-
-  # 装 node
-  if ! command -v node >/dev/null 2>&1; then
-    echo "Installing Node.js..."
-    brew install node
-  fi
+  if ! command -v git >/dev/null 2>&1; then brew install git; fi
+  if ! command -v node >/dev/null 2>&1; then brew install node; fi
   NODE_MAJOR="$(node -v | sed 's/v\([0-9]*\).*/\1/')"
-  if [ "${NODE_MAJOR}" -lt 22 ]; then
-    echo "Upgrading Node.js to latest..."
-    brew upgrade node
-  fi
+  if [ "${NODE_MAJOR}" -lt 22 ]; then brew upgrade node; fi
 
 elif [ "$PLATFORM" = "Linux" ]; then
   if ! command -v apt-get >/dev/null 2>&1; then
@@ -58,7 +41,6 @@ elif [ "$PLATFORM" = "Linux" ]; then
   sudo apt-get update -qq
   sudo apt-get install -y curl git build-essential nginx
 
-  # 安装 Node.js 22
   if command -v node >/dev/null 2>&1; then
     NODE_MAJOR="$(node -v | sed 's/v\([0-9]*\).*/\1/')"
   else
@@ -76,7 +58,7 @@ fi
 
 # ── 2. 拉取代码 ──────────────────────────────────────────
 
-echo "[2/6] Pull code..."
+echo "[2/5] Pull code..."
 
 if [ "$PLATFORM" = "Darwin" ]; then
   mkdir -p "$(dirname "$APP_DIR")"
@@ -98,109 +80,122 @@ fi
 
 # ── 3. 安装依赖 + 构建 UI ────────────────────────────────
 
-echo "[3/6] Install deps + build UI..."
+echo "[3/5] Install deps + build UI..."
 cd "$APP_DIR"
 npm install
 npm run build
 npm link
 
-# 确保 npm global bin 在 PATH 里
 NPM_GLOBAL_BIN="$(npm prefix -g)/bin"
 SHELL_RC=""
-if [ -f "$HOME/.zshrc" ]; then
-  SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-  SHELL_RC="$HOME/.bashrc"
-elif [ -f "$HOME/.bash_profile" ]; then
-  SHELL_RC="$HOME/.bash_profile"
+if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then SHELL_RC="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then SHELL_RC="$HOME/.bash_profile"
 fi
 if [ -n "$SHELL_RC" ] && ! grep -q "$NPM_GLOBAL_BIN" "$SHELL_RC" 2>/dev/null; then
   echo "export PATH=\"$NPM_GLOBAL_BIN:\$PATH\"" >> "$SHELL_RC"
 fi
 export PATH="$NPM_GLOBAL_BIN:$PATH"
 
-# ── 4. 初始化 .env ───────────────────────────────────────
+# ── 4. 配置守护进程 ──────────────────────────────────────
 
-echo "[4/6] Init .env..."
-if [ ! -f .env ]; then
-  cp .env.example .env
-fi
-if ! grep -q '^LOCAL_PORT=' .env; then
-  echo "LOCAL_PORT=${LOCAL_PORT}" >> .env
-fi
-if ! grep -q '^APPS_PORT=' .env; then
-  echo "APPS_PORT=${APPS_PORT}" >> .env
-fi
-
-# ── 5. 配置守护进程 ──────────────────────────────────────
-
-echo "[5/6] Setup daemon..."
+echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
 
 if [ "$PLATFORM" = "Darwin" ]; then
-  # macOS: launchd
-  LAUNCH_AGENT_LABEL="ai.${APP_NAME}.server"
-  PLIST_PATH="$HOME/Library/LaunchAgents/${LAUNCH_AGENT_LABEL}.plist"
   LOG_DIR="$HOME/.${APP_NAME}/logs"
   mkdir -p "$LOG_DIR"
 
-  # 停掉旧的（忽略错误）
-  launchctl bootout "gui/$(id -u)/${LAUNCH_AGENT_LABEL}" 2>/dev/null || true
-
-  cat > "$PLIST_PATH" <<EOF
+  # 主服务
+  LABEL_SERVER="ai.${APP_NAME}.server"
+  PLIST_SERVER="$HOME/Library/LaunchAgents/${LABEL_SERVER}.plist"
+  launchctl bootout "gui/$(id -u)/${LABEL_SERVER}" 2>/dev/null || true
+  cat > "$PLIST_SERVER" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key>
-  <string>${LAUNCH_AGENT_LABEL}</string>
+  <key>Label</key><string>${LABEL_SERVER}</string>
   <key>ProgramArguments</key>
   <array>
     <string>${NODE_BIN}</string>
-    <string>${APP_DIR}/index.js</string>
+    <string>${APP_DIR}/server/index.js</string>
   </array>
-  <key>WorkingDirectory</key>
-  <string>${APP_DIR}</string>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>LOCAL_PORT</key>
-    <string>${LOCAL_PORT}</string>
-    <key>APPS_PORT</key>
-    <string>${APPS_PORT}</string>
-  </dict>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>ThrottleInterval</key>
-  <integer>10</integer>
-  <key>StandardOutPath</key>
-  <string>${LOG_DIR}/server.log</string>
-  <key>StandardErrorPath</key>
-  <string>${LOG_DIR}/server.err.log</string>
+  <key>WorkingDirectory</key><string>${APP_DIR}</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <key>StandardOutPath</key><string>${LOG_DIR}/server.log</string>
+  <key>StandardErrorPath</key><string>${LOG_DIR}/server.err.log</string>
 </dict>
 </plist>
 EOF
+  launchctl bootstrap "gui/$(id -u)" "$PLIST_SERVER"
+  launchctl kickstart -k "gui/$(id -u)/${LABEL_SERVER}"
 
-  launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH"
-  launchctl kickstart -k "gui/$(id -u)/${LAUNCH_AGENT_LABEL}"
+  # 应用服务
+  LABEL_APPS="ai.${APP_NAME}.apps"
+  PLIST_APPS="$HOME/Library/LaunchAgents/${LABEL_APPS}.plist"
+  launchctl bootout "gui/$(id -u)/${LABEL_APPS}" 2>/dev/null || true
+  cat > "$PLIST_APPS" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>${LABEL_APPS}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>${NODE_BIN}</string>
+    <string>${APP_DIR}/apps/index.js</string>
+  </array>
+  <key>WorkingDirectory</key><string>${APP_DIR}</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <key>StandardOutPath</key><string>${LOG_DIR}/apps.log</string>
+  <key>StandardErrorPath</key><string>${LOG_DIR}/apps.err.log</string>
+</dict>
+</plist>
+EOF
+  launchctl bootstrap "gui/$(id -u)" "$PLIST_APPS"
+  launchctl kickstart -k "gui/$(id -u)/${LABEL_APPS}"
 
 else
-  # Linux: systemd
   SERVICE_USER="${SERVICE_USER:-$USER}"
+
+  # 主服务
   sudo tee /etc/systemd/system/${APP_NAME}.service >/dev/null <<EOF
 [Unit]
-Description=aios - AI Agent Server
+Description=AIOS - Main Server
 After=network.target
 
 [Service]
 Type=simple
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
-ExecStart=${NODE_BIN} index.js
+ExecStart=${NODE_BIN} server/index.js
 Restart=always
 RestartSec=5
-EnvironmentFile=${APP_DIR}/.env
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # 应用服务
+  sudo tee /etc/systemd/system/${APP_NAME}-apps.service >/dev/null <<EOF
+[Unit]
+Description=AIOS - Apps Server
+After=network.target
+
+[Service]
+Type=simple
+User=${SERVICE_USER}
+WorkingDirectory=${APP_DIR}
+ExecStart=${NODE_BIN} apps/index.js
+Restart=always
+RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
@@ -209,8 +204,8 @@ WantedBy=multi-user.target
 EOF
 
   sudo systemctl daemon-reload
-  sudo systemctl enable "${APP_NAME}"
-  sudo systemctl restart "${APP_NAME}"
+  sudo systemctl enable "${APP_NAME}" "${APP_NAME}-apps"
+  sudo systemctl restart "${APP_NAME}" "${APP_NAME}-apps"
 
   # Nginx 反向代理
   DOMAIN="${DOMAIN:-_}"
@@ -241,30 +236,25 @@ EOF
   sudo systemctl restart nginx
 fi
 
-# ── 6. 完成 ─────────────────────────────────────────────
+# ── 5. 完成 ─────────────────────────────────────────────
 
 echo
 echo "Done."
 echo
 
 if [ "$PLATFORM" = "Darwin" ]; then
-  LAUNCH_AGENT_LABEL="ai.${APP_NAME}.server"
-  PLIST_PATH="$HOME/Library/LaunchAgents/${LAUNCH_AGENT_LABEL}.plist"
-  LOG_DIR="$HOME/.${APP_NAME}/logs"
-  echo "  Service:"
-  echo "    status:  launchctl print gui/$(id -u)/${LAUNCH_AGENT_LABEL}"
-  echo "    stop:    launchctl bootout gui/$(id -u)/${LAUNCH_AGENT_LABEL}"
-  echo "    start:   launchctl bootstrap gui/$(id -u) ${PLIST_PATH}"
-  echo "    logs:    tail -f ${LOG_DIR}/server.log"
+  echo "  主服务:    launchctl print gui/$(id -u)/ai.${APP_NAME}.server"
+  echo "  应用服务:  launchctl print gui/$(id -u)/ai.${APP_NAME}.apps"
+  echo "  日志:      tail -f $HOME/.${APP_NAME}/logs/server.log"
 else
-  echo "  Service:  systemctl status ${APP_NAME}"
-  echo "  Logs:     journalctl -u ${APP_NAME} -f"
-  echo "  URL:      http://<server-ip>"
+  echo "  主服务:    systemctl status ${APP_NAME}"
+  echo "  应用服务:  systemctl status ${APP_NAME}-apps"
+  echo "  日志:      journalctl -u ${APP_NAME} -f"
 fi
 
 echo
-echo "  CLI:      aios"
-echo "  Web:      http://localhost:${LOCAL_PORT}"
+echo "  CLI:   aios"
+echo "  Web:   http://localhost:${LOCAL_PORT}"
 echo
 echo "  注意：如果 aios 命令不可用，请重新加载 shell："
 echo "    source ~/.zshrc   # 或 source ~/.bashrc"

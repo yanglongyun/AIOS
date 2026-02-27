@@ -154,12 +154,11 @@ const filteredLists = computed(() => {
   if (!searchQuery.value) return lists.value
   return lists.value.filter(l => l.topic?.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
-
 const fetchLists = async () => {
   try {
-    const res = await fetch(`${API_BASE}/list`)
+    const res = await fetch(`/list`)
     const data = await res.json()
-    lists.value = data
+    if (data?.success) lists.value = data.data
   } catch (e) {
     console.error(e)
   }

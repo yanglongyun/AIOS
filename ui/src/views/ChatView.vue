@@ -334,10 +334,27 @@ const toggleResult = (m) => { m.expanded = !m.expanded; };
 const closeMenu = () => { if (showMenu.value) showMenu.value = false; };
 const copyText = (text) => { navigator.clipboard?.writeText(text); };
 
+const isNearBottom = () => {
+  const el = msgBox.value;
+  if (!el) return true;
+  const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
+  return distance < 140;
+};
+
 const scrollToBottom = (smooth = true) => {
+  const doScroll = () => {
+    const el = msgBox.value;
+    if (!el) return;
+    // 用 scrollTop 直接跳转更稳定；smooth 仅用于“新消息到来”的场景
+    if (smooth) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    else el.scrollTop = el.scrollHeight;
+  };
+
+  // 初次进入页面时 msgBox 可能还没挂载；多拍几次确保布局稳定后能真正到底
   nextTick(() => {
-    if (!msgBox.value) return;
-    msgBox.value.scrollTo({ top: msgBox.value.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
+    doScroll();
+    requestAnimationFrame(() => doScroll());
+    setTimeout(() => doScroll(), 80);
   });
 };
 
@@ -398,8 +415,15 @@ const openChatFromHistory = async (chat) => {
 };
 
 watch(() => messages.value.length, (newLen, oldLen) => {
+  // 初次加载：直接跳到底，避免 smooth 造成卡顿/滚不到底
+  if (oldLen === 0 && newLen > 0) {
+    scrollToBottom(false);
+    return;
+  }
+  // 用户上滑看历史时不要强行拉回底部
+  if (!isNearBottom()) return;
   if (oldLen > 0 && newLen - oldLen > 5) return;
-  scrollToBottom();
+  scrollToBottom(true);
 });
 
 watch(() => route.fullPath, async () => {
@@ -418,7 +442,12 @@ watch(() => route.fullPath, async () => {
   chatId.value = id; saveLastChatId(id);
   chatTitle.value = typeof route.query.title === 'string' ? route.query.title : '';
   messages.value = []; hasMore.value = false; loadedOffset.value = 0;
-  try { await loadChatPage(id, 0, 20); } catch (e) { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); }
+  try {
+    await loadChatPage(id, 0, 20);
+    scrollToBottom(false);
+  } catch (e) {
+    messages.value.push({ role: 'assistant', content: `错误: ${e.message}` });
+  }
 }, { immediate: true });
 
 onMounted(() => {

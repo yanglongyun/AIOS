@@ -102,7 +102,7 @@ const createNewNote = async () => {
       body: JSON.stringify({ title: '', content: '' })
     })
     await fetchNotes()
-    if (notes.value.length > 0) selectNote(notes.value[0])
+    const result = await res.json(); if (result.success && result.data) { await fetchNotes(); const newNote = notes.value.find(n => n.id === result.data.id); if (newNote) selectNote(newNote); } else { await fetchNotes(); if (notes.value.length > 0) selectNote(notes.value[0]); }
   } catch (e) { console.error(e) }
 }
 

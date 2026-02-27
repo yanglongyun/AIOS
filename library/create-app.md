@@ -2,21 +2,26 @@
 
 ## 概述
 
-AIOS 的应用运行在独立的 apps 服务（端口 3001）上，与核心 server 完全隔离。每个应用是 `apps/` 目录下的一个子目录，有自己的 API、数据库表、前端页面。
+AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 server（端口 9700）完全隔离。每个应用是 `apps/` 目录下的一个子目录，有自己的 API、数据库表、前端页面。
 
 ## 界面结构
 
 ```
-左侧边栏
-├── 聊天入口（顶部）
-│   └── 点击进入 AI 对话
-└── 应用列表（下方）
-    ├── Notebook
-    ├── Files
-    └── ... 新应用添加到这里
+顶部栏（全宽固定）
+├── 汉堡菜单（控制左侧导航面板）
+└── AIOS 标题
+
+左侧导航面板 NavPanel（ui/src/components/NavPanel.vue）
+├── 聊天
+└── 应用列表
+    ├── 已有应用...
+    └── 新应用注册到这里
 ```
 
-新增应用后，需要将其注册到左侧边栏的应用列表中。
+新增应用后，需要：
+1. 在 `ui/src/components/NavPanel.vue` 添加导航入口
+2. 在 `ui/src/views/apps/` 创建页面组件
+3. 在 `ui/src/router/index.js` 注册路由
 
 ## 目录结构
 
@@ -74,9 +79,17 @@ if (path.startsWith('/api/apps/todo/')) {
 initTodoDatabase();
 ```
 
-## 注册到左侧边栏
+## 注册到导航面板
 
-在 UI 的侧边栏组件中添加应用入口，点击后跳转到应用页面。应用页面放在 `ui/src/views/apps/` 目录下。
+在 `ui/src/components/NavPanel.vue` 中添加应用入口，在 `ui/src/router/index.js` 注册路由，应用页面放在 `ui/src/views/apps/` 目录下。
+
+## 移动端适配
+
+- 布局用 flex/grid，避免固定宽度
+- 触摸目标不小于 44px（按钮用 `h-10 w-10` 或以上）
+- 文字最小 `text-sm`
+- 列表/表格在小屏用卡片堆叠替代横向布局
+- 用 Tailwind 响应式前缀（`md:`, `sm:`）处理断点差异
 
 ## 完整示例：Todo 应用
 

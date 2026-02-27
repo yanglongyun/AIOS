@@ -103,7 +103,7 @@
                     </svg>
                     <span class="text-xs text-neutral-600 dark:text-neutral-300 truncate flex-1">{{ m.reason || m.command || '工具调用' }}</span>
                     <!-- 有结果 -->
-                    <span v-else-if="m.result" class="text-xs text-neutral-400 shrink-0">完成</span>
+                    <span v-if="m.result" class="text-xs text-neutral-400 shrink-0">完成</span>
                   </button>
 
                   <!-- 展开内容 -->

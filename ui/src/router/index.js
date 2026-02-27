@@ -3,6 +3,7 @@ import ChatView from '../views/ChatView.vue';
 import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FilesView from '../views/apps/FilesView.vue';
+import FinanceView from '../views/apps/FinanceView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -10,6 +11,7 @@ const routes = [
   { path: '/history', redirect: '/chat' },
   { path: '/notebook', component: NotebookView },
   { path: '/files', component: FilesView },
+  { path: '/finance', component: FinanceView },
   { path: '/settings', component: SettingsView }
 ];
 

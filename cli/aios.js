@@ -3,17 +3,53 @@ import readline from 'readline';
 import { WebSocket } from 'ws';
 import chalk from 'chalk';
 import { randomUUID } from 'crypto';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
 
 const WS_URL = `ws://localhost:9700/ws`;
 const WEB_URL = `http://localhost:9700`;
 const API_URL = `http://localhost:9700/api`;
 
+function startServices() {
+  console.log(chalk.dim('  启动 AIOS 服务...'));
+  const opts = { cwd: ROOT, detached: true, stdio: 'ignore' };
+  spawn('node', ['server/index.js'], opts).unref();
+  spawn('node', ['apps/index.js'], opts).unref();
+}
+
+async function waitReady(retries = 15, delay = 800) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(`${API_URL}/chat/create`, { method: 'POST' });
+      if (res.ok) {
+        const { id } = await res.json();
+        return id;
+      }
+    } catch {}
+    await new Promise(r => setTimeout(r, delay));
+    process.stdout.write('.');
+  }
+  throw new Error('服务启动超时');
+}
+
 async function createChat() {
-  const res = await fetch(`${API_URL}/chat/create`, { method: 'POST' });
-  if (!res.ok) throw new Error(`创建会话失败: ${res.status}`);
-  const { id } = await res.json();
-  return id;
+  try {
+    const res = await fetch(`${API_URL}/chat/create`, { method: 'POST' });
+    if (!res.ok) throw new Error(`${res.status}`);
+    const { id } = await res.json();
+    return id;
+  } catch {
+    // 服务未运行，自动启动
+    startServices();
+    process.stdout.write(chalk.dim('  等待服务就绪'));
+    const id = await waitReady();
+    console.log(chalk.dim(' 就绪\n'));
+    return id;
+  }
 }
 
 // ── 子命令处理 ───────────────────────────────────────────
@@ -82,8 +118,7 @@ async function main() {
   try {
     chatId = await createChat();
   } catch (e) {
-    console.error(chalk.red('连接失败，请确认 AIOS 守护进程正在运行'));
-    console.error(chalk.dim('  ' + e.message));
+    console.error(chalk.red('启动失败: ' + e.message));
     process.exit(1);
   }
 

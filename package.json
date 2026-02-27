@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "main": "server/index.js",
   "bin": {
     "aios": "./cli/aios.js"
   },
   "scripts": {
-    "dev": "node index.js & vite --config ui/vite.config.js ui",
+    "dev": "node server/index.js & node apps/index.js & vite --config ui/vite.config.js ui",
     "build": "vite build --config ui/vite.config.js ui",
-    "start": "node index.js"
+    "start": "node server/index.js",
+    "start:apps": "node apps/index.js"
   },
   "keywords": [],
   "author": "",

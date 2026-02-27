@@ -44,6 +44,18 @@
             记事本
           </button>
 
+          <button @click="goFinance"
+            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+            :class="isFinance
+              ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+              : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"/>
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m12.72-12.72l-1.41 1.41"/>
+            </svg>
+            记账本
+          </button>
+
           <button @click="goFiles"
             class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
             :class="isFiles
@@ -86,6 +98,7 @@ const router = useRouter();
 
 const isChat = computed(() => route.path.startsWith('/chat'));
 const isNotebook = computed(() => route.path === '/notebook');
+const isFinance = computed(() => route.path === '/finance');
 const isFiles = computed(() => route.path === '/files');
 const isSettings = computed(() => route.path === '/settings');
 const closeMobileIfNeeded = () => { if (window.innerWidth < 768) emit('close'); };
@@ -96,6 +109,7 @@ const goChat = async () => {
   closeMobileIfNeeded();
 };
 const goNotebook = async () => { await router.push('/notebook'); closeMobileIfNeeded(); };
+const goFinance = async () => { await router.push('/finance'); closeMobileIfNeeded(); };
 const goFiles = async () => { await router.push('/files'); closeMobileIfNeeded(); };
 const goSettings = async () => { await router.push('/settings'); closeMobileIfNeeded(); };
 

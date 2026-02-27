@@ -26,7 +26,7 @@ export async function handleSmartlistApi(req, res, path) {
     if (!topic) return json(res, { success: false, message: 'Missing topic' }, 400);
     
     // 调用 AI 生成列表
-    const aiResponse = await fetch('http://localhost:9700/api/ai/chat', {
+    const aiResponse = await fetch('http://localhost:9700/api/llm/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -41,7 +41,7 @@ export async function handleSmartlistApi(req, res, path) {
     let items = [];
     
     try {
-      const content = aiData.messages?.[aiData.messages.length - 1]?.content || '[]';
+      const content = aiData?.message?.content || '[]';
       items = JSON.parse(content);
       if (!Array.isArray(items)) items = [];
     } catch (e) {

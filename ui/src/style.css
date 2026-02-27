@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+/* 全局滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+:root:not(.dark) * {
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+.dark *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
+.dark *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+
+textarea { field-sizing: content; }
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.2s steps(1) infinite;
+}
+@keyframes dots {
+  0%   { content: ''; }
+  33%  { content: '.'; }
+  66%  { content: '..'; }
+  100% { content: '...'; }
+}
+
+.typing-cursor::after {
+  content: '▋';
+  animation: blink 1s steps(1) infinite;
+  margin-left: 1px;
+  font-size: 0.9em;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

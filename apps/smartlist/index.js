@@ -1,5 +1,5 @@
-import { json } from '../../utils/json.js';
-import { readBody } from '../../utils/readBody.js';
+import { json } from '../utils/json.js';
+import { readBody } from '../utils/readBody.js';
 import { initSmartlistDatabase, getLists, getListDetail, createList, toggleStar, deleteList, deleteItem } from './db.js';
 
 export { initSmartlistDatabase };

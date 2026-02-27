@@ -1,44 +1,23 @@
 <template>
   <div class="relative min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
 
-    <!-- 顶部标题栏 -->
-    <div class="flex items-center gap-2 px-3 py-2 shrink-0 border-b border-gray-100 dark:border-neutral-800">
-      <!-- sidebar 收起时展开按钮 -->
-      <button v-if="!sidebarOpen"
-        @click="$emit('open-sidebar')"
-        title="展开侧边栏"
-        class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
-        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-          <rect x="1" y="2" width="2.5" height="12" rx="1"/>
-          <rect x="5.5" y="2" width="2.5" height="12" rx="1"/>
-          <path d="M10.5 8l3.5-3.5v7L10.5 8z"/>
+    <!-- 聊天操作栏 -->
+    <div class="flex items-center justify-end gap-1 px-2 py-1 shrink-0 border-b border-gray-100 dark:border-neutral-800">
+      <button @click="goNewChat" title="新对话"
+        class="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
         </svg>
       </button>
-
-      <!-- 当前对话标题 -->
-      <span class="flex-1 min-w-0 truncate text-sm font-medium text-neutral-700 dark:text-neutral-300"
-        :class="!sidebarOpen ? '' : 'pl-1'">
-        {{ activeTab === 'history' ? '历史对话' : (chatTitle || '新对话') }}
-      </span>
-
-      <!-- 右侧操作 -->
-      <div class="flex items-center gap-1 shrink-0">
-        <button @click="goNewChat" title="新对话"
-          class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-        </button>
-        <button @click="activeTab = activeTab === 'history' ? 'chat' : 'history'" title="历史对话"
-          class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer"
-          :class="activeTab === 'history'
-            ? 'text-neutral-700 dark:text-neutral-200 bg-gray-100 dark:bg-neutral-800'
-            : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </button>
-      </div>
+      <button @click="activeTab = activeTab === 'history' ? 'chat' : 'history'" title="历史对话"
+        class="flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer"
+        :class="activeTab === 'history'
+          ? 'text-neutral-700 dark:text-neutral-200 bg-gray-100 dark:bg-neutral-800'
+          : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </button>
     </div>
 
     <!-- 历史面板 -->
@@ -257,8 +236,6 @@ import { marked } from 'marked';
 import { connect, send, on, wsStatus } from '../ws.js';
 import HistoryPanel from '../components/chat/History.vue';
 
-const props = defineProps(['sidebarOpen']);
-defineEmits(['toggle-sidebar', 'open-sidebar']);
 
 const route = useRoute();
 const router = useRouter();

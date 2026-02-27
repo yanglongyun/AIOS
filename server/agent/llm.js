@@ -1,4 +1,4 @@
-export const callLLM = async ({ messages, tools, model, apiUrl, apiKey }) => {
+export const callLLM = async ({ messages, tools, model, apiUrl, apiKey, signal }) => {
   const body = { model, messages };
   if (tools?.length) body.tools = tools;
 
@@ -8,7 +8,8 @@ export const callLLM = async ({ messages, tools, model, apiUrl, apiKey }) => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal
   });
 
   if (!res.ok) {

@@ -12,12 +12,13 @@ const trimMessages = (messages, contextRounds) => {
   return [messages[0], ...messages.slice(cutIndex)];
 };
 
-export const chat = async (chatId, messages, send, { model, contextRounds, apiUrl, apiKey, mode, waitForApproval, saveMessage }) => {
+export const chat = async (chatId, messages, send, { model, contextRounds, apiUrl, apiKey, mode, waitForApproval, saveMessage, signal }) => {
   let round = 0;
 
   while (round++ < MAX_ROUNDS) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     const trimmed = trimMessages(messages, contextRounds);
-    const message = await callLLM({ messages: trimmed, tools, model, apiUrl, apiKey });
+    const message = await callLLM({ messages: trimmed, tools, model, apiUrl, apiKey, signal });
 
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
       const assistantMsg = {

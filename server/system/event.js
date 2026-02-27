@@ -21,10 +21,19 @@ export const createSession = (send) => {
   let chatId = null;
   let messages = [];
   let approvalResolve = null;
+  let abortController = null;
 
   const handleMessage = async (data) => {
     if (data.type === 'ping') {
       send({ type: 'pong' });
+      return;
+    }
+
+    if (data.type === 'abort') {
+      if (abortController) {
+        abortController.abort();
+        abortController = null;
+      }
       return;
     }
 
@@ -69,6 +78,9 @@ export const createSession = (send) => {
       const mode = data.mode || 'auto';
       const waitForApproval = () => new Promise((resolve) => { approvalResolve = resolve; });
 
+      abortController = new AbortController();
+      const { signal } = abortController;
+
       try {
         await chat(chatId, messages, send, {
           model,
@@ -77,10 +89,17 @@ export const createSession = (send) => {
           apiKey,
           mode,
           waitForApproval,
-          saveMessage
+          saveMessage,
+          signal
         });
       } catch (e) {
-        send({ type: 'error', content: e.message });
+        if (e.name === 'AbortError') {
+          send({ type: 'aborted' });
+        } else {
+          send({ type: 'error', content: e.message });
+        }
+      } finally {
+        abortController = null;
       }
     }
   };

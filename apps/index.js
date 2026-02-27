@@ -5,6 +5,7 @@ import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
 import { handleSmartlistApi, initSmartlistDatabase } from './smartlist/index.js';
+import { handleOutlineApi, initOutlineDatabase } from './outline/index.js';
 
 const APPS_PORT = 9701;
 
@@ -44,13 +45,20 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
+  if (path.startsWith('/api/apps/outline/')) {
+    const handled = await handleOutlineApi(req, res, path);
+    if (handled !== false) return;
+  }
+
   json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
 initNotebookDatabase();
 initFinanceDatabase();
 initSmartlistDatabase();
+initOutlineDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);
 });
+

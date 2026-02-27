@@ -4,6 +4,7 @@ import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FilesView from '../views/apps/FilesView.vue';
 import FinanceView from '../views/apps/FinanceView.vue';
+import SmartlistView from '../views/apps/SmartlistView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -12,6 +13,7 @@ const routes = [
   { path: '/notebook', component: NotebookView },
   { path: '/files', component: FilesView },
   { path: '/finance', component: FinanceView },
+  { path: '/smartlist', component: SmartlistView },
   { path: '/settings', component: SettingsView }
 ];
 

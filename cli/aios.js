@@ -133,14 +133,6 @@ async function main() {
   });
 
   ws = connect((socket) => {
-    // 监听 ESC 键打断
-    readline.emitKeypressEvents(process.stdin);
-    process.stdin.on('keypress', (_, key) => {
-      if (key && key.name === 'escape' && busy) {
-        socket.send(JSON.stringify({ type: 'abort' }));
-      }
-    });
-
     // 心跳
     const ping = setInterval(() => {
       if (socket.readyState === WebSocket.OPEN) {

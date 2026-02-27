@@ -33,6 +33,17 @@
       <div class="mt-3 flex flex-col min-h-0 flex-1">
         <div class="px-3 mb-1 text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider shrink-0">应用</div>
         <div class="overflow-y-auto flex-1 space-y-0.5">
+          <button @click="goSmartlist"
+            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+            :class="isSmartlist
+              ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+              : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            智能列表
+          </button>
+
           <button @click="goNotebook"
             class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
             :class="isNotebook
@@ -97,6 +108,7 @@ const route = useRoute();
 const router = useRouter();
 
 const isChat = computed(() => route.path.startsWith('/chat'));
+const isSmartlist = computed(() => route.path === '/smartlist');
 const isNotebook = computed(() => route.path === '/notebook');
 const isFinance = computed(() => route.path === '/finance');
 const isFiles = computed(() => route.path === '/files');
@@ -108,6 +120,7 @@ const goChat = async () => {
   await router.push(lastId ? `/chat/${lastId}` : { path: '/chat', query: { new: String(Date.now()) } });
   closeMobileIfNeeded();
 };
+const goSmartlist = async () => { await router.push('/smartlist'); closeMobileIfNeeded(); };
 const goNotebook = async () => { await router.push('/notebook'); closeMobileIfNeeded(); };
 const goFinance = async () => { await router.push('/finance'); closeMobileIfNeeded(); };
 const goFiles = async () => { await router.push('/files'); closeMobileIfNeeded(); };
@@ -115,3 +128,4 @@ const goSettings = async () => { await router.push('/settings'); closeMobileIfNe
 
 onMounted(() => {});
 </script>
+

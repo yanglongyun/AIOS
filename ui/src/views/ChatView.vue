@@ -488,6 +488,7 @@ onUnmounted(() => { document.removeEventListener('click', closeMenu); unsubs.for
 
 /* markdown */
 .markdown-body p { margin: 0.5em 0; }
+.markdown-body { overflow-wrap: break-word; word-break: break-word; }
 .markdown-body p:first-child { margin-top: 0; }
 .markdown-body p:last-child { margin-bottom: 0; }
 .markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4 { font-weight: 600; margin: 0.8em 0 0.4em; line-height: 1.3; }
@@ -496,7 +497,7 @@ onUnmounted(() => { document.removeEventListener('click', closeMenu); unsubs.for
 .markdown-body h3 { font-size: 1em; }
 .markdown-body code { background: rgba(0,0,0,0.06); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; font-family: ui-monospace, monospace; }
 .dark .markdown-body code { background: rgba(255,255,255,0.08); }
-.markdown-body pre { background: #f5f7fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; overflow-x: auto; margin: 0.6em 0; }
+.markdown-body pre { background: #f5f7fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; overflow-x: auto; margin: 0.6em 0; max-width: 100%; }
 .dark .markdown-body pre { background: #0d0d0d; border-color: #2a2a2a; }
 .markdown-body pre code { background: none; padding: 0; font-size: 0.8em; white-space: pre; }
 .markdown-body ul,.markdown-body ol { padding-left: 1.5em; margin: 0.4em 0; }
@@ -507,7 +508,7 @@ onUnmounted(() => { document.removeEventListener('click', closeMenu); unsubs.for
 .dark .markdown-body a { color: #60a5fa; }
 .markdown-body hr { border: none; border-top: 1px solid #e5e7eb; margin: 0.8em 0; }
 .dark .markdown-body hr { border-top-color: #2a2a2a; }
-.markdown-body table { border-collapse: collapse; width: 100%; margin: 0.5em 0; font-size: 0.875em; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin: 0.5em 0; font-size: 0.875em; max-width: 100%; table-layout: fixed; }
 .markdown-body th,.markdown-body td { border: 1px solid #e5e7eb; padding: 6px 12px; text-align: left; }
 .dark .markdown-body th,.dark .markdown-body td { border-color: #2a2a2a; }
 .markdown-body th { background: rgba(0,0,0,0.03); font-weight: 600; }

@@ -20,7 +20,7 @@
         class="fixed inset-0 z-20 md:hidden" />
       <div v-show="sidebarOpen"
         class="shrink-0 w-[220px] h-full border-r border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 z-30 max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-xl">
-        <NavPanel />
+        <NavPanel @navigate="onNavigate" />
       </div>
       <div class="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
         <RouterView />
@@ -35,6 +35,10 @@ import { RouterView } from 'vue-router';
 import NavPanel from './components/NavPanel.vue';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
+
+const onNavigate = () => {
+  if (window.innerWidth < 768) sidebarOpen.value = false;
+};
 
 const onResize = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;

@@ -77,15 +77,20 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+const emit = defineEmits(['navigate']);
 const route = useRoute();
 const router = useRouter();
 
 const isChat = computed(() => route.path.startsWith('/chat'));
 const is = (path) => route.path === path;
 
-const go = (path) => router.push(path);
+const go = (path) => {
+  emit('navigate');
+  router.push(path);
+};
 
 const goChat = async () => {
+  emit('navigate');
   const lastId = localStorage.getItem('lastChatId');
   await router.push(lastId ? `/chat/${lastId}` : { path: '/chat', query: { new: String(Date.now()) } });
 };

@@ -49,7 +49,7 @@
               <span class="text-xs text-neutral-400">加载更多...</span>
             </div>
 
-            <div v-for="(m, i) in messages" :key="i" class="mb-6">
+            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-6">
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
@@ -217,6 +217,19 @@ const msgBox = ref(null);
 const textarea = ref(null);
 const composing = ref(false);
 
+const seenKeys = ref(new Set());
+
+const addUniqueMessages = (items, { prepend = false } = {}) => {
+  const uniq = [];
+  for (const it of items) {
+    const k = it?._key;
+    if (k && seenKeys.value.has(k)) continue;
+    if (k) seenKeys.value.add(k);
+    uniq.push(it);
+  }
+  messages.value = prepend ? [...uniq, ...messages.value] : uniq;
+};
+
 const unsubs = [];
 const LAST_CHAT_KEY = 'lastChatId';
 
@@ -240,10 +253,14 @@ const extractSuggestions = (text = '') => {
 const parseMessages = (raw) => {
   const list = [];
   for (const m of raw) {
+    const base = m && m._id != null ? `db:${m._id}` : null;
+
     if (m.role === 'assistant' && m.tool_calls?.length) {
+      let tcIdx = 0;
       for (const tc of m.tool_calls) {
         const args = JSON.parse(tc.function.arguments || '{}');
-        list.push({ type: 'tool_call', command: args.command, reason: args.reason });
+        list.push({ type: 'tool_call', command: args.command, reason: args.reason, _key: base ? `${base}:tool_call:${tcIdx}` : undefined });
+        tcIdx++;
       }
       continue;
     }
@@ -259,10 +276,12 @@ const parseMessages = (raw) => {
     }
     if (m.role === 'assistant' && m.content) {
       const parsed = extractSuggestions(m.content);
-      list.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions });
+      list.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions, _key: base ? `${base}:assistant` : undefined });
       continue;
     }
-    if (m.role === 'user' && m.content) list.push({ role: m.role, content: m.content });
+    if (m.role === 'user' && m.content) {
+      list.push({ role: m.role, content: m.content, _key: base ? `${base}:user` : undefined });
+    }
   }
   return list;
 };
@@ -273,13 +292,19 @@ const loadChatPage = async (id, offset = 0, limit = 20) => {
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
   const parsed = parseMessages(data.messages);
-  messages.value = offset > 0 ? [...parsed, ...messages.value] : parsed;
+  if (offset <= 0) {
+    seenKeys.value = new Set();
+    addUniqueMessages(parsed, { prepend: false });
+  } else {
+    addUniqueMessages(parsed, { prepend: true });
+  }
 };
 
 const createNewChat = async (title = '新对话') => {
   const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
   chatId.value = data.id; chatTitle.value = title; saveLastChatId(data.id);
   messages.value = []; hasMore.value = false; loadedOffset.value = 0;
+  seenKeys.value = new Set();
 };
 
 const ensureChatId = async (text) => {
@@ -343,7 +368,9 @@ const handleSend = () => {
   if (!text || busy.value) return;
   busy.value = true;
   ensureChatId(text).then((id) => {
-    messages.value.push({ role: 'user', content: text });
+    const _key = `client:${Date.now()}:user`;
+    seenKeys.value.add(_key);
+    messages.value.push({ role: 'user', content: text, _key });
     send({ type: 'message', chatId: id, content: text, mode: 'auto' });
     input.value = '';
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
@@ -393,6 +420,7 @@ watch(() => route.fullPath, async () => {
   chatId.value = id; saveLastChatId(id);
   chatTitle.value = typeof route.query.title === 'string' ? route.query.title : '';
   messages.value = []; hasMore.value = false; loadedOffset.value = 0;
+  seenKeys.value = new Set();
   try {
     await loadChatPage(id, 0, 20);
     scrollToBottom(false);
@@ -406,28 +434,44 @@ onMounted(() => {
 
   unsubs.push(on('tool_confirm', (data) => {
     // 兼容后端 ask 模式：前端始终自动批准并按 tool_call 展示
-    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, expanded: true });
+    const _key = `ws:${Date.now()}:tool_confirm`;
+    seenKeys.value.add(_key);
+    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, expanded: true, _key });
     if (!approvalSent) {
       approvalSent = true;
       send({ type: 'tool_approve' });
     }
   }));
   unsubs.push(on('tool_approved', (data) => { approvalSent = false; }));
-  unsubs.push(on('tool_call', (data) => { messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason }); }));
+  unsubs.push(on('tool_call', (data) => {
+    const _key = `ws:${Date.now()}:tool_call`;
+    seenKeys.value.add(_key);
+    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, _key });
+  }));
   unsubs.push(on('tool_result', (data) => {
     for (let i = messages.value.length - 1; i >= 0; i--) {
       const m = messages.value[i];
       if (m.type === 'tool_call' && !m.result) { m.result = data.content; return; }
     }
-    messages.value.push({ type: 'tool_result', content: data.content });
+    const _key = `ws:${Date.now()}:tool_result`;
+    seenKeys.value.add(_key);
+    messages.value.push({ type: 'tool_result', content: data.content, _key });
   }));
   unsubs.push(on('reply', (data) => {
     approvalSent = false;
     const parsed = extractSuggestions(data.content || '');
-    messages.value.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions });
+    const _key = `ws:${Date.now()}:assistant`;
+    seenKeys.value.add(_key);
+    messages.value.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions, _key });
     busy.value = false;
   }));
-  unsubs.push(on('error', (data) => { approvalSent = false; messages.value.push({ role: 'assistant', content: `错误: ${data.content}` }); busy.value = false; }));
+  unsubs.push(on('error', (data) => {
+    approvalSent = false;
+    const _key = `ws:${Date.now()}:error`;
+    seenKeys.value.add(_key);
+    messages.value.push({ role: 'assistant', content: `错误: ${data.content}`, _key });
+    busy.value = false;
+  }));
 });
 
 onUnmounted(() => { unsubs.forEach(fn => fn()); });

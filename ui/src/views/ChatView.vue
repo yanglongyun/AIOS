@@ -87,8 +87,8 @@
                 </div>
               </div>
 
-              <!-- 工具调用（tool_call / confirm），可折叠 -->
-              <div v-else-if="m.type === 'tool_call' || m.type === 'confirm'" class="flex items-start gap-3">
+              <!-- 工具调用（tool_call），可折叠 -->
+              <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-3">
                 <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800">
                   <svg class="w-3.5 h-3.5 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -102,12 +102,6 @@
                       <path d="M9 18l6-6-6-6"/>
                     </svg>
                     <span class="text-xs text-neutral-600 dark:text-neutral-300 truncate flex-1">{{ m.reason || m.command || '工具调用' }}</span>
-                    <!-- confirm 待确认 -->
-                    <span v-if="m.type === 'confirm' && m.pending" class="text-xs text-amber-600 dark:text-amber-400 shrink-0">待确认</span>
-                    <!-- confirm 已处理 -->
-                    <span v-else-if="m.type === 'confirm' && m.status" class="text-xs shrink-0" :class="m.status === 'approved' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'">
-                      {{ m.status === 'approved' ? '✓ 已允许' : '✗ 已拒绝' }}
-                    </span>
                     <!-- 有结果 -->
                     <span v-else-if="m.result" class="text-xs text-neutral-400 shrink-0">完成</span>
                   </button>
@@ -116,11 +110,6 @@
                   <div v-if="m.expanded" class="border-t border-gray-200 dark:border-neutral-700">
                     <!-- command -->
                     <div v-if="m.command" class="px-3 py-2.5 font-mono text-xs text-green-700 dark:text-green-400 bg-white dark:bg-neutral-900 whitespace-pre-wrap break-all">{{ m.command }}</div>
-                    <!-- confirm 按钮 -->
-                    <div v-if="m.type === 'confirm' && m.pending" class="px-3 py-2 flex gap-2 border-t border-gray-100 dark:border-neutral-700/50">
-                      <button @click="handleApprove(true)" class="px-3 py-1 rounded-lg text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 hover:opacity-80 cursor-pointer transition-opacity">允许</button>
-                      <button @click="handleApprove(false)" class="px-3 py-1 rounded-lg text-xs bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 hover:opacity-80 cursor-pointer transition-opacity">拒绝</button>
-                    </div>
                     <!-- result -->
                     <div v-if="m.result" class="px-3 py-2.5 font-mono text-xs text-neutral-500 dark:text-neutral-400 bg-gray-50 dark:bg-neutral-800/40 border-t border-gray-100 dark:border-neutral-700/50 whitespace-pre-wrap break-all max-h-48 overflow-y-auto">{{ m.result }}</div>
                   </div>
@@ -166,41 +155,14 @@
               @keydown.enter.exact="onEnter"
               @compositionstart="composing = true"
               @compositionend="composing = false"
-              @focus="focused = true"
-              @blur="focused = false"
               placeholder="输入消息..."
               rows="1"
               :disabled="busy"
               class="w-full px-3 py-3 bg-transparent text-base md:text-sm leading-relaxed text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none min-h-[52px] max-h-[200px] resize-none overflow-y-auto disabled:opacity-50 pr-12"
             />
 
-            <!-- 底部工具栏 -->
-            <div class="flex items-center px-3 pb-2.5 pt-1 text-gray-500 dark:text-gray-400">
-              <!-- 模式切换 -->
-              <div class="relative">
-                <button type="button" @click.stop="showMenu = !showMenu"
-                  class="flex items-center gap-1 text-xs cursor-pointer transition-colors rounded-full px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10"
-                  :class="mode === 'auto' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'">
-                  <span class="transition-transform inline-block" :class="showMenu ? 'rotate-90' : ''">›</span>
-                  {{ mode === 'auto' ? 'Auto' : 'Ask' }}
-                </button>
-                <div v-if="showMenu"
-                  class="absolute bottom-full left-0 mb-2 rounded-xl overflow-hidden z-10 min-w-[160px] shadow-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-                  <button type="button" @click="mode = 'auto'; showMenu = false"
-                    class="w-full px-4 py-2.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors"
-                    :class="mode === 'auto' ? 'text-green-600 dark:text-green-400' : 'text-neutral-500 dark:text-neutral-400'">
-                    <div class="font-medium mb-0.5">Auto</div>
-                    <div class="opacity-60">自动执行所有命令</div>
-                  </button>
-                  <button type="button" @click="mode = 'ask'; showMenu = false"
-                    class="w-full px-4 py-2.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors border-t border-gray-100 dark:border-neutral-700"
-                    :class="mode === 'ask' ? 'text-yellow-600 dark:text-yellow-400' : 'text-neutral-500 dark:text-neutral-400'">
-                    <div class="font-medium mb-0.5">Ask</div>
-                    <div class="opacity-60">每次执行前需确认</div>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <!-- 底部工具栏（固定一点高度，避免右下角按钮遮挡输入） -->
+            <div class="px-3 pb-2.5 pt-1"></div>
 
             <!-- 发送/停止按钮（绝对定位右下角） -->
             <div class="absolute bottom-2 right-2 flex items-center gap-1.5">
@@ -249,14 +211,11 @@ const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
 const loadedOffset = ref(0);
-const mode = ref('auto');
 const activeTab = ref('chat');
 const input = ref('');
 const msgBox = ref(null);
 const textarea = ref(null);
 const composing = ref(false);
-const showMenu = ref(false);
-const focused = ref(false);
 
 const unsubs = [];
 const LAST_CHAT_KEY = 'lastChatId';
@@ -331,7 +290,6 @@ const ensureChatId = async (text) => {
 
 const goNewChat = () => router.push({ path: '/chat', query: { new: String(Date.now()) } });
 const toggleResult = (m) => { m.expanded = !m.expanded; };
-const closeMenu = () => { if (showMenu.value) showMenu.value = false; };
 const copyText = (text) => { navigator.clipboard?.writeText(text); };
 
 const isNearBottom = () => {
@@ -386,7 +344,7 @@ const handleSend = () => {
   busy.value = true;
   ensureChatId(text).then((id) => {
     messages.value.push({ role: 'user', content: text });
-    send({ type: 'message', chatId: id, content: text, mode: mode.value });
+    send({ type: 'message', chatId: id, content: text, mode: 'auto' });
     input.value = '';
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
   }).catch((e) => { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); busy.value = false; });
@@ -394,15 +352,8 @@ const handleSend = () => {
 
 const stopBusy = () => { busy.value = false; };
 
-const handleApprove = (approved) => {
-  for (let i = messages.value.length - 1; i >= 0; i--) {
-    if (messages.value[i].type === 'confirm' && messages.value[i].pending) {
-      messages.value[i].pending = false; messages.value[i].status = approved ? 'approved' : 'rejected'; break;
-    }
-  }
-  send({ type: approved ? 'tool_approve' : 'tool_reject' });
-  busy.value = true;
-};
+let approvalSent = false;
+
 
 const applySuggestion = (text) => {
   input.value = text;
@@ -451,33 +402,35 @@ watch(() => route.fullPath, async () => {
 }, { immediate: true });
 
 onMounted(() => {
-  document.addEventListener('click', closeMenu);
   if (wsStatus.value === 'disconnected') connect();
 
-  unsubs.push(on('tool_confirm', (data) => { messages.value.push({ type: 'confirm', command: data.command, reason: data.reason, pending: true, expanded: true }); busy.value = false; }));
-  unsubs.push(on('tool_approved', (data) => {
-    for (let i = messages.value.length - 1; i >= 0; i--) {
-      const m = messages.value[i];
-      if (m.type === 'confirm' && !m.pending) { m.status = data.approved ? 'approved' : 'rejected'; break; }
+  unsubs.push(on('tool_confirm', (data) => {
+    // 兼容后端 ask 模式：前端始终自动批准并按 tool_call 展示
+    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, expanded: true });
+    if (!approvalSent) {
+      approvalSent = true;
+      send({ type: 'tool_approve' });
     }
   }));
+  unsubs.push(on('tool_approved', (data) => { approvalSent = false; }));
   unsubs.push(on('tool_call', (data) => { messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason }); }));
   unsubs.push(on('tool_result', (data) => {
     for (let i = messages.value.length - 1; i >= 0; i--) {
       const m = messages.value[i];
-      if ((m.type === 'tool_call' || m.type === 'confirm') && !m.result) { m.result = data.content; return; }
+      if (m.type === 'tool_call' && !m.result) { m.result = data.content; return; }
     }
     messages.value.push({ type: 'tool_result', content: data.content });
   }));
   unsubs.push(on('reply', (data) => {
+    approvalSent = false;
     const parsed = extractSuggestions(data.content || '');
     messages.value.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions });
     busy.value = false;
   }));
-  unsubs.push(on('error', (data) => { messages.value.push({ role: 'assistant', content: `错误: ${data.content}` }); busy.value = false; }));
+  unsubs.push(on('error', (data) => { approvalSent = false; messages.value.push({ role: 'assistant', content: `错误: ${data.content}` }); busy.value = false; }));
 });
 
-onUnmounted(() => { document.removeEventListener('click', closeMenu); unsubs.forEach(fn => fn()); });
+onUnmounted(() => { unsubs.forEach(fn => fn()); });
 </script>
 
 <style>
@@ -496,14 +449,6 @@ onUnmounted(() => { document.removeEventListener('click', closeMenu); unsubs.for
 .dark .tool-reason { color: #737373; background: #111; border-bottom-color: #2a2a2a; }
 .tool-command { padding: 10px 14px; font-family: ui-monospace, monospace; font-size: 12px; color: #166534; word-break: break-all; background: #f8fafc; }
 .dark .tool-command { color: #4ade80; background: transparent; }
-.tool-actions { padding: 8px 14px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; }
-.dark .tool-actions { border-top-color: #2a2a2a; }
-.tool-btn { padding: 4px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; border: none; transition: opacity 0.15s; }
-.tool-btn:hover { opacity: 0.8; }
-.tool-btn-approve { background: #dcfce7; color: #166534; }
-.tool-btn-reject  { background: #fee2e2; color: #991b1b; }
-.dark .tool-btn-approve { background: #14532d; color: #86efac; }
-.dark .tool-btn-reject  { background: #450a0a; color: #fca5a5; }
 .tool-status { padding: 6px 14px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280; }
 .dark .tool-status { border-top-color: #2a2a2a; color: #525252; }
 .tool-output-wrap { border-top: 1px solid #e5e7eb; }

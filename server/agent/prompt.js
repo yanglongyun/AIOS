@@ -137,6 +137,16 @@ AIOS 由两个独立 Node.js 进程组成：
 
 两个服务独立启停，互不影响。主服务通过反向代理将 /api/apps/ 转发到应用服务。
 
+应用如需调用 LLM，使用主服务提供的统一接口（无需关心 apiKey/model）：
+\`\`\`js
+const res = await fetch('http://localhost:9700/api/llm/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages: [{ role: 'user', content: '...' }] })
+});
+const { message } = await res.json(); // message.content 是回复文本
+\`\`\`
+
 ## 环境
 - 项目根目录：${cwd}
 - 系统数据库：${cwd}/database/aios.db（SQLite，表：chats, messages, settings）

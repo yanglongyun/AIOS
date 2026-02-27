@@ -43,7 +43,7 @@
         </div>
         <div v-else class="flex-1 flex flex-col items-center justify-center text-neutral-300 dark:text-neutral-600 space-y-4">
           <div class="w-20 h-20 bg-neutral-50 dark:bg-neutral-800/50 rounded-full flex items-center justify-center italic text-4xl">?</div>
-          <p class="text-sm">点击上方蓝色“新建笔记”按钮开始</p>
+          <p class="text-sm">点击上方蓝色"新建笔记"按钮开始</p>
         </div>
       </div>
     </div>
@@ -60,8 +60,7 @@ const API_BASE = 'http://localhost:9701/api/apps/notebook'
 const fetchNotes = async (selectId = null) => {
   try {
     const res = await fetch(`${API_BASE}/list`)
-    const result = await res.json()
-    notes.value = result.data || []
+    notes.value = await res.json()
     if (selectId) {
       const found = notes.value.find(n => n.id === selectId)
       if (found) activeNote.value = found
@@ -89,7 +88,7 @@ const createNewNote = async () => {
       body: JSON.stringify({ content: '' })
     })
     const result = await res.json()
-    const newId = result.data?.id
+    const newId = result?.id
     await fetchNotes(newId)
   } catch (e) { console.error(e) }
 }

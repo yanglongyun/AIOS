@@ -26,9 +26,9 @@
     </div>
 
     <!-- 聊天主区域 -->
-    <template v-else>
+    <div v-else class="flex-1 flex flex-col min-h-0">
       <div ref="msgBox" class="flex-1 overflow-y-auto min-h-0" @scroll="onScroll">
-        <div class="mx-auto flex min-h-full max-w-3xl flex-col gap-0 px-5 pt-6 pb-6 xl:max-w-4xl xl:pt-10">
+        <div class="mx-auto flex max-w-3xl flex-col gap-0 px-5 pt-6 pb-6 xl:max-w-4xl xl:pt-10">
 
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-col items-center justify-center flex-1 py-20 text-center">
@@ -224,7 +224,7 @@
 
         </div>
       </div>
-    </template>
+    </div>
 
   </div>
 </template>

@@ -6,9 +6,9 @@
       <button @click="sidebarOpen = !sidebarOpen"
         class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer shrink-0">
         <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-          <rect x="1" y="2" width="2.5" height="12" rx="1"/>
-          <rect x="5.5" y="2" width="2.5" height="12" rx="1"/>
-          <rect x="10" y="2" width="2.5" height="12" rx="1"/>
+          <rect x="1" y="2.5" width="14" height="1.5" rx="0.75"/>
+          <rect x="1" y="7.25" width="14" height="1.5" rx="0.75"/>
+          <rect x="1" y="12" width="14" height="1.5" rx="0.75"/>
         </svg>
       </button>
       <span class="text-sm font-semibold text-neutral-800 dark:text-neutral-200 tracking-tight">AIOS</span>
@@ -22,7 +22,7 @@
         class="shrink-0 w-[220px] h-full border-r border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 z-30 max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-xl">
         <NavPanel />
       </div>
-      <div class="flex-1 min-w-0 min-h-0 overflow-hidden">
+      <div class="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
         <RouterView />
       </div>
     </div>

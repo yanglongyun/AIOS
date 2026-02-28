@@ -103,9 +103,6 @@ echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
 
 if [ "$PLATFORM" = "Darwin" ]; then
-  LOG_DIR="$HOME/.${APP_NAME}/logs"
-  mkdir -p "$LOG_DIR"
-
   # 主服务
   LABEL_SERVER="ai.${APP_NAME}.server"
   PLIST_SERVER="$HOME/Library/LaunchAgents/${LABEL_SERVER}.plist"
@@ -125,8 +122,8 @@ if [ "$PLATFORM" = "Darwin" ]; then
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>10</integer>
-  <key>StandardOutPath</key><string>${LOG_DIR}/server.log</string>
-  <key>StandardErrorPath</key><string>${LOG_DIR}/server.err.log</string>
+  <key>StandardOutPath</key><string>/dev/null</string>
+  <key>StandardErrorPath</key><string>/dev/null</string>
 </dict>
 </plist>
 EOF
@@ -152,8 +149,8 @@ EOF
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>10</integer>
-  <key>StandardOutPath</key><string>${LOG_DIR}/apps.log</string>
-  <key>StandardErrorPath</key><string>${LOG_DIR}/apps.err.log</string>
+  <key>StandardOutPath</key><string>/dev/null</string>
+  <key>StandardErrorPath</key><string>/dev/null</string>
 </dict>
 </plist>
 EOF
@@ -245,7 +242,7 @@ echo
 if [ "$PLATFORM" = "Darwin" ]; then
   echo "  主服务:    launchctl print gui/$(id -u)/ai.${APP_NAME}.server"
   echo "  应用服务:  launchctl print gui/$(id -u)/ai.${APP_NAME}.apps"
-  echo "  日志:      tail -f $HOME/.${APP_NAME}/logs/server.log"
+  echo "  日志:      launchctl print gui/$(id -u)/ai.${APP_NAME}.server"
 else
   echo "  主服务:    systemctl status ${APP_NAME}"
   echo "  应用服务:  systemctl status ${APP_NAME}-apps"

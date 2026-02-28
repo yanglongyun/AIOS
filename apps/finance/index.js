@@ -1,22 +1,37 @@
 import { json } from '../utils/json.js';
 import { readBody } from '../utils/readBody.js';
-import { initFinanceDatabase, getTransactions, createTransaction, deleteTransaction } from './db.js';
+import { db } from '../db/client.js';
+import { listHandler } from './api/list.js';
+import { createHandler } from './api/create.js';
+import { deleteHandler } from './api/delete.js';
 
-export { initFinanceDatabase };
+export function initFinanceDatabase() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS finance_transactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT CHECK(type IN ('income', 'expense')) NOT NULL,
+      amount REAL NOT NULL,
+      category TEXT NOT NULL,
+      note TEXT,
+      date DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
 
 export async function handleFinanceApi(req, res, path) {
   if (path === '/api/apps/finance/list' && req.method === 'GET') {
-    return json(res, { success: true, data: getTransactions() });
+    return json(res, listHandler());
   }
+
   if (path === '/api/apps/finance/create' && req.method === 'POST') {
-    const data = await readBody(req);
-    createTransaction(data);
-    return json(res, { success: true });
+    const body = await readBody(req);
+    return json(res, createHandler(body));
   }
+
   if (path === '/api/apps/finance/delete' && req.method === 'POST') {
-    const { id } = await readBody(req);
-    deleteTransaction(id);
-    return json(res, { success: true });
+    const body = await readBody(req);
+    return json(res, deleteHandler(body));
   }
+
   return false;
 }

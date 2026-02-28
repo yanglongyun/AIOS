@@ -23,6 +23,11 @@ AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 ser
 2. 在 `ui/src/views/apps/` 创建页面组件
 3. 在 `ui/src/router/index.js` 注册路由
 
+## 页面容器标准
+
+- 应用页面根容器统一使用：`class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto"`
+- 不要只写 `max-w-4xl mx-auto`，必须包含 `w-full`，避免在某些布局下内容区域按内容宽度收缩
+
 ## 目录结构
 
 每个应用遵循以下结构：
@@ -90,6 +95,12 @@ initTodoDatabase();
 - 文字最小 `text-sm`
 - 列表/表格在小屏用卡片堆叠替代横向布局
 - 用 Tailwind 响应式前缀（`md:`, `sm:`）处理断点差异
+
+## 主题适配规范
+
+- 应用页面样式必须同时提供浅色/深色样式，统一使用 Tailwind 的 `dark:` 变体（例如 `bg-white dark:bg-neutral-800`）
+- 不要在应用页面里额外实现主题状态管理逻辑；主题切换由全局设置驱动，组件只负责写 `dark:` 类
+- 文本、边框、背景、hover 态都要成对提供浅色/深色样式，避免只改背景不改文字导致可读性问题
 
 ## 完整示例：Todo 应用
 

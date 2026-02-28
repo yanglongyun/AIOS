@@ -1,6 +1,7 @@
-export const callLLM = async ({ messages, tools, model, apiUrl, apiKey, signal }) => {
+export const callLLM = async ({ messages, tools, model, apiUrl, apiKey, signal, responseFormat }) => {
   const body = { model, messages };
   if (tools?.length) body.tools = tools;
+  if (responseFormat) body.response_format = responseFormat;
 
   const res = await fetch(apiUrl, {
     method: 'POST',

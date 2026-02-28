@@ -5,7 +5,7 @@ import { callLLM } from '../../agent/llm.js';
 
 export const handleLlmChat = async (req, res) => {
   const body = await readBody(req);
-  const { messages, model: bodyModel } = body;
+  const { messages, model: bodyModel, response_format } = body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return json(res, { success: false, message: 'messages 不能为空' }, 400);
@@ -16,7 +16,13 @@ export const handleLlmChat = async (req, res) => {
   const model = bodyModel || defaultModel;
 
   try {
-    const message = await callLLM({ messages, model, apiUrl, apiKey });
+    const message = await callLLM({
+      messages,
+      model,
+      apiUrl,
+      apiKey,
+      responseFormat: response_format
+    });
     json(res, { success: true, message });
   } catch (e) {
     json(res, { success: false, message: e.message }, 500);

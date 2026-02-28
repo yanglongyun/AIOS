@@ -1,14 +1,14 @@
 <template>
-  <div class="p-6 max-w-4xl mx-auto h-full overflow-y-auto">
+  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto">
     <!-- 顶部标题 -->
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-3xl font-bold text-neutral-800 dark:text-neutral-100 italic tracking-tight">Finance.</h1>
-        <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">管理你的资产与债务</p>
+        <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">管理你的收入与支出</p>
       </div>
       <div class="flex gap-4">
         <div class="text-right">
-          <p class="text-[10px] uppercase tracking-widest text-neutral-400">总负债</p>
+          <p class="text-[10px] uppercase tracking-widest text-neutral-400">总支出</p>
           <p class="text-2xl font-mono font-bold text-rose-500">-￥{{ Math.abs(totalExpense).toLocaleString() }}</p>
         </div>
       </div>
@@ -45,14 +45,34 @@
       </div>
     </div>
 
+    <!-- 智能记录 -->
+    <div class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-4">
+      <div class="flex flex-wrap gap-2 items-center">
+        <input
+          v-model="smartInput"
+          @keyup.enter="smartFill"
+          placeholder="例如：今天午饭 58 元，分类餐饮；或：工资到账 12000 元"
+          class="flex-1 min-w-[280px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+        />
+        <button
+          @click="smartFill"
+          :disabled="smartFilling || !smartInput.trim()"
+          class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ smartFilling ? '识别中...' : '智能填充' }}
+        </button>
+      </div>
+      <p v-if="smartError" class="mt-2 text-xs text-rose-500 px-2">{{ smartError }}</p>
+    </div>
+
     <!-- 记账表单 -->
     <div class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-8 flex flex-wrap gap-2 items-center">
       <select v-model="newItem.type" class="bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-        <option value="expense">支出/负债</option>
+        <option value="expense">支出</option>
         <option value="income">收入</option>
       </select>
       <input v-model="newItem.amount" type="number" placeholder="金额" class="flex-1 min-w-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-      <input v-model="newItem.category" placeholder="分类 (如: 餐饮, 贷款)" class="flex-1 min-w-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input v-model="newItem.category" placeholder="分类 (如: 餐饮, 交通)" class="flex-1 min-w-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
       <input v-model="newItem.note" @keyup.enter="add" placeholder="备注..." class="flex-[2] min-w-[200px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
       <button @click="add" class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all active:scale-95">记录</button>
     </div>
@@ -96,6 +116,9 @@ import { ref, onMounted, computed } from 'vue'
 
 const items = ref([])
 const newItem = ref({ type: 'expense', amount: '', category: '', note: '' })
+const smartInput = ref('')
+const smartFilling = ref(false)
+const smartError = ref('')
 const API_BASE = 'http://localhost:9701/api/apps/finance'
 
 const totalIncome = computed(() => items.value.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0))
@@ -119,6 +142,48 @@ const add = async () => {
     newItem.value = { type: 'expense', amount: '', category: '', note: '' }
     fetchItems()
   } catch (e) { console.error(e) }
+}
+
+const smartFill = async () => {
+  const text = smartInput.value.trim()
+  if (!text || smartFilling.value) return
+
+  smartFilling.value = true
+  smartError.value = ''
+  try {
+    const res = await fetch('http://localhost:9700/api/llm/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: '你是记账助手。把用户的一句话记账描述提取成 JSON：{"type":"income|expense","amount":数字,"category":"分类","note":"备注"}。只返回 JSON，不要解释，不要代码块。'
+          },
+          { role: 'user', content: text }
+        ]
+      })
+    })
+    const data = await res.json()
+    if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`)
+
+    const raw = String(data.message?.content || '').trim().replace(/^```json\s*|```$/g, '')
+    const parsed = JSON.parse(raw)
+    const type = parsed.type === 'income' ? 'income' : 'expense'
+    const amount = Number(parsed.amount)
+    const category = String(parsed.category || '').trim()
+    const note = String(parsed.note || '').trim()
+
+    if (!Number.isFinite(amount) || amount <= 0 || !category) {
+      throw new Error('识别结果不完整，请补充金额和分类')
+    }
+
+    newItem.value = { type, amount: String(amount), category, note }
+  } catch (e) {
+    smartError.value = e.message || '智能填充失败'
+  } finally {
+    smartFilling.value = false
+  }
 }
 
 const remove = async (id) => {

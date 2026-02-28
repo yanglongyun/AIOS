@@ -34,6 +34,8 @@ node apps/index.js     # 应用服务，端口 9701
 ```bash
 npm install -g .
 aios    # 在终端直接与 AI 对话
+aios start  # 启动主服务(9700)和应用服务(9701)
+aios stop   # 停止主服务和应用服务
 ```
 
 CLI 会自动检测并拉起本地服务。
@@ -64,13 +66,10 @@ POST http://localhost:9700/api/llm/chat
 
 ## 内置应用
 
-AI 可以在对话中为你创建新应用并自动注册。当前内置：
+当前内置：
 
-- **智能列表** — AI 辅助的任务清单
-- **记事本** — 支持 AI 编辑的笔记
+- **记事本** — 笔记记录与整理
 - **记账本** — 收支记录
-- **文件管理器** — 本地文件浏览
-- **大纲** — 树形结构笔记
 
 ## 项目结构
 
@@ -83,10 +82,7 @@ server/          # 主服务（9700）
 
 apps/            # 应用服务（9701）
   notebook/
-  smartlist/
   finance/
-  files/
-  outline/
 
 ui/src/
   App.vue        # 顶部栏 + NavPanel + RouterView

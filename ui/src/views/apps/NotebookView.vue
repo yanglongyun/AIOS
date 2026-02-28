@@ -1,198 +1,333 @@
 <template>
-  <div class="h-full flex flex-col bg-white dark:bg-neutral-900 font-sans">
-    <!-- 顶部栏 -->
-    <div class="h-14 shrink-0 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between px-4 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md z-10">
-      <div class="flex items-center gap-3">
-        <button v-if="!showList" @click="showList = true" class="p-2 -ml-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-        <h1 class="text-base font-bold text-neutral-800 dark:text-neutral-100">记事本</h1>
-      </div>
+  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto text-neutral-900 dark:text-neutral-100">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold italic tracking-tight">Notebook.</h1>
+      <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">记录想法，快速检索，置顶重点。</p>
     </div>
-    
-    <div class="flex-1 flex overflow-hidden relative">
-      <!-- 笔记列表 -->
-      <div v-show="showList" 
-           class="absolute md:relative inset-0 md:inset-auto z-20 md:z-0 w-full md:w-80 shrink-0 border-r border-neutral-100 dark:border-neutral-800 flex flex-col bg-neutral-50/50 dark:bg-black/10">
-        <!-- 遮罩层（移动端） -->
-        <div @click="showList = false" class="absolute inset-0 bg-black/20 md:hidden -z-10"></div>
-        
-        <div class="relative z-10 flex flex-col h-full bg-neutral-50 dark:bg-black/10">
-          <!-- 新建笔记输入框 -->
-          <div class="p-3 border-b border-neutral-100 dark:border-neutral-800">
-            <div class="flex gap-2">
-              <input v-model="newNoteTitle" type="text" placeholder="新笔记标题..." 
-                     class="flex-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                     @keyup.enter="createNewNote" />
-              <button @click="createNewNote" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-base font-medium transition-all active:scale-95">
-                保存
-              </button>
-            </div>
-          </div>
-          
-          <!-- 搜索框 -->
-          <div class="p-3">
-            <input v-model="searchQuery" type="text" placeholder="搜索..." class="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-base outline-none focus:ring-2 focus:ring-blue-500/20" />
-          </div>
-          
-          <div class="flex-1 overflow-y-auto">
-            <div v-for="note in filteredNotes" :key="note.id" 
-                 @click="selectNote(note)"
-                 :class="activeNote?.id === note.id ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800/50 border-transparent'"
-                 class="mx-2 mb-1 p-4 rounded-xl cursor-pointer border transition-all group relative min-h-[60px] flex items-center">
-              <div class="flex-1 min-w-0">
-                <h3 class="text-base font-medium text-neutral-800 dark:text-neutral-100 truncate">{{ getTitle(note.content) }}</h3>
-                <p class="text-xs text-neutral-400 mt-1 line-clamp-1 italic">{{ getContent(note.content) }}</p>
-              </div>
-              <button @click.stop="deleteNote(note.id)" class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-2 text-neutral-400 hover:text-red-500 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round"/></svg>
-              </button>
-            </div>
-            <div v-if="filteredNotes.length === 0" class="text-center text-neutral-400 text-sm py-8">
-              暂无笔记
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 笔记编辑区 -->
-      <div class="flex-1 flex flex-col bg-white dark:bg-neutral-900">
-        <!-- 移动端返回按钮 -->
-        <div v-if="activeNote" class="md:hidden border-b border-neutral-100 dark:border-neutral-800 px-4 py-2 flex items-center">
-          <button @click="activeNote = null; showList = true" class="p-2 -ml-2 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"/></svg>
+
+    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-8">
+      <textarea
+        v-model="draft"
+        class="w-full min-h-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-3 text-sm leading-6 focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
+        placeholder="写点什么...（Ctrl/Cmd + Enter 保存）"
+        @keydown.meta.enter.prevent="saveNote"
+        @keydown.ctrl.enter.prevent="saveNote"
+      />
+      <div class="mt-2 px-2 flex items-center justify-between">
+        <span class="text-xs text-neutral-500">{{ draft.length }} 字</span>
+        <div class="flex items-center gap-2">
+          <button
+            class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="optimizing || !draft.trim()"
+            @click="optimizeDraft"
+          >
+            {{ optimizing ? '优化中...' : '优化' }}
           </button>
-          <span class="text-sm text-neutral-500 ml-1">{{ getTitle(activeNote.content) }}</span>
-        </div>
-        
-        <div v-if="activeNote" class="flex-1 flex flex-col">
-          <div class="flex-1 p-4 md:p-8">
-            <textarea v-model="activeNote.content" 
-                  @input="debouncedUpdate"
-                  class="w-full h-full bg-transparent border-none outline-none resize-none text-neutral-700 dark:text-neutral-200 text-base md:text-lg leading-relaxed placeholder-neutral-300 dark:placeholder-neutral-700"
-                  placeholder="在这里输入内容，第一行是标题..."
-                  autofocus></textarea>
-          </div>
-          <div class="px-4 md:px-8 py-3 border-t border-neutral-50 dark:border-neutral-800 flex justify-between items-center text-xs font-mono text-neutral-400 uppercase tracking-widest">
-            <span>字符: {{ activeNote.content?.length || 0 }}</span>
-            <span>{{ saving ? '保存中...' : '已自动保存' }}</span>
-          </div>
-        </div>
-        <div v-else class="flex-1 flex flex-col items-center justify-center text-neutral-300 dark:text-neutral-600 space-y-4 p-4">
-          <div class="w-16 h-16 md:w-20 md:h-20 bg-neutral-50 dark:bg-neutral-800/50 rounded-full flex items-center justify-center italic text-3xl md:text-4xl">?</div>
-          <p class="text-sm text-center">从左侧列表选择笔记或新建</p>
+          <button
+            class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="creating || !draft.trim()"
+            @click="saveNote"
+          >
+            {{ creating ? '保存中...' : '保存' }}
+          </button>
         </div>
       </div>
-    </div>
+      <div v-if="optimizedDraft" class="mt-3 rounded-xl border border-indigo-200 bg-indigo-50/70 dark:bg-indigo-900/20 dark:border-indigo-800 p-3">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">优化结果</p>
+          <div class="flex items-center gap-2">
+            <button class="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500" @click="applyOptimized">直接使用</button>
+            <button class="text-xs px-2 py-1 rounded border border-indigo-300 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-100/60 dark:hover:bg-indigo-800/50" @click="closeOptimized">关闭</button>
+          </div>
+        </div>
+        <div class="whitespace-pre-wrap break-words text-sm leading-6 text-neutral-700 dark:text-neutral-200">{{ optimizedDraft }}</div>
+      </div>
+      <p v-if="error" class="mt-2 px-2 text-xs text-rose-500">{{ error }}</p>
+    </section>
+
+    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-6">
+      <div class="bg-white dark:bg-neutral-800 rounded-xl flex flex-wrap gap-2 items-center px-3 py-2">
+        <input
+          v-model="searchQuery"
+          type="text"
+          class="flex-1 min-w-[220px] bg-transparent border-none rounded-xl px-1 py-1.5 text-sm focus:ring-0 outline-none"
+          placeholder="搜索笔记内容..."
+          @input="onSearchInput"
+        />
+        <span class="text-xs text-neutral-400">每页 {{ PAGE_SIZE }} 条</span>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-transparent rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-neutral-50 dark:border-neutral-800 flex justify-between items-center bg-gray-50/50 dark:bg-neutral-800/50">
+        <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400">笔记列表</h3>
+        <span class="text-[10px] text-neutral-400">第 {{ page }} 页</span>
+      </div>
+
+      <div class="divide-y divide-neutral-50 dark:divide-neutral-800">
+        <article v-for="note in notes" :key="note.id" class="px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors group">
+          <template v-if="editingId === note.id">
+            <textarea
+              v-model="editingDraft"
+              class="w-full min-h-[110px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2 text-sm leading-6 outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+              @keydown.meta.enter.prevent="saveInlineEdit"
+              @keydown.ctrl.enter.prevent="saveInlineEdit"
+            />
+          </template>
+
+          <template v-else>
+            <div class="flex items-start gap-3">
+              <div v-if="note.pinned" class="mt-0.5 text-amber-500" title="已置顶">📌</div>
+              <div class="whitespace-pre-wrap break-words text-sm leading-6 text-neutral-800 dark:text-neutral-100">{{ note.content || '（空）' }}</div>
+            </div>
+          </template>
+
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-[11px] text-neutral-400">{{ formatTime(note.updated_at || note.created_at) }}</span>
+            <div class="flex items-center gap-3 text-sm">
+              <template v-if="editingId === note.id">
+                <button class="text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 disabled:opacity-50" :disabled="editingSaving" @click="cancelInlineEdit">取消</button>
+                <button class="text-indigo-600 hover:text-indigo-700 disabled:opacity-50" :disabled="editingSaving || !editingDraft.trim()" @click="saveInlineEdit">
+                  {{ editingSaving ? '保存中...' : '保存' }}
+                </button>
+              </template>
+              <button v-else class="text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200" @click="editNote(note)">编辑</button>
+              <button class="text-amber-600 hover:text-amber-700" @click="togglePin(note)">{{ note.pinned ? '取消置顶' : '置顶' }}</button>
+              <button class="text-rose-500 hover:text-rose-600" @click="deleteNote(note.id)">删除</button>
+            </div>
+          </div>
+        </article>
+
+        <div v-if="!notes.length" class="py-16 text-center text-neutral-400 text-sm">暂无笔记，开始记录第一条吧</div>
+      </div>
+    </section>
+
+    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl flex items-center justify-between">
+      <span class="text-sm text-neutral-500 px-2">共 {{ total }} 条 · 第 {{ page }} / {{ totalPages }} 页</span>
+      <div class="flex items-center gap-2">
+        <button
+          class="bg-white dark:bg-neutral-800 rounded-xl px-4 py-2 text-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="page <= 1 || loading"
+          @click="goPrevPage"
+        >
+          上一页
+        </button>
+        <button
+          class="bg-white dark:bg-neutral-800 rounded-xl px-4 py-2 text-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="page >= totalPages || loading"
+          @click="goNextPage"
+        >
+          下一页
+        </button>
+      </div>
+    </section>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import { useWindowSize } from '@vueuse/core'
+import { onMounted, ref } from 'vue';
 
-const { width } = useWindowSize()
+const API_BASE = 'http://localhost:9701/api/apps/notebook';
+const PAGE_SIZE = 10;
 
-const notes = ref([])
-const activeNote = ref(null)
-const searchQuery = ref('')
-const newNoteTitle = ref('')
-const saving = ref(false)
-const showList = ref(true)
-let timer = null
-const API_BASE = 'http://localhost:9701/api/apps/notebook'
+const notes = ref([]);
+const draft = ref('');
+const editingId = ref(null);
+const editingDraft = ref('');
+const creating = ref(false);
+const optimizing = ref(false);
+const editingSaving = ref(false);
+const loading = ref(false);
+const error = ref('');
+const optimizedDraft = ref('');
+const searchQuery = ref('');
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
+let searchTimer = null;
 
-// 响应式控制列表显示
-watch(width, (w) => {
-  showList.value = w >= 768
-})
-
-const fetchNotes = async (selectId = null) => {
+const fetchNotes = async () => {
   try {
-    const res = await fetch(`${API_BASE}/list`)
-    notes.value = await res.json()
-    if (selectId) {
-      const found = notes.value.find(n => n.id === selectId)
-      if (found) activeNote.value = found
+    loading.value = true;
+    const params = new URLSearchParams({
+      q: searchQuery.value,
+      page: String(page.value),
+      pageSize: String(PAGE_SIZE)
+    });
+    const res = await fetch(`${API_BASE}/list?${params.toString()}`);
+    const data = await res.json();
+    notes.value = data.items || [];
+    total.value = Number(data.total || 0);
+    totalPages.value = Number(data.totalPages || 1);
+    if (page.value > totalPages.value) {
+      page.value = totalPages.value;
+      return fetchNotes();
     }
-  } catch (e) { console.error(e) }
-}
-
-const filteredNotes = computed(() => {
-  if (!searchQuery.value) return notes.value
-  return notes.value.filter(n => n.content?.toLowerCase().includes(searchQuery.value.toLowerCase()))
-})
-
-const getTitle = (content) => {
-  if (!content || !content.trim()) return '新笔记'
-  return content.trim().split('\n')[0].substring(0, 20)
-}
-
-const getContent = (content) => {
-  if (!content || !content.trim()) return '暂无内容...'
-  const lines = content.trim().split('\n')
-  return lines.length > 1 ? lines.slice(1).join(' ').substring(0, 40) : '...'
-}
-
-const selectNote = (note) => {
-  activeNote.value = note
-  if (width.value < 768) {
-    showList.value = false
+  } catch (e) {
+    error.value = e.message || '加载失败';
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-const createNewNote = async () => {
-  const title = newNoteTitle.value.trim()
-  if (!title) return
+const saveNote = async () => {
+  const content = draft.value.trim();
+  if (!content || creating.value) return;
+
+  creating.value = true;
+  error.value = '';
   try {
     const res = await fetch(`${API_BASE}/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: title + '\n' })
-    })
-    const result = await res.json()
-    newNoteTitle.value = ''
-    await fetchNotes(result.id)
-    if (width.value < 768) {
-      showList.value = false
-    }
-  } catch (e) { console.error(e) }
-}
+      body: JSON.stringify({ content })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-const debouncedUpdate = () => {
-  if (!activeNote.value) return
-  saving.value = true
-  clearTimeout(timer)
-  timer = setTimeout(async () => {
-    try {
-      await fetch(`${API_BASE}/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: activeNote.value.id, content: activeNote.value.content })
+    draft.value = '';
+    page.value = 1;
+    await fetchNotes();
+  } catch (e) {
+    error.value = e.message || '保存失败';
+  } finally {
+    creating.value = false;
+  }
+};
+
+const optimizeDraft = async () => {
+  const content = draft.value.trim();
+  if (!content || optimizing.value) return;
+
+  optimizing.value = true;
+  error.value = '';
+  optimizedDraft.value = '';
+  try {
+    const res = await fetch('http://localhost:9700/api/llm/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: '你是用户的记事本写作助手。下面内容是用户准备保存到记事本的一条笔记。请在不改变原意的前提下，优化表达、结构和可读性，保留关键信息与语气。只返回可直接保存的优化后笔记正文，不要解释、不要加标题、不要使用代码块。'
+          },
+          { role: 'user', content }
+        ]
       })
-      saving.value = false
-    } catch (e) { console.error(e) }
-  }, 500)
-}
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
+    const improved = (data.message?.content || '').trim();
+    if (!improved) throw new Error('优化结果为空');
+    optimizedDraft.value = improved;
+  } catch (e) {
+    error.value = e.message || '优化失败';
+  } finally {
+    optimizing.value = false;
+  }
+};
+
+const applyOptimized = () => {
+  if (!optimizedDraft.value) return;
+  draft.value = optimizedDraft.value;
+  optimizedDraft.value = '';
+};
+
+const closeOptimized = () => {
+  optimizedDraft.value = '';
+};
+
+const editNote = (note) => {
+  editingId.value = note.id;
+  editingDraft.value = note.content || '';
+};
+
+const cancelInlineEdit = () => {
+  editingId.value = null;
+  editingDraft.value = '';
+};
+
+const saveInlineEdit = async () => {
+  const content = editingDraft.value.trim();
+  if (!editingId.value || !content || editingSaving.value) return;
+
+  editingSaving.value = true;
+  error.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editingId.value, content })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    cancelInlineEdit();
+    await fetchNotes();
+  } catch (e) {
+    error.value = e.message || '更新失败';
+  } finally {
+    editingSaving.value = false;
+  }
+};
 
 const deleteNote = async (id) => {
-  if (activeNote.value?.id === id) activeNote.value = null
+  error.value = '';
   try {
-    await fetch(`${API_BASE}/delete`, {
+    const res = await fetch(`${API_BASE}/delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
-    })
-    await fetchNotes()
-  } catch (e) { console.error(e) }
-}
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-onMounted(() => {
-  fetchNotes()
-  if (width.value < 768) {
-    showList.value = true
+    if (editingId.value === id) cancelInlineEdit();
+    await fetchNotes();
+  } catch (e) {
+    error.value = e.message || '删除失败';
   }
-})
+};
+
+const togglePin = async (note) => {
+  error.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/pin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: note.id, pinned: note.pinned ? 0 : 1 })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await fetchNotes();
+  } catch (e) {
+    error.value = e.message || '置顶更新失败';
+  }
+};
+
+const onSearchInput = () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    page.value = 1;
+    fetchNotes();
+  }, 250);
+};
+
+const goPrevPage = async () => {
+  if (page.value <= 1 || loading.value) return;
+  page.value -= 1;
+  await fetchNotes();
+};
+
+const goNextPage = async () => {
+  if (page.value >= totalPages.value || loading.value) return;
+  page.value += 1;
+  await fetchNotes();
+};
+
+const formatTime = (value) => {
+  if (!value) return '';
+  const date = new Date(value.replace(' ', 'T'));
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('zh-CN', { hour12: false });
+};
+
+onMounted(fetchNotes);
 </script>
-<style scoped>
-.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-</style>

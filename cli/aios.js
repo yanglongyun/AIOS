@@ -13,12 +13,49 @@ const ROOT = path.resolve(__dirname, '..');
 const WS_URL = `ws://localhost:9700/ws`;
 const WEB_URL = `http://localhost:9700`;
 const API_URL = `http://localhost:9700/api`;
+const APPS_URL = `http://localhost:9701`;
 
 function startServices() {
   console.log(chalk.dim('  启动 AIOS 服务...'));
   const opts = { cwd: ROOT, detached: true, stdio: 'ignore' };
   spawn('node', ['server/index.js'], opts).unref();
   spawn('node', ['apps/index.js'], opts).unref();
+}
+
+function stopServices() {
+  console.log(chalk.dim('  停止 AIOS 服务...'));
+  const patterns = ['node server/index.js', 'node apps/index.js'];
+  let stoppedAny = false;
+
+  for (const pattern of patterns) {
+    try {
+      execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
+      stoppedAny = true;
+      console.log(chalk.dim(`  已停止: ${pattern}`));
+    } catch {
+      console.log(chalk.dim(`  未运行: ${pattern}`));
+    }
+  }
+
+  return stoppedAny;
+}
+
+async function isReady(url, method = 'GET') {
+  try {
+    const res = await fetch(url, { method });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function waitReadyUrl(url, method = 'GET', retries = 15, delay = 800) {
+  for (let i = 0; i < retries; i++) {
+    if (await isReady(url, method)) return true;
+    await new Promise(r => setTimeout(r, delay));
+    process.stdout.write('.');
+  }
+  return false;
 }
 
 async function waitReady(retries = 15, delay = 800) {
@@ -58,6 +95,36 @@ if (arg === 'web') {
   const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
   console.log(chalk.dim(`Opening ${WEB_URL} ...`));
   execSync(`${cmd} ${WEB_URL}`);
+  process.exit(0);
+}
+if (arg === 'start') {
+  const serverReady = await isReady(`${API_URL}/chat/list`);
+  const appsReady = await isReady(`${APPS_URL}/api/apps/notebook/list`);
+  if (serverReady && appsReady) {
+    console.log(chalk.green('AIOS 服务已在运行'));
+    process.exit(0);
+  }
+
+  startServices();
+  process.stdout.write(chalk.dim('  等待服务就绪'));
+  const serverOk = await waitReadyUrl(`${API_URL}/chat/list`);
+  const appsOk = await waitReadyUrl(`${APPS_URL}/api/apps/notebook/list`);
+  console.log();
+
+  if (!serverOk || !appsOk) {
+    console.error(chalk.red('启动失败: 服务未就绪'));
+    process.exit(1);
+  }
+
+  console.log(chalk.green('AIOS 服务已启动'));
+  console.log(chalk.dim(`  主服务: ${WEB_URL}`));
+  console.log(chalk.dim(`  应用服务: ${APPS_URL}`));
+  process.exit(0);
+}
+if (arg === 'stop') {
+  const stopped = stopServices();
+  if (stopped) console.log(chalk.green('AIOS 服务已停止'));
+  else console.log(chalk.yellow('未发现运行中的 AIOS 服务'));
   process.exit(0);
 }
 

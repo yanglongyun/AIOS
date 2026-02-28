@@ -2,10 +2,8 @@ import { createServer } from 'http';
 import { json } from './utils/json.js';
 
 import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
-import { handleFilesApi } from './files/index.js';
 import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
-import { handleSmartlistApi, initSmartlistDatabase } from './smartlist/index.js';
-import { handleOutlineApi, initOutlineDatabase } from './outline/index.js';
+import { handleInboxApi, initInboxDatabase } from './inbox/index.js';
 
 const APPS_PORT = 9701;
 
@@ -30,23 +28,13 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
-  if (path.startsWith('/api/apps/files/')) {
-    const handled = await handleFilesApi(req, res, path);
-    if (handled !== false) return;
-  }
-
   if (path.startsWith('/api/apps/finance/')) {
     const handled = await handleFinanceApi(req, res, path);
     if (handled !== false) return;
   }
 
-  if (path.startsWith('/api/apps/smartlist/')) {
-    const handled = await handleSmartlistApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/outline/')) {
-    const handled = await handleOutlineApi(req, res, path);
+  if (path.startsWith('/api/apps/inbox/') || path === '/inbox/submit') {
+    const handled = await handleInboxApi(req, res, path);
     if (handled !== false) return;
   }
 
@@ -55,10 +43,8 @@ const appsServer = createServer(async (req, res) => {
 
 initNotebookDatabase();
 initFinanceDatabase();
-initSmartlistDatabase();
-initOutlineDatabase();
+initInboxDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);
 });
-

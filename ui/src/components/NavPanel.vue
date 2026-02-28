@@ -75,6 +75,16 @@
             </svg>
             心树
           </button>
+
+          <button @click="go('/writerpad')"
+            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+            :class="route.path.startsWith('/writerpad') ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+              <path d="M14 4v6h6"/>
+            </svg>
+            写字板
+          </button>
         </div>
       </div>
     </div>

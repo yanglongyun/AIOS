@@ -41,4 +41,5 @@ export const initDatabase = () => {
   initSetting.run('apiKey', '');
   initSetting.run('model', 'gpt-4o-mini');
   initSetting.run('enableFollowupSuggestions', '1');
+  initSetting.run('provider', 'openrouter');
 };

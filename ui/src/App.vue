@@ -119,6 +119,8 @@ onUnmounted(() => {
   position: fixed;
   inset: 0;
   z-index: 60;
+  background: rgba(22, 14, 8, 0.45);
+  backdrop-filter: blur(1px);
   display: none;
 }
 @media (max-width: 767px) {
@@ -132,6 +134,7 @@ onUnmounted(() => {
   height: 100%;
   width: 220px;
   flex-shrink: 0;
+  opacity: 1;
   background: linear-gradient(180deg, #3a2a1a 0%, #2e2014 100%);
   border-right: 1px solid #1a1008;
   background-image:

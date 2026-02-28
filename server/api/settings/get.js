@@ -5,6 +5,7 @@ export const getSettings = () => {
   const obj = {};
   for (const r of rows) obj[r.key] = r.value;
   return {
+    provider: obj.provider || 'openrouter',
     systemPrompt: obj.systemPrompt || '',
     contextRounds: Number(obj.contextRounds) || 30,
     apiUrl: obj.apiUrl || 'https://api.openai.com/v1/chat/completions',

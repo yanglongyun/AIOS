@@ -21,7 +21,7 @@ const getOverview = () => {
 
 export const buildSystemPrompt = (
   appsCatalog = [],
-  { enableFollowupSuggestions = true, chatContext = null } = {}
+  { enableFollowupSuggestions = true, chatContext = null, modelInfo = null } = {}
 ) => {
   const cwd = process.cwd();
 
@@ -55,6 +55,13 @@ const { message } = await res.json(); // message.content 是回复文本
 - 系统数据库：${cwd}/database/aios.db（SQLite，表：chats, messages, settings）
 - 应用数据库：${cwd}/database/apps.db（SQLite，应用表如 notebook_notes）
 - 记忆文件：${cwd}/library/overview.md`;
+
+  if (modelInfo) {
+    prompt += `\n\n## 当前模型配置
+- 供应方：${modelInfo.provider || '-'}
+- 模型：${modelInfo.model || '-'}
+- 请求地址：${modelInfo.apiUrl || '-'}`;
+  }
 
   if (Array.isArray(appsCatalog) && appsCatalog.length > 0) {
     const lines = appsCatalog.map((app, i) => {

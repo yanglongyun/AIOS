@@ -79,7 +79,7 @@ export const createSession = (send) => {
 
     if (data.type === 'message') {
       const settings = getSettings();
-      const { contextRounds, apiUrl, apiKey, model, enableFollowupSuggestions } = settings;
+      const { contextRounds, apiUrl, apiKey, model, provider, enableFollowupSuggestions } = settings;
       const appsCatalog = getAppsCatalog();
 
       const incomingChatId = data.chatId || null;
@@ -95,6 +95,7 @@ export const createSession = (send) => {
           role: 'system',
           content: buildSystemPrompt(appsCatalog, {
             enableFollowupSuggestions,
+            modelInfo: { provider, model, apiUrl },
             chatContext: {
               currentChatId: chatId,
               recentChats
@@ -139,12 +140,13 @@ export const createSession = (send) => {
           contextRounds,
           apiUrl,
           apiKey,
+          provider,
           saveMessage,
           signal
         });
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(appsCatalog, { enableFollowupSuggestions })
+          content: buildSystemPrompt(appsCatalog, { enableFollowupSuggestions, modelInfo: { provider, model, apiUrl } })
         }, ...getMessages(chatId)];
       } catch (e) {
         if (e.name === 'AbortError') {

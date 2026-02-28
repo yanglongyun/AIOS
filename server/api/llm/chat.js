@@ -12,17 +12,13 @@ export const handleLlmChat = async (req, res) => {
   }
 
   const settings = getSettings();
-  const { apiUrl, apiKey, model: defaultModel } = settings;
+  const { apiUrl, apiKey, provider, model: defaultModel } = settings;
   const model = bodyModel || defaultModel;
 
   try {
-    const message = await callLLM({
-      messages,
-      model,
-      apiUrl,
-      apiKey,
-      responseFormat: response_format
-    });
+    const payload = { model, messages };
+    if (response_format) payload.response_format = response_format;
+    const message = await callLLM(provider, apiUrl, apiKey, payload);
     json(res, { success: true, message });
   } catch (e) {
     json(res, { success: false, message: e.message }, 500);

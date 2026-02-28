@@ -1,15 +1,21 @@
-export const callLLM = async ({ messages, tools, model, apiUrl, apiKey, signal, responseFormat }) => {
-  const body = { model, messages };
-  if (tools?.length) body.tools = tools;
-  if (responseFormat) body.response_format = responseFormat;
+export const callLLM = async (provider, apiUrl, apiKey, payload, signal) => {
+  const headers = { 'Content-Type': 'application/json' };
+  if (provider === 'claude') {
+    headers['x-api-key'] = apiKey;
+    headers['anthropic-version'] = '2023-06-01';
+  } else {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  }
+
+  if (apiUrl.includes('openrouter.ai')) {
+    headers['HTTP-Referer'] = 'http://localhost:3000';
+    headers['X-Title'] = 'aios';
+  }
 
   const res = await fetch(apiUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify(body),
+    headers,
+    body: JSON.stringify(payload),
     signal
   });
 

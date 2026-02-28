@@ -96,6 +96,7 @@ const goHistory = async () => {
   height: 100%;
   overflow: hidden;
   font-family: 'Georgia', 'PingFang SC', serif;
+  background: linear-gradient(180deg, #3a2a1a 0%, #2e2014 100%);
 }
 
 .np-section {

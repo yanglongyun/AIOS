@@ -1,6 +1,7 @@
 import { db } from '../../db/client.js';
 
 export const updateSettings = (body) => {
+  if (body.provider !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('provider', body.provider);
   if (body.systemPrompt !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('systemPrompt', body.systemPrompt);
   if (body.contextRounds !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('contextRounds', String(Number(body.contextRounds)));
   if (body.apiUrl !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('apiUrl', body.apiUrl);

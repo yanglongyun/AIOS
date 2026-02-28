@@ -28,15 +28,11 @@
           :api-url="editApiUrl"
           :api-key="editApiKey"
           :model="editModel"
-          :model-items="modelItems"
-          :loading-models="loadingModels"
-          :model-hint="modelHint"
           @save="save"
           @update:provider="provider = $event"
           @update:api-url="editApiUrl = $event"
           @update:api-key="editApiKey = $event"
           @update:model="editModel = $event"
-          @fetch-models="fetchModels"
         />
         <ConversationTab
           v-else-if="activeTab === 'conversation'"
@@ -85,9 +81,6 @@ const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
 const enableFollowupSuggestions = ref(true);
-const modelItems = ref([]);
-const loadingModels = ref(false);
-const modelHint = ref('可手动输入，也可加载可用模型列表');
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
@@ -98,33 +91,12 @@ const request = async (url, options = {}) => {
 
 const fetchSettings = async () => {
   const data = await request('/api/settings');
+  provider.value = data.provider || 'openrouter';
   editRounds.value = data.contextRounds || 30;
   editApiUrl.value = data.apiUrl || '';
   editApiKey.value = data.apiKey || '';
   editModel.value = data.model || '';
   enableFollowupSuggestions.value = data.enableFollowupSuggestions !== false;
-  if (editApiUrl.value.includes('openrouter.ai')) provider.value = 'openrouter';
-  else if (editApiUrl.value.includes('api.openai.com')) provider.value = 'openai';
-  else provider.value = 'custom';
-};
-
-const fetchModels = async () => {
-  loadingModels.value = true;
-  modelHint.value = '正在加载可用模型...';
-  try {
-    const data = await request('/api/settings/models', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiUrl: editApiUrl.value, apiKey: editApiKey.value })
-    });
-    modelItems.value = Array.isArray(data.items) ? data.items : [];
-    modelHint.value = modelItems.value.length ? `已加载 ${modelItems.value.length} 个可用模型` : '未获取到模型，请检查 URL/Key';
-  } catch (err) {
-    modelItems.value = [];
-    modelHint.value = `加载失败：${err.message}`;
-  } finally {
-    loadingModels.value = false;
-  }
 };
 
 const setTheme = (t) => {
@@ -138,6 +110,7 @@ const save = async () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      provider: provider.value,
       contextRounds: editRounds.value,
       apiUrl: editApiUrl.value,
       apiKey: editApiKey.value,
@@ -147,8 +120,5 @@ const save = async () => {
   });
 };
 
-onMounted(async () => {
-  await fetchSettings();
-  await fetchModels();
-});
+onMounted(fetchSettings);
 </script>

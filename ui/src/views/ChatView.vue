@@ -1,69 +1,49 @@
 <template>
-  <div class="relative min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
+  <div class="chat-root">
     <!-- 聊天主区域 -->
-    <div class="flex-1 flex flex-col min-h-0">
-      <div ref="msgBox" class="flex-1 overflow-y-auto min-h-0" @scroll="onScroll">
-        <div class="mx-auto flex max-w-3xl flex-col gap-0 px-5 pt-6 pb-6 xl:max-w-4xl xl:pt-10">
+    <div class="chat-main">
+      <div ref="msgBox" class="chat-scroll" @scroll="onScroll">
+        <div class="chat-inner">
 
           <!-- 空状态 -->
-          <div v-if="!messages.length" class="flex flex-col items-center justify-center flex-1 py-20 text-center">
-            <div class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 dark:bg-neutral-800 shadow-lg">
-              <svg class="w-7 h-7 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <h2 class="text-xl font-semibold text-neutral-800 dark:text-neutral-200 mb-2">有什么可以帮你？</h2>
-            <p class="text-neutral-400 text-sm max-w-sm leading-relaxed">
-              输入任意内容开始对话，支持自动执行命令或手动确认模式。
-            </p>
+          <div v-if="!messages.length" class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <h2 class="chat-empty-title">有什么可以帮你？</h2>
+            <p class="chat-empty-desc">输入任意内容开始对话，支持自动执行命令或手动确认模式。</p>
           </div>
 
           <!-- 消息列表 -->
           <template v-else>
-            <div v-if="hasMore" class="flex justify-center py-2">
-              <span class="text-xs text-neutral-400">加载更多...</span>
+            <div v-if="hasMore" class="chat-loadmore">
+              <span>加载更多...</span>
             </div>
 
-            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-6">
+            <div v-for="(m, i) in messages" :key="m._key || i" class="chat-msg-wrap">
 
               <!-- 用户消息 -->
-              <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] break-words rounded-2xl rounded-tr-sm bg-gray-100 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200" style="overflow-wrap: break-word; word-break: break-word;">
+              <div v-if="m.role === 'user'" class="chat-msg-user">
+                <div class="chat-bubble-user">
                   <div>{{ m.content }}</div>
-                  <div v-if="m.attachments?.length" class="mt-2 space-y-1">
-                    <div class="text-[10px] uppercase tracking-wider text-neutral-400">附件</div>
-                    <div
-                      v-for="(f, idx) in m.attachments"
-                      :key="`${f.path}-${idx}`"
-                      class="rounded-lg border border-gray-200 bg-white/80 px-2 py-1 text-[11px] text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-                    >
-                      <div class="truncate font-medium">{{ f.name }}</div>
-                      <div class="break-all text-[10px] text-neutral-400 dark:text-neutral-500">{{ f.path }}</div>
+                  <div v-if="m.attachments?.length" class="chat-attachments">
+                    <div class="chat-attach-label">附件</div>
+                    <div v-for="(f, idx) in m.attachments" :key="`${f.path}-${idx}`" class="chat-attach-item">
+                      <div class="chat-attach-name">{{ f.name }}</div>
+                      <div class="chat-attach-path">{{ f.path }}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- 助手消息 -->
-              <div v-else-if="m.role === 'assistant'" class="group flex items-start gap-3">
-                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 shadow-sm">
-                  <svg class="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  </svg>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="markdown-body prose max-w-none text-neutral-800 dark:text-neutral-200" v-html="renderMd(m.content)" />
-                  <div v-if="m.suggestions?.length" class="mt-3 flex flex-wrap gap-2">
-                    <button
-                      v-for="(s, idx) in m.suggestions" :key="`${i}-s-${idx}`"
-                      @click="applySuggestion(s)"
-                      class="px-3 py-1 rounded-xl text-xs cursor-pointer bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors">
-                      {{ s }}
-                    </button>
+              <div v-else-if="m.role === 'assistant'" class="chat-msg-bot group">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-bubble-bot-wrap">
+                  <div class="chat-bubble-bot markdown-body" v-html="renderMd(m.content)" />
+                  <div v-if="m.suggestions?.length" class="chat-suggestions">
+                    <button v-for="(s, idx) in m.suggestions" :key="`${i}-s-${idx}`" @click="applySuggestion(s)" class="chat-suggest-btn">{{ s }}</button>
                   </div>
-                  <div class="mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click="copyText(m.content)"
-                      class="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
+                  <div class="chat-actions">
+                    <button @click="copyText(m.content)" class="chat-action-btn">
                       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                       </svg>
@@ -73,85 +53,52 @@
                 </div>
               </div>
 
-              <!-- 工具调用（tool_call），可折叠 -->
-              <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-3">
-                <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800">
-                  <svg class="w-3.5 h-3.5 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-                <div class="min-w-0 flex-1 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
-                  <!-- 可点击 header -->
-                  <button type="button" @click="m.expanded = !m.expanded"
-                    class="w-full flex items-center gap-2 px-3 py-2 text-left bg-gray-50 dark:bg-neutral-800/60 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
-                    <svg class="w-3 h-3 text-neutral-400 shrink-0 transition-transform" :class="m.expanded ? 'rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <path d="M9 18l6-6-6-6"/>
-                    </svg>
-                    <span class="text-xs text-neutral-600 dark:text-neutral-300 truncate flex-1">{{ m.reason || m.command || '工具调用' }}</span>
-                    <!-- 有结果 -->
-                    <span v-if="m.result" class="text-xs text-neutral-400 shrink-0">完成</span>
+              <!-- 工具调用 -->
+              <div v-else-if="m.type === 'tool_call'" class="chat-msg-bot">
+                <div class="chat-avatar chat-avatar-tool">⚙️</div>
+                <div class="chat-tool-card">
+                  <button type="button" @click="m.expanded = !m.expanded" class="chat-tool-header">
+                    <svg class="chat-tool-arrow" :class="m.expanded ? 'rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                    <span class="chat-tool-reason">{{ m.reason || m.command || '工具调用' }}</span>
+                    <span v-if="m.result" class="chat-tool-done">完成</span>
                   </button>
-
-                  <!-- 展开内容 -->
-                  <div v-if="m.expanded" class="border-t border-gray-200 dark:border-neutral-700">
-                    <!-- command -->
-                    <div v-if="m.command" class="px-3 py-2.5 font-mono text-xs text-green-700 dark:text-green-400 bg-white dark:bg-neutral-900 whitespace-pre-wrap break-all">{{ m.command }}</div>
-                    <!-- result -->
-                    <div v-if="m.result" class="px-3 py-2.5 font-mono text-xs text-neutral-500 dark:text-neutral-400 bg-gray-50 dark:bg-neutral-800/40 border-t border-gray-100 dark:border-neutral-700/50 whitespace-pre-wrap break-all max-h-48 overflow-y-auto">{{ m.result }}</div>
+                  <div v-if="m.expanded" class="chat-tool-body">
+                    <div v-if="m.command" class="chat-tool-cmd">{{ m.command }}</div>
+                    <div v-if="m.result" class="chat-tool-result">{{ m.result }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- tool 结果（兜底：未能合并到 tool_call 的） -->
-              <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="flex items-start gap-3">
-                <div class="mt-0.5 h-7 w-7 shrink-0 flex items-center justify-center">
-                  <div class="w-1.5 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></div>
-                </div>
-                <div class="min-w-0 flex-1 font-mono text-xs text-neutral-500 dark:text-neutral-400 whitespace-pre-wrap break-all leading-relaxed">{{ m.result || m.content }}</div>
+              <!-- tool 结果兜底 -->
+              <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="chat-msg-bot">
+                <div class="chat-avatar-dot"></div>
+                <div class="chat-tool-fallback">{{ m.result || m.content }}</div>
               </div>
 
             </div>
 
             <!-- 思考中 -->
-            <div v-if="busy" class="flex items-start gap-3 mb-6">
-              <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800">
-                <svg class="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-              </div>
-              <div class="flex items-center py-2">
-                <span class="loading-dots text-sm text-neutral-400">思考中</span>
-              </div>
+            <div v-if="busy" class="chat-msg-bot">
+              <div class="chat-avatar">🤖</div>
+              <div class="chat-thinking">思考中<span class="chat-dots">...</span></div>
             </div>
           </template>
         </div>
       </div>
 
+      <!-- 底部输入 -->
+      <div class="chat-input-area">
+        <div class="chat-input-inner">
+          <form @submit.prevent="handleSend" class="chat-form">
+            <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
 
-      <!-- 底部输入浮层 -->
-      <div class="input-gradient shrink-0 mx-auto flex w-full max-w-3xl flex-col items-center px-3.5 pb-2 xl:max-w-4xl" :style="{ paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 16px)` }">
-        <div class="w-full">
-          <form @submit.prevent="handleSend"
-            class="relative flex w-full flex-col rounded-xl bg-gray-100 dark:bg-gray-800">
-            <input
-              ref="fileInput"
-              type="file"
-              class="hidden"
-              multiple
-              @change="onPickFiles"
-            />
-
-            <div v-if="pendingFiles.length" class="px-3 pt-2.5 flex flex-wrap gap-2">
-              <div
-                v-for="(f, idx) in pendingFiles"
-                :key="`${f.path}-${idx}`"
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2 py-1 text-[11px] text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-              >
-                <span class="truncate max-w-[220px]">{{ f.name }}</span>
-                <button type="button" class="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200" @click="removePendingFile(idx)">x</button>
+            <div v-if="pendingFiles.length" class="chat-pending-files">
+              <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="chat-pending-file">
+                <span class="chat-pending-name">{{ f.name }}</span>
+                <button type="button" @click="removePendingFile(idx)" class="chat-pending-remove">x</button>
               </div>
             </div>
-            <p v-if="uploadError" class="px-3 pt-2 text-xs text-rose-500">{{ uploadError }}</p>
+            <p v-if="uploadError" class="chat-upload-error">{{ uploadError }}</p>
 
             <textarea
               ref="textarea"
@@ -163,17 +110,11 @@
               placeholder="输入消息..."
               rows="1"
               :disabled="busy"
-              class="w-full px-3 py-3 bg-transparent text-base md:text-sm leading-relaxed text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none min-h-[52px] max-h-[200px] resize-none overflow-y-auto disabled:opacity-50 pr-12"
+              class="chat-textarea"
             />
 
-            <!-- 底部工具栏（固定一点高度，避免右下角按钮遮挡输入） -->
-            <div class="px-3 pb-2.5 pt-1 flex items-center">
-              <button
-                type="button"
-                @click="openFilePicker"
-                :disabled="busy || uploading"
-                class="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-neutral-500 hover:bg-white hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+            <div class="chat-toolbar">
+              <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="chat-upload-btn">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.2a4 4 0 0 1 5.66 5.66l-9.2 9.2a2 2 0 0 1-2.82-2.83l8.48-8.48" />
                 </svg>
@@ -181,30 +122,18 @@
               </button>
             </div>
 
-            <!-- 发送/停止按钮（绝对定位右下角） -->
-            <div class="absolute bottom-2 right-2 flex items-center gap-1.5">
-              <button v-if="busy" type="button" @click="stopBusy"
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black border border-transparent hover:opacity-80 transition-opacity cursor-pointer">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="6" y="6" width="12" height="12" rx="2"/>
-                </svg>
+            <div class="chat-send-area">
+              <button v-if="busy" type="button" @click="stopBusy" class="chat-stop-btn">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
               </button>
-              <button v-else type="submit" :disabled="!input.trim()"
-                class="flex h-8 w-8 items-center justify-center rounded-full border transition-colors cursor-pointer"
-                :class="input.trim()
-                  ? 'bg-black dark:bg-white text-white dark:text-black border-transparent hover:opacity-80'
-                  : 'bg-white dark:bg-gray-600 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-transparent shadow cursor-default'">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M12 19V5M5 12l7-7 7 7"/>
-                </svg>
+              <button v-else type="submit" :disabled="!input.trim()" class="chat-send-btn" :class="input.trim() ? 'active' : ''">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
               </button>
             </div>
           </form>
-
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -284,7 +213,6 @@ const parseMessages = (raw) => {
       continue;
     }
     if (m.role === 'tool') {
-      // 合并到前一个 tool_call 的 result 字段
       for (let i = list.length - 1; i >= 0; i--) {
         if ((list[i].type === 'tool_call' || list[i].type === 'confirm') && !list[i].result) {
           list[i].result = m.content;
@@ -352,12 +280,9 @@ const scrollToBottom = (smooth = true) => {
   const doScroll = () => {
     const el = msgBox.value;
     if (!el) return;
-    // 用 scrollTop 直接跳转更稳定；smooth 仅用于“新消息到来”的场景
     if (smooth) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     else el.scrollTop = el.scrollHeight;
   };
-
-  // 初次进入页面时 msgBox 可能还没挂载；多拍几次确保布局稳定后能真正到底
   nextTick(() => {
     doScroll();
     requestAnimationFrame(() => doScroll());
@@ -469,12 +394,10 @@ const onPickFiles = async (e) => {
 };
 
 watch(() => messages.value.length, (newLen, oldLen) => {
-  // 初次加载：直接跳到底，避免 smooth 造成卡顿/滚不到底
   if (oldLen === 0 && newLen > 0) {
     scrollToBottom(false);
     return;
   }
-  // 用户上滑看历史时不要强行拉回底部
   if (!isNearBottom()) return;
   if (oldLen > 0 && newLen - oldLen > 5) return;
   scrollToBottom(true);
@@ -545,59 +468,337 @@ onMounted(() => {
 onUnmounted(() => { unsubs.forEach(fn => fn()); });
 </script>
 
+<style scoped>
+.chat-root {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f5f0e8;
+  /* 纸纹 */
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(0,0,0,0.02) 28px, rgba(0,0,0,0.02) 29px);
+  font-family: 'Georgia', 'PingFang SC', serif;
+}
+
+.chat-main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+.chat-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+.chat-scroll::-webkit-scrollbar { width: 6px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+.chat-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 空状态 */
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 80px 0;
+  text-align: center;
+}
+.chat-empty-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  filter: grayscale(0.2);
+}
+.chat-empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #5a4a38;
+  margin-bottom: 8px;
+}
+.chat-empty-desc {
+  font-size: 13px;
+  color: #a0907a;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+.chat-loadmore { text-align: center; padding: 8px 0; font-size: 12px; color: #a0907a; }
+
+.chat-msg-wrap { margin-bottom: 20px; }
+
+/* 用户消息 */
+.chat-msg-user { display: flex; justify-content: flex-end; }
+.chat-bubble-user {
+  max-width: 85%;
+  background: #5a3e28;
+  color: #f0e8d8;
+  padding: 12px 16px;
+  border-radius: 18px 18px 4px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chat-attachments { margin-top: 8px; }
+.chat-attach-label { font-size: 10px; color: #c0a878; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.chat-attach-item {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+.chat-attach-name { font-size: 11px; font-weight: 600; }
+.chat-attach-path { font-size: 10px; color: #c0a878; word-break: break-all; }
+
+/* 助手消息 */
+.chat-msg-bot { display: flex; align-items: flex-start; gap: 10px; }
+.chat-avatar {
+  width: 32px; height: 32px;
+  background: #e8dcc8;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.chat-avatar-tool {
+  background: #dce8d4;
+}
+
+.chat-bubble-bot-wrap { min-width: 0; flex: 1; }
+.chat-bubble-bot {
+  background: #fffdf8;
+  border: 1px solid #e8dcc8;
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #4a3a28;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.chat-suggestions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.chat-suggest-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #f5ead8;
+  border: 1px dashed #d4c0a0;
+  color: #7a6a50;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.chat-suggest-btn:hover { background: #ece0c8; color: #5a4a38; border-color: #c0a878; }
+
+.chat-actions {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.group:hover .chat-actions { opacity: 1; }
+.chat-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #a0907a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.chat-action-btn:hover { background: #f0e8d8; color: #5a4a38; }
+
+/* 工具调用卡片 */
+.chat-tool-card {
+  min-width: 0; flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #dcd0b8;
+  background: #fffdf8;
+}
+.chat-tool-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f5ead8;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s;
+}
+.chat-tool-header:hover { background: #ece0c8; }
+.chat-tool-arrow { width: 12px; height: 12px; color: #a0907a; flex-shrink: 0; transition: transform 0.15s; }
+.chat-tool-arrow.rotate-90 { transform: rotate(90deg); }
+.chat-tool-reason { font-size: 12px; color: #5a4a38; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-tool-done { font-size: 11px; color: #a0907a; flex-shrink: 0; }
+.chat-tool-body { border-top: 1px solid #e8dcc8; }
+.chat-tool-cmd { padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 12px; color: #2d6a30; background: #fffdf8; white-space: pre-wrap; word-break: break-all; }
+.chat-tool-result { padding: 10px 12px; font-family: 'Courier New', monospace; font-size: 11px; color: #7a6a50; background: #f5ead8; border-top: 1px solid #e8dcc8; white-space: pre-wrap; word-break: break-all; max-height: 192px; overflow-y: auto; }
+
+.chat-avatar-dot { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-avatar-dot::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #d4c0a0; }
+.chat-tool-fallback { min-width: 0; flex: 1; font-family: 'Courier New', monospace; font-size: 12px; color: #a0907a; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+
+/* 思考中 */
+.chat-thinking { padding: 8px 0; font-size: 14px; color: #a0907a; }
+.chat-dots { animation: dotPulse 1.4s infinite; }
+@keyframes dotPulse { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+/* ========== 输入区 ========== */
+.chat-input-area {
+  flex-shrink: 0;
+  padding: 0 16px 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  background: linear-gradient(to top, #f5f0e8 60%, transparent);
+}
+.chat-input-inner { max-width: 720px; margin: 0 auto; }
+
+.chat-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: #fffdf8;
+  border: 1px solid #dcd0b8;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.chat-pending-files { padding: 10px 14px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chat-pending-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 20px;
+  border: 1px solid #dcd0b8;
+  background: #f5ead8;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #5a4a38;
+}
+.chat-pending-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-pending-remove { background: none; border: none; color: #a0907a; cursor: pointer; font-size: 12px; }
+.chat-pending-remove:hover { color: #5a4a38; }
+
+.chat-upload-error { padding: 8px 14px 0; font-size: 12px; color: #c04040; }
+
+.chat-textarea {
+  width: 100%;
+  padding: 14px 48px 14px 16px;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4a3a28;
+  border: none;
+  outline: none;
+  min-height: 52px;
+  max-height: 200px;
+  resize: none;
+  overflow-y: auto;
+  font-family: inherit;
+}
+.chat-textarea::placeholder { color: #c0b098; }
+.chat-textarea:disabled { opacity: 0.5; }
+
+.chat-toolbar {
+  padding: 0 14px 10px;
+  display: flex;
+  align-items: center;
+}
+.chat-upload-btn {
+  display: inline-flex;
+  height: 28px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #a0907a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.chat-upload-btn:hover { background: #f5ead8; color: #5a4a38; }
+.chat-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.chat-send-area {
+  position: absolute;
+  bottom: 10px; right: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.chat-stop-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #5a3e28;
+  color: #f0e8d8;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.chat-stop-btn:hover { opacity: 0.8; }
+.chat-send-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #e8dcc8;
+  color: #b8a888;
+  border: 1px solid #dcd0b8;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default;
+  transition: all 0.15s;
+}
+.chat-send-btn.active {
+  background: #5a3e28;
+  color: #f0e8d8;
+  border-color: transparent;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(90,62,40,0.3);
+}
+.chat-send-btn.active:hover { opacity: 0.85; }
+
+.hidden { display: none; }
+</style>
+
 <style>
-/* 渐变遮罩 */
-.input-gradient {
-  background: linear-gradient(to top, #ffffff 40%, rgba(255,255,255,0.9) 75%, transparent);
-}
-.dark .input-gradient {
-  background: linear-gradient(to top, #171717 40%, rgba(23,23,23,0.9) 75%, transparent);
-}
-
-/* 工具卡片 */
-.tool-card { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; background: #ffffff; }
-.dark .tool-card { border-color: #2a2a2a; background: #1a1a1a; }
-.tool-reason { padding: 8px 14px; font-size: 12px; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-.dark .tool-reason { color: #737373; background: #111; border-bottom-color: #2a2a2a; }
-.tool-command { padding: 10px 14px; font-family: ui-monospace, monospace; font-size: 12px; color: #166534; word-break: break-all; background: #f8fafc; }
-.dark .tool-command { color: #4ade80; background: transparent; }
-.tool-status { padding: 6px 14px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280; }
-.dark .tool-status { border-top-color: #2a2a2a; color: #525252; }
-.tool-output-wrap { border-top: 1px solid #e5e7eb; }
-.dark .tool-output-wrap { border-top-color: #2a2a2a; }
-.tool-output-toggle { padding: 6px 14px; font-size: 11px; color: #6b7280; cursor: pointer; background: none; border: none; width: 100%; text-align: left; transition: color 0.15s; }
-.tool-output-toggle:hover { color: #374151; }
-.dark .tool-output-toggle { color: #525252; }
-.dark .tool-output-toggle:hover { color: #a3a3a3; }
-.tool-output { padding: 8px 14px; font-family: ui-monospace, monospace; font-size: 11px; color: #374151; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; border-top: 1px solid #e5e7eb; background: #f8fafc; }
-.dark .tool-output { color: #a3a3a3; border-top-color: #222; background: transparent; }
-
-/* markdown */
-.markdown-body p { margin: 0.5em 0; }
-.markdown-body { overflow-wrap: break-word; word-break: break-word; }
-.markdown-body p:first-child { margin-top: 0; }
-.markdown-body p:last-child { margin-bottom: 0; }
-.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4 { font-weight: 600; margin: 0.8em 0 0.4em; line-height: 1.3; }
-.markdown-body h1 { font-size: 1.3em; }
-.markdown-body h2 { font-size: 1.15em; }
-.markdown-body h3 { font-size: 1em; }
-.markdown-body code { background: rgba(0,0,0,0.06); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; font-family: ui-monospace, monospace; }
-.dark .markdown-body code { background: rgba(255,255,255,0.08); }
-.markdown-body pre { background: #f5f7fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; overflow-x: auto; margin: 0.6em 0; max-width: 100%; }
-.dark .markdown-body pre { background: #0d0d0d; border-color: #2a2a2a; }
-.markdown-body pre code { background: none; padding: 0; font-size: 0.8em; white-space: pre; }
-.markdown-body ul,.markdown-body ol { padding-left: 1.5em; margin: 0.4em 0; }
-.markdown-body li { margin: 0.25em 0; }
-.markdown-body blockquote { border-left: 3px solid #d1d5db; padding-left: 12px; color: #6b7280; margin: 0.5em 0; }
-.dark .markdown-body blockquote { border-left-color: #404040; color: #737373; }
-.markdown-body a { color: #2563eb; text-decoration: underline; }
-.dark .markdown-body a { color: #60a5fa; }
-.markdown-body hr { border: none; border-top: 1px solid #e5e7eb; margin: 0.8em 0; }
-.dark .markdown-body hr { border-top-color: #2a2a2a; }
-.markdown-body table { border-collapse: collapse; width: 100%; margin: 0.5em 0; font-size: 0.875em; max-width: 100%; table-layout: fixed; }
-.markdown-body th,.markdown-body td { border: 1px solid #e5e7eb; padding: 6px 12px; text-align: left; }
-.dark .markdown-body th,.dark .markdown-body td { border-color: #2a2a2a; }
-.markdown-body th { background: rgba(0,0,0,0.03); font-weight: 600; }
-.dark .markdown-body th { background: rgba(255,255,255,0.04); }
-.markdown-body strong { font-weight: 600; }
+/* markdown (全局) */
+.chat-bubble-bot p { margin: 0.4em 0; }
+.chat-bubble-bot p:first-child { margin-top: 0; }
+.chat-bubble-bot p:last-child { margin-bottom: 0; }
+.chat-bubble-bot h1,.chat-bubble-bot h2,.chat-bubble-bot h3,.chat-bubble-bot h4 { font-weight: 700; margin: 0.8em 0 0.4em; line-height: 1.3; color: #3a2a18; }
+.chat-bubble-bot h1 { font-size: 1.3em; }
+.chat-bubble-bot h2 { font-size: 1.15em; }
+.chat-bubble-bot h3 { font-size: 1em; }
+.chat-bubble-bot code { background: rgba(90,62,40,0.08); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; font-family: 'Courier New', monospace; }
+.chat-bubble-bot pre { background: #f5ead8; border: 1px solid #e8dcc8; border-radius: 10px; padding: 14px; overflow-x: auto; margin: 0.6em 0; }
+.chat-bubble-bot pre code { background: none; padding: 0; font-size: 0.8em; white-space: pre; }
+.chat-bubble-bot ul,.chat-bubble-bot ol { padding-left: 1.5em; margin: 0.4em 0; }
+.chat-bubble-bot li { margin: 0.25em 0; }
+.chat-bubble-bot blockquote { border-left: 3px solid #d4c0a0; padding-left: 12px; color: #8a7a60; margin: 0.5em 0; }
+.chat-bubble-bot a { color: #8a5a30; text-decoration: underline; }
+.chat-bubble-bot hr { border: none; border-top: 1px dashed #d4c0a0; margin: 0.8em 0; }
+.chat-bubble-bot table { border-collapse: collapse; width: 100%; margin: 0.5em 0; font-size: 0.875em; }
+.chat-bubble-bot th,.chat-bubble-bot td { border: 1px solid #e8dcc8; padding: 6px 12px; text-align: left; }
+.chat-bubble-bot th { background: #f5ead8; font-weight: 600; }
+.chat-bubble-bot strong { font-weight: 700; }
 </style>

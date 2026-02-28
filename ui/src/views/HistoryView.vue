@@ -1,11 +1,14 @@
 <template>
-  <div class="h-full overflow-y-auto p-6">
-    <div class="w-full max-w-4xl mx-auto">
-      <div class="mb-4">
-        <h1 class="text-2xl font-semibold text-neutral-800 dark:text-neutral-100">历史会话</h1>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">选择一个会话继续对话</p>
+  <div class="hist-root">
+    <div class="hist-container">
+      <div class="hist-header">
+        <span class="hist-header-icon">📜</span>
+        <div>
+          <h1 class="hist-title">历史会话</h1>
+          <p class="hist-desc">选择一个会话继续对话</p>
+        </div>
       </div>
-      <div class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3">
+      <div class="hist-card">
         <HistoryPanel @open-chat="openChatFromHistory" />
       </div>
     </div>
@@ -23,3 +26,48 @@ const openChatFromHistory = async (chat) => {
 };
 </script>
 
+<style scoped>
+.hist-root {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+  background: #f5f0e8;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(0,0,0,0.02) 28px, rgba(0,0,0,0.02) 29px);
+  font-family: 'Georgia', 'PingFang SC', serif;
+}
+
+.hist-container {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.hist-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.hist-header-icon {
+  font-size: 28px;
+}
+.hist-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #4a3a28;
+  margin: 0;
+}
+.hist-desc {
+  font-size: 12px;
+  color: #a0907a;
+  margin: 2px 0 0;
+}
+
+.hist-card {
+  background: #fffdf8;
+  border: 1px solid #e8dcc8;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+</style>

@@ -22,6 +22,18 @@ const BASE_PROMPT = `
 - 构建有界面的应用，注册到系统供长期使用
 - 修改自身代码和配置，扩展自己的能力
 
+## AIOS 核心特点：环境感知与资源调度
+
+- 你不只是聊天助手，你是运行在用户环境中的执行者，可以调度整台机器/服务器资源来解决问题。
+- 可使用与管理的资源包括但不限于：
+  - 文件系统（项目文件、日志、配置、脚本、数据文件）
+  - 系统能力（进程、端口、服务、命令行工具）
+  - 数据库（主服务库 \`database/aios.db\`、应用库 \`database/apps.db\`）
+  - 网络与外部服务（API、远程服务、部署环境）
+- 目标是解决问题本身，而不是局限在单一手段（只聊天或只写代码）。
+- 当任务需要额外资源或权限（例如 API Key、外部账号、素材文件、用户侧授权操作），可以直接向用户提出明确请求，让用户协助提供；拿到资源后继续推进。
+- 遇到检索、统计、追溯、交叉分析任务时，优先考虑直接查文件/查库/跑命令给出结果。
+
 ## 社区与文档
 
 - AIOS 提供官方社区，地址：https://aios.chatnext.ai/
@@ -115,7 +127,10 @@ const getOverview = () => {
   }
 };
 
-export const buildSystemPrompt = (appsCatalog = [], { enableFollowupSuggestions = true } = {}) => {
+export const buildSystemPrompt = (
+  appsCatalog = [],
+  { enableFollowupSuggestions = true, chatContext = null } = {}
+) => {
   const cwd = process.cwd();
 
   let prompt = BASE_PROMPT;
@@ -157,6 +172,23 @@ const { message } = await res.json(); // message.content 是回复文本
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。\n${lines.join('\n')}`;
   } else {
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。`;
+  }
+
+  if (chatContext?.currentChatId || (Array.isArray(chatContext?.recentChats) && chatContext.recentChats.length)) {
+    const currentChatId = String(chatContext?.currentChatId || '').trim();
+    const recentChats = Array.isArray(chatContext?.recentChats) ? chatContext.recentChats : [];
+    const recentLines = recentChats
+      .slice(0, 3)
+      .map((c, i) => `${i + 1}. ${c.title || '未命名'} ｜ ${String(c.description || '').slice(0, 100)}`);
+
+    prompt += `\n\n## 会话上下文`;
+    if (currentChatId) {
+      prompt += `\n- 当前会话ID：${currentChatId}`;
+      prompt += `\n- 你可以在需要时调用工具 update_chat_description 来更新当前会话描述（chatId 必须使用当前会话ID）`;
+    }
+    if (recentLines.length) {
+      prompt += `\n- 最近 3 次会话（标题｜描述前100字）：\n${recentLines.join('\n')}`;
+    }
   }
 
   if (enableFollowupSuggestions) {

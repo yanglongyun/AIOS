@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
-const APPS_ROOT = join(process.cwd(), 'apps');
+const APPS_ROOT = join(process.cwd(), 'apps', 'api');
 
 const parseReadme = (filePath) => {
   if (!existsSync(filePath)) return null;

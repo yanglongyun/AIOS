@@ -1,5 +1,5 @@
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { handleApiRequest } from '../api/index.js';
@@ -67,7 +67,7 @@ export const httpServer = createServer(async (req, res) => {
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
   const filePath = join(PUBLIC_DIR, pathname);
 
-  if (existsSync(filePath)) {
+  if (existsSync(filePath) && statSync(filePath).isFile()) {
     const ext = pathname.slice(pathname.lastIndexOf('.'));
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
     res.end(readFileSync(filePath));

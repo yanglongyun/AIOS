@@ -2,7 +2,7 @@
 
 ## 概述
 
-AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 server（端口 9700）完全隔离。每个应用是 `apps/` 目录下的一个子目录，有自己的 API、数据库表、前端页面。
+AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 server（端口 9700）完全隔离。每个应用是 `apps/api/` 目录下的一个子目录，有自己的 API、数据库表、前端页面。
 
 ## 界面结构
 
@@ -38,19 +38,23 @@ AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 ser
 
 ## 目录结构
 
-每个应用遵循以下结构：
-
 ```
 apps/
-└── {appname}/
-    ├── index.js        # 入口 + 路由注册
-    ├── db.js           # 数据库初始化 + CRUD
-    ├── APP.md          # 应用说明（必须）
-    └── api/
-        ├── list.js
-        ├── create.js
-        ├── update.js
-        └── delete.js
+├── index.js          # apps 服务入口 + 路由分发
+├── db/
+│   └── client.js     # 共享数据库连接
+├── utils/
+│   ├── json.js       # JSON 响应工具
+│   └── readBody.js   # 请求体解析工具
+└── api/
+    └── {appname}/
+        ├── index.js    # 入口 + 路由注册 + 建表
+        ├── APP.md      # 应用说明（必须）
+        └── api/
+            ├── list.js
+            ├── create.js
+            ├── update.js
+            └── delete.js
 ```
 
 ## 数据库
@@ -58,12 +62,16 @@ apps/
 所有应用共用 `apps.db`（SQLite），通过 `apps/db/client.js` 获取连接：
 
 ```js
-import { db } from '../db/client.js';
+// 在 apps/api/{appname}/index.js 中
+import { db } from '../../db/client.js';
+
+// 在 apps/api/{appname}/api/*.js 中
+import { db } from '../../../db/client.js';
 ```
 
 表命名规范：`{appname}_{table}`，例如 `notebook_notes`、`todo_items`。
 
-建表在 `db.js` 的 `initDatabase()` 函数中完成，使用 `CREATE TABLE IF NOT EXISTS`。
+建表在 `index.js` 的 `initDatabase()` 函数中完成，使用 `CREATE TABLE IF NOT EXISTS`。
 
 ## API 规范
 
@@ -80,7 +88,7 @@ import { db } from '../db/client.js';
 
 ```js
 // 1. 导入
-import { handleTodoApi, initTodoDatabase } from './todo/index.js';
+import { handleTodoApi, initTodoDatabase } from './api/todo/index.js';
 
 // 2. 路由分发（在 createServer 回调中）
 if (path.startsWith('/api/apps/todo/')) {
@@ -112,9 +120,11 @@ initTodoDatabase();
 
 ## 完整示例：Todo 应用
 
-### `apps/todo/db.js`
+### `apps/api/todo/index.js`
 ```js
-import { db } from '../db/client.js';
+import { json } from '../../utils/json.js';
+import { readBody } from '../../utils/readBody.js';
+import { db } from '../../db/client.js';
 
 export function initTodoDatabase() {
   db.exec(`
@@ -127,55 +137,31 @@ export function initTodoDatabase() {
   `);
 }
 
-export function getTodos() {
-  return db.prepare('SELECT * FROM todo_items ORDER BY created_at DESC').all();
-}
-
-export function createTodo(content) {
-  return db.prepare('INSERT INTO todo_items (content) VALUES (?)').run(content);
-}
-
-export function updateTodo(id, done) {
-  return db.prepare('UPDATE todo_items SET done = ? WHERE id = ?').run(done, id);
-}
-
-export function deleteTodo(id) {
-  return db.prepare('DELETE FROM todo_items WHERE id = ?').run(id);
-}
-```
-
-### `apps/todo/index.js`
-```js
-import { json } from '../utils/json.js';
-import { readBody } from '../utils/readBody.js';
-import { initTodoDatabase, getTodos, createTodo, updateTodo, deleteTodo } from './db.js';
-
-export { initTodoDatabase };
-
 export async function handleTodoApi(req, res, path) {
   if (path === '/api/apps/todo/list' && req.method === 'GET') {
-    return json(res, { success: true, data: getTodos() });
+    const items = db.prepare('SELECT * FROM todo_items ORDER BY created_at DESC').all();
+    return json(res, { success: true, data: items });
   }
   if (path === '/api/apps/todo/create' && req.method === 'POST') {
     const { content } = await readBody(req);
-    createTodo(content);
+    db.prepare('INSERT INTO todo_items (content) VALUES (?)').run(content);
     return json(res, { success: true });
   }
   if (path === '/api/apps/todo/update' && req.method === 'POST') {
     const { id, done } = await readBody(req);
-    updateTodo(id, done);
+    db.prepare('UPDATE todo_items SET done = ? WHERE id = ?').run(done, id);
     return json(res, { success: true });
   }
   if (path === '/api/apps/todo/delete' && req.method === 'POST') {
     const { id } = await readBody(req);
-    deleteTodo(id);
+    db.prepare('DELETE FROM todo_items WHERE id = ?').run(id);
     return json(res, { success: true });
   }
   return false;
 }
 ```
 
-### `apps/todo/APP.md`
+### `apps/api/todo/APP.md`
 ```
 ---
 name: todo

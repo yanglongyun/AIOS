@@ -28,8 +28,19 @@
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-gray-100 dark:bg-neutral-800 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-neutral-800 dark:text-neutral-200">
-                  {{ m.content }}
+                <div class="max-w-[85%] break-words rounded-2xl rounded-tr-sm bg-gray-100 px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200" style="overflow-wrap: break-word; word-break: break-word;">
+                  <div>{{ m.content }}</div>
+                  <div v-if="m.attachments?.length" class="mt-2 space-y-1">
+                    <div class="text-[10px] uppercase tracking-wider text-neutral-400">附件</div>
+                    <div
+                      v-for="(f, idx) in m.attachments"
+                      :key="`${f.path}-${idx}`"
+                      class="rounded-lg border border-gray-200 bg-white/80 px-2 py-1 text-[11px] text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                    >
+                      <div class="truncate font-medium">{{ f.name }}</div>
+                      <div class="break-all text-[10px] text-neutral-400 dark:text-neutral-500">{{ f.path }}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -118,10 +129,29 @@
 
 
       <!-- 底部输入浮层 -->
-      <div class="input-gradient shrink-0 mx-auto flex w-full max-w-3xl flex-col items-center px-3.5 pb-2 xl:max-w-4xl" :style="{ paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 8px)` }">
+      <div class="input-gradient shrink-0 mx-auto flex w-full max-w-3xl flex-col items-center px-3.5 pb-2 xl:max-w-4xl" :style="{ paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 16px)` }">
         <div class="w-full">
           <form @submit.prevent="handleSend"
             class="relative flex w-full flex-col rounded-xl bg-gray-100 dark:bg-gray-800">
+            <input
+              ref="fileInput"
+              type="file"
+              class="hidden"
+              multiple
+              @change="onPickFiles"
+            />
+
+            <div v-if="pendingFiles.length" class="px-3 pt-2.5 flex flex-wrap gap-2">
+              <div
+                v-for="(f, idx) in pendingFiles"
+                :key="`${f.path}-${idx}`"
+                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2 py-1 text-[11px] text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+              >
+                <span class="truncate max-w-[220px]">{{ f.name }}</span>
+                <button type="button" class="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200" @click="removePendingFile(idx)">x</button>
+              </div>
+            </div>
+            <p v-if="uploadError" class="px-3 pt-2 text-xs text-rose-500">{{ uploadError }}</p>
 
             <textarea
               ref="textarea"
@@ -137,7 +167,19 @@
             />
 
             <!-- 底部工具栏（固定一点高度，避免右下角按钮遮挡输入） -->
-            <div class="px-3 pb-2.5 pt-1"></div>
+            <div class="px-3 pb-2.5 pt-1 flex items-center">
+              <button
+                type="button"
+                @click="openFilePicker"
+                :disabled="busy || uploading"
+                class="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-neutral-500 hover:bg-white hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.2a4 4 0 0 1 5.66 5.66l-9.2 9.2a2 2 0 0 1-2.82-2.83l8.48-8.48" />
+                </svg>
+                {{ uploading ? '上传中...' : '上传文件' }}
+              </button>
+            </div>
 
             <!-- 发送/停止按钮（绝对定位右下角） -->
             <div class="absolute bottom-2 right-2 flex items-center gap-1.5">
@@ -188,7 +230,11 @@ const loadedOffset = ref(0);
 const input = ref('');
 const msgBox = ref(null);
 const textarea = ref(null);
+const fileInput = ref(null);
 const composing = ref(false);
+const uploading = ref(false);
+const uploadError = ref('');
+const pendingFiles = ref([]);
 
 const seenKeys = ref(new Set());
 
@@ -209,7 +255,7 @@ const LAST_CHAT_KEY = 'lastChatId';
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
+  if (!res.ok) throw new Error(data.error || data.message || `${res.status} ${res.statusText}`);
   return data;
 };
 
@@ -253,7 +299,8 @@ const parseMessages = (raw) => {
       continue;
     }
     if (m.role === 'user' && m.content) {
-      list.push({ role: m.role, content: m.content, _key: base ? `${base}:user` : undefined });
+      const attachments = Array.isArray(m._meta?.attachments) ? m._meta.attachments : [];
+      list.push({ role: m.role, content: m.content, attachments, _key: base ? `${base}:user` : undefined });
     }
   }
   return list;
@@ -342,14 +389,28 @@ const onEnter = (e) => { if (composing.value) return; e.preventDefault(); handle
 
 const handleSend = () => {
   const text = input.value.trim();
-  if (!text || busy.value) return;
+  if ((!text && pendingFiles.value.length === 0) || busy.value) return;
   busy.value = true;
-  ensureChatId(text).then((id) => {
+  const content = text || '请先阅读附件并总结关键信息';
+  const outgoingAttachments = pendingFiles.value.map((f) => ({
+    name: f.name,
+    path: f.path,
+    size: f.size
+  }));
+
+  ensureChatId(content).then((id) => {
     const _key = `client:${Date.now()}:user`;
     seenKeys.value.add(_key);
-    messages.value.push({ role: 'user', content: text, _key });
-    send({ type: 'message', chatId: id, content: text, mode: 'auto' });
+    messages.value.push({ role: 'user', content, attachments: outgoingAttachments, _key });
+    send({
+      type: 'message',
+      chatId: id,
+      content,
+      mode: 'auto',
+      attachments: outgoingAttachments
+    });
     input.value = '';
+    pendingFiles.value = [];
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
   }).catch((e) => { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); busy.value = false; });
 };
@@ -362,6 +423,53 @@ let approvalSent = false;
 const applySuggestion = (text) => {
   input.value = text;
   nextTick(() => { autoResize(); textarea.value?.focus(); });
+};
+
+const openFilePicker = () => {
+  uploadError.value = '';
+  fileInput.value?.click();
+};
+
+const removePendingFile = (idx) => {
+  pendingFiles.value.splice(idx, 1);
+};
+
+const toDataUrl = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || ''));
+  reader.onerror = () => reject(new Error('文件读取失败'));
+  reader.readAsDataURL(file);
+});
+
+const uploadSingleFile = async (file) => {
+  const dataUrl = await toDataUrl(file);
+  const res = await request('/api/files/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: file.name,
+      data: dataUrl
+    })
+  });
+  return res.file;
+};
+
+const onPickFiles = async (e) => {
+  const files = Array.from(e.target?.files || []);
+  if (!files.length) return;
+  uploadError.value = '';
+  uploading.value = true;
+  try {
+    for (const f of files) {
+      const uploaded = await uploadSingleFile(f);
+      if (uploaded?.path) pendingFiles.value.push(uploaded);
+    }
+  } catch (err) {
+    uploadError.value = err.message || '上传失败';
+  } finally {
+    uploading.value = false;
+    if (fileInput.value) fileInput.value.value = '';
+  }
 };
 
 watch(() => messages.value.length, (newLen, oldLen) => {

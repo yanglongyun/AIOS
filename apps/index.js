@@ -1,12 +1,14 @@
 import { createServer } from 'http';
 import { json } from './utils/json.js';
 
-import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
-import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
-import { handleInboxApi, initInboxDatabase } from './inbox/index.js';
-import { handlePlaygroundApi, initPlaygroundDatabase } from './playground/index.js';
-import { handleMindtreeApi, initMindtreeDatabase } from './mindtree/index.js';
-import { handleWriterpadApi, initWriterpadDatabase } from './writerpad/index.js';
+import { handleNotebookApi, initNotebookDatabase } from './api/notebook/index.js';
+import { handleFinanceApi, initFinanceDatabase } from './api/finance/index.js';
+import { handleInboxApi, initInboxDatabase } from './api/inbox/index.js';
+import { handlePlaygroundApi, initPlaygroundDatabase } from './api/playground/index.js';
+import { handleMindtreeApi, initMindtreeDatabase } from './api/mindtree/index.js';
+import { handleWriterpadApi, initWriterpadDatabase } from './api/writerpad/index.js';
+import { handleLovehouseApi, initLovehouseDatabase } from './api/lovehouse/index.js';
+import { handleNokiaApi, initNokiaDatabase } from './api/nokia/index.js';
 
 const APPS_PORT = 9701;
 
@@ -56,6 +58,16 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
+  if (path.startsWith('/api/apps/lovehouse/')) {
+    const handled = await handleLovehouseApi(req, res, path);
+    if (handled !== false) return;
+  }
+
+  if (path.startsWith('/api/apps/nokia/')) {
+    const handled = await handleNokiaApi(req, res, path);
+    if (handled !== false) return;
+  }
+
   json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
@@ -65,6 +77,8 @@ initInboxDatabase();
 initPlaygroundDatabase();
 initMindtreeDatabase();
 initWriterpadDatabase();
+initLovehouseDatabase();
+initNokiaDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

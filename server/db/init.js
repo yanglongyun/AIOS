@@ -8,6 +8,7 @@ export const initDatabase = () => {
     CREATE TABLE IF NOT EXISTS chats (
       id TEXT PRIMARY KEY,
       title TEXT,
+      description TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -28,6 +29,10 @@ export const initDatabase = () => {
 
   try {
     db.exec('ALTER TABLE messages ADD COLUMN meta TEXT');
+  } catch {}
+
+  try {
+    db.exec("ALTER TABLE chats ADD COLUMN description TEXT DEFAULT ''");
   } catch {}
 
   const initSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');

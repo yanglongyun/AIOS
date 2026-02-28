@@ -9,6 +9,8 @@ import PlaygroundView from '../views/apps/PlaygroundView.vue';
 import CommunityView from '../views/CommunityView.vue';
 import OutlinerView from '../views/apps/OutlinerView.vue';
 import WriterpadView from '../views/apps/WriterpadView.vue';
+import LovehouseView from '../views/apps/LovehouseView.vue';
+import NokiaView from '../views/apps/NokiaView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -20,6 +22,8 @@ const routes = [
   { path: '/playground', component: PlaygroundView },
   { path: '/mindtree', component: OutlinerView },
   { path: '/writerpad', component: WriterpadView },
+  { path: '/lovehouse', component: LovehouseView },
+  { path: '/nokia', component: NokiaView },
   { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }
 ];

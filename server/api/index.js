@@ -2,6 +2,7 @@ import { json } from './utils/json.js';
 import { handleChatApi } from './chat/index.js';
 import { handleSettingsApi } from './settings/index.js';
 import { handleLlmApi } from './llm/index.js';
+import { handleFilesApi } from './files/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -19,6 +20,11 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/llm')) {
       await handleLlmApi(req, res, path);
+      return true;
+    }
+
+    if (path.startsWith('/api/files/')) {
+      await handleFilesApi(req, res, path);
       return true;
     }
 

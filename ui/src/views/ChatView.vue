@@ -406,7 +406,6 @@ const handleSend = () => {
       type: 'message',
       chatId: id,
       content,
-      mode: 'auto',
       attachments: outgoingAttachments
     });
     input.value = '';
@@ -416,9 +415,6 @@ const handleSend = () => {
 };
 
 const stopBusy = () => { busy.value = false; };
-
-let approvalSent = false;
-
 
 const applySuggestion = (text) => {
   input.value = text;
@@ -517,17 +513,6 @@ watch(() => route.fullPath, async () => {
 onMounted(() => {
   if (wsStatus.value === 'disconnected') connect();
 
-  unsubs.push(on('tool_confirm', (data) => {
-    // 兼容后端 ask 模式：前端始终自动批准并按 tool_call 展示
-    const _key = `ws:${Date.now()}:tool_confirm`;
-    seenKeys.value.add(_key);
-    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, expanded: true, _key });
-    if (!approvalSent) {
-      approvalSent = true;
-      send({ type: 'tool_approve' });
-    }
-  }));
-  unsubs.push(on('tool_approved', (data) => { approvalSent = false; }));
   unsubs.push(on('tool_call', (data) => {
     const _key = `ws:${Date.now()}:tool_call`;
     seenKeys.value.add(_key);
@@ -543,7 +528,6 @@ onMounted(() => {
     messages.value.push({ type: 'tool_result', content: data.content, _key });
   }));
   unsubs.push(on('reply', (data) => {
-    approvalSent = false;
     const parsed = extractSuggestions(data.content || '');
     const _key = `ws:${Date.now()}:assistant`;
     seenKeys.value.add(_key);
@@ -551,7 +535,6 @@ onMounted(() => {
     busy.value = false;
   }));
   unsubs.push(on('error', (data) => {
-    approvalSent = false;
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'assistant', content: `错误: ${data.content}`, _key });

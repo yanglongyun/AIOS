@@ -1,111 +1,81 @@
 <template>
-  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto">
-    <!-- 顶部标题 -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-neutral-800 dark:text-neutral-100 italic tracking-tight">Finance.</h1>
-        <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">管理你的收入与支出</p>
-      </div>
-      <div class="flex gap-4">
-        <div class="text-right">
-          <p class="text-[10px] uppercase tracking-widest text-neutral-400">总支出</p>
-          <p class="text-2xl font-mono font-bold text-rose-500">-￥{{ Math.abs(totalExpense).toLocaleString() }}</p>
-        </div>
-      </div>
+  <div class="fin-root">
+
+    <!-- 顶部 -->
+    <div class="fin-header">
+      <h1>记账本</h1>
+      <span class="fin-date-tag">{{ currentMonth }}</span>
     </div>
 
     <!-- 统计卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white dark:bg-neutral-800/50 p-5 rounded-2xl border border-neutral-100 dark:border-neutral-700 shadow-sm">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-          <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">本月收入</span>
-        </div>
-        <p class="text-2xl font-mono font-semibold">+{{ totalIncome.toLocaleString() }}</p>
+    <div class="fin-balance">
+      <div class="fin-box income-box">
+        <div class="fin-box-label">收入</div>
+        <div class="fin-box-value">+{{ totalIncome.toLocaleString() }}</div>
       </div>
-
-      <div class="bg-white dark:bg-neutral-800/50 p-5 rounded-2xl border border-neutral-100 dark:border-neutral-700 shadow-sm">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 12H4" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-          <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">本月支出</span>
-        </div>
-        <p class="text-2xl font-mono font-semibold">-{{ totalExpense.toLocaleString() }}</p>
+      <div class="fin-box expense-box">
+        <div class="fin-box-label">支出</div>
+        <div class="fin-box-value">-{{ totalExpense.toLocaleString() }}</div>
       </div>
-
-      <div class="bg-indigo-600 p-5 rounded-2xl shadow-lg shadow-indigo-500/20 text-white">
-        <div class="flex items-center gap-3 mb-3 text-indigo-100">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke-width="2"/></svg>
-          <span class="text-sm font-medium">净头寸</span>
-        </div>
-        <p class="text-2xl font-mono font-bold">￥{{ (totalIncome - totalExpense).toLocaleString() }}</p>
+      <div class="fin-box net-box">
+        <div class="fin-box-label">结余</div>
+        <div class="fin-box-value">{{ (totalIncome - totalExpense).toLocaleString() }}</div>
       </div>
     </div>
 
-    <!-- 智能记录 -->
-    <div class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-4">
-      <div class="flex flex-wrap gap-2 items-center">
+    <!-- 流水列表 -->
+    <div class="fin-scroll">
+      <div v-if="items.length === 0" class="fin-empty">
+        <span class="fin-empty-icon">📒</span>
+        <p>暂无流水记录</p>
+      </div>
+      <template v-else>
+        <template v-for="(group, gi) in groupedItems" :key="gi">
+          <div class="fin-day-label">{{ group.label }}</div>
+          <div
+            v-for="item in group.items" :key="item.id"
+            class="fin-tx-item"
+          >
+            <div class="fin-tx-tag" :class="getCategoryClass(item.category)">
+              {{ getCategoryEmoji(item.category) }}
+            </div>
+            <div class="fin-tx-info">
+              <div class="fin-tx-name">{{ item.note || item.category }}</div>
+              <div class="fin-tx-meta">{{ item.category }} · {{ formatTime(item.date) }}</div>
+            </div>
+            <div class="fin-tx-amount" :class="item.type === 'income' ? 'up' : 'down'">
+              {{ item.type === 'income' ? '+' : '-' }}{{ item.amount.toLocaleString() }}
+            </div>
+            <button class="fin-tx-del" @click="remove(item.id)">×</button>
+          </div>
+        </template>
+      </template>
+    </div>
+
+    <!-- 错误 -->
+    <div v-if="error" class="fin-error">{{ error }}</div>
+
+    <!-- 底部输入 -->
+    <div class="fin-input-bar">
+      <div class="fin-smart-row">
         <input
           v-model="smartInput"
+          placeholder="说句话记账：午饭花了58块"
           @keyup.enter="smartFill"
-          placeholder="例如：今天午饭 58 元，分类餐饮；或：工资到账 12000 元"
-          class="flex-1 min-w-[280px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
         />
-        <button
-          @click="smartFill"
-          :disabled="smartFilling || !smartInput.trim()"
-          class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {{ smartFilling ? '识别中...' : '智能填充' }}
+        <button class="fin-btn-smart" :disabled="smartFilling || !smartInput.trim()" @click="smartFill">
+          {{ smartFilling ? '识别中...' : '✨ 智能识别' }}
         </button>
       </div>
-      <p v-if="smartError" class="mt-2 text-xs text-rose-500 px-2">{{ smartError }}</p>
-    </div>
-
-    <!-- 记账表单 -->
-    <div class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-8 flex flex-wrap gap-2 items-center">
-      <select v-model="newItem.type" class="bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-        <option value="expense">支出</option>
-        <option value="income">收入</option>
-      </select>
-      <input v-model="newItem.amount" type="number" placeholder="金额" class="flex-1 min-w-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-      <input v-model="newItem.category" placeholder="分类 (如: 餐饮, 交通)" class="flex-1 min-w-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-      <input v-model="newItem.note" @keyup.enter="add" placeholder="备注..." class="flex-[2] min-w-[200px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-      <button @click="add" class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all active:scale-95">记录</button>
-    </div>
-
-    <!-- 列表记录 -->
-    <div class="bg-white dark:bg-transparent rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
-      <div class="px-6 py-4 border-b border-neutral-50 dark:border-neutral-800 flex justify-between items-center bg-gray-50/50 dark:bg-neutral-800/50">
-        <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400">最近流水</h3>
-        <span class="text-[10px] text-neutral-400">{{ items.length }} 条记录</span>
-      </div>
-      <div class="divide-y divide-neutral-50 dark:divide-neutral-800">
-        <div v-for="item in items" :key="item.id" class="px-6 py-4 flex items-center hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors group">
-          <div :class="item.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'" class="w-10 h-10 rounded-xl flex items-center justify-center font-bold mr-4 shrink-0">
-            {{ item.category.slice(0, 1) }}
-          </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{{ item.note || item.category }}</h4>
-            <div class="flex gap-3 mt-0.5">
-              <span class="text-[11px] text-neutral-400">{{ item.category }}</span>
-              <span class="text-[11px] text-neutral-300 dark:text-neutral-600">•</span>
-              <span class="text-[11px] text-neutral-400">{{ formatDate(item.date) }}</span>
-            </div>
-          </div>
-          <div class="text-right mr-4">
-            <p :class="item.type === 'income' ? 'text-emerald-500' : 'text-neutral-800 dark:text-neutral-200'" class="font-mono font-bold">
-              {{ item.type === 'income' ? '+' : '-' }}{{ item.amount.toLocaleString() }}
-            </p>
-          </div>
-          <button @click="remove(item.id)" class="opacity-0 group-hover:opacity-100 p-2 text-neutral-300 hover:text-rose-500 transition-all cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <div v-if="items.length === 0" class="py-20 text-center text-neutral-400 text-sm">暂无流水记录</div>
+      <div class="fin-form-row">
+        <select v-model="newItem.type">
+          <option value="expense">支出</option>
+          <option value="income">收入</option>
+        </select>
+        <input v-model="newItem.amount" type="number" placeholder="金额" class="fin-input-amount" />
+        <input v-model="newItem.category" placeholder="分类" class="fin-input-cat" />
+        <input v-model="newItem.note" placeholder="备注" @keyup.enter="add" />
+        <button class="fin-btn-add" :disabled="!newItem.amount || !newItem.category" @click="add">+</button>
       </div>
     </div>
   </div>
@@ -118,21 +88,77 @@ const items = ref([])
 const newItem = ref({ type: 'expense', amount: '', category: '', note: '' })
 const smartInput = ref('')
 const smartFilling = ref(false)
-const smartError = ref('')
+const error = ref('')
 const API_BASE = 'http://localhost:9701/api/apps/finance'
 
 const totalIncome = computed(() => items.value.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0))
 const totalExpense = computed(() => items.value.filter(i => i.type === 'expense').reduce((s, i) => s + i.amount, 0))
 
+const currentMonth = computed(() => {
+  const now = new Date()
+  return `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`
+})
+
+// 按日期分组
+const groupedItems = computed(() => {
+  const groups = {}
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const yesterday = today - 86400000
+
+  for (const item of items.value) {
+    const d = new Date(item.date)
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+    let label
+    if (dayStart === today) label = '今天'
+    else if (dayStart === yesterday) label = '昨天'
+    else label = `${d.getMonth() + 1}月${d.getDate()}日`
+
+    if (!groups[label]) groups[label] = { label, items: [] }
+    groups[label].items.push(item)
+  }
+  return Object.values(groups)
+})
+
+const emojiMap = {
+  '餐饮': '🍜', '午餐': '🍜', '晚餐': '🍱', '早餐': '🥐',
+  '交通': '🚇', '出行': '🚇',
+  '饮品': '☕', '咖啡': '☕', '奶茶': '🧋',
+  '购物': '🛒', '生活': '🛒',
+  '收入': '💰', '工资': '💰', '奖金': '💰',
+  '娱乐': '🎮', '游戏': '🎮',
+  '医疗': '💊', '教育': '📚', '通讯': '📱', '住房': '🏠',
+}
+
+const classMap = {
+  '餐饮': 'food', '午餐': 'food', '晚餐': 'food', '早餐': 'food',
+  '交通': 'transport', '出行': 'transport',
+  '饮品': 'drink', '咖啡': 'drink', '奶茶': 'drink',
+  '购物': 'shopping', '生活': 'life',
+  '收入': 'income', '工资': 'income', '奖金': 'income',
+  '娱乐': 'fun', '游戏': 'fun',
+  '医疗': 'life', '教育': 'life', '通讯': 'life', '住房': 'life',
+}
+
+const getCategoryEmoji = (cat) => emojiMap[cat] || '📝'
+const getCategoryClass = (cat) => classMap[cat] || 'life'
+
+const formatTime = (dateStr) => {
+  const d = new Date(dateStr)
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+}
+
 const fetchItems = async () => {
   try {
     const res = await fetch(`${API_BASE}/list`)
-    const result = await res.json(); items.value = (result.data || []).reverse()
+    const result = await res.json()
+    items.value = (result.data || []).reverse()
   } catch (e) { console.error(e) }
 }
 
 const add = async () => {
   if (!newItem.value.amount || !newItem.value.category) return
+  error.value = ''
   try {
     await fetch(`${API_BASE}/create`, {
       method: 'POST',
@@ -141,7 +167,9 @@ const add = async () => {
     })
     newItem.value = { type: 'expense', amount: '', category: '', note: '' }
     fetchItems()
-  } catch (e) { console.error(e) }
+  } catch (e) {
+    error.value = e.message || '记录失败'
+  }
 }
 
 const smartFill = async () => {
@@ -149,7 +177,7 @@ const smartFill = async () => {
   if (!text || smartFilling.value) return
 
   smartFilling.value = true
-  smartError.value = ''
+  error.value = ''
   try {
     const res = await fetch('http://localhost:9700/api/llm/chat', {
       method: 'POST',
@@ -180,7 +208,7 @@ const smartFill = async () => {
 
     newItem.value = { type, amount: String(amount), category, note }
   } catch (e) {
-    smartError.value = e.message || '智能填充失败'
+    error.value = e.message || '智能填充失败'
   } finally {
     smartFilling.value = false
   }
@@ -197,10 +225,277 @@ const remove = async (id) => {
   } catch (e) { console.error(e) }
 }
 
-const formatDate = (dateStr) => {
-  const date = new Date(dateStr)
-  return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-}
-
 onMounted(fetchItems)
 </script>
+
+<style scoped>
+.fin-root {
+  font-family: 'PingFang SC', -apple-system, sans-serif;
+  background: #f9f5ef;
+  color: #4a3f35;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 纸张纹理 */
+.fin-root::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    #e8ddd0 31px,
+    #e8ddd0 32px
+  );
+  background-position: 0 100px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* 顶部 */
+.fin-header {
+  padding: 24px 24px 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.fin-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #5a4030;
+  font-style: italic;
+}
+.fin-date-tag {
+  font-size: 12px;
+  color: #b8a090;
+  background: #f0e8dd;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* 统计 */
+.fin-balance {
+  padding: 16px 24px 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.fin-balance .fin-box {
+  display: inline-flex;
+  flex-direction: column;
+}
+.fin-balance {
+  display: flex;
+  gap: 12px;
+}
+.fin-box {
+  flex: 1;
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px dashed;
+}
+.fin-box.income-box { border-color: #b8d8b0; background: #f5faf3; }
+.fin-box.expense-box { border-color: #e8b8a0; background: #fdf5f0; }
+.fin-box.net-box { border-color: #c0b8d8; background: #f5f3fa; }
+.fin-box-label {
+  font-size: 11px;
+  color: #a09080;
+  font-weight: 500;
+}
+.fin-box-value {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  margin-top: 4px;
+}
+.fin-box.income-box .fin-box-value { color: #5a9a4a; }
+.fin-box.expense-box .fin-box-value { color: #c06040; }
+.fin-box.net-box .fin-box-value { color: #6a5a8a; }
+
+/* 流水 */
+.fin-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 16px;
+  position: relative;
+  z-index: 1;
+}
+.fin-scroll::-webkit-scrollbar { width: 0; }
+
+.fin-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #c4b8a8;
+  gap: 8px;
+}
+.fin-empty-icon { font-size: 36px; opacity: 0.5; }
+.fin-empty p { font-size: 14px; }
+
+.fin-day-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c09060;
+  padding: 14px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fin-day-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0d4c4;
+}
+
+.fin-tx-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dotted #e0d8cc;
+  cursor: default;
+}
+.fin-tx-item:last-child { border-bottom: none; }
+
+.fin-tx-tag {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+.fin-tx-tag.food { background: #fef9f0; border-color: #e8d8c0; }
+.fin-tx-tag.transport { background: #f0f6fe; border-color: #c0d4e8; }
+.fin-tx-tag.drink { background: #fef0f4; border-color: #e8c0cc; }
+.fin-tx-tag.income { background: #f0fef4; border-color: #b8d8b8; }
+.fin-tx-tag.shopping { background: #f8f0fe; border-color: #d0c0e8; }
+.fin-tx-tag.life { background: #f0fefe; border-color: #b8d8d8; }
+.fin-tx-tag.fun { background: #fef0fe; border-color: #d8b8d8; }
+
+.fin-tx-info { flex: 1; }
+.fin-tx-name { font-size: 14px; font-weight: 600; }
+.fin-tx-meta { font-size: 11px; color: #b8a898; margin-top: 1px; }
+
+.fin-tx-amount {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+.fin-tx-amount.up { color: #5a9a4a; }
+.fin-tx-amount.down { color: #4a3f35; }
+
+.fin-tx-del {
+  margin-left: 8px;
+  opacity: 0;
+  border: none; background: none;
+  cursor: pointer; color: #d0c0b0;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.fin-tx-item:hover .fin-tx-del { opacity: 1; }
+.fin-tx-del:hover { color: #c06040; }
+
+/* 错误 */
+.fin-error {
+  flex-shrink: 0;
+  margin: 0 24px 8px;
+  font-size: 12px;
+  color: #c06040;
+  background: #fdf5f0;
+  border: 1px dashed #e8b8a0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 底部输入 */
+.fin-input-bar {
+  flex-shrink: 0;
+  padding: 12px 24px 24px;
+  background: #f0e8dd;
+  border-top: 2px solid #e0d4c4;
+  position: relative;
+  z-index: 1;
+}
+.fin-smart-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.fin-smart-row input {
+  flex: 1;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1.5px dashed #d4c8b8;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  color: #4a3f35;
+  font-family: inherit;
+  transition: border 0.15s;
+}
+.fin-smart-row input::placeholder { color: #c4b8a8; }
+.fin-smart-row input:focus { border-style: solid; border-color: #c09060; }
+.fin-btn-smart {
+  padding: 0 16px;
+  background: #5a4030;
+  color: #f5efe8;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.fin-btn-smart:hover { background: #6a5040; }
+.fin-btn-smart:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.fin-form-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.fin-form-row select,
+.fin-form-row input {
+  padding: 10px 12px;
+  background: #fff;
+  border: 1.5px solid #e0d4c4;
+  border-radius: 10px;
+  font-size: 13px;
+  outline: none;
+  color: #4a3f35;
+  font-family: inherit;
+}
+.fin-form-row select { width: 72px; }
+.fin-form-row input { flex: 1; min-width: 0; }
+.fin-form-row input::placeholder { color: #c4b8a8; }
+.fin-input-amount { max-width: 80px; }
+.fin-input-cat { max-width: 80px; }
+
+.fin-btn-add {
+  width: 38px; height: 38px;
+  border: 2px solid #5a4030;
+  border-radius: 50%;
+  background: transparent; color: #5a4030;
+  font-size: 20px; cursor: pointer;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.fin-btn-add:hover { background: #5a4030; color: #f5efe8; }
+.fin-btn-add:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>

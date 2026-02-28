@@ -12,7 +12,7 @@ const trimMessages = (messages, contextRounds) => {
   return [messages[0], ...messages.slice(cutIndex)];
 };
 
-export const chat = async (chatId, messages, send, { model, contextRounds, apiUrl, apiKey, mode, waitForApproval, saveMessage, signal }) => {
+export const chat = async (chatId, messages, send, { model, contextRounds, apiUrl, apiKey, saveMessage, signal }) => {
   let round = 0;
 
   while (round++ < MAX_ROUNDS) {
@@ -32,36 +32,9 @@ export const chat = async (chatId, messages, send, { model, contextRounds, apiUr
       // 解析参数
       const parsed = message.tool_calls.map(tc => JSON.parse(tc.function.arguments || '{}'));
 
-      // ask 模式：发确认请求，等用户批准
-      if (mode === 'ask') {
-        for (let i = 0; i < message.tool_calls.length; i++) {
-          const { command, reason } = parsed[i];
-          send({ type: 'tool_confirm', id: message.tool_calls[i].id, command, reason });
-        }
-
-        const approved = await waitForApproval();
-        send({ type: 'tool_approved', approved });
-
-        if (!approved) {
-          // 用户拒绝，返回拒绝结果给 LLM
-          const toolMessages = message.tool_calls.map(tc => ({
-            role: 'tool',
-            tool_call_id: tc.id,
-            content: '用户拒绝执行此命令'
-          }));
-          for (const tm of toolMessages) {
-            messages.push(tm);
-            saveMessage(chatId, tm, { status: 'rejected', ...parsed[0] });
-          }
-          continue;
-        }
-      }
-
-      // auto 模式：发送 tool_call 卡片（ask 模式已有 confirm 卡片，不重复）
-      if (mode !== 'ask') {
-        for (const { command, reason } of parsed) {
-          send({ type: 'tool_call', command, reason });
-        }
+      // 发送 tool_call 卡片
+      for (const { command, reason } of parsed) {
+        send({ type: 'tool_call', command, reason });
       }
 
       const toolMessages = await runTools(message.tool_calls);

@@ -1,131 +1,134 @@
 <template>
-  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto text-neutral-900 dark:text-neutral-100">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold italic tracking-tight">Notebook.</h1>
-      <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">记录想法，快速检索，置顶重点。</p>
+  <div class="notebook-root">
+
+    <!-- 顶部栏 -->
+    <div class="nb-header">
+      <h1>随心记</h1>
+      <button class="nb-icon-btn" @click="showSearch = !showSearch">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
     </div>
 
-    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-8">
-      <textarea
-        v-model="draft"
-        class="w-full min-h-[120px] bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-3 text-sm leading-6 focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
-        placeholder="写点什么...（Ctrl/Cmd + Enter 保存）"
-        @keydown.meta.enter.prevent="saveNote"
-        @keydown.ctrl.enter.prevent="saveNote"
+    <!-- 搜索栏 -->
+    <div v-if="showSearch" class="nb-search">
+      <input
+        ref="searchInputEl"
+        v-model="searchQuery"
+        type="text"
+        placeholder="搜索笔记..."
+        @input="onSearchInput"
       />
-      <div class="mt-2 px-2 flex items-center justify-between">
-        <span class="text-xs text-neutral-500">{{ draft.length }} 字</span>
-        <div class="flex items-center gap-2">
-          <button
-            class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="optimizing || !draft.trim()"
-            @click="optimizeDraft"
-          >
-            {{ optimizing ? '优化中...' : '优化' }}
-          </button>
-          <button
-            class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="creating || !draft.trim()"
-            @click="saveNote"
-          >
-            {{ creating ? '保存中...' : '保存' }}
-          </button>
-        </div>
-      </div>
-      <div v-if="optimizedDraft" class="mt-3 rounded-xl border border-indigo-200 bg-indigo-50/70 dark:bg-indigo-900/20 dark:border-indigo-800 p-3">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">优化结果</p>
-          <div class="flex items-center gap-2">
-            <button class="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500" @click="applyOptimized">直接使用</button>
-            <button class="text-xs px-2 py-1 rounded border border-indigo-300 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-100/60 dark:hover:bg-indigo-800/50" @click="closeOptimized">关闭</button>
-          </div>
-        </div>
-        <div class="whitespace-pre-wrap break-words text-sm leading-6 text-neutral-700 dark:text-neutral-200">{{ optimizedDraft }}</div>
-      </div>
-      <p v-if="error" class="mt-2 px-2 text-xs text-rose-500">{{ error }}</p>
-    </section>
+      <button v-if="searchQuery" class="nb-search-clear" @click="searchQuery = ''; onSearchInput()">✕</button>
+    </div>
 
-    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl mb-6">
-      <div class="bg-white dark:bg-neutral-800 rounded-xl flex flex-wrap gap-2 items-center px-3 py-2">
-        <input
-          v-model="searchQuery"
-          type="text"
-          class="flex-1 min-w-[220px] bg-transparent border-none rounded-xl px-1 py-1.5 text-sm focus:ring-0 outline-none"
-          placeholder="搜索笔记内容..."
-          @input="onSearchInput"
-        />
-        <span class="text-xs text-neutral-400">每页 {{ PAGE_SIZE }} 条</span>
-      </div>
-    </section>
-
-    <section class="bg-white dark:bg-transparent rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden mb-6">
-      <div class="px-6 py-4 border-b border-neutral-50 dark:border-neutral-800 flex justify-between items-center bg-gray-50/50 dark:bg-neutral-800/50">
-        <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400">笔记列表</h3>
-        <span class="text-[10px] text-neutral-400">第 {{ page }} 页</span>
+    <!-- 笔记列表 -->
+    <div class="nb-scroll">
+      <!-- 空状态 -->
+      <div v-if="!notes.length && !loading" class="nb-empty">
+        <span class="nb-empty-icon">📝</span>
+        <p>还没有笔记，写点什么吧</p>
       </div>
 
-      <div class="divide-y divide-neutral-50 dark:divide-neutral-800">
-        <article v-for="note in notes" :key="note.id" class="px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors group">
+      <!-- 便签网格 -->
+      <div v-else class="nb-grid">
+        <div
+          v-for="(note, idx) in notes" :key="note.id"
+          class="nb-sticky"
+          :class="[`c${(idx % 5) + 1}`, { pinned: note.pinned }]"
+        >
+          <!-- 置顶图钉 -->
+          <span v-if="note.pinned" class="nb-pin">📌</span>
+
+          <!-- 编辑模式 -->
           <template v-if="editingId === note.id">
             <textarea
               v-model="editingDraft"
-              class="w-full min-h-[110px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2 text-sm leading-6 outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+              class="nb-edit-area"
               @keydown.meta.enter.prevent="saveInlineEdit"
               @keydown.ctrl.enter.prevent="saveInlineEdit"
             />
+            <div class="nb-edit-actions">
+              <button class="nb-edit-cancel" @click="cancelInlineEdit">取消</button>
+              <button class="nb-edit-save" :disabled="editingSaving || !editingDraft.trim()" @click="saveInlineEdit">
+                {{ editingSaving ? '...' : '保存' }}
+              </button>
+            </div>
           </template>
 
+          <!-- 展示模式 -->
           <template v-else>
-            <div class="flex items-start gap-3">
-              <div v-if="note.pinned" class="mt-0.5 text-amber-500" title="已置顶">📌</div>
-              <div class="whitespace-pre-wrap break-words text-sm leading-6 text-neutral-800 dark:text-neutral-100">{{ note.content || '（空）' }}</div>
+            <div class="nb-sticky-text">{{ note.content || '（空）' }}</div>
+            <div class="nb-sticky-bottom">
+              <span class="nb-sticky-time">{{ formatTime(note.updated_at || note.created_at) }}</span>
+              <div class="nb-sticky-ops">
+                <button @click="editNote(note)" title="编辑">✏️</button>
+                <button @click="togglePin(note)" :title="note.pinned ? '取消置顶' : '置顶'">📌</button>
+                <button @click="deleteNote(note.id)" title="删除">🗑</button>
+              </div>
             </div>
           </template>
-
-          <div class="mt-3 flex items-center justify-between">
-            <span class="text-[11px] text-neutral-400">{{ formatTime(note.updated_at || note.created_at) }}</span>
-            <div class="flex items-center gap-3 text-sm">
-              <template v-if="editingId === note.id">
-                <button class="text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 disabled:opacity-50" :disabled="editingSaving" @click="cancelInlineEdit">取消</button>
-                <button class="text-indigo-600 hover:text-indigo-700 disabled:opacity-50" :disabled="editingSaving || !editingDraft.trim()" @click="saveInlineEdit">
-                  {{ editingSaving ? '保存中...' : '保存' }}
-                </button>
-              </template>
-              <button v-else class="text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200" @click="editNote(note)">编辑</button>
-              <button class="text-amber-600 hover:text-amber-700" @click="togglePin(note)">{{ note.pinned ? '取消置顶' : '置顶' }}</button>
-              <button class="text-rose-500 hover:text-rose-600" @click="deleteNote(note.id)">删除</button>
-            </div>
-          </div>
-        </article>
-
-        <div v-if="!notes.length" class="py-16 text-center text-neutral-400 text-sm">暂无笔记，开始记录第一条吧</div>
+        </div>
       </div>
-    </section>
 
-    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-2 rounded-2xl flex items-center justify-between">
-      <span class="text-sm text-neutral-500 px-2">共 {{ total }} 条 · 第 {{ page }} / {{ totalPages }} 页</span>
-      <div class="flex items-center gap-2">
+      <!-- 分页 -->
+      <div v-if="totalPages > 1" class="nb-pager">
+        <button :disabled="page <= 1 || loading" @click="goPrevPage">‹</button>
+        <span>{{ page }} / {{ totalPages }}</span>
+        <button :disabled="page >= totalPages || loading" @click="goNextPage">›</button>
+      </div>
+    </div>
+
+    <!-- 优化结果浮层 -->
+    <div v-if="optimizedDraft" class="nb-optimize">
+      <div class="nb-optimize-head">
+        <span>✨ 优化结果</span>
+        <div class="nb-optimize-btns">
+          <button class="nb-opt-use" @click="applyOptimized">使用</button>
+          <button class="nb-opt-close" @click="closeOptimized">关闭</button>
+        </div>
+      </div>
+      <div class="nb-optimize-body">{{ optimizedDraft }}</div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div v-if="error" class="nb-error">{{ error }}</div>
+
+    <!-- 底部输入区 -->
+    <div class="nb-input-bar">
+      <div class="nb-input-row">
+        <textarea
+          ref="inputEl"
+          v-model="draft"
+          rows="1"
+          placeholder="写点什么..."
+          @input="autoResize"
+          @keydown.meta.enter.prevent="saveNote"
+          @keydown.ctrl.enter.prevent="saveNote"
+        />
         <button
-          class="bg-white dark:bg-neutral-800 rounded-xl px-4 py-2 text-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="page <= 1 || loading"
-          @click="goPrevPage"
+          class="nb-btn-ai"
+          :disabled="optimizing || !draft.trim()"
+          title="AI 优化"
+          @click="optimizeDraft"
         >
-          上一页
+          <span v-if="optimizing">...</span>
+          <span v-else>✨</span>
         </button>
         <button
-          class="bg-white dark:bg-neutral-800 rounded-xl px-4 py-2 text-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="page >= totalPages || loading"
-          @click="goNextPage"
+          class="nb-btn-add"
+          :disabled="creating || !draft.trim()"
+          @click="saveNote"
         >
-          下一页
+          <span v-if="creating">...</span>
+          <span v-else>+</span>
         </button>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, nextTick, watch } from 'vue';
 
 const API_BASE = 'http://localhost:9701/api/apps/notebook';
 const PAGE_SIZE = 10;
@@ -141,10 +144,23 @@ const loading = ref(false);
 const error = ref('');
 const optimizedDraft = ref('');
 const searchQuery = ref('');
+const showSearch = ref(false);
 const page = ref(1);
 const total = ref(0);
 const totalPages = ref(1);
+const inputEl = ref(null);
+const searchInputEl = ref(null);
 let searchTimer = null;
+
+const autoResize = () => {
+  if (!inputEl.value) return;
+  inputEl.value.style.height = 'auto';
+  inputEl.value.style.height = Math.min(inputEl.value.scrollHeight, 100) + 'px';
+};
+
+watch(showSearch, (v) => {
+  if (v) nextTick(() => searchInputEl.value?.focus());
+});
 
 const fetchNotes = async () => {
   try {
@@ -185,6 +201,7 @@ const saveNote = async () => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     draft.value = '';
+    if (inputEl.value) inputEl.value.style.height = 'auto';
     page.value = 1;
     await fetchNotes();
   } catch (e) {
@@ -231,6 +248,7 @@ const applyOptimized = () => {
   if (!optimizedDraft.value) return;
   draft.value = optimizedDraft.value;
   optimizedDraft.value = '';
+  nextTick(autoResize);
 };
 
 const closeOptimized = () => {
@@ -326,8 +344,331 @@ const formatTime = (value) => {
   if (!value) return '';
   const date = new Date(value.replace(' ', 'T'));
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('zh-CN', { hour12: false });
+  const now = new Date();
+  const diff = now - date;
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
 };
 
 onMounted(fetchNotes);
 </script>
+
+<style scoped>
+.notebook-root {
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+  background: #f5f0e8;
+  color: #3a3a3a;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 顶部 */
+.nb-header {
+  padding: 20px 20px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.nb-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #5a4a3a;
+}
+.nb-icon-btn {
+  width: 36px; height: 36px; border: none; background: transparent;
+  border-radius: 10px; cursor: pointer; color: #a09080;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.nb-icon-btn:hover { background: rgba(0,0,0,0.05); color: #5a4a3a; }
+
+/* 搜索 */
+.nb-search {
+  padding: 0 20px 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+.nb-search input {
+  width: 100%;
+  padding: 10px 32px 10px 14px;
+  border: 2px dashed #d4c8b8;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+  color: #3a3a3a;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.nb-search input:focus { border-color: #c0a878; border-style: solid; }
+.nb-search input::placeholder { color: #c4b8a8; }
+.nb-search-clear {
+  position: absolute;
+  right: 28px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; cursor: pointer;
+  color: #a09080; font-size: 14px;
+}
+
+/* 滚动区 */
+.nb-scroll {
+  flex: 1; overflow-y: auto; padding: 8px 16px 16px;
+}
+.nb-scroll::-webkit-scrollbar { width: 0; }
+
+/* 空状态 */
+.nb-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b8a898;
+  gap: 8px;
+}
+.nb-empty-icon { font-size: 36px; opacity: 0.5; }
+.nb-empty p { font-size: 14px; }
+
+/* 便签网格 */
+.nb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+/* 便签卡片 */
+.nb-sticky {
+  padding: 16px;
+  border-radius: 4px;
+  min-height: 100px;
+  position: relative;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+.nb-sticky:hover {
+  transform: translateY(-2px) rotate(-0.3deg) !important;
+  box-shadow: 3px 6px 16px rgba(0,0,0,0.12);
+}
+
+/* 五种颜色 + 微旋转 */
+.nb-sticky.c1 { background: #fff9c4; transform: rotate(-0.8deg); }
+.nb-sticky.c2 { background: #c8e6c9; transform: rotate(0.5deg); }
+.nb-sticky.c3 { background: #ffccbc; transform: rotate(-0.3deg); }
+.nb-sticky.c4 { background: #b3e5fc; transform: rotate(0.7deg); }
+.nb-sticky.c5 { background: #e1bee7; transform: rotate(-0.5deg); }
+
+/* 置顶图钉 */
+.nb-pin {
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  font-size: 16px;
+  transform: rotate(15deg);
+}
+
+/* 便签文字 */
+.nb-sticky-text {
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nb-sticky-bottom {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nb-sticky-time { font-size: 10px; color: rgba(0,0,0,0.3); }
+
+.nb-sticky-ops {
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity 0.15s;
+}
+.nb-sticky:hover .nb-sticky-ops { opacity: 1; }
+
+.nb-sticky-ops button {
+  width: 24px; height: 24px; border: none;
+  background: rgba(255,255,255,0.6); border-radius: 6px;
+  cursor: pointer; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s;
+}
+.nb-sticky-ops button:hover { background: rgba(255,255,255,0.9); }
+
+/* 编辑模式 */
+.nb-edit-area {
+  width: 100%;
+  min-height: 80px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  color: #3a3a3a;
+}
+.nb-edit-area:focus { border-color: #c0a878; }
+.nb-edit-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.nb-edit-cancel, .nb-edit-save {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nb-edit-cancel {
+  background: rgba(0,0,0,0.06);
+  color: #888;
+}
+.nb-edit-cancel:hover { background: rgba(0,0,0,0.1); }
+.nb-edit-save {
+  background: #e8a44a;
+  color: #fff;
+}
+.nb-edit-save:hover { background: #d49440; }
+.nb-edit-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 分页 */
+.nb-pager {
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #b8a898;
+}
+.nb-pager button {
+  border: none; background: none;
+  font-size: 18px; color: #a09080;
+  cursor: pointer; padding: 4px 8px;
+}
+.nb-pager button:hover { color: #5a4a3a; }
+.nb-pager button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 优化结果 */
+.nb-optimize {
+  flex-shrink: 0;
+  margin: 0 16px 8px;
+  padding: 12px 14px;
+  background: #fff9e8;
+  border: 1px solid #f0e4c8;
+  border-radius: 10px;
+}
+.nb-optimize-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.nb-optimize-head > span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #c0903a;
+}
+.nb-optimize-btns { display: flex; gap: 6px; }
+.nb-opt-use, .nb-opt-close {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nb-opt-use { background: #e8a44a; color: #fff; }
+.nb-opt-use:hover { background: #d49440; }
+.nb-opt-close { background: transparent; color: #999; }
+.nb-opt-close:hover { background: rgba(0,0,0,0.05); }
+.nb-optimize-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #3a3a3a;
+  max-height: 100px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* 错误 */
+.nb-error {
+  flex-shrink: 0;
+  margin: 0 16px 8px;
+  font-size: 12px;
+  color: #e85d5d;
+  background: #fef0f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* 底部输入 */
+.nb-input-bar {
+  flex-shrink: 0;
+  padding: 10px 16px 20px;
+  background: #eee8dd;
+}
+.nb-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.nb-input-row textarea {
+  flex: 1;
+  padding: 12px 14px;
+  background: #fff;
+  border: 2px dashed #d4c8b8;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  max-height: 100px;
+  font-family: inherit;
+  color: #3a3a3a;
+  transition: border 0.15s;
+}
+.nb-input-row textarea:focus { border-color: #c0a878; border-style: solid; }
+.nb-input-row textarea::placeholder { color: #c4b8a8; }
+
+.nb-btn-ai {
+  width: 36px; height: 36px; border: none;
+  background: transparent; border-radius: 10px;
+  cursor: pointer; font-size: 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #e8a44a;
+  transition: all 0.15s;
+}
+.nb-btn-ai:hover { background: rgba(232,164,74,0.1); }
+.nb-btn-ai:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nb-btn-add {
+  width: 40px; height: 40px; border: none;
+  border-radius: 50%; background: #e8a44a; color: #fff;
+  cursor: pointer; font-size: 22px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(232,164,74,0.3);
+  transition: all 0.15s;
+}
+.nb-btn-add:hover { background: #d49440; transform: scale(1.05); }
+.nb-btn-add:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+</style>

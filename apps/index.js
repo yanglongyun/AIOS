@@ -9,6 +9,8 @@ import { handleMindtreeApi, initMindtreeDatabase } from './api/mindtree/index.js
 import { handleWriterpadApi, initWriterpadDatabase } from './api/writerpad/index.js';
 import { handleLovehouseApi, initLovehouseDatabase } from './api/lovehouse/index.js';
 import { handleNokiaApi, initNokiaDatabase } from './api/nokia/index.js';
+import { handleDebateApi, initDebateDatabase } from './api/debate/index.js';
+import { handleTreasureApi, initTreasureDatabase } from './api/treasure/index.js';
 
 const APPS_PORT = 9701;
 
@@ -68,6 +70,16 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
+  if (path.startsWith('/api/apps/debate/')) {
+    const handled = await handleDebateApi(req, res, path);
+    if (handled !== false) return;
+  }
+
+  if (path.startsWith('/api/apps/treasure/')) {
+    const handled = await handleTreasureApi(req, res, path);
+    if (handled !== false) return;
+  }
+
   json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
@@ -79,6 +91,8 @@ initMindtreeDatabase();
 initWriterpadDatabase();
 initLovehouseDatabase();
 initNokiaDatabase();
+initDebateDatabase();
+initTreasureDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

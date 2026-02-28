@@ -1,18 +1,18 @@
 ---
 name: notebook
-description: User-facing notebook app; SQL is implemented in API handlers and routed by `apps/notebook/index.js`; data stored in `apps_notes`.
+description: 随心记 - 轻量笔记应用，支持创建、编辑、置顶、搜索、AI 优化。数据在 apps_notes。
 ---
 
-# Notebook App
-Summary: User-facing notebook app; SQL is implemented in API handlers and routed by `apps/notebook/index.js`; data stored in `apps_notes`.
+# 随心记
+
+轻量笔记应用，支持 AI 优化文字、置顶、搜索、分页。
 
 ## API
-- `GET /api/apps/notebook/list?q=&page=&pageSize=`
-- `POST /api/apps/notebook/create`
-- `POST /api/apps/notebook/update`
-- `POST /api/apps/notebook/delete`
-- `POST /api/apps/notebook/pin`
+- `GET /api/apps/notebook/list?q=&page=&pageSize=` - 笔记列表（搜索+分页）
+- `POST /api/apps/notebook/create` - 创建笔记（参数：content）
+- `POST /api/apps/notebook/update` - 更新笔记（参数：id, content）
+- `POST /api/apps/notebook/delete` - 删除笔记（参数：id）
+- `POST /api/apps/notebook/pin` - 置顶/取消置顶（参数：id, pinned）
 
-## Files
-- `apps/notebook/index.js`: app entry + API router + schema init
-- `apps/notebook/api/*.js`: endpoint handlers (SQL in handlers)
+## 数据表
+- `apps_notes` - 笔记（content, pinned, created_at, updated_at）

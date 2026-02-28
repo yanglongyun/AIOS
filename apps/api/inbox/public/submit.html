@@ -1,54 +1,287 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AIOS 收件箱</title>
-  <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;color:#111827}
-    .wrap{max-width:720px;margin:40px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
-    h1{margin:0 0 8px;font-size:24px}
-    p{margin:0 0 18px;color:#6b7280;font-size:14px}
-    input,textarea{width:100%;box-sizing:border-box;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
-    textarea{min-height:130px;resize:vertical}
-    .row{display:grid;gap:10px;margin-bottom:10px}
-    button{background:#111827;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .msg{margin-top:10px;font-size:13px}
-    .ok{color:#059669}.err{color:#dc2626}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>给我写信 ✉️</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Georgia', 'PingFang SC', serif;
+  min-height: 100vh;
+  background: #f0ebe3;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(139,90,43,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139,90,43,0.02) 0%, transparent 40%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 80px,
+    rgba(139,90,43,0.015) 80px,
+    rgba(139,90,43,0.015) 81px
+  );
+  pointer-events: none;
+}
+
+.envelope {
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+.envelope-back {
+  background: #faf6f0;
+  border-radius: 4px;
+  padding: 48px 36px 36px;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 32px rgba(0,0,0,0.08),
+    inset 0 0 80px rgba(139,90,43,0.02);
+  border: 1px solid #e8e0d4;
+  position: relative;
+}
+
+.envelope-back::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 23px,
+    rgba(139,90,43,0.025) 23px,
+    rgba(139,90,43,0.025) 24px
+  );
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+.stamp {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  width: 56px;
+  height: 68px;
+  background: #fff;
+  border: 2px dotted #d4c8b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(3deg);
+  z-index: 2;
+}
+.stamp-emoji { font-size: 24px; }
+.stamp-text { font-size: 7px; color: #b8a898; margin-top: 4px; letter-spacing: 1px; }
+
+.envelope-content {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.title h1 {
+  font-size: 22px;
+  color: #7a6a58;
+  font-weight: 700;
+  font-style: italic;
+}
+.title p {
+  font-size: 13px;
+  color: #b8a898;
+  margin-top: 6px;
+}
+
+.airmail-stripe {
+  display: flex;
+  height: 8px;
+  margin: -36px -36px 28px;
+  overflow: hidden;
+}
+.airmail-stripe i {
+  flex: 1;
+  display: block;
+}
+.airmail-stripe i:nth-child(odd) { background: #d4968e; }
+.airmail-stripe i:nth-child(even) { background: #8eaad4; }
+
+.letter-field {
+  margin-bottom: 16px;
+}
+.letter-label {
+  font-size: 12px;
+  color: #b8a898;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+.letter-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.6);
+  border: none;
+  border-bottom: 1.5px solid #e0d4c8;
+  font-size: 14px;
+  font-family: 'Georgia', 'PingFang SC', serif;
+  color: #5a5048;
+  outline: none;
+  transition: all 0.2s;
+}
+.letter-input:focus {
+  background: rgba(255,255,255,0.85);
+  border-bottom-color: #c8b8a0;
+}
+.letter-input::placeholder { color: #d0c4b8; }
+
+.letter-textarea {
+  width: 100%;
+  padding: 14px;
+  background: rgba(255,255,255,0.6);
+  border: none;
+  border-bottom: 1.5px solid #e0d4c8;
+  font-size: 14px;
+  line-height: 1.8;
+  font-family: 'Georgia', 'PingFang SC', serif;
+  color: #5a5048;
+  outline: none;
+  resize: vertical;
+  min-height: 140px;
+  transition: all 0.2s;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(180,160,130,0.15) 27px,
+    rgba(180,160,130,0.15) 28px
+  );
+  background-attachment: local;
+  background-position: 0 14px;
+}
+.letter-textarea:focus {
+  background-color: rgba(255,255,255,0.85);
+  border-bottom-color: #c8b8a0;
+}
+.letter-textarea::placeholder { color: #d0c4b8; }
+
+.send-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+.postmark {
+  font-size: 11px;
+  color: #c4b8a8;
+  font-style: italic;
+}
+.btn-send {
+  padding: 12px 32px;
+  background: #8a7a68;
+  color: #faf6f0;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'Georgia', 'PingFang SC', serif;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+}
+.btn-send:hover { background: #9a8a78; }
+.btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-send::after {
+  content: ' ✉';
+}
+
+.msg {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  font-style: italic;
+  min-height: 20px;
+}
+.msg.ok { color: #7aaa6a; }
+.msg.err { color: #d4756a; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>提交信息</h1>
-      <p>你的信息会发送到 AIOS 收件箱。</p>
-      <div class="row"><input id="name" placeholder="你的称呼（可选）" /></div>
-      <div class="row"><input id="email" placeholder="邮箱（可选）" /></div>
-      <div class="row"><textarea id="content" placeholder="请输入要提交的内容"></textarea></div>
-      <button id="submit">提交</button>
+
+<div class="envelope">
+  <div class="stamp">
+    <span class="stamp-emoji">🕊️</span>
+    <span class="stamp-text">AIOS</span>
+  </div>
+
+  <div class="envelope-back">
+    <div class="airmail-stripe">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <div class="envelope-content">
+      <div class="title">
+        <h1>给我写封信 ✉️</h1>
+        <p>你的来信会送到我的收件箱</p>
+      </div>
+
+      <div class="letter-field">
+        <div class="letter-label">你的称呼</div>
+        <input class="letter-input" id="name" placeholder="匿名也没关系" />
+      </div>
+
+      <div class="letter-field">
+        <div class="letter-label">联系邮箱</div>
+        <input class="letter-input" id="email" placeholder="方便回信（可选）" />
+      </div>
+
+      <div class="letter-field">
+        <div class="letter-label">信的内容</div>
+        <textarea class="letter-textarea" id="content" placeholder="想说什么都可以..."></textarea>
+      </div>
+
+      <div class="send-row">
+        <span class="postmark">📮 本地邮局</span>
+        <button class="btn-send" id="submit">寄 出</button>
+      </div>
+
       <div id="msg" class="msg"></div>
     </div>
   </div>
-  <script>
-    const btn=document.getElementById('submit');
-    const msg=document.getElementById('msg');
-    btn.addEventListener('click',async()=>{
-      const name=document.getElementById('name').value.trim();
-      const email=document.getElementById('email').value.trim();
-      const content=document.getElementById('content').value.trim();
-      if(!content){msg.className='msg err';msg.textContent='请填写内容';return}
-      btn.disabled=true;msg.className='msg';msg.textContent='提交中...';
-      try{
-        const res=await fetch('/api/apps/inbox/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,content})});
-        const data=await res.json();
-        if(!res.ok||data.success===false) throw new Error(data.message||'提交失败');
-        document.getElementById('content').value='';
-        msg.className='msg ok';msg.textContent='提交成功';
-      }catch(e){msg.className='msg err';msg.textContent=e.message||'提交失败'}
-      finally{btn.disabled=false}
+</div>
+
+<script>
+const btn = document.getElementById('submit');
+const msg = document.getElementById('msg');
+btn.addEventListener('click', async () => {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const content = document.getElementById('content').value.trim();
+  if (!content) { msg.className = 'msg err'; msg.textContent = '✗ 信的内容不能空着呀'; return; }
+  btn.disabled = true; msg.className = 'msg'; msg.textContent = '🕊️ 信鸽飞行中...';
+  try {
+    const res = await fetch('/api/apps/inbox/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, content })
     });
-  </script>
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || '投递失败');
+    document.getElementById('content').value = '';
+    msg.className = 'msg ok'; msg.textContent = '✓ 信已寄出，感谢来信！';
+  } catch (e) { msg.className = 'msg err'; msg.textContent = '✗ ' + (e.message || '投递失败'); }
+  finally { btn.disabled = false; }
+});
+</script>
 </body>
 </html>

@@ -1,70 +1,71 @@
 <template>
-  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-3xl font-bold italic tracking-tight text-neutral-800 dark:text-neutral-100">Inbox.</h1>
-        <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">接收来自外部网页的提交信息</p>
+  <div class="inbox-root">
+
+    <!-- 顶部 -->
+    <div class="inbox-header">
+      <h1>收件箱 <span>📬</span></h1>
+      <span v-if="unread > 0" class="inbox-unread-badge">{{ unread }} 封未读</span>
+    </div>
+
+    <!-- 公开链接 -->
+    <div class="inbox-public-bar">
+      <div class="inbox-public-left">
+        <div class="inbox-public-label">📮 对外投信地址</div>
+        <div class="inbox-public-url">{{ publicUrl }}</div>
       </div>
-      <div class="text-right">
-        <p class="text-[10px] uppercase tracking-widest text-neutral-400">未读</p>
-        <p class="text-2xl font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ unread }}</p>
+      <button class="inbox-btn-copy" @click="copySubmitUrl">{{ copied ? '已复制 ✓' : '复制地址' }}</button>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="inbox-toolbar">
+      <div class="inbox-toolbar-left">
+        <button class="inbox-filter-btn" :class="{ active: readFilter === 'all' }" @click="readFilter = 'all'; fetchMessages()">全部</button>
+        <button class="inbox-filter-btn" :class="{ active: readFilter === 'unread' }" @click="readFilter = 'unread'; fetchMessages()">未读</button>
+        <button class="inbox-filter-btn" :class="{ active: readFilter === 'read' }" @click="readFilter = 'read'; fetchMessages()">已读</button>
+      </div>
+      <span class="inbox-toolbar-count">{{ messages.length }} 封信件</span>
+    </div>
+
+    <!-- 信件列表 -->
+    <div class="inbox-scroll">
+      <div v-if="!messages.length" class="inbox-empty">
+        <span class="inbox-empty-icon">📭</span>
+        <p>暂无来信</p>
+      </div>
+
+      <div
+        v-for="m in messages" :key="m.id"
+        class="inbox-mail-card"
+        :class="{ unread: !m.is_read }"
+      >
+        <!-- 未读蜡封 -->
+        <div v-if="!m.is_read" class="inbox-wax">新</div>
+
+        <!-- 发件人 -->
+        <div class="inbox-sender">
+          <div class="inbox-sender-avatar">{{ getSenderEmoji(m.name) }}</div>
+          <div>
+            <div class="inbox-sender-name">{{ m.name || '匿名' }}</div>
+            <div class="inbox-sender-email">{{ m.email || '无邮箱' }}</div>
+          </div>
+        </div>
+
+        <!-- 信件正文 -->
+        <div class="inbox-body">{{ m.content }}</div>
+
+        <!-- 底部 -->
+        <div class="inbox-footer">
+          <span class="inbox-meta">📅 {{ formatDate(m.created_at) }} · 🌐 {{ m.source_ip || 'unknown' }}</span>
+          <div class="inbox-actions">
+            <button @click="toggleRead(m)">{{ m.is_read ? '标未读' : '标已读' }}</button>
+            <button class="danger" @click="remove(m.id)">删除</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-3 rounded-2xl mb-6">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-sm font-semibold text-neutral-700 dark:text-neutral-200">对外提交页</p>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">复制地址后发给外部用户提交信息</p>
-          <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 break-all">{{ publicUrl }}</p>
-        </div>
-        <button
-          @click="copySubmitUrl"
-          class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90"
-        >
-          {{ copied ? '已复制' : '复制' }}
-        </button>
-      </div>
-    </section>
-
-    <section class="bg-white dark:bg-transparent rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
-      <div class="px-6 py-4 border-b border-neutral-50 dark:border-neutral-800 flex justify-between items-center bg-gray-50/50 dark:bg-neutral-800/50">
-        <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400">消息列表</h3>
-        <div class="flex items-center gap-2">
-          <select v-model="readFilter" @change="fetchMessages" class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
-            <option value="all">全部</option>
-            <option value="unread">仅未读</option>
-            <option value="read">仅已读</option>
-          </select>
-          <button @click="fetchMessages" class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90">刷新</button>
-          <span class="text-[10px] text-neutral-400">{{ messages.length }} 条</span>
-        </div>
-      </div>
-
-      <div class="divide-y divide-neutral-50 dark:divide-neutral-800">
-        <article v-for="m in messages" :key="m.id" class="px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <span v-if="!m.is_read" class="inline-block text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">未读</span>
-                <span class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{{ m.name || '匿名' }}</span>
-                <span class="text-xs text-neutral-400">{{ m.email || '无邮箱' }}</span>
-              </div>
-              <p class="whitespace-pre-wrap break-words text-sm leading-6 text-neutral-700 dark:text-neutral-200">{{ m.content }}</p>
-              <div class="mt-2 text-[11px] text-neutral-400">{{ formatDate(m.created_at) }} · {{ m.source_ip || 'unknown ip' }}</div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <button @click="toggleRead(m)" class="px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-800">
-                {{ m.is_read ? '标未读' : '标已读' }}
-              </button>
-              <button @click="remove(m.id)" class="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 text-xs hover:bg-rose-50">删除</button>
-            </div>
-          </div>
-        </article>
-
-        <div v-if="!messages.length" class="py-20 text-center text-neutral-400 text-sm">暂无消息</div>
-      </div>
-    </section>
+    <!-- 底部邮戳 -->
+    <div class="inbox-postmark">📮 AIOS 邮局 · 本地投递</div>
   </div>
 </template>
 
@@ -109,7 +110,7 @@ const copySubmitUrl = async () => {
   try {
     await navigator.clipboard.writeText(publicUrl);
     copied.value = true;
-    setTimeout(() => { copied.value = false; }, 1200);
+    setTimeout(() => { copied.value = false; }, 1500);
   } catch {}
 };
 
@@ -117,8 +118,336 @@ const formatDate = (v) => {
   if (!v) return '';
   const d = new Date(v.replace(' ', 'T'));
   if (Number.isNaN(d.getTime())) return v;
-  return d.toLocaleString('zh-CN', { hour12: false });
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)} 天前`;
+  return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+};
+
+const senderEmojis = ['🧑', '👩', '👨‍💻', '🎨', '🌍', '🤖', '👾', '🦊', '🐱', '🐻'];
+const getSenderEmoji = (name) => {
+  if (!name) return '🤖';
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return senderEmojis[Math.abs(hash) % senderEmojis.length];
 };
 
 onMounted(fetchMessages);
 </script>
+
+<style scoped>
+.inbox-root {
+  font-family: 'Georgia', 'PingFang SC', serif;
+  background: #f0ebe3;
+  background-image:
+    radial-gradient(circle at 30% 70%, rgba(139,90,43,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(139,90,43,0.02) 0%, transparent 40%);
+  color: #5a5048;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 木桌纹理 */
+.inbox-root::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 80px,
+    rgba(139,90,43,0.015) 80px,
+    rgba(139,90,43,0.015) 81px
+  );
+  pointer-events: none;
+}
+
+/* 顶部 */
+.inbox-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.inbox-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #7a6a58;
+  font-style: italic;
+}
+.inbox-header h1 span { font-size: 20px; margin-left: 4px; }
+.inbox-unread-badge {
+  background: #d4756a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: -apple-system, sans-serif;
+  box-shadow: 0 2px 6px rgba(212,117,106,0.25);
+}
+
+/* 公开链接 */
+.inbox-public-bar {
+  margin: 16px 24px 0;
+  padding: 14px 18px;
+  background: #faf6f0;
+  border: 1px solid #e8e0d4;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.inbox-public-left { flex: 1; min-width: 0; }
+.inbox-public-label { font-size: 12px; color: #b8a898; font-style: italic; }
+.inbox-public-url {
+  font-size: 11px;
+  color: #9a8a78;
+  font-family: 'Courier New', monospace;
+  margin-top: 3px;
+  word-break: break-all;
+}
+.inbox-btn-copy {
+  padding: 8px 18px;
+  background: #8a7a68;
+  color: #faf6f0;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Georgia', serif;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.inbox-btn-copy:hover { background: #9a8a78; }
+
+/* 工具栏 */
+.inbox-toolbar {
+  padding: 16px 24px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.inbox-toolbar-left { display: flex; align-items: center; gap: 8px; }
+.inbox-filter-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1.5px solid #d4c8b8;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Georgia', serif;
+  color: #a89888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.inbox-filter-btn:hover { background: #f5ead0; }
+.inbox-filter-btn.active {
+  background: #8a7a68;
+  color: #faf6f0;
+  border-color: #8a7a68;
+}
+.inbox-toolbar-count {
+  font-size: 11px;
+  color: #c4b8a8;
+  font-style: italic;
+}
+
+/* 滚动区 */
+.inbox-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px 24px;
+  position: relative;
+  z-index: 1;
+}
+.inbox-scroll::-webkit-scrollbar { width: 0; }
+
+.inbox-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #c4b8a8;
+  gap: 8px;
+}
+.inbox-empty-icon { font-size: 48px; opacity: 0.5; }
+.inbox-empty p { font-size: 14px; font-style: italic; }
+
+/* 信件卡片 */
+.inbox-mail-card {
+  background: #faf6f0;
+  border: 1px solid #e8e0d4;
+  border-radius: 4px;
+  padding: 20px 22px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  position: relative;
+  transition: all 0.2s;
+  cursor: default;
+}
+.inbox-mail-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* 红蓝条纹 */
+.inbox-mail-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d4968e 0, #d4968e 10px,
+    #8eaad4 10px, #8eaad4 20px
+  );
+  border-radius: 4px 4px 0 0;
+}
+
+/* 未读 */
+.inbox-mail-card.unread {
+  border-left: 4px solid #d4968e;
+}
+
+/* 蜡封 */
+.inbox-wax {
+  position: absolute;
+  top: 14px; right: 16px;
+  width: 32px; height: 32px;
+  background: radial-gradient(circle at 40% 35%, #e0887e, #c06858);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(192,104,88,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+  font-weight: 700;
+  font-family: -apple-system, sans-serif;
+}
+
+/* 发件人 */
+.inbox-sender {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.inbox-sender-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #f0e8dc;
+  border: 1.5px solid #e0d4c8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.inbox-sender-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7a6a58;
+}
+.inbox-sender-email {
+  font-size: 11px;
+  color: #b8a898;
+  font-style: italic;
+}
+
+/* 正文 */
+.inbox-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #6a5e50;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 10px 0;
+  padding-left: 40px;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(180,160,130,0.12) 27px,
+    rgba(180,160,130,0.12) 28px
+  );
+  background-position: 0 2px;
+}
+
+/* 底部 */
+.inbox-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-left: 40px;
+}
+.inbox-meta {
+  font-size: 11px;
+  color: #c4b8a8;
+  font-style: italic;
+}
+
+.inbox-actions {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.inbox-mail-card:hover .inbox-actions { opacity: 1; }
+
+.inbox-actions button {
+  padding: 5px 14px;
+  border: 1.5px solid #e0d4c8;
+  background: rgba(255,255,255,0.5);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Georgia', serif;
+  color: #a89888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.inbox-actions button:hover {
+  background: #8a7a68;
+  color: #faf6f0;
+  border-color: #8a7a68;
+}
+.inbox-actions button.danger:hover {
+  background: #d4756a;
+  border-color: #d4756a;
+  color: #fff;
+}
+
+/* 邮戳底部 */
+.inbox-postmark {
+  flex-shrink: 0;
+  padding: 12px 24px;
+  text-align: center;
+  font-size: 11px;
+  color: #c4b8a8;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+  border-top: 1px dashed #d8d0c4;
+}
+</style>

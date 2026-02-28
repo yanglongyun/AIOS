@@ -1,7 +1,7 @@
-import { chat } from '../agent/chat.js';
+import { chat } from '../agent/handler.js';
 import { db } from '../db/client.js';
 import { getSettings } from '../api/settings/get.js';
-import { buildSystemPrompt } from '../agent/prompt.js';
+import { buildSystemPrompt } from './prompt.js';
 import { getAppsCatalog } from './apps.js';
 import { resolve } from 'path';
 
@@ -61,7 +61,6 @@ const buildAttachmentContext = (attachments = []) => {
 export const createSession = (send) => {
   let chatId = null;
   let messages = [];
-  let approvalResolve = null;
   let abortController = null;
 
   const handleMessage = async (data) => {
@@ -75,16 +74,6 @@ export const createSession = (send) => {
         abortController.abort();
         abortController = null;
       }
-      return;
-    }
-
-    if (data.type === 'tool_approve') {
-      if (approvalResolve) approvalResolve(true);
-      return;
-    }
-
-    if (data.type === 'tool_reject') {
-      if (approvalResolve) approvalResolve(false);
       return;
     }
 
@@ -141,9 +130,6 @@ export const createSession = (send) => {
         };
       }
 
-      const mode = data.mode || 'auto';
-      const waitForApproval = () => new Promise((resolve) => { approvalResolve = resolve; });
-
       abortController = new AbortController();
       const { signal } = abortController;
 
@@ -153,8 +139,6 @@ export const createSession = (send) => {
           contextRounds,
           apiUrl,
           apiKey,
-          mode,
-          waitForApproval,
           saveMessage,
           signal
         });

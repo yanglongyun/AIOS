@@ -8,7 +8,17 @@
     <section class="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/40 overflow-hidden mb-5">
       <div class="px-4 py-3 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
         <span class="text-xs uppercase tracking-widest text-neutral-400">3D 渲染</span>
-        <span class="text-xs text-neutral-400">{{ loading ? '生成中...' : '就绪' }}</span>
+        <div class="flex items-center gap-2">
+          <select
+            v-model="selectedVersionId"
+            @change="loadSelectedVersion"
+            class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+          >
+            <option :value="0">最新版本</option>
+            <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} · #{{ v.id }}</option>
+          </select>
+          <span class="text-xs text-neutral-400">{{ loading ? '生成中...' : '就绪' }}</span>
+        </div>
       </div>
       <iframe
         class="w-full h-[460px] bg-neutral-50 dark:bg-neutral-900"
@@ -51,11 +61,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const prompt = ref('');
 const loading = ref(false);
 const error = ref('');
+const versions = ref([]);
+const selectedVersionId = ref(0);
 
 const defaultSuggestions = [
   '做一个低多边形小岛，海面有波动和阳光',
@@ -106,11 +118,44 @@ const parseStructuredOutput = (raw = '') => {
   const fenced = txt.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const normalized = (fenced ? fenced[1] : txt).trim();
   const parsed = JSON.parse(normalized);
+  const name = String(parsed?.name || '').trim();
   const html = String(parsed?.html || '').trim();
   const next = Array.isArray(parsed?.suggestions)
     ? parsed.suggestions.map(s => String(s || '').trim()).filter(Boolean).slice(0, 3)
     : [];
-  return { html, suggestions: next };
+  return { name, html, suggestions: next };
+};
+
+const fetchVersions = async () => {
+  const res = await fetch('http://localhost:9701/api/apps/playground/list');
+  const data = await res.json();
+  versions.value = data.data || [];
+};
+
+const loadLatestVersion = async () => {
+  const res = await fetch('http://localhost:9701/api/apps/playground/latest');
+  const data = await res.json();
+  const row = data.data;
+  if (!row) return;
+  sceneHtml.value = row.html || defaultHtml;
+  suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
+    ? row.suggestions
+    : [...defaultSuggestions];
+};
+
+const loadSelectedVersion = async () => {
+  if (!selectedVersionId.value) {
+    await loadLatestVersion();
+    return;
+  }
+  const res = await fetch(`http://localhost:9701/api/apps/playground/detail?id=${selectedVersionId.value}`);
+  const data = await res.json();
+  if (!data?.success || !data?.data) return;
+  const row = data.data;
+  sceneHtml.value = row.html || defaultHtml;
+  suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
+    ? row.suggestions
+    : [...defaultSuggestions];
 };
 
 const submitPrompt = async (suggestion) => {
@@ -130,7 +175,7 @@ const submitPrompt = async (suggestion) => {
         messages: [
           {
             role: 'system',
-            content: '你是 3D 网页生成助手。根据用户要求返回结构化 JSON：{"html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
+            content: '你是 3D 网页生成助手。根据用户要求返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
           },
           { role: 'user', content }
         ]
@@ -140,10 +185,12 @@ const submitPrompt = async (suggestion) => {
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
 
+    let name = '';
     let html = '';
     let nextSuggestions = [];
     try {
       const structured = parseStructuredOutput(data.message?.content || '');
+      name = structured.name;
       html = structured.html;
       nextSuggestions = structured.suggestions;
     } catch {
@@ -153,10 +200,28 @@ const submitPrompt = async (suggestion) => {
     if (!html.toLowerCase().includes('<html')) throw new Error('模型未返回完整 HTML');
     sceneHtml.value = html;
     suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
+
+    await fetch('http://localhost:9701/api/apps/playground/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name || content.slice(0, 24),
+        prompt: content,
+        html,
+        suggestions: suggestions.value
+      })
+    });
+    await fetchVersions();
+    selectedVersionId.value = 0;
   } catch (e) {
     error.value = e.message || '生成失败';
   } finally {
     loading.value = false;
   }
 };
+
+onMounted(async () => {
+  await fetchVersions();
+  await loadLatestVersion();
+});
 </script>

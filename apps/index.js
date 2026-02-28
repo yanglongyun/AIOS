@@ -4,6 +4,7 @@ import { json } from './utils/json.js';
 import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
 import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
 import { handleInboxApi, initInboxDatabase } from './inbox/index.js';
+import { handlePlaygroundApi, initPlaygroundDatabase } from './playground/index.js';
 
 const APPS_PORT = 9701;
 
@@ -38,12 +39,18 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
+  if (path.startsWith('/api/apps/playground/')) {
+    const handled = await handlePlaygroundApi(req, res, path);
+    if (handled !== false) return;
+  }
+
   json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
 initNotebookDatabase();
 initFinanceDatabase();
 initInboxDatabase();
+initPlaygroundDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

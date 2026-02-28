@@ -2,16 +2,26 @@
   <nav class="flex flex-col h-full overflow-hidden">
 
     <div class="flex flex-col flex-1 min-h-0 px-2 py-2">
-      <!-- 聊天 -->
-      <button @click="goChat"
+      <!-- 对话：新会话 / 历史会话 -->
+      <button @click="goNewSession"
         class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer shrink-0"
-        :class="isChat
+        :class="isChatNew
           ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
           : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          <path d="M12 5v14M5 12h14"/>
         </svg>
-        聊天
+        新会话
+      </button>
+      <button @click="goHistory"
+        class="mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer shrink-0"
+        :class="isChatHistory
+          ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+          : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        历史会话
       </button>
 
       <!-- 应用区域 -->
@@ -55,12 +65,34 @@
             </svg>
             游乐园
           </button>
+
+          <button @click="go('/mindtree')"
+            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+            :class="route.path.startsWith('/mindtree') ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 4h14a2 2 0 0 1 2 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2z"/>
+              <path d="M9 9h6M9 13h6"/>
+            </svg>
+            心树
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 底部：设置 -->
+    <!-- 底部：社区 + 设置 -->
     <div class="border-t border-gray-200 dark:border-neutral-800 p-3 shrink-0">
+      <button @click="go('/community')"
+        class="mb-1.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
+        :class="is('/community') ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 11c1.657 0 3-1.343 3-3S17.657 5 16 5s-3 1.343-3 3 1.343 3 3 3z"/>
+          <path d="M8 13c2.21 0 4-1.79 4-4S10.21 5 8 5 4 6.79 4 9s1.79 4 4 4z"/>
+          <path d="M16 13c-2.67 0-8 1.34-8 4v2h12v-2c0-2.66-1.33-4-4-4z"/>
+          <path d="M8 15c-2.67 0-6 1.34-6 4v1h6"/>
+        </svg>
+        社区
+      </button>
+
       <button @click="go('/settings')"
         class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer"
         :class="is('/settings') ? 'bg-gray-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800/60'">
@@ -82,7 +114,8 @@ const emit = defineEmits(['navigate']);
 const route = useRoute();
 const router = useRouter();
 
-const isChat = computed(() => route.path.startsWith('/chat'));
+const isChatNew = computed(() => route.path.startsWith('/chat'));
+const isChatHistory = computed(() => route.path === '/history');
 const is = (path) => route.path === path;
 
 const go = (path) => {
@@ -90,9 +123,13 @@ const go = (path) => {
   router.push(path);
 };
 
-const goChat = async () => {
+const goNewSession = async () => {
   emit('navigate');
-  const lastId = localStorage.getItem('lastChatId');
-  await router.push(lastId ? `/chat/${lastId}` : { path: '/chat', query: { new: String(Date.now()) } });
+  await router.push({ path: '/chat', query: { new: String(Date.now()) } });
+};
+
+const goHistory = async () => {
+  emit('navigate');
+  await router.push('/history');
 };
 </script>

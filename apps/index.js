@@ -5,6 +5,7 @@ import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
 import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
 import { handleInboxApi, initInboxDatabase } from './inbox/index.js';
 import { handlePlaygroundApi, initPlaygroundDatabase } from './playground/index.js';
+import { handleMindtreeApi, initMindtreeDatabase } from './mindtree/index.js';
 
 const APPS_PORT = 9701;
 
@@ -44,6 +45,11 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
+  if (path.startsWith('/api/apps/mindtree/')) {
+    const handled = await handleMindtreeApi(req, res, path);
+    if (handled !== false) return;
+  }
+
   json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
@@ -51,6 +57,7 @@ initNotebookDatabase();
 initFinanceDatabase();
 initInboxDatabase();
 initPlaygroundDatabase();
+initMindtreeDatabase();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

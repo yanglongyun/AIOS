@@ -1,32 +1,7 @@
 <template>
   <div class="relative min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-900">
-
-    <!-- 聊天操作栏 -->
-    <div class="flex items-center justify-end gap-1 px-2 py-1 shrink-0 border-b border-gray-100 dark:border-neutral-800">
-      <button @click="goNewChat" title="新对话"
-        class="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-      </button>
-      <button @click="activeTab = activeTab === 'history' ? 'chat' : 'history'" title="历史对话"
-        class="flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer"
-        :class="activeTab === 'history'
-          ? 'text-neutral-700 dark:text-neutral-200 bg-gray-100 dark:bg-neutral-800'
-          : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- 历史面板 -->
-    <div v-if="activeTab === 'history'" class="flex-1 overflow-y-auto px-3 py-2">
-      <HistoryPanel @open-chat="openChatFromHistory" />
-    </div>
-
     <!-- 聊天主区域 -->
-    <div v-else class="flex-1 flex flex-col min-h-0">
+    <div class="flex-1 flex flex-col min-h-0">
       <div ref="msgBox" class="flex-1 overflow-y-auto min-h-0" @scroll="onScroll">
         <div class="mx-auto flex max-w-3xl flex-col gap-0 px-5 pt-6 pb-6 xl:max-w-4xl xl:pt-10">
 
@@ -60,7 +35,7 @@
 
               <!-- 助手消息 -->
               <div v-else-if="m.role === 'assistant'" class="group flex items-start gap-3">
-                <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 shadow-sm">
+                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 shadow-sm">
                   <svg class="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                   </svg>
@@ -196,7 +171,6 @@ import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 import { connect, send, on, wsStatus } from '../ws.js';
-import HistoryPanel from '../components/chat/History.vue';
 
 
 const route = useRoute();
@@ -211,7 +185,6 @@ const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
 const loadedOffset = ref(0);
-const activeTab = ref('chat');
 const input = ref('');
 const msgBox = ref(null);
 const textarea = ref(null);
@@ -307,13 +280,17 @@ const createNewChat = async (title = '新对话') => {
   seenKeys.value = new Set();
 };
 
+const buildChatTitleFromFirstMessage = (text = '') => {
+  const normalized = String(text).replace(/\s+/g, ' ').trim();
+  return normalized.slice(0, 20) || '新对话';
+};
+
 const ensureChatId = async (text) => {
   if (chatId.value) return chatId.value;
-  await createNewChat(text.slice(0, 20) || '新对话');
+  await createNewChat(buildChatTitleFromFirstMessage(text));
   return chatId.value;
 };
 
-const goNewChat = () => router.push({ path: '/chat', query: { new: String(Date.now()) } });
 const toggleResult = (m) => { m.expanded = !m.expanded; };
 const copyText = (text) => { navigator.clipboard?.writeText(text); };
 
@@ -387,11 +364,6 @@ const applySuggestion = (text) => {
   nextTick(() => { autoResize(); textarea.value?.focus(); });
 };
 
-const openChatFromHistory = async (chat) => {
-  activeTab.value = 'chat';
-  await router.push({ path: `/chat/${chat.id}`, query: { title: chat.title || chat.id.slice(0, 8) } });
-};
-
 watch(() => messages.value.length, (newLen, oldLen) => {
   // 初次加载：直接跳到底，避免 smooth 造成卡顿/滚不到底
   if (oldLen === 0 && newLen > 0) {
@@ -406,9 +378,14 @@ watch(() => messages.value.length, (newLen, oldLen) => {
 
 watch(() => route.fullPath, async () => {
   if (!route.path.startsWith('/chat')) return;
-  activeTab.value = 'chat';
   if (route.query.new) {
-    try { await createNewChat(); } catch (e) { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); }
+    chatId.value = null;
+    chatTitle.value = '新对话';
+    messages.value = [];
+    hasMore.value = false;
+    loadedOffset.value = 0;
+    seenKeys.value = new Set();
+    busy.value = false;
     return;
   }
   const id = route.params.id ? String(route.params.id) : null;

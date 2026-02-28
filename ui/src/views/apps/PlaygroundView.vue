@@ -68,6 +68,7 @@ const loading = ref(false);
 const error = ref('');
 const versions = ref([]);
 const selectedVersionId = ref(0);
+const currentVersionName = ref('默认场景');
 
 const defaultSuggestions = [
   '做一个低多边形小岛，海面有波动和阳光',
@@ -136,7 +137,11 @@ const loadLatestVersion = async () => {
   const res = await fetch('http://localhost:9701/api/apps/playground/latest');
   const data = await res.json();
   const row = data.data;
-  if (!row) return;
+  if (!row) {
+    currentVersionName.value = '默认场景';
+    return;
+  }
+  currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
     ? row.suggestions
@@ -152,6 +157,7 @@ const loadSelectedVersion = async () => {
   const data = await res.json();
   if (!data?.success || !data?.data) return;
   const row = data.data;
+  currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
     ? row.suggestions
@@ -167,6 +173,16 @@ const submitPrompt = async (suggestion) => {
   error.value = '';
 
   try {
+    const currentName = currentVersionName.value || '未命名场景';
+    const currentHtml = String(sceneHtml.value || defaultHtml);
+    const contextBlock = [
+      `当前场景名称：${currentName}`,
+      '当前场景完整 HTML：',
+      currentHtml,
+      '',
+      `用户新需求：${content}`
+    ].join('\n');
+
     const res = await fetch('http://localhost:9700/api/llm/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -175,9 +191,9 @@ const submitPrompt = async (suggestion) => {
         messages: [
           {
             role: 'system',
-            content: '你是 3D 网页生成助手。根据用户要求返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
+            content: '你是 3D 网页生成助手。你会收到“当前场景名称 + 当前场景完整HTML + 用户新需求”。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
           },
-          { role: 'user', content }
+          { role: 'user', content: contextBlock }
         ]
       })
     });
@@ -199,6 +215,7 @@ const submitPrompt = async (suggestion) => {
 
     if (!html.toLowerCase().includes('<html')) throw new Error('模型未返回完整 HTML');
     sceneHtml.value = html;
+    currentVersionName.value = name || content.slice(0, 24);
     suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
 
     await fetch('http://localhost:9701/api/apps/playground/create', {

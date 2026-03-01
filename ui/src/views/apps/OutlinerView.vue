@@ -62,7 +62,14 @@
             </div>
           </section>
 
-          <draggable v-model="outlineData" group="outline" item-key="id" handle=".drag-handle" animation="150" ghost-class="ghost">
+          <draggable
+            v-model="outlineData"
+            group="outline"
+            item-key="id"
+            handle=".drag-handle"
+            animation="150"
+            :ghost-class="'opacity-70 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50'"
+          >
             <template #item="{ element }">
               <OutlineNode
                 :node="element"
@@ -502,12 +509,3 @@ onMounted(() => {
   loadOutline();
 });
 </script>
-
-<style scoped>
-.ghost {
-  opacity: 0.65;
-  border: 2px dashed #cbd5e1;
-  border-radius: 8px;
-  background: #f8fafc;
-}
-</style>

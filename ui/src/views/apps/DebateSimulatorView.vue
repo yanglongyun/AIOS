@@ -130,7 +130,11 @@
           </div>
 
           <div v-else-if="aiThinking" class="flex items-center justify-center rounded-[23px] bg-gray-200 p-5 shadow-md dark:bg-neutral-800">
-            <div class="typing-indicator"><span></span><span></span><span></span></div>
+            <div class="inline-flex items-center">
+              <span class="mr-[5px] inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:0ms]" />
+              <span class="mr-[5px] inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:200ms]" />
+              <span class="inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:400ms]" />
+            </div>
           </div>
 
           <div v-else-if="debateEnded" class="flex items-center justify-center rounded-[23px] p-[5px] shadow-md" :class="won ? 'bg-green-700' : 'bg-gray-700'">
@@ -480,35 +484,3 @@ const resetGame = () => {
   debateId.value = generateDebateId(16);
 };
 </script>
-
-<style scoped>
-.typing-indicator {
-  display: inline-flex;
-  align-items: center;
-}
-
-.typing-indicator span {
-  height: 8px;
-  width: 8px;
-  margin-right: 5px;
-  display: inline-block;
-  border-radius: 9999px;
-  background-color: #606060;
-  animation: typing 1s infinite ease-in-out;
-}
-
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-  margin-right: 0;
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0px); }
-}
-</style>

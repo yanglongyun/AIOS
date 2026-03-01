@@ -1,61 +1,47 @@
 <template>
-  <nav class="np-root">
-
-    <!-- 对话区 -->
-    <div class="np-section">
-      <div class="np-label">对话</div>
-      <button @click="goNewSession" class="np-btn" :class="{ active: isChatNew }">
-        <span class="np-icon">✦</span> 新会话
+  <nav class="flex h-full flex-col overflow-hidden bg-gradient-to-b from-[#3a2a1a] to-[#2e2014] font-['Georgia','PingFang_SC',serif]">
+    <div class="px-3 pb-2 pt-4">
+      <div class="mb-1 flex items-center justify-between px-2">
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">对话</span>
+        <button @click="goNewSession" title="新对话" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-sm leading-none text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">+</button>
+      </div>
+      <button @click="goLastChat" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(isChatNew)">
+        <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
+        对话
       </button>
-      <button @click="goHistory" class="np-btn" :class="{ active: isChatHistory }">
-        <span class="np-icon">◷</span> 历史会话
+      <button @click="goHistory" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(isChatHistory)">
+        <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">◷</span>
+        历史
       </button>
     </div>
 
-    <!-- 应用区域 -->
-    <div class="np-section np-apps">
-      <div class="np-label">应用</div>
-      <div class="np-scroll">
-        <button @click="go('/notebook')" class="np-btn" :class="{ active: is('/notebook') }">
-          <span class="np-icon">📝</span> 随心记
-        </button>
-        <button @click="go('/finance')" class="np-btn" :class="{ active: is('/finance') }">
-          <span class="np-icon">💰</span> 记账本
-        </button>
-        <button @click="go('/inbox')" class="np-btn" :class="{ active: is('/inbox') }">
-          <span class="np-icon">📬</span> 收件箱
-        </button>
-        <button @click="go('/playground')" class="np-btn" :class="{ active: is('/playground') }">
-          <span class="np-icon">⚡</span> 游乐园
-        </button>
-        <button @click="go('/mindtree')" class="np-btn" :class="{ active: route.path.startsWith('/mindtree') }">
-          <span class="np-icon">🌳</span> 心树
-        </button>
-        <button @click="go('/writerpad')" class="np-btn" :class="{ active: route.path.startsWith('/writerpad') }">
-          <span class="np-icon">📄</span> 写字板
-        </button>
-        <button @click="go('/debate-simulator')" class="np-btn" :class="{ active: route.path.startsWith('/debate-simulator') }">
-          <span class="np-icon">🎤</span> 竞选模拟器
-        </button>
-        <button @click="go('/treasure')" class="np-btn" :class="{ active: route.path.startsWith('/treasure') }">
-          <span class="np-icon">🔍</span> 藏宝阁
-        </button>
-        <button @click="go('/lovehouse')" class="np-btn" :class="{ active: is('/lovehouse') }">
-          <span class="np-icon">❤️</span> 窗口
-        </button>
-        <button @click="go('/nokia')" class="np-btn" :class="{ active: is('/nokia') }">
-          <span class="np-icon">📱</span> 老手机
-        </button>
+    <div class="flex min-h-0 flex-1 flex-col px-3 pb-2">
+      <div class="mb-1 flex items-center justify-between px-2">
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">应用</span>
+        <button @click="go('/apps/create')" title="创建应用" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-sm leading-none text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">+</button>
+      </div>
+
+      <div class="flex-1 space-y-0.5 overflow-y-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <button @click="go('/notebook')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/notebook'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📝</span>随心记</button>
+        <button @click="go('/finance')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/finance'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>记账本</button>
+        <button @click="go('/inbox')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/inbox'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>收件箱</button>
+        <button @click="go('/playground')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/playground'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⚡</span>空间工坊</button>
+        <button @click="go('/writerpad')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/writerpad'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📄</span>写字板</button>
+        <button @click="go('/debate-simulator')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/debate-simulator'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🎤</span>竞选模拟器</button>
+        <button @click="go('/treasure')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/treasure'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔍</span>藏宝阁</button>
+        <button @click="go('/lovehouse')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/lovehouse'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">❤️</span>窗口</button>
+        <button @click="go('/nokia')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/nokia'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
       </div>
     </div>
 
-    <!-- 底部 -->
-    <div class="np-bottom">
-      <button @click="go('/community')" class="np-btn" :class="{ active: is('/community') }">
-        <span class="np-icon">👥</span> 社区
+    <div class="border-t border-white/10 px-3 pb-3 pt-2">
+      <button @click="go('/community')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/community'))">
+        <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">👥</span>
+        社区
       </button>
-      <button @click="go('/settings')" class="np-btn" :class="{ active: is('/settings') }">
-        <span class="np-icon">⚙️</span> 设置
+      <button @click="go('/settings')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/settings'))">
+        <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⚙️</span>
+        设置
       </button>
     </div>
   </nav>
@@ -73,6 +59,10 @@ const isChatNew = computed(() => route.path.startsWith('/chat'));
 const isChatHistory = computed(() => route.path === '/history');
 const is = (path) => route.path === path;
 
+const btnClass = (active) => active
+  ? 'bg-[rgba(200,160,100,0.15)] text-[#e8d0a8] shadow-[inset_3px_0_0_0_#c8a060]'
+  : 'text-[#b8a080] hover:bg-white/5 hover:text-[#e0c8a0]';
+
 const go = (path) => {
   emit('navigate');
   router.push(path);
@@ -83,86 +73,18 @@ const goNewSession = async () => {
   await router.push({ path: '/chat', query: { new: String(Date.now()) } });
 };
 
+const goLastChat = async () => {
+  emit('navigate');
+  const lastId = localStorage.getItem('lastChatId');
+  if (lastId) {
+    await router.push(`/chat/${lastId}`);
+  } else {
+    await router.push({ path: '/chat', query: { new: String(Date.now()) } });
+  }
+};
+
 const goHistory = async () => {
   emit('navigate');
   await router.push('/history');
 };
 </script>
-
-<style scoped>
-.np-root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Georgia', 'PingFang SC', serif;
-  background: linear-gradient(180deg, #3a2a1a 0%, #2e2014 100%);
-}
-
-.np-section {
-  padding: 16px 12px 8px;
-}
-
-.np-apps {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.np-label {
-  font-size: 9px;
-  color: #8a7050;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 0 10px;
-  margin-bottom: 6px;
-}
-
-.np-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 9px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #b8a080;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-  position: relative;
-}
-.np-btn:hover {
-  background: rgba(255,255,255,0.06);
-  color: #e0c8a0;
-}
-.np-btn.active {
-  background: rgba(200,160,100,0.15);
-  color: #e8d0a8;
-  box-shadow: inset 3px 0 0 #c8a060;
-}
-
-.np-icon {
-  width: 18px; height: 18px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 5px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  flex-shrink: 0;
-}
-
-.np-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 8px;
-}
-.np-scroll::-webkit-scrollbar { width: 0; }
-
-.np-bottom {
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 8px 12px 12px;
-}
-</style>

@@ -1,131 +1,150 @@
 <template>
-  <div class="w-full h-full flex items-start justify-center overflow-y-auto bg-black">
-  <div class="w-[calc(100%-1rem)] h-[calc(100%-1rem)] my-2 md:w-[calc(100%-4rem)] md:h-[calc(100%-6rem)] md:my-12 max-w-md mx-auto flex flex-col overflow-hidden rounded-2xl border-2 border-white/20" style="background: #4a3728">
-
-    <!-- ====== 上半区：窗口 ====== -->
-    <div class="room">
-      <div class="wall"></div>
-
-      <div class="window-frame">
-        <!-- 窗外内容：照片 or 默认场景 -->
-        <div class="window-scene" :style="{ opacity: sceneTransition ? 0 : 1 }">
-          <img
-            v-if="currentPhoto"
-            :src="currentPhoto.type === 'base64' ? `data:image/png;base64,${currentPhoto.url}` : currentPhoto.url"
-            class="photo-img"
-            @error="currentPhoto = null"
-          />
-          <div v-else v-html="defaultScenes[currentScene]?.svg || ''"></div>
-        </div>
-        <div class="window-glare"></div>
-        <div class="window-cross-h"></div>
-        <div class="window-cross-v"></div>
-
-        <!-- 生成中遮罩 -->
-        <div class="generating-overlay" v-if="generating">
-          <div class="gen-text">
-            正在生成照片
-            <span class="dots"><span></span><span></span><span></span></span>
-          </div>
-        </div>
-
-        <!-- 照片切换 -->
-        <div class="photo-nav" v-if="photos.length > 1">
-          <button class="pn-btn" @click="prevPhoto">‹</button>
-          <span class="pn-count">{{ photoIndex + 1 }} / {{ photos.length }}</span>
-          <button class="pn-btn" @click="nextPhoto">›</button>
-        </div>
-
-        <div class="scene-caption">{{ currentPhoto ? (currentPhoto.prompt || 'AI 照片') : (defaultScenes[currentScene]?.caption || '') }}</div>
-      </div>
-
-      <!-- 窗台装饰 -->
-      <div class="sill-items">
-        <span class="sill-item">🌵</span>
-        <span class="sill-item">📷</span>
-        <span class="sill-item" @click="showSettings = true" style="cursor:pointer" title="设置">⚙️</span>
-      </div>
-      <div class="windowsill"></div>
-
-      <!-- 没照片时的场景切换箭头 -->
-      <button v-if="!photos.length" class="scene-nav prev" @click="prevScene">‹</button>
-      <button v-if="!photos.length" class="scene-nav next" @click="nextScene">›</button>
-    </div>
-
-    <!-- ====== 下半区：粉笔留言板 ====== -->
-    <div class="board">
-      <div class="board-frame-top"></div>
-      <div class="board-bg"></div>
-
-      <div class="messages" ref="messagesEl">
-        <div class="chalk-divider" v-if="messages.length">～～～ 留言板 ～～～</div>
-
+  <div class="flex h-full w-full items-start justify-center overflow-y-auto bg-black">
+    <div class="mx-auto my-2 flex h-[calc(100%-1rem)] w-[calc(100%-1rem)] max-w-md flex-col overflow-hidden rounded-2xl border-2 border-white/20 bg-[#4a3728] md:my-12 md:h-[calc(100%-6rem)] md:w-[calc(100%-4rem)]">
+      <div class="relative basis-[46%] overflow-hidden">
         <div
-          v-for="msg in messages" :key="msg.id"
-          class="chalk-msg fade-in"
-          :class="msg.role === 'user' ? 'mine' : 'hers'"
-        >{{ msg.content }}</div>
+          class="absolute inset-0 bg-[#f5e6d3] [background-image:repeating-linear-gradient(90deg,transparent,transparent_60px,rgba(0,0,0,0.02)_60px,rgba(0,0,0,0.02)_61px),repeating-linear-gradient(0deg,transparent,transparent_60px,rgba(0,0,0,0.02)_60px,rgba(0,0,0,0.02)_61px)]"
+        ></div>
 
-        <div class="writing-indicator" v-if="sending">
-          正在写 <span class="chalk-dust"><span></span><span></span><span></span></span>
-        </div>
-      </div>
+        <div class="absolute left-1/2 top-5 h-[calc(100%-50px)] w-[min(85vw,340px)] -translate-x-1/2 overflow-hidden rounded-[6px] border-[12px] border-[#8b6914] bg-[#1a1a2e] shadow-[inset_0_0_0_3px_#a07d2e,0_8px_32px_rgba(0,0,0,0.3),inset_0_0_60px_rgba(0,0,0,0.2)]">
+          <div class="absolute inset-0 transition-opacity duration-700 ease-out [&_svg]:block [&_svg]:h-full [&_svg]:w-full" :style="{ opacity: sceneTransition ? 0 : 1 }">
+            <img
+              v-if="currentPhoto"
+              :src="currentPhoto.type === 'base64' ? `data:image/png;base64,${currentPhoto.url}` : currentPhoto.url"
+              class="block h-full w-full object-cover"
+              @error="currentPhoto = null"
+            />
+            <div v-else v-html="defaultScenes[currentScene]?.svg || ''"></div>
+          </div>
 
-      <!-- 输入区 -->
-      <div class="input-area">
-        <div class="chalk-picker" :class="{ open: colorPickerOpen }">
-          <button class="chalk-current" :style="{ background: chalkColor }" @click="colorPickerOpen = !colorPickerOpen"></button>
-          <div class="chalk-options" v-if="colorPickerOpen">
-            <button
-              v-for="c in chalkOptions" :key="c.name"
-              class="chalk-opt"
-              :style="{ background: c.color }"
-              :class="{ active: chalkColor === c.color }"
-              @click="chalkColor = c.color; colorPickerOpen = false"
-            ></button>
+          <div class="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-br from-white/10 via-transparent to-white/5"></div>
+          <div class="absolute left-0 right-0 top-1/2 z-[4] h-2 -translate-y-1/2 bg-[#8b6914]"></div>
+          <div class="absolute bottom-0 left-1/2 top-0 z-[4] w-2 -translate-x-1/2 bg-[#8b6914]"></div>
+
+          <div v-if="generating" class="absolute inset-0 z-[6] flex items-center justify-center bg-black/40">
+            <div class="flex items-center gap-2 text-base text-white/85 [font-family:'Caveat',cursive]">
+              正在生成照片
+              <span class="inline-flex gap-1">
+                <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70 [animation-delay:0ms]"></span>
+                <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70 [animation-delay:120ms]"></span>
+                <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70 [animation-delay:240ms]"></span>
+              </span>
+            </div>
+          </div>
+
+          <div v-if="photos.length > 1" class="absolute bottom-2.5 left-1/2 z-[8] flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/35 px-2.5 py-1 backdrop-blur">
+            <button class="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-sm text-white transition hover:bg-white/30" @click="prevPhoto">‹</button>
+            <span class="text-xs text-white/70 [font-family:'Caveat',cursive]">{{ photoIndex + 1 }} / {{ photos.length }}</span>
+            <button class="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-sm text-white transition hover:bg-white/30" @click="nextPhoto">›</button>
+          </div>
+
+          <div class="absolute left-1/2 top-2.5 z-[8] max-w-[80%] -translate-x-1/2 truncate rounded-full bg-black/25 px-3 py-1 text-[13px] text-white/50 backdrop-blur [font-family:'Caveat',cursive]">
+            {{ currentPhoto ? (currentPhoto.prompt || 'AI 照片') : (defaultScenes[currentScene]?.caption || '') }}
           </div>
         </div>
-        <div class="input-wrap">
-          <textarea
-            ref="inputEl"
-            v-model="inputText"
-            rows="1"
-            placeholder="在黑板上写点什么…"
-            :style="{ color: chalkColor }"
-            @input="autoResize"
-            @keydown.enter.exact.prevent="sendMsg"
-          ></textarea>
+
+        <div class="absolute bottom-2.5 left-1/2 z-[6] flex w-[min(85vw,340px)] -translate-x-1/2 justify-between px-4">
+          <span class="text-xl drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)]">🌵</span>
+          <span class="text-xl drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)]">📷</span>
+          <span class="cursor-pointer text-xl drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)]" title="设置" @click="showSettings = true">⚙️</span>
         </div>
-        <button class="btn-write" @click="sendMsg" :disabled="sending || !inputText.trim()">✎</button>
+        <div class="absolute bottom-0 left-1/2 z-[5] h-[14px] w-[calc(min(85vw,340px)+40px)] -translate-x-1/2 rounded-b-[3px] bg-gradient-to-b from-[#a07d2e] to-[#8b6914] shadow-[0_3px_8px_rgba(0,0,0,0.2)]"></div>
+
+        <button
+          v-if="!photos.length"
+          class="absolute left-[calc(50%-min(42.5vw,170px)-20px)] top-1/2 z-[8] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-sm text-white/70 transition hover:bg-black/50"
+          @click="prevScene"
+        >‹</button>
+        <button
+          v-if="!photos.length"
+          class="absolute right-[calc(50%-min(42.5vw,170px)-20px)] top-1/2 z-[8] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-sm text-white/70 transition hover:bg-black/50"
+          @click="nextScene"
+        >›</button>
+      </div>
+
+      <div class="relative flex flex-1 flex-col overflow-hidden">
+        <div class="relative z-[2] h-1.5 shrink-0 bg-gradient-to-b from-[#8b6914] to-[#6b5010]"></div>
+        <div class="pointer-events-none absolute inset-0 bg-[#2d3a2d] [background-image:radial-gradient(ellipse_at_20%_50%,rgba(255,255,255,0.03)_0%,transparent_70%),radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.02)_0%,transparent_60%)]"></div>
+
+        <div ref="messagesEl" class="relative z-[1] flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 pb-2 pt-4">
+          <div v-if="messages.length" class="py-1 text-center text-[13px] text-white/20 [font-family:'Caveat',cursive]">～～～ 留言板 ～～～</div>
+
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="max-w-[80%] break-words px-0 py-0.5 text-[17px] leading-[1.6] [font-family:'Caveat',cursive,'PingFang_SC',sans-serif]"
+            :class="msg.role === 'user' ? 'self-end text-right text-[#ffb6ceeb] [text-shadow:0_0_4px_rgba(255,182,206,0.15)]' : 'self-start text-white/90 [text-shadow:0_0_4px_rgba(255,255,255,0.15)]'"
+          >{{ msg.content }}</div>
+
+          <div v-if="sending" class="flex items-center gap-1 self-start text-base text-white/40 [font-family:'Caveat',cursive]">
+            正在写
+            <span class="inline-flex gap-1">
+              <span class="h-1 w-1 animate-bounce rounded-full bg-white/40 [animation-delay:0ms]"></span>
+              <span class="h-1 w-1 animate-bounce rounded-full bg-white/40 [animation-delay:120ms]"></span>
+              <span class="h-1 w-1 animate-bounce rounded-full bg-white/40 [animation-delay:240ms]"></span>
+            </span>
+          </div>
+        </div>
+
+        <div class="relative z-[2] flex items-end gap-2 border-t border-white/5 bg-[rgba(35,45,35,0.8)] px-3 pb-3 pt-2">
+          <div class="relative flex shrink-0 items-end pb-1.5">
+            <button class="h-5 w-5 rounded-full border-2 border-white/25 transition hover:border-white/50" :style="{ background: chalkColor }" @click="colorPickerOpen = !colorPickerOpen"></button>
+            <div v-if="colorPickerOpen" class="absolute -left-1 bottom-8 flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-[rgba(30,40,30,0.95)] p-2 backdrop-blur">
+              <button
+                v-for="c in chalkOptions"
+                :key="c.name"
+                class="h-[22px] w-[22px] rounded-full border-2 border-transparent transition hover:scale-110"
+                :class="chalkColor === c.color ? 'border-white/60' : ''"
+                :style="{ background: c.color }"
+                @click="chalkColor = c.color; colorPickerOpen = false"
+              ></button>
+            </div>
+          </div>
+
+          <div class="flex flex-1 items-end">
+            <textarea
+              ref="inputEl"
+              v-model="inputText"
+              rows="1"
+              placeholder="在黑板上写点什么…"
+              class="max-h-20 flex-1 resize-none border-0 border-b border-dashed border-white/15 bg-transparent px-1 py-1.5 text-[17px] leading-6 outline-none placeholder:text-white/20 [font-family:'Caveat',cursive,'PingFang_SC',sans-serif]"
+              :style="{ color: chalkColor }"
+              @input="autoResize"
+              @keydown.enter.exact.prevent="sendMsg"
+            ></textarea>
+          </div>
+
+          <button
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm text-white/60 transition enabled:hover:bg-white/15 enabled:hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-30"
+            @click="sendMsg"
+            :disabled="sending || !inputText.trim()"
+          >✎</button>
+        </div>
+      </div>
+
+      <div v-if="showSettings" class="fixed inset-0 z-50 flex items-end justify-center bg-black/50" @click.self="showSettings = false">
+        <div class="w-full max-w-[420px] animate-[slide-up_.3s_ease] rounded-t-[20px] bg-white px-5 pb-8 pt-4">
+          <div class="mx-auto mb-4 h-1 w-9 rounded bg-gray-300"></div>
+          <div class="mb-4 text-base font-semibold text-[#1a1a2e]">图片生成模型设置</div>
+
+          <label class="mb-1 mt-3 block text-xs text-gray-500">API 地址</label>
+          <input v-model="imgSettings.imgApiUrl" class="w-full rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#8b6914] focus:bg-white" placeholder="https://ark.cn-beijing.volces.com/api/v3/images/generations" />
+
+          <label class="mb-1 mt-3 block text-xs text-gray-500">API Key</label>
+          <input v-model="imgSettings.imgApiKey" class="w-full rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#8b6914] focus:bg-white" type="password" placeholder="your-api-key" />
+
+          <label class="mb-1 mt-3 block text-xs text-gray-500">模型 ID</label>
+          <input v-model="imgSettings.imgModel" class="w-full rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#8b6914] focus:bg-white" placeholder="doubao-seedream-4-5-251128" />
+
+          <div class="mt-3 text-xs leading-5 text-gray-400">支持豆包 SeeDream、DALL·E、Flux 等 OpenAI 兼容格式的图片生成 API。</div>
+
+          <div class="mt-5 flex gap-2.5">
+            <button class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-500" @click="showSettings = false">取消</button>
+            <button class="flex-1 rounded-xl bg-[#8b6914] px-3 py-2.5 text-sm font-medium text-white transition enabled:hover:bg-[#a07d2e] disabled:cursor-not-allowed disabled:opacity-50" @click="saveSettings" :disabled="savingSettings">{{ savingSettings ? '保存中...' : '保存' }}</button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- ====== 设置面板 ====== -->
-    <div class="settings-overlay" v-if="showSettings" @click.self="showSettings = false">
-      <div class="settings-sheet">
-        <div class="sheet-handle"></div>
-        <div class="sheet-title">图片生成模型设置</div>
-
-        <label class="field-label">API 地址</label>
-        <input v-model="imgSettings.imgApiUrl" class="field-input" placeholder="https://ark.cn-beijing.volces.com/api/v3/images/generations" />
-
-        <label class="field-label">API Key</label>
-        <input v-model="imgSettings.imgApiKey" class="field-input" type="password" placeholder="your-api-key" />
-
-        <label class="field-label">模型 ID</label>
-        <input v-model="imgSettings.imgModel" class="field-input" placeholder="doubao-seedream-4-5-251128" />
-
-        <div class="sheet-hint">
-          支持豆包 SeeDream、DALL·E、Flux 等 OpenAI 兼容格式的图片生成 API。
-        </div>
-
-        <div class="sheet-actions">
-          <button class="btn-cancel" @click="showSettings = false">取消</button>
-          <button class="btn-save" @click="saveSettings" :disabled="savingSettings">{{ savingSettings ? '保存中...' : '保存' }}</button>
-        </div>
-      </div>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -274,86 +293,3 @@ const switchScene = async (key) => {
 
 onMounted(() => { loadMessages(); loadPhotos(); loadSettings(); });
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');
-
-.room { flex: 0 0 46%; position: relative; overflow: hidden; }
-.wall { position: absolute; inset: 0; background: #f5e6d3; background-image: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px), repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px); }
-.window-frame { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: min(85vw, 340px); height: calc(100% - 50px); border: 12px solid #8b6914; border-radius: 6px; background: #1a1a2e; box-shadow: inset 0 0 0 3px #a07d2e, 0 8px 32px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.2); overflow: hidden; }
-.window-cross-h { position: absolute; top: 50%; left: 0; right: 0; height: 8px; background: #8b6914; transform: translateY(-50%); z-index: 4; }
-.window-cross-v { position: absolute; left: 50%; top: 0; bottom: 0; width: 8px; background: #8b6914; transform: translateX(-50%); z-index: 4; }
-.window-scene { position: absolute; inset: 0; transition: opacity 0.8s ease; }
-.window-scene :deep(svg) { width: 100%; height: 100%; display: block; }
-.photo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.window-glare { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(255,255,255,0.05) 100%); z-index: 3; pointer-events: none; }
-.windowsill { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: calc(min(85vw, 340px) + 40px); height: 14px; background: linear-gradient(180deg, #a07d2e, #8b6914); border-radius: 0 0 3px 3px; z-index: 5; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
-.sill-items { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: min(85vw, 340px); display: flex; justify-content: space-between; padding: 0 16px; z-index: 6; }
-.sill-item { font-size: 20px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
-.scene-caption { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-family: 'Caveat', cursive; font-size: 13px; color: rgba(255,255,255,0.5); background: rgba(0,0,0,0.25); padding: 3px 12px; border-radius: 10px; z-index: 8; backdrop-filter: blur(4px); white-space: nowrap; max-width: 80%; overflow: hidden; text-overflow: ellipsis; }
-.scene-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; z-index: 8; display: flex; align-items: center; justify-content: center; }
-.scene-nav:hover { background: rgba(0,0,0,0.5); }
-.scene-nav.prev { left: calc(50% - min(42.5vw, 170px) - 20px); }
-.scene-nav.next { right: calc(50% - min(42.5vw, 170px) - 20px); }
-
-.photo-nav { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; z-index: 8; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 14px; }
-.pn-btn { width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.pn-btn:hover { background: rgba(255,255,255,0.3); }
-.pn-count { font-size: 12px; color: rgba(255,255,255,0.7); font-family: 'Caveat', cursive; }
-
-.generating-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 6; background: rgba(0,0,0,0.4); }
-.gen-text { font-family: 'Caveat', cursive; color: rgba(255,255,255,0.85); font-size: 16px; display: flex; align-items: center; gap: 8px; }
-.gen-text .dots span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.6); animation: dustFloat 1s infinite; }
-.gen-text .dots span:nth-child(2) { animation-delay: 0.2s; }
-.gen-text .dots span:nth-child(3) { animation-delay: 0.4s; }
-
-.board { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-.board-bg { position: absolute; inset: 0; background: #2d3a2d; background-image: radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 70%), radial-gradient(ellipse at 80% 30%, rgba(255,255,255,0.02) 0%, transparent 60%); }
-.board-frame-top { height: 6px; background: linear-gradient(180deg, #8b6914, #6b5010); flex-shrink: 0; position: relative; z-index: 2; }
-.messages { flex: 1; overflow-y: auto; padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
-.messages::-webkit-scrollbar { width: 3px; }
-.messages::-webkit-scrollbar-track { background: transparent; }
-.messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-.chalk-msg { font-family: 'Caveat', cursive, 'PingFang SC', sans-serif; font-size: 17px; line-height: 1.6; max-width: 80%; padding: 2px 0; word-break: break-word; }
-.chalk-msg.hers { color: rgba(255,255,255,0.88); text-shadow: 0 0 4px rgba(255,255,255,0.15); align-self: flex-start; }
-.chalk-msg.mine { color: rgba(255,182,206,0.92); text-shadow: 0 0 4px rgba(255,182,206,0.15); align-self: flex-end; text-align: right; }
-.chalk-divider { text-align: center; color: rgba(255,255,255,0.2); font-family: 'Caveat', cursive; font-size: 13px; padding: 4px 0; }
-.writing-indicator { align-self: flex-start; color: rgba(255,255,255,0.4); font-family: 'Caveat', cursive; font-size: 16px; display: flex; align-items: center; gap: 4px; }
-.chalk-dust { display: inline-flex; gap: 3px; }
-.chalk-dust span { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.4); animation: dustFloat 1.4s infinite; }
-.chalk-dust span:nth-child(2) { animation-delay: 0.3s; }
-.chalk-dust span:nth-child(3) { animation-delay: 0.6s; }
-@keyframes dustFloat { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
-
-.input-area { padding: 8px 12px 12px; display: flex; align-items: flex-end; gap: 8px; position: relative; z-index: 2; background: rgba(35,45,35,0.8); border-top: 1px solid rgba(255,255,255,0.06); }
-.chalk-picker { position: relative; flex-shrink: 0; display: flex; align-items: flex-end; padding-bottom: 6px; }
-.chalk-current { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); cursor: pointer; transition: all 0.2s; }
-.chalk-current:hover { border-color: rgba(255,255,255,0.5); }
-.chalk-options { position: absolute; bottom: 32px; left: -4px; display: flex; flex-direction: column; gap: 6px; background: rgba(30,40,30,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 8px; backdrop-filter: blur(8px); animation: fadeIn 0.15s ease; }
-.chalk-opt { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
-.chalk-opt:hover { transform: scale(1.2); }
-.chalk-opt.active { border-color: rgba(255,255,255,0.6); }
-.input-wrap { flex: 1; display: flex; align-items: flex-end; }
-.input-wrap textarea { flex: 1; background: transparent; border: none; border-bottom: 1px dashed rgba(255,255,255,0.15); color: rgba(255,182,206,0.92); font-family: 'Caveat', cursive, 'PingFang SC', sans-serif; font-size: 17px; resize: none; outline: none; padding: 6px 4px; max-height: 80px; line-height: 1.5; }
-.input-wrap textarea::placeholder { color: rgba(255,255,255,0.2); font-family: 'Caveat', cursive; }
-.btn-write { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; transition: all 0.2s; }
-.btn-write:hover { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
-.btn-write:disabled { opacity: 0.3; cursor: not-allowed; }
-.fade-in { animation: fadeIn 0.6s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-.settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
-.settings-sheet { width: 100%; max-width: 420px; background: #fff; border-radius: 20px 20px 0 0; padding: 16px 20px 32px; animation: slideUp 0.3s ease; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
-.sheet-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; }
-.field-label { display: block; font-size: 12px; color: #666; margin: 12px 0 4px; }
-.field-input { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s; background: #f9fafb; }
-.field-input:focus { border-color: #8b6914; background: #fff; }
-.sheet-hint { margin-top: 12px; font-size: 12px; color: #999; line-height: 1.5; }
-.sheet-actions { display: flex; gap: 10px; margin-top: 20px; }
-.btn-cancel { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; font-size: 14px; cursor: pointer; color: #666; }
-.btn-save { flex: 1; padding: 10px; border-radius: 12px; border: none; background: #8b6914; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; }
-.btn-save:hover { background: #a07d2e; }
-.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-</style>

@@ -4,6 +4,7 @@ const handlers = new Map();
 let ws = null;
 let pingTimer = null;
 let pongTimer = null;
+let reconnectTimer = null;
 
 // 响应式状态
 export const wsStatus = ref('disconnected'); // connected | disconnected | connecting
@@ -18,6 +19,13 @@ const getDefaultWsUrl = () => {
 
 export const wsUrl = ref(getDefaultWsUrl());
 
+const scheduleReconnect = (delay = 3000) => {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => {
+    if (wsStatus.value === 'disconnected') connect();
+  }, delay);
+};
+
 export const connect = (url) => {
   if (url) {
     wsUrl.value = url;
@@ -30,6 +38,7 @@ export const connect = (url) => {
 
   clearInterval(pingTimer);
   clearTimeout(pongTimer);
+  clearTimeout(reconnectTimer);
   wsStatus.value = 'connecting';
 
   ws = new WebSocket(wsUrl.value);
@@ -64,6 +73,7 @@ export const connect = (url) => {
     clearInterval(pingTimer);
     clearTimeout(pongTimer);
     emit('close');
+    scheduleReconnect();
   };
 
   ws.onerror = () => {
@@ -74,12 +84,27 @@ export const connect = (url) => {
 export const disconnect = () => {
   clearInterval(pingTimer);
   clearTimeout(pongTimer);
+  clearTimeout(reconnectTimer);
   if (ws) {
     ws.onclose = null;
     ws.close();
   }
   ws = null;
   wsStatus.value = 'disconnected';
+};
+
+// 确保连接就绪，最多等 5 秒
+export const ensureConnected = () => {
+  if (ws?.readyState === WebSocket.OPEN) return Promise.resolve();
+  if (wsStatus.value !== 'connecting') connect();
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('WebSocket 连接超时')), 5000);
+    const unsub = on('open', () => {
+      clearTimeout(timeout);
+      unsub();
+      resolve();
+    });
+  });
 };
 
 export const send = (data) => {

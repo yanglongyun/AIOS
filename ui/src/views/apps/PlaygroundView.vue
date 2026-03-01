@@ -1,62 +1,65 @@
 <template>
-  <div class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold italic tracking-tight text-neutral-800 dark:text-neutral-100">Playground.</h1>
-      <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-1">输入一句话，AI 生成可运行的 3D 网页场景。</p>
-    </div>
-
-    <section class="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/40 overflow-hidden mb-5">
-      <div class="px-4 py-3 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
-        <span class="text-xs uppercase tracking-widest text-neutral-400">3D 渲染</span>
-        <div class="flex items-center gap-2">
-          <select
-            v-model="selectedVersionId"
-            @change="loadSelectedVersion"
-            class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
-          >
-            <option :value="0">最新版本</option>
-            <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} · #{{ v.id }}</option>
-          </select>
-          <span class="text-xs text-neutral-400">{{ loading ? '生成中...' : '就绪' }}</span>
+  <div class="flex-1 overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] font-['Georgia','PingFang_SC',serif]">
+    <div class="mx-auto max-w-[860px] px-5 py-7">
+      <div class="mb-[22px] flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[linear-gradient(135deg,#d4a574,#c08a50)] text-lg shadow-[0_2px_8px_rgba(160,120,60,0.25)]">⚡</div>
+        <div>
+          <div class="text-lg font-bold text-[#5a4a38]">空间工坊</div>
+          <div class="mt-0.5 text-xs text-[#a09078]">输入一句话，AI 生成可运行的 3D 网页场景</div>
         </div>
       </div>
-      <iframe
-        class="w-full h-[460px] bg-neutral-50 dark:bg-neutral-900"
-        :srcdoc="sceneHtml"
-        sandbox="allow-scripts allow-same-origin"
-      />
-    </section>
 
-    <section class="bg-neutral-100 dark:bg-neutral-800/30 p-3 rounded-2xl">
-      <div class="flex flex-wrap gap-2 mb-3">
+      <div class="relative mb-4 overflow-hidden rounded-[14px] bg-[#3a2a1a] shadow-[0_4px_16px_rgba(60,40,20,0.2),inset_0_0_0_6px_#4a3828,inset_0_0_0_7px_rgba(255,255,255,0.08)]">
+        <div class="flex items-center justify-between border-b border-white/5 bg-[#4a3828] px-3.5 py-2">
+          <span class="text-[11px] tracking-[0.08em] text-[#b8a080]">3D 渲染</span>
+          <div class="flex items-center gap-2.5">
+            <select
+              v-model="selectedVersionId"
+              @change="loadSelectedVersion"
+              class="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-[#c8b090] outline-none"
+            >
+              <option :value="0">最新版本</option>
+              <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} · #{{ v.id }}</option>
+            </select>
+            <div class="flex items-center gap-1 text-[10px] text-[#8a7a60]">
+              <span class="h-[5px] w-[5px] rounded-full bg-[#4ade80]" :class="{ 'animate-pulse bg-[#facc15]': loading }"></span>
+              {{ loading ? '生成中...' : '就绪' }}
+            </div>
+          </div>
+        </div>
+        <iframe
+          class="h-[440px] w-full border-none bg-[#1a1210]"
+          :srcdoc="sceneHtml"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      </div>
+
+      <div class="mb-[14px] flex flex-wrap gap-2">
         <button
           v-for="s in suggestions"
           :key="s"
           @click="submitPrompt(s)"
-          class="px-3 py-1.5 rounded-xl text-xs bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700"
-        >
-          {{ s }}
-        </button>
+          class="cursor-pointer rounded-lg border border-[rgba(160,120,60,0.2)] bg-[rgba(200,160,100,0.08)] px-3.5 py-[7px] text-xs text-[#8a7050] transition-all hover:border-[rgba(160,120,60,0.35)] hover:bg-[rgba(200,160,100,0.15)] hover:text-[#5a4a38]"
+        >{{ s }}</button>
       </div>
 
-      <div class="flex gap-2 items-center">
-        <input
-          v-model="prompt"
-          @keyup.enter="submitPrompt()"
-          placeholder="例如：做一个赛博风格旋转星球，带粒子和相机缓慢环绕"
-          class="flex-1 bg-white dark:bg-neutral-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-        />
-        <button
-          @click="submitPrompt()"
-          :disabled="loading || !prompt.trim()"
-          class="bg-neutral-900 dark:bg-white dark:text-neutral-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ loading ? '生成中...' : '发送' }}
-        </button>
+      <div class="rounded-xl border border-[rgba(160,120,60,0.15)] bg-[#faf6ee] p-3.5 shadow-[0_2px_8px_rgba(100,80,40,0.06)]">
+        <div class="flex items-center gap-2">
+          <input
+            v-model="prompt"
+            @keyup.enter="submitPrompt()"
+            placeholder="描述你想要的 3D 场景..."
+            class="flex-1 border-none border-b border-[rgba(160,120,60,0.2)] bg-transparent px-1 py-2 text-[13px] text-[#5a4a38] outline-none placeholder:text-[#c0b098] focus:border-b-[rgba(160,120,60,0.5)]"
+          />
+          <button
+            @click="submitPrompt()"
+            :disabled="loading || !prompt.trim()"
+            class="whitespace-nowrap rounded-[10px] bg-[#5a3e28] px-5 py-[9px] text-[13px] text-[#f0e8d8] shadow-[0_2px_6px_rgba(90,62,40,0.25)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >{{ loading ? '生成中...' : '生成' }}</button>
+        </div>
+        <p v-if="error" class="mt-2.5 text-xs text-[#c05040]">{{ error }}</p>
       </div>
-
-      <p v-if="error" class="mt-2 text-xs text-rose-500">{{ error }}</p>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -85,7 +88,7 @@ const defaultHtml = `<!doctype html>
 <style>html,body{margin:0;height:100%;overflow:hidden;background:#09090b}canvas{display:block}</style>
 </head>
 <body>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"><\\/script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"><\/script>
 <script>
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
@@ -102,7 +105,7 @@ const stars = new THREE.Points(new THREE.BufferGeometry().setAttribute('position
 scene.add(stars);
 addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 (function animate(){ requestAnimationFrame(animate); mesh.rotation.x += 0.006; mesh.rotation.y += 0.01; stars.rotation.y += 0.0008; renderer.render(scene,camera); })();
-<\\/script>
+<\/script>
 </body>
 </html>`;
 
@@ -191,7 +194,7 @@ const submitPrompt = async (suggestion) => {
         messages: [
           {
             role: 'system',
-            content: '你是 3D 网页生成助手。你会收到“当前场景名称 + 当前场景完整HTML + 用户新需求”。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
+            content: '你是 3D 网页生成助手。你会收到"当前场景名称 + 当前场景完整HTML + 用户新需求"。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
           },
           { role: 'user', content: contextBlock }
         ]

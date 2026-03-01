@@ -3,7 +3,6 @@ import { json } from '../../utils/json.js';
 import { db } from '../../db/client.js';
 import { getHandler } from './api/get.js';
 import { syncHandler } from './api/sync.js';
-import { rewriteHandler } from './api/rewrite.js';
 
 export const initWriterpadDatabase = () => {
   db.exec(`
@@ -48,12 +47,6 @@ export const handleWriterpadApi = async (req, res, path) => {
     return json(res, data);
   }
 
-  if (path === '/api/apps/writerpad/rewrite' && req.method === 'POST') {
-    const body = await readBody(req);
-    const data = await rewriteHandler(body);
-    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
-    return json(res, data);
-  }
 
   return false;
 };

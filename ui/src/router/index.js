@@ -7,22 +7,22 @@ import FinanceView from '../views/apps/FinanceView.vue';
 import InboxView from '../views/apps/InboxView.vue';
 import PlaygroundView from '../views/apps/PlaygroundView.vue';
 import CommunityView from '../views/CommunityView.vue';
-import OutlinerView from '../views/apps/OutlinerView.vue';
 import WriterpadView from '../views/apps/WriterpadView.vue';
 import LovehouseView from '../views/apps/LovehouseView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
 import DebateSimulatorView from '../views/apps/DebateSimulatorView.vue';
 import TreasureView from '../views/apps/TreasureView.vue';
+import CreateAppView from '../views/apps/CreateAppView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
   { path: '/chat/:id?', component: ChatView },
   { path: '/history', component: HistoryView },
+  { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },
   { path: '/finance', component: FinanceView },
   { path: '/inbox', component: InboxView },
   { path: '/playground', component: PlaygroundView },
-  { path: '/mindtree', component: OutlinerView },
   { path: '/writerpad', component: WriterpadView },
   { path: '/debate-simulator', component: DebateSimulatorView },
   { path: '/treasure', component: TreasureView },

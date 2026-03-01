@@ -24,7 +24,15 @@ const readRawBody = async (req) => {
 const proxyAppsRequest = async (req, res, url) => {
   const target = `http://127.0.0.1:${APPS_PORT}${url.pathname}${url.search}`;
   const headers = { ...req.headers };
+  // Strip hop-by-hop headers when proxying to fetch.
   delete headers.host;
+  delete headers.connection;
+  delete headers.upgrade;
+  delete headers['proxy-connection'];
+  delete headers['keep-alive'];
+  delete headers['transfer-encoding'];
+  delete headers.te;
+  delete headers.trailer;
 
   const method = req.method || 'GET';
   const hasBody = method !== 'GET' && method !== 'HEAD';

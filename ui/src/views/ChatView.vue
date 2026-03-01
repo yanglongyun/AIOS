@@ -21,8 +21,8 @@
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] rounded-[18px_18px_4px_18px] bg-[#5a3e28] px-4 py-3 text-sm leading-relaxed text-[#f0e8d8] shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
-                  <div>{{ m.content }}</div>
+                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#5a3e28] px-4 py-3 text-sm leading-relaxed text-[#f0e8d8] shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
+                  <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
                     <div class="mb-1 text-[10px] uppercase tracking-[0.08em] text-[#c0a878]">附件</div>
                     <div v-for="(f, idx) in m.attachments" :key="`${f.path}-${idx}`" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1">
@@ -37,7 +37,7 @@
               <div v-else-if="m.role === 'assistant'" class="group flex items-start gap-2.5">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
                 <div class="min-w-0 flex-1">
-                  <div class="prose prose-sm max-w-none rounded-[18px_18px_18px_4px] border border-[#e8dcc8] bg-[#fffdf8] px-4 py-3 text-[#4a3a28] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#3a2a18] prose-pre:border prose-pre:border-[#e8dcc8] prose-pre:bg-[#f5ead8] prose-code:rounded prose-code:bg-[rgba(90,62,40,0.08)] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-[#d4c0a0] prose-blockquote:text-[#8a7a60]" v-html="renderMd(m.content)" />
+                  <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-[#e8dcc8] bg-[#fffdf8] px-4 py-3 text-[#4a3a28] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#3a2a18] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-[#e8dcc8] prose-pre:bg-[#f5ead8] prose-code:rounded prose-code:bg-[rgba(90,62,40,0.08)] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-[#d4c0a0] prose-blockquote:text-[#8a7a60]" v-html="renderMd(m.content)" />
                   <div v-if="m.suggestions?.length" class="mt-2.5 flex flex-wrap gap-1.5">
                     <button v-for="(s, idx) in m.suggestions" :key="`${i}-s-${idx}`" @click="applySuggestion(s)" class="cursor-pointer rounded-full border border-dashed border-[#d4c0a0] bg-[#f5ead8] px-3.5 py-1 text-xs text-[#7a6a50] transition-all hover:border-[#c0a878] hover:bg-[#ece0c8] hover:text-[#5a4a38]">{{ s }}</button>
                   </div>
@@ -62,8 +62,8 @@
                     <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a]">完成</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#e8dcc8]">
-                    <div v-if="m.command" class="whitespace-pre-wrap break-all bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.command }}</div>
-                    <div v-if="m.result" class="max-h-48 overflow-y-auto whitespace-pre-wrap break-all border-t border-[#e8dcc8] bg-[#f5ead8] px-3 py-2.5 font-mono text-[11px] text-[#7a6a50]">{{ m.result }}</div>
+                    <div v-if="m.command" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.command }}</div>
+                    <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-[#e8dcc8] bg-[#f5ead8] px-3 py-2.5 font-mono text-[11px] text-[#7a6a50]">{{ m.result }}</div>
                   </div>
                 </div>
               </div>
@@ -73,7 +73,7 @@
                 <div class="flex h-7 w-7 shrink-0 items-center justify-center">
                   <span class="h-1.5 w-1.5 rounded-full bg-[#d4c0a0]"></span>
                 </div>
-                <div class="min-w-0 flex-1 whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-[#a0907a]">{{ m.result || m.content }}</div>
+                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-[#a0907a]">{{ m.result || m.content }}</div>
               </div>
 
             </div>

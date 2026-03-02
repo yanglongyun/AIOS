@@ -69,8 +69,10 @@ const onProviderChange = (e) => {
   const preset = getProvider(value);
   if (preset && value !== 'custom') {
     emit('update:api-url', preset.apiUrl);
+    emit('update:model', preset.defaultModel || '');
+  } else {
+    emit('update:model', '');
   }
   emit('update:api-key', '');
-  emit('update:model', '');
 };
 </script>

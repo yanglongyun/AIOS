@@ -38,6 +38,13 @@ export const PROVIDERS = [
     id: 'glm',
     name: 'GLM (智谱)',
     apiUrl: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    defaultModel: 'glm-4.5',
+  },
+  {
+    id: 'glm-coding',
+    name: '智谱 Coding Plan',
+    apiUrl: 'https://open.bigmodel.cn/api/coding/paas/v4/chat/completions',
+    defaultModel: 'glm-5',
   },
   {
     id: 'kimi',
@@ -63,6 +70,7 @@ export const PROVIDERS = [
     id: 'aliyun-coding',
     name: '阿里云 Coding Plan',
     apiUrl: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
+    defaultModel: 'qwen3-coder-plus',
   },
   {
     id: 'custom',

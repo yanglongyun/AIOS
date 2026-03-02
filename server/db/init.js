@@ -3,7 +3,8 @@ import { db } from './client.js';
 export const initDatabase = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
-      id TEXT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT NOT NULL,
       title TEXT,
       description TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
@@ -11,7 +12,7 @@ export const initDatabase = () => {
 
     CREATE TABLE IF NOT EXISTS messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      chat_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
       message TEXT NOT NULL,
       meta TEXT,
       created_at TEXT DEFAULT (datetime('now'))
@@ -24,6 +25,7 @@ export const initDatabase = () => {
 
     CREATE TABLE IF NOT EXISTS requests (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT,
       app TEXT NOT NULL,
       prompt TEXT NOT NULL,
       response TEXT,

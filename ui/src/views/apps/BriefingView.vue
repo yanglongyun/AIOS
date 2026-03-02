@@ -129,7 +129,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/briefing';
+const API_BASE = 'http://localhost:9701/apps/briefing';
 
 const requirement = ref('');
 const configUpdatedAt = ref('');
@@ -167,7 +167,7 @@ const request = async (url, options = {}) => {
 const saveConfig = async () => {
   error.value = '';
   try {
-    const data = await request(`${API_BASE}/config`, {
+    const data = await request(`${API_BASE}/config/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ requirement: requirement.value })
@@ -180,13 +180,13 @@ const saveConfig = async () => {
 };
 
 const loadConfig = async () => {
-  const data = await request(`${API_BASE}/config`);
+  const data = await request(`${API_BASE}/config/get`);
   requirement.value = data.requirement || '';
   configUpdatedAt.value = data.updatedAt || '';
 };
 
 const loadList = async () => {
-  const data = await request(`${API_BASE}/list?page=${page.value}&pageSize=${pageSize}`);
+  const data = await request(`${API_BASE}/report/list?page=${page.value}&pageSize=${pageSize}`);
   items.value = data.items || [];
   total.value = data.total || 0;
   totalPages.value = data.totalPages || 1;
@@ -195,7 +195,7 @@ const loadList = async () => {
 const loadDetail = async (id) => {
   error.value = '';
   try {
-    const data = await request(`${API_BASE}/detail?id=${id}`);
+    const data = await request(`${API_BASE}/report/detail?id=${id}`);
     report.value = data.report;
   } catch (e) {
     error.value = e.message || '加载失败';
@@ -210,7 +210,7 @@ const generate = async () => {
     if (!text) throw new Error('请先填写关注方向');
 
     await saveConfig();
-    const data = await request(`${API_BASE}/generate`, {
+    const data = await request(`${API_BASE}/report/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ requirement: text })

@@ -111,7 +111,7 @@
 <script setup>
 import { onMounted, ref, nextTick, watch } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/notebook';
+const API_BASE = 'http://localhost:9701/apps/notebook';
 const PAGE_SIZE = 10;
 
 const notes = ref([]);

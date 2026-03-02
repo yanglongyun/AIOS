@@ -155,7 +155,7 @@ const router = useRouter();
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
-const chatId = ref(null);
+const sessionId = ref(null);
 const chatTitle = ref('');
 const messages = ref([]);
 const busy = ref(false);
@@ -184,7 +184,7 @@ const addUniqueMessages = (items, { prepend = false } = {}) => {
 };
 
 const unsubs = [];
-const LAST_CHAT_KEY = 'lastChatId';
+const LAST_CHAT_KEY = 'lastSessionId';
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
@@ -240,7 +240,7 @@ const parseMessages = (raw) => {
 };
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
-  const params = new URLSearchParams({ chatId: id, offset: String(offset), limit: String(limit) });
+  const params = new URLSearchParams({ sessionId: id, offset: String(offset), limit: String(limit) });
   const data = await request(`/api/chat/messages?${params.toString()}`);
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
@@ -255,7 +255,7 @@ const loadChatPage = async (id, offset = 0, limit = 20) => {
 
 const createNewChat = async (title = '新对话') => {
   const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
-  chatId.value = data.id; chatTitle.value = title; saveLastChatId(data.id);
+  sessionId.value = data.sessionId; chatTitle.value = title; saveLastChatId(data.sessionId);
   messages.value = []; hasMore.value = false; loadedOffset.value = 0;
   seenKeys.value = new Set();
 };
@@ -266,9 +266,9 @@ const buildChatTitleFromFirstMessage = (text = '') => {
 };
 
 const ensureChatId = async (text) => {
-  if (chatId.value) return chatId.value;
+  if (sessionId.value) return sessionId.value;
   await createNewChat(buildChatTitleFromFirstMessage(text));
-  return chatId.value;
+  return sessionId.value;
 };
 
 const toggleResult = (m) => { m.expanded = !m.expanded; };
@@ -299,10 +299,10 @@ const onScroll = () => {
   const el = msgBox.value;
   if (!el) return;
   const { scrollTop } = el;
-  if (!hasMore.value || !chatId.value) return;
+  if (!hasMore.value || !sessionId.value) return;
   if (scrollTop < 50) {
     const oldHeight = el.scrollHeight;
-    loadChatPage(chatId.value, loadedOffset.value, 20).then(() => {
+    loadChatPage(sessionId.value, loadedOffset.value, 20).then(() => {
       nextTick(() => { el.scrollTop = el.scrollHeight - oldHeight; });
     }).catch(() => {});
   }
@@ -343,7 +343,7 @@ const handleSend = async () => {
     messages.value.push({ role: 'user', content, attachments: outgoingAttachments, _key });
     send({
       type: 'message',
-      chatId: id,
+      sessionId: id,
       content,
       attachments: outgoingAttachments
     });
@@ -423,7 +423,7 @@ watch(() => messages.value.length, (newLen, oldLen) => {
 watch(() => route.fullPath, async () => {
   if (!route.path.startsWith('/chat')) return;
   if (route.query.new) {
-    chatId.value = null;
+    sessionId.value = null;
     chatTitle.value = '新对话';
     messages.value = [];
     hasMore.value = false;
@@ -438,7 +438,7 @@ watch(() => route.fullPath, async () => {
     if (lastId) await router.replace({ path: `/chat/${lastId}` });
     return;
   }
-  chatId.value = id; saveLastChatId(id);
+  sessionId.value = id; saveLastChatId(id);
   chatTitle.value = typeof route.query.title === 'string' ? route.query.title : '';
   messages.value = []; hasMore.value = false; loadedOffset.value = 0;
   seenKeys.value = new Set();

@@ -144,7 +144,7 @@ import { marked } from 'marked';
 import OutlineNode from '../../components/apps/mindtree/OutlineNode.vue';
 import OutlinerChat from '../../components/apps/mindtree/OutlinerChat.vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/mindtree';
+const API_BASE = 'http://localhost:9701/apps/mindtree';
 const GLOBAL_OUTLINE_ID = 'global-outline';
 
 const outlineData = ref([]);

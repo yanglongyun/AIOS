@@ -39,7 +39,7 @@ AIOS 由两个独立 Node.js 进程组成：
 - **应用服务**（端口 9701）：所有 apps/ 下的应用 API，入口 apps/index.js
 - **前端**：静态文件由主服务 serve，源码在 ui/src/，构建产物在 ui/dist/
 
-两个服务独立启停，互不影响。主服务通过反向代理将 /api/apps/ 转发到应用服务。
+两个服务独立启停，互不影响。主服务通过反向代理将 /apps/ 转发到应用服务。
 
 应用如需调用 LLM，使用主服务提供的统一接口（无需关心 apiKey/model）：
 \`\`\`js
@@ -74,16 +74,16 @@ const { message } = await res.json(); // message.content 是回复文本
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。`;
   }
 
-  if (chatContext?.currentChatId || (Array.isArray(chatContext?.recentChats) && chatContext.recentChats.length)) {
-    const currentChatId = String(chatContext?.currentChatId || '').trim();
+  if (chatContext?.currentSessionId || (Array.isArray(chatContext?.recentChats) && chatContext.recentChats.length)) {
+    const currentSessionId = String(chatContext?.currentSessionId || '').trim();
     const recentChats = Array.isArray(chatContext?.recentChats) ? chatContext.recentChats : [];
     const recentLines = recentChats
       .slice(0, 3)
       .map((c, i) => `${i + 1}. ${c.title || '未命名'} ｜ ${String(c.description || '').slice(0, 100)}`);
 
     prompt += `\n\n## 会话上下文`;
-    if (currentChatId) {
-      prompt += `\n- 当前会话ID：${currentChatId}`;
+    if (currentSessionId) {
+      prompt += `\n- 当前会话ID：${currentSessionId}`;
     }
     if (recentLines.length) {
       prompt += `\n- 最近 3 次会话（标题｜描述前100字）：\n${recentLines.join('\n')}`;

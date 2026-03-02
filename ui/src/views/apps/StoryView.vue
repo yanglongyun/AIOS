@@ -121,7 +121,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/story';
+const API_BASE = 'http://localhost:9701/apps/story';
 
 const sessions = ref([]);
 const activeSession = ref(null);

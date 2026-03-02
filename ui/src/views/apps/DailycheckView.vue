@@ -118,7 +118,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/dailycheck';
+const API_BASE = 'http://localhost:9701/apps/dailycheck';
 
 const today = reactive({
   id: 0,

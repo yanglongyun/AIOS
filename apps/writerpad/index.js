@@ -7,14 +7,14 @@ import { syncHandler } from './api/sync.js';
 export { initWriterpadDatabase };
 
 export const handleWriterpadApi = async (req, res, path) => {
-  if (path === '/api/apps/writerpad/get' && req.method === 'GET') {
+  if (path === '/apps/writerpad/get' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const data = getHandler({ id: url.searchParams.get('id') });
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/writerpad/sync' && req.method === 'POST') {
+  if (path === '/apps/writerpad/sync' && req.method === 'POST') {
     const body = await readBody(req);
     const data = syncHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);

@@ -22,6 +22,6 @@ import HistoryPanel from '../components/chat/History.vue';
 const router = useRouter();
 
 const openChatFromHistory = async (chat) => {
-  await router.push({ path: `/chat/${chat.id}`, query: { title: chat.title || chat.id.slice(0, 8) } });
+  await router.push({ path: `/chat/${chat.session_id}`, query: { title: chat.title || chat.session_id.slice(0, 8) } });
 };
 </script>

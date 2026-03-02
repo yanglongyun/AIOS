@@ -13,54 +13,54 @@ import { saveHandler } from './api/save.js';
 export { initDebateDatabase };
 
 export const handleDebateApi = async (req, res, path) => {
-  if (path === '/api/apps/debate/parties' && req.method === 'POST') {
+  if (path === '/apps/debate/parties' && req.method === 'POST') {
     const body = await readBody(req);
     return json(res, partiesHandler(body));
   }
 
-  if (path === '/api/apps/debate/start' && req.method === 'POST') {
+  if (path === '/apps/debate/start' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await startHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/debate' && req.method === 'POST') {
+  if (path === '/apps/debate/debate' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await debateHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/optimize' && req.method === 'POST') {
+  if (path === '/apps/debate/optimize' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await optimizeHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/summary' && req.method === 'POST') {
+  if (path === '/apps/debate/summary' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await summaryHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/continue' && req.method === 'POST') {
+  if (path === '/apps/debate/continue' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await continueHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/finish' && req.method === 'POST') {
+  if (path === '/apps/debate/finish' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await finishHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (path === '/api/apps/debate/save' && req.method === 'POST') {
+  if (path === '/apps/debate/save' && req.method === 'POST') {
     const body = await readBody(req);
     const data = saveHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);

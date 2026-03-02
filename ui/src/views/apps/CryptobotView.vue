@@ -141,7 +141,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 
-const API = 'http://localhost:9701/api/apps/cryptobot';
+const API = 'http://localhost:9701/apps/cryptobot';
 
 const error = ref('');
 let poller = null;

@@ -1,127 +1,79 @@
 import { createServer } from 'http';
 import { json } from './app_shared/utils/json.js';
-
-import { handleNotebookApi, initNotebookDatabase } from './notebook/index.js';
-import { handleFinanceApi, initFinanceDatabase } from './finance/index.js';
-import { handleInboxApi, initInboxDatabase } from './inbox/index.js';
-import { handlePlaygroundApi, initPlaygroundDatabase } from './playground/index.js';
-import { handleMindtreeApi, initMindtreeDatabase } from './mindtree/index.js';
-import { handleWriterpadApi, initWriterpadDatabase } from './writerpad/index.js';
-import { handleLovehouseApi, initLovehouseDatabase } from './lovehouse/index.js';
-import { handleNokiaApi, initNokiaDatabase } from './nokia/index.js';
-import { handleDebateApi, initDebateDatabase } from './debate/index.js';
-import { handleTreasureApi, initTreasureDatabase } from './treasure/index.js';
-import { handleBriefingApi, initBriefingDatabase } from './briefing/index.js';
-import { handleDailycheckApi, initDailycheckDatabase } from './dailycheck/index.js';
-import { handleCryptobotApi, initCryptobotDatabase, initCryptobotRuntime } from './cryptobot/index.js';
-import { handleStoryApi, initStoryDatabase } from './story/index.js';
+import { appRegistry } from './registry.js';
 
 const APPS_PORT = 9701;
+
+const moduleCache = new Map();
+const dbInitCache = new Set();
+
+const loadModule = async (entry) => {
+  if (moduleCache.has(entry.name)) return moduleCache.get(entry.name);
+  const mod = await entry.load();
+  moduleCache.set(entry.name, mod);
+  return mod;
+};
+
+const initDbModule = async (entry, mod) => {
+  if (dbInitCache.has(entry.name)) return;
+  for (const fnName of entry.dbInit || []) {
+    if (typeof mod[fnName] === 'function') {
+      await mod[fnName]();
+    }
+  }
+  dbInitCache.add(entry.name);
+};
+
+const bootServices = async () => {
+  for (const entry of appRegistry) {
+    if (!Array.isArray(entry.serviceStart) || entry.serviceStart.length === 0) continue;
+    const mod = await loadModule(entry);
+    await initDbModule(entry, mod);
+    for (const fnName of entry.serviceStart) {
+      if (typeof mod[fnName] === 'function') {
+        await mod[fnName]();
+      }
+    }
+  }
+};
 
 const appsServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
 
-  // CORS 响应头处理
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // 处理预检请求 (Options)
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
     return;
   }
 
-  if (path.startsWith('/api/apps/notebook/')) {
-    const handled = await handleNotebookApi(req, res, path);
-    if (handled !== false) return;
+  const entry = appRegistry.find((item) => item.match(path));
+  if (!entry) {
+    json(res, { success: false, message: 'Apps endpoint not found' }, 404);
+    return;
   }
 
-  if (path.startsWith('/api/apps/finance/')) {
-    const handled = await handleFinanceApi(req, res, path);
-    if (handled !== false) return;
+  const mod = await loadModule(entry);
+  await initDbModule(entry, mod);
+
+  const handle = mod[entry.apiHandler];
+  if (typeof handle !== 'function') {
+    json(res, { success: false, message: `Invalid app handler: ${entry.name}` }, 500);
+    return;
   }
 
-  if (path.startsWith('/api/apps/inbox/') || path === '/inbox/submit') {
-    const handled = await handleInboxApi(req, res, path);
-    if (handled !== false) return;
+  const handled = await handle(req, res, path);
+  if (handled === false) {
+    json(res, { success: false, message: 'Apps endpoint not found' }, 404);
+    return;
   }
-
-  if (path.startsWith('/api/apps/playground/')) {
-    const handled = await handlePlaygroundApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/mindtree/')) {
-    const handled = await handleMindtreeApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/writerpad/')) {
-    const handled = await handleWriterpadApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/lovehouse/')) {
-    const handled = await handleLovehouseApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/nokia/')) {
-    const handled = await handleNokiaApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/debate/')) {
-    const handled = await handleDebateApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/treasure/')) {
-    const handled = await handleTreasureApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/briefing/')) {
-    const handled = await handleBriefingApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/dailycheck/')) {
-    const handled = await handleDailycheckApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/cryptobot/')) {
-    const handled = await handleCryptobotApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  if (path.startsWith('/api/apps/story/')) {
-    const handled = await handleStoryApi(req, res, path);
-    if (handled !== false) return;
-  }
-
-  json(res, { success: false, message: 'Apps endpoint not found' }, 404);
 });
 
-initNotebookDatabase();
-initFinanceDatabase();
-initInboxDatabase();
-initPlaygroundDatabase();
-initMindtreeDatabase();
-initWriterpadDatabase();
-initLovehouseDatabase();
-initNokiaDatabase();
-initDebateDatabase();
-initTreasureDatabase();
-initBriefingDatabase();
-initDailycheckDatabase();
-initCryptobotDatabase();
-initStoryDatabase();
-initCryptobotRuntime();
+await bootServices();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

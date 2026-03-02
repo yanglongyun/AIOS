@@ -27,26 +27,26 @@ export const handleInboxApi = async (req, res, pathName) => {
     return true;
   }
 
-  if (pathName === '/api/apps/inbox/list' && req.method === 'GET') {
+  if (pathName === '/apps/inbox/list' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
     return json(res, listHandler({ read: url.searchParams.get('read') || 'all' }));
   }
 
-  if (pathName === '/api/apps/inbox/submit' && req.method === 'POST') {
+  if (pathName === '/apps/inbox/submit' && req.method === 'POST') {
     const body = await readBody(req);
     const data = submitHandler(body, getSourceIp(req));
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (pathName === '/api/apps/inbox/read' && req.method === 'POST') {
+  if (pathName === '/apps/inbox/read' && req.method === 'POST') {
     const body = await readBody(req);
     const data = readHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
-  if (pathName === '/api/apps/inbox/delete' && req.method === 'POST') {
+  if (pathName === '/apps/inbox/delete' && req.method === 'POST') {
     const body = await readBody(req);
     const data = deleteHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);

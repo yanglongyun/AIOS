@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db } from '../../db.js';
 
 export const listReportsHandler = ({ page = 1, pageSize = 10 } = {}) => {
   const safePage = Number.isFinite(Number(page)) ? Math.max(1, Number(page)) : 1;

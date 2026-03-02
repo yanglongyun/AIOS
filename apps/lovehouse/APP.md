@@ -8,9 +8,9 @@ description: 恋爱屋 - 沉浸式恋人聊天应用。上半区房间窗口（A
 沉浸式恋人聊天体验。房间窗口 + 粉笔黑板留言。
 
 ## API
-- `GET /api/apps/lovehouse/messages?limit=50` - 获取聊天记录
-- `POST /api/apps/lovehouse/chat` - 发消息，AI 回复
-- `POST /api/apps/lovehouse/scene` - 切换场景
+- `GET /apps/lovehouse/messages?limit=50` - 获取聊天记录
+- `POST /apps/lovehouse/chat` - 发消息，AI 回复
+- `POST /apps/lovehouse/scene` - 切换场景
 
 ## 数据表
 - `apps_lovehouse_messages` - 聊天消息

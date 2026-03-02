@@ -57,7 +57,7 @@ const proxyAppsRequest = async (req, res, url) => {
 export const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  if (url.pathname.startsWith('/api/apps/')) {
+  if (url.pathname.startsWith('/apps/')) {
     try {
       await proxyAppsRequest(req, res, url);
     } catch (error) {

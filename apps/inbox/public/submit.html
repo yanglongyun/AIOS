@@ -270,7 +270,7 @@ btn.addEventListener('click', async () => {
   if (!content) { msg.className = 'msg err'; msg.textContent = '✗ 信的内容不能空着呀'; return; }
   btn.disabled = true; msg.className = 'msg'; msg.textContent = '🕊️ 信鸽飞行中...';
   try {
-    const res = await fetch('/api/apps/inbox/submit', {
+    const res = await fetch('/apps/inbox/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, content })

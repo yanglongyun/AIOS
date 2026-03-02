@@ -5,7 +5,7 @@
   "type": "module",
   "main": "server/index.js",
   "bin": {
-    "aios": "./cli/aios.js"
+    "aios": "./cli/index.js"
   },
   "scripts": {
     "dev": "node server/index.js & node apps/index.js & vite --config ui/vite.config.js ui",

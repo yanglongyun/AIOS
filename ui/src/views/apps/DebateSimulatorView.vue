@@ -273,7 +273,7 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/debate';
+const API_BASE = 'http://localhost:9701/apps/debate';
 const parties = ref([]);
 const selectedParty = ref(null);
 const candidateName = ref('');

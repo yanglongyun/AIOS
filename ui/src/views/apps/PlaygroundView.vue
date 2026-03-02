@@ -131,13 +131,13 @@ const parseStructuredOutput = (raw = '') => {
 };
 
 const fetchVersions = async () => {
-  const res = await fetch('http://localhost:9701/api/apps/playground/list');
+  const res = await fetch('http://localhost:9701/apps/playground/list');
   const data = await res.json();
   versions.value = data.data || [];
 };
 
 const loadLatestVersion = async () => {
-  const res = await fetch('http://localhost:9701/api/apps/playground/latest');
+  const res = await fetch('http://localhost:9701/apps/playground/latest');
   const data = await res.json();
   const row = data.data;
   if (!row) {
@@ -156,7 +156,7 @@ const loadSelectedVersion = async () => {
     await loadLatestVersion();
     return;
   }
-  const res = await fetch(`http://localhost:9701/api/apps/playground/detail?id=${selectedVersionId.value}`);
+  const res = await fetch(`http://localhost:9701/apps/playground/detail?id=${selectedVersionId.value}`);
   const data = await res.json();
   if (!data?.success || !data?.data) return;
   const row = data.data;
@@ -221,7 +221,7 @@ const submitPrompt = async (suggestion) => {
     currentVersionName.value = name || content.slice(0, 24);
     suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
 
-    await fetch('http://localhost:9701/api/apps/playground/create', {
+    await fetch('http://localhost:9701/apps/playground/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

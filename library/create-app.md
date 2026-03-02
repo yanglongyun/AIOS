@@ -43,22 +43,26 @@ AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 ser
 
 ```
 apps/
-├── index.js                        # apps 服务入口 + 路由分发
+├── index.js                        # apps 服务入口（service 启动 + API 懒加载分发）
+├── registry.js                     # 应用总注册表（api + db + service）
 ├── app_shared/
 │   └── utils/
 │       ├── json.js                 # JSON 响应工具
 │       └── readBody.js             # 请求体解析工具
 └── {appname}/
-    ├── index.js                    # 应用入口 + 路由注册
+    ├── index.js                    # 应用入口（导出 init/handle/start）
     ├── db.js                       # 应用独立数据库连接 + 建表初始化
     ├── APP.md                      # 应用说明（必须）
-    ├── api/                        # 一个文件一个 API
-    │   ├── list.js
-    │   ├── create.js
-    │   ├── update.js
-    │   └── delete.js
-    └── scripts/                    # 可选：供 Agent 直接执行
-        └── *.sh / *.js
+    ├── api/
+    │   ├── index.js                # 分发到 group
+    │   └── {group}/
+    │       ├── index.js            # 分发到 action
+    │       ├── list.js
+    │       ├── create.js
+    │       └── ...
+    └── service/                    # 可选：后台任务（定时器/轮询）
+        ├── index.js
+        └── *.js
 ```
 
 ## 数据库
@@ -84,30 +88,31 @@ db.pragma('journal_mode = WAL');
 
 ## API 规范
 
-- 路径：`/api/apps/{appname}/{action}`
-- 列表：`GET /api/apps/{appname}/list`
-- 详情：`GET /api/apps/{appname}/detail?id=xxx`
-- 创建：`POST /api/apps/{appname}/create`
-- 更新：`POST /api/apps/{appname}/update`
-- 删除：`POST /api/apps/{appname}/delete`
+- 路径：`/apps/{appname}/{action}`
+- 列表：`GET /apps/{appname}/list`
+- 详情：`GET /apps/{appname}/detail?id=xxx`
+- 创建：`POST /apps/{appname}/create`
+- 更新：`POST /apps/{appname}/update`
+- 删除：`POST /apps/{appname}/delete`
 
-## 应用注册到 apps 服务
+## 注册规范（关键）
 
-在 `apps/index.js` 中注册新应用：
+1) `apps/registry.js` 统一注册每个应用的 API/DB/Service：
 
 ```js
-// 1. 导入
-import { handleTodoApi, initTodoDatabase } from './todo/index.js';
-
-// 2. 路由分发（在 createServer 回调中）
-if (path.startsWith('/api/apps/todo/')) {
-  const handled = await handleTodoApi(req, res, path);
-  if (handled !== false) return;
+{
+  name: 'todo',
+  match: (path) => path.startsWith('/apps/todo/'),
+  load: () => import('../todo/index.js'),
+  apiHandler: 'handleTodoApi',
+  dbInit: ['initTodoDatabase'],
+  serviceStart: ['startTodoService'] // 可选
 }
-
-// 3. 初始化数据库
-initTodoDatabase();
 ```
+
+2) `apps/index.js` 只做：
+- 启动时 `bootServices()`
+- 请求时按 `registry` 懒加载并分发
 
 ## Agent 协作规范
 
@@ -135,34 +140,30 @@ initTodoDatabase();
 ### `apps/todo/index.js`
 
 ```js
+import { initTodoDatabase } from './db.js';
+import { handleTodoApiRoute } from './api/index.js';
 import { json } from '../app_shared/utils/json.js';
 import { readBody } from '../app_shared/utils/readBody.js';
-import { initTodoDatabase } from './db.js';
 
 export { initTodoDatabase };
 
 export async function handleTodoApi(req, res, path) {
-  if (path === '/api/apps/todo/list' && req.method === 'GET') {
-    const items = db.prepare('SELECT * FROM apps_todo_items ORDER BY created_at DESC').all();
-    return json(res, { success: true, data: items });
-  }
-  if (path === '/api/apps/todo/create' && req.method === 'POST') {
-    const { content } = await readBody(req);
-    db.prepare('INSERT INTO apps_todo_items (content) VALUES (?)').run(content);
-    return json(res, { success: true });
-  }
-  if (path === '/api/apps/todo/update' && req.method === 'POST') {
-    const { id, done } = await readBody(req);
-    db.prepare('UPDATE apps_todo_items SET done = ? WHERE id = ?').run(done, id);
-    return json(res, { success: true });
-  }
-  if (path === '/api/apps/todo/delete' && req.method === 'POST') {
-    const { id } = await readBody(req);
-    db.prepare('DELETE FROM apps_todo_items WHERE id = ?').run(id);
-    return json(res, { success: true });
-  }
-  return false;
+  const result = await handleTodoApiRoute({ req, path, readBody });
+  if (result === false) return false;
+  return json(res, result.data, result.status || 200);
 }
+```
+
+### `apps/todo/api/index.js`
+
+```js
+import { handleItemApi } from './item/index.js';
+
+export const handleTodoApiRoute = async (ctx) => {
+  const result = await handleItemApi(ctx);
+  if (result !== false) return result;
+  return false;
+};
 ```
 
 ### `apps/todo/db.js`
@@ -195,7 +196,7 @@ export function initTodoDatabase() {
 ```
 ---
 name: todo
-description: Todo list app. API under /api/apps/todo/, data in todo.db table apps_todo_items.
+description: Todo list app. API under /apps/todo/, data in todo.db table apps_todo_items.
 ---
 ```
 
@@ -204,6 +205,8 @@ description: Todo list app. API under /api/apps/todo/, data in todo.db table app
 - 应用共享能力统一放在 `apps/app_shared/`
 - 每个应用必须有 `APP.md`
 - 每个应用必须有自己的 `db.js`，不要复用共享 DB 连接文件
-- 每个 API 一个文件
+- 每层 api 目录都必须有 `index.js` 路由入口
+- action 文件一个文件一个 API
+- `registry.js` 中 `serviceStart` 只启动服务，不做 DB 初始化
 - 建表始终用 `CREATE TABLE IF NOT EXISTS`
 - 开发阶段不做兼容分支，按当前规范直接演进

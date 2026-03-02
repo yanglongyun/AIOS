@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db } from '../../db.js';
 
 export const saveConfigHandler = (body = {}) => {
   const requirement = String(body.requirement || '').trim();

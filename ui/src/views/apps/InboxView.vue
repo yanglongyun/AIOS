@@ -63,7 +63,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/inbox';
+const API_BASE = 'http://localhost:9701/apps/inbox';
 const publicUrl = 'http://localhost:9701/inbox/submit';
 
 const messages = ref([]);

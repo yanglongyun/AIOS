@@ -108,7 +108,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/api/apps/treasure';
+const API_BASE = 'http://localhost:9701/apps/treasure';
 const fileInput = ref(null);
 const loading = ref(false);
 const error = ref('');

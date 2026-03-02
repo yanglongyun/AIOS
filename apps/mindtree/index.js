@@ -8,9 +8,9 @@ import { chatHandler } from './api/chat.js';
 export { initMindtreeDatabase };
 
 export const handleMindtreeApi = async (req, res, path) => {
-  const isGetPath = path === '/api/apps/mindtree/get';
-  const isSyncPath = path === '/api/apps/mindtree/sync';
-  const isChatPath = path === '/api/apps/mindtree/chat';
+  const isGetPath = path === '/apps/mindtree/get';
+  const isSyncPath = path === '/apps/mindtree/sync';
+  const isChatPath = path === '/apps/mindtree/chat';
 
   if (isGetPath && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);

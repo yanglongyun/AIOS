@@ -93,7 +93,7 @@ const newItem = ref({ type: 'expense', amount: '', category: '', note: '' })
 const smartInput = ref('')
 const smartFilling = ref(false)
 const error = ref('')
-const API_BASE = 'http://localhost:9701/api/apps/finance'
+const API_BASE = 'http://localhost:9701/apps/finance'
 
 const totalIncome = computed(() => items.value.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0))
 const totalExpense = computed(() => items.value.filter(i => i.type === 'expense').reduce((s, i) => s + i.amount, 0))

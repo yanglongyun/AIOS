@@ -8,9 +8,9 @@ description: 心树 - 大纲编辑器，支持 AI 对话辅助展开节点。数
 大纲编辑器，支持拖拽排序、AI 对话辅助展开内容。
 
 ## API
-- `GET /api/apps/mindtree/get?id=xxx` - 获取大纲文档
-- `POST /api/apps/mindtree/sync` - 同步大纲数据（参数：id, title, data）
-- `POST /api/apps/mindtree/chat` - AI 对话（参数：outline_id, content）
+- `GET /apps/mindtree/get?id=xxx` - 获取大纲文档
+- `POST /apps/mindtree/sync` - 同步大纲数据（参数：id, title, data）
+- `POST /apps/mindtree/chat` - AI 对话（参数：outline_id, content）
 
 ## 数据表
 - `apps_mindtree_docs` - 大纲文档（id, title, data）

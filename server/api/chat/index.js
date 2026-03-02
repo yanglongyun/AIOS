@@ -15,24 +15,24 @@ export const handleChatApi = async (req, res, path, url) => {
   }
 
   if (path === '/api/chat/messages' && req.method === 'GET') {
-    const chatId = url.searchParams.get('chatId');
-    if (!chatId) return json(res, { error: '缺少 chatId' }, 400);
+    const sessionId = url.searchParams.get('sessionId');
+    if (!sessionId) return json(res, { error: '缺少 sessionId' }, 400);
     const limit = Number(url.searchParams.get('limit') || 20);
     const offset = Number(url.searchParams.get('offset') || 0);
-    return json(res, getChatMessagesPaged(chatId, limit, offset));
+    return json(res, getChatMessagesPaged(sessionId, limit, offset));
   }
 
   if (path === '/api/chat/rename' && req.method === 'POST') {
     const body = await readBody(req);
-    if (!body.chatId) return json(res, { error: '缺少 chatId' }, 400);
+    if (!body.sessionId) return json(res, { error: '缺少 sessionId' }, 400);
     if (!body.title) return json(res, { error: '缺少 title' }, 400);
-    return json(res, renameChat(body.chatId, body.title));
+    return json(res, renameChat(body.sessionId, body.title));
   }
 
   if (path === '/api/chat/delete' && req.method === 'POST') {
     const body = await readBody(req);
-    if (!body.chatId) return json(res, { error: '缺少 chatId' }, 400);
-    return json(res, deleteChat(body.chatId));
+    if (!body.sessionId) return json(res, { error: '缺少 sessionId' }, 400);
+    return json(res, deleteChat(body.sessionId));
   }
 
   return json(res, { error: 'API endpoint not found' }, 404);

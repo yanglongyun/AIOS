@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db } from '../../db.js';
 
 const GOOGLE_NEWS_RSS = 'https://news.google.com/rss/search';
 

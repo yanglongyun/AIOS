@@ -1,7 +1,7 @@
 import { db } from '../../db/client.js';
 
-export const deleteChat = (chatId) => {
-  db.prepare('DELETE FROM messages WHERE chat_id = ?').run(chatId);
-  db.prepare('DELETE FROM chats WHERE id = ?').run(chatId);
+export const deleteChat = (sessionId) => {
+  db.prepare('DELETE FROM messages WHERE session_id = ?').run(sessionId);
+  db.prepare('DELETE FROM chats WHERE session_id = ?').run(sessionId);
   return { ok: true };
 };

@@ -1,16 +1,17 @@
 import { tools as defaultTools } from './tools.js';
 import { runTools } from './runner.js';
 import { callLLM } from './llm.js';
+import { trimMessages } from './messages.js';
 
-const MAX_ROUNDS = 20;
+const MAX_ROUNDS = 50;
 
-const trimMessages = (messages, contextRounds) => {
-  if (!contextRounds || messages.length <= contextRounds + 1) return messages;
-  let cutIndex = messages.length - contextRounds;
-  if (cutIndex > 1 && messages[cutIndex].role === 'tool') cutIndex--;
-  return [messages[0], ...messages.slice(cutIndex)];
-};
-
+/**
+ * send 协议：
+ *   { type: 'assistant',    _message }           — assistant 消息（含 tool_calls），仅持久化
+ *   { type: 'tool_call',    command, reason }     — 单个工具调用，仅 UI
+ *   { type: 'tool_result',  content, _message, _meta } — 工具结果，UI + 持久化
+ *   { type: 'reply',        content, _message }   — 最终回复，UI + 持久化
+ */
 export const chat = async (messages, { model, contextRounds, apiUrl, apiKey, provider, tools = defaultTools, send = () => {}, signal } = {}) => {
   let round = 0;
 
@@ -28,6 +29,7 @@ export const chat = async (messages, { model, contextRounds, apiUrl, apiKey, pro
         tool_calls: message.tool_calls
       };
       messages.push(assistantMsg);
+      send({ type: 'assistant', _message: assistantMsg });
 
       const parsed = message.tool_calls.map(tc => JSON.parse(tc.function.arguments || '{}'));
       for (const { command, reason } of parsed) {
@@ -37,9 +39,9 @@ export const chat = async (messages, { model, contextRounds, apiUrl, apiKey, pro
       const toolMessages = await runTools(message.tool_calls);
       for (let i = 0; i < toolMessages.length; i++) {
         const tm = toolMessages[i];
-        tm._meta = { command: parsed[i]?.command, reason: parsed[i]?.reason, status: 'executed' };
+        const meta = { command: parsed[i]?.command, reason: parsed[i]?.reason, status: 'executed' };
         messages.push(tm);
-        send({ type: 'tool_result', content: tm.content, _meta: tm._meta });
+        send({ type: 'tool_result', content: tm.content, _message: tm, _meta: meta });
       }
 
       continue;
@@ -48,7 +50,7 @@ export const chat = async (messages, { model, contextRounds, apiUrl, apiKey, pro
     const text = message.content ?? '';
     const replyMsg = { role: 'assistant', content: text };
     messages.push(replyMsg);
-    send({ type: 'reply', content: text });
+    send({ type: 'reply', content: text, _message: replyMsg });
     return text;
   }
 

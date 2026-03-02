@@ -1,9 +1,6 @@
 import { db } from './client.js';
 
-
 export const initDatabase = () => {
-  db.pragma('foreign_keys = OFF');
-
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
       id TEXT PRIMARY KEY,
@@ -25,13 +22,27 @@ export const initDatabase = () => {
       value TEXT
     );
 
-  `);
+    CREATE TABLE IF NOT EXISTS requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      app TEXT NOT NULL,
+      prompt TEXT NOT NULL,
+      response TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      error TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      finished_at TEXT
+    );
 
-  const initSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
-  initSetting.run('contextRounds', '30');
-  initSetting.run('apiUrl', 'https://api.openai.com/v1/chat/completions');
-  initSetting.run('apiKey', '');
-  initSetting.run('model', 'gpt-4o-mini');
-  initSetting.run('enableFollowupSuggestions', '1');
-  initSetting.run('provider', 'openrouter');
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      app TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT,
+      read INTEGER NOT NULL DEFAULT 0,
+      reply TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      read_at TEXT
+    );
+
+  `);
 };

@@ -58,14 +58,14 @@ const buildAttachmentContext = (attachments = []) => {
   return lines.join('\n');
 };
 
-export const createSession = (send) => {
+export const createSession = (wsSend) => {
   let chatId = null;
   let messages = [];
   let abortController = null;
 
   const handleMessage = async (data) => {
     if (data.type === 'ping') {
-      send({ type: 'pong' });
+      wsSend({ type: 'pong' });
       return;
     }
 
@@ -84,7 +84,7 @@ export const createSession = (send) => {
 
       const incomingChatId = data.chatId || null;
       if (!incomingChatId) {
-        send({ type: 'error', content: '缺少 chatId' });
+        wsSend({ type: 'error', content: '缺少 chatId' });
         return;
       }
 
@@ -134,14 +134,19 @@ export const createSession = (send) => {
       abortController = new AbortController();
       const { signal } = abortController;
 
+      const send = (msg) => {
+        if (msg._message) saveMessage(chatId, msg._message, msg._meta);
+        if (msg.type !== 'assistant') wsSend(msg);
+      };
+
       try {
-        await chat(chatId, modelMessages, send, {
+        await chat(modelMessages, {
           model,
           contextRounds,
           apiUrl,
           apiKey,
           provider,
-          saveMessage,
+          send,
           signal
         });
         messages = [{
@@ -150,9 +155,9 @@ export const createSession = (send) => {
         }, ...getMessages(chatId)];
       } catch (e) {
         if (e.name === 'AbortError') {
-          send({ type: 'aborted' });
+          wsSend({ type: 'aborted' });
         } else {
-          send({ type: 'error', content: e.message });
+          wsSend({ type: 'error', content: e.message });
         }
       } finally {
         abortController = null;

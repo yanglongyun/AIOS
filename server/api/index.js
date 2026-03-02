@@ -3,6 +3,8 @@ import { handleChatApi } from './chat/index.js';
 import { handleSettingsApi } from './settings/index.js';
 import { handleLlmApi } from './llm/index.js';
 import { handleFilesApi } from './files/index.js';
+import { handleRequestsApi } from './requests/index.js';
+import { handleNotificationsApi } from './notifications/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -25,6 +27,16 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/files/')) {
       await handleFilesApi(req, res, path);
+      return true;
+    }
+
+    if (path === '/api/requests') {
+      await handleRequestsApi(req, res, path, url);
+      return true;
+    }
+
+    if (path.startsWith('/api/notifications')) {
+      await handleNotificationsApi(req, res, path, url);
       return true;
     }
 

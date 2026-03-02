@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { countUnread } from '../api/notifications/list.js';
 
 const INSTRUCTION_PATH = join(process.cwd(), 'instruction.md');
 
@@ -87,6 +88,12 @@ const { message } = await res.json(); // message.content 是回复文本
     if (recentLines.length) {
       prompt += `\n- 最近 3 次会话（标题｜描述前100字）：\n${recentLines.join('\n')}`;
     }
+  }
+
+  const unread = countUnread();
+  if (unread > 0) {
+    prompt += `\n\n## 通知
+你有 ${unread} 条未读通知。可以用 shell 执行 \`curl http://localhost:9700/api/notifications\` 查看详情，用 \`curl -X POST http://localhost:9700/api/notifications/read -H 'Content-Type: application/json' -d '{"id":通知ID,"reply":"处理说明"}'\` 标记已读。`;
   }
 
   if (enableFollowupSuggestions) {

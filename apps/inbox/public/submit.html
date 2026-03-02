@@ -177,13 +177,8 @@ body::before {
 .send-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 24px;
-}
-.postmark {
-  font-size: 11px;
-  color: #c4b8a8;
-  font-style: italic;
 }
 .btn-send {
   padding: 12px 32px;
@@ -201,7 +196,7 @@ body::before {
 .btn-send:hover { background: #9a8a78; }
 .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-send::after {
-  content: ' ✉';
+  content: '';
 }
 
 .msg {
@@ -241,7 +236,7 @@ body::before {
       </div>
 
       <div class="letter-field">
-        <div class="letter-label">联系邮箱</div>
+        <div class="letter-label">联系方式</div>
         <input class="letter-input" id="email" placeholder="方便回信（可选）" />
       </div>
 
@@ -251,8 +246,7 @@ body::before {
       </div>
 
       <div class="send-row">
-        <span class="postmark">📮 本地邮局</span>
-        <button class="btn-send" id="submit">寄 出</button>
+        <button class="btn-send" id="submit">提交</button>
       </div>
 
       <div id="msg" class="msg"></div>

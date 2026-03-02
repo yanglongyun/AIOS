@@ -20,7 +20,7 @@ const getSourceIp = (req) => {
 };
 
 export const handleInboxApi = async (req, res, pathName) => {
-  if (pathName === '/inbox/submit' && req.method === 'GET') {
+  if (pathName === '/apps/inbox/submit' && req.method === 'GET') {
     const html = fs.readFileSync(path.join(__dirname, 'public/submit.html'), 'utf8');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);

@@ -7,10 +7,14 @@
 
     <div class="relative z-[1] mx-6 mt-4 flex shrink-0 items-center justify-between gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4]">
       <div class="min-w-0 flex-1">
-        <div class="text-xs italic text-[#b8a898]">📮 对外投信地址</div>
+        <div class="text-xs italic text-[#b8a898]">📮 外部提交入口</div>
+        <div class="mt-0.5 text-[11px] leading-relaxed text-[#a59686]">把这个地址发给他人，他们可以在网页上提交留言，提交后会自动进入你的收件箱。</div>
         <div class="mt-1 break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
       </div>
-      <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copySubmitUrl">{{ copied ? '已复制 ✓' : '复制地址' }}</button>
+      <div class="flex items-center gap-2">
+        <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openSubmitUrl">打开</button>
+        <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copySubmitUrl">{{ copied ? '已复制 ✓' : '复制地址' }}</button>
+      </div>
     </div>
 
     <div class="relative z-[1] flex shrink-0 items-center justify-between px-6 pb-2 pt-4">
@@ -32,21 +36,19 @@
         v-for="m in messages"
         :key="m.id"
         class="group relative mb-3 cursor-default rounded bg-[#faf6f0] px-[22px] pb-5 pt-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] ring-1 ring-[#e8e0d4] transition-all before:absolute before:left-0 before:right-0 before:top-0 before:h-1.5 before:rounded-t before:bg-[repeating-linear-gradient(90deg,#d4968e_0,#d4968e_10px,#8eaad4_10px,#8eaad4_20px)] hover:-translate-y-px hover:shadow-[0_2px_6px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)]"
-        :class="{ 'border-l-4 border-l-[#d4968e]': !m.is_read }"
       >
         <div v-if="!m.is_read" class="absolute right-4 top-3.5 flex h-8 w-8 items-center justify-center rounded-full bg-[radial-gradient(circle_at_40%_35%,#e0887e,#c06858)] text-[11px] font-bold text-white/90 shadow-[0_1px_4px_rgba(192,104,88,0.3)]">新</div>
 
         <div class="mb-2 flex items-center gap-2">
-          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#e0d4c8] bg-[#f0e8dc] text-sm">{{ getSenderEmoji(m.name) }}</div>
           <div>
             <div class="text-sm font-bold text-[#7a6a58]">{{ m.name || '匿名' }}</div>
             <div class="text-[11px] italic text-[#b8a898]">{{ m.email || '无邮箱' }}</div>
           </div>
         </div>
 
-        <div class="my-2.5 whitespace-pre-wrap break-words bg-[repeating-linear-gradient(transparent,transparent_27px,rgba(180,160,130,0.12)_27px,rgba(180,160,130,0.12)_28px)] bg-[position:0_2px] pl-10 text-sm leading-[1.8] text-[#6a5e50]">{{ m.content }}</div>
+        <div class="my-2.5 whitespace-pre-wrap break-words bg-[repeating-linear-gradient(transparent,transparent_27px,rgba(180,160,130,0.12)_27px,rgba(180,160,130,0.12)_28px)] bg-[position:0_2px] text-sm leading-[1.8] text-[#6a5e50]">{{ m.content }}</div>
 
-        <div class="mt-2.5 flex items-center justify-between pl-10">
+        <div class="mt-2.5 flex items-center justify-between">
           <span class="text-[11px] italic text-[#c4b8a8]">📅 {{ formatDate(m.created_at) }} · 🌐 {{ m.source_ip || 'unknown' }}</span>
           <div class="flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
             <button class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#8a7a68] hover:bg-[#8a7a68] hover:text-[#faf6f0]" @click="toggleRead(m)">{{ m.is_read ? '标未读' : '标已读' }}</button>
@@ -64,7 +66,7 @@
 import { onMounted, ref } from 'vue';
 
 const API_BASE = 'http://localhost:9701/apps/inbox';
-const publicUrl = 'http://localhost:9701/inbox/submit';
+const publicUrl = 'http://localhost:9701/apps/inbox/submit';
 
 const messages = ref([]);
 const unread = ref(0);
@@ -105,6 +107,10 @@ const copySubmitUrl = async () => {
   } catch {}
 };
 
+const openSubmitUrl = () => {
+  window.open(publicUrl, '_blank', 'noopener,noreferrer');
+};
+
 const formatDate = (v) => {
   if (!v) return '';
   const d = new Date(v.replace(' ', 'T'));
@@ -116,14 +122,6 @@ const formatDate = (v) => {
   if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
   if (diff < 604800000) return `${Math.floor(diff / 86400000)} 天前`;
   return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
-};
-
-const senderEmojis = ['🧑', '👩', '👨‍💻', '🎨', '🌍', '🤖', '👾', '🦊', '🐱', '🐻'];
-const getSenderEmoji = (name) => {
-  if (!name) return '🤖';
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return senderEmojis[Math.abs(hash) % senderEmojis.length];
 };
 
 onMounted(fetchMessages);

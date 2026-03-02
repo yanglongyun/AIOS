@@ -3,7 +3,7 @@
 
     <!-- 顶栏 -->
     <div class="flex shrink-0 items-center gap-3 border-b border-white/5 bg-[#1a1008] px-4 py-2.5">
-      <span class="text-[13px] font-semibold tracking-wide text-[#d4b880]">空间工坊</span>
+      <span class="text-[13px] font-semibold tracking-wide text-[#d4b880]">小宇宙</span>
       <span class="h-3.5 w-px bg-white/10"></span>
       <span class="text-[11px] text-[#5a4828]">{{ currentVersionName }}</span>
       <div class="ml-auto flex items-center gap-3">
@@ -15,10 +15,6 @@
           <option :value="0">最新</option>
           <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} #{{ v.id }}</option>
         </select>
-        <div class="flex items-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full transition-colors" :class="loading ? 'bg-[#facc15] animate-pulse' : 'bg-[#4ade80]'"></span>
-          <span class="text-[11px]" :class="loading ? 'text-[#facc15]' : 'text-[#3a6040]'">{{ loading ? '生成中' : '就绪' }}</span>
-        </div>
       </div>
     </div>
 

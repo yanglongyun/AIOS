@@ -15,7 +15,7 @@ export const appRegistry = [
   },
   {
     name: 'inbox',
-    match: (path) => path.startsWith('/apps/inbox/') || path === '/inbox/submit',
+    match: (path) => path.startsWith('/apps/inbox/'),
     load: () => import('./inbox/index.js'),
     apiHandler: 'handleInboxApi',
     dbInit: ['initInboxDatabase']
@@ -99,4 +99,3 @@ export const appRegistry = [
     dbInit: ['initStoryDatabase']
   }
 ];
-

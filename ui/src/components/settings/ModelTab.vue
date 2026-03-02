@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { PROVIDERS, getProvider } from '../../data/providers.js';
+import { PROVIDERS } from '../../data/providers.js';
 
 defineProps({
   provider: { type: String, default: 'openrouter' },
@@ -66,14 +66,5 @@ const emit = defineEmits([
 const onProviderChange = (e) => {
   const value = e.target.value;
   emit('update:provider', value);
-  const preset = getProvider(value);
-  if (preset && value !== 'custom') {
-    emit('update:api-url', preset.apiUrl);
-    emit('update:model', preset.defaultModel || '');
-  } else {
-    emit('update:api-url', '');
-    emit('update:model', '');
-  }
-  emit('update:api-key', '');
 };
 </script>

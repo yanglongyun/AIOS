@@ -69,13 +69,15 @@
     <!-- 下方：导航面板 + 内容区 -->
     <div class="relative flex min-h-0 flex-1">
       <div v-if="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-[60] hidden bg-[rgba(22,14,8,0.45)] backdrop-blur-[1px] max-md:block" />
-      <div v-show="sidebarOpen" class="relative z-[70] h-full w-[220px] shrink-0 border-r border-[#1a1008] bg-[linear-gradient(180deg,#3a2a1a_0%,#2e2014_100%)] bg-[repeating-linear-gradient(180deg,transparent_0,transparent_6px,rgba(255,255,255,0.01)_6px,rgba(255,255,255,0.01)_7px)] opacity-100 max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-[4px_0_20px_rgba(0,0,0,0.5)]">
+      <div v-show="sidebarOpen" class="relative z-[70] h-full w-[220px] shrink-0 border-r border-[#1a1008] bg-[repeating-linear-gradient(180deg,transparent_0,transparent_6px,rgba(255,255,255,0.04)_6px,rgba(255,255,255,0.04)_7px),linear-gradient(180deg,#3a2a1a_0%,#2e2014_100%)] opacity-100 max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-[4px_0_20px_rgba(0,0,0,0.5)]">
         <NavPanel @navigate="onNavigate" />
       </div>
       <div class="relative z-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <RouterView />
       </div>
     </div>
+
+    <GlobalToast />
   </div>
 </template>
 
@@ -84,6 +86,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { RouterView } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
+import GlobalToast from './components/GlobalToast.vue';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
 const activePanel = ref(null);

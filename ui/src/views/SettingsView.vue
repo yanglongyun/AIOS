@@ -29,7 +29,7 @@
           :api-key="editApiKey"
           :model="editModel"
           @save="save"
-          @update:provider="provider = $event"
+          @update:provider="onProviderChange"
           @update:api-url="editApiUrl = $event"
           @update:api-key="editApiKey = $event"
           @update:model="editModel = $event"
@@ -64,6 +64,8 @@ import ModelTab from '../components/settings/ModelTab.vue';
 import ConversationTab from '../components/settings/ConversationTab.vue';
 import ContextTab from '../components/settings/ContextTab.vue';
 import GeneralTab from '../components/settings/GeneralTab.vue';
+import { getProvider } from '../data/providers.js';
+import { toast } from '../stores/toast.js';
 
 
 const tabs = [
@@ -81,12 +83,54 @@ const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
 const enableFollowupSuggestions = ref(true);
+const providerConfigs = ref({});
+
+const PROVIDER_CONFIGS_KEY = 'aios.providerConfigs.v1';
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
   return data;
+};
+
+const loadProviderConfigs = () => {
+  try {
+    const raw = localStorage.getItem(PROVIDER_CONFIGS_KEY);
+    providerConfigs.value = raw ? JSON.parse(raw) : {};
+  } catch {
+    providerConfigs.value = {};
+  }
+};
+
+const saveProviderConfigs = () => {
+  localStorage.setItem(PROVIDER_CONFIGS_KEY, JSON.stringify(providerConfigs.value));
+};
+
+const applyProviderConfig = (providerId) => {
+  const saved = providerConfigs.value[providerId];
+  if (saved) {
+    editApiUrl.value = saved.apiUrl || '';
+    editApiKey.value = saved.apiKey || '';
+    editModel.value = saved.model || '';
+    return;
+  }
+
+  const preset = getProvider(providerId);
+  if (providerId === 'custom') {
+    editApiUrl.value = '';
+    editApiKey.value = '';
+    editModel.value = '';
+    return;
+  }
+  editApiUrl.value = preset?.apiUrl || '';
+  editApiKey.value = '';
+  editModel.value = preset?.defaultModel || '';
+};
+
+const onProviderChange = (nextProvider) => {
+  provider.value = nextProvider;
+  applyProviderConfig(nextProvider);
 };
 
 const fetchSettings = async () => {
@@ -97,6 +141,12 @@ const fetchSettings = async () => {
   editApiKey.value = data.apiKey || '';
   editModel.value = data.model || '';
   enableFollowupSuggestions.value = data.enableFollowupSuggestions !== false;
+  providerConfigs.value[provider.value] = {
+    apiUrl: editApiUrl.value,
+    apiKey: editApiKey.value,
+    model: editModel.value
+  };
+  saveProviderConfigs();
 };
 
 const setTheme = (t) => {
@@ -106,19 +156,33 @@ const setTheme = (t) => {
 };
 
 const save = async () => {
-  await request('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      provider: provider.value,
-      contextRounds: editRounds.value,
+  try {
+    await request('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: provider.value,
+        contextRounds: editRounds.value,
+        apiUrl: editApiUrl.value,
+        apiKey: editApiKey.value,
+        model: editModel.value,
+        enableFollowupSuggestions: enableFollowupSuggestions.value
+      })
+    });
+    providerConfigs.value[provider.value] = {
       apiUrl: editApiUrl.value,
       apiKey: editApiKey.value,
-      model: editModel.value,
-      enableFollowupSuggestions: enableFollowupSuggestions.value
-    })
-  });
+      model: editModel.value
+    };
+    saveProviderConfigs();
+    toast.show('模型配置已保存');
+  } catch (e) {
+    toast.show(`保存失败：${e.message}`, { type: 'error' });
+  }
 };
 
-onMounted(fetchSettings);
+onMounted(async () => {
+  loadProviderConfigs();
+  await fetchSettings();
+});
 </script>

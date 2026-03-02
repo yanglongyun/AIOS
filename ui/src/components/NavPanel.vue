@@ -4,7 +4,7 @@
     <div class="px-3 pb-2 pt-4">
       <div class="mb-1 flex items-center justify-between px-2">
         <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">对话</span>
-        <button @click="goNewSession" title="新对话" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-sm leading-none text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">+</button>
+        <button @click="goNewSession" title="新对话" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
       </div>
       <button @click="goLastChat" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(isChatNew)">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
@@ -20,7 +20,7 @@
     <div class="flex min-h-0 flex-1 flex-col px-3 pb-2">
       <div class="mb-1 flex items-center justify-between px-2">
         <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">应用</span>
-        <button @click="go('/apps/create')" title="创建应用" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-sm leading-none text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">+</button>
+        <button @click="go('/apps/create')" title="创建应用" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
       </div>
 
       <div class="flex-1 space-y-0.5 overflow-y-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -59,6 +59,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { Plus } from 'lucide-vue-next';
 
 const emit = defineEmits(['navigate']);
 const route = useRoute();

@@ -14,9 +14,16 @@ export const initFinanceDatabase = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       type TEXT CHECK(type IN ('income', 'expense')) NOT NULL,
       amount REAL NOT NULL,
-      category TEXT NOT NULL,
       note TEXT,
       date DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 迁移：删除旧 category 列
+  try {
+    const cols = db.prepare('PRAGMA table_info(finance_transactions)').all();
+    if (cols.some(c => c.name === 'category')) {
+      db.exec('ALTER TABLE finance_transactions DROP COLUMN category');
+    }
+  } catch {}
 };

@@ -40,12 +40,12 @@
             :key="item.id"
             class="group flex items-center border-b border-b-[dotted] border-b-[#e0d8cc] py-3 last:border-b-0"
           >
-            <div class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border-[1.5px] text-base" :class="getCategoryClass(item.category)">
-              {{ getCategoryEmoji(item.category) }}
+            <div class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border-[1.5px] font-mono text-base font-bold" :class="item.type === 'income' ? 'bg-[#f0fef4] border-[#b8d8b8] text-[#5a9a4a]' : 'bg-[#fef9f0] border-[#e8d8c0] text-[#c06040]'">
+              {{ item.type === 'income' ? '+' : '-' }}
             </div>
             <div class="flex-1">
-              <div class="text-sm font-semibold">{{ item.note || item.category }}</div>
-              <div class="mt-px text-[11px] text-[#b8a898]">{{ item.category }} · {{ formatTime(item.date) }}</div>
+              <div class="text-sm font-semibold">{{ item.note || (item.type === 'income' ? '收入' : '支出') }}</div>
+              <div class="mt-px text-[11px] text-[#b8a898]">{{ formatTime(item.date) }}</div>
             </div>
             <div class="font-mono text-[15px] font-bold" :class="item.type === 'income' ? 'text-[#5a9a4a]' : 'text-[#4a3f35]'">
               {{ item.type === 'income' ? '+' : '-' }}{{ item.amount.toLocaleString() }}
@@ -77,9 +77,8 @@
           <option value="income">收入</option>
         </select>
         <input v-model="newItem.amount" type="number" placeholder="金额" class="w-20 rounded-[10px] border-[1.5px] border-[#e0d4c4] bg-white px-3 py-2.5 text-[13px] outline-none placeholder:text-[#c4b8a8]" />
-        <input v-model="newItem.category" placeholder="分类" class="w-20 rounded-[10px] border-[1.5px] border-[#e0d4c4] bg-white px-3 py-2.5 text-[13px] outline-none placeholder:text-[#c4b8a8]" />
         <input v-model="newItem.note" placeholder="备注" @keyup.enter="add" class="min-w-0 flex-1 rounded-[10px] border-[1.5px] border-[#e0d4c4] bg-white px-3 py-2.5 text-[13px] outline-none placeholder:text-[#c4b8a8]" />
-        <button class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border-2 border-[#5a4030] bg-transparent text-xl text-[#5a4030] transition-all hover:bg-[#5a4030] hover:text-[#f5efe8] disabled:cursor-not-allowed disabled:opacity-30" :disabled="!newItem.amount || !newItem.category" @click="add">+</button>
+        <button class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border-2 border-[#5a4030] bg-transparent text-[#5a4030] transition-all hover:bg-[#5a4030] hover:text-[#f5efe8] disabled:cursor-not-allowed disabled:opacity-30" :disabled="!newItem.amount" @click="add"><Plus class="h-4 w-4" /></button>
       </div>
     </div>
   </div>
@@ -87,9 +86,10 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { Plus } from 'lucide-vue-next'
 
 const items = ref([])
-const newItem = ref({ type: 'expense', amount: '', category: '', note: '' })
+const newItem = ref({ type: 'expense', amount: '', note: '' })
 const smartInput = ref('')
 const smartFilling = ref(false)
 const error = ref('')
@@ -123,29 +123,6 @@ const groupedItems = computed(() => {
   return Object.values(groups)
 })
 
-const emojiMap = {
-  '餐饮': '🍜', '午餐': '🍜', '晚餐': '🍱', '早餐': '🥐',
-  '交通': '🚇', '出行': '🚇',
-  '饮品': '☕', '咖啡': '☕', '奶茶': '🧋',
-  '购物': '🛒', '生活': '🛒',
-  '收入': '💰', '工资': '💰', '奖金': '💰',
-  '娱乐': '🎮', '游戏': '🎮',
-  '医疗': '💊', '教育': '📚', '通讯': '📱', '住房': '🏠',
-}
-
-const classMap = {
-  '餐饮': 'bg-[#fef9f0] border-[#e8d8c0]', '午餐': 'bg-[#fef9f0] border-[#e8d8c0]', '晚餐': 'bg-[#fef9f0] border-[#e8d8c0]', '早餐': 'bg-[#fef9f0] border-[#e8d8c0]',
-  '交通': 'bg-[#f0f6fe] border-[#c0d4e8]', '出行': 'bg-[#f0f6fe] border-[#c0d4e8]',
-  '饮品': 'bg-[#fef0f4] border-[#e8c0cc]', '咖啡': 'bg-[#fef0f4] border-[#e8c0cc]', '奶茶': 'bg-[#fef0f4] border-[#e8c0cc]',
-  '收入': 'bg-[#f0fef4] border-[#b8d8b8]', '工资': 'bg-[#f0fef4] border-[#b8d8b8]', '奖金': 'bg-[#f0fef4] border-[#b8d8b8]',
-  '购物': 'bg-[#f8f0fe] border-[#d0c0e8]',
-  '生活': 'bg-[#f0fefe] border-[#b8d8d8]', '医疗': 'bg-[#f0fefe] border-[#b8d8d8]', '教育': 'bg-[#f0fefe] border-[#b8d8d8]', '通讯': 'bg-[#f0fefe] border-[#b8d8d8]', '住房': 'bg-[#f0fefe] border-[#b8d8d8]',
-  '娱乐': 'bg-[#fef0fe] border-[#d8b8d8]', '游戏': 'bg-[#fef0fe] border-[#d8b8d8]'
-}
-
-const getCategoryEmoji = (cat) => emojiMap[cat] || '📝'
-const getCategoryClass = (cat) => classMap[cat] || 'bg-[#f0fefe] border-[#b8d8d8]'
-
 const formatTime = (dateStr) => {
   const d = new Date(dateStr)
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
@@ -160,7 +137,7 @@ const fetchItems = async () => {
 }
 
 const add = async () => {
-  if (!newItem.value.amount || !newItem.value.category) return
+  if (!newItem.value.amount) return
   error.value = ''
   try {
     await fetch(`${API_BASE}/create`, {
@@ -168,7 +145,7 @@ const add = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newItem.value)
     })
-    newItem.value = { type: 'expense', amount: '', category: '', note: '' }
+    newItem.value = { type: 'expense', amount: '', note: '' }
     fetchItems()
   } catch (e) {
     error.value = e.message || '记录失败'
@@ -189,7 +166,7 @@ const smartFill = async () => {
         messages: [
           {
             role: 'system',
-            content: '你是记账助手。把用户的一句话记账描述提取成 JSON：{"type":"income|expense","amount":数字,"category":"分类","note":"备注"}。只返回 JSON，不要解释，不要代码块。'
+            content: '你是记账助手。把用户的一句话记账描述提取成 JSON：{"type":"income|expense","amount":数字,"note":"备注"}。只返回 JSON，不要解释，不要代码块。'
           },
           { role: 'user', content: text }
         ]
@@ -202,14 +179,13 @@ const smartFill = async () => {
     const parsed = JSON.parse(raw)
     const type = parsed.type === 'income' ? 'income' : 'expense'
     const amount = Number(parsed.amount)
-    const category = String(parsed.category || '').trim()
     const note = String(parsed.note || '').trim()
 
-    if (!Number.isFinite(amount) || amount <= 0 || !category) {
-      throw new Error('识别结果不完整，请补充金额和分类')
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('识别结果不完整，请补充金额')
     }
 
-    newItem.value = { type, amount: String(amount), category, note }
+    newItem.value = { type, amount: String(amount), note }
   } catch (e) {
     error.value = e.message || '智能填充失败'
   } finally {

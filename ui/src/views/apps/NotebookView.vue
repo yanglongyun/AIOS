@@ -84,7 +84,7 @@
     <div v-if="error" class="mx-4 mb-2 shrink-0 rounded-lg bg-[#fef0f0] px-3 py-2 text-xs text-[#e85d5d]">{{ error }}</div>
 
     <div class="shrink-0 bg-[#eee8dd] px-4 pb-5 pt-2.5">
-      <div class="flex items-end gap-2">
+      <div class="flex items-center gap-2">
         <textarea
           ref="inputEl"
           v-model="draft"
@@ -95,13 +95,13 @@
           @keydown.meta.enter.prevent="saveNote"
           @keydown.ctrl.enter.prevent="saveNote"
         />
-        <button class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border-none bg-transparent text-base text-[#e8a44a] transition-all hover:bg-[rgba(232,164,74,0.1)] disabled:cursor-not-allowed disabled:opacity-30" :disabled="optimizing || !draft.trim()" title="AI 优化" @click="optimizeDraft">
-          <span v-if="optimizing">...</span>
-          <span v-else>✨</span>
+        <button class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border-none bg-transparent text-[#e8a44a] transition-all hover:bg-[rgba(232,164,74,0.1)] disabled:cursor-not-allowed disabled:opacity-30" :disabled="optimizing || !draft.trim()" title="AI 优化" @click="optimizeDraft">
+          <span v-if="optimizing" class="text-xs">...</span>
+          <Sparkles v-else class="h-[18px] w-[18px]" />
         </button>
-        <button class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-none bg-[#e8a44a] text-[22px] text-white shadow-[0_2px_8px_rgba(232,164,74,0.3)] transition-all hover:scale-105 hover:bg-[#d49440] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100" :disabled="creating || !draft.trim()" @click="saveNote">
-          <span v-if="creating">...</span>
-          <span v-else>+</span>
+        <button class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-none bg-[#e8a44a] text-white shadow-[0_2px_8px_rgba(232,164,74,0.3)] transition-all hover:scale-105 hover:bg-[#d49440] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100" :disabled="creating || !draft.trim()" @click="saveNote">
+          <span v-if="creating" class="text-xs">...</span>
+          <Plus v-else class="h-5 w-5" />
         </button>
       </div>
     </div>
@@ -110,7 +110,7 @@
 
 <script setup>
 import { onMounted, ref, nextTick, watch } from 'vue';
-import { Search } from 'lucide-vue-next';
+import { Plus, Search, Sparkles } from 'lucide-vue-next';
 
 const API_BASE = 'http://localhost:9701/apps/notebook';
 const PAGE_SIZE = 10;

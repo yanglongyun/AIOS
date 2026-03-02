@@ -1,70 +1,82 @@
 <template>
-  <div class="flex-1 overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] font-['Georgia','PingFang_SC',serif]">
-    <div class="mx-auto max-w-[860px] px-5 py-7">
-      <div class="mb-[22px] flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[linear-gradient(135deg,#d4a574,#c08a50)] text-lg shadow-[0_2px_8px_rgba(160,120,60,0.25)]">⚡</div>
-        <div>
-          <div class="text-lg font-bold text-[#5a4a38]">空间工坊</div>
-          <div class="mt-0.5 text-xs text-[#a09078]">输入一句话，AI 生成可运行的 3D 网页场景</div>
+  <div class="flex h-full w-full flex-col overflow-hidden bg-[#0e0a06] font-['PingFang_SC',-apple-system,sans-serif]">
+
+    <!-- 顶栏 -->
+    <div class="flex shrink-0 items-center gap-3 border-b border-white/5 bg-[#1a1008] px-4 py-2.5">
+      <span class="text-[13px] font-semibold tracking-wide text-[#d4b880]">空间工坊</span>
+      <span class="h-3.5 w-px bg-white/10"></span>
+      <span class="text-[11px] text-[#5a4828]">{{ currentVersionName }}</span>
+      <div class="ml-auto flex items-center gap-3">
+        <select
+          v-model="selectedVersionId"
+          @change="loadSelectedVersion"
+          class="rounded-md border border-white/8 bg-white/5 px-2 py-1 text-[11px] text-[#9a8060] outline-none"
+        >
+          <option :value="0">最新</option>
+          <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} #{{ v.id }}</option>
+        </select>
+        <div class="flex items-center gap-1.5">
+          <span class="h-1.5 w-1.5 rounded-full transition-colors" :class="loading ? 'bg-[#facc15] animate-pulse' : 'bg-[#4ade80]'"></span>
+          <span class="text-[11px]" :class="loading ? 'text-[#facc15]' : 'text-[#3a6040]'">{{ loading ? '生成中' : '就绪' }}</span>
         </div>
       </div>
+    </div>
 
-      <div class="relative mb-4 overflow-hidden rounded-[14px] bg-[#3a2a1a] shadow-[0_4px_16px_rgba(60,40,20,0.2),inset_0_0_0_6px_#4a3828,inset_0_0_0_7px_rgba(255,255,255,0.08)]">
-        <div class="flex items-center justify-between border-b border-white/5 bg-[#4a3828] px-3.5 py-2">
-          <span class="text-[11px] tracking-[0.08em] text-[#b8a080]">3D 渲染</span>
-          <div class="flex items-center gap-2.5">
-            <select
-              v-model="selectedVersionId"
-              @change="loadSelectedVersion"
-              class="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-[#c8b090] outline-none"
-            >
-              <option :value="0">最新版本</option>
-              <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} · #{{ v.id }}</option>
-            </select>
-            <div class="flex items-center gap-1 text-[10px] text-[#8a7a60]">
-              <span class="h-[5px] w-[5px] rounded-full bg-[#4ade80]" :class="{ 'animate-pulse bg-[#facc15]': loading }"></span>
-              {{ loading ? '生成中...' : '就绪' }}
-            </div>
+    <!-- 场景区域 -->
+    <div class="relative min-h-0 flex-1">
+      <iframe
+        class="h-full w-full border-none"
+        :srcdoc="sceneHtml"
+        sandbox="allow-scripts allow-same-origin"
+      />
+      <!-- 生成遮罩 -->
+      <Transition name="fade">
+        <div v-if="loading" class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div class="flex flex-col items-center gap-3">
+            <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-[#d4b880]"></div>
+            <span class="text-[13px] text-[#d4b880]">AI 生成中...</span>
           </div>
         </div>
-        <iframe
-          class="h-[440px] w-full border-none bg-[#1a1210]"
-          :srcdoc="sceneHtml"
-          sandbox="allow-scripts allow-same-origin"
-        />
-      </div>
+      </Transition>
+    </div>
 
-      <div class="mb-[14px] flex flex-wrap gap-2">
+    <!-- 底部输入区 -->
+    <div class="shrink-0 border-t border-white/5 bg-[#140e06] px-4 pb-4 pt-3">
+      <!-- 建议词 -->
+      <div class="mb-2.5 flex flex-wrap gap-1.5">
         <button
           v-for="s in suggestions"
           :key="s"
           @click="submitPrompt(s)"
-          class="cursor-pointer rounded-lg border border-[rgba(160,120,60,0.2)] bg-[rgba(200,160,100,0.08)] px-3.5 py-[7px] text-xs text-[#8a7050] transition-all hover:border-[rgba(160,120,60,0.35)] hover:bg-[rgba(200,160,100,0.15)] hover:text-[#5a4a38]"
+          :disabled="loading"
+          class="rounded-full border border-white/8 bg-white/4 px-3 py-1 text-[11px] text-[#6a5838] transition-all hover:border-[#d4b880]/30 hover:bg-[#d4b880]/8 hover:text-[#c4a870] disabled:pointer-events-none disabled:opacity-30"
         >{{ s }}</button>
       </div>
-
-      <div class="rounded-xl border border-[rgba(160,120,60,0.15)] bg-[#faf6ee] p-3.5 shadow-[0_2px_8px_rgba(100,80,40,0.06)]">
-        <div class="flex items-center gap-2">
-          <input
-            v-model="prompt"
-            @keyup.enter="submitPrompt()"
-            placeholder="描述你想要的 3D 场景..."
-            class="flex-1 border-none border-b border-[rgba(160,120,60,0.2)] bg-transparent px-1 py-2 text-[13px] text-[#5a4a38] outline-none placeholder:text-[#c0b098] focus:border-b-[rgba(160,120,60,0.5)]"
-          />
-          <button
-            @click="submitPrompt()"
-            :disabled="loading || !prompt.trim()"
-            class="whitespace-nowrap rounded-[10px] bg-[#5a3e28] px-5 py-[9px] text-[13px] text-[#f0e8d8] shadow-[0_2px_6px_rgba(90,62,40,0.25)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >{{ loading ? '生成中...' : '生成' }}</button>
-        </div>
-        <p v-if="error" class="mt-2.5 text-xs text-[#c05040]">{{ error }}</p>
+      <!-- 输入框 -->
+      <div class="flex items-center gap-2">
+        <input
+          v-model="prompt"
+          @keyup.enter="submitPrompt()"
+          placeholder="描述你想要的 3D 场景..."
+          class="flex-1 rounded-xl border border-white/8 bg-white/5 px-4 py-2.5 text-[13px] text-[#e8d8b8] outline-none transition-all placeholder:text-[#3a2e1a] focus:border-[#d4b880]/30 focus:bg-white/7"
+        />
+        <button
+          @click="submitPrompt()"
+          :disabled="loading || !prompt.trim()"
+          class="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#c8a050] px-5 py-2.5 text-[13px] font-semibold text-[#0e0a06] transition-all hover:bg-[#d4ac60] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <Zap class="h-3.5 w-3.5" />
+          生成
+        </button>
       </div>
+      <p v-if="error" class="mt-2 text-[11px] text-[#c06050]">{{ error }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { Zap } from 'lucide-vue-next';
 
 const prompt = ref('');
 const loading = ref(false);
@@ -74,9 +86,9 @@ const selectedVersionId = ref(0);
 const currentVersionName = ref('默认场景');
 
 const defaultSuggestions = [
-  '做一个低多边形小岛，海面有波动和阳光',
-  '生成一个霓虹城市夜景，镜头缓慢推进',
-  '做一个太阳系场景，行星绕着太阳转'
+  '低多边形小岛，海面有波动',
+  '霓虹城市夜景，镜头推进',
+  '太阳系，行星绕太阳转'
 ];
 const suggestions = ref([...defaultSuggestions]);
 
@@ -140,22 +152,15 @@ const loadLatestVersion = async () => {
   const res = await fetch('http://localhost:9701/apps/playground/latest');
   const data = await res.json();
   const row = data.data;
-  if (!row) {
-    currentVersionName.value = '默认场景';
-    return;
-  }
+  if (!row) { currentVersionName.value = '默认场景'; return; }
   currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
-    ? row.suggestions
-    : [...defaultSuggestions];
+    ? row.suggestions : [...defaultSuggestions];
 };
 
 const loadSelectedVersion = async () => {
-  if (!selectedVersionId.value) {
-    await loadLatestVersion();
-    return;
-  }
+  if (!selectedVersionId.value) { await loadLatestVersion(); return; }
   const res = await fetch(`http://localhost:9701/apps/playground/detail?id=${selectedVersionId.value}`);
   const data = await res.json();
   if (!data?.success || !data?.data) return;
@@ -163,8 +168,7 @@ const loadSelectedVersion = async () => {
   currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
-    ? row.suggestions
-    : [...defaultSuggestions];
+    ? row.suggestions : [...defaultSuggestions];
 };
 
 const submitPrompt = async (suggestion) => {
@@ -176,12 +180,10 @@ const submitPrompt = async (suggestion) => {
   error.value = '';
 
   try {
-    const currentName = currentVersionName.value || '未命名场景';
-    const currentHtml = String(sceneHtml.value || defaultHtml);
     const contextBlock = [
-      `当前场景名称：${currentName}`,
+      `当前场景名称：${currentVersionName.value || '未命名场景'}`,
       '当前场景完整 HTML：',
-      currentHtml,
+      String(sceneHtml.value || defaultHtml),
       '',
       `用户新需求：${content}`
     ].join('\n');
@@ -204,14 +206,10 @@ const submitPrompt = async (suggestion) => {
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
 
-    let name = '';
-    let html = '';
-    let nextSuggestions = [];
+    let name = '', html = '', nextSuggestions = [];
     try {
       const structured = parseStructuredOutput(data.message?.content || '');
-      name = structured.name;
-      html = structured.html;
-      nextSuggestions = structured.suggestions;
+      name = structured.name; html = structured.html; nextSuggestions = structured.suggestions;
     } catch {
       html = normalizeModelText(data.message?.content || '');
     }
@@ -220,16 +218,12 @@ const submitPrompt = async (suggestion) => {
     sceneHtml.value = html;
     currentVersionName.value = name || content.slice(0, 24);
     suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
+    prompt.value = '';
 
     await fetch('http://localhost:9701/apps/playground/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name || content.slice(0, 24),
-        prompt: content,
-        html,
-        suggestions: suggestions.value
-      })
+      body: JSON.stringify({ name: name || content.slice(0, 24), prompt: content, html, suggestions: suggestions.value })
     });
     await fetchVersions();
     selectedVersionId.value = 0;
@@ -245,3 +239,8 @@ onMounted(async () => {
   await loadLatestVersion();
 });
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

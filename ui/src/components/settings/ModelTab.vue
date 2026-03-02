@@ -71,6 +71,7 @@ const onProviderChange = (e) => {
     emit('update:api-url', preset.apiUrl);
     emit('update:model', preset.defaultModel || '');
   } else {
+    emit('update:api-url', '');
     emit('update:model', '');
   }
   emit('update:api-key', '');

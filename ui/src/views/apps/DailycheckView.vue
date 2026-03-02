@@ -6,7 +6,7 @@
 
 
     <!-- topbar -->
-    <div class="relative z-10 mx-auto flex max-w-xl items-center justify-between px-6 pb-3 pt-6">
+    <div class="relative z-10 mx-auto flex max-w-[720px] items-center justify-between px-6 pb-3 pt-6">
       <div class="text-[22px] font-extrabold italic text-[#5a4030]">每日打卡</div>
       <div class="rounded-[10px] bg-[#ede7dc] px-3 py-1.5 text-right">
         <div class="text-[10px] leading-none tracking-widest text-[#b8a090]">{{ weekday }}</div>
@@ -15,7 +15,7 @@
     </div>
 
     <!-- content -->
-    <div class="relative z-10 mx-auto max-w-xl px-6 pb-16">
+    <div class="relative z-10 mx-auto max-w-[720px] px-6 pb-16">
 
       <!-- error -->
       <div v-if="error" class="mb-3 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">

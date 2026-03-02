@@ -33,25 +33,7 @@ export const buildSystemPrompt = (
     prompt += `\n\n## 记忆\n${overview}`;
   }
 
-  prompt += `\n\n## 运行架构
-AIOS 由两个独立 Node.js 进程组成：
-- **主服务**（端口 9700）：WebSocket、AI 引擎、HTTP、核心数据库，入口 server/index.js
-- **应用服务**（端口 9701）：所有 apps/ 下的应用 API，入口 apps/index.js
-- **前端**：静态文件由主服务 serve，源码在 ui/src/，构建产物在 ui/dist/
-
-两个服务独立启停，互不影响。主服务通过反向代理将 /apps/ 转发到应用服务。
-
-应用如需调用 LLM，使用主服务提供的统一接口（无需关心 apiKey/model）：
-\`\`\`js
-const res = await fetch('http://localhost:9700/api/llm/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ messages: [{ role: 'user', content: '...' }] })
-});
-const { message } = await res.json(); // message.content 是回复文本
-\`\`\`
-
-## 环境
+  prompt += `\n\n## 环境
 - 项目根目录：${cwd}
 - 系统数据库：${cwd}/database/aios.db（SQLite，表：chats, messages, settings）
 - 应用数据库：${cwd}/database/apps.db（SQLite，应用表如 notebook_notes）

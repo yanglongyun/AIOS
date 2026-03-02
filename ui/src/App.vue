@@ -49,7 +49,7 @@
     <div v-if="activePanel === 'asks'" class="fixed inset-0 z-[90]" @click.self="activePanel = null">
       <div class="absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
-          <span class="text-sm font-bold text-[#e8d0a8]">Agent 活动</span>
+          <span class="text-sm font-bold text-[#e8d0a8]">活动</span>
           <span class="text-[10px] text-[#8a7860]">最近 20 条</span>
         </div>
         <div class="flex-1 overflow-y-auto">

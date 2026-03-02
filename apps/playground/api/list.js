@@ -1,0 +1,10 @@
+import { db } from '../../app_shared/db/client.js';
+
+export const listHandler = () => {
+  const data = db.prepare(`
+    SELECT id, name, prompt, created_at
+    FROM playground_versions
+    ORDER BY id DESC
+  `).all();
+  return { success: true, data };
+};

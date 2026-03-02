@@ -2,7 +2,11 @@
 
 ## 概述
 
-AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 server（端口 9700）完全隔离。每个应用是 `apps/api/` 目录下的一个子目录，有自己的 API、数据库表、前端页面。
+AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 server（端口 9700）隔离。
+
+**AIOS App 定义：**
+- 具备传统应用能力：UI + API + DB
+- 具备 Agent 原生能力：`APP.md` + `scripts/`（可选）+ 任务/通知协作
 
 ## 界面结构
 
@@ -25,53 +29,54 @@ AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 ser
 
 ## 页面容器标准
 
-- 应用页面根容器统一使用：`class="p-6 w-full max-w-4xl mx-auto h-full overflow-y-auto"`
-- 不要只写 `max-w-4xl mx-auto`，必须包含 `w-full`，避免在某些布局下内容区域按内容宽度收缩
+- 应用页面根容器统一使用：`class="w-full max-w-4xl mx-auto h-full overflow-y-auto"`
+- 不要只写 `max-w-4xl mx-auto`，必须包含 `w-full`，避免内容区域按内容宽度收缩
 
 ## 层级（z-index）规范
 
-- 顶部全局栏（App Header）必须最高层：建议 `z-[80]`
+- 顶部全局栏（App Header）最高层：建议 `z-[80]`
 - 左侧导航面板（Sidebar）次高：建议 `z-[70]`
 - 侧边栏遮罩层（仅移动端）低于侧边栏：建议 `z-[60]`
-- 应用内部浮层（如底部输入框、应用内预览气泡）必须低于全局栏和侧边栏：建议 `z-10` 到 `z-30`
-- 结论：应用内组件不允许盖住全局顶部栏和侧边栏
+- 应用内部浮层必须低于全局栏和侧边栏：建议 `z-10` 到 `z-30`
 
-## 目录结构
+## 目录结构（新规范）
 
 ```
 apps/
-├── index.js          # apps 服务入口 + 路由分发
-├── db/
-│   └── client.js     # 共享数据库连接
-├── utils/
-│   ├── json.js       # JSON 响应工具
-│   └── readBody.js   # 请求体解析工具
-└── api/
-    └── {appname}/
-        ├── index.js    # 入口 + 路由注册 + 建表
-        ├── APP.md      # 应用说明（必须）
-        └── api/
-            ├── list.js
-            ├── create.js
-            ├── update.js
-            └── delete.js
+├── index.js                        # apps 服务入口 + 路由分发
+├── app_shared/
+│   ├── db/
+│   │   └── client.js               # 共享数据库连接
+│   └── utils/
+│       ├── json.js                 # JSON 响应工具
+│       └── readBody.js             # 请求体解析工具
+└── {appname}/
+    ├── index.js                    # 应用入口 + 路由注册 + 建表
+    ├── APP.md                      # 应用说明（必须）
+    ├── api/                        # 一个文件一个 API
+    │   ├── list.js
+    │   ├── create.js
+    │   ├── update.js
+    │   └── delete.js
+    └── scripts/                    # 可选：供 Agent 直接执行
+        └── *.sh / *.js
 ```
 
 ## 数据库
 
-所有应用共用 `apps.db`（SQLite），通过 `apps/db/client.js` 获取连接：
+所有应用共用 `apps.db`（SQLite），通过 `apps/app_shared/db/client.js` 获取连接：
 
 ```js
-// 在 apps/api/{appname}/index.js 中
-import { db } from '../../db/client.js';
+// 在 apps/{appname}/index.js 中
+import { db } from '../app_shared/db/client.js';
 
-// 在 apps/api/{appname}/api/*.js 中
-import { db } from '../../../db/client.js';
+// 在 apps/{appname}/api/*.js 中
+import { db } from '../../app_shared/db/client.js';
 ```
 
-表命名规范：`{appname}_{table}`，例如 `notebook_notes`、`todo_items`。
+表命名建议：`apps_{appname}_{table}`。
 
-建表在 `index.js` 的 `initDatabase()` 函数中完成，使用 `CREATE TABLE IF NOT EXISTS`。
+建表在应用 `index.js` 的 `init...Database()` 中完成，始终使用 `CREATE TABLE IF NOT EXISTS`。
 
 ## API 规范
 
@@ -82,13 +87,13 @@ import { db } from '../../../db/client.js';
 - 更新：`POST /api/apps/{appname}/update`
 - 删除：`POST /api/apps/{appname}/delete`
 
-## 注册到 apps 服务
+## 应用注册到 apps 服务
 
 在 `apps/index.js` 中注册新应用：
 
 ```js
 // 1. 导入
-import { handleTodoApi, initTodoDatabase } from './api/todo/index.js';
+import { handleTodoApi, initTodoDatabase } from './todo/index.js';
 
 // 2. 路由分发（在 createServer 回调中）
 if (path.startsWith('/api/apps/todo/')) {
@@ -100,35 +105,39 @@ if (path.startsWith('/api/apps/todo/')) {
 initTodoDatabase();
 ```
 
-## 注册到导航面板
+## Agent 协作规范
 
-在 `ui/src/components/NavPanel.vue` 中添加应用入口，在 `ui/src/router/index.js` 注册路由，应用页面放在 `ui/src/views/apps/` 目录下。
+每个应用都应具备：
+- `APP.md`：说明目标、边界、数据结构、可执行脚本
+- `scripts/`（可选）：供 Agent 执行，不直接给前端调用
+- 应用可发起：
+  - `ask`：向 Agent 请求分析/决策
+  - `task`：启动后台任务（异步）
+  - `notify`：写入事件通知（异步）
 
-## 移动端适配
-
-- 布局用 flex/grid，避免固定宽度
-- 触摸目标不小于 44px（按钮用 `h-10 w-10` 或以上）
-- 文字最小 `text-sm`
-- 列表/表格在小屏用卡片堆叠替代横向布局
-- 用 Tailwind 响应式前缀（`md:`, `sm:`）处理断点差异
+推荐原则：
+- UI 读 DB
+- Agent 跑脚本改 DB
+- API 做编排与权限边界
 
 ## 主题适配规范
 
-- 应用页面样式必须同时提供浅色/深色样式，统一使用 Tailwind 的 `dark:` 变体（例如 `bg-white dark:bg-neutral-800`）
-- 不要在应用页面里额外实现主题状态管理逻辑；主题切换由全局设置驱动，组件只负责写 `dark:` 类
-- 文本、边框、背景、hover 态都要成对提供浅色/深色样式，避免只改背景不改文字导致可读性问题
+- 应用页面样式必须同时提供浅色/深色样式，统一使用 Tailwind `dark:` 变体
+- 不要在应用页面里额外实现主题状态管理逻辑；主题切换由全局设置驱动
+- 文本、边框、背景、hover 态都要成对提供浅色/深色样式
 
 ## 完整示例：Todo 应用
 
-### `apps/api/todo/index.js`
+### `apps/todo/index.js`
+
 ```js
-import { json } from '../../utils/json.js';
-import { readBody } from '../../utils/readBody.js';
-import { db } from '../../db/client.js';
+import { json } from '../app_shared/utils/json.js';
+import { readBody } from '../app_shared/utils/readBody.js';
+import { db } from '../app_shared/db/client.js';
 
 export function initTodoDatabase() {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS todo_items (
+    CREATE TABLE IF NOT EXISTS apps_todo_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       content TEXT NOT NULL,
       done INTEGER DEFAULT 0,
@@ -139,39 +148,41 @@ export function initTodoDatabase() {
 
 export async function handleTodoApi(req, res, path) {
   if (path === '/api/apps/todo/list' && req.method === 'GET') {
-    const items = db.prepare('SELECT * FROM todo_items ORDER BY created_at DESC').all();
+    const items = db.prepare('SELECT * FROM apps_todo_items ORDER BY created_at DESC').all();
     return json(res, { success: true, data: items });
   }
   if (path === '/api/apps/todo/create' && req.method === 'POST') {
     const { content } = await readBody(req);
-    db.prepare('INSERT INTO todo_items (content) VALUES (?)').run(content);
+    db.prepare('INSERT INTO apps_todo_items (content) VALUES (?)').run(content);
     return json(res, { success: true });
   }
   if (path === '/api/apps/todo/update' && req.method === 'POST') {
     const { id, done } = await readBody(req);
-    db.prepare('UPDATE todo_items SET done = ? WHERE id = ?').run(done, id);
+    db.prepare('UPDATE apps_todo_items SET done = ? WHERE id = ?').run(done, id);
     return json(res, { success: true });
   }
   if (path === '/api/apps/todo/delete' && req.method === 'POST') {
     const { id } = await readBody(req);
-    db.prepare('DELETE FROM todo_items WHERE id = ?').run(id);
+    db.prepare('DELETE FROM apps_todo_items WHERE id = ?').run(id);
     return json(res, { success: true });
   }
   return false;
 }
 ```
 
-### `apps/api/todo/APP.md`
+### `apps/todo/APP.md`
+
 ```
 ---
 name: todo
-description: Todo list app. API under /api/apps/todo/, data in apps.db table todo_items.
+description: Todo list app. API under /api/apps/todo/, data in apps.db table apps_todo_items.
 ---
 ```
 
 ## 注意事项
 
-- 不要动 `apps/db/client.js` 和 `apps/utils/`
-- 不要修改 `server/` 目录
+- 应用共享能力统一放在 `apps/app_shared/`
+- 每个应用必须有 `APP.md`
+- 每个 API 一个文件
 - 建表始终用 `CREATE TABLE IF NOT EXISTS`
-- 每个应用必须有 `APP.md`，首行写 name 和 description
+- 开发阶段不做兼容分支，按当前规范直接演进

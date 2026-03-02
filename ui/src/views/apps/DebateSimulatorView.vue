@@ -1,47 +1,53 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-neutral-900">
-    <div v-if="!debateStarted" class="flex min-h-screen items-center justify-center p-4">
-      <div class="w-full max-w-md rounded-lg border border-gray-300 bg-white p-8 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
-        <h1 class="mb-6 text-center text-4xl font-bold tracking-tight text-blue-900 dark:text-blue-300">竞选模拟器</h1>
-        <p class="mb-6 text-center leading-relaxed text-gray-700 dark:text-neutral-300">
-          你将担任党派候选人，与竞争对手进行电视辩论。辩论结束后支持率超过 50%，将获得就职演讲。
-        </p>
+  <div class="min-h-screen bg-[#f4f3f0] font-serif">
+    <!-- ===== 开始页面 ===== -->
+    <div v-if="!debateStarted" class="flex min-h-screen items-center justify-center p-4 bg-[#eceae5]">
+      <div class="w-full max-w-[480px] overflow-hidden rounded-md bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+        <!-- 深蓝金顶栏 -->
+        <div class="relative bg-[#1c2841] px-8 pb-7 pt-8 text-center text-[#c9b06b] after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-[linear-gradient(90deg,transparent,#c9b06b,transparent)]">
+          <h1 class="mb-1.5 text-[26px] font-bold tracking-[3px]">🎤 竞选模拟器</h1>
+          <p class="text-xs tracking-wide text-[#8a9ab5]">Presidential Debate Simulator</p>
+        </div>
 
-        <div class="space-y-6">
-          <div class="space-y-4 text-center">
-            <img v-if="selectedParty" :src="selectedParty.logo" alt="党派标志" class="mx-auto h-28 w-auto object-contain" />
-            <div v-if="selectedParty" class="space-y-2">
-              <p class="text-lg font-semibold text-gray-800 dark:text-neutral-100">
-                {{ selectedParty.name }} <span class="text-blue-600 dark:text-blue-400">支持率: {{ selectedParty.support_rate }}%</span>
-              </p>
-              <div class="flex justify-center space-x-4 text-sm">
-                <p class="rounded bg-yellow-100 px-2 py-1 dark:bg-yellow-900/50 dark:text-yellow-100">胜利难度: <span class="font-medium">{{ selectedParty.difficulty }}</span></p>
-                <p class="rounded bg-green-100 px-2 py-1 dark:bg-green-900/50 dark:text-green-100">胜场数: <span class="font-medium">{{ selectedParty.win_count }}</span></p>
+        <div class="px-7 pb-8 pt-7">
+          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">选择党派</div>
+
+          <!-- 党派列表 -->
+          <div class="mb-6">
+            <div
+              v-for="party in parties"
+              :key="party.id"
+              @click="selectPartyItem(party)"
+              class="mb-1 flex cursor-pointer items-center gap-3 rounded border px-3.5 py-2.5 transition-all"
+              :class="candidateParty === party.name
+                ? 'border-[#c9b06b] bg-[#f0efe8] shadow-[inset_3px_0_0_#c9b06b]'
+                : 'border-[#e8e6e0] hover:border-[#ccc] hover:bg-[#f8f7f4]'"
+            >
+              <img v-if="party.logo" :src="party.logo" class="h-7 w-7 object-contain" />
+              <span v-else class="text-2xl">🏛️</span>
+              <div class="flex-1">
+                <div class="text-sm font-bold text-[#1c2841]">{{ party.name }}</div>
+                <div class="text-[11px] text-[#8a9ab5]">{{ party.difficulty }} · 胜场 {{ party.win_count }}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-base font-bold text-[#1c2841]">{{ party.support_rate }}%</div>
+                <div class="text-[10px] text-[#8a9ab5]">支持率</div>
               </div>
             </div>
-
-            <select
-              v-model="candidateParty"
-              @change="updatePartySelection"
-              class="w-full rounded-md border bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
-              required
-            >
-              <option value="">选择党派</option>
-              <option v-for="party in parties" :key="party.id" :value="party.name">{{ party.name }}</option>
-            </select>
           </div>
 
+          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">候选人姓名</div>
           <input
             v-model="candidateName"
             type="text"
-            placeholder="候选人姓名"
-            class="w-full rounded-md border bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+            placeholder="输入姓名"
+            class="mb-5 w-full rounded border border-[#d8d6d0] bg-white px-3.5 py-3 font-serif text-[15px] text-[#1c2841] outline-none placeholder:text-[#bbb] focus:border-[#c9b06b]"
           />
 
           <button
             @click="startDebate"
             :disabled="!candidateParty || !candidateName || preparing"
-            class="w-full rounded-md bg-blue-700 py-2 text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+            class="w-full rounded bg-[#1c2841] py-3.5 font-serif text-base font-bold tracking-[2px] text-[#c9b06b] transition-colors hover:bg-[#263556] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span v-if="preparing">准备中...</span>
             <span v-else>开始辩论</span>
@@ -50,139 +56,214 @@
       </div>
     </div>
 
-    <div v-if="debateStarted" class="fixed inset-0 flex items-center justify-center bg-white p-0 sm:p-4 dark:bg-neutral-900">
-      <div class="flex h-full w-full max-w-4xl flex-col border border-gray-300 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
-        <div class="w-full bg-gray-300 text-center shadow-lg dark:bg-neutral-800">
-          <div class="flex items-center justify-between bg-gray-200 p-2 dark:bg-neutral-700">
-            <div class="flex w-1/2 flex-col items-center">
-              <div class="w-full bg-blue-600 py-1 text-sm text-white">{{ candidateParty }}</div>
-              <div class="w-full bg-blue-600 py-1 text-white">{{ candidateName }} {{ getCurrentSupportRate('candidate') }}%</div>
+    <!-- ===== 辩论页面 ===== -->
+    <div v-if="debateStarted" class="fixed inset-0 flex flex-col bg-[#f4f3f0]">
+      <!-- 顶部深蓝栏 -->
+      <div class="shrink-0 border-b-[3px] border-[#c9b06b] bg-[#1c2841] text-[#c9b06b]">
+        <div class="border-b border-white/[0.06] py-1.5 text-center text-[11px] tracking-[4px] text-[#8a9ab5]">
+          2026 总统竞选辩论 · 全国直播
+        </div>
+
+        <div class="flex items-stretch">
+          <!-- 己方 -->
+          <div class="flex flex-1 items-center gap-2.5 px-5 py-3.5">
+            <div class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border-2 border-[#c9b06b] text-lg font-bold text-[#c9b06b]">
+              {{ candidateName?.charAt(0) }}
             </div>
-            <div class="flex w-1/2 flex-col items-center">
-              <div class="w-full bg-red-600 py-1 text-sm text-white">{{ opponentParty }}</div>
-              <div class="w-full bg-red-600 py-1 text-white">{{ opponentName }} {{ getCurrentSupportRate('opponent') }}%</div>
+            <div>
+              <div class="text-base font-bold text-[#e8e6e0]">{{ candidateName }}</div>
+              <div class="text-[11px] text-[#8a9ab5]">{{ candidateParty }}</div>
+            </div>
+            <div class="ml-auto text-2xl font-bold text-[#c9b06b]">
+              {{ getCurrentSupportRate('candidate') }}%
+              <small class="block text-[10px] font-normal text-[#8a9ab5]">支持率</small>
+            </div>
+          </div>
+          <!-- 对方 -->
+          <div class="flex flex-1 flex-row-reverse items-center gap-2.5 border-l border-white/[0.06] px-5 py-3.5 text-right">
+            <div class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border-2 border-[#c9b06b] text-lg font-bold text-[#c9b06b]">
+              {{ opponentName?.charAt(0) }}
+            </div>
+            <div>
+              <div class="text-base font-bold text-[#e8e6e0]">{{ opponentName }}</div>
+              <div class="text-[11px] text-[#8a9ab5]">{{ opponentParty }}</div>
+            </div>
+            <div class="mr-auto text-2xl font-bold text-[#c9b06b]">
+              {{ getCurrentSupportRate('opponent') }}%
+              <small class="block text-[10px] font-normal text-[#8a9ab5]">支持率</small>
             </div>
           </div>
         </div>
 
-        <div ref="chatContainer" class="flex-1 overflow-y-auto p-4">
-          <template v-for="(topic, topicIndex) in topics" :key="topicIndex">
-            <div v-if="topic.status" class="mb-4">
-              <div class="mb-3 flex items-center justify-center text-xl text-neutral-800 dark:text-neutral-100">
-                <span class="mr-3 flex-grow border-t border-dashed border-gray-300 dark:border-neutral-700"></span>
-                {{ topic.topicName }} ({{ topicIndex + 1 }}/{{ topics.length }})
-                <span class="ml-3 flex-grow border-t border-dashed border-gray-300 dark:border-neutral-700"></span>
-              </div>
+        <!-- 议题进度 -->
+        <div class="flex items-center gap-2 bg-black/20 px-5 py-2">
+          <template v-for="(topic, i) in topics" :key="i">
+            <div
+              class="h-2 w-2 rounded-full"
+              :class="i < currentTopic - 1 ? 'bg-[#6b9a6b]'
+                : i === currentTopic - 1 ? 'bg-[#c9b06b] shadow-[0_0_6px_rgba(201,176,107,0.4)]'
+                : 'bg-white/15'"
+            />
+          </template>
+          <span class="ml-1 text-[11px] text-[#8a9ab5]">
+            议题 {{ currentTopic }}/{{ topics.length }} · {{ topics[currentTopic - 1]?.topicName }}
+          </span>
+        </div>
+      </div>
 
-              <template v-for="(message, index) in topic.messages" :key="index">
-                <div v-if="message.role === 'candidate'" class="mb-4 flex justify-end">
-                  <div class="max-w-[80%] break-words rounded-lg bg-yellow-200 px-4 py-2 shadow dark:bg-yellow-700 dark:text-yellow-50">
-                    <strong>{{ message.name }}</strong>: {{ message.content }}
-                  </div>
-                </div>
-                <div v-else-if="message.role === 'opponent'" class="mb-4 flex justify-start">
-                  <div class="max-w-[80%] break-words rounded-lg bg-red-100 px-4 py-2 text-red-800 shadow dark:bg-red-900/70 dark:text-red-100">
-                    <strong>{{ message.name }}</strong>: {{ message.content }}
-                  </div>
-                </div>
-                <div v-else-if="message.role === 'moderator'" class="mb-4 flex justify-center">
-                  <div class="max-w-[80%] break-words rounded-lg bg-gray-100 px-4 py-2 text-yellow-800 shadow dark:bg-neutral-800 dark:text-yellow-200">
-                    <strong>主持人</strong>: {{ message.content }}
-                  </div>
-                </div>
-                <div v-else-if="message.role === 'media'" class="mb-4 flex justify-center">
-                  <div class="max-w-[80%] break-words rounded-lg bg-blue-100 px-4 py-2 text-blue-800 shadow dark:bg-blue-900/60 dark:text-blue-100">
-                    <strong>媒体</strong>: {{ message.content }}
-                  </div>
-                </div>
-              </template>
+      <!-- 聊天区域 -->
+      <div ref="chatContainer" class="flex-1 overflow-y-auto px-5 py-4">
+        <template v-for="(topic, topicIndex) in topics" :key="topicIndex">
+          <div v-if="topic.status">
+            <!-- 议题分隔线 -->
+            <div class="my-4 flex items-center gap-3 text-xs text-[#8a9ab5]">
+              <span class="h-px flex-1 bg-[#d8d6d0]"></span>
+              {{ topic.topicName }} ({{ topicIndex + 1 }}/{{ topics.length }})
+              <span class="h-px flex-1 bg-[#d8d6d0]"></span>
             </div>
+
+            <template v-for="(message, index) in topic.messages" :key="index">
+              <!-- 己方发言 -->
+              <div v-if="message.role === 'candidate'" class="mb-3 ml-auto flex max-w-[82%] flex-row-reverse gap-2">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1c2841] text-[13px] font-bold text-[#c9b06b]">
+                  {{ message.name?.charAt(0) }}
+                </div>
+                <div class="rounded-[12px_12px_4px_12px] bg-[#1c2841] px-3.5 py-2.5 text-sm leading-relaxed text-[#e8e6e0]">
+                  <div class="mb-0.5 text-[10px] font-bold text-[#c9b06b]/70">{{ message.name }}</div>
+                  {{ message.content }}
+                </div>
+              </div>
+              <!-- 对方发言 -->
+              <div v-else-if="message.role === 'opponent'" class="mb-3 mr-auto flex max-w-[82%] gap-2">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8b2020] text-[13px] font-bold text-[#f0d0d0]">
+                  {{ message.name?.charAt(0) }}
+                </div>
+                <div class="rounded-[12px_12px_12px_4px] border border-[#e0ddd6] bg-white px-3.5 py-2.5 text-sm leading-relaxed text-[#1c2841]">
+                  <div class="mb-0.5 text-[10px] font-bold text-[#8a9ab5]">{{ message.name }}</div>
+                  {{ message.content }}
+                </div>
+              </div>
+              <!-- 主持人 -->
+              <div v-else-if="message.role === 'moderator'" class="mx-auto mb-3 max-w-[88%]">
+                <div class="rounded-lg border border-[#e0ddd6] bg-[#f8f7f4] px-3.5 py-2.5 text-center text-sm italic leading-relaxed text-[#6a7a8a]">
+                  <div class="mb-0.5 text-[10px] font-bold not-italic text-[#8a9ab5]">主持人</div>
+                  {{ message.content }}
+                </div>
+              </div>
+              <!-- 媒体 -->
+              <div v-else-if="message.role === 'media'" class="mx-auto mb-3 max-w-[88%]">
+                <div class="rounded-r-lg border-l-[3px] border-[#c9b06b] bg-white px-3.5 py-2.5 text-center text-sm leading-relaxed text-[#6a7a8a]">
+                  <div class="mb-0.5 text-[10px] font-bold text-[#8a9ab5]">📺 媒体快评</div>
+                  {{ message.content }}
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- 输入区域 -->
+      <div class="shrink-0 border-t border-[#e0ddd6] bg-white px-5 pb-3.5 pt-2.5">
+        <!-- 输入状态 -->
+        <div v-if="isMyTurn" class="flex items-end gap-2 rounded-xl border border-[#e0ddd6] bg-[#f8f7f4] py-1 pl-3.5 pr-1">
+          <button @click="optimizeSpeech" class="group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-[#e8e6e0] transition-colors hover:bg-[#d8d6d0]">
+            <svg class="h-5 w-5 text-[#6a7a8a] transition-colors group-hover:text-[#c9b06b]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.898.855a.4.4 0 0 0-.795 0c-.123 1.064-.44 1.802-.943 2.305-.503.503-1.241.82-2.306.943a.4.4 0 0 0 .001.794c1.047.119 1.801.436 2.317.942.512.504.836 1.241.93 2.296a.4.4 0 0 0 .796 0c.09-1.038.413-1.792.93-2.308.515-.516 1.269-.839 2.306-.928a.4.4 0 0 0 .001-.797c-1.055-.094-1.792-.418-2.296-.93-.506-.516-.823-1.27-.941-2.317Z" />
+            </svg>
+          </button>
+
+          <textarea
+            ref="messageInput"
+            v-model="newMessage"
+            rows="1"
+            placeholder="输入你的发言..."
+            @input="autoResize"
+            @keydown.enter.prevent="speak"
+            class="max-h-[120px] min-h-[22px] flex-1 resize-none border-none bg-transparent py-2 font-serif text-sm text-[#1c2841] outline-none placeholder:text-[#bbb]"
+          />
+
+          <button
+            @click="speak"
+            :disabled="!newMessage.trim()"
+            class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors"
+            :class="newMessage.trim() ? 'bg-[#1c2841] text-[#c9b06b] cursor-pointer hover:bg-[#263556]' : 'bg-[#e8e6e0] text-[#bbb] cursor-not-allowed'"
+          >
+            <svg width="20" height="20" fill="none" viewBox="0 0 32 32">
+              <path fill="currentColor" fill-rule="evenodd" d="M15.192 8.906a1.143 1.143 0 0 1 1.616 0l5.143 5.143a1.143 1.143 0 0 1-1.616 1.616l-3.192-3.192v9.813a1.143 1.143 0 0 1-2.286 0v-9.813l-3.192 3.192a1.143 1.143 0 1 1-1.616-1.616z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- AI思考中 -->
+        <div v-else-if="aiThinking" class="flex items-center justify-center rounded-xl border border-[#e0ddd6] bg-[#f8f7f4] py-4">
+          <div class="inline-flex items-center gap-1">
+            <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[#c9b06b] [animation-delay:0ms]" />
+            <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[#c9b06b] [animation-delay:200ms]" />
+            <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[#c9b06b] [animation-delay:400ms]" />
+          </div>
+        </div>
+
+        <!-- 辩论结束 -->
+        <div v-else-if="debateEnded" class="flex items-center justify-center rounded-xl py-1" :class="won ? 'bg-[#1c2841]' : 'bg-[#8b2020]'">
+          <button @click="showResults = true" class="min-h-[36px] font-serif font-bold leading-[36px] tracking-wide text-[#c9b06b]">
+            {{ won ? '打开就职演讲' : '查看失败原因' }}
+          </button>
+        </div>
+
+        <!-- 等待状态 -->
+        <div v-else class="flex items-center justify-center rounded-xl border border-dashed border-[#e0ddd6] bg-[#f8f7f4] py-3.5">
+          <span class="text-sm italic text-[#8a9ab5]">等待他人发言</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 结果弹窗 ===== -->
+    <div v-if="showResults" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
+      <div class="w-full max-w-[440px] overflow-hidden rounded-md bg-white shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
+        <!-- 顶部色条 -->
+        <div class="h-[3px]" :class="won ? 'bg-[linear-gradient(90deg,transparent,#c9b06b,transparent)]' : 'bg-[linear-gradient(90deg,transparent,#8b2020,transparent)]'"></div>
+
+        <!-- 深蓝头部 -->
+        <div class="bg-[#1c2841] px-7 pb-5 pt-7 text-center" :class="won ? 'text-[#c9b06b]' : 'text-[#d09090]'">
+          <button @click="closeResults" class="absolute right-3 top-3 text-[#8a9ab5] hover:text-white">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          <div class="mb-2 text-5xl">{{ won ? '🏛️' : '📉' }}</div>
+          <div class="mb-1 text-[22px] font-bold tracking-[2px]">{{ won ? '恭喜当选总统！' : '很遗憾，未能胜出' }}</div>
+          <div class="mt-4 text-[44px] font-bold">
+            {{ getCurrentSupportRate('candidate') }}%
+            <small class="mt-1 block text-xs font-normal text-[#8a9ab5]">最终支持率</small>
+          </div>
+        </div>
+
+        <!-- 内容 -->
+        <div class="max-h-[220px] overflow-y-auto px-7 py-5 text-sm leading-relaxed text-[#4a5568]">
+          <template v-if="won">
+            <div class="whitespace-pre-wrap" v-html="victorySpeech"></div>
+          </template>
+          <template v-else>
+            <div class="whitespace-pre-wrap" v-html="failureReason"></div>
           </template>
         </div>
 
-        <div class="w-full border-t border-gray-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
-          <div v-if="isMyTurn" class="flex items-end rounded-[23px] bg-gray-200 p-[5px] shadow-md dark:bg-neutral-800">
-            <button @click="optimizeSpeech" class="group flex min-h-[38px] min-w-[38px] items-center justify-center">
-              <svg class="h-6 w-6 text-gray-500 transition-colors group-hover:text-purple-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.898.855a.4.4 0 0 0-.795 0c-.123 1.064-.44 1.802-.943 2.305-.503.503-1.241.82-2.306.943a.4.4 0 0 0 .001.794c1.047.119 1.801.436 2.317.942.512.504.836 1.241.93 2.296a.4.4 0 0 0 .796 0c.09-1.038.413-1.792.93-2.308.515-.516 1.269-.839 2.306-.928a.4.4 0 0 0 .001-.797c-1.055-.094-1.792-.418-2.296-.93-.506-.516-.823-1.27-.941-2.317Z" />
-              </svg>
-            </button>
-
-            <textarea
-              ref="messageInput"
-              v-model="newMessage"
-              rows="1"
-              placeholder="等待您的发言"
-              @input="autoResize"
-              @keydown.enter.prevent="speak"
-              class="max-h-[160px] min-h-[36px] flex-1 resize-none overflow-auto border-none bg-gray-200 p-2 focus:outline-none dark:bg-neutral-800 dark:text-neutral-100"
-            />
-
-            <button
-              @click="speak"
-              :disabled="!newMessage.trim()"
-              :class="['ml-3 mr-2 flex min-h-[38px] min-w-[38px] items-center justify-center rounded-full', newMessage.trim() ? 'bg-black cursor-pointer' : 'bg-gray-400 cursor-not-allowed']"
-            >
-              <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
-                <path fill="white" fill-rule="evenodd" d="M15.192 8.906a1.143 1.143 0 0 1 1.616 0l5.143 5.143a1.143 1.143 0 0 1-1.616 1.616l-3.192-3.192v9.813a1.143 1.143 0 0 1-2.286 0v-9.813l-3.192 3.192a1.143 1.143 0 1 1-1.616-1.616z" />
-              </svg>
-            </button>
-          </div>
-
-          <div v-else-if="aiThinking" class="flex items-center justify-center rounded-[23px] bg-gray-200 p-5 shadow-md dark:bg-neutral-800">
-            <div class="inline-flex items-center">
-              <span class="mr-[5px] inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:0ms]" />
-              <span class="mr-[5px] inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:200ms]" />
-              <span class="inline-block h-2 w-2 animate-bounce rounded-full bg-[#606060] [animation-delay:400ms]" />
-            </div>
-          </div>
-
-          <div v-else-if="debateEnded" class="flex items-center justify-center rounded-[23px] p-[5px] shadow-md" :class="won ? 'bg-green-700' : 'bg-gray-700'">
-            <button @click="showResults = true" class="min-h-[36px] leading-[36px] text-white">
-              {{ won ? '打开就职演讲' : '查看失败原因' }}
-            </button>
-          </div>
-
-          <div v-else class="flex items-center justify-center rounded-[23px] bg-gray-200 p-[5px] shadow-md dark:bg-neutral-800">
-            <span class="min-h-[36px] leading-[36px] text-gray-500 dark:text-neutral-400">等待他人发言</span>
-          </div>
+        <!-- 操作按钮 -->
+        <div class="flex gap-2.5 px-7 pb-6 pt-4">
+          <button @click="closeResults" class="flex-1 rounded border border-[#d8d6d0] bg-[#f4f3f0] py-3 font-serif text-sm font-bold text-[#6a7a8a]">
+            关闭
+          </button>
+          <button @click="resetGame" class="flex-1 rounded bg-[#1c2841] py-3 font-serif text-sm font-bold text-[#c9b06b]">
+            {{ won ? '再次挑战' : '再试一次' }}
+          </button>
         </div>
       </div>
     </div>
 
-    <div v-if="showResults" class="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
-      <div class="relative w-full max-w-md rounded-lg border border-gray-300 bg-white p-6 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
-        <button @click="closeResults" class="absolute right-2 top-2 text-gray-600 hover:text-gray-800 dark:text-neutral-300 dark:hover:text-neutral-100">
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-
-        <template v-if="won">
-          <p class="mb-2 text-center text-gray-700 dark:text-neutral-300">最终支持率: {{ getCurrentSupportRate('candidate') }}%</p>
-          <h2 class="mb-4 text-center text-2xl font-semibold text-green-700 dark:text-green-400">恭喜你赢得选举！</h2>
-          <p class="mb-4 text-center text-gray-700 dark:text-neutral-300">这是你的就职演讲：</p>
-          <div class="max-h-80 overflow-y-auto border-y border-gray-200 py-4 dark:border-neutral-700">
-            <div class="whitespace-pre-wrap px-4 text-gray-700 dark:text-neutral-200" v-html="victorySpeech"></div>
-          </div>
-          <button @click="resetGame" class="mt-4 w-full rounded-md bg-green-700 py-2 text-white hover:bg-green-800">再次挑战</button>
-        </template>
-
-        <template v-else>
-          <p class="mb-2 text-center text-gray-700 dark:text-neutral-300">最终支持率: {{ getCurrentSupportRate('candidate') }}%</p>
-          <h2 class="mb-4 text-center text-2xl font-semibold text-red-700 dark:text-red-400">很遗憾，未能胜出。</h2>
-          <p class="mb-4 text-center text-gray-700 dark:text-neutral-300">失败原因分析：</p>
-          <div class="max-h-80 overflow-y-auto border-y border-gray-200 py-4 dark:border-neutral-700">
-            <div class="whitespace-pre-wrap px-4 text-gray-700 dark:text-neutral-200" v-html="failureReason"></div>
-          </div>
-          <button @click="resetGame" class="mt-4 w-full rounded-md bg-red-700 py-2 text-white hover:bg-red-800">再试一次</button>
-        </template>
-      </div>
-    </div>
-
-    <div v-if="preparing" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div class="rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-800">
-        <div class="flex items-center space-x-3">
-          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-          <span class="text-lg dark:text-neutral-100">准备辩论中...</span>
+    <!-- ===== 准备中 ===== -->
+    <div v-if="preparing" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
+      <div class="rounded-md bg-white px-8 py-6 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="h-7 w-7 animate-spin rounded-full border-2 border-[#c9b06b] border-t-transparent"></div>
+          <span class="font-serif text-lg text-[#1c2841]">准备辩论中...</span>
         </div>
       </div>
     </div>
@@ -239,8 +320,9 @@ const loadParties = async () => {
   }
 };
 
-const updatePartySelection = () => {
-  selectedParty.value = parties.value.find((p) => p.name === candidateParty.value) || null;
+const selectPartyItem = (party) => {
+  candidateParty.value = party.name;
+  selectedParty.value = party;
 };
 
 const startDebate = async () => {

@@ -13,6 +13,10 @@ import NokiaView from '../views/apps/NokiaView.vue';
 import DebateSimulatorView from '../views/apps/DebateSimulatorView.vue';
 import TreasureView from '../views/apps/TreasureView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
+import BriefingView from '../views/apps/BriefingView.vue';
+import LifeguideView from '../views/apps/LifeguideView.vue';
+import CryptobotView from '../views/apps/CryptobotView.vue';
+import StoryView from '../views/apps/StoryView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -28,6 +32,10 @@ const routes = [
   { path: '/treasure', component: TreasureView },
   { path: '/lovehouse', component: LovehouseView },
   { path: '/nokia', component: NokiaView },
+  { path: '/briefing', component: BriefingView },
+  { path: '/lifeguide', component: LifeguideView },
+  { path: '/cryptobot', component: CryptobotView },
+  { path: '/story', component: StoryView },
   { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }
 ];

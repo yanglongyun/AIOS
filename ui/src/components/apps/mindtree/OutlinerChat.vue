@@ -39,13 +39,8 @@
             :class="{ 'bg-gray-200 dark:bg-neutral-700': isOpen }"
             @click="$emit('toggle')"
           >
-            <svg v-if="isOpen" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            <svg v-else viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            <X v-if="isOpen" class="h-6 w-6" />
+            <MessageSquare v-else class="h-6 w-6" />
           </button>
 
           <textarea
@@ -64,10 +59,7 @@
             :class="localInput.trim() && !loading ? 'cursor-pointer bg-stone-800 text-white shadow-sm hover:bg-stone-900 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200' : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-neutral-700 dark:text-neutral-500'"
             @click="handleSend"
           >
-            <svg v-if="!loading" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+            <Send v-if="!loading" class="h-5 w-5" />
             <div v-else class="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
           </button>
         </div>
@@ -79,6 +71,7 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue';
 import { marked } from 'marked';
+import { MessageSquare, Send, X } from 'lucide-vue-next';
 
 const props = defineProps({
   messages: { type: Array, default: () => [] },

@@ -6,16 +6,7 @@
         :class="{ invisible: !hasChildren }"
         @click="toggleExpand"
       >
-        <svg
-          class="h-4 w-4 transition-transform duration-200"
-          :class="{ 'rotate-90': expanded }"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
+        <ChevronRight class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-90': expanded }" />
       </button>
 
       <div class="min-w-0 flex-1 pt-0.5">
@@ -45,26 +36,13 @@
 
       <div class="absolute right-2 top-1 ml-2 flex items-center gap-1 rounded-md border border-gray-100 bg-white/80 px-1 py-0.5 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover/row:opacity-100 dark:border-neutral-700 dark:bg-neutral-800/80">
         <div class="drag-handle cursor-grab rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 active:cursor-grabbing dark:hover:bg-neutral-700">
-          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="12" r="1" />
-            <circle cx="9" cy="5" r="1" />
-            <circle cx="9" cy="19" r="1" />
-            <circle cx="15" cy="12" r="1" />
-            <circle cx="15" cy="5" r="1" />
-            <circle cx="15" cy="19" r="1" />
-          </svg>
+          <GripVertical class="h-3.5 w-3.5" />
         </div>
         <button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-stone-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-200" @click="addChildToSelf">
-          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Plus class="h-3.5 w-3.5" />
         </button>
         <button class="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40" @click="$emit('delete', node.id)">
-          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <X class="h-3.5 w-3.5" />
         </button>
       </div>
     </div>
@@ -97,6 +75,7 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
+import { ChevronRight, GripVertical, Plus, X } from 'lucide-vue-next';
 
 const props = defineProps({
   node: { type: Object, required: true },

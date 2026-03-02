@@ -3,7 +3,7 @@
     <div class="flex shrink-0 items-center justify-between px-5 pb-2 pt-5">
       <h1 class="text-[22px] font-bold text-[#5a4a3a]">随心记</h1>
       <button class="flex h-9 w-9 items-center justify-center rounded-[10px] border-none bg-transparent text-[#a09080] transition-all hover:bg-black/5 hover:text-[#5a4a3a]" @click="showSearch = !showSearch">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <Search class="h-[18px] w-[18px]" />
       </button>
     </div>
 
@@ -110,6 +110,7 @@
 
 <script setup>
 import { onMounted, ref, nextTick, watch } from 'vue';
+import { Search } from 'lucide-vue-next';
 
 const API_BASE = 'http://localhost:9701/apps/notebook';
 const PAGE_SIZE = 10;

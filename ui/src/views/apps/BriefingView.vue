@@ -34,7 +34,7 @@
               @click="generate"
             >
               <span v-if="generating" class="flex items-center gap-1.5">
-                <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-20"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                <LoaderCircle class="h-3 w-3 animate-spin" />
                 生成中
               </span>
               <span v-else>生成今日早报</span>
@@ -128,6 +128,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { LoaderCircle } from 'lucide-vue-next';
 
 const API_BASE = 'http://localhost:9701/apps/briefing';
 

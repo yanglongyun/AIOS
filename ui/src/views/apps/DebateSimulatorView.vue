@@ -167,9 +167,7 @@
         <!-- 输入状态 -->
         <div v-if="isMyTurn" class="flex items-end gap-2 rounded-xl border border-[#e0ddd6] bg-[#f8f7f4] py-1 pl-3.5 pr-1">
           <button @click="optimizeSpeech" class="group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-[#e8e6e0] transition-colors hover:bg-[#d8d6d0]">
-            <svg class="h-5 w-5 text-[#6a7a8a] transition-colors group-hover:text-[#c9b06b]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19.898.855a.4.4 0 0 0-.795 0c-.123 1.064-.44 1.802-.943 2.305-.503.503-1.241.82-2.306.943a.4.4 0 0 0 .001.794c1.047.119 1.801.436 2.317.942.512.504.836 1.241.93 2.296a.4.4 0 0 0 .796 0c.09-1.038.413-1.792.93-2.308.515-.516 1.269-.839 2.306-.928a.4.4 0 0 0 .001-.797c-1.055-.094-1.792-.418-2.296-.93-.506-.516-.823-1.27-.941-2.317Z" />
-            </svg>
+            <Sparkles class="h-5 w-5 text-[#6a7a8a] transition-colors group-hover:text-[#c9b06b]" />
           </button>
 
           <textarea
@@ -188,9 +186,7 @@
             class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors"
             :class="newMessage.trim() ? 'bg-[#1c2841] text-[#c9b06b] cursor-pointer hover:bg-[#263556]' : 'bg-[#e8e6e0] text-[#bbb] cursor-not-allowed'"
           >
-            <svg width="20" height="20" fill="none" viewBox="0 0 32 32">
-              <path fill="currentColor" fill-rule="evenodd" d="M15.192 8.906a1.143 1.143 0 0 1 1.616 0l5.143 5.143a1.143 1.143 0 0 1-1.616 1.616l-3.192-3.192v9.813a1.143 1.143 0 0 1-2.286 0v-9.813l-3.192 3.192a1.143 1.143 0 1 1-1.616-1.616z" />
-            </svg>
+            <SendHorizontal class="h-5 w-5" />
           </button>
         </div>
 
@@ -226,7 +222,7 @@
         <!-- 深蓝头部 -->
         <div class="bg-[#1c2841] px-7 pb-5 pt-7 text-center" :class="won ? 'text-[#c9b06b]' : 'text-[#d09090]'">
           <button @click="closeResults" class="absolute right-3 top-3 text-[#8a9ab5] hover:text-white">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <X class="h-5 w-5" />
           </button>
           <div class="mb-2 text-5xl">{{ won ? '🏛️' : '📉' }}</div>
           <div class="mb-1 text-[22px] font-bold tracking-[2px]">{{ won ? '恭喜当选总统！' : '很遗憾，未能胜出' }}</div>
@@ -272,6 +268,7 @@
 
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
+import { SendHorizontal, Sparkles, X } from 'lucide-vue-next';
 
 const API_BASE = 'http://localhost:9701/apps/debate';
 const parties = ref([]);

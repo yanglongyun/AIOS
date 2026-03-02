@@ -8,7 +8,7 @@ let timer = null;
 const jsonParse = (raw, fallback) => { try { return JSON.parse(raw); } catch { return fallback; } };
 
 const askAI = async (prompt) => {
-  const resp = await fetch('http://localhost:9700/api/requests', {
+  const resp = await fetch('http://localhost:9700/api/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ app: 'cryptobot', prompt })

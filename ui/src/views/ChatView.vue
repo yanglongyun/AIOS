@@ -43,9 +43,7 @@
                   </div>
                   <div class="mt-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <button @click="copyText(m.content)" class="flex cursor-pointer items-center gap-1 rounded-md border-none bg-transparent px-2 py-0.5 text-[11px] text-[#a0907a] transition-all hover:bg-[#f0e8d8] hover:text-[#5a4a38]">
-                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                      </svg>
+                      <Copy class="h-3.5 w-3.5" />
                       复制
                     </button>
                   </div>
@@ -57,7 +55,7 @@
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#dce8d4] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">⚙️</div>
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-[#dcd0b8] bg-[#fffdf8]">
                   <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-[#f5ead8] px-3 py-2 text-left transition-colors hover:bg-[#ece0c8]">
-                    <svg class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform" :class="m.expanded ? 'rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                    <ChevronRight class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
                     <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38]">{{ m.reason || m.command || '工具调用' }}</span>
                     <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a]">完成</span>
                   </button>
@@ -116,19 +114,17 @@
 
             <div class="flex items-center px-3.5 pb-2.5">
               <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-[#a0907a] transition-all hover:bg-[#f5ead8] hover:text-[#5a4a38] disabled:cursor-not-allowed disabled:opacity-50">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.2a4 4 0 0 1 5.66 5.66l-9.2 9.2a2 2 0 0 1-2.82-2.83l8.48-8.48" />
-                </svg>
+                <Paperclip class="h-3.5 w-3.5" />
                 {{ uploading ? '上传中...' : '上传文件' }}
               </button>
             </div>
 
             <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
               <button v-if="busy" type="button" @click="stopBusy" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none bg-[#5a3e28] text-[#f0e8d8] transition-opacity hover:opacity-80">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                <Square class="h-3.5 w-3.5 fill-current" />
               </button>
               <button v-else type="submit" :disabled="!input.trim()" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border text-[#b8a888] transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#5a3e28] text-[#f0e8d8] shadow-[0_2px_8px_rgba(90,62,40,0.3)] hover:opacity-85' : 'cursor-default border-[#dcd0b8] bg-[#e8dcc8]'">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                <ArrowUp class="h-4 w-4" />
               </button>
             </div>
           </form>
@@ -146,6 +142,7 @@
 import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
+import { ArrowUp, ChevronRight, Copy, Paperclip, Square } from 'lucide-vue-next';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
 
 

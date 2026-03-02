@@ -9,10 +9,7 @@
             :disabled="!canUndo"
             @click="undo"
           >
-            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 14 4 9l5-5" />
-              <path d="M20 20a8 8 0 0 0-8-8H4" />
-            </svg>
+            <Undo2 class="h-[18px] w-[18px]" />
           </button>
           <button
             class="rounded-full p-2 transition-colors"
@@ -20,27 +17,17 @@
             :disabled="!canRedo"
             @click="redo"
           >
-            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m15 14 5-5-5-5" />
-              <path d="M4 20a8 8 0 0 1 8-8h8" />
-            </svg>
+            <Redo2 class="h-[18px] w-[18px]" />
           </button>
         </div>
 
         <div class="ml-2 flex shrink-0 items-center gap-2 text-sm">
           <div class="h-4 w-px bg-gray-200 dark:bg-neutral-700" />
           <button class="rounded-full p-2 text-gray-400 transition-colors hover:bg-stone-100 hover:text-stone-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-100" @click="copyOutline">
-            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
+            <Copy class="h-[18px] w-[18px]" />
           </button>
           <button class="rounded-full p-2 text-gray-400 transition-colors hover:bg-stone-100 hover:text-stone-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-100" @click="downloadOutline">
-            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+            <Download class="h-[18px] w-[18px]" />
           </button>
         </div>
       </div>
@@ -91,10 +78,7 @@
           >
             <span v-if="loading" class="loading-dots">正在绘制中</span>
             <template v-else>
-              <svg viewBox="0 0 24 24" class="mr-2 h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <Plus class="mr-2 h-[18px] w-[18px]" />
               添加新节点
             </template>
           </button>
@@ -114,10 +98,7 @@
               class="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-neutral-600"
               @click.stop="closePreview"
             >
-              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X class="h-3.5 w-3.5" />
             </button>
             <div class="prose prose-sm line-clamp-3 text-sm text-gray-800 dark:prose-invert dark:text-neutral-100" v-html="renderMarkdown(latestAiReply)" />
           </div>
@@ -141,6 +122,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
+import { Copy, Download, Plus, Redo2, Undo2, X } from 'lucide-vue-next';
 import OutlineNode from '../../components/apps/mindtree/OutlineNode.vue';
 import OutlinerChat from '../../components/apps/mindtree/OutlinerChat.vue';
 

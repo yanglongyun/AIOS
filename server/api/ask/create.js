@@ -3,12 +3,12 @@ import { db } from '../../db/client.js';
 import { getSettings } from '../../db/settings.js';
 import { chat } from '../../agent/handler.js';
 
-export const createRequest = async ({ app, prompt }) => {
+export const createAsk = async ({ app, prompt }) => {
   const { apiUrl, apiKey, model, provider } = getSettings();
-  const sessionId = `req:${randomUUID().slice(0, 8)}`;
+  const sessionId = `ask:${randomUUID().slice(0, 8)}`;
 
   const row = db.prepare(
-    "INSERT INTO requests (session_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
+    "INSERT INTO asks (session_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
   ).get(sessionId, app, prompt);
 
   const messages = [
@@ -36,13 +36,13 @@ export const createRequest = async ({ app, prompt }) => {
     });
 
     db.prepare(
-      "UPDATE requests SET response = ?, status = 'done', finished_at = datetime('now') WHERE id = ?"
+      "UPDATE asks SET response = ?, status = 'done', finished_at = datetime('now') WHERE id = ?"
     ).run(result, row.id);
 
     return { id: row.id, sessionId, response: result };
   } catch (e) {
     db.prepare(
-      "UPDATE requests SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
+      "UPDATE asks SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
     ).run(e.message, row.id);
 
     throw e;

@@ -1,23 +1,16 @@
-import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
+import { readBody } from '../app_shared/utils/readBody.js';
 import { initDailycheckDatabase } from './db.js';
 import { todayHandler } from './api/today.js';
-import { answerHandler } from './api/answer.js';
 import { historyHandler } from './api/history.js';
-import { ensureTodayQuestion } from './api/generate-question.js';
+import { refreshHandler } from './api/refresh.js';
+import { answerHandler } from './api/answer.js';
 
 export { initDailycheckDatabase };
 
 export const handleDailycheckApi = async (req, res, path) => {
   if (path === '/apps/dailycheck/today' && req.method === 'GET') {
     const data = await todayHandler();
-    return json(res, data);
-  }
-
-  if (path === '/apps/dailycheck/answer' && req.method === 'POST') {
-    const body = await readBody(req);
-    const data = answerHandler(body);
-    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
@@ -30,8 +23,15 @@ export const handleDailycheckApi = async (req, res, path) => {
   }
 
   if (path === '/apps/dailycheck/refresh' && req.method === 'POST') {
-    const q = await ensureTodayQuestion();
-    return json(res, { success: true, id: q.id });
+    const data = await refreshHandler();
+    return json(res, data);
+  }
+
+  if (path === '/apps/dailycheck/answer' && req.method === 'POST') {
+    const body = await readBody(req);
+    const data = await answerHandler(body);
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
   }
 
   return false;

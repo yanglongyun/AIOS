@@ -1,10 +1,22 @@
 <template>
-  <div class="min-h-screen bg-[#f5f0e8] font-serif">
-    <div class="mx-auto max-w-[520px] px-4 pb-20">
+  <div class="h-full w-full overflow-y-auto bg-[#f5f0e8] font-serif">
+    <div class="mx-auto w-full max-w-4xl px-4 pb-20">
       <!-- 顶部 -->
-      <div class="pb-2 pt-7">
-        <h1 class="text-xl font-bold text-[#3a2e1e]">我的宝贝</h1>
-        <p class="mt-1 text-[11px] tracking-wide text-[#9a8a70]">已陪伴你 {{ daysSinceFirst }} 天</p>
+      <div class="flex items-center justify-between pb-2 pt-7">
+        <div>
+          <h1 class="text-xl font-bold text-[#3a2e1e]">我的宝贝</h1>
+          <p class="mt-1 text-[11px] tracking-wide text-[#9a8a70]">已陪伴你 {{ daysSinceFirst }} 天</p>
+        </div>
+        <button
+          @click="pickImage"
+          :disabled="loading"
+          class="flex items-center gap-1.5 rounded-full bg-[#5a3e28] px-4 py-2 font-serif text-[13px] font-bold text-[#e8d8b8] shadow-[0_2px_8px_rgba(90,62,40,0.25)] transition-colors hover:bg-[#6d4e34] disabled:opacity-60"
+        >
+          <Camera v-if="!loading" class="h-4 w-4" />
+          <LoaderCircle v-else class="inline h-4 w-4 animate-spin" />
+          {{ loading ? '鉴宝中...' : '鉴宝入库' }}
+        </button>
+        <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onFileChange" />
       </div>
 
       <!-- 总估值 -->
@@ -57,31 +69,6 @@
       </div>
     </div>
 
-    <!-- 悬浮鉴宝按钮 - 跟内容区同宽居中 -->
-    <div class="pointer-events-none fixed inset-x-0 bottom-6 z-50">
-      <div class="mx-auto max-w-[520px] px-4">
-        <button
-          @click="pickImage"
-          :disabled="loading"
-          class="pointer-events-auto flex w-full items-center justify-center gap-2 rounded-full bg-[#5a3e28] px-6 py-3.5 font-serif text-[15px] font-bold tracking-wide text-[#e8d8b8] shadow-[0_4px_20px_rgba(90,62,40,0.35)] transition-colors hover:bg-[#6d4e34] disabled:opacity-60"
-        >
-          <svg v-if="!loading" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-          <span v-if="loading">
-            <svg class="inline h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.3"/>
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            鉴宝中...
-          </span>
-          <span v-else>鉴宝入库</span>
-        </button>
-        <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onFileChange" />
-      </div>
-    </div>
-
     <!-- 详情抽屉 -->
     <div v-if="detailItem" class="fixed inset-0 z-[100] bg-black/50" @click.self="detailItem = null"></div>
     <Transition name="drawer">
@@ -107,6 +94,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { Camera, LoaderCircle } from 'lucide-vue-next';
 
 const API_BASE = 'http://localhost:9701/apps/treasure';
 const fileInput = ref(null);

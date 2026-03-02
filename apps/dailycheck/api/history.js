@@ -5,31 +5,24 @@ export const historyHandler = ({ page = 1, pageSize = 10 } = {}) => {
   const safePageSize = Math.min(30, Math.max(1, Number(pageSize) || 10));
   const offset = (safePage - 1) * safePageSize;
 
-  const total = db.prepare('SELECT COUNT(*) AS c FROM apps_dailycheck_questions').get().c || 0;
+  const total = db.prepare('SELECT COUNT(*) AS c FROM apps_dailycheck_daily').get().c || 0;
   const rows = db.prepare(`
     SELECT
-      q.id, q.date, q.question, q.purpose, q.tags_json, q.created_at,
-      a.answer, a.updated_at AS answer_updated_at
-    FROM apps_dailycheck_questions q
-    LEFT JOIN apps_dailycheck_answers a ON a.question_id = q.id
-    ORDER BY q.date DESC
+      id,
+      date,
+      question,
+      answer,
+      response,
+      CASE WHEN trim(answer) <> '' THEN 1 ELSE 0 END AS answered,
+      COALESCE(updated_at, created_at) AS updatedAt
+    FROM apps_dailycheck_daily
+    ORDER BY date DESC
     LIMIT ? OFFSET ?
   `).all(safePageSize, offset);
 
   return {
     success: true,
-    items: rows.map((r) => ({
-      id: r.id,
-      date: r.date,
-      question: r.question,
-      purpose: r.purpose || '',
-      tags: (() => {
-        try { return JSON.parse(r.tags_json || '[]'); } catch { return []; }
-      })(),
-      answer: r.answer || '',
-      answered: Boolean(r.answer),
-      updatedAt: r.answer_updated_at || r.created_at
-    })),
+    items: rows,
     page: safePage,
     pageSize: safePageSize,
     total,

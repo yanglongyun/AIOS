@@ -12,7 +12,7 @@ import { handleNokiaApi, initNokiaDatabase } from './nokia/index.js';
 import { handleDebateApi, initDebateDatabase } from './debate/index.js';
 import { handleTreasureApi, initTreasureDatabase } from './treasure/index.js';
 import { handleBriefingApi, initBriefingDatabase } from './briefing/index.js';
-import { handleLifeguideApi, initLifeguideDatabase } from './lifeguide/index.js';
+import { handleDailycheckApi, initDailycheckDatabase } from './dailycheck/index.js';
 import { handleCryptobotApi, initCryptobotDatabase, initCryptobotRuntime } from './cryptobot/index.js';
 import { handleStoryApi, initStoryDatabase } from './story/index.js';
 
@@ -89,8 +89,8 @@ const appsServer = createServer(async (req, res) => {
     if (handled !== false) return;
   }
 
-  if (path.startsWith('/api/apps/lifeguide/')) {
-    const handled = await handleLifeguideApi(req, res, path);
+  if (path.startsWith('/api/apps/dailycheck/')) {
+    const handled = await handleDailycheckApi(req, res, path);
     if (handled !== false) return;
   }
 
@@ -118,7 +118,7 @@ initNokiaDatabase();
 initDebateDatabase();
 initTreasureDatabase();
 initBriefingDatabase();
-initLifeguideDatabase();
+initDailycheckDatabase();
 initCryptobotDatabase();
 initStoryDatabase();
 initCryptobotRuntime();

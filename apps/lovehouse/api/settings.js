@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 const KEYS = ['img_api_url', 'img_api_key', 'img_model'];
 

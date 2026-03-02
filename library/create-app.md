@@ -45,13 +45,12 @@ AIOS 的应用运行在独立的 apps 服务（端口 9701）上，与核心 ser
 apps/
 ├── index.js                        # apps 服务入口 + 路由分发
 ├── app_shared/
-│   ├── db/
-│   │   └── client.js               # 共享数据库连接
 │   └── utils/
 │       ├── json.js                 # JSON 响应工具
 │       └── readBody.js             # 请求体解析工具
 └── {appname}/
-    ├── index.js                    # 应用入口 + 路由注册 + 建表
+    ├── index.js                    # 应用入口 + 路由注册
+    ├── db.js                       # 应用独立数据库连接 + 建表初始化
     ├── APP.md                      # 应用说明（必须）
     ├── api/                        # 一个文件一个 API
     │   ├── list.js
@@ -64,19 +63,24 @@ apps/
 
 ## 数据库
 
-所有应用共用 `apps.db`（SQLite），通过 `apps/app_shared/db/client.js` 获取连接：
+每个应用使用独立数据库文件（SQLite）：
 
 ```js
-// 在 apps/{appname}/index.js 中
-import { db } from '../app_shared/db/client.js';
+// apps/{appname}/db.js
+import Database from 'better-sqlite3';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
 
-// 在 apps/{appname}/api/*.js 中
-import { db } from '../../app_shared/db/client.js';
+const dir = join(process.cwd(), 'database', 'apps');
+mkdirSync(dir, { recursive: true });
+
+export const db = new Database(join(dir, '{appname}.db'));
+db.pragma('journal_mode = WAL');
 ```
 
 表命名建议：`apps_{appname}_{table}`。
 
-建表在应用 `index.js` 的 `init...Database()` 中完成，始终使用 `CREATE TABLE IF NOT EXISTS`。
+建表在应用 `db.js` 的 `init...Database()` 中完成，始终使用 `CREATE TABLE IF NOT EXISTS`。
 
 ## API 规范
 
@@ -133,18 +137,9 @@ initTodoDatabase();
 ```js
 import { json } from '../app_shared/utils/json.js';
 import { readBody } from '../app_shared/utils/readBody.js';
-import { db } from '../app_shared/db/client.js';
+import { initTodoDatabase } from './db.js';
 
-export function initTodoDatabase() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_todo_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content TEXT NOT NULL,
-      done INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-}
+export { initTodoDatabase };
 
 export async function handleTodoApi(req, res, path) {
   if (path === '/api/apps/todo/list' && req.method === 'GET') {
@@ -170,12 +165,37 @@ export async function handleTodoApi(req, res, path) {
 }
 ```
 
+### `apps/todo/db.js`
+
+```js
+import Database from 'better-sqlite3';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
+
+const dir = join(process.cwd(), 'database', 'apps');
+mkdirSync(dir, { recursive: true });
+
+export const db = new Database(join(dir, 'todo.db'));
+db.pragma('journal_mode = WAL');
+
+export function initTodoDatabase() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS apps_todo_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      content TEXT NOT NULL,
+      done INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
+```
+
 ### `apps/todo/APP.md`
 
 ```
 ---
 name: todo
-description: Todo list app. API under /api/apps/todo/, data in apps.db table apps_todo_items.
+description: Todo list app. API under /api/apps/todo/, data in todo.db table apps_todo_items.
 ---
 ```
 
@@ -183,6 +203,7 @@ description: Todo list app. API under /api/apps/todo/, data in apps.db table app
 
 - 应用共享能力统一放在 `apps/app_shared/`
 - 每个应用必须有 `APP.md`
+- 每个应用必须有自己的 `db.js`，不要复用共享 DB 连接文件
 - 每个 API 一个文件
 - 建表始终用 `CREATE TABLE IF NOT EXISTS`
 - 开发阶段不做兼容分支，按当前规范直接演进

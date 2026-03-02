@@ -1,20 +1,10 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
-import { db } from '../app_shared/db/client.js';
+import { initNokiaDatabase } from './db.js';
 import { generationHandler } from './api/generation.js';
 import { progressHandler } from './api/progress.js';
 
-export const initNokiaDatabase = () => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_nokia_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      current_screen TEXT NOT NULL DEFAULT '{}',
-      screen_history TEXT DEFAULT '{}',
-      battery_level INTEGER DEFAULT 100,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-};
+export { initNokiaDatabase };
 
 export const handleNokiaApi = async (req, res, path) => {
   if (path === '/api/apps/nokia/generation' && req.method === 'POST') {

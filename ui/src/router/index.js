@@ -14,7 +14,7 @@ import DebateSimulatorView from '../views/apps/DebateSimulatorView.vue';
 import TreasureView from '../views/apps/TreasureView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
 import BriefingView from '../views/apps/BriefingView.vue';
-import LifeguideView from '../views/apps/LifeguideView.vue';
+import DailycheckView from '../views/apps/DailycheckView.vue';
 import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
 
@@ -33,7 +33,7 @@ const routes = [
   { path: '/lovehouse', component: LovehouseView },
   { path: '/nokia', component: NokiaView },
   { path: '/briefing', component: BriefingView },
-  { path: '/lifeguide', component: LifeguideView },
+  { path: '/dailycheck', component: DailycheckView },
   { path: '/cryptobot', component: CryptobotView },
   { path: '/story', component: StoryView },
   { path: '/community', component: CommunityView },

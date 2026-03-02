@@ -1,9 +1,6 @@
-import { saveConfig, startBot } from '../service.js';
+import { startBot } from '../schedule.js';
 
 export const startHandler = (body = {}) => {
-  if (body && typeof body === 'object' && Object.keys(body).length > 0) {
-    saveConfig(body);
-  }
-  const state = startBot();
-  return { success: true, state };
+  startBot(body.interval_sec);
+  return { success: true };
 };

@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const createHandler = (body = {}) => {
   const name = String(body.name || '').trim().slice(0, 80) || '未命名场景';

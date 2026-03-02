@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const getHandler = ({ id } = {}) => {
   const outlineId = String(id || '').trim();

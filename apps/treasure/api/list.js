@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const listHandler = (query = {}) => {
   const page = Math.max(1, Number(query.page || 1));

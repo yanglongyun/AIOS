@@ -353,7 +353,10 @@ const handleSend = async () => {
   }).catch((e) => { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); busy.value = false; });
 };
 
-const stopBusy = () => { busy.value = false; };
+const stopBusy = () => {
+  send({ type: 'abort' });
+  busy.value = false;
+};
 
 const applySuggestion = (text) => {
   input.value = text;
@@ -475,6 +478,9 @@ onMounted(() => {
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'assistant', content: `错误: ${data.content}`, _key });
+    busy.value = false;
+  }));
+  unsubs.push(on('aborted', () => {
     busy.value = false;
   }));
 });

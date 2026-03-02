@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const latestHandler = () => {
   const row = db.prepare(`

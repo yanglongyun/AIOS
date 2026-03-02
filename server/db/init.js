@@ -27,14 +27,6 @@ export const initDatabase = () => {
 
   `);
 
-  try {
-    db.exec('ALTER TABLE messages ADD COLUMN meta TEXT');
-  } catch {}
-
-  try {
-    db.exec("ALTER TABLE chats ADD COLUMN description TEXT DEFAULT ''");
-  } catch {}
-
   const initSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   initSetting.run('contextRounds', '30');
   initSetting.run('apiUrl', 'https://api.openai.com/v1/chat/completions');

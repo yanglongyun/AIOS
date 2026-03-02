@@ -1,6 +1,6 @@
-import { stopBot } from '../service.js';
+import { stopBot } from '../schedule.js';
 
 export const stopHandler = () => {
-  const state = stopBot();
-  return { success: true, state };
+  stopBot();
+  return { success: true };
 };

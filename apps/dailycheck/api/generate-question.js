@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 const parseModelJson = (raw = '') => {
   const text = String(raw || '').trim();
@@ -54,17 +54,17 @@ export const ensureTodayQuestion = async () => {
   const today = toDateKey();
   const exists = db.prepare(`
     SELECT id, date, question, purpose, tags_json, created_at
-    FROM apps_lifeguide_questions
+    FROM apps_dailycheck_questions
     WHERE date = ?
     LIMIT 1
   `).get(today);
   if (exists) return exists;
 
-  const answeredCount = db.prepare('SELECT COUNT(*) AS c FROM apps_lifeguide_answers').get().c || 0;
+  const answeredCount = db.prepare('SELECT COUNT(*) AS c FROM apps_dailycheck_answers').get().c || 0;
   const history = db.prepare(`
     SELECT q.date, q.question, a.answer
-    FROM apps_lifeguide_questions q
-    LEFT JOIN apps_lifeguide_answers a ON a.question_id = q.id
+    FROM apps_dailycheck_questions q
+    LEFT JOIN apps_dailycheck_answers a ON a.question_id = q.id
     ORDER BY q.date DESC
     LIMIT 7
   `).all();
@@ -94,13 +94,13 @@ export const ensureTodayQuestion = async () => {
   }
 
   const ret = db.prepare(`
-    INSERT INTO apps_lifeguide_questions (date, question, purpose, tags_json, created_at)
+    INSERT INTO apps_dailycheck_questions (date, question, purpose, tags_json, created_at)
     VALUES (?, ?, ?, ?, datetime('now'))
   `).run(today, generated.question, generated.purpose, JSON.stringify(generated.tags || []));
 
   return db.prepare(`
     SELECT id, date, question, purpose, tags_json, created_at
-    FROM apps_lifeguide_questions
+    FROM apps_dailycheck_questions
     WHERE id = ?
   `).get(ret.lastInsertRowid);
 };

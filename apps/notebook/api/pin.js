@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const pinHandler = (body = {}) => {
   if (!body.id) return { error: '缺少 id', status: 400 };

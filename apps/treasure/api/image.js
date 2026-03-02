@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { extname } from 'path';
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 const MIME = {
   '.jpg': 'image/jpeg',

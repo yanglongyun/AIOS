@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const syncHandler = (body = {}) => {
   const docId = String(body.docId || '').trim();

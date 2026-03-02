@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const listHandler = ({ q = '', page = 1, pageSize = 10 } = {}) => {
   const safePage = Math.max(1, Number(page) || 1);

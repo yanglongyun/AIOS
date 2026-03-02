@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const startHandler = async (body = {}) => {
   const debateId = String(body.debateId || '').trim();

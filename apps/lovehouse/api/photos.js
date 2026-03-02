@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const photosHandler = ({ limit = 50 } = {}) => {
   const safeLimit = Math.min(200, Math.max(1, Number(limit) || 50));

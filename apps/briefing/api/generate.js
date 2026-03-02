@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 const GOOGLE_NEWS_RSS = 'https://news.google.com/rss/search';
 

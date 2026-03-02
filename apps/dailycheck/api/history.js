@@ -1,17 +1,17 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const historyHandler = ({ page = 1, pageSize = 10 } = {}) => {
   const safePage = Math.max(1, Number(page) || 1);
   const safePageSize = Math.min(30, Math.max(1, Number(pageSize) || 10));
   const offset = (safePage - 1) * safePageSize;
 
-  const total = db.prepare('SELECT COUNT(*) AS c FROM apps_lifeguide_questions').get().c || 0;
+  const total = db.prepare('SELECT COUNT(*) AS c FROM apps_dailycheck_questions').get().c || 0;
   const rows = db.prepare(`
     SELECT
       q.id, q.date, q.question, q.purpose, q.tags_json, q.created_at,
       a.answer, a.updated_at AS answer_updated_at
-    FROM apps_lifeguide_questions q
-    LEFT JOIN apps_lifeguide_answers a ON a.question_id = q.id
+    FROM apps_dailycheck_questions q
+    LEFT JOIN apps_dailycheck_answers a ON a.question_id = q.id
     ORDER BY q.date DESC
     LIMIT ? OFFSET ?
   `).all(safePageSize, offset);

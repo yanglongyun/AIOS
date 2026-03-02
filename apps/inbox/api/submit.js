@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const submitHandler = (body = {}, sourceIp = '') => {
   const name = String(body.name || '').trim().slice(0, 80);

@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const createHandler = (body = {}) => {
   const title = String(body.title || '').trim() || '未命名故事';

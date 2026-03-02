@@ -1,6 +1,6 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
-import { db } from '../app_shared/db/client.js';
+import { initTreasureDatabase } from './db.js';
 import { uploadHandler } from './api/upload.js';
 import { appraiseHandler } from './api/appraise.js';
 import { listHandler } from './api/list.js';
@@ -8,21 +8,7 @@ import { detailHandler } from './api/detail.js';
 import { deleteHandler } from './api/delete.js';
 import { imageHandler } from './api/image.js';
 
-export const initTreasureDatabase = () => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_treasures (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      image_path TEXT NOT NULL,
-      name TEXT NOT NULL DEFAULT '',
-      category TEXT NOT NULL DEFAULT '',
-      condition_text TEXT NOT NULL DEFAULT '',
-      summary_tag TEXT NOT NULL DEFAULT '',
-      value REAL NOT NULL DEFAULT 0,
-      comment TEXT NOT NULL DEFAULT '',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-};
+export { initTreasureDatabase };
 
 export const handleTreasureApi = async (req, res, path) => {
   if (path === '/api/apps/treasure/upload' && req.method === 'POST') {

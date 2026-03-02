@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const deleteHandler = (body = {}) => {
   const id = Number(body.id);

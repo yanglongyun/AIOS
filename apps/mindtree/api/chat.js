@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 const toArray = (value, fallback = []) => (Array.isArray(value) ? value : fallback);
 

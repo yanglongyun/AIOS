@@ -1,4 +1,4 @@
-import { db } from '../../app_shared/db/client.js';
+import { db } from '../db.js';
 
 export const getConfigHandler = () => {
   const row = db.prepare('SELECT requirement, updated_at FROM apps_briefing_config WHERE id = 1').get();

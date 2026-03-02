@@ -1,23 +1,12 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
-import { db } from '../app_shared/db/client.js';
+import { initPlaygroundDatabase } from './db.js';
 import { listHandler } from './api/list.js';
 import { latestHandler } from './api/latest.js';
 import { detailHandler } from './api/detail.js';
 import { createHandler } from './api/create.js';
 
-export const initPlaygroundDatabase = () => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS playground_versions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL DEFAULT '未命名场景',
-      prompt TEXT DEFAULT '',
-      html TEXT NOT NULL,
-      suggestions TEXT DEFAULT '[]',
-      created_at TEXT DEFAULT (datetime('now'))
-    )
-  `);
-};
+export { initPlaygroundDatabase };
 
 export const handlePlaygroundApi = async (req, res, pathName) => {
   if (pathName === '/api/apps/playground/list' && req.method === 'GET') {

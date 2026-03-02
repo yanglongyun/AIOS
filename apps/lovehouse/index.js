@@ -1,6 +1,6 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
-import { db } from '../app_shared/db/client.js';
+import { initLovehouseDatabase } from './db.js';
 import { messagesHandler } from './api/messages.js';
 import { chatHandler } from './api/chat.js';
 import { sceneHandler } from './api/scene.js';
@@ -8,40 +8,7 @@ import { generateHandler } from './api/generate.js';
 import { getSettingsHandler, updateSettingsHandler } from './api/settings.js';
 import { photosHandler } from './api/photos.js';
 
-export const initLovehouseDatabase = () => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_lovehouse_messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      role TEXT NOT NULL,
-      content TEXT NOT NULL DEFAULT '',
-      scene TEXT DEFAULT 'sunset',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_lovehouse_settings (
-      key TEXT PRIMARY KEY,
-      value TEXT
-    );
-  `);
-
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_lovehouse_photos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      prompt TEXT NOT NULL DEFAULT '',
-      url TEXT NOT NULL DEFAULT '',
-      type TEXT NOT NULL DEFAULT 'url',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-  `);
-
-  // 默认场景
-  const exists = db.prepare('SELECT key FROM apps_lovehouse_settings WHERE key = ?').get('current_scene');
-  if (!exists) {
-    db.prepare('INSERT INTO apps_lovehouse_settings (key, value) VALUES (?, ?)').run('current_scene', 'sunset');
-  }
-};
+export { initLovehouseDatabase };
 
 export const handleLovehouseApi = async (req, res, path) => {
   if (path === '/api/apps/lovehouse/messages' && req.method === 'GET') {

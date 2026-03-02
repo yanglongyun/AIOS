@@ -77,7 +77,7 @@ const tabs = [
 
 const activeTab = ref('model');
 const theme = ref(localStorage.getItem('theme') || 'dark');
-const provider = ref('openrouter');
+const provider = ref('openai');
 const editRounds = ref(30);
 const editApiUrl = ref('');
 const editApiKey = ref('');
@@ -135,7 +135,7 @@ const onProviderChange = (nextProvider) => {
 
 const fetchSettings = async () => {
   const data = await request('/api/settings');
-  provider.value = data.provider || 'openrouter';
+  provider.value = data.provider || 'openai';
   editRounds.value = data.contextRounds || 30;
   editApiUrl.value = data.apiUrl || '';
   editApiKey.value = data.apiKey || '';

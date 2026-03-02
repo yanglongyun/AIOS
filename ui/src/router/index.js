@@ -17,6 +17,7 @@ import BriefingView from '../views/apps/BriefingView.vue';
 import DailycheckView from '../views/apps/DailycheckView.vue';
 import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
+import BlackroomView from '../views/apps/BlackroomView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -36,6 +37,7 @@ const routes = [
   { path: '/dailycheck', component: DailycheckView },
   { path: '/cryptobot', component: CryptobotView },
   { path: '/story', component: StoryView },
+  { path: '/blackroom', component: BlackroomView },
   { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }
 ];

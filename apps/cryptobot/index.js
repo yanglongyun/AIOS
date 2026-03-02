@@ -4,6 +4,7 @@ import { initDatabase } from './db.js';
 import { initRuntime } from './schedule/index.js';
 import { getStatusHandler } from './api/get/status.js';
 import { saveExchangeHandler } from './api/save/exchange.js';
+import { testExchangeHandler } from './api/test/exchange.js';
 import { saveDirectiveHandler } from './api/save/directive.js';
 import { startHandler } from './api/start.js';
 import { stopHandler } from './api/stop.js';
@@ -21,6 +22,11 @@ export const handleCryptobotApi = async (req, res, path) => {
   if (path === '/apps/cryptobot/exchange' && req.method === 'POST') {
     const body = await readBody(req);
     return json(res, saveExchangeHandler(body));
+  }
+
+  if (path === '/apps/cryptobot/exchange/test' && req.method === 'POST') {
+    const body = await readBody(req);
+    return json(res, await testExchangeHandler(body));
   }
 
   if (path === '/apps/cryptobot/directive' && req.method === 'POST') {

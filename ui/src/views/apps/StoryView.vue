@@ -1,119 +1,162 @@
 <template>
-  <div class="h-full w-full overflow-y-auto bg-[#f5f0e8] px-4 py-6 text-[#4a3a28]">
-    <div class="mx-auto flex w-full max-w-4xl flex-col gap-4">
-      <section class="rounded-2xl border border-[#e0d4c4] bg-[#fffdf8] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-        <div class="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h1 class="text-2xl font-extrabold italic text-[#5a4030]">故事机</h1>
-            <p class="mt-1 text-xs text-[#a0907a]">每次推进都输出三选项，并持续更新故事梗概与进度。</p>
-          </div>
-          <button
-            class="rounded-lg border border-[#d4c0a0] bg-[#f5ead8] px-3 py-1.5 text-xs font-semibold text-[#6a5a48] transition hover:bg-[#ece0c8] disabled:opacity-40"
-            :disabled="!activeSession || loading"
-            @click="resetStory"
-          >重置故事</button>
-        </div>
+  <div class="flex h-full w-full overflow-hidden bg-[#f5f0e8] font-['PingFang_SC',-apple-system,sans-serif] text-[#4a3a28]">
 
-        <div class="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto]">
-          <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-            <input
-              v-model="newTitle"
-              placeholder="故事标题"
-              class="rounded-lg border border-[#e0d4c4] bg-white px-3 py-2 text-sm outline-none focus:border-[#c8a060]"
-            />
-            <button
-              class="rounded-lg bg-[#5a3e28] px-4 py-2 text-sm font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40"
-              :disabled="creating"
-              @click="createStory"
-            >{{ creating ? '创建中...' : '新建故事' }}</button>
-          </div>
-          <textarea
-            v-model="newPrompt"
-            rows="2"
-            placeholder="故事设定（可选）：世界观、风格、主线目标..."
-            class="rounded-lg border border-[#e0d4c4] bg-white px-3 py-2 text-sm leading-6 outline-none placeholder:text-[#c0b098] focus:border-[#c8a060] md:col-span-2"
-          ></textarea>
-        </div>
-      </section>
+    <!-- 左侧：故事列表 -->
+    <div class="flex w-[220px] shrink-0 flex-col border-r border-[#e0d4c4] bg-[#ede8e0]">
+      <div class="shrink-0 px-4 py-4">
+        <div class="text-[14px] font-extrabold italic text-[#5a4030]">故事机</div>
+        <p class="mt-0.5 text-[10px] text-[#a0907a]">互动式章节故事</p>
+      </div>
 
-      <section v-if="error" class="rounded-xl border border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-sm text-[#c06040]">{{ error }}</section>
+      <!-- 新建按钮 -->
+      <div class="shrink-0 px-3 pb-3">
+        <button
+          @click="showCreate = !showCreate"
+          class="w-full rounded-xl border border-[#d4c0a0] bg-[#f5ead8] py-2 text-[12px] font-semibold text-[#6a5040] transition hover:bg-[#ece0c8]"
+        >+ 新建故事</button>
+      </div>
 
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <section class="rounded-2xl border border-[#e0d4c4] bg-[#fffdf8] p-3 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-          <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-sm font-bold text-[#5a4030]">故事列表</h2>
-            <span class="text-xs text-[#a0907a]">{{ sessions.length }}</span>
-          </div>
-          <div class="max-h-[560px] space-y-2 overflow-y-auto pr-1">
-            <button
-              v-for="s in sessions"
-              :key="s.id"
-              class="w-full rounded-xl border px-3 py-2 text-left transition"
-              :class="activeSession?.id === s.id ? 'border-[#c8a060] bg-[#fff7ea]' : 'border-[#ece2d4] bg-white hover:border-[#d4c0a0]'"
-              @click="selectSession(s.id)"
-            >
-              <p class="truncate text-sm font-semibold text-[#4a3a28]">{{ s.title }}</p>
-              <p class="mt-1 line-clamp-2 text-xs text-[#8a7a60]">{{ s.progress || '第0章' }}</p>
-            </button>
-            <div v-if="!sessions.length" class="rounded-lg border border-dashed border-[#e0d4c4] bg-[#fffcf6] px-3 py-5 text-center text-xs text-[#b0a090]">
-              暂无故事
+      <!-- 新建表单 -->
+      <div v-if="showCreate" class="shrink-0 space-y-2 border-b border-[#e0d4c4] px-3 pb-3">
+        <input
+          v-model="newTitle"
+          placeholder="故事标题"
+          class="w-full rounded-lg border border-[#e0d4c4] bg-white px-2.5 py-1.5 text-[12px] outline-none focus:border-[#c8a060]"
+        />
+        <textarea
+          v-model="newPremise"
+          rows="2"
+          placeholder="世界观设定（可选）"
+          class="w-full rounded-lg border border-[#e0d4c4] bg-white px-2.5 py-1.5 text-[12px] leading-5 outline-none placeholder:text-[#c0b098] focus:border-[#c8a060]"
+        />
+        <button
+          @click="createStory"
+          :disabled="creating"
+          class="w-full rounded-lg bg-[#5a3e28] py-1.5 text-[12px] font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40"
+        >{{ creating ? '创建中...' : '确认创建' }}</button>
+      </div>
+
+      <!-- 列表 -->
+      <div class="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-1">
+        <button
+          v-for="s in sessions"
+          :key="s.id"
+          @click="selectSession(s.id)"
+          class="w-full rounded-xl px-3 py-2.5 text-left transition"
+          :class="activeSession?.id === s.id
+            ? 'bg-[#5a3e28] text-[#f5ead8]'
+            : 'text-[#5a4030] hover:bg-white/60'"
+        >
+          <p class="truncate text-[12px] font-semibold">{{ s.title }}</p>
+          <p class="mt-0.5 text-[10px]" :class="activeSession?.id === s.id ? 'text-[#c8a870]' : 'text-[#a0907a]'">
+            {{ s.progress || '第0章' }} · {{ s.chapterCount }}章
+          </p>
+        </button>
+        <div v-if="!sessions.length" class="py-8 text-center text-[11px] text-[#b0a090]">暂无故事</div>
+      </div>
+    </div>
+
+    <!-- 右侧：阅读/交互区 -->
+    <div class="flex min-w-0 flex-1 flex-col">
+
+      <!-- 无故事选中 -->
+      <div v-if="!activeSession" class="flex flex-1 items-center justify-center text-[13px] text-[#b0a090]">
+        选择或新建一个故事开始
+      </div>
+
+      <template v-else>
+        <!-- 故事头部 -->
+        <div class="shrink-0 border-b border-[#e0d4c4] bg-[#fffdf8] px-6 py-3">
+          <div class="flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <h2 class="truncate text-[15px] font-extrabold text-[#4a3020]">{{ activeSession.title }}</h2>
+              <p v-if="activeSession.summary" class="mt-0.5 line-clamp-1 text-[11px] text-[#8a7a60]">{{ activeSession.summary }}</p>
             </div>
-          </div>
-        </section>
-
-        <section class="rounded-2xl border border-[#e0d4c4] bg-[#fffdf8] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-          <div v-if="activeSession" class="mb-3 rounded-xl border border-[#ece2d4] bg-[#fffbf4] px-3 py-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h2 class="text-base font-bold text-[#5a4030]">{{ activeSession.title }}</h2>
-              <span class="rounded-full border border-[#d4c0a0] bg-[#f5ead8] px-2 py-0.5 text-xs text-[#6a5a48]">{{ activeSession.progress || '第0章' }}</span>
-            </div>
-            <p class="mt-1 text-xs leading-6 text-[#6a5a48]">{{ activeSession.summary || '故事尚未展开。点击“开始故事”进入第一章。' }}</p>
-          </div>
-
-          <div ref="timelineRef" class="max-h-[460px] space-y-3 overflow-y-auto pr-1">
-            <article v-for="turn in turns" :key="turn.id" class="rounded-xl border px-3 py-2" :class="turn.role === 'assistant' ? 'border-[#e8dcc8] bg-[#fffaf2]' : 'border-[#ece2d4] bg-white'">
-              <div class="mb-1 flex items-center justify-between text-[11px] text-[#a0907a]">
-                <span>{{ turn.role === 'assistant' ? `第${turn.turnIndex}章` : '你的选择' }}</span>
-                <span>{{ formatTime(turn.createdAt) }}</span>
-              </div>
-              <p class="whitespace-pre-wrap text-sm leading-7 text-[#4a3a28]">{{ turn.content }}</p>
-              <div v-if="turn.role === 'assistant'" class="mt-2">
-                <p class="text-[11px] text-[#8a7a60]">进度：{{ turn.progress }}</p>
-                <p class="mt-1 text-[11px] leading-5 text-[#8a7a60]">梗概：{{ turn.summary }}</p>
-              </div>
-            </article>
-            <div v-if="!turns.length" class="rounded-xl border border-dashed border-[#e0d4c4] bg-[#fffcf6] px-4 py-10 text-center text-sm text-[#b0a090]">
-              还没有章节，点击下面“开始故事”即可生成第一章。
-            </div>
-          </div>
-
-          <div v-if="activeSession" class="mt-3 space-y-2">
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div class="flex shrink-0 items-center gap-2">
+              <span class="rounded-full border border-[#d4c0a0] bg-[#f5ead8] px-2.5 py-0.5 text-[10px] font-semibold text-[#7a5a38]">
+                {{ activeSession.progress || '第0章' }}
+              </span>
               <button
-                v-for="(c, idx) in currentChoices"
-                :key="`${idx}-${c}`"
-                class="rounded-xl border border-[#d4c0a0] bg-[#f5ead8] px-3 py-2 text-left text-sm text-[#5a4a38] transition hover:bg-[#ece0c8] disabled:opacity-40"
+                @click="resetStory"
                 :disabled="loading"
-                @click="generateByChoice(c)"
+                class="rounded-lg border border-[#e0d4c4] px-2.5 py-1 text-[11px] text-[#b0a080] transition hover:border-[#c8a060] hover:text-[#a07040] disabled:opacity-40"
+              >重置</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 章节流 -->
+        <div ref="timelineRef" class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          <div class="mx-auto max-w-[680px] space-y-5">
+
+            <!-- 空状态 -->
+            <div v-if="!chapters.length" class="rounded-2xl border border-dashed border-[#e0d4c4] py-14 text-center text-[13px] text-[#b0a090]">
+              还没有章节，点击下面"开始故事"即可生成第一章
+            </div>
+
+            <!-- 章节卡片 -->
+            <div v-for="ch in chapters" :key="ch.id">
+              <!-- 用户行动标签 -->
+              <div v-if="ch.action && ch.action !== '开始故事'" class="mb-2 flex items-center gap-2">
+                <span class="h-px flex-1 bg-[#e8e0d4]" />
+                <span class="rounded-full border border-[#e0d4c4] bg-[#ede8e0] px-2.5 py-0.5 text-[10px] text-[#8a7a60]">
+                  {{ ch.action }}
+                </span>
+                <span class="h-px flex-1 bg-[#e8e0d4]" />
+              </div>
+
+              <!-- 章节正文 -->
+              <article class="rounded-2xl border border-[#e8dcc8] bg-[#fffaf2] px-5 py-4">
+                <div class="mb-2.5 flex items-center justify-between text-[10px] text-[#b0a080]">
+                  <span class="font-bold tracking-wider">第 {{ ch.idx }} 章</span>
+                  <span>{{ ch.progress }}</span>
+                </div>
+                <p class="whitespace-pre-wrap text-[14px] leading-[1.9] text-[#3a2e1e]">{{ ch.content }}</p>
+              </article>
+            </div>
+
+            <!-- 生成中 -->
+            <div v-if="loading" class="flex items-center gap-3 py-4 text-[12px] text-[#b0a080]">
+              <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#e8e0d4] border-t-[#c8a060]" />
+              Agent 正在推进剧情...
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部操作区 -->
+        <div class="shrink-0 border-t border-[#e0d4c4] bg-[#fffdf8] px-6 py-4">
+          <div class="mx-auto max-w-[680px]">
+            <!-- 错误 -->
+            <div v-if="error" class="mb-3 rounded-xl border border-[#e8c0b0] bg-[#fdf5f0] px-3 py-2 text-[11px] text-[#c06040]">{{ error }}</div>
+
+            <!-- 三选项 -->
+            <div v-if="currentChoices.length" class="mb-3 grid grid-cols-3 gap-2">
+              <button
+                v-for="(c, i) in currentChoices"
+                :key="`${i}-${c}`"
+                @click="runGenerate(c)"
+                :disabled="loading"
+                class="rounded-xl border border-[#d4c0a0] bg-[#f5ead8] px-3 py-2.5 text-left text-[12px] leading-snug text-[#5a4a38] transition hover:bg-[#ece0c8] hover:border-[#c8a060] disabled:opacity-40"
               >{{ c }}</button>
             </div>
 
+            <!-- 自定义输入 -->
             <div class="flex items-center gap-2">
               <input
                 v-model="customAction"
-                placeholder="自定义行动..."
-                @keyup.enter="generateByCustom"
-                class="min-w-0 flex-1 rounded-lg border border-[#e0d4c4] bg-white px-3 py-2 text-sm outline-none focus:border-[#c8a060]"
+                placeholder="自定义行动，或直接开始故事..."
+                @keyup.enter="chapters.length ? runCustom() : runGenerate('开始故事')"
+                class="min-w-0 flex-1 rounded-xl border border-[#e0d4c4] bg-white px-4 py-2.5 text-[13px] outline-none transition placeholder:text-[#c0b098] focus:border-[#c8a060]"
               />
               <button
-                class="rounded-lg bg-[#5a3e28] px-3 py-2 text-sm font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40"
+                @click="chapters.length ? runCustom() : runGenerate('开始故事')"
                 :disabled="loading"
-                @click="turns.length ? generateByCustom() : generateByChoice('开始故事')"
-              >{{ loading ? '生成中...' : (turns.length ? '发送' : '开始故事') }}</button>
+                class="shrink-0 rounded-xl bg-[#5a3e28] px-5 py-2.5 text-[13px] font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40"
+              >{{ loading ? '生成中...' : (chapters.length ? '行动' : '开始故事') }}</button>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -125,24 +168,22 @@ const API_BASE = 'http://localhost:9701/apps/story';
 
 const sessions = ref([]);
 const activeSession = ref(null);
-const turns = ref([]);
+const chapters = ref([]);
 const error = ref('');
 const creating = ref(false);
 const loading = ref(false);
-
+const showCreate = ref(false);
 const newTitle = ref('');
-const newPrompt = ref('');
+const newPremise = ref('');
 const customAction = ref('');
 const timelineRef = ref(null);
 
 const currentChoices = computed(() => {
-  for (let i = turns.value.length - 1; i >= 0; i -= 1) {
-    const t = turns.value[i];
-    if (t.role === 'assistant' && Array.isArray(t.choices) && t.choices.length) {
-      return t.choices.slice(0, 3);
-    }
+  for (let i = chapters.value.length - 1; i >= 0; i--) {
+    const ch = chapters.value[i];
+    if (Array.isArray(ch.choices) && ch.choices.length) return ch.choices.slice(0, 3);
   }
-  return ['观察环境', '主动出击', '保守试探'];
+  return [];
 });
 
 const request = async (url, options = {}) => {
@@ -154,9 +195,7 @@ const request = async (url, options = {}) => {
 
 const scrollToBottom = async () => {
   await nextTick();
-  if (timelineRef.value) {
-    timelineRef.value.scrollTop = timelineRef.value.scrollHeight;
-  }
+  if (timelineRef.value) timelineRef.value.scrollTop = timelineRef.value.scrollHeight;
 };
 
 const loadSessions = async () => {
@@ -167,7 +206,8 @@ const loadSessions = async () => {
 const selectSession = async (id) => {
   const data = await request(`${API_BASE}/history?sessionId=${id}`);
   activeSession.value = data.session;
-  turns.value = data.turns || [];
+  chapters.value = data.chapters || [];
+  error.value = '';
   await scrollToBottom();
 };
 
@@ -178,13 +218,11 @@ const createStory = async () => {
     const data = await request(`${API_BASE}/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: newTitle.value.trim(),
-        story_prompt: newPrompt.value.trim()
-      })
+      body: JSON.stringify({ title: newTitle.value.trim(), premise: newPremise.value.trim() })
     });
     newTitle.value = '';
-    newPrompt.value = '';
+    newPremise.value = '';
+    showCreate.value = false;
     await loadSessions();
     await selectSession(data.session.id);
   } catch (e) {
@@ -194,19 +232,7 @@ const createStory = async () => {
   }
 };
 
-const refreshSessionHeader = () => {
-  if (!activeSession.value) return;
-  const latest = turns.value.filter(t => t.role === 'assistant').slice(-1)[0];
-  if (!latest) return;
-  activeSession.value = {
-    ...activeSession.value,
-    summary: latest.summary || activeSession.value.summary,
-    progress: latest.progress || activeSession.value.progress,
-    totalChapters: latest.turnIndex || activeSession.value.totalChapters
-  };
-};
-
-const runGenerate = async (actionText) => {
+const runGenerate = async (action) => {
   if (!activeSession.value || loading.value) return;
   error.value = '';
   loading.value = true;
@@ -214,10 +240,9 @@ const runGenerate = async (actionText) => {
     await request(`${API_BASE}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: activeSession.value.id, action: actionText })
+      body: JSON.stringify({ sessionId: activeSession.value.id, action })
     });
     await selectSession(activeSession.value.id);
-    refreshSessionHeader();
     await loadSessions();
   } catch (e) {
     error.value = e.message || '生成失败';
@@ -227,11 +252,7 @@ const runGenerate = async (actionText) => {
   }
 };
 
-const generateByChoice = async (choice) => {
-  await runGenerate(choice);
-};
-
-const generateByCustom = async () => {
+const runCustom = async () => {
   const text = customAction.value.trim();
   if (!text) return;
   await runGenerate(text);
@@ -239,6 +260,7 @@ const generateByCustom = async () => {
 
 const resetStory = async () => {
   if (!activeSession.value || loading.value) return;
+  if (!confirm(`重置「${activeSession.value.title}」？所有章节将被清除。`)) return;
   error.value = '';
   loading.value = true;
   try {
@@ -256,19 +278,10 @@ const resetStory = async () => {
   }
 };
 
-const formatTime = (value) => {
-  if (!value) return '';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleString('zh-CN', { hour12: false });
-};
-
 onMounted(async () => {
   try {
     await loadSessions();
-    if (sessions.value.length > 0) {
-      await selectSession(sessions.value[0].id);
-    }
+    if (sessions.value.length > 0) await selectSession(sessions.value[0].id);
   } catch (e) {
     error.value = e.message || '初始化失败';
   }

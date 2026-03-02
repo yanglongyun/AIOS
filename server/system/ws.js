@@ -1,10 +1,22 @@
 import { WebSocketServer } from 'ws';
 import { createSession } from '../chat/session.js';
 
+const clients = new Set();
+
+export const broadcast = (msg) => {
+  const payload = JSON.stringify(msg);
+  for (const ws of clients) {
+    if (ws.readyState === ws.OPEN) {
+      ws.send(payload);
+    }
+  }
+};
+
 export const setupWebSocket = (httpServer) => {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
   wss.on('connection', (ws) => {
+    clients.add(ws);
     const send = (msg) => {
       if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(msg));
     };
@@ -15,6 +27,10 @@ export const setupWebSocket = (httpServer) => {
       let data;
       try { data = JSON.parse(raw); } catch { return; }
       await handleMessage(data);
+    });
+
+    ws.on('close', () => {
+      clients.delete(ws);
     });
   });
 };

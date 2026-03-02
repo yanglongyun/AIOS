@@ -2,7 +2,7 @@ import { db } from '../db.js';
 
 export const listHandler = () => {
   const rows = db.prepare(`
-    SELECT id, title, summary, progress, total_chapters, updated_at, created_at
+    SELECT id, title, summary, progress, chapter_count, updated_at, created_at
     FROM apps_story_sessions
     ORDER BY id DESC
   `).all();
@@ -14,7 +14,7 @@ export const listHandler = () => {
       title: r.title,
       summary: r.summary || '',
       progress: r.progress || '',
-      totalChapters: r.total_chapters || 0,
+      chapterCount: r.chapter_count || 0,
       updatedAt: r.updated_at,
       createdAt: r.created_at
     }))

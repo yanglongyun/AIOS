@@ -5,18 +5,17 @@ export const historyHandler = ({ sessionId }) => {
   if (!Number.isInteger(id) || id <= 0) return { status: 400, message: 'sessionId 无效' };
 
   const session = db.prepare(`
-    SELECT id, title, story_prompt, summary, progress, total_chapters, created_at, updated_at
+    SELECT id, title, premise, summary, progress, chapter_count, created_at, updated_at
     FROM apps_story_sessions
     WHERE id = ?
   `).get(id);
-
   if (!session) return { status: 404, message: '故事不存在' };
 
-  const turns = db.prepare(`
-    SELECT id, turn_index, role, type, content, choices_json, summary, progress, created_at
-    FROM apps_story_turns
+  const chapters = db.prepare(`
+    SELECT id, idx, action, content, choices_json, summary, progress, created_at
+    FROM apps_story_chapters
     WHERE session_id = ?
-    ORDER BY id ASC
+    ORDER BY idx ASC
   `).all(id);
 
   return {
@@ -24,25 +23,22 @@ export const historyHandler = ({ sessionId }) => {
     session: {
       id: session.id,
       title: session.title,
-      storyPrompt: session.story_prompt || '',
+      premise: session.premise || '',
       summary: session.summary || '',
       progress: session.progress || '',
-      totalChapters: session.total_chapters || 0,
+      chapterCount: session.chapter_count || 0,
       createdAt: session.created_at,
       updatedAt: session.updated_at
     },
-    turns: turns.map((t) => ({
-      id: t.id,
-      turnIndex: t.turn_index,
-      role: t.role,
-      type: t.type,
-      content: t.content,
-      choices: (() => {
-        try { return JSON.parse(t.choices_json || '[]'); } catch { return []; }
-      })(),
-      summary: t.summary || '',
-      progress: t.progress || '',
-      createdAt: t.created_at
+    chapters: chapters.map((c) => ({
+      id: c.id,
+      idx: c.idx,
+      action: c.action || '',
+      content: c.content || '',
+      choices: (() => { try { return JSON.parse(c.choices_json || '[]'); } catch { return []; } })(),
+      summary: c.summary || '',
+      progress: c.progress || '',
+      createdAt: c.created_at
     }))
   };
 };

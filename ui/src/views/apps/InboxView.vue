@@ -5,13 +5,13 @@
       <span v-if="unread > 0" class="rounded-full bg-[#d4756a] px-3 py-1 text-[13px] font-bold text-white shadow-[0_2px_6px_rgba(212,117,106,0.25)]">{{ unread }} 封未读</span>
     </div>
 
-    <div class="relative z-[1] mx-6 mt-4 flex shrink-0 items-center justify-between gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4]">
+    <div class="relative z-[1] mx-6 mt-4 flex shrink-0 flex-col gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4] sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0 flex-1">
         <div class="text-xs italic text-[#b8a898]">📮 外部提交入口</div>
         <div class="mt-0.5 text-[11px] leading-relaxed text-[#a59686]">把这个地址发给他人，他们可以在网页上提交留言，提交后会自动进入你的收件箱。</div>
         <div class="mt-1 break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
         <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openSubmitUrl">打开</button>
         <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copySubmitUrl">{{ copied ? '已复制 ✓' : '复制地址' }}</button>
       </div>

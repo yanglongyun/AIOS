@@ -97,5 +97,12 @@ export const appRegistry = [
     load: () => import('./story/index.js'),
     apiHandler: 'handleStoryApi',
     dbInit: ['initStoryDatabase']
+  },
+  {
+    name: 'blackroom',
+    match: (path) => path.startsWith('/apps/blackroom/'),
+    load: () => import('./blackroom/index.js'),
+    apiHandler: 'handleBlackroomApi',
+    dbInit: ['initBlackroomDatabase']
   }
 ];

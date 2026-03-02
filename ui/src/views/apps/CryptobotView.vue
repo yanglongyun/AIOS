@@ -30,7 +30,11 @@
           <input v-model="exForm.passphrase" type="password" placeholder="Passphrase" class="ex-input" />
         </div>
         <input v-model="exForm.base_url" placeholder="API URL（默认 https://www.okx.com）" class="ex-input mt-2 !w-full" />
-        <div class="mt-2.5 text-right">
+        <div class="mt-2.5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button class="btn-ghost" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? '测试中...' : '测试连接' }}</button>
+            <span v-if="testResult" class="text-[11px]" :class="testResult.ok ? 'text-[#2a7030]' : 'text-[#c05030]'">{{ testResult.msg }}</span>
+          </div>
           <button class="btn-dark" @click="doSaveExchange">保存</button>
         </div>
       </div>
@@ -154,6 +158,8 @@ const status = reactive({
 
 const showExPanel = ref(false);
 const exForm = reactive({ api_key: '', api_secret: '', passphrase: '', base_url: '' });
+const testingEx = ref(false);
+const testResult = ref(null);
 const directive = ref('');
 const intervalMin = ref(5);
 const decisions = ref([]);
@@ -206,11 +212,25 @@ const loadMoreDecisions = () => {
 
 // ---- Actions ----
 
+const doTestExchange = async () => {
+  testingEx.value = true;
+  testResult.value = null;
+  try {
+    await post('/exchange/test', exForm);
+    testResult.value = { ok: true, msg: '✓ 连接成功' };
+  } catch (e) {
+    testResult.value = { ok: false, msg: e.message };
+  } finally {
+    testingEx.value = false;
+  }
+};
+
 const doSaveExchange = async () => {
   error.value = '';
   try {
     await post('/exchange', exForm);
     showExPanel.value = false;
+    testResult.value = null;
     exForm.api_key = ''; exForm.api_secret = ''; exForm.passphrase = '';
     await loadStatus();
   } catch (e) { error.value = e.message; }
@@ -396,6 +416,20 @@ onUnmounted(() => {
   transition: all 0.15s;
 }
 .btn-dark:hover { background: #4a3e30; }
+.btn-ghost {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #c0b098;
+  background: transparent;
+  color: #6a5a40;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { background: #f0e8d8; color: #3a2e20; }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-stop {
   padding: 6px 14px;
   border-radius: 8px;

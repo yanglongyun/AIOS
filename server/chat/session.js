@@ -1,6 +1,6 @@
 import { chat } from '../agent/handler.js';
 import { db } from '../db/client.js';
-import { getSettings } from '../api/settings/get.js';
+import { getSettings } from '../db/settings.js';
 import { buildSystemPrompt } from './prompt.js';
 import { getAppsCatalog } from './apps.js';
 import { resolve } from 'path';

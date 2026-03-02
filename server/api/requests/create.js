@@ -1,5 +1,5 @@
 import { db } from '../../db/client.js';
-import { getSettings } from '../settings/get.js';
+import { getSettings } from '../../db/settings.js';
 import { chat } from '../../agent/handler.js';
 
 export const createRequest = async ({ app, prompt }) => {
@@ -17,7 +17,7 @@ export const createRequest = async ({ app, prompt }) => {
   try {
     const result = await chat(messages, {
       model, apiUrl, apiKey, provider,
-      tools: null
+      maxRounds: 10
     });
 
     db.prepare(

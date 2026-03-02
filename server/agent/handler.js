@@ -1,9 +1,6 @@
-import { tools as defaultTools } from './tools.js';
+import { tools } from './tools.js';
 import { runTools } from './runner.js';
 import { callLLM } from './llm.js';
-import { trimMessages } from './messages.js';
-
-const MAX_ROUNDS = 50;
 
 /**
  * send 协议：
@@ -12,14 +9,12 @@ const MAX_ROUNDS = 50;
  *   { type: 'tool_result',  content, _message, _meta } — 工具结果，UI + 持久化
  *   { type: 'reply',        content, _message }   — 最终回复，UI + 持久化
  */
-export const chat = async (messages, { model, contextRounds, apiUrl, apiKey, provider, tools = defaultTools, send = () => {}, signal } = {}) => {
+export const chat = async (messages, { model, maxRounds = 50, apiUrl, apiKey, provider, send = () => {}, signal } = {}) => {
   let round = 0;
 
-  while (round++ < MAX_ROUNDS) {
+  while (round++ < maxRounds) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-    const trimmed = trimMessages(messages, contextRounds);
-    const payload = { model, messages: trimmed };
-    if (tools) payload.tools = tools;
+    const payload = { model, messages, tools };
     const message = await callLLM(provider, apiUrl, apiKey, payload, signal);
 
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {

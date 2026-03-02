@@ -1,6 +1,6 @@
 import { readBody } from '../utils/readBody.js';
 import { json } from '../utils/json.js';
-import { getSettings } from '../settings/get.js';
+import { getSettings } from '../../db/settings.js';
 import { callLLM } from '../../agent/llm.js';
 
 export const handleLlmChat = async (req, res) => {

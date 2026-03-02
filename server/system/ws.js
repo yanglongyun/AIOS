@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { createSession } from './event.js';
+import { createSession } from '../chat/session.js';
 
 export const setupWebSocket = (httpServer) => {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

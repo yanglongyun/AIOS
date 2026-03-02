@@ -10,21 +10,22 @@ db.pragma('journal_mode = WAL');
 
 export const initBriefingDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_briefing_config (
+    CREATE TABLE IF NOT EXISTS apps_briefing_profile (
       id INTEGER PRIMARY KEY CHECK(id = 1),
-      requirement TEXT NOT NULL DEFAULT '',
+      focus TEXT NOT NULL DEFAULT '',
       updated_at TEXT DEFAULT (datetime('now'))
-    )
-  `);
+    );
 
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_briefing_reports (
+    CREATE TABLE IF NOT EXISTS apps_briefing_daily (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      requirement TEXT NOT NULL DEFAULT '',
-      content_markdown TEXT NOT NULL,
-      sources_json TEXT NOT NULL DEFAULT '[]',
-      created_at TEXT DEFAULT (datetime('now'))
-    )
+      date TEXT NOT NULL UNIQUE,
+      focus TEXT NOT NULL DEFAULT '',
+      title TEXT NOT NULL DEFAULT '',
+      brief TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
+      note TEXT NOT NULL DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 };

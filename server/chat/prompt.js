@@ -1,6 +1,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { countUnread } from '../api/notifications/list.js';
+import { getSettings } from '../db/settings.js';
+import { getAppsCatalog } from './apps.js';
+import { getRecentChats } from './chats.js';
 
 const INSTRUCTION_PATH = join(process.cwd(), 'instruction.md');
 
@@ -20,10 +23,19 @@ const getOverview = () => {
   }
 };
 
-export const buildSystemPrompt = (
-  appsCatalog = [],
-  { enableFollowupSuggestions = true, chatContext = null, modelInfo = null, toolConfig = null } = {}
-) => {
+export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestions = true) => {
+  const settings = getSettings();
+  const {
+    apiUrl,
+    model,
+    provider,
+    enableToolResultTruncate,
+    toolResultMaxChars,
+    enableToolLoopLimit,
+    toolMaxRounds
+  } = settings;
+  const appsCatalog = getAppsCatalog();
+  const recentChats = getRecentChats();
   const cwd = process.cwd();
 
   let prompt = getInstruction();
@@ -42,20 +54,16 @@ export const buildSystemPrompt = (
 - 下载目录：${cwd}/files/downloads/
 - 记忆文件：${cwd}/library/overview.md`;
 
-  if (modelInfo) {
-    prompt += `\n\n## 当前模型配置
-- 供应方：${modelInfo.provider || '-'}
-- 模型：${modelInfo.model || '-'}
-- 请求地址：${modelInfo.apiUrl || '-'}`;
-  }
+  prompt += `\n\n## 当前模型配置
+- 供应方：${provider || '-'}
+- 模型：${model || '-'}
+- 请求地址：${apiUrl || '-'}`;
 
-  if (toolConfig) {
-    prompt += `\n\n## 工具配置
-- 工具结果截断：${toolConfig.enableToolResultTruncate ? '开启' : '关闭'}
-- 工具结果最大长度：${toolConfig.toolResultMaxChars ?? '-'}
-- 工具循环限制：${toolConfig.enableToolLoopLimit ? '开启' : '关闭'}
-- 工具最大循环轮次：${toolConfig.toolMaxRounds ?? '-'}`;
-  }
+  prompt += `\n\n## 工具配置
+- 工具结果截断：${enableToolResultTruncate ? '开启' : '关闭'}
+- 工具结果最大长度：${toolResultMaxChars ?? '-'}
+- 工具循环限制：${enableToolLoopLimit ? '开启' : '关闭'}
+- 工具最大循环轮次：${toolMaxRounds ?? '-'}`;
 
   if (Array.isArray(appsCatalog) && appsCatalog.length > 0) {
     const lines = appsCatalog.map((app, i) => {
@@ -67,16 +75,15 @@ export const buildSystemPrompt = (
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。`;
   }
 
-  if (chatContext?.currentSessionId || (Array.isArray(chatContext?.recentChats) && chatContext.recentChats.length)) {
-    const currentSessionId = String(chatContext?.currentSessionId || '').trim();
-    const recentChats = Array.isArray(chatContext?.recentChats) ? chatContext.recentChats : [];
+  const currentId = String(currentSessionId || '').trim();
+  if (currentId || (Array.isArray(recentChats) && recentChats.length)) {
     const recentLines = recentChats
       .slice(0, 3)
       .map((c, i) => `${i + 1}. ${c.title || '未命名'} ｜ ${String(c.description || '').slice(0, 100)}`);
 
     prompt += `\n\n## 会话上下文`;
-    if (currentSessionId) {
-      prompt += `\n- 当前会话ID：${currentSessionId}`;
+    if (currentId) {
+      prompt += `\n- 当前会话ID：${currentId}`;
     }
     if (recentLines.length) {
       prompt += `\n- 最近 3 次会话（标题｜描述前100字）：\n${recentLines.join('\n')}`;

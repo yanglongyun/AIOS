@@ -1,10 +1,8 @@
 import { chat } from '../agent/handler.js';
 import { getSettings } from '../db/settings.js';
 import { buildSystemPrompt } from './prompt.js';
-import { getAppsCatalog } from './apps.js';
-import { normalizeAttachments, buildAttachmentContext } from './attachments.js';
+import { injectAttachmentsMessage } from './attachments.js';
 import { getMessages, saveMessage } from './messages.js';
-import { getRecentChats } from './chats.js';
 
 export const createSession = (wsSend) => {
   let sessionId = null;
@@ -38,9 +36,7 @@ export const createSession = (wsSend) => {
         enableToolLoopLimit,
         toolMaxRounds
       } = settings;
-      const appsCatalog = getAppsCatalog();
-
-      const incomingSessionId = data.sessionId || data.chatId || null;
+      const incomingSessionId = data.sessionId || null;
       if (!incomingSessionId) {
         wsSend({ type: 'error', content: '缺少 sessionId' });
         return;
@@ -48,56 +44,32 @@ export const createSession = (wsSend) => {
 
       if (incomingSessionId !== sessionId) {
         sessionId = incomingSessionId;
-        const recentChats = getRecentChats();
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(appsCatalog, {
-            modelInfo: { provider, model, apiUrl },
-            chatContext: {
-              currentSessionId: sessionId,
-              recentChats
-            },
-            toolConfig: {
-              enableToolResultTruncate,
-              toolResultMaxChars,
-              enableToolLoopLimit,
-              toolMaxRounds
-            }
-          })
+          content: buildSystemPrompt(sessionId)
         }, ...getMessages(sessionId, contextRounds)];
       }
 
-      const recentChats = getRecentChats();
       messages[0] = {
         role: 'system',
-        content: buildSystemPrompt(appsCatalog, {
-          chatContext: {
-            currentSessionId: sessionId,
-            recentChats
-          },
-          toolConfig: {
-            enableToolResultTruncate,
-            toolResultMaxChars,
-            enableToolLoopLimit,
-            toolMaxRounds
-          }
-        })
+        content: buildSystemPrompt(sessionId)
       };
 
       const userMsg = { role: 'user', content: data.content };
-      messages.push(userMsg);
-      const attachments = normalizeAttachments(data.attachments);
-      saveMessage(sessionId, userMsg, attachments.length ? { attachments } : null);
-
-      const modelMessages = [...messages];
-      if (attachments.length) {
-        const lastIndex = modelMessages.length - 1;
-        const original = modelMessages[lastIndex];
-        modelMessages[lastIndex] = {
-          ...original,
-          content: `${original.content}\n\n${buildAttachmentContext(attachments)}`
-        };
+      let userMeta = null;
+      let modelUserMsg = userMsg;
+      if (Array.isArray(data.attachments) && data.attachments.length > 0) {
+        const injected = injectAttachmentsMessage([userMsg], data.attachments);
+        modelUserMsg = injected.messages[0] || userMsg;
+        if (injected.attachments.length > 0) {
+          userMeta = { attachments: injected.attachments };
+        }
       }
+
+      messages.push(userMsg);
+      const modelMessages = [...messages];
+      modelMessages[modelMessages.length - 1] = modelUserMsg;
+      saveMessage(sessionId, userMsg, userMeta);
 
       abortController = new AbortController();
       const { signal } = abortController;
@@ -146,15 +118,7 @@ export const createSession = (wsSend) => {
         });
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(appsCatalog, {
-            modelInfo: { provider, model, apiUrl },
-            toolConfig: {
-              enableToolResultTruncate,
-              toolResultMaxChars,
-              enableToolLoopLimit,
-              toolMaxRounds
-            }
-          })
+          content: buildSystemPrompt(sessionId)
         }, ...getMessages(sessionId, contextRounds)];
       } catch (e) {
         if (e.name === 'AbortError') {

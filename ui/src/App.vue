@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <ActivityPanel
+    <AvatarPanel
       v-if="avatarPanelOpen"
       :avatar-emoji="avatarEmoji"
       :avatar-burst="avatarBurst"
@@ -36,6 +36,7 @@
       @toggle-emoji="saveUiPrefs({ enableAvatarEmoji: $event })"
       @toggle-sound="saveUiPrefs({ enableAvatarSound: $event })"
     />
+
 
     <NotificationsPanel
       v-if="activePanel === 'notifications'"
@@ -65,7 +66,7 @@ import { RouterView } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
-import ActivityPanel from './components/ActivityPanel.vue';
+import AvatarPanel from './components/AvatarPanel.vue';
 import NotificationsPanel from './components/NotificationsPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 import { useAvatarEffects } from './components/avatarEffects.js';

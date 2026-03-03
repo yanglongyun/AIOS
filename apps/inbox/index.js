@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
 import { initInboxDatabase } from './db.js';
@@ -8,8 +7,6 @@ import { listHandler } from './api/list.js';
 import { submitHandler } from './api/submit.js';
 import { readHandler } from './api/read.js';
 import { deleteHandler } from './api/delete.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export { initInboxDatabase };
 
@@ -21,7 +18,7 @@ const getSourceIp = (req) => {
 
 export const handleInboxApi = async (req, res, pathName) => {
   if (pathName === '/apps/inbox/submit' && req.method === 'GET') {
-    const html = fs.readFileSync(path.join(__dirname, 'public/submit.html'), 'utf8');
+    const html = fs.readFileSync(path.join(process.cwd(), 'www', 'apps', 'inbox', 'submit.html'), 'utf8');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);
     return true;

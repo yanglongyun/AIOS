@@ -1,6 +1,6 @@
 <template>
   <section class="space-y-2">
-    <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">上下文轮数</span>
+    <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_context_rounds') }}</span>
     <div class="flex gap-2">
       <button
         v-for="n in [10, 30, 100]"
@@ -15,12 +15,16 @@
       </button>
     </div>
     <div class="pt-2 flex justify-end">
-      <button @click="$emit('save')" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:opacity-80 rounded-lg text-sm text-white dark:text-neutral-900 cursor-pointer transition-opacity">保存</button>
+      <button @click="$emit('save')" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:opacity-80 rounded-lg text-sm text-white dark:text-neutral-900 cursor-pointer transition-opacity">{{ t('common_save') }}</button>
     </div>
   </section>
 </template>
 
 <script setup>
+import { useI18n } from '../../i18n/index.js';
+
+const { t } = useI18n();
+
 defineProps({
   contextRounds: { type: Number, default: 30 }
 });

@@ -1,5 +1,14 @@
 import { db } from '../db.js';
 
+const DEFAULT_QUESTION = '今天你最想推进的一件事是什么？为什么它重要？';
+
+const toDateKey = (date = new Date()) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const calcStreak = () => {
   const rows = db.prepare(`
     SELECT date, answer
@@ -16,6 +25,13 @@ const calcStreak = () => {
 };
 
 export const todayHandler = async () => {
+  const todayDate = toDateKey();
+  db.prepare(`
+    INSERT INTO apps_dailycheck_daily (date, question, answer, response, note, updated_at)
+    VALUES (?, ?, '', '', '', datetime('now'))
+    ON CONFLICT(date) DO NOTHING
+  `).run(todayDate, DEFAULT_QUESTION);
+
   const dailyRow = db.prepare(`
     SELECT
       id,

@@ -5,7 +5,7 @@ import { db } from '../db.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../../..');
-const UPLOAD_DIR = join(ROOT, 'uploads', 'treasure');
+const UPLOAD_DIR = join(ROOT, 'files', 'uploads', 'treasure');
 
 const parseModelJson = (raw = '') => {
   const text = String(raw || '').trim();

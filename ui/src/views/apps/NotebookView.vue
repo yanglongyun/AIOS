@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full w-full flex-col overflow-hidden bg-[#f5f0e8] font-['PingFang_SC',-apple-system,sans-serif] text-[#3a3a3a]">
     <div class="flex shrink-0 items-center justify-between px-5 pb-2 pt-5">
-      <h1 class="text-[22px] font-bold text-[#5a4a3a]">随心记</h1>
+      <h1 class="text-[22px] font-bold text-[#5a4a3a]">{{ t('notebook_title') }}</h1>
       <button class="flex h-9 w-9 items-center justify-center rounded-[10px] border-none bg-transparent text-[#a09080] transition-all hover:bg-black/5 hover:text-[#5a4a3a]" @click="showSearch = !showSearch">
         <Search class="h-[18px] w-[18px]" />
       </button>
@@ -12,7 +12,7 @@
         ref="searchInputEl"
         v-model="searchQuery"
         type="text"
-        placeholder="搜索笔记..."
+        :placeholder="t('notebook_search_placeholder')"
         class="w-full rounded-[10px] border-2 border-dashed border-[#d4c8b8] bg-white px-3.5 py-2.5 pr-8 text-sm text-[#3a3a3a] outline-none transition-colors placeholder:text-[#c4b8a8] focus:border-solid focus:border-[#c0a878]"
         @input="onSearchInput"
       />
@@ -22,7 +22,7 @@
     <div class="flex-1 overflow-y-auto px-4 pb-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div v-if="!notes.length && !loading" class="flex h-full flex-col items-center justify-center gap-2 text-[#b8a898]">
         <span class="text-4xl opacity-50">📝</span>
-        <p class="text-sm">还没有笔记，写点什么吧</p>
+        <p class="text-sm">{{ t('notebook_empty') }}</p>
       </div>
 
       <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
@@ -42,21 +42,21 @@
               @keydown.ctrl.enter.prevent="saveInlineEdit"
             />
             <div class="mt-2 flex justify-end gap-1.5">
-              <button class="rounded-md bg-black/5 px-3 py-1 text-[11px] text-[#888] transition-colors hover:bg-black/10" @click="cancelInlineEdit">取消</button>
-              <button class="rounded-md bg-[#e8a44a] px-3 py-1 text-[11px] text-white transition-colors hover:bg-[#d49440] disabled:cursor-not-allowed disabled:opacity-40" :disabled="editingSaving || !editingDraft.trim()" @click="saveInlineEdit">
-                {{ editingSaving ? '...' : '保存' }}
-              </button>
-            </div>
-          </template>
+                <button class="rounded-md bg-black/5 px-3 py-1 text-[11px] text-[#888] transition-colors hover:bg-black/10" @click="cancelInlineEdit">{{ t('common_cancel') }}</button>
+                <button class="rounded-md bg-[#e8a44a] px-3 py-1 text-[11px] text-white transition-colors hover:bg-[#d49440] disabled:cursor-not-allowed disabled:opacity-40" :disabled="editingSaving || !editingDraft.trim()" @click="saveInlineEdit">
+                  {{ editingSaving ? '...' : t('common_save') }}
+                </button>
+              </div>
+            </template>
 
           <template v-else>
             <div class="line-clamp-6 whitespace-pre-wrap break-words text-[13px] leading-7">{{ note.content || '（空）' }}</div>
             <div class="mt-2.5 flex items-center justify-between">
               <span class="text-[10px] text-black/30">{{ formatTime(note.updated_at || note.created_at) }}</span>
               <div class="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="editNote(note)" title="编辑">✏️</button>
-                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="togglePin(note)" :title="note.pinned ? '取消置顶' : '置顶'">📌</button>
-                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="deleteNote(note.id)" title="删除">🗑</button>
+                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="editNote(note)" :title="t('notebook_edit')">✏️</button>
+                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="togglePin(note)" :title="note.pinned ? t('notebook_unpin') : t('notebook_pin')">📌</button>
+                <button class="flex h-6 w-6 items-center justify-center rounded-md border-none bg-white/60 text-[11px] transition-colors hover:bg-white/90" @click="deleteNote(note.id)" :title="t('notebook_delete')">🗑</button>
               </div>
             </div>
           </template>
@@ -72,10 +72,10 @@
 
     <div v-if="optimizedDraft" class="mx-4 mb-2 shrink-0 rounded-[10px] border border-[#f0e4c8] bg-[#fff9e8] px-3.5 py-3">
       <div class="mb-2 flex items-center justify-between">
-        <span class="text-xs font-medium text-[#c0903a]">✨ 优化结果</span>
+        <span class="text-xs font-medium text-[#c0903a]">✨ {{ t('notebook_optimized') }}</span>
         <div class="flex gap-1.5">
-          <button class="rounded-md bg-[#e8a44a] px-2.5 py-0.5 text-[11px] text-white transition-colors hover:bg-[#d49440]" @click="applyOptimized">使用</button>
-          <button class="rounded-md bg-transparent px-2.5 py-0.5 text-[11px] text-[#999] transition-colors hover:bg-black/5" @click="closeOptimized">关闭</button>
+          <button class="rounded-md bg-[#e8a44a] px-2.5 py-0.5 text-[11px] text-white transition-colors hover:bg-[#d49440]" @click="applyOptimized">{{ t('notebook_use') }}</button>
+          <button class="rounded-md bg-transparent px-2.5 py-0.5 text-[11px] text-[#999] transition-colors hover:bg-black/5" @click="closeOptimized">{{ t('common_close') }}</button>
         </div>
       </div>
       <div class="max-h-[100px] overflow-y-auto whitespace-pre-wrap text-[13px] leading-6 text-[#3a3a3a]">{{ optimizedDraft }}</div>
@@ -89,13 +89,13 @@
           ref="inputEl"
           v-model="draft"
           rows="1"
-          placeholder="写点什么..."
+          :placeholder="t('notebook_input_placeholder')"
           class="max-h-[100px] flex-1 resize-none rounded-[10px] border-2 border-dashed border-[#d4c8b8] bg-white px-3.5 py-3 text-sm leading-6 text-[#3a3a3a] outline-none transition-colors placeholder:text-[#c4b8a8] focus:border-solid focus:border-[#c0a878]"
           @input="autoResize"
           @keydown.meta.enter.prevent="saveNote"
           @keydown.ctrl.enter.prevent="saveNote"
         />
-        <button class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border-none bg-transparent text-[#e8a44a] transition-all hover:bg-[rgba(232,164,74,0.1)] disabled:cursor-not-allowed disabled:opacity-30" :disabled="optimizing || !draft.trim()" title="AI 优化" @click="optimizeDraft">
+        <button class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border-none bg-transparent text-[#e8a44a] transition-all hover:bg-[rgba(232,164,74,0.1)] disabled:cursor-not-allowed disabled:opacity-30" :disabled="optimizing || !draft.trim()" :title="t('notebook_optimize')" @click="optimizeDraft">
           <span v-if="optimizing" class="text-xs">...</span>
           <Sparkles v-else class="h-[18px] w-[18px]" />
         </button>
@@ -111,9 +111,11 @@
 <script setup>
 import { onMounted, ref, nextTick, watch } from 'vue';
 import { Plus, Search, Sparkles } from 'lucide-vue-next';
+import { useI18n } from '../../i18n/index.js';
 
 const API_BASE = 'http://localhost:9701/apps/notebook';
 const PAGE_SIZE = 10;
+const { t } = useI18n();
 
 const notes = ref([]);
 const draft = ref('');
@@ -173,7 +175,7 @@ const fetchNotes = async () => {
       return fetchNotes();
     }
   } catch (e) {
-    error.value = e.message || '加载失败';
+    error.value = e.message || t('notebook_load_failed');
   } finally {
     loading.value = false;
   }
@@ -198,7 +200,7 @@ const saveNote = async () => {
     page.value = 1;
     await fetchNotes();
   } catch (e) {
-    error.value = e.message || '保存失败';
+    error.value = e.message || t('notebook_create_failed');
   } finally {
     creating.value = false;
   }
@@ -228,10 +230,10 @@ const optimizeDraft = async () => {
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
     const improved = (data.message?.content || '').trim();
-    if (!improved) throw new Error('优化结果为空');
+    if (!improved) throw new Error(t('notebook_optimize_empty'));
     optimizedDraft.value = improved;
   } catch (e) {
-    error.value = e.message || '优化失败';
+    error.value = e.message || t('notebook_optimize_failed');
   } finally {
     optimizing.value = false;
   }
@@ -275,7 +277,7 @@ const saveInlineEdit = async () => {
     cancelInlineEdit();
     await fetchNotes();
   } catch (e) {
-    error.value = e.message || '更新失败';
+    error.value = e.message || t('notebook_update_failed');
   } finally {
     editingSaving.value = false;
   }
@@ -294,7 +296,7 @@ const deleteNote = async (id) => {
     if (editingId.value === id) cancelInlineEdit();
     await fetchNotes();
   } catch (e) {
-    error.value = e.message || '删除失败';
+    error.value = e.message || t('notebook_delete_failed');
   }
 };
 
@@ -309,7 +311,7 @@ const togglePin = async (note) => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     await fetchNotes();
   } catch (e) {
-    error.value = e.message || '置顶更新失败';
+    error.value = e.message || t('notebook_pin_failed');
   }
 };
 

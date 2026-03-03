@@ -22,7 +22,7 @@ const getOverview = () => {
 
 export const buildSystemPrompt = (
   appsCatalog = [],
-  { enableFollowupSuggestions = true, chatContext = null, modelInfo = null } = {}
+  { enableFollowupSuggestions = true, chatContext = null, modelInfo = null, toolConfig = null } = {}
 ) => {
   const cwd = process.cwd();
 
@@ -36,7 +36,10 @@ export const buildSystemPrompt = (
   prompt += `\n\n## 环境
 - 项目根目录：${cwd}
 - 系统数据库：${cwd}/database/aios.db（SQLite，表：chats, messages, settings）
-- 应用数据库：${cwd}/database/apps.db（SQLite，应用表如 notebook_notes）
+- 应用数据库目录：${cwd}/database/apps/（SQLite，每个应用独立 db 文件）
+- 文件系统目录：${cwd}/files/
+- 上传目录：${cwd}/files/uploads/
+- 下载目录：${cwd}/files/downloads/
 - 记忆文件：${cwd}/library/overview.md`;
 
   if (modelInfo) {
@@ -44,6 +47,14 @@ export const buildSystemPrompt = (
 - 供应方：${modelInfo.provider || '-'}
 - 模型：${modelInfo.model || '-'}
 - 请求地址：${modelInfo.apiUrl || '-'}`;
+  }
+
+  if (toolConfig) {
+    prompt += `\n\n## 工具配置
+- 工具结果截断：${toolConfig.enableToolResultTruncate ? '开启' : '关闭'}
+- 工具结果最大长度：${toolConfig.toolResultMaxChars ?? '-'}
+- 工具循环限制：${toolConfig.enableToolLoopLimit ? '开启' : '关闭'}
+- 工具最大循环轮次：${toolConfig.toolMaxRounds ?? '-'}`;
   }
 
   if (Array.isArray(appsCatalog) && appsCatalog.length > 0) {

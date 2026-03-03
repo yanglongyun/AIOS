@@ -5,9 +5,10 @@ import { buildSystemPrompt } from './prompt.js';
 import { getAppsCatalog } from './apps.js';
 import { resolve } from 'path';
 
-const getMessages = (sessionId) => {
-  const rows = db.prepare('SELECT message, meta FROM messages WHERE session_id = ? ORDER BY id').all(sessionId);
-  return rows.map((r) => ({ ...JSON.parse(r.message), _meta: r.meta ? JSON.parse(r.meta) : null }));
+const getMessages = (sessionId, messageLimit = 30) => {
+  const limit = Math.max(1, Math.min(500, Number(messageLimit) || 30));
+  const rows = db.prepare('SELECT message, meta FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT ?').all(sessionId, limit);
+  return rows.reverse().map((r) => ({ ...JSON.parse(r.message), _meta: r.meta ? JSON.parse(r.meta) : null }));
 };
 
 const saveMessage = (sessionId, msg, meta) => {
@@ -32,7 +33,7 @@ const getRecentChats = () => {
 };
 
 const normalizeAttachments = (raw) => {
-  const baseDir = resolve(process.cwd(), 'uploads', 'chat');
+  const baseDir = resolve(process.cwd(), 'files', 'uploads', 'chat');
   if (!Array.isArray(raw)) return [];
   return raw
     .map((item) => ({
@@ -79,7 +80,17 @@ export const createSession = (wsSend) => {
 
     if (data.type === 'message') {
       const settings = getSettings();
-      const { contextRounds, apiUrl, apiKey, model, provider, enableFollowupSuggestions } = settings;
+      const {
+        contextRounds,
+        apiUrl,
+        apiKey,
+        model,
+        provider,
+        enableToolResultTruncate,
+        toolResultMaxChars,
+        enableToolLoopLimit,
+        toolMaxRounds
+      } = settings;
       const appsCatalog = getAppsCatalog();
 
       const incomingSessionId = data.sessionId || data.chatId || null;
@@ -94,24 +105,34 @@ export const createSession = (wsSend) => {
         messages = [{
           role: 'system',
           content: buildSystemPrompt(appsCatalog, {
-            enableFollowupSuggestions,
             modelInfo: { provider, model, apiUrl },
             chatContext: {
               currentSessionId: sessionId,
               recentChats
+            },
+            toolConfig: {
+              enableToolResultTruncate,
+              toolResultMaxChars,
+              enableToolLoopLimit,
+              toolMaxRounds
             }
           })
-        }, ...getMessages(sessionId)];
+        }, ...getMessages(sessionId, contextRounds)];
       }
 
       const recentChats = getRecentChats();
       messages[0] = {
         role: 'system',
         content: buildSystemPrompt(appsCatalog, {
-          enableFollowupSuggestions,
           chatContext: {
             currentSessionId: sessionId,
             recentChats
+          },
+          toolConfig: {
+            enableToolResultTruncate,
+            toolResultMaxChars,
+            enableToolLoopLimit,
+            toolMaxRounds
           }
         })
       };
@@ -142,17 +163,28 @@ export const createSession = (wsSend) => {
       try {
         await chat(modelMessages, {
           model,
+          maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
           contextRounds,
           apiUrl,
           apiKey,
           provider,
+          enableToolResultTruncate,
+          toolResultMaxChars,
           send,
           signal
         });
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(appsCatalog, { enableFollowupSuggestions, modelInfo: { provider, model, apiUrl } })
-        }, ...getMessages(sessionId)];
+          content: buildSystemPrompt(appsCatalog, {
+            modelInfo: { provider, model, apiUrl },
+            toolConfig: {
+              enableToolResultTruncate,
+              toolResultMaxChars,
+              enableToolLoopLimit,
+              toolMaxRounds
+            }
+          })
+        }, ...getMessages(sessionId, contextRounds)];
       } catch (e) {
         if (e.name === 'AbortError') {
           wsSend({ type: 'aborted' });

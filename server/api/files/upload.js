@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..', '..');
-const UPLOAD_DIR = join(ROOT, 'uploads', 'chat');
+const UPLOAD_DIR = join(ROOT, 'files', 'uploads', 'chat');
 const MAX_SIZE = 10 * 1024 * 1024;
 const ALLOWED_EXT = new Set([
   '.txt', '.md', '.pdf', '.doc', '.docx', '.json', '.csv',

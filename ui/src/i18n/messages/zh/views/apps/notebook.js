@@ -1,0 +1,21 @@
+export default {
+  notebook_title: '随心记',
+  notebook_search_placeholder: '搜索笔记...',
+  notebook_empty: '还没有笔记，写点什么吧',
+  notebook_edit: '编辑',
+  notebook_pin: '置顶',
+  notebook_unpin: '取消置顶',
+  notebook_delete: '删除',
+  notebook_optimized: '优化结果',
+  notebook_use: '使用',
+  notebook_input_placeholder: '写点什么...',
+  notebook_optimize: 'AI 优化',
+  notebook_create_failed: '保存失败',
+  notebook_load_failed: '加载失败',
+  notebook_update_failed: '更新失败',
+  notebook_delete_failed: '删除失败',
+  notebook_pin_failed: '置顶更新失败',
+  notebook_optimize_failed: '优化失败',
+  notebook_optimize_empty: '优化结果为空'
+};
+

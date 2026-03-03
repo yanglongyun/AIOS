@@ -1,19 +1,34 @@
 import { createServer } from 'http';
-import { readFileSync, existsSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync, statSync, mkdirSync } from 'fs';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { handleApiRequest } from '../api/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = join(__dirname, '..', '..', 'ui', 'dist');
+const ROOT_DIR = join(__dirname, '..', '..');
+const PUBLIC_DIR = join(ROOT_DIR, 'ui', 'dist');
+const FILES_DIR = join(ROOT_DIR, 'files');
+const FILES_UPLOADS_DIR = join(FILES_DIR, 'uploads');
+const FILES_DOWNLOADS_DIR = join(FILES_DIR, 'downloads');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript',
   '.css': 'text/css',
+  '.md': 'text/markdown; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
 };
 
 const APPS_PORT = 9701;
+
+mkdirSync(FILES_UPLOADS_DIR, { recursive: true });
+mkdirSync(FILES_DOWNLOADS_DIR, { recursive: true });
 
 const readRawBody = async (req) => {
   const chunks = [];
@@ -24,7 +39,6 @@ const readRawBody = async (req) => {
 const proxyAppsRequest = async (req, res, url) => {
   const target = `http://127.0.0.1:${APPS_PORT}${url.pathname}${url.search}`;
   const headers = { ...req.headers };
-  // Strip hop-by-hop headers when proxying to fetch.
   delete headers.host;
   delete headers.connection;
   delete headers.upgrade;
@@ -57,6 +71,20 @@ const proxyAppsRequest = async (req, res, url) => {
 export const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  if (url.pathname.startsWith('/files/')) {
+    const filePath = join(ROOT_DIR, url.pathname);
+    if (existsSync(filePath) && statSync(filePath).isFile()) {
+      const fileName = url.pathname.split('/').pop() || 'file';
+      const ext = extname(fileName).toLowerCase();
+      res.writeHead(200, {
+        'Content-Type': MIME[ext] || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`
+      });
+      res.end(readFileSync(filePath));
+      return;
+    }
+  }
+
   if (url.pathname.startsWith('/apps/')) {
     try {
       await proxyAppsRequest(req, res, url);
@@ -82,7 +110,6 @@ export const httpServer = createServer(async (req, res) => {
     return;
   }
 
-  // SPA history fallback: let vue-router handle /settings, /chat/*, /notebook, etc.
   const indexPath = join(PUBLIC_DIR, 'index.html');
   if (existsSync(indexPath)) {
     res.writeHead(200, { 'Content-Type': MIME['.html'] });

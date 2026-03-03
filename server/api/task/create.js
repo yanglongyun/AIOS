@@ -4,8 +4,26 @@ import { getSettings } from '../../db/settings.js';
 import { chat } from '../../agent/handler.js';
 import { broadcast } from '../../system/ws.js';
 
+const runningTaskControllers = new Map();
+
+export const stopTaskExecution = (taskId) => {
+  const controller = runningTaskControllers.get(taskId);
+  if (!controller) return false;
+  controller.abort();
+  return true;
+};
+
 export const createTask = async ({ app, prompt }) => {
-  const { apiUrl, apiKey, model, provider } = getSettings();
+  const {
+    apiUrl,
+    apiKey,
+    model,
+    provider,
+    enableToolResultTruncate,
+    toolResultMaxChars,
+    enableToolLoopLimit,
+    toolMaxRounds
+  } = getSettings();
   const sessionId = `task:${randomUUID().slice(0, 8)}`;
 
   const row = db.prepare(
@@ -14,7 +32,14 @@ export const createTask = async ({ app, prompt }) => {
   broadcast({ type: 'tasks_changed' });
 
   const messages = [
-    { role: 'system', content: `你是 AIOS 的 agent，正在处理来自「${app}」应用的请求。直接返回结果，不要废话。` },
+    {
+      role: 'system',
+      content: [
+        `你是 AIOS 的 agent，正在处理来自「${app}」应用的请求。直接返回结果，不要废话。`,
+        `工具结果截断：${enableToolResultTruncate ? '开启' : '关闭'}；最大长度：${toolResultMaxChars}`,
+        `工具循环限制：${enableToolLoopLimit ? '开启' : '关闭'}；最大轮次：${toolMaxRounds}`
+      ].join('\n')
+    },
     { role: 'user', content: prompt }
   ];
 
@@ -30,11 +55,17 @@ export const createTask = async ({ app, prompt }) => {
     if (msg._message) saveMessage(msg._message, msg._meta);
   };
 
+  const abortController = new AbortController();
+  runningTaskControllers.set(row.id, abortController);
+
   try {
     const result = await chat(messages, {
       model, apiUrl, apiKey, provider,
-      maxRounds: 10,
-      send
+      maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
+      enableToolResultTruncate,
+      toolResultMaxChars,
+      send,
+      signal: abortController.signal
     });
 
     db.prepare(
@@ -44,11 +75,19 @@ export const createTask = async ({ app, prompt }) => {
 
     return { id: row.id, sessionId, response: result };
   } catch (e) {
-    db.prepare(
-      "UPDATE tasks SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
-    ).run(e.message, row.id);
+    if (e?.name === 'AbortError') {
+      db.prepare(
+        "UPDATE tasks SET error = '用户终止任务', status = 'aborted', finished_at = datetime('now') WHERE id = ?"
+      ).run(row.id);
+    } else {
+      db.prepare(
+        "UPDATE tasks SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
+      ).run(e.message, row.id);
+    }
     broadcast({ type: 'tasks_changed' });
 
     throw e;
+  } finally {
+    runningTaskControllers.delete(row.id);
   }
 };

@@ -30,7 +30,7 @@ export const handleApiRequest = async (req, res, url) => {
       return true;
     }
 
-    if (path === '/api/task') {
+    if (path.startsWith('/api/task')) {
       await handleTaskApi(req, res, path, url);
       return true;
     }

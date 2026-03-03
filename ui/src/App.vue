@@ -9,12 +9,12 @@
       <span class="text-base font-bold tracking-[0.12em] text-[#e8d4b8] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
       <div class="ml-auto flex items-center gap-2">
         <!-- 通知 -->
-        <button @click="togglePanel('notifications')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
+        <button :title="t('app_top_notifications')" @click="togglePanel('notifications')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <Bell class="h-[14px] w-[14px]" />
           <span v-if="unreadCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c07060] px-0.5 text-[9px] font-bold text-white">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </button>
-        <!-- 活动 -->
-        <button @click="togglePanel('tasks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
+        <!-- 任务 -->
+        <button :title="t('app_top_tasks')" @click="togglePanel('tasks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <LoaderCircle class="h-[14px] w-[14px]" :class="{ 'animate-spin': hasPending }" />
           <span v-if="taskCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ taskCount > 99 ? '99+' : taskCount }}</span>
         </button>
@@ -58,8 +58,10 @@ import GlobalToast from './components/GlobalToast.vue';
 import NotificationsPanel from './components/NotificationsPanel.vue';
 import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
+import { useI18n } from './i18n/index.js';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
+const { t } = useI18n();
 const {
   activePanel,
   tasks,

@@ -1,6 +1,7 @@
 import { tools } from './tools.js';
 import { runTools } from './runner.js';
 import { callLLM } from './llm.js';
+import { normalizeAgentMessages, normalizeChatOptions, truncateToolResult } from './utils.js';
 
 /**
  * send 协议：
@@ -9,12 +10,24 @@ import { callLLM } from './llm.js';
  *   { type: 'tool_result',  content, _message, _meta } — 工具结果，UI + 持久化
  *   { type: 'reply',        content, _message }   — 最终回复，UI + 持久化
  */
-export const chat = async (messages, { model, maxRounds = 50, apiUrl, apiKey, provider, send = () => {}, signal } = {}) => {
+export const chat = async (messages, {
+  model,
+  maxRounds = 50,
+  apiUrl,
+  apiKey,
+  provider,
+  send = () => {},
+  signal,
+  enableToolResultTruncate = true,
+  toolResultMaxChars = 12000
+} = {}) => {
+  const opts = normalizeChatOptions({ maxRounds, enableToolResultTruncate, toolResultMaxChars });
+  const workMessages = normalizeAgentMessages(messages);
   let round = 0;
 
-  while (round++ < maxRounds) {
+  while (round++ < opts.maxRounds) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-    const payload = { model, messages, tools };
+    const payload = { model, messages: workMessages, tools };
     const message = await callLLM(provider, apiUrl, apiKey, payload, signal);
 
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
@@ -23,7 +36,7 @@ export const chat = async (messages, { model, maxRounds = 50, apiUrl, apiKey, pr
         content: message.content ?? null,
         tool_calls: message.tool_calls
       };
-      messages.push(assistantMsg);
+      workMessages.push(assistantMsg);
       send({ type: 'assistant', _message: assistantMsg });
 
       const parsed = message.tool_calls.map(tc => JSON.parse(tc.function.arguments || '{}'));
@@ -33,9 +46,20 @@ export const chat = async (messages, { model, maxRounds = 50, apiUrl, apiKey, pr
 
       const toolMessages = await runTools(message.tool_calls);
       for (let i = 0; i < toolMessages.length; i++) {
-        const tm = toolMessages[i];
-        const meta = { command: parsed[i]?.command, reason: parsed[i]?.reason, status: 'executed' };
-        messages.push(tm);
+        const raw = toolMessages[i];
+        const trimmed = truncateToolResult(raw.content, {
+          enabled: opts.enableToolResultTruncate,
+          maxChars: opts.toolResultMaxChars
+        });
+        const tm = { ...raw, content: trimmed.content };
+        const meta = {
+          command: parsed[i]?.command,
+          reason: parsed[i]?.reason,
+          status: 'executed',
+          truncated: trimmed.truncated,
+          originalLength: trimmed.originalLength
+        };
+        workMessages.push(tm);
         send({ type: 'tool_result', content: tm.content, _message: tm, _meta: meta });
       }
 
@@ -44,7 +68,7 @@ export const chat = async (messages, { model, maxRounds = 50, apiUrl, apiKey, pr
 
     const text = message.content ?? '';
     const replyMsg = { role: 'assistant', content: text };
-    messages.push(replyMsg);
+    workMessages.push(replyMsg);
     send({ type: 'reply', content: text, _message: replyMsg });
     return text;
   }

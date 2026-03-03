@@ -38,38 +38,47 @@ const bootServices = async () => {
 };
 
 const appsServer = createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
+  try {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const path = url.pathname;
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
 
-  const entry = appRegistry.find((item) => item.match(path));
-  if (!entry) {
-    json(res, { success: false, message: 'Apps endpoint not found' }, 404);
-    return;
-  }
+    const entry = appRegistry.find((item) => item.match(path));
+    if (!entry) {
+      json(res, { success: false, message: 'Apps endpoint not found' }, 404);
+      return;
+    }
 
-  const mod = await loadModule(entry);
-  await initDbModule(entry, mod);
+    const mod = await loadModule(entry);
+    await initDbModule(entry, mod);
 
-  const handle = mod[entry.apiHandler];
-  if (typeof handle !== 'function') {
-    json(res, { success: false, message: `Invalid app handler: ${entry.name}` }, 500);
-    return;
-  }
+    const handle = mod[entry.apiHandler];
+    if (typeof handle !== 'function') {
+      json(res, { success: false, message: `Invalid app handler: ${entry.name}` }, 500);
+      return;
+    }
 
-  const handled = await handle(req, res, path);
-  if (handled === false) {
-    json(res, { success: false, message: 'Apps endpoint not found' }, 404);
-    return;
+    const handled = await handle(req, res, path);
+    if (handled === false) {
+      json(res, { success: false, message: 'Apps endpoint not found' }, 404);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    if (!res.headersSent) {
+      json(res, { success: false, message }, 500);
+    } else {
+      res.end();
+    }
+    console.error('[apps]', error);
   }
 });
 

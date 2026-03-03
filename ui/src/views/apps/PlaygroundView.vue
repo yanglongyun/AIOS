@@ -100,7 +100,7 @@ const defaultHtml = `<!doctype html>
 <script>
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
-camera.position.set(0, 0.6, 3.2);
+camera.position.set(0, 0, 3.2);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);

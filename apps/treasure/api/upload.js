@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../../..');
-const UPLOAD_DIR = join(ROOT, 'uploads', 'treasure');
+const UPLOAD_DIR = join(ROOT, 'files', 'uploads', 'treasure');
 const MAX_SIZE = 8 * 1024 * 1024;
 const ALLOWED_EXT = new Set(['.png', '.jpg', '.jpeg', '.webp']);
 

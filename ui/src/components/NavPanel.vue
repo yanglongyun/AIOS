@@ -3,32 +3,32 @@
     <!-- 对话区域 -->
     <div class="px-3 pb-2 pt-4">
       <div class="mb-1 flex items-center justify-between px-2">
-        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">对话</span>
-        <button @click="goNewSession" title="新对话" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">{{ t('app_sidebar_chat') }}</span>
+        <button @click="goNewSession" :title="t('app_sidebar_new_chat')" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
       </div>
       <button @click="goLastChat" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(isChatNew)">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
-        对话
+        {{ t('app_sidebar_chat') }}
       </button>
       <button @click="goHistory" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(isChatHistory)">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">◷</span>
-        历史
+        {{ t('app_sidebar_history') }}
       </button>
     </div>
 
     <!-- 应用区域 -->
     <div class="flex min-h-0 flex-1 flex-col px-3 pb-2">
       <div class="mb-1 flex items-center justify-between px-2">
-        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">应用</span>
-        <button @click="go('/apps/create')" title="创建应用" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">{{ t('app_sidebar_apps') }}</span>
+        <button @click="go('/apps/create')" :title="t('app_sidebar_create_app')" class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]"><Plus class="h-3 w-3" /></button>
       </div>
 
       <div class="relative min-h-0 flex-1">
         <div ref="appListRef" class="app-list h-full space-y-0.5 overflow-y-auto pb-2 pr-2">
         <!-- 每日打卡 - 第一位 -->
-        <button @click="go('/dailycheck')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/dailycheck'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌱</span>每日打卡</button>
+        <button @click="go('/dailycheck')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/dailycheck'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌱</span>{{ t('app_sidebar_dailycheck') }}</button>
         
-        <button @click="go('/notebook')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/notebook'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📝</span>随心记</button>
+        <button @click="go('/notebook')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/notebook'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📝</span>{{ t('app_sidebar_notebook') }}</button>
         <button @click="go('/finance')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/finance'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>记账本</button>
         <button @click="go('/inbox')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/inbox'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>收件箱</button>
         <button @click="go('/playground')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/playground'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌌</span>小宇宙</button>
@@ -55,11 +55,11 @@
     <div class="border-t border-white/10 px-3 pb-3 pt-2">
       <button @click="go('/community')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/community'))">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">👥</span>
-        社区
+        {{ t('app_sidebar_community') }}
       </button>
       <button @click="go('/settings')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/settings'))">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⚙️</span>
-        设置
+        {{ t('app_sidebar_settings') }}
       </button>
     </div>
   </nav>
@@ -69,8 +69,10 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Plus } from 'lucide-vue-next';
+import { useI18n } from '../i18n/index.js';
 
 const emit = defineEmits(['navigate']);
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const appListRef = ref(null);
@@ -98,7 +100,7 @@ const goNewSession = async () => {
 
 const goLastChat = async () => {
   emit('navigate');
-  const lastId = localStorage.getItem('lastChatId');
+  const lastId = localStorage.getItem('lastSessionId');
   if (lastId) {
     await router.push(`/chat/${lastId}`);
   } else {

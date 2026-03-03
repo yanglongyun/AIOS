@@ -1,13 +1,12 @@
 import { createServer } from 'http';
 import { readFileSync, existsSync, statSync, mkdirSync } from 'fs';
-import { join, dirname, extname, resolve } from 'path';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { handleApiRequest } from '../api/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..', '..');
 const PUBLIC_DIR = join(ROOT_DIR, 'ui', 'dist');
-const WWW_DIR = join(ROOT_DIR, 'www');
 const FILES_DIR = join(ROOT_DIR, 'files');
 const FILES_UPLOADS_DIR = join(FILES_DIR, 'uploads');
 const FILES_DOWNLOADS_DIR = join(FILES_DIR, 'downloads');
@@ -71,28 +70,6 @@ const proxyAppsRequest = async (req, res, url) => {
 
 export const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-
-  if (url.pathname === '/app-picker.html' || url.pathname.startsWith('/www/')) {
-    const requested = url.pathname === '/app-picker.html'
-      ? 'app-picker.html'
-      : url.pathname.slice('/www/'.length);
-    const base = resolve(WWW_DIR);
-    const filePath = resolve(WWW_DIR, requested);
-    if (!filePath.startsWith(base)) {
-      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end('Forbidden');
-      return;
-    }
-    if (existsSync(filePath) && statSync(filePath).isFile()) {
-      const ext = extname(filePath).toLowerCase();
-      res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
-      res.end(readFileSync(filePath));
-      return;
-    }
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('Not Found');
-    return;
-  }
 
   if (url.pathname.startsWith('/files/')) {
     const filePath = join(ROOT_DIR, url.pathname);

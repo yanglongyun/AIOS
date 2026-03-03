@@ -8,29 +8,30 @@
       </button>
       <span class="text-base font-bold tracking-[0.12em] text-[#e8d4b8] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
       <div class="ml-auto flex items-center gap-2">
-        <button :title="t('app_top_avatar')" @click="toggleAvatarPanel" class="relative flex h-7 min-w-8 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 px-1.5 text-sm text-[#f0d9a8] transition-all hover:bg-white/15">
-          <span>{{ avatarEmoji }}</span>
-          <span v-if="avatarBurst" class="pointer-events-none absolute -top-4 right-0 text-sm animate-bounce">{{ avatarBurst }}</span>
-        </button>
         <!-- 通知 -->
         <button :title="t('app_top_notifications')" @click="togglePanel('notifications')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <Bell class="h-[14px] w-[14px]" />
           <span v-if="unreadCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c07060] px-0.5 text-[9px] font-bold text-white">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </button>
-        <!-- 任务 -->
-        <button :title="t('app_top_tasks')" @click="togglePanel('tasks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
-          <LoaderCircle class="h-[14px] w-[14px]" :class="{ 'animate-spin': hasPending }" />
+        <!-- 活动精灵：表情 + 任务合并 -->
+        <button :title="t('app_top_avatar')" @click="toggleActivityPanel" class="relative flex h-7 min-w-8 cursor-pointer items-center justify-center gap-1 rounded-md border border-white/10 bg-white/10 px-1.5 text-sm text-[#f0d9a8] transition-all hover:bg-white/15">
+          <span>{{ avatarEmoji }}</span>
+          <LoaderCircle v-if="hasPending" class="h-3 w-3 animate-spin text-[#c8a060]" />
+          <span v-if="avatarBurst" class="pointer-events-none absolute -top-4 right-0 text-sm animate-bounce">{{ avatarBurst }}</span>
           <span v-if="taskCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ taskCount > 99 ? '99+' : taskCount }}</span>
         </button>
       </div>
     </div>
 
-    <AvatarPanel
+    <ActivityPanel
       v-if="avatarPanelOpen"
       :avatar-emoji="avatarEmoji"
+      :avatar-burst="avatarBurst"
       :avatar-name="avatarName"
       :enable-avatar-emoji="enableAvatarEmoji"
       :enable-avatar-sound="enableAvatarSound"
+      :tasks="tasks"
+      :has-pending="hasPending"
       @close="avatarPanelOpen = false"
       @toggle-emoji="saveUiPrefs({ enableAvatarEmoji: $event })"
       @toggle-sound="saveUiPrefs({ enableAvatarSound: $event })"
@@ -40,12 +41,6 @@
       v-if="activePanel === 'notifications'"
       :notifications="notifications"
       :unread-count="unreadCount"
-      @close="activePanel = null"
-    />
-
-    <TasksPanel
-      v-if="activePanel === 'tasks'"
-      :tasks="tasks"
       @close="activePanel = null"
     />
 
@@ -70,9 +65,8 @@ import { RouterView } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
-import AvatarPanel from './components/AvatarPanel.vue';
+import ActivityPanel from './components/ActivityPanel.vue';
 import NotificationsPanel from './components/NotificationsPanel.vue';
-import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 import { useAvatarEffects } from './components/avatarEffects.js';
 import { useI18n } from './i18n/index.js';
@@ -93,7 +87,7 @@ const {
   stop
 } = useTopPanels();
 
-const toggleAvatarPanel = () => {
+const toggleActivityPanel = () => {
   avatarPanelOpen.value = !avatarPanelOpen.value;
   activePanel.value = null;
 };

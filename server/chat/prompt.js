@@ -55,6 +55,7 @@ export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestio
 - 文件系统目录：${cwd}/files/
 - 上传目录：${cwd}/files/uploads/
 - 下载目录：${cwd}/files/downloads/
+- 对外静态目录：${cwd}/www/（由应用服务提供访问，放置可公开访问页面与静态资源）
 - 记忆文件：${cwd}/library/overview.md`;
 
   prompt += `\n\n## 当前模型配置

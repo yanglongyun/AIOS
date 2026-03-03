@@ -1,8 +1,27 @@
 import { createServer } from 'http';
+import { existsSync, readFileSync, statSync } from 'fs';
+import { extname, join, resolve } from 'path';
 import { json } from './app_shared/utils/json.js';
 import { appRegistry } from './registry.js';
 
 const APPS_PORT = 9701;
+const ROOT_DIR = process.cwd();
+const WWW_DIR = join(ROOT_DIR, 'www');
+const WWW_BASE = resolve(WWW_DIR);
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.md': 'text/markdown; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp'
+};
 
 const moduleCache = new Map();
 const dbInitCache = new Set();
@@ -54,6 +73,25 @@ const appsServer = createServer(async (req, res) => {
 
     if (path === '/apps/health') {
       json(res, { success: true });
+      return;
+    }
+
+    if (path.startsWith('/www/')) {
+      const requested = path.slice('/www/'.length);
+      const filePath = resolve(WWW_DIR, requested);
+      if (!filePath.startsWith(WWW_BASE)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Forbidden');
+        return;
+      }
+      if (!existsSync(filePath) || !statSync(filePath).isFile()) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Not Found');
+        return;
+      }
+      const ext = extname(filePath).toLowerCase();
+      res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+      res.end(readFileSync(filePath));
       return;
     }
 

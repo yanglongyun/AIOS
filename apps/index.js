@@ -52,6 +52,11 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
 
+    if (path === '/apps/health') {
+      json(res, { success: true });
+      return;
+    }
+
     const entry = appRegistry.find((item) => item.match(path));
     if (!entry) {
       json(res, { success: false, message: 'Apps endpoint not found' }, 404);

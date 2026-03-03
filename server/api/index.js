@@ -10,6 +10,11 @@ export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
 
   try {
+    if (path === '/api/health') {
+      json(res, { success: true });
+      return true;
+    }
+
     if (path.startsWith('/api/chat/')) {
       await handleChatApi(req, res, path, url);
       return true;

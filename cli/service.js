@@ -45,6 +45,36 @@ export const waitReadyUrl = async (url, method = 'GET', retries = 15, delay = 80
   return false;
 };
 
+const findPids = (pattern) => {
+  try {
+    const out = execSync(`pgrep -f "${pattern}"`, { encoding: 'utf8' }).trim();
+    if (!out) return [];
+    return out.split('\n').map((line) => Number(line.trim())).filter((n) => Number.isInteger(n) && n > 0);
+  } catch {
+    return [];
+  }
+};
+
+export const getServiceStatus = async () => {
+  const serverPattern = 'node server/index.js';
+  const appsPattern = 'node apps/index.js';
+  const serverPids = findPids(serverPattern);
+  const appsPids = findPids(appsPattern);
+
+  return {
+    server: {
+      running: serverPids.length > 0,
+      pids: serverPids,
+      ready: await isReady(`${API_URL}/health`)
+    },
+    apps: {
+      running: appsPids.length > 0,
+      pids: appsPids,
+      ready: await isReady(`${APPS_URL}/apps/health`)
+    }
+  };
+};
+
 export const createSession = async () => {
   const waitReady = async (retries = 15, delay = 800) => {
     for (let i = 0; i < retries; i++) {

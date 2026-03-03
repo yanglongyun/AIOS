@@ -2,7 +2,7 @@
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { WEB_URL, API_URL, APPS_URL } from './config.js';
-import { startServices, stopServices, isReady, waitReadyUrl } from './service.js';
+import { getServiceStatus, startServices, stopServices, isReady, waitReadyUrl } from './service.js';
 import { startChat } from './chat.js';
 
 const arg = process.argv[2];
@@ -15,8 +15,8 @@ if (arg === 'web') {
 }
 
 if (arg === 'start') {
-  const serverReady = await isReady(`${API_URL}/chat/list`);
-  const appsReady = await isReady(`${APPS_URL}/apps/notebook/list`);
+  const serverReady = await isReady(`${API_URL}/health`);
+  const appsReady = await isReady(`${APPS_URL}/apps/health`);
   if (serverReady && appsReady) {
     console.log(chalk.green('AIOS 服务已在运行'));
     process.exit(0);
@@ -24,8 +24,8 @@ if (arg === 'start') {
 
   startServices();
   process.stdout.write(chalk.dim('  等待服务就绪'));
-  const serverOk = await waitReadyUrl(`${API_URL}/chat/list`);
-  const appsOk = await waitReadyUrl(`${APPS_URL}/apps/notebook/list`);
+  const serverOk = await waitReadyUrl(`${API_URL}/health`);
+  const appsOk = await waitReadyUrl(`${APPS_URL}/apps/health`);
   console.log();
 
   if (!serverOk || !appsOk) {
@@ -44,6 +44,22 @@ if (arg === 'stop') {
   if (stopped) console.log(chalk.green('AIOS 服务已停止'));
   else console.log(chalk.yellow('未发现运行中的 AIOS 服务'));
   process.exit(0);
+}
+
+if (arg === 'status') {
+  const status = await getServiceStatus();
+  const formatState = (running, ready) => {
+    if (!running) return chalk.red('未运行');
+    if (!ready) return chalk.yellow('运行中(未就绪)');
+    return chalk.green('运行中(就绪)');
+  };
+
+  console.log(chalk.bold('AIOS 服务状态'));
+  console.log(`  主服务(9700): ${formatState(status.server.running, status.server.ready)}`);
+  console.log(`    PID: ${status.server.pids.length ? status.server.pids.join(', ') : '-'}`);
+  console.log(`  应用服务(9701): ${formatState(status.apps.running, status.apps.ready)}`);
+  console.log(`    PID: ${status.apps.pids.length ? status.apps.pids.join(', ') : '-'}`);
+  process.exit(status.server.ready && status.apps.ready ? 0 : 1);
 }
 
 // 默认：交互式对话

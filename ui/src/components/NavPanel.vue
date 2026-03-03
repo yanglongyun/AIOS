@@ -24,7 +24,7 @@
       </div>
 
       <div class="relative min-h-0 flex-1">
-        <div ref="appListRef" class="h-full space-y-0.5 overflow-y-auto pb-2 pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div ref="appListRef" class="app-list h-full space-y-0.5 overflow-y-auto pb-2 pr-2">
         <!-- 每日打卡 - 第一位 -->
         <button @click="go('/dailycheck')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(route.path.startsWith('/dailycheck'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌱</span>每日打卡</button>
         
@@ -42,9 +42,9 @@
         <button @click="go('/lovehouse')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/lovehouse'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">❤️</span>窗口</button>
         <button @click="go('/nokia')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/nokia'))"><span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
         </div>
-        <div v-if="thumbVisible" class="pointer-events-none absolute bottom-1 right-0 top-0 w-px rounded-full bg-[#2a1d12]/35 opacity-40 transition-opacity duration-200 group-hover:opacity-70">
+        <div v-if="thumbVisible" class="pointer-events-none absolute bottom-1 right-0 top-0 w-[3px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
           <div
-            class="absolute left-0 right-0 rounded-full bg-[#9a7a58]/70"
+            class="absolute left-0 right-0 rounded-full bg-[#c8a870]/55"
             :style="{ height: `${thumbHeight}px`, transform: `translateY(${thumbTop}px)` }"
           />
         </div>
@@ -111,6 +111,7 @@ const goHistory = async () => {
   await router.push('/history');
 };
 
+
 const updateThumb = () => {
   const el = appListRef.value;
   if (!el) return;
@@ -145,3 +146,12 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateThumb);
 });
 </script>
+
+<style scoped>
+.app-list {
+  scrollbar-width: none;
+}
+.app-list::-webkit-scrollbar {
+  display: none;
+}
+</style>

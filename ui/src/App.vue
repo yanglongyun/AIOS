@@ -14,9 +14,9 @@
           <span v-if="unreadCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c07060] px-0.5 text-[9px] font-bold text-white">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </button>
         <!-- 活动 -->
-        <button @click="togglePanel('asks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
+        <button @click="togglePanel('tasks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <LoaderCircle class="h-[14px] w-[14px]" :class="{ 'animate-spin': hasPending }" />
-          <span v-if="askCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ askCount > 99 ? '99+' : askCount }}</span>
+          <span v-if="taskCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ taskCount > 99 ? '99+' : taskCount }}</span>
         </button>
       </div>
     </div>
@@ -28,9 +28,9 @@
       @close="activePanel = null"
     />
 
-    <AsksPanel
-      v-if="activePanel === 'asks'"
-      :asks="asks"
+    <TasksPanel
+      v-if="activePanel === 'tasks'"
+      :tasks="tasks"
       @close="activePanel = null"
     />
 
@@ -56,15 +56,15 @@ import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
 import NotificationsPanel from './components/NotificationsPanel.vue';
-import AsksPanel from './components/AsksPanel.vue';
+import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
 const {
   activePanel,
-  asks,
+  tasks,
   notifications,
-  askCount,
+  taskCount,
   hasPending,
   unreadCount,
   togglePanel,

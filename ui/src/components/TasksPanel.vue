@@ -6,8 +6,8 @@
         <span class="text-[10px] text-[#8a7860]">最近 20 条</span>
       </div>
       <div class="flex-1 overflow-y-auto">
-        <div v-if="asks.length === 0" class="px-4 py-8 text-center text-xs text-[#6a5840]">暂无活动</div>
-        <div v-for="r in asks" :key="r.id" class="border-b border-[#3a2818] px-4 py-2.5 last:border-b-0">
+        <div v-if="tasks.length === 0" class="px-4 py-8 text-center text-xs text-[#6a5840]">暂无活动</div>
+        <div v-for="r in tasks" :key="r.id" class="border-b border-[#3a2818] px-4 py-2.5 last:border-b-0">
           <div class="flex items-center gap-2">
             <span class="rounded bg-[#4a3828] px-1.5 py-0.5 text-[10px] text-[#c8a060]">{{ r.app }}</span>
             <span :class="r.status === 'done' ? 'text-[#7a9a6a]' : r.status === 'error' ? 'text-[#c07060]' : 'text-[#c8a060]'" class="text-[10px]">{{ r.status }}</span>
@@ -22,7 +22,7 @@
 
 <script setup>
 defineProps({
-  asks: { type: Array, default: () => [] }
+  tasks: { type: Array, default: () => [] }
 });
 
 defineEmits(['close']);
@@ -32,4 +32,3 @@ const formatTime = (t) => {
   return String(t).slice(11, 16);
 };
 </script>
-

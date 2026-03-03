@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { askAgentJson } from '../../app_shared/askAgent.js';
+import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
 const normalizeChoices = (choices = []) => {
   const out = [];
@@ -12,8 +12,8 @@ const normalizeChoices = (choices = []) => {
   return out;
 };
 
-const askAgent = async ({ sessionId, action }) => {
-  return await askAgentJson({
+const taskAgent = async ({ sessionId, action }) => {
+  return await taskAgentJson({
     app: 'story',
     prompt: [
       '你在处理 story 的章节推进请求。',
@@ -39,7 +39,7 @@ export const generateHandler = async (body = {}) => {
   const session = db.prepare('SELECT id FROM apps_story_sessions WHERE id = ?').get(sessionId);
   if (!session) return { status: 404, message: '故事不存在' };
 
-  const result = await askAgent({ sessionId, action });
+  const result = await taskAgent({ sessionId, action });
 
   const content = String(result.content || '').trim();
   const choices = normalizeChoices(result.choices);

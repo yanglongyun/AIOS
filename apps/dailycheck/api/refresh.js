@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { askAgentJson } from '../../app_shared/askAgent.js';
+import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
 const toDateKey = (date = new Date()) => {
   const y = date.getFullYear();
@@ -8,8 +8,8 @@ const toDateKey = (date = new Date()) => {
   return `${y}-${m}-${d}`;
 };
 
-const askAgent = async () => {
-  const parsed = await askAgentJson({
+const taskAgent = async () => {
+  const parsed = await taskAgentJson({
     app: 'dailycheck',
     prompt: [
       '你在处理 dailycheck 的换题请求。',
@@ -24,7 +24,7 @@ const askAgent = async () => {
 
 export const refreshHandler = async () => {
   const date = toDateKey();
-  const question = await askAgent();
+  const question = await taskAgent();
 
   db.prepare(`
     INSERT INTO apps_dailycheck_daily (date, question, answer, response, updated_at)

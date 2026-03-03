@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { askAgentJson } from '../../app_shared/askAgent.js';
+import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
 const toDateKey = (date = new Date()) => {
   const y = date.getFullYear();
@@ -8,8 +8,8 @@ const toDateKey = (date = new Date()) => {
   return `${y}-${m}-${d}`;
 };
 
-const askAgent = async ({ date, focus, note }) => {
-  const parsed = await askAgentJson({
+const taskAgent = async ({ date, focus, note }) => {
+  const parsed = await taskAgentJson({
     app: 'briefing',
     prompt: [
       '你在处理 briefing 的今日专属早报生成请求。',
@@ -60,7 +60,7 @@ export const refreshHandler = async (body = {}) => {
     LIMIT 1
   `).get(date);
 
-  const result = await askAgent({ date, focus, note: prev?.note || '' });
+  const result = await taskAgent({ date, focus, note: prev?.note || '' });
   if (!result.title || !result.brief || !result.content) {
     return { status: 500, message: '生成结果不完整' };
   }
@@ -94,4 +94,3 @@ export const refreshHandler = async (body = {}) => {
 
   return { success: true, today };
 };
-

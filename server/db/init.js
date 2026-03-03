@@ -23,7 +23,7 @@ export const initDatabase = () => {
       value TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS asks (
+    CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id TEXT,
       app TEXT NOT NULL,

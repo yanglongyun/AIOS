@@ -3,40 +3,44 @@ import { connect, on } from '../ws.js';
 
 export const useTopPanels = () => {
   const activePanel = ref(null);
-  const asks = ref([]);
+  const tasks = ref([]);
   const notifications = ref([]);
-  const lastSeenAskId = ref(Number(localStorage.getItem('asks.lastSeenId') || 0));
+  const lastSeenTaskId = ref(Number(localStorage.getItem('tasks.lastSeenId') || 0));
 
-  const askCount = computed(() => asks.value.filter(r => Number(r.id || 0) > lastSeenAskId.value).length);
-  const hasPending = computed(() => asks.value.some(r => r.status === 'pending'));
-  const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
+  const taskRows = computed(() => (Array.isArray(tasks.value) ? tasks.value : []));
+  const notificationRows = computed(() => (Array.isArray(notifications.value) ? notifications.value : []));
+  const taskCount = computed(() => taskRows.value.filter(r => Number(r.id || 0) > lastSeenTaskId.value).length);
+  const hasPending = computed(() => taskRows.value.some(r => r.status === 'pending'));
+  const unreadCount = computed(() => notificationRows.value.filter(n => !n.read).length);
 
   const fetchData = async () => {
     try {
       const [reqRes, notifRes] = await Promise.all([
-        fetch('/api/ask?limit=20'),
+        fetch('/api/task?limit=20'),
         fetch('/api/notifications?limit=20')
       ]);
-      asks.value = await reqRes.json();
-      notifications.value = await notifRes.json();
+      const taskData = await reqRes.json();
+      const notifData = await notifRes.json();
+      tasks.value = Array.isArray(taskData) ? taskData : [];
+      notifications.value = Array.isArray(notifData) ? notifData : [];
     } catch {}
   };
 
-  const markAsksRead = () => {
+  const markTasksRead = () => {
     let max = 0;
-    for (const r of asks.value) {
+    for (const r of taskRows.value) {
       const id = Number(r.id || 0);
       if (id > max) max = id;
     }
     if (max <= 0) return;
-    lastSeenAskId.value = max;
-    localStorage.setItem('asks.lastSeenId', String(max));
+    lastSeenTaskId.value = max;
+    localStorage.setItem('tasks.lastSeenId', String(max));
   };
 
   const togglePanel = (name) => {
     const opening = activePanel.value !== name;
     activePanel.value = opening ? name : null;
-    if (opening && name === 'asks') markAsksRead();
+    if (opening && name === 'tasks') markTasksRead();
   };
 
   const unsubs = [];
@@ -44,7 +48,7 @@ export const useTopPanels = () => {
     connect();
     fetchData();
     unsubs.push(on('open', fetchData));
-    unsubs.push(on('asks_changed', fetchData));
+    unsubs.push(on('tasks_changed', fetchData));
     unsubs.push(on('notifications_changed', fetchData));
   };
 
@@ -57,9 +61,9 @@ export const useTopPanels = () => {
 
   return {
     activePanel,
-    asks,
+    tasks,
     notifications,
-    askCount,
+    taskCount,
     hasPending,
     unreadCount,
     togglePanel,
@@ -67,4 +71,3 @@ export const useTopPanels = () => {
     stop
   };
 };
-

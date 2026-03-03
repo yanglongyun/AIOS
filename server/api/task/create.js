@@ -4,14 +4,14 @@ import { getSettings } from '../../db/settings.js';
 import { chat } from '../../agent/handler.js';
 import { broadcast } from '../../system/ws.js';
 
-export const createAsk = async ({ app, prompt }) => {
+export const createTask = async ({ app, prompt }) => {
   const { apiUrl, apiKey, model, provider } = getSettings();
-  const sessionId = `ask:${randomUUID().slice(0, 8)}`;
+  const sessionId = `task:${randomUUID().slice(0, 8)}`;
 
   const row = db.prepare(
-    "INSERT INTO asks (session_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
+    "INSERT INTO tasks (session_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
   ).get(sessionId, app, prompt);
-  broadcast({ type: 'asks_changed' });
+  broadcast({ type: 'tasks_changed' });
 
   const messages = [
     { role: 'system', content: `你是 AIOS 的 agent，正在处理来自「${app}」应用的请求。直接返回结果，不要废话。` },
@@ -38,16 +38,16 @@ export const createAsk = async ({ app, prompt }) => {
     });
 
     db.prepare(
-      "UPDATE asks SET response = ?, status = 'done', finished_at = datetime('now') WHERE id = ?"
+      "UPDATE tasks SET response = ?, status = 'done', finished_at = datetime('now') WHERE id = ?"
     ).run(result, row.id);
-    broadcast({ type: 'asks_changed' });
+    broadcast({ type: 'tasks_changed' });
 
     return { id: row.id, sessionId, response: result };
   } catch (e) {
     db.prepare(
-      "UPDATE asks SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
+      "UPDATE tasks SET error = ?, status = 'error', finished_at = datetime('now') WHERE id = ?"
     ).run(e.message, row.id);
-    broadcast({ type: 'asks_changed' });
+    broadcast({ type: 'tasks_changed' });
 
     throw e;
   }

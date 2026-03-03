@@ -1,8 +1,8 @@
 import { db } from '../db.js';
-import { askAgentJson } from '../../app_shared/askAgent.js';
+import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
-const askAgent = async ({ complaint, poopCount }) => {
-  const parsed = await askAgentJson({
+const taskAgent = async ({ complaint, poopCount }) => {
+  const parsed = await taskAgentJson({
     app: 'blackroom',
     prompt: [
       '你在处理 blackroom 的用户不满反馈。',
@@ -31,7 +31,7 @@ export const submitHandler = async (body = {}) => {
   let agentResponse = '';
   let note = '';
   try {
-    const result = await askAgent({ complaint, poopCount });
+    const result = await taskAgent({ complaint, poopCount });
     agentResponse = result.response;
     note = result.note;
   } catch {}
@@ -55,4 +55,3 @@ export const submitHandler = async (body = {}) => {
 
   return { success: true, item };
 };
-

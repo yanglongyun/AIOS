@@ -1,8 +1,8 @@
 import { db } from '../db.js';
-import { askAgentJson } from '../../app_shared/askAgent.js';
+import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
-const askAgent = async ({ date, question, answer, note }) => {
-  const parsed = await askAgentJson({
+const taskAgent = async ({ date, question, answer, note }) => {
+  const parsed = await taskAgentJson({
     app: 'dailycheck',
     prompt: [
       '你在处理 dailycheck 的回答请求。',
@@ -50,7 +50,7 @@ export const answerHandler = async (body = {}) => {
   let response = '';
   let note = '';
   try {
-    const result = await askAgent({
+    const result = await taskAgent({
       date: exists.date,
       question: exists.question,
       answer,

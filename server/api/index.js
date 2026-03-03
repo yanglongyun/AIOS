@@ -5,6 +5,7 @@ import { handleLlmApi } from './llm/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
 import { handleNotificationsApi } from './notifications/index.js';
+import { handleAvatarApi } from './avatar/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -42,6 +43,11 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/notifications')) {
       await handleNotificationsApi(req, res, path, url);
+      return true;
+    }
+
+    if (path.startsWith('/api/avatar')) {
+      await handleAvatarApi(req, res, path);
       return true;
     }
 

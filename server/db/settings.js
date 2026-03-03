@@ -18,6 +18,9 @@ export const getSettings = () => {
     enableToolResultTruncate: obj.enableToolResultTruncate === undefined ? true : obj.enableToolResultTruncate === '1',
     toolResultMaxChars,
     enableToolLoopLimit: obj.enableToolLoopLimit === undefined ? true : obj.enableToolLoopLimit === '1',
-    toolMaxRounds
+    toolMaxRounds,
+    enableAvatarEmoji: obj.enableAvatarEmoji === undefined ? true : obj.enableAvatarEmoji === '1',
+    enableAvatarSound: obj.enableAvatarSound === undefined ? false : obj.enableAvatarSound === '1',
+    avatarName: String(obj.avatarName || 'AIOS').trim() || 'AIOS'
   };
 };

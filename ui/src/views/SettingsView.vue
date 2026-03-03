@@ -52,9 +52,15 @@
           v-else
           :theme="theme"
           :language="language"
+          :avatar-name="avatarName"
+          :enable-avatar-emoji="enableAvatarEmoji"
+          :enable-avatar-sound="enableAvatarSound"
           @save="save"
           @set-theme="setTheme"
           @set-language="setLanguage"
+          @update:avatar-name="avatarName = $event"
+          @update:enable-avatar-emoji="enableAvatarEmoji = $event"
+          @update:enable-avatar-sound="enableAvatarSound = $event"
         />
       </div>
     </div>
@@ -89,6 +95,9 @@ const enableToolResultTruncate = ref(true);
 const toolResultMaxChars = ref(12000);
 const enableToolLoopLimit = ref(true);
 const toolMaxRounds = ref(50);
+const avatarName = ref('AIOS');
+const enableAvatarEmoji = ref(true);
+const enableAvatarSound = ref(false);
 const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
@@ -152,6 +161,9 @@ const fetchSettings = async () => {
   toolResultMaxChars.value = Number(data.toolResultMaxChars) || 12000;
   enableToolLoopLimit.value = data.enableToolLoopLimit !== false;
   toolMaxRounds.value = Number(data.toolMaxRounds) || 50;
+  avatarName.value = String(data.avatarName || 'AIOS');
+  enableAvatarEmoji.value = data.enableAvatarEmoji !== false;
+  enableAvatarSound.value = data.enableAvatarSound === true;
   editApiUrl.value = data.apiUrl || '';
   editApiKey.value = data.apiKey || '';
   editModel.value = data.model || '';
@@ -191,6 +203,9 @@ const save = async () => {
         toolResultMaxChars: maxChars,
         enableToolLoopLimit: enableToolLoopLimit.value,
         toolMaxRounds: maxRounds,
+        avatarName: String(avatarName.value || 'AIOS').trim().slice(0, 24) || 'AIOS',
+        enableAvatarEmoji: enableAvatarEmoji.value,
+        enableAvatarSound: enableAvatarSound.value,
         language: language.value,
         apiUrl: editApiUrl.value,
         apiKey: editApiKey.value,

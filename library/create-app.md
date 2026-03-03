@@ -118,7 +118,7 @@ db.pragma('journal_mode = WAL');
 
 每个应用都应具备：
 - `APP.md`：说明目标、边界、数据结构、可执行脚本
-- `scripts/`（可选）：供 Agent 执行，不直接给前端调用
+- `scripts/`：供 Agent 执行，不直接给前端调用。脚本创建规范见 `library/create-script.md`
 - 应用可发起：
   - `ask`：向 Agent 请求分析/决策
   - `task`：启动后台任务（异步）

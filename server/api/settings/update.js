@@ -1,4 +1,5 @@
 import { db } from '../../db/client.js';
+import { broadcast } from '../../system/ws.js';
 
 export const updateSettings = (body) => {
   if (body.provider !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('provider', body.provider);
@@ -25,5 +26,16 @@ export const updateSettings = (body) => {
     const value = Math.max(1, Math.min(500, Number(body.toolMaxRounds) || 50));
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('toolMaxRounds', String(value));
   }
+  if (body.enableAvatarEmoji !== undefined) {
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('enableAvatarEmoji', body.enableAvatarEmoji ? '1' : '0');
+  }
+  if (body.enableAvatarSound !== undefined) {
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('enableAvatarSound', body.enableAvatarSound ? '1' : '0');
+  }
+  if (body.avatarName !== undefined) {
+    const value = String(body.avatarName || '').trim().slice(0, 24) || 'AIOS';
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('avatarName', value);
+  }
+  broadcast({ type: 'settings_changed' });
   return { ok: true };
 };

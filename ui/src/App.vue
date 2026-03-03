@@ -8,6 +8,10 @@
       </button>
       <span class="text-base font-bold tracking-[0.12em] text-[#e8d4b8] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
       <div class="ml-auto flex items-center gap-2">
+        <button :title="t('app_top_avatar')" @click="toggleAvatarPanel" class="relative flex h-7 min-w-8 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 px-1.5 text-sm text-[#f0d9a8] transition-all hover:bg-white/15">
+          <span>{{ avatarEmoji }}</span>
+          <span v-if="avatarBurst" class="pointer-events-none absolute -top-4 right-0 text-sm animate-bounce">{{ avatarBurst }}</span>
+        </button>
         <!-- 通知 -->
         <button :title="t('app_top_notifications')" @click="togglePanel('notifications')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <Bell class="h-[14px] w-[14px]" />
@@ -20,6 +24,17 @@
         </button>
       </div>
     </div>
+
+    <AvatarPanel
+      v-if="avatarPanelOpen"
+      :avatar-emoji="avatarEmoji"
+      :avatar-name="avatarName"
+      :enable-avatar-emoji="enableAvatarEmoji"
+      :enable-avatar-sound="enableAvatarSound"
+      @close="avatarPanelOpen = false"
+      @toggle-emoji="saveUiPrefs({ enableAvatarEmoji: $event })"
+      @toggle-sound="saveUiPrefs({ enableAvatarSound: $event })"
+    />
 
     <NotificationsPanel
       v-if="activePanel === 'notifications'"
@@ -55,13 +70,17 @@ import { RouterView } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
+import AvatarPanel from './components/AvatarPanel.vue';
 import NotificationsPanel from './components/NotificationsPanel.vue';
 import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
+import { useAvatarEffects } from './components/avatarEffects.js';
 import { useI18n } from './i18n/index.js';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
 const { t } = useI18n();
+const avatar = useAvatarEffects();
+const { avatarPanelOpen, avatarEmoji, avatarBurst, avatarName, enableAvatarEmoji, enableAvatarSound, saveUiPrefs } = avatar;
 const {
   activePanel,
   tasks,
@@ -74,6 +93,11 @@ const {
   stop
 } = useTopPanels();
 
+const toggleAvatarPanel = () => {
+  avatarPanelOpen.value = !avatarPanelOpen.value;
+  activePanel.value = null;
+};
+
 const onNavigate = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;
 };
@@ -85,10 +109,12 @@ const onResize = () => {
 onMounted(() => {
   window.addEventListener('resize', onResize);
   start();
+  avatar.start();
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
   stop();
+  avatar.stop();
 });
 </script>

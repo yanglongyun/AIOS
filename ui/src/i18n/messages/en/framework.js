@@ -15,7 +15,9 @@ export default {
   notifications_empty: 'No notifications',
   notifications_read: 'Read',
   tasks_title: 'Tasks',
-  tasks_recent: 'Recent 20',
+  tasks_view_all: 'View all',
+  tasks_view_all_title: 'All Tasks',
+  tasks_view_all_desc: 'Browse recent tasks and open details',
+  tasks_refresh: 'Refresh',
   tasks_empty: 'No tasks'
 };
-

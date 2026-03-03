@@ -15,7 +15,9 @@ export default {
   notifications_empty: '暂无通知',
   notifications_read: '已读',
   tasks_title: '任务',
-  tasks_recent: '最近 20 条',
+  tasks_view_all: '查看全部',
+  tasks_view_all_title: '全部任务',
+  tasks_view_all_desc: '查看近期全部任务并进入详情',
+  tasks_refresh: '刷新',
   tasks_empty: '暂无任务'
 };
-

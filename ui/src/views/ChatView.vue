@@ -56,11 +56,11 @@
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-[#dcd0b8] bg-[#fffdf8]">
                   <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-[#f5ead8] px-3 py-2 text-left transition-colors hover:bg-[#ece0c8]">
                     <ChevronRight class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38]">{{ m.reason || m.command || t('chat_tool_call') }}</span>
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38]">{{ m.title || t('chat_tool_call') }}</span>
                     <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a]">{{ t('chat_done') }}</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#e8dcc8]">
-                    <div v-if="m.command" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.command }}</div>
+                    <div v-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.detail }}</div>
                     <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-[#e8dcc8] bg-[#f5ead8] px-3 py-2.5 font-mono text-[11px] text-[#7a6a50]">{{ m.result }}</div>
                   </div>
                 </div>
@@ -202,6 +202,24 @@ const extractSuggestions = (text = '') => {
   return { content: src.replace(match[0], '').trim(), suggestions };
 };
 
+const parseToolArgs = (toolCall) => {
+  const raw = toolCall?.function?.arguments;
+  if (typeof raw !== 'string') return '';
+  try {
+    return JSON.stringify(JSON.parse(raw), null, 2);
+  } catch {
+    return raw;
+  }
+};
+
+const mapToolCallMessage = (toolCall, _key) => ({
+  type: 'tool_call',
+  toolCall,
+  title: toolCall?.function?.name || t('chat_tool_call'),
+  detail: parseToolArgs(toolCall),
+  _key
+});
+
 const parseMessages = (raw) => {
   const list = [];
   for (const m of raw) {
@@ -210,8 +228,7 @@ const parseMessages = (raw) => {
     if (m.role === 'assistant' && m.tool_calls?.length) {
       let tcIdx = 0;
       for (const tc of m.tool_calls) {
-        const args = JSON.parse(tc.function.arguments || '{}');
-        list.push({ type: 'tool_call', command: args.command, reason: args.reason, _key: base ? `${base}:tool_call:${tcIdx}` : undefined });
+        list.push(mapToolCallMessage(tc, base ? `${base}:tool_call:${tcIdx}` : undefined));
         tcIdx++;
       }
       continue;
@@ -455,7 +472,7 @@ onMounted(() => {
   unsubs.push(on('tool_call', (data) => {
     const _key = `ws:${Date.now()}:tool_call`;
     seenKeys.value.add(_key);
-    messages.value.push({ type: 'tool_call', command: data.command, reason: data.reason, _key });
+    messages.value.push(mapToolCallMessage(data.toolCall, _key));
   }));
   unsubs.push(on('tool_result', (data) => {
     for (let i = messages.value.length - 1; i >= 0; i--) {
@@ -466,7 +483,7 @@ onMounted(() => {
     seenKeys.value.add(_key);
     messages.value.push({ type: 'tool_result', content: data.content, _key });
   }));
-  unsubs.push(on('reply', (data) => {
+  unsubs.push(on('assistant', (data) => {
     const parsed = extractSuggestions(data.content || '');
     const _key = `ws:${Date.now()}:assistant`;
     seenKeys.value.add(_key);

@@ -19,10 +19,12 @@ import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
 import BlackroomView from '../views/apps/BlackroomView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
+import TasksView from '../views/TasksView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
   { path: '/chat/:id?', component: ChatView },
+  { path: '/tasks', component: TasksView },
   { path: '/task/:id', component: TaskDetailView },
   { path: '/history', component: HistoryView },
   { path: '/apps/create', component: CreateAppView },

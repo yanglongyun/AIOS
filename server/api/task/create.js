@@ -52,7 +52,25 @@ export const createTask = async ({ app, prompt }) => {
   };
 
   const send = (msg) => {
-    if (msg._message) saveMessage(msg._message, msg._meta);
+    if (msg.type === 'tool_call') {
+      if (msg.toolCall) {
+        saveMessage({
+          role: 'assistant',
+          content: null,
+          tool_calls: [msg.toolCall]
+        }, null);
+      }
+      return;
+    }
+
+    if (msg.type === 'tool_result') {
+      if (msg.message) saveMessage(msg.message, null);
+      return;
+    }
+
+    if (msg.type === 'assistant') {
+      if (msg.message) saveMessage(msg.message, null);
+    }
   };
 
   const abortController = new AbortController();
@@ -60,12 +78,15 @@ export const createTask = async ({ app, prompt }) => {
 
   try {
     const result = await chat(messages, {
-      model, apiUrl, apiKey, provider,
+      provider,
+      apiUrl,
+      apiKey,
+      model,
+      send,
+      signal: abortController.signal,
       maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
       enableToolResultTruncate,
-      toolResultMaxChars,
-      send,
-      signal: abortController.signal
+      toolResultMaxChars
     });
 
     db.prepare(

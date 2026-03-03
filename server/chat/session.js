@@ -1,63 +1,10 @@
 import { chat } from '../agent/handler.js';
-import { db } from '../db/client.js';
 import { getSettings } from '../db/settings.js';
 import { buildSystemPrompt } from './prompt.js';
 import { getAppsCatalog } from './apps.js';
-import { resolve } from 'path';
-
-const getMessages = (sessionId, messageLimit = 30) => {
-  const limit = Math.max(1, Math.min(500, Number(messageLimit) || 30));
-  const rows = db.prepare('SELECT message, meta FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT ?').all(sessionId, limit);
-  return rows.reverse().map((r) => ({ ...JSON.parse(r.message), _meta: r.meta ? JSON.parse(r.meta) : null }));
-};
-
-const saveMessage = (sessionId, msg, meta) => {
-  db.prepare('INSERT INTO messages (session_id, message, meta) VALUES (?, ?, ?)').run(
-    sessionId,
-    JSON.stringify(msg),
-    meta ? JSON.stringify(meta) : null
-  );
-};
-
-const getRecentChats = () => {
-  return db.prepare(`
-    SELECT session_id, title, description
-    FROM chats
-    ORDER BY datetime(created_at) DESC, id DESC
-    LIMIT 3
-  `).all().map((row) => ({
-    sessionId: row.session_id,
-    title: String(row.title || '').trim(),
-    description: String(row.description || '').trim().slice(0, 100)
-  }));
-};
-
-const normalizeAttachments = (raw) => {
-  const baseDir = resolve(process.cwd(), 'files', 'uploads', 'chat');
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((item) => ({
-      name: String(item?.name || '').trim(),
-      path: String(item?.path || '').trim(),
-      size: Number(item?.size || 0)
-    }))
-    .filter((item) => {
-      if (!item.name || !item.path) return false;
-      const abs = resolve(item.path);
-      return abs.startsWith(baseDir);
-    })
-    .slice(0, 10);
-};
-
-const buildAttachmentContext = (attachments = []) => {
-  if (!attachments.length) return '';
-  const lines = [
-    '【附件文件路径】',
-    ...attachments.map((f, i) => `${i + 1}. ${f.name}: ${f.path}`),
-    '请先用 shell 读取这些文件内容，再结合用户问题回答。'
-  ];
-  return lines.join('\n');
-};
+import { normalizeAttachments, buildAttachmentContext } from './attachments.js';
+import { getMessages, saveMessage } from './messages.js';
+import { getRecentChats } from './chats.js';
 
 export const createSession = (wsSend) => {
   let sessionId = null;
@@ -156,22 +103,46 @@ export const createSession = (wsSend) => {
       const { signal } = abortController;
 
       const send = (msg) => {
-        if (msg._message) saveMessage(sessionId, msg._message, msg._meta);
-        if (msg.type !== 'assistant') wsSend(msg);
+        if (msg.type === 'tool_call') {
+          if (msg.toolCall) {
+            saveMessage(sessionId, {
+              role: 'assistant',
+              content: null,
+              tool_calls: [msg.toolCall]
+            }, null);
+          }
+          wsSend({ type: 'tool_call', toolCall: msg.toolCall });
+          return;
+        }
+
+        if (msg.type === 'tool_result') {
+          if (msg.message) saveMessage(sessionId, msg.message, null);
+          wsSend({
+            type: 'tool_result',
+            toolCallId: msg.message?.tool_call_id,
+            content: msg.message?.content ?? ''
+          });
+          return;
+        }
+
+        if (msg.type === 'assistant') {
+          if (msg.message) saveMessage(sessionId, msg.message, null);
+          wsSend({ type: 'assistant', content: msg.message?.content ?? '' });
+          return;
+        }
       };
 
       try {
         await chat(modelMessages, {
-          model,
-          maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
-          contextRounds,
+          provider,
           apiUrl,
           apiKey,
-          provider,
-          enableToolResultTruncate,
-          toolResultMaxChars,
+          model,
           send,
-          signal
+          signal,
+          maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
+          enableToolResultTruncate,
+          toolResultMaxChars
         });
         messages = [{
           role: 'system',

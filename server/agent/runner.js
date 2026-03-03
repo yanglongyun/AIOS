@@ -1,6 +1,7 @@
 import * as functions from './functions.js';
+import { truncateToolResult } from './utils.js';
 
-export const runTools = async (toolCalls) => {
+export const runTools = async (toolCalls, { enableToolResultTruncate = true, toolResultMaxChars = 12000 } = {}) => {
   const results = await Promise.all(toolCalls.map(async (tc) => {
     const name = tc.function.name;
     const args = JSON.parse(tc.function.arguments || '{}');
@@ -14,10 +15,16 @@ export const runTools = async (toolCalls) => {
       content = `tool error: ${e.message}`;
     }
 
+    const text = typeof content === 'string' ? content : JSON.stringify(content);
+    const trimmed = truncateToolResult(text, {
+      enabled: enableToolResultTruncate,
+      maxChars: toolResultMaxChars
+    });
+
     return {
       role: 'tool',
       tool_call_id: tc.id,
-      content: typeof content === 'string' ? content : JSON.stringify(content)
+      content: trimmed.content
     };
   }));
 

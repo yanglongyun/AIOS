@@ -91,28 +91,111 @@ const suggestions = ref([...defaultSuggestions]);
 const defaultHtml = `<!doctype html>
 <html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<style>html,body{margin:0;height:100%;overflow:hidden;background:#09090b}canvas{display:block}</style>
+<meta charset="utf-8"/>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{display:block;width:100%;height:100%}</style>
 </head>
 <body>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"><\/script>
+<canvas id="c"></canvas>
 <script>
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 3.2);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-const dir = new THREE.DirectionalLight(0xa5b4fc, 1.2); dir.position.set(2,3,2); scene.add(dir);
-const geo = new THREE.TorusKnotGeometry(0.7, 0.22, 180, 24);
-const mat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.3, metalness: 0.7 });
-const mesh = new THREE.Mesh(geo, mat); scene.add(mesh);
-const stars = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(Array.from({length:1200},()=> (Math.random()-0.5)*30), 3)), new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.03 }));
-scene.add(stars);
-addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-(function animate(){ requestAnimationFrame(animate); mesh.rotation.x += 0.006; mesh.rotation.y += 0.01; stars.rotation.y += 0.0008; renderer.render(scene,camera); })();
+const canvas = document.getElementById('c');
+const gl = canvas.getContext('webgl');
+const vert = \`attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0,1); }\`;
+const frag = \`
+precision highp float;
+uniform vec2 u_res;
+uniform float u_time;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float sn(vec2 p){
+  vec2 i=floor(p); vec2 f=fract(p);
+  f = f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+}
+float fbm(vec2 p){
+  float v=0.0, a=0.5;
+  for(int i=0;i<6;i++){ v+=a*sn(p); p*=2.05; a*=0.52; }
+  return v;
+}
+float warp(vec2 p, float t){
+  vec2 q = vec2(fbm(p + vec2(0.0,0.0) + t*0.04), fbm(p + vec2(5.2,1.3) + t*0.03));
+  vec2 r = vec2(fbm(p + q*2.2 + vec2(1.7,9.2) + t*0.025), fbm(p + q*2.2 + vec2(8.3,2.8) + t*0.02));
+  return fbm(p + r*2.4);
+}
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_res;
+  uv.x *= u_res.x / u_res.y;
+  float t = u_time * 0.12;
+  float n = warp(uv * 1.4 - 0.7, t);
+  float dense = pow(n, 1.6);
+  float mid   = pow(max(0.0, n - 0.3), 1.2) * 2.0;
+  float thin  = max(0.0, n - 0.55) * 3.5;
+  vec3 c1 = vec3(0.72, 0.08, 0.28);
+  vec3 c2 = vec3(0.04, 0.42, 0.78);
+  vec3 c3 = vec3(0.85, 0.42, 0.06);
+  vec3 c4 = vec3(0.12, 0.04, 0.22);
+  float mixA = fbm(uv*2.1 + t*0.02);
+  float mixB = fbm(uv*1.8 + vec2(3.1,2.2) + t*0.015);
+  vec3 nebulaCol = mix(c1, c2, mixA);
+  nebulaCol = mix(nebulaCol, c3, mixB * 0.5);
+  nebulaCol = mix(c4, nebulaCol, dense * 1.8);
+  float glow = dense * 0.9 + mid * 0.5 + thin * 0.3;
+  vec3 col = nebulaCol * glow;
+  float hotN = warp(uv*2.0 - 0.5, t * 1.3);
+  float hotCore = pow(max(0.0, hotN - 0.62), 2.0) * 6.0;
+  col += vec3(0.95, 0.85, 1.0) * hotCore;
+  vec2 sid1 = floor(uv * 95.0);
+  vec2 sf1  = fract(uv * 95.0) - 0.5;
+  float s1  = smoothstep(0.09, 0.0, length(sf1));
+  s1 *= step(hash(sid1 + 0.1), 0.14);
+  s1 *= 0.4 + 0.6 * hash(sid1 + 2.3);
+  s1 *= 0.6 + 0.4 * sin(u_time * 0.9 + hash(sid1)*20.0);
+  col += s1 * vec3(0.85, 0.9, 1.0);
+  vec2 sid2 = floor(uv * 42.0);
+  vec2 sf2  = fract(uv * 42.0) - 0.5;
+  float s2  = smoothstep(0.13, 0.0, length(sf2));
+  s2 *= step(hash(sid2 + 5.0), 0.10);
+  s2 *= 0.5 + 0.5*hash(sid2+1.0);
+  col += s2 * mix(vec3(0.8,0.9,1.0), vec3(1.0,0.85,0.6), hash(sid2+3.0)) * 1.2;
+  vec2 sp3 = uv - vec2(0.38, 0.55);
+  float sr3 = length(sp3);
+  col += 0.6 * exp(-sr3 * 22.0) * vec3(0.9, 0.95, 1.0);
+  col += 0.12 * exp(-abs(sp3.x)*55.0) * exp(-sr3*3.0) * vec3(0.8,0.9,1.0);
+  col += 0.12 * exp(-abs(sp3.y)*55.0) * exp(-sr3*3.0) * vec3(0.8,0.9,1.0);
+  vec2 sp4 = uv - vec2(0.72, 0.30);
+  float sr4 = length(sp4);
+  col += 0.4 * exp(-sr4 * 28.0) * vec3(1.0,0.88,0.7);
+  col += 0.08 * exp(-abs(sp4.x)*70.0) * exp(-sr4*4.0) * vec3(1.0,0.85,0.6);
+  col += 0.08 * exp(-abs(sp4.y)*70.0) * exp(-sr4*4.0) * vec3(1.0,0.85,0.6);
+  float dustN = warp(uv*2.5 + vec2(1.0,0.5), t*0.8);
+  float dustMask = smoothstep(0.7, 0.58, dustN);
+  col *= 0.15 + 0.85 * dustMask;
+  col *= 1.3;
+  col = pow(clamp(col, 0.0, 1.0), vec3(0.85));
+  gl_FragColor = vec4(col, 1.0);
+}
+\`;
+function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+const prog=gl.createProgram();
+gl.attachShader(prog,compile(gl.VERTEX_SHADER,vert));
+gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,frag));
+gl.linkProgram(prog);gl.useProgram(prog);
+const buf=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(prog,'a_pos');
+gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const uRes=gl.getUniformLocation(prog,'u_res');
+const uTime=gl.getUniformLocation(prog,'u_time');
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;gl.viewport(0,0,innerWidth,innerHeight);}
+addEventListener('resize',resize);resize();
+let start=performance.now() - Math.random()*100000;
+(function loop(){
+  requestAnimationFrame(loop);
+  const t=(performance.now()-start)/1000;
+  gl.uniform2f(uRes,canvas.width,canvas.height);
+  gl.uniform1f(uTime,t);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+})();
 <\/script>
 </body>
 </html>`;

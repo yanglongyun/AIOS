@@ -45,7 +45,7 @@ CLI 会自动检测并拉起本地服务。
 ```bash
 git clone https://github.com/valueriver/aios.git
 cd aios
-bash scripts/install.sh
+bash install.sh
 ```
 
 ## 运行架构

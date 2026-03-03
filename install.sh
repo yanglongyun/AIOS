@@ -3,7 +3,7 @@ set -euo pipefail
 
 # One-click install for Linux (Ubuntu/Debian) and macOS
 # Usage:
-#   bash scripts/install.sh
+#   bash install.sh
 
 REPO_URL="${REPO_URL:-https://github.com/valueriver/aios.git}"
 APP_NAME="${APP_NAME:-aios}"

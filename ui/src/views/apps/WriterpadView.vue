@@ -45,8 +45,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/writerpad';
-const LLM_API = 'http://localhost:9700/api/llm/chat';
+const API_BASE = '/apps/writerpad';
+const LLM_API = '/api/llm/chat';
 const GLOBAL_DOC_ID = 'global-writerpad';
 const MAX_ROUNDS = 10;
 

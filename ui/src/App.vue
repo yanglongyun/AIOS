@@ -1,5 +1,7 @@
 <template>
-  <div class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#2a2218] font-['Georgia','PingFang_SC',serif]">
+  <RouterView v-if="isLoginRoute" />
+
+  <div v-else class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#2a2218] font-['Georgia','PingFang_SC',serif]">
 
     <!-- 顶部栏 -->
     <div class="relative z-[80] flex h-12 shrink-0 items-center gap-3.5 border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28_0%,#4a3020_100%)] bg-[repeating-linear-gradient(90deg,transparent_0,transparent_3px,rgba(255,255,255,0.02)_3px,rgba(255,255,255,0.02)_4px)] px-4 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
@@ -50,8 +52,9 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterView } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
@@ -61,6 +64,8 @@ import { useTopPanels } from './components/topPanels.js';
 import { useI18n } from './i18n/index.js';
 
 const sidebarOpen = ref(window.innerWidth >= 768);
+const route = useRoute();
+const isLoginRoute = computed(() => route.path === '/login');
 const { t } = useI18n();
 const {
   activePanel,
@@ -73,6 +78,7 @@ const {
   start,
   stop
 } = useTopPanels();
+let panelStarted = false;
 
 const onNavigate = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;
@@ -84,11 +90,26 @@ const onResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', onResize);
-  start();
+  if (!isLoginRoute.value) {
+    start();
+    panelStarted = true;
+  }
+});
+
+watch(isLoginRoute, (isLogin) => {
+  if (isLogin && panelStarted) {
+    stop();
+    panelStarted = false;
+    return;
+  }
+  if (!isLogin && !panelStarted) {
+    start();
+    panelStarted = true;
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
-  stop();
+  if (panelStarted) stop();
 });
 </script>

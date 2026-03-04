@@ -96,7 +96,7 @@
 import { computed, ref } from 'vue';
 import { Camera, LoaderCircle } from 'lucide-vue-next';
 
-const API_BASE = 'http://localhost:9701/apps/treasure';
+const API_BASE = '/apps/treasure';
 const fileInput = ref(null);
 const loading = ref(false);
 const error = ref('');

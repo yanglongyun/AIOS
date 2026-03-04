@@ -113,7 +113,7 @@ import { onMounted, ref, nextTick, watch } from 'vue';
 import { Plus, Search, Sparkles } from 'lucide-vue-next';
 import { useI18n } from '../../i18n/index.js';
 
-const API_BASE = 'http://localhost:9701/apps/notebook';
+const API_BASE = '/apps/notebook';
 const PAGE_SIZE = 10;
 const { t } = useI18n();
 
@@ -214,7 +214,7 @@ const optimizeDraft = async () => {
   error.value = '';
   optimizedDraft.value = '';
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
+    const res = await fetch('/api/llm/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

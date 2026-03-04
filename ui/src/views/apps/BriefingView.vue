@@ -86,7 +86,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/briefing';
+const API_BASE = '/apps/briefing';
 
 const focus = ref('');
 const focusUpdatedAt = ref('');

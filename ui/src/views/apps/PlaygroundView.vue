@@ -222,13 +222,13 @@ const parseStructuredOutput = (raw = '') => {
 };
 
 const fetchVersions = async () => {
-  const res = await fetch('http://localhost:9701/apps/playground/list');
+  const res = await fetch('/apps/playground/list');
   const data = await res.json();
   versions.value = data.data || [];
 };
 
 const loadLatestVersion = async () => {
-  const res = await fetch('http://localhost:9701/apps/playground/latest');
+  const res = await fetch('/apps/playground/latest');
   const data = await res.json();
   const row = data.data;
   if (!row) { currentVersionName.value = '默认场景'; return; }
@@ -240,7 +240,7 @@ const loadLatestVersion = async () => {
 
 const loadSelectedVersion = async () => {
   if (!selectedVersionId.value) { await loadLatestVersion(); return; }
-  const res = await fetch(`http://localhost:9701/apps/playground/detail?id=${selectedVersionId.value}`);
+  const res = await fetch(`/apps/playground/detail?id=${selectedVersionId.value}`);
   const data = await res.json();
   if (!data?.success || !data?.data) return;
   const row = data.data;
@@ -267,7 +267,7 @@ const submitPrompt = async (suggestion) => {
       `用户新需求：${content}`
     ].join('\n');
 
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
+    const res = await fetch('/api/llm/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -299,7 +299,7 @@ const submitPrompt = async (suggestion) => {
     suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
     prompt.value = '';
 
-    await fetch('http://localhost:9701/apps/playground/create', {
+    await fetch('/apps/playground/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: name || content.slice(0, 24), prompt: content, html, suggestions: suggestions.value })

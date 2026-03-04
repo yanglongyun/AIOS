@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { createSession } from '../chat/session.js';
+import { getAuthUser } from '../../shared/auth/guard.js';
 
 const clients = new Set();
 
@@ -15,7 +16,13 @@ export const broadcast = (msg) => {
 export const setupWebSocket = (httpServer) => {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws, req) => {
+    const user = getAuthUser(req);
+    if (!user) {
+      ws.close(1008, 'Unauthorized');
+      return;
+    }
+
     clients.add(ws);
     const send = (msg) => {
       if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(msg));

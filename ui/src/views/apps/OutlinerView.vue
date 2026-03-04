@@ -126,7 +126,7 @@ import { Copy, Download, Plus, Redo2, Undo2, X } from 'lucide-vue-next';
 import OutlineNode from '../../components/apps/mindtree/OutlineNode.vue';
 import OutlinerChat from '../../components/apps/mindtree/OutlinerChat.vue';
 
-const API_BASE = 'http://localhost:9701/apps/mindtree';
+const API_BASE = '/apps/mindtree';
 const GLOBAL_OUTLINE_ID = 'global-outline';
 
 const outlineData = ref([]);

@@ -95,7 +95,7 @@
 <script setup>
 import { onMounted, ref, reactive } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/blackroom';
+const API_BASE = '/apps/blackroom';
 
 const complaint = ref('');
 const poopCount = ref(0);

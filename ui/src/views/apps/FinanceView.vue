@@ -93,7 +93,7 @@ const newItem = ref({ type: 'expense', amount: '', note: '' })
 const smartInput = ref('')
 const smartFilling = ref(false)
 const error = ref('')
-const API_BASE = 'http://localhost:9701/apps/finance'
+const API_BASE = '/apps/finance'
 
 const totalIncome = computed(() => items.value.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0))
 const totalExpense = computed(() => items.value.filter(i => i.type === 'expense').reduce((s, i) => s + i.amount, 0))
@@ -159,7 +159,7 @@ const smartFill = async () => {
   smartFilling.value = true
   error.value = ''
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
+    const res = await fetch('/api/llm/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

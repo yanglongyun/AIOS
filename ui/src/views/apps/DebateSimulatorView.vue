@@ -270,7 +270,7 @@
 import { nextTick, onMounted, ref } from 'vue';
 import { SendHorizontal, Sparkles, X } from 'lucide-vue-next';
 
-const API_BASE = 'http://localhost:9701/apps/debate';
+const API_BASE = '/apps/debate';
 const parties = ref([]);
 const selectedParty = ref(null);
 const candidateName = ref('');

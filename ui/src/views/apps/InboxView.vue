@@ -65,8 +65,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/inbox';
-const publicUrl = 'http://localhost:9701/apps/inbox/submit';
+const API_BASE = '/apps/inbox';
+const publicUrl = `${window.location.origin}/apps/inbox/submit`;
 
 const messages = ref([]);
 const unread = ref(0);

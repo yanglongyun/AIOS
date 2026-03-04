@@ -62,7 +62,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/nokia';
+const API_BASE = '/apps/nokia';
 
 const homePage = ref(true);
 const currentIndex = ref(0);

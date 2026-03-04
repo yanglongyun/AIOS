@@ -151,7 +151,7 @@
 <script setup>
 import { ref, reactive, onMounted, nextTick } from 'vue';
 
-const API_BASE = 'http://localhost:9701/apps/lovehouse';
+const API_BASE = '/apps/lovehouse';
 
 // ========== 默认 SVG 场景 ==========
 const defaultScenes = {

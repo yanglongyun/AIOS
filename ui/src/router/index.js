@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { ensureAuth } from '../auth/session.js';
 import ChatView from '../views/ChatView.vue';
 import HistoryView from '../views/HistoryView.vue';
+import LoginView from '../views/LoginView.vue';
 import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FinanceView from '../views/apps/FinanceView.vue';
@@ -23,6 +25,7 @@ import TasksView from '../views/TasksView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
+  { path: '/login', component: LoginView },
   { path: '/chat/:id?', component: ChatView },
   { path: '/tasks', component: TasksView },
   { path: '/task/:id', component: TaskDetailView },
@@ -49,4 +52,15 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(),
   routes
+});
+
+router.beforeEach(async (to) => {
+  if (to.path === '/login') {
+    const ok = await ensureAuth();
+    if (ok) return '/chat';
+    return true;
+  }
+  const ok = await ensureAuth();
+  if (!ok) return '/login';
+  return true;
 });

@@ -5,6 +5,13 @@ import { handleLlmApi } from './llm/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
 import { handleNotificationsApi } from './notifications/index.js';
+import { handleAuthApi } from './auth/index.js';
+import { getAuthUser } from './auth/require.js';
+
+const isPublicApiPath = (path) => {
+  return path === '/api/health'
+    || path.startsWith('/api/auth/');
+};
 
 export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -13,6 +20,19 @@ export const handleApiRequest = async (req, res, url) => {
     if (path === '/api/health') {
       json(res, { success: true });
       return true;
+    }
+
+    if (path.startsWith('/api/auth/')) {
+      await handleAuthApi(req, res, path);
+      return true;
+    }
+
+    if (!isPublicApiPath(path)) {
+      const user = getAuthUser(req);
+      if (!user) {
+        json(res, { success: false, message: '未登录' }, 401);
+        return true;
+      }
     }
 
     if (path.startsWith('/api/chat/')) {

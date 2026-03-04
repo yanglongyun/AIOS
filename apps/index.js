@@ -3,11 +3,12 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import { extname, join, resolve } from 'path';
 import { json } from './app_shared/utils/json.js';
 import { appRegistry } from './registry.js';
+import { getAuthUser } from '../shared/auth/guard.js';
 
 const APPS_PORT = 9701;
 const ROOT_DIR = process.cwd();
-const WWW_DIR = join(ROOT_DIR, 'www');
-const WWW_BASE = resolve(WWW_DIR);
+const PUBLIC_DIR = join(ROOT_DIR, 'public');
+const PUBLIC_BASE = resolve(PUBLIC_DIR);
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -76,10 +77,18 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
 
-    if (path.startsWith('/www/')) {
-      const requested = path.slice('/www/'.length);
-      const filePath = resolve(WWW_DIR, requested);
-      if (!filePath.startsWith(WWW_BASE)) {
+    if (path !== '/apps/inbox/submit' && !path.startsWith('/public/')) {
+      const user = getAuthUser(req);
+      if (!user) {
+        json(res, { success: false, message: '未登录' }, 401);
+        return;
+      }
+    }
+
+    if (path.startsWith('/public/')) {
+      const requested = path.slice('/public/'.length);
+      const filePath = resolve(PUBLIC_DIR, requested);
+      if (!filePath.startsWith(PUBLIC_BASE)) {
         res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end('Forbidden');
         return;

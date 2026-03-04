@@ -10,7 +10,6 @@ export default {
   app_sidebar_community: '社区',
   app_top_tasks: '任务',
   app_top_notifications: '通知',
-  app_top_avatar: '头像',
   notifications_title: '通知',
   notifications_unread: '{count} 条未读',
   notifications_empty: '暂无通知',

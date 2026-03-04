@@ -32,10 +32,7 @@ export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestio
     enableToolResultTruncate,
     toolResultMaxChars,
     enableToolLoopLimit,
-    toolMaxRounds,
-    enableAvatarEmoji,
-    enableAvatarSound,
-    avatarName
+    toolMaxRounds
   } = settings;
   const appsCatalog = getAppsCatalog();
   const recentChats = getRecentChats();
@@ -55,7 +52,6 @@ export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestio
 - 文件系统目录：${cwd}/files/
 - 上传目录：${cwd}/files/uploads/
 - 下载目录：${cwd}/files/downloads/
-- 对外静态目录：${cwd}/www/（由应用服务提供访问，放置可公开访问页面与静态资源）
 - 记忆文件：${cwd}/library/overview.md`;
 
   prompt += `\n\n## 当前模型配置
@@ -68,13 +64,6 @@ export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestio
 - 工具结果最大长度：${toolResultMaxChars ?? '-'}
 - 工具循环限制：${enableToolLoopLimit ? '开启' : '关闭'}
 - 工具最大循环轮次：${toolMaxRounds ?? '-'}`;
-
-  prompt += `\n\n## 互动效果配置
-- 头像名称：${avatarName || 'AIOS'}
-- 表情效果：${enableAvatarEmoji ? '开启' : '关闭'}
-- 音效：${enableAvatarSound ? '开启' : '关闭'}
-- 可用接口：POST http://localhost:9700/api/avatar
-- 说明：可通过 shell 调用该接口触发前端表情或音效提示（遵循当前开关状态）`;
 
   if (Array.isArray(appsCatalog) && appsCatalog.length > 0) {
     const lines = appsCatalog.map((app, i) => {

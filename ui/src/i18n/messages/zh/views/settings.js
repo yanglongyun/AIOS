@@ -26,10 +26,6 @@ export default {
   settings_language: '语言',
   settings_language_zh: '中文',
   settings_language_en: 'English',
-  settings_avatar_title: '头像设置',
-  settings_avatar_name: 'AI 名称',
-  settings_avatar_emoji: '启用表情提示',
-  settings_avatar_sound: '启用音效',
   settings_saved: '配置已保存',
   settings_save_failed: '保存失败：{message}'
 };

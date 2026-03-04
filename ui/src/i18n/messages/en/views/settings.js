@@ -26,10 +26,6 @@ export default {
   settings_language: 'Language',
   settings_language_zh: '中文',
   settings_language_en: 'English',
-  settings_avatar_title: 'Avatar',
-  settings_avatar_name: 'AI Name',
-  settings_avatar_emoji: 'Enable emoji effects',
-  settings_avatar_sound: 'Enable sound effects',
   settings_saved: 'Saved',
   settings_save_failed: 'Save failed: {message}'
 };

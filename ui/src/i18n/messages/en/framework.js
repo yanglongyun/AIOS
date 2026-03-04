@@ -10,7 +10,6 @@ export default {
   app_sidebar_community: 'Community',
   app_top_tasks: 'Tasks',
   app_top_notifications: 'Notifications',
-  app_top_avatar: 'Avatar',
   notifications_title: 'Notifications',
   notifications_unread: '{count} unread',
   notifications_empty: 'No notifications',

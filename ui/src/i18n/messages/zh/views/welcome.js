@@ -2,7 +2,7 @@ export default {
   welcome_init: '初始化',
   welcome_title_prefix: '欢迎来到',
   welcome_desc: 'AI 驱动的个人操作系统，拥有图形桌面与自然语言操控能力，本地运行，数据完全私有。',
-  welcome_start: '开始初始化',
+  welcome_start: '开始',
   welcome_admin_title: '创建管理员',
   welcome_admin_hint: '系统主账号，仅创建一次',
   welcome_username: '用户名',

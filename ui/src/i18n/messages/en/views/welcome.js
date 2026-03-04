@@ -2,7 +2,7 @@ export default {
   welcome_init: 'Setup',
   welcome_title_prefix: 'Welcome to',
   welcome_desc: 'An AI-driven personal operating system with a graphical desktop and natural language control. Runs locally, fully private.',
-  welcome_start: 'Get Started',
+  welcome_start: 'Start',
   welcome_admin_title: 'Create Admin',
   welcome_admin_hint: 'System admin account, created only once',
   welcome_username: 'Username',

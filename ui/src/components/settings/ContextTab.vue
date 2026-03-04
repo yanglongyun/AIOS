@@ -1,21 +1,21 @@
 <template>
-  <section class="space-y-2">
-    <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_context_rounds') }}</span>
+  <section class="space-y-3">
+    <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840]">{{ t('settings_context_rounds') }}</div>
     <div class="flex gap-2">
       <button
         v-for="n in [10, 30, 100]"
         :key="n"
         @click="$emit('update:context-rounds', n)"
-        class="flex-1 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors border"
+        class="flex-1 px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-all border"
         :class="contextRounds === n
-          ? 'bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 border-transparent'
-          : 'border-gray-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800'"
+          ? 'bg-[rgba(90,58,40,0.08)] border-[#b08a40] text-[#5a3e28] font-semibold dark:bg-[rgba(200,160,96,0.12)] dark:border-[#c8a060] dark:text-[#c8a060]'
+          : 'border-[#dcd0b8] text-[#b8a888] hover:border-[#c0a878] hover:text-[#7a6a50] dark:border-[#2a1e14] dark:text-[#6a5840] dark:hover:border-[#5a4a30] dark:hover:text-[#a08c70]'"
       >
         {{ n }}
       </button>
     </div>
     <div class="pt-2 flex justify-end">
-      <button @click="$emit('save')" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:opacity-80 rounded-lg text-sm text-white dark:text-neutral-900 cursor-pointer transition-opacity">{{ t('common_save') }}</button>
+      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">{{ t('common_save') }}</button>
     </div>
   </section>
 </template>

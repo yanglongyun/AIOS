@@ -4,7 +4,7 @@ export const initDatabase = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT NOT NULL,
+      conversation_id TEXT NOT NULL,
       title TEXT,
       description TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
@@ -12,7 +12,7 @@ export const initDatabase = () => {
 
     CREATE TABLE IF NOT EXISTS messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT NOT NULL,
+      conversation_id TEXT NOT NULL,
       message TEXT NOT NULL,
       meta TEXT,
       created_at TEXT DEFAULT (datetime('now'))
@@ -25,7 +25,7 @@ export const initDatabase = () => {
 
     CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT,
+      conversation_id TEXT,
       app TEXT NOT NULL,
       prompt TEXT NOT NULL,
       response TEXT,
@@ -53,7 +53,7 @@ export const initDatabase = () => {
       created_at TEXT DEFAULT (datetime('now'))
     );
 
-    CREATE TABLE IF NOT EXISTS auth_sessions (
+    CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       token_hash TEXT NOT NULL UNIQUE,

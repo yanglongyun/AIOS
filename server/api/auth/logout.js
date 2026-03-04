@@ -1,10 +1,6 @@
 import { json } from '../utils/json.js';
 import { deleteAuthSessionByTokenHash } from '../../../shared/auth/repository.js';
-import {
-  buildClearSessionCookie,
-  getSessionTokenFromRequest,
-  hashSessionToken
-} from '../../../shared/auth/session.js';
+import { buildClearSessionCookie, getSessionTokenFromRequest, hashSessionToken } from '../../../shared/auth/session.js';
 
 export const logout = async (req, res) => {
   const token = getSessionTokenFromRequest(req);

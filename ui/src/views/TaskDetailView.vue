@@ -39,7 +39,7 @@
         <div class="grid gap-2 text-xs text-[#7a6a58] md:grid-cols-2">
           <div>创建时间：{{ task.created_at || '-' }}</div>
           <div>完成时间：{{ task.finished_at || '-' }}</div>
-          <div class="md:col-span-2 break-all">会话ID：{{ task.session_id || '-' }}</div>
+          <div class="md:col-span-2 break-all">会话ID：{{ task.conversation_id || '-' }}</div>
         </div>
         <div class="mt-3 space-y-2">
           <div>
@@ -170,4 +170,3 @@ onUnmounted(() => {
   }
 });
 </script>
-

@@ -24,11 +24,11 @@ export const createTask = async ({ app, prompt }) => {
     enableToolLoopLimit,
     toolMaxRounds
   } = getSettings();
-  const sessionId = `task:${randomUUID().slice(0, 8)}`;
+  const conversationId = `task:${randomUUID().slice(0, 8)}`;
 
   const row = db.prepare(
-    "INSERT INTO tasks (session_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
-  ).get(sessionId, app, prompt);
+    "INSERT INTO tasks (conversation_id, app, prompt, status) VALUES (?, ?, ?, 'pending') RETURNING id"
+  ).get(conversationId, app, prompt);
   broadcast({ type: 'tasks_changed' });
 
   const messages = [
@@ -44,8 +44,8 @@ export const createTask = async ({ app, prompt }) => {
   ];
 
   const saveMessage = (msg, meta) => {
-    db.prepare('INSERT INTO messages (session_id, message, meta) VALUES (?, ?, ?)').run(
-      sessionId,
+    db.prepare('INSERT INTO messages (conversation_id, message, meta) VALUES (?, ?, ?)').run(
+      conversationId,
       JSON.stringify(msg),
       meta ? JSON.stringify(meta) : null
     );
@@ -94,7 +94,7 @@ export const createTask = async ({ app, prompt }) => {
     ).run(result, row.id);
     broadcast({ type: 'tasks_changed' });
 
-    return { id: row.id, sessionId, response: result };
+    return { id: row.id, conversationId, response: result };
   } catch (e) {
     if (e?.name === 'AbortError') {
       db.prepare(

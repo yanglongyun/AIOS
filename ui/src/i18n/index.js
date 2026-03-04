@@ -3,7 +3,11 @@ import zhMessages from './messages/zh/index.js';
 import enMessages from './messages/en/index.js';
 
 const LOCALE_KEY = 'aios.locale';
-const defaultLocale = 'zh';
+const detectLocale = () => {
+  const lang = String(navigator.language || '').toLowerCase();
+  return lang.startsWith('zh') ? 'zh' : 'en';
+};
+const defaultLocale = detectLocale();
 
 export const locale = ref(localStorage.getItem(LOCALE_KEY) || defaultLocale);
 

@@ -1,46 +1,50 @@
 <template>
   <section class="space-y-4">
-    <div class="space-y-2">
-      <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_provider') }}</span>
+    <div>
+      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">{{ t('settings_provider') }}</div>
       <select
         :value="provider"
         @change="onProviderChange"
-        class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 cursor-pointer"
+        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] outline-none focus:border-[#b08a40] transition-colors cursor-pointer appearance-none dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
+        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;"
       >
         <option v-for="p in PROVIDERS" :key="p.id" :value="p.id">{{ p.name }}</option>
       </select>
-      <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_api_url') }}</span>
+    </div>
+
+    <div>
+      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">{{ t('settings_api_url') }}</div>
       <input
         :value="apiUrl"
         @input="$emit('update:api-url', $event.target.value)"
         placeholder="https://api.example.com/v1/chat/completions"
-        class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500"
+        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
       />
     </div>
 
-    <div class="space-y-2">
-      <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_api_key') }}</span>
+    <div>
+      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">{{ t('settings_api_key') }}</div>
       <input
         :value="apiKey"
         @input="$emit('update:api-key', $event.target.value)"
         type="password"
         :placeholder="t('settings_api_key')"
-        class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500"
+        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
       />
     </div>
 
-    <div class="space-y-2">
-      <span class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{{ t('settings_model') }}</span>
+    <div>
+      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">{{ t('settings_model') }}</div>
       <input
         :value="model"
         @input="$emit('update:model', $event.target.value)"
         :placeholder="t('settings_model_placeholder')"
-        class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500"
+        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
       />
     </div>
 
     <div class="pt-2 flex justify-end">
-      <button @click="$emit('save')" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:opacity-80 rounded-lg text-sm text-white dark:text-neutral-900 cursor-pointer transition-opacity">{{ t('common_save') }}</button>
+      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">{{ t('common_save') }}</button>
     </div>
   </section>
 </template>

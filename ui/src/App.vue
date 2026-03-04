@@ -1,5 +1,7 @@
 <template>
-  <RouterView v-if="isLoginRoute" />
+  <div v-if="!ready" class="h-[100dvh] w-screen bg-[#1a1410]"></div>
+
+  <RouterView v-else-if="isAuthRoute" />
 
   <div v-else class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#2a2218] font-['Georgia','PingFang_SC',serif]">
 
@@ -53,8 +55,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { RouterView } from 'vue-router';
-import { useRoute } from 'vue-router';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 import { Bell, LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
@@ -63,9 +64,11 @@ import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 import { useI18n } from './i18n/index.js';
 
+const ready = ref(false);
 const sidebarOpen = ref(window.innerWidth >= 768);
 const route = useRoute();
-const isLoginRoute = computed(() => route.path === '/login');
+const router = useRouter();
+const isAuthRoute = computed(() => route.path === '/login' || route.path === '/welcome');
 const { t } = useI18n();
 const {
   activePanel,
@@ -88,21 +91,23 @@ const onResize = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await router.isReady();
+  ready.value = true;
   window.addEventListener('resize', onResize);
-  if (!isLoginRoute.value) {
+  if (!isAuthRoute.value) {
     start();
     panelStarted = true;
   }
 });
 
-watch(isLoginRoute, (isLogin) => {
-  if (isLogin && panelStarted) {
+watch(isAuthRoute, (isAuth) => {
+  if (isAuth && panelStarted) {
     stop();
     panelStarted = false;
     return;
   }
-  if (!isLogin && !panelStarted) {
+  if (!isAuth && !panelStarted) {
     start();
     panelStarted = true;
   }

@@ -1,17 +1,16 @@
 import { readBody } from '../utils/readBody.js';
 import { json } from '../utils/json.js';
-import { createAuthSession, createUser, findUserByUsername } from '../../../shared/auth/repository.js';
+import { countUsers, createAuthSession, createUser, findUserByUsername } from '../../../shared/auth/repository.js';
 import { hashPassword } from '../../../shared/auth/password.js';
-import {
-  buildSessionCookie,
-  generateSessionToken,
-  hashSessionToken,
-  SESSION_TTL_SECONDS
-} from '../../../shared/auth/session.js';
+import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL_SECONDS } from '../../../shared/auth/session.js';
 
 const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
 
 export const register = async (req, res) => {
+  if (countUsers() > 0) {
+    return json(res, { success: false, message: '系统已初始化，禁止公开注册' }, 403);
+  }
+
   const body = await readBody(req);
   const username = normalizeUsername(body.username);
   const password = String(body.password || '');

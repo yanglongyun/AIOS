@@ -25,7 +25,7 @@ export const handleTaskApi = async (req, res, path, url) => {
     if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: 'id 无效' }, 400);
     const task = getTaskDetail({ id });
     if (!task) return json(res, { success: false, message: '任务不存在' }, 404);
-    return json(res, { success: true, messages: listTaskMessages({ sessionId: task.session_id || '' }) });
+    return json(res, { success: true, messages: listTaskMessages({ conversationId: task.conversation_id || '' }) });
   }
 
   if (path === '/api/task' && req.method === 'POST') {

@@ -8,10 +8,10 @@ const parseJSON = (value, fallback = null) => {
   }
 };
 
-export const listTaskMessages = ({ sessionId }) => {
+export const listTaskMessages = ({ conversationId }) => {
   const rows = db.prepare(
-    'SELECT id, message, meta, created_at FROM messages WHERE session_id = ? ORDER BY id ASC'
-  ).all(sessionId);
+    'SELECT id, message, meta, created_at FROM messages WHERE conversation_id = ? ORDER BY id ASC'
+  ).all(conversationId);
 
   return rows.map((row) => ({
     id: row.id,
@@ -20,4 +20,3 @@ export const listTaskMessages = ({ sessionId }) => {
     meta: parseJSON(row.meta, null)
   }));
 };
-

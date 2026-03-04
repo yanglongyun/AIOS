@@ -1,17 +1,17 @@
 <template>
   <section class="space-y-3">
-    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-neutral-700 dark:bg-neutral-800/60">
-      <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-200 cursor-pointer">
+    <div class="rounded-xl border border-[#dcd0b8] bg-[#fffdf8] p-4 dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.4)]">
+      <label class="flex items-center gap-2 text-[13px] text-[#4a3a28] cursor-pointer dark:text-[#c8b898]">
         <input
           type="checkbox"
           :checked="enableToolResultTruncate"
           @change="$emit('update:enable-tool-result-truncate', $event.target.checked)"
-          class="cursor-pointer"
+          class="cursor-pointer accent-[#c8a060]"
         />
         {{ t('settings_tool_truncate_enable') }}
       </label>
-      <div class="mt-2 flex items-center gap-2">
-        <span class="text-xs text-neutral-500 dark:text-neutral-400">{{ t('settings_tool_max_chars') }}</span>
+      <div class="mt-3 flex items-center gap-3">
+        <span class="text-xs text-[#a0907a] dark:text-[#6a5840]">{{ t('settings_tool_max_chars') }}</span>
         <input
           :value="toolResultMaxChars"
           @input="$emit('update:tool-result-max-chars', Number($event.target.value || 0))"
@@ -20,24 +20,24 @@
           max="50000"
           step="1000"
           :disabled="!enableToolResultTruncate"
-          class="w-28 rounded border border-gray-200 bg-white px-2 py-1 text-xs text-neutral-800 outline-none focus:border-neutral-400 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-neutral-500"
+          class="w-28 rounded-lg border border-[#dcd0b8] bg-[#f5f0e8] px-2.5 py-1.5 text-xs text-[#4a3a28] outline-none focus:border-[#b08a40] disabled:opacity-40 transition-colors dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
         />
       </div>
-      <div class="mt-1 text-[11px] text-neutral-400">{{ t('settings_tool_max_chars_hint') }}</div>
+      <div class="mt-1.5 text-[11px] text-[#c0b098] dark:text-[#5a4a30]">{{ t('settings_tool_max_chars_hint') }}</div>
     </div>
 
-    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-neutral-700 dark:bg-neutral-800/60">
-      <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-200 cursor-pointer">
+    <div class="rounded-xl border border-[#dcd0b8] bg-[#fffdf8] p-4 dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.4)]">
+      <label class="flex items-center gap-2 text-[13px] text-[#4a3a28] cursor-pointer dark:text-[#c8b898]">
         <input
           type="checkbox"
           :checked="enableToolLoopLimit"
           @change="$emit('update:enable-tool-loop-limit', $event.target.checked)"
-          class="cursor-pointer"
+          class="cursor-pointer accent-[#c8a060]"
         />
         {{ t('settings_tool_loop_limit_enable') }}
       </label>
-      <div class="mt-2 flex items-center gap-2">
-        <span class="text-xs text-neutral-500 dark:text-neutral-400">{{ t('settings_tool_max_rounds') }}</span>
+      <div class="mt-3 flex items-center gap-3">
+        <span class="text-xs text-[#a0907a] dark:text-[#6a5840]">{{ t('settings_tool_max_rounds') }}</span>
         <input
           :value="toolMaxRounds"
           @input="$emit('update:tool-max-rounds', Number($event.target.value || 0))"
@@ -46,14 +46,14 @@
           max="500"
           step="1"
           :disabled="!enableToolLoopLimit"
-          class="w-28 rounded border border-gray-200 bg-white px-2 py-1 text-xs text-neutral-800 outline-none focus:border-neutral-400 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:focus:border-neutral-500"
+          class="w-28 rounded-lg border border-[#dcd0b8] bg-[#f5f0e8] px-2.5 py-1.5 text-xs text-[#4a3a28] outline-none focus:border-[#b08a40] disabled:opacity-40 transition-colors dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
         />
       </div>
-      <div class="mt-1 text-[11px] text-neutral-400">{{ t('settings_tool_max_rounds_hint') }}</div>
+      <div class="mt-1.5 text-[11px] text-[#c0b098] dark:text-[#5a4a30]">{{ t('settings_tool_max_rounds_hint') }}</div>
     </div>
 
     <div class="pt-2 flex justify-end">
-      <button @click="$emit('save')" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-200 hover:opacity-80 rounded-lg text-sm text-white dark:text-neutral-900 cursor-pointer transition-opacity">{{ t('common_save') }}</button>
+      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">{{ t('common_save') }}</button>
     </div>
   </section>
 </template>
@@ -78,4 +78,3 @@ defineEmits([
   'save'
 ]);
 </script>
-

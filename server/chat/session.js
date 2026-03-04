@@ -5,7 +5,7 @@ import { injectAttachmentsMessage } from './attachments.js';
 import { getMessages, saveMessage } from './messages.js';
 
 export const createSession = (wsSend) => {
-  let sessionId = null;
+  let conversationId = null;
   let messages = [];
   let abortController = null;
 
@@ -36,23 +36,23 @@ export const createSession = (wsSend) => {
         enableToolLoopLimit,
         toolMaxRounds
       } = settings;
-      const incomingSessionId = data.sessionId || null;
-      if (!incomingSessionId) {
-        wsSend({ type: 'error', content: '缺少 sessionId' });
+      const incomingConversationId = data.conversationId || null;
+      if (!incomingConversationId) {
+        wsSend({ type: 'error', content: '缺少 conversationId' });
         return;
       }
 
-      if (incomingSessionId !== sessionId) {
-        sessionId = incomingSessionId;
+      if (incomingConversationId !== conversationId) {
+        conversationId = incomingConversationId;
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(sessionId)
-        }, ...getMessages(sessionId, contextRounds)];
+          content: buildSystemPrompt(conversationId)
+        }, ...getMessages(conversationId, contextRounds)];
       }
 
       messages[0] = {
         role: 'system',
-        content: buildSystemPrompt(sessionId)
+        content: buildSystemPrompt(conversationId)
       };
 
       const userMsg = { role: 'user', content: data.content };
@@ -69,7 +69,7 @@ export const createSession = (wsSend) => {
       messages.push(userMsg);
       const modelMessages = [...messages];
       modelMessages[modelMessages.length - 1] = modelUserMsg;
-      saveMessage(sessionId, userMsg, userMeta);
+      saveMessage(conversationId, userMsg, userMeta);
 
       abortController = new AbortController();
       const { signal } = abortController;
@@ -77,7 +77,7 @@ export const createSession = (wsSend) => {
       const send = (msg) => {
         if (msg.type === 'tool_call') {
           if (msg.toolCall) {
-            saveMessage(sessionId, {
+            saveMessage(conversationId, {
               role: 'assistant',
               content: null,
               tool_calls: [msg.toolCall]
@@ -88,7 +88,7 @@ export const createSession = (wsSend) => {
         }
 
         if (msg.type === 'tool_result') {
-          if (msg.message) saveMessage(sessionId, msg.message, null);
+          if (msg.message) saveMessage(conversationId, msg.message, null);
           wsSend({
             type: 'tool_result',
             toolCallId: msg.message?.tool_call_id,
@@ -98,7 +98,7 @@ export const createSession = (wsSend) => {
         }
 
         if (msg.type === 'assistant') {
-          if (msg.message) saveMessage(sessionId, msg.message, null);
+          if (msg.message) saveMessage(conversationId, msg.message, null);
           wsSend({ type: 'assistant', content: msg.message?.content ?? '' });
           return;
         }
@@ -118,8 +118,8 @@ export const createSession = (wsSend) => {
         });
         messages = [{
           role: 'system',
-          content: buildSystemPrompt(sessionId)
-        }, ...getMessages(sessionId, contextRounds)];
+          content: buildSystemPrompt(conversationId)
+        }, ...getMessages(conversationId, contextRounds)];
       } catch (e) {
         if (e.name === 'AbortError') {
           wsSend({ type: 'aborted' });

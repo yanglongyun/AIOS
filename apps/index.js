@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from 'fs';
 import { extname, join, resolve } from 'path';
 import { json } from './app_shared/utils/json.js';
 import { appRegistry } from './registry.js';
-import { getAuthUser } from '../shared/auth/guard.js';
+import { access } from '../shared/auth/index.js';
 
 const APPS_PORT = 9701;
 const ROOT_DIR = process.cwd();
@@ -77,12 +77,10 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
 
-    if (path !== '/apps/inbox/submit' && !path.startsWith('/public/')) {
-      const user = getAuthUser(req);
-      if (!user) {
-        json(res, { success: false, message: '未登录' }, 401);
-        return;
-      }
+    const gate = access(req, path, req.method || 'GET', 'apps');
+    if (!gate.ok) {
+      json(res, { success: false, message: gate.message }, gate.status || 401);
+      return;
     }
 
     if (path.startsWith('/public/')) {

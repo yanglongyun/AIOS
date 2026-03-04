@@ -23,7 +23,7 @@ const getOverview = () => {
   }
 };
 
-export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestions = true) => {
+export const buildSystemPrompt = (currentConversationId = '', enableFollowupSuggestions = true) => {
   const settings = getSettings();
   const {
     apiUrl,
@@ -75,7 +75,7 @@ export const buildSystemPrompt = (currentSessionId = '', enableFollowupSuggestio
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。`;
   }
 
-  const currentId = String(currentSessionId || '').trim();
+  const currentId = String(currentConversationId || '').trim();
   if (currentId || (Array.isArray(recentChats) && recentChats.length)) {
     const recentLines = recentChats
       .slice(0, 3)

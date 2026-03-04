@@ -100,7 +100,7 @@ const goNewSession = async () => {
 
 const goLastChat = async () => {
   emit('navigate');
-  const lastId = localStorage.getItem('lastSessionId');
+  const lastId = localStorage.getItem('lastConversationId');
   if (lastId) {
     await router.push(`/chat/${lastId}`);
   } else {

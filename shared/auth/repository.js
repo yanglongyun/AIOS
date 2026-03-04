@@ -27,26 +27,26 @@ export const createAuthSession = (userId, tokenHash, ttlSeconds) => {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + ttlSeconds * 1000);
   db.prepare(
-    'INSERT INTO auth_sessions (user_id, token_hash, expires_at, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO sessions (user_id, token_hash, expires_at, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?)'
   ).run(userId, tokenHash, toIso(expiresAt), toIso(now), toIso(now));
   return { userId, tokenHash, expiresAt: toIso(expiresAt) };
 };
 
 export const findAuthSessionByTokenHash = (tokenHash) => db.prepare(
   `SELECT id, user_id, token_hash, expires_at, created_at, last_seen_at
-   FROM auth_sessions
+   FROM sessions
    WHERE token_hash = ?`
 ).get(tokenHash);
 
 export const touchAuthSession = (id) => {
-  db.prepare('UPDATE auth_sessions SET last_seen_at = ? WHERE id = ?')
+  db.prepare('UPDATE sessions SET last_seen_at = ? WHERE id = ?')
     .run(toIso(new Date()), id);
 };
 
 export const deleteAuthSessionByTokenHash = (tokenHash) => {
-  db.prepare('DELETE FROM auth_sessions WHERE token_hash = ?').run(tokenHash);
+  db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(tokenHash);
 };
 
 export const deleteExpiredAuthSessions = () => {
-  db.prepare('DELETE FROM auth_sessions WHERE expires_at <= ?').run(toIso(new Date()));
+  db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(toIso(new Date()));
 };

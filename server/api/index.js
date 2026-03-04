@@ -6,17 +6,19 @@ import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
 import { handleNotificationsApi } from './notifications/index.js';
 import { handleAuthApi } from './auth/index.js';
-import { getAuthUser } from './auth/require.js';
-
-const isPublicApiPath = (path) => {
-  return path === '/api/health'
-    || path.startsWith('/api/auth/');
-};
+import { handleSetupApi } from './setup/index.js';
+import { access } from '../../shared/auth/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
 
   try {
+    const gate = access(req, path, req.method || 'GET', 'server-api');
+    if (!gate.ok) {
+      json(res, { success: false, message: gate.message }, gate.status || 401);
+      return true;
+    }
+
     if (path === '/api/health') {
       json(res, { success: true });
       return true;
@@ -27,12 +29,9 @@ export const handleApiRequest = async (req, res, url) => {
       return true;
     }
 
-    if (!isPublicApiPath(path)) {
-      const user = getAuthUser(req);
-      if (!user) {
-        json(res, { success: false, message: '未登录' }, 401);
-        return true;
-      }
+    if (path.startsWith('/api/setup/')) {
+      await handleSetupApi(req, res, path);
+      return true;
     }
 
     if (path.startsWith('/api/chat/')) {

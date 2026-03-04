@@ -1,8 +1,8 @@
 import { db } from '../../db/client.js';
 
-export const getChatMessagesPaged = (sessionId, limit = 20, offset = 0) => {
-  const total = db.prepare('SELECT COUNT(*) as count FROM messages WHERE session_id = ?').get(sessionId).count;
-  const rows = db.prepare('SELECT id, message, meta FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT ? OFFSET ?').all(sessionId, limit, offset);
+export const getChatMessagesPaged = (conversationId, limit = 20, offset = 0) => {
+  const total = db.prepare('SELECT COUNT(*) as count FROM messages WHERE conversation_id = ?').get(conversationId).count;
+  const rows = db.prepare('SELECT id, message, meta FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT ? OFFSET ?').all(conversationId, limit, offset);
 
   return {
     messages: rows.reverse().map((r) => ({

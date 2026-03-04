@@ -1,6 +1,5 @@
 export default {
   settings_tab_model: 'Model',
-  settings_tab_conversation: 'Conversation',
   settings_tab_messages: 'Messages',
   settings_tab_context: 'Context',
   settings_tab_tools: 'Tools',
@@ -10,9 +9,6 @@ export default {
   settings_api_key: 'API Key',
   settings_model: 'Model',
   settings_model_placeholder: 'Model name, e.g. gpt-4o',
-  settings_conversation: 'Conversation',
-  settings_followup: 'Enable follow-up suggestions',
-  settings_followup_desc: 'When enabled, AI appends suggestion tags with 3 follow-up prompts you can click.',
   settings_context_rounds: 'Context Rounds',
   settings_tool_truncate_enable: 'Enable tool-result truncation',
   settings_tool_max_chars: 'Tool result max chars',

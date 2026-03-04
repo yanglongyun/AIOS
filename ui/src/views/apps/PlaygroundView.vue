@@ -38,16 +38,6 @@
 
     <!-- 底部输入区 -->
     <div class="shrink-0 border-t border-white/5 bg-[#140e06] px-4 pb-4 pt-3">
-      <!-- 建议词 -->
-      <div class="mb-2.5 flex flex-wrap gap-1.5">
-        <button
-          v-for="s in suggestions"
-          :key="s"
-          @click="submitPrompt(s)"
-          :disabled="loading"
-          class="rounded-full border border-white/8 bg-white/4 px-3 py-1 text-[11px] text-[#6a5838] transition-all hover:border-[#d4b880]/30 hover:bg-[#d4b880]/8 hover:text-[#c4a870] disabled:pointer-events-none disabled:opacity-30"
-        >{{ s }}</button>
-      </div>
       <!-- 输入框 -->
       <div class="flex items-center gap-2">
         <input
@@ -80,13 +70,6 @@ const error = ref('');
 const versions = ref([]);
 const selectedVersionId = ref(0);
 const currentVersionName = ref('默认场景');
-
-const defaultSuggestions = [
-  '低多边形小岛，海面有波动',
-  '霓虹城市夜景，镜头推进',
-  '太阳系，行星绕太阳转'
-];
-const suggestions = ref([...defaultSuggestions]);
 
 const defaultHtml = `<!doctype html>
 <html>
@@ -215,10 +198,7 @@ const parseStructuredOutput = (raw = '') => {
   const parsed = JSON.parse(normalized);
   const name = String(parsed?.name || '').trim();
   const html = String(parsed?.html || '').trim();
-  const next = Array.isArray(parsed?.suggestions)
-    ? parsed.suggestions.map(s => String(s || '').trim()).filter(Boolean).slice(0, 3)
-    : [];
-  return { name, html, suggestions: next };
+  return { name, html };
 };
 
 const fetchVersions = async () => {
@@ -234,8 +214,6 @@ const loadLatestVersion = async () => {
   if (!row) { currentVersionName.value = '默认场景'; return; }
   currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
-  suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
-    ? row.suggestions : [...defaultSuggestions];
 };
 
 const loadSelectedVersion = async () => {
@@ -246,15 +224,11 @@ const loadSelectedVersion = async () => {
   const row = data.data;
   currentVersionName.value = row.name || '未命名场景';
   sceneHtml.value = row.html || defaultHtml;
-  suggestions.value = Array.isArray(row.suggestions) && row.suggestions.length === 3
-    ? row.suggestions : [...defaultSuggestions];
 };
 
-const submitPrompt = async (suggestion) => {
-  const content = (suggestion || prompt.value).trim();
+const submitPrompt = async () => {
+  const content = prompt.value.trim();
   if (!content || loading.value) return;
-
-  if (suggestion) prompt.value = suggestion;
   loading.value = true;
   error.value = '';
 
@@ -275,7 +249,7 @@ const submitPrompt = async (suggestion) => {
         messages: [
           {
             role: 'system',
-            content: '你是 3D 网页生成助手。你会收到"当前场景名称 + 当前场景完整HTML + 用户新需求"。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["建议1","建议2","建议3"]}。name 要简短明确；suggestions 必须给出恰好3条可继续生成3D场景的短建议。只返回 JSON，不要解释，不要 markdown。'
+            content: '你是 3D 网页生成助手。你会收到"当前场景名称 + 当前场景完整HTML + 用户新需求"。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）"}。name 要简短明确。只返回 JSON，不要解释，不要 markdown。'
           },
           { role: 'user', content: contextBlock }
         ]
@@ -285,10 +259,10 @@ const submitPrompt = async (suggestion) => {
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
 
-    let name = '', html = '', nextSuggestions = [];
+    let name = '', html = '';
     try {
       const structured = parseStructuredOutput(data.message?.content || '');
-      name = structured.name; html = structured.html; nextSuggestions = structured.suggestions;
+      name = structured.name; html = structured.html;
     } catch {
       html = normalizeModelText(data.message?.content || '');
     }
@@ -296,13 +270,12 @@ const submitPrompt = async (suggestion) => {
     if (!html.toLowerCase().includes('<html')) throw new Error('模型未返回完整 HTML');
     sceneHtml.value = html;
     currentVersionName.value = name || content.slice(0, 24);
-    suggestions.value = nextSuggestions.length === 3 ? nextSuggestions : [...defaultSuggestions];
     prompt.value = '';
 
     await fetch('/apps/playground/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name || content.slice(0, 24), prompt: content, html, suggestions: suggestions.value })
+      body: JSON.stringify({ name: name || content.slice(0, 24), prompt: content, html })
     });
     await fetchVersions();
     selectedVersionId.value = 0;

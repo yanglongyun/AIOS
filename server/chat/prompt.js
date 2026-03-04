@@ -23,7 +23,7 @@ const getOverview = () => {
   }
 };
 
-export const buildSystemPrompt = (currentConversationId = '', enableFollowupSuggestions = true) => {
+export const buildSystemPrompt = (currentConversationId = '') => {
   const settings = getSettings();
   const {
     apiUrl,
@@ -94,20 +94,6 @@ export const buildSystemPrompt = (currentConversationId = '', enableFollowupSugg
   if (unread > 0) {
     prompt += `\n\n## 通知
 你有 ${unread} 条未读通知。可以用 shell 执行 \`curl http://localhost:9700/api/notifications\` 查看详情，用 \`curl -X POST http://localhost:9700/api/notifications/read -H 'Content-Type: application/json' -d '{"id":通知ID,"reply":"处理说明"}'\` 标记已读。`;
-  }
-
-  if (enableFollowupSuggestions) {
-    prompt += `\n\n## 后续建议输出
-在回答的最后追加一个建议标签，格式必须如下：
-<suggestions>
-1. 建议一
-2. 建议二
-3. 建议三
-</suggestions>
-
-要求：
-- 必须给出 3 条与当前对话相关的后续追问建议。
-- 建议应简短、具体、可直接提问。`;
   }
 
   return prompt;

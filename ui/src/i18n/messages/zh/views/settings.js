@@ -1,6 +1,5 @@
 export default {
   settings_tab_model: '模型',
-  settings_tab_conversation: '对话',
   settings_tab_messages: '消息',
   settings_tab_context: '上下文',
   settings_tab_tools: '工具',
@@ -10,9 +9,6 @@ export default {
   settings_api_key: '模型 Key',
   settings_model: '模型',
   settings_model_placeholder: '输入模型名称，如 gpt-4o',
-  settings_conversation: '对话',
-  settings_followup: '是否开启后续建议',
-  settings_followup_desc: '开启后，AI 会在回答结尾输出建议标签，包含 3 条后续追问建议，点击可填充输入框。',
   settings_context_rounds: '上下文轮数',
   settings_tool_truncate_enable: '启用工具结果截断',
   settings_tool_max_chars: '工具结果内容长度',

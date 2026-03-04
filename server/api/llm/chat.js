@@ -1,7 +1,7 @@
 import { readBody } from '../utils/readBody.js';
 import { json } from '../utils/json.js';
 import { getSettings } from '../../db/settings.js';
-import { callLLM } from '../../agent/llm.js';
+import { callLlmRegular } from '../../llm/regular.js';
 
 export const handleLlmChat = async (req, res) => {
   const body = await readBody(req);
@@ -19,7 +19,7 @@ export const handleLlmChat = async (req, res) => {
     const payload = { model, messages };
     if (response_format) payload.response_format = response_format;
     if (tools) payload.tools = tools;
-    const message = await callLLM(provider, apiUrl, apiKey, payload);
+    const message = await callLlmRegular(provider, apiUrl, apiKey, payload);
     json(res, { success: true, message });
   } catch (e) {
     json(res, { success: false, message: e.message }, 500);

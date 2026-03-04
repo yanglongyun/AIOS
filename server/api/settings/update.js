@@ -8,9 +8,6 @@ export const updateSettings = (body) => {
   if (body.apiUrl !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('apiUrl', body.apiUrl);
   if (body.apiKey !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('apiKey', body.apiKey);
   if (body.model !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('model', body.model);
-  if (body.enableFollowupSuggestions !== undefined) {
-    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('enableFollowupSuggestions', body.enableFollowupSuggestions ? '1' : '0');
-  }
   if (body.enableToolResultTruncate !== undefined) {
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('enableToolResultTruncate', body.enableToolResultTruncate ? '1' : '0');
   }

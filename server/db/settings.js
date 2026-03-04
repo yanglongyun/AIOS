@@ -14,7 +14,6 @@ export const getSettings = () => {
     apiUrl: obj.apiUrl || 'https://api.openai.com/v1/chat/completions',
     apiKey: obj.apiKey || '',
     model: obj.model || 'gpt-5.2',
-    enableFollowupSuggestions: obj.enableFollowupSuggestions === undefined ? true : obj.enableFollowupSuggestions === '1',
     enableToolResultTruncate: obj.enableToolResultTruncate === undefined ? true : obj.enableToolResultTruncate === '1',
     toolResultMaxChars,
     enableToolLoopLimit: obj.enableToolLoopLimit === undefined ? true : obj.enableToolLoopLimit === '1',

@@ -57,7 +57,8 @@
                     <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a]">{{ t('chat_done') }}</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#e8dcc8]">
-                    <div v-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.detail }}</div>
+                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#f5ead8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]"><span class="select-none text-[#a0907a]">$ </span>{{ m.command }}</div>
+                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.detail }}</div>
                     <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-[#e8dcc8] bg-[#f5ead8] px-3 py-2.5 font-mono text-[11px] text-[#7a6a50]">{{ m.result }}</div>
                   </div>
                 </div>
@@ -192,23 +193,32 @@ const request = async (url, options = {}) => {
 
 const saveLastChatId = (id) => { if (id) localStorage.setItem(LAST_CHAT_KEY, String(id)); };
 
-const parseToolArgs = (toolCall) => {
-  const raw = toolCall?.function?.arguments;
-  if (typeof raw !== 'string') return '';
-  try {
-    return JSON.stringify(JSON.parse(raw), null, 2);
-  } catch {
-    return raw;
-  }
+const parseToolArgs = (raw) => {
+  if (typeof raw !== 'string') return null;
+  try { return JSON.parse(raw); } catch { return null; }
 };
 
-const mapToolCallMessage = (toolCall, _key) => ({
-  type: 'tool_call',
-  toolCall,
-  title: toolCall?.function?.name || t('chat_tool_call'),
-  detail: parseToolArgs(toolCall),
-  _key
-});
+const mapToolCallMessage = (toolCall, _key) => {
+  const name = toolCall?.function?.name || '';
+  const args = parseToolArgs(toolCall?.function?.arguments);
+  if (name === 'shell' && args) {
+    return {
+      type: 'tool_call',
+      shell: true,
+      toolCall,
+      title: args.reason || 'shell',
+      command: args.command || '',
+      _key
+    };
+  }
+  return {
+    type: 'tool_call',
+    toolCall,
+    title: name || t('chat_tool_call'),
+    detail: args ? JSON.stringify(args, null, 2) : '',
+    _key
+  };
+};
 
 const parseMessages = (raw) => {
   const list = [];
@@ -453,53 +463,38 @@ watch(() => route.fullPath, async () => {
 onMounted(() => {
   if (wsStatus.value === 'disconnected') connect();
 
-  unsubs.push(on('assistant_start', () => {
-    const _key = `ws:${Date.now()}:assistant_stream`;
-    streamingAssistantKey.value = _key;
-    seenKeys.value.add(_key);
-    messages.value.push({ role: 'assistant', content: '', _key, streaming: true });
-    scrollToBottom(true);
-  }));
-
-  unsubs.push(on('assistant_delta', (data) => {
-    const key = streamingAssistantKey.value;
-    if (!key) return;
+  unsubs.push(on('delta', (data) => {
+    let key = streamingAssistantKey.value;
+    if (!key) {
+      key = `ws:${Date.now()}:assistant_stream`;
+      streamingAssistantKey.value = key;
+      seenKeys.value.add(key);
+      messages.value.push({ role: 'assistant', content: '', _key: key, streaming: true });
+    }
     const msg = messages.value.find((m) => m._key === key);
     if (!msg) return;
     msg.content = `${msg.content || ''}${data.delta || ''}`;
     scrollToBottom(true);
   }));
 
-  unsubs.push(on('assistant_cancel', () => {
-    const key = streamingAssistantKey.value;
-    if (!key) return;
-    messages.value = messages.value.filter((m) => m._key !== key);
-    streamingAssistantKey.value = '';
-  }));
-
-  unsubs.push(on('assistant_done', (data) => {
-    const content = data.content || '';
+  unsubs.push(on('done', () => {
     const key = streamingAssistantKey.value;
     if (key) {
       const msg = messages.value.find((m) => m._key === key);
-      if (msg) {
-        msg.content = content;
-        msg.streaming = false;
-      } else {
-        const _key = `ws:${Date.now()}:assistant`;
-        seenKeys.value.add(_key);
-        messages.value.push({ role: 'assistant', content, _key });
-      }
-    } else {
-      const _key = `ws:${Date.now()}:assistant`;
-      seenKeys.value.add(_key);
-      messages.value.push({ role: 'assistant', content, _key });
+      if (msg) msg.streaming = false;
     }
     streamingAssistantKey.value = '';
     busy.value = false;
   }));
 
   unsubs.push(on('tool_call', (data) => {
+    // 工具调用前，如果有正在流式的气泡，先收尾
+    const sKey = streamingAssistantKey.value;
+    if (sKey) {
+      const msg = messages.value.find((m) => m._key === sKey);
+      if (msg) msg.streaming = false;
+      streamingAssistantKey.value = '';
+    }
     const _key = `ws:${Date.now()}:tool_call`;
     seenKeys.value.add(_key);
     messages.value.push(mapToolCallMessage(data.toolCall, _key));

@@ -11,7 +11,7 @@ AI 生成 HTML 场景，用户描述想法即可得到可交互的页面。
 - `GET /apps/playground/list` - 获取场景列表
 - `GET /apps/playground/latest` - 获取最新场景
 - `GET /apps/playground/detail?id=xxx` - 获取场景详情
-- `POST /apps/playground/create` - 创建场景（参数：prompt, html, name, suggestions）
+- `POST /apps/playground/create` - 创建场景（参数：prompt, html, name）
 
 ## 数据表
-- `playground_versions` - 场景版本（name, prompt, html, suggestions）
+- `playground_versions` - 场景版本（name, prompt, html）

@@ -18,7 +18,6 @@ export const initPlaygroundDatabase = () => {
       name TEXT NOT NULL DEFAULT '未命名场景',
       prompt TEXT DEFAULT '',
       html TEXT NOT NULL,
-      suggestions TEXT DEFAULT '[]',
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);

@@ -75,14 +75,17 @@ export const createSession = (wsSend) => {
       const { signal } = abortController;
 
       const send = (msg) => {
+        if (msg.type === 'delta') {
+          wsSend({ type: 'delta', delta: msg.delta || '' });
+          return;
+        }
+
+        if (msg.type === 'assistant_tool_calls') {
+          if (msg.message) saveMessage(conversationId, msg.message, null);
+          return;
+        }
+
         if (msg.type === 'tool_call') {
-          if (msg.toolCall) {
-            saveMessage(conversationId, {
-              role: 'assistant',
-              content: null,
-              tool_calls: [msg.toolCall]
-            }, null);
-          }
           wsSend({ type: 'tool_call', toolCall: msg.toolCall });
           return;
         }
@@ -97,9 +100,9 @@ export const createSession = (wsSend) => {
           return;
         }
 
-        if (msg.type === 'assistant') {
+        if (msg.type === 'done') {
           if (msg.message) saveMessage(conversationId, msg.message, null);
-          wsSend({ type: 'assistant', content: msg.message?.content ?? '' });
+          wsSend({ type: 'done' });
           return;
         }
       };

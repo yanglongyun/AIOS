@@ -38,9 +38,6 @@
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
                 <div class="min-w-0 flex-1">
                   <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-[#e8dcc8] bg-[#fffdf8] px-4 py-3 text-[#4a3a28] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#3a2a18] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-[#e8dcc8] prose-pre:bg-[#f5ead8] prose-code:rounded prose-code:bg-[rgba(90,62,40,0.08)] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-[#d4c0a0] prose-blockquote:text-[#8a7a60]" v-html="renderMd(m.content)" />
-                  <div v-if="m.suggestions?.length" class="mt-2.5 flex flex-wrap gap-1.5">
-                    <button v-for="(s, idx) in m.suggestions" :key="`${i}-s-${idx}`" @click="applySuggestion(s)" class="cursor-pointer rounded-full border border-dashed border-[#d4c0a0] bg-[#f5ead8] px-3.5 py-1 text-xs text-[#7a6a50] transition-all hover:border-[#c0a878] hover:bg-[#ece0c8] hover:text-[#5a4a38]">{{ s }}</button>
-                  </div>
                   <div class="mt-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <button @click="copyText(m.content)" class="flex cursor-pointer items-center gap-1 rounded-md border-none bg-transparent px-2 py-0.5 text-[11px] text-[#a0907a] transition-all hover:bg-[#f0e8d8] hover:text-[#5a4a38]">
                       <Copy class="h-3.5 w-3.5" />
@@ -168,6 +165,7 @@ const composing = ref(false);
 const uploading = ref(false);
 const uploadError = ref('');
 const pendingFiles = ref([]);
+const streamingAssistantKey = ref('');
 
 const seenKeys = ref(new Set());
 
@@ -193,14 +191,6 @@ const request = async (url, options = {}) => {
 };
 
 const saveLastChatId = (id) => { if (id) localStorage.setItem(LAST_CHAT_KEY, String(id)); };
-
-const extractSuggestions = (text = '') => {
-  const src = String(text || '');
-  const match = src.match(/<suggestions>([\s\S]*?)<\/suggestions>/i);
-  if (!match) return { content: src, suggestions: [] };
-  const suggestions = (match[1] || '').split(/\r?\n|\|/g).map(l => l.replace(/^\s*[-*\d.)]+\s*/, '').trim()).filter(Boolean).slice(0, 3);
-  return { content: src.replace(match[0], '').trim(), suggestions };
-};
 
 const parseToolArgs = (toolCall) => {
   const raw = toolCall?.function?.arguments;
@@ -243,8 +233,7 @@ const parseMessages = (raw) => {
       continue;
     }
     if (m.role === 'assistant' && m.content) {
-      const parsed = extractSuggestions(m.content);
-      list.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions, _key: base ? `${base}:assistant` : undefined });
+      list.push({ role: 'assistant', content: m.content, _key: base ? `${base}:assistant` : undefined });
       continue;
     }
     if (m.role === 'user' && m.content) {
@@ -374,11 +363,6 @@ const stopBusy = () => {
   busy.value = false;
 };
 
-const applySuggestion = (text) => {
-  input.value = text;
-  nextTick(() => { autoResize(); textarea.value?.focus(); });
-};
-
 const openFilePicker = () => {
   uploadError.value = '';
   fileInput.value?.click();
@@ -469,6 +453,52 @@ watch(() => route.fullPath, async () => {
 onMounted(() => {
   if (wsStatus.value === 'disconnected') connect();
 
+  unsubs.push(on('assistant_start', () => {
+    const _key = `ws:${Date.now()}:assistant_stream`;
+    streamingAssistantKey.value = _key;
+    seenKeys.value.add(_key);
+    messages.value.push({ role: 'assistant', content: '', _key, streaming: true });
+    scrollToBottom(true);
+  }));
+
+  unsubs.push(on('assistant_delta', (data) => {
+    const key = streamingAssistantKey.value;
+    if (!key) return;
+    const msg = messages.value.find((m) => m._key === key);
+    if (!msg) return;
+    msg.content = `${msg.content || ''}${data.delta || ''}`;
+    scrollToBottom(true);
+  }));
+
+  unsubs.push(on('assistant_cancel', () => {
+    const key = streamingAssistantKey.value;
+    if (!key) return;
+    messages.value = messages.value.filter((m) => m._key !== key);
+    streamingAssistantKey.value = '';
+  }));
+
+  unsubs.push(on('assistant_done', (data) => {
+    const content = data.content || '';
+    const key = streamingAssistantKey.value;
+    if (key) {
+      const msg = messages.value.find((m) => m._key === key);
+      if (msg) {
+        msg.content = content;
+        msg.streaming = false;
+      } else {
+        const _key = `ws:${Date.now()}:assistant`;
+        seenKeys.value.add(_key);
+        messages.value.push({ role: 'assistant', content, _key });
+      }
+    } else {
+      const _key = `ws:${Date.now()}:assistant`;
+      seenKeys.value.add(_key);
+      messages.value.push({ role: 'assistant', content, _key });
+    }
+    streamingAssistantKey.value = '';
+    busy.value = false;
+  }));
+
   unsubs.push(on('tool_call', (data) => {
     const _key = `ws:${Date.now()}:tool_call`;
     seenKeys.value.add(_key);
@@ -483,20 +513,15 @@ onMounted(() => {
     seenKeys.value.add(_key);
     messages.value.push({ type: 'tool_result', content: data.content, _key });
   }));
-  unsubs.push(on('assistant', (data) => {
-    const parsed = extractSuggestions(data.content || '');
-    const _key = `ws:${Date.now()}:assistant`;
-    seenKeys.value.add(_key);
-    messages.value.push({ role: 'assistant', content: parsed.content, suggestions: parsed.suggestions, _key });
-    busy.value = false;
-  }));
   unsubs.push(on('error', (data) => {
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
+    streamingAssistantKey.value = '';
     busy.value = false;
   }));
   unsubs.push(on('aborted', () => {
+    streamingAssistantKey.value = '';
     busy.value = false;
   }));
 });

@@ -1,6 +1,6 @@
 import { tools } from './tools.js';
 import { runTools } from './runner.js';
-import { callLLM } from './llm.js';
+import { callLlmStream } from '../llm/stream.js';
 import { normalizeAgentMessages, normalizeChatOptions } from './utils.js';
 
 // Agent 主循环：
@@ -31,10 +31,19 @@ export const chat = async (messages, {
 
     // 把当前消息栈和工具定义发给模型
     const payload = { model, messages: workMessages, tools };
-    const message = await callLLM(provider, apiUrl, apiKey, payload, signal);
+    send({ type: 'assistant_start' });
+    const message = await callLlmStream(provider, apiUrl, apiKey, payload, {
+      signal,
+      onDelta: (delta) => {
+        if (delta) send({ type: 'assistant_delta', delta });
+      }
+    });
 
     // 工具分支：模型返回 tool_calls，需要先执行工具再继续下一轮
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
+      if (!message.content) {
+        send({ type: 'assistant_cancel' });
+      }
       // 先把 assistant 的 tool_calls 消息入栈，作为后续 tool 消息的上文
       const assistantMsg = {
         role: 'assistant',
@@ -42,6 +51,7 @@ export const chat = async (messages, {
         tool_calls: message.tool_calls
       };
       workMessages.push(assistantMsg);
+      send({ type: 'assistant_tool_calls', message: assistantMsg });
 
       // 通知外部：逐条工具调用（用于 UI 展示）
       for (const toolCall of message.tool_calls) {
@@ -68,11 +78,11 @@ export const chat = async (messages, {
     // 这里不需要再 push 到 workMessages，因为下面会立即 return
     const text = message.content ?? '';
     const replyMsg = { role: 'assistant', content: text };
-    send({ type: 'assistant', message: replyMsg });
+    send({ type: 'assistant_done', message: replyMsg });
     return text;
   }
 
   // 超过最大轮次仍未得到最终回复，返回兜底文案
-  send({ type: 'assistant', message: { role: 'assistant', content: '(达到最大轮次限制)' } });
+  send({ type: 'assistant_done', message: { role: 'assistant', content: '(达到最大轮次限制)' } });
   return '(达到最大轮次限制)';
 };

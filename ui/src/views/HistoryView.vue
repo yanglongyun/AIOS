@@ -1,14 +1,14 @@
 <template>
-  <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
+  <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif] dark:bg-[#1a1410] dark:bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(255,255,255,0.02)_28px,rgba(255,255,255,0.02)_29px)]">
     <div class="mx-auto max-w-[640px]">
       <div class="mb-5 flex items-center gap-3">
         <span class="text-[28px]">📜</span>
         <div>
-          <h1 class="m-0 text-xl font-bold text-[#4a3a28]">历史会话</h1>
-          <p class="mt-0.5 text-xs text-[#a0907a]">选择一个会话继续对话</p>
+          <h1 class="m-0 text-xl font-bold text-[#4a3a28] dark:text-[#e8dcc8]">历史会话</h1>
+          <p class="mt-0.5 text-xs text-[#a0907a] dark:text-[#6a5840]">选择一个会话继续对话</p>
         </div>
       </div>
-      <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+      <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
         <HistoryPanel @open-chat="openChatFromHistory" />
       </div>
     </div>

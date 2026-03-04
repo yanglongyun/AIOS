@@ -18,38 +18,22 @@
         </div>
 
         <!-- Step 1: 欢迎 -->
-        <div v-if="step === 1" class="px-9 py-10 text-center">
-          <h2 class="text-[32px] font-extrabold leading-tight tracking-wide">{{ t('welcome_title_prefix') }}<br><em class="italic text-[#c8a060]">AIOS</em></h2>
-          <p class="mt-4 text-sm leading-[1.8] text-[#a08c70]">
-            {{ t('welcome_tagline_1') }}<br>{{ t('welcome_tagline_2') }}
-          </p>
-          <div class="mt-7 flex justify-center gap-3">
-            <div class="flex-1 max-w-[140px] rounded-[10px] border border-[#3a2a1a] bg-[rgba(200,160,96,0.04)] p-3.5 text-left">
-              <div class="text-lg">🧠</div>
-              <div class="mt-1.5 text-xs font-semibold">{{ t('welcome_feat1_title') }}</div>
-              <div class="mt-0.5 text-[10px] leading-snug text-[#6a5840]">{{ t('welcome_feat1_desc') }}</div>
+        <div v-if="step === 1" class="px-10 py-12 text-center">
+          <h2 class="bg-gradient-to-b from-[#e8d4b8] from-20% to-[#c8a060] bg-clip-text text-[56px] font-extrabold leading-none tracking-[0.08em] text-transparent">AIOS</h2>
+          <div class="mx-auto mt-6 h-[2px] w-10 rounded-full bg-[#c8a060] opacity-50"></div>
+          <p class="mt-6 text-[13px] leading-[2] tracking-[0.02em] text-[#8a7a60]">{{ t('welcome_desc') }}</p>
+          <div class="mt-7 flex items-center justify-between border-t border-[#3a2a1a] pt-6">
+            <div class="flex gap-2">
+              <button
+                v-for="lang in [{ id: 'zh', label: '中文' }, { id: 'en', label: 'English' }]"
+                :key="lang.id"
+                class="rounded-lg border px-4 py-1.5 text-[13px] transition-all"
+                :class="model.language === lang.id ? 'border-[#c8a060] bg-[rgba(200,160,96,0.12)] text-[#c8a060] font-semibold' : 'border-[#3a2a1a] text-[#6a5840] hover:border-[#5a4a30] hover:text-[#a08c70]'"
+                @click="model.language = lang.id"
+              >{{ lang.label }}</button>
             </div>
-            <div class="flex-1 max-w-[140px] rounded-[10px] border border-[#3a2a1a] bg-[rgba(200,160,96,0.04)] p-3.5 text-left">
-              <div class="text-lg">🖥</div>
-              <div class="mt-1.5 text-xs font-semibold">{{ t('welcome_feat2_title') }}</div>
-              <div class="mt-0.5 text-[10px] leading-snug text-[#6a5840]">{{ t('welcome_feat2_desc') }}</div>
-            </div>
-            <div class="flex-1 max-w-[140px] rounded-[10px] border border-[#3a2a1a] bg-[rgba(200,160,96,0.04)] p-3.5 text-left">
-              <div class="text-lg">👤</div>
-              <div class="mt-1.5 text-xs font-semibold">{{ t('welcome_feat3_title') }}</div>
-              <div class="mt-0.5 text-[10px] leading-snug text-[#6a5840]">{{ t('welcome_feat3_desc') }}</div>
-            </div>
+            <button class="rounded-lg bg-[#c8a060] px-7 py-2.5 text-[13px] font-semibold text-[#1a1008] hover:bg-[#d4b070]" @click="step = 2">{{ t('welcome_start') }}</button>
           </div>
-          <div class="mt-6 flex justify-center gap-2">
-            <button
-              v-for="lang in [{ id: 'zh', label: '中文' }, { id: 'en', label: 'English' }]"
-              :key="lang.id"
-              class="rounded-lg border px-4 py-1.5 text-[13px] transition-all"
-              :class="model.language === lang.id ? 'border-[#c8a060] bg-[rgba(200,160,96,0.12)] text-[#c8a060] font-semibold' : 'border-[#3a2a1a] text-[#6a5840] hover:border-[#5a4a30] hover:text-[#a08c70]'"
-              @click="model.language = lang.id"
-            >{{ lang.label }}</button>
-          </div>
-          <button class="mt-5 rounded-lg bg-[#c8a060] px-9 py-3 text-sm font-semibold text-[#1a1008] hover:bg-[#d4b070]" @click="step = 2">{{ t('welcome_start') }}</button>
         </div>
 
         <!-- Step 2: 创建管理员 -->

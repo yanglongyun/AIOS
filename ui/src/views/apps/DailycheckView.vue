@@ -7,7 +7,7 @@
 
     <!-- topbar -->
     <div class="relative z-10 mx-auto flex max-w-[720px] items-center justify-between px-6 pb-3 pt-6">
-      <div class="text-[22px] font-extrabold italic text-[#5a4030]">每日打卡</div>
+      <div class="text-[22px] font-extrabold text-[#5a4030]">每日打卡</div>
       <div class="rounded-[10px] bg-[#ede7dc] px-3 py-1.5 text-right">
         <div class="text-[10px] leading-none tracking-widest text-[#b8a090]">{{ weekday }}</div>
         <div class="mt-0.5 text-[15px] font-bold leading-snug text-[#7a6050]">{{ monthDay }}</div>
@@ -144,7 +144,7 @@
             </div>
             <div class="mb-1 text-[13px] font-semibold leading-snug text-[#4a3a28]">{{ item.question }}</div>
             <div v-if="item.answer" class="text-xs leading-relaxed text-[#7a6a58]">{{ item.answer }}</div>
-            <div v-else class="text-xs italic text-[#c0b098]">当天未回答</div>
+            <div v-else class="text-xs text-[#c0b098]">当天未回答</div>
             <div v-if="item.response" class="mt-1.5 rounded-lg bg-[#fdf8ee] px-2.5 py-2 text-xs leading-relaxed text-[#9a7a48]">
               {{ item.response }}
             </div>

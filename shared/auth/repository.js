@@ -1,6 +1,9 @@
 import Database from 'better-sqlite3';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-const db = new Database('database/aios.db');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const db = new Database(resolve(__dirname, '..', '..', 'database', 'aios.db'));
 
 const toIso = (date) => date.toISOString();
 

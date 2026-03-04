@@ -1,12 +1,15 @@
 import { createServer } from 'http';
 import { existsSync, readFileSync, statSync } from 'fs';
 import { extname, join, resolve } from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { json } from './app_shared/utils/json.js';
 import { appRegistry } from './registry.js';
 import { access } from '../shared/auth/index.js';
 
 const APPS_PORT = 9701;
-const ROOT_DIR = process.cwd();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT_DIR = resolve(__dirname, '..');
 const PUBLIC_DIR = join(ROOT_DIR, 'public');
 const PUBLIC_BASE = resolve(PUBLIC_DIR);
 

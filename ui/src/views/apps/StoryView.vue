@@ -4,7 +4,7 @@
     <!-- 左侧：故事列表 -->
     <div class="flex w-[220px] shrink-0 flex-col border-r border-[#e0d4c4] bg-[#ede8e0]">
       <div class="shrink-0 px-4 py-4">
-        <div class="text-[14px] font-extrabold italic text-[#5a4030]">故事机</div>
+        <div class="text-[14px] font-extrabold text-[#5a4030]">故事会</div>
         <p class="mt-0.5 text-[10px] text-[#a0907a]">互动式章节故事</p>
       </div>
 

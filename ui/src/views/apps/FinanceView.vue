@@ -4,7 +4,7 @@
       <div class="absolute inset-0 [background-image:repeating-linear-gradient(transparent,transparent_31px,#e8ddd0_31px,#e8ddd0_32px)] [background-position:0_100px] opacity-30"></div>
     </div>
     <div class="relative z-[1] flex shrink-0 items-end justify-between px-6 pb-2 pt-6">
-      <h1 class="text-2xl font-extrabold italic text-[#5a4030]">记账本</h1>
+      <h1 class="text-2xl font-extrabold text-[#5a4030]">记账本</h1>
       <span class="rounded-full bg-[#f0e8dd] px-3 py-1 text-xs text-[#b8a090]">{{ currentMonth }}</span>
     </div>
 

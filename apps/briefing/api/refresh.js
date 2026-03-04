@@ -12,7 +12,7 @@ const taskAgent = async ({ date, focus, note }) => {
   const parsed = await taskAgentJson({
     app: 'briefing',
     prompt: [
-      '你在处理 briefing 的今日专属早报生成请求。',
+      '你在处理 briefing 的今日新闻简报生成请求。',
       '你可以自行使用 shell 搜索和阅读网页，再整理结果。',
       '最终只输出 JSON，不要输出任何其它文字。',
       'JSON 格式必须是：{"title":"...","brief":"...","content":"...","note":"..."}。',

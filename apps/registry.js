@@ -28,27 +28,6 @@ export const appRegistry = [
     dbInit: ['initPlaygroundDatabase']
   },
   {
-    name: 'mindtree',
-    match: (path) => path.startsWith('/apps/mindtree/'),
-    load: () => import('./mindtree/index.js'),
-    apiHandler: 'handleMindtreeApi',
-    dbInit: ['initMindtreeDatabase']
-  },
-  {
-    name: 'writerpad',
-    match: (path) => path.startsWith('/apps/writerpad/'),
-    load: () => import('./writerpad/index.js'),
-    apiHandler: 'handleWriterpadApi',
-    dbInit: ['initWriterpadDatabase']
-  },
-  {
-    name: 'lovehouse',
-    match: (path) => path.startsWith('/apps/lovehouse/'),
-    load: () => import('./lovehouse/index.js'),
-    apiHandler: 'handleLovehouseApi',
-    dbInit: ['initLovehouseDatabase']
-  },
-  {
     name: 'nokia',
     match: (path) => path.startsWith('/apps/nokia/'),
     load: () => import('./nokia/index.js'),
@@ -104,5 +83,33 @@ export const appRegistry = [
     load: () => import('./blackroom/index.js'),
     apiHandler: 'handleBlackroomApi',
     dbInit: ['initBlackroomDatabase']
+  },
+  {
+    name: 'fortune',
+    match: (path) => path.startsWith('/apps/fortune/'),
+    load: () => import('./fortune/index.js'),
+    apiHandler: 'handleFortuneApi',
+    dbInit: ['initFortuneDatabase']
+  },
+  {
+    name: 'poker',
+    match: (path) => path.startsWith('/apps/poker/'),
+    load: () => import('./poker/index.js'),
+    apiHandler: 'handlePokerApi',
+    dbInit: ['initPokerDatabase']
+  },
+  {
+    name: 'doodle',
+    match: (path) => path.startsWith('/apps/doodle/'),
+    load: () => import('./doodle/index.js'),
+    apiHandler: 'handleDoodleApi',
+    dbInit: ['initDoodleDatabase']
+  },
+  {
+    name: 'redmill',
+    match: (path) => path.startsWith('/apps/redmill/'),
+    load: () => import('./redmill/index.js'),
+    apiHandler: 'handleRedmillApi',
+    dbInit: ['initRedmillDatabase']
   }
 ];

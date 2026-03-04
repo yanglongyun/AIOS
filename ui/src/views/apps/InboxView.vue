@@ -1,13 +1,13 @@
 <template>
   <div class="relative flex h-full w-full flex-col overflow-hidden bg-[#f0ebe3] bg-[radial-gradient(circle_at_30%_70%,rgba(139,90,43,0.03)_0%,transparent_50%),radial-gradient(circle_at_70%_30%,rgba(139,90,43,0.02)_0%,transparent_40%),repeating-linear-gradient(90deg,transparent,transparent_80px,rgba(139,90,43,0.015)_80px,rgba(139,90,43,0.015)_81px)] font-['Georgia','PingFang_SC',serif] text-[#5a5048]">
     <div class="relative z-[1] flex shrink-0 items-end justify-between px-6 pt-6">
-      <h1 class="text-2xl font-extrabold italic text-[#7a6a58]">收件箱 <span class="ml-1 text-xl">📬</span></h1>
+      <h1 class="text-2xl font-extrabold text-[#7a6a58]">收件箱 <span class="ml-1 text-xl">📬</span></h1>
       <span v-if="unread > 0" class="rounded-full bg-[#d4756a] px-3 py-1 text-[13px] font-bold text-white shadow-[0_2px_6px_rgba(212,117,106,0.25)]">{{ unread }} 封未读</span>
     </div>
 
     <div class="relative z-[1] mx-6 mt-4 flex shrink-0 flex-col gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4] sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0 flex-1">
-        <div class="text-xs italic text-[#b8a898]">📮 外部提交入口</div>
+        <div class="text-xs text-[#b8a898]">📮 外部提交入口</div>
         <div class="mt-0.5 text-[11px] leading-relaxed text-[#a59686]">把这个地址发给他人，他们可以在网页上提交留言，提交后会自动进入你的收件箱。</div>
         <div class="mt-1 break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
       </div>
@@ -23,13 +23,13 @@
         <button class="rounded border border-[#d4c8b8] px-3.5 py-1.5 text-xs text-[#a89888] transition-all hover:bg-[#f5ead0]" :class="readFilter === 'unread' ? 'border-[#8a7a68] bg-[#8a7a68] text-[#faf6f0]' : ''" @click="readFilter = 'unread'; fetchMessages()">未读</button>
         <button class="rounded border border-[#d4c8b8] px-3.5 py-1.5 text-xs text-[#a89888] transition-all hover:bg-[#f5ead0]" :class="readFilter === 'read' ? 'border-[#8a7a68] bg-[#8a7a68] text-[#faf6f0]' : ''" @click="readFilter = 'read'; fetchMessages()">已读</button>
       </div>
-      <span class="text-[11px] italic text-[#c4b8a8]">{{ messages.length }} 封信件</span>
+      <span class="text-[11px] text-[#c4b8a8]">{{ messages.length }} 封信件</span>
     </div>
 
     <div class="relative z-[1] flex-1 overflow-y-auto px-6 pb-6 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div v-if="!messages.length" class="flex h-full flex-col items-center justify-center gap-2 text-[#c4b8a8]">
         <span class="text-5xl opacity-50">📭</span>
-        <p class="text-sm italic">暂无来信</p>
+        <p class="text-sm ">暂无来信</p>
       </div>
 
       <div
@@ -42,14 +42,14 @@
         <div class="mb-2 flex items-center gap-2">
           <div>
             <div class="text-sm font-bold text-[#7a6a58]">{{ m.name || '匿名' }}</div>
-            <div class="text-[11px] italic text-[#b8a898]">{{ m.email || '无邮箱' }}</div>
+            <div class="text-[11px] text-[#b8a898]">{{ m.email || '无邮箱' }}</div>
           </div>
         </div>
 
         <div class="my-2.5 whitespace-pre-wrap break-words bg-[repeating-linear-gradient(transparent,transparent_27px,rgba(180,160,130,0.12)_27px,rgba(180,160,130,0.12)_28px)] bg-[position:0_2px] text-sm leading-[1.8] text-[#6a5e50]">{{ m.content }}</div>
 
         <div class="mt-2.5 flex items-center justify-between">
-          <span class="text-[11px] italic text-[#c4b8a8]">📅 {{ formatDate(m.created_at) }} · 🌐 {{ m.source_ip || 'unknown' }}</span>
+          <span class="text-[11px] text-[#c4b8a8]">📅 {{ formatDate(m.created_at) }} · 🌐 {{ m.source_ip || 'unknown' }}</span>
           <div class="flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
             <button class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#8a7a68] hover:bg-[#8a7a68] hover:text-[#faf6f0]" @click="toggleRead(m)">{{ m.is_read ? '标未读' : '标已读' }}</button>
             <button class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#d4756a] hover:bg-[#d4756a] hover:text-white" @click="remove(m.id)">删除</button>
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div class="relative z-[1] shrink-0 border-t border-dashed border-[#d8d0c4] px-6 py-3 text-center text-[11px] italic text-[#c4b8a8]">📮 AIOS 邮局 · 本地投递</div>
+    <div class="relative z-[1] shrink-0 border-t border-dashed border-[#d8d0c4] px-6 py-3 text-center text-[11px] text-[#c4b8a8]">📮 AIOS 邮局 · 本地投递</div>
   </div>
 </template>
 

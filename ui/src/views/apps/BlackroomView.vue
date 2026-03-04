@@ -75,7 +75,7 @@
               <span class="text-xs text-[#aaa]">💩 x {{ item.poopCount }}</span>
             </div>
             <div v-if="item.complaint" class="whitespace-pre-wrap text-sm leading-relaxed text-[#ddd]">{{ item.complaint }}</div>
-            <div v-else class="text-sm italic text-[#777]">（无文本，仅情绪投掷）</div>
+            <div v-else class="text-sm text-[#777]">（无文本，仅情绪投掷）</div>
             <div v-if="item.agentResponse" class="mt-2 rounded-lg border border-white/10 bg-[#171717] px-2.5 py-2 text-xs leading-relaxed text-[#bbb]">
               Agent：{{ item.agentResponse }}
             </div>

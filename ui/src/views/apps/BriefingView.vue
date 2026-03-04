@@ -3,7 +3,7 @@
     <div class="mx-auto w-full max-w-4xl px-4 py-8">
       <header class="mb-6 border-b-2 border-[#3a2e20] pb-4">
         <p class="text-[10px] uppercase tracking-[.35em] text-[#a09080]">AI-Powered Personal</p>
-        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">专属早报</h1>
+        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">看新闻</h1>
         <p class="mt-1.5 text-xs tracking-wide text-[#9a8a70]">{{ todayText }}</p>
       </header>
 
@@ -43,7 +43,7 @@
           <h2 class="text-xl font-extrabold text-[#3a2e20]">{{ today.title }}</h2>
           <span class="text-[10px] text-[#a09080]">{{ formatTime(today.updatedAt || today.createdAt) }}</span>
         </div>
-        <p class="mb-4 rounded-lg bg-[#eee6da] px-3 py-2 text-xs italic leading-relaxed text-[#6a5a44]">{{ today.brief }}</p>
+        <p class="mb-4 rounded-lg bg-[#eee6da] px-3 py-2 text-xs leading-relaxed text-[#6a5a44]">{{ today.brief }}</p>
         <article class="whitespace-pre-wrap break-words text-sm leading-[1.9] text-[#4a3e2a]">{{ today.content }}</article>
       </section>
 

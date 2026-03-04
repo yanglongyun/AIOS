@@ -5,11 +5,14 @@
       <div class="w-full max-w-[480px] overflow-hidden rounded-md bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
         <!-- 深蓝金顶栏 -->
         <div class="relative bg-[#1c2841] px-8 pb-7 pt-8 text-center text-[#c9b06b] after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-[linear-gradient(90deg,transparent,#c9b06b,transparent)]">
-          <h1 class="mb-1.5 text-[26px] font-bold tracking-[3px]">🎤 竞选模拟器</h1>
-          <p class="text-xs tracking-wide text-[#8a9ab5]">Presidential Debate Simulator</p>
+          <h1 class="mb-1.5 text-[26px] font-bold tracking-[3px]">🃏 纸牌屋</h1>
+          <p class="text-xs tracking-wide text-[#8a9ab5]">House of Cards</p>
         </div>
 
         <div class="px-7 pb-8 pt-7">
+          <div class="mb-5 rounded border border-[#e8e6e0] bg-[#f8f7f4] px-4 py-3.5 text-[13px] leading-[1.8] text-[#4a5568]">
+            想竞选总统？先来纸牌屋练练。选择你的党派，与 AI 对手展开多轮辩论，争夺选民支持率。主持人提问、媒体快评、实时民调——每一句话都可能改变选情。超过 50% 即可入主白宫。
+          </div>
           <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">选择党派</div>
 
           <!-- 党派列表 -->
@@ -145,7 +148,7 @@
               </div>
               <!-- 主持人 -->
               <div v-else-if="message.role === 'moderator'" class="mx-auto mb-3 max-w-[88%]">
-                <div class="rounded-lg border border-[#e0ddd6] bg-[#f8f7f4] px-3.5 py-2.5 text-center text-sm italic leading-relaxed text-[#6a7a8a]">
+                <div class="rounded-lg border border-[#e0ddd6] bg-[#f8f7f4] px-3.5 py-2.5 text-center text-sm leading-relaxed text-[#6a7a8a]">
                   <div class="mb-0.5 text-[10px] font-bold not-italic text-[#8a9ab5]">主持人</div>
                   {{ message.content }}
                 </div>
@@ -208,7 +211,7 @@
 
         <!-- 等待状态 -->
         <div v-else class="flex items-center justify-center rounded-xl border border-dashed border-[#e0ddd6] bg-[#f8f7f4] py-3.5">
-          <span class="text-sm italic text-[#8a9ab5]">等待他人发言</span>
+          <span class="text-sm text-[#8a9ab5]">等待他人发言</span>
         </div>
       </div>
     </div>

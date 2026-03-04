@@ -79,7 +79,7 @@
           <div class="text-xl font-bold text-[#3a2e1e]">{{ detailItem.name }}</div>
           <div class="mt-1 text-xs text-[#9a8a70]">{{ detailItem.category }} · {{ detailItem.condition_text }} · {{ detailItem.summary_tag }} · 入库于 {{ formatDate(detailItem.created_at) }}</div>
           <div class="mt-3 text-[28px] font-bold text-[#5a3e28]">¥{{ formatValue(detailItem.value) }}</div>
-          <div class="mt-3 rounded-lg border-l-2 border-[#c8a06040] bg-[#f5f0e8] p-3.5 text-[13px] italic leading-relaxed text-[#7a6a50]">
+          <div class="mt-3 rounded-lg border-l-2 border-[#c8a06040] bg-[#f5f0e8] p-3.5 text-[13px] leading-relaxed text-[#7a6a50]">
             "{{ detailItem.comment || '暂无点评' }}"
           </div>
           <div class="mt-4 flex gap-2.5">

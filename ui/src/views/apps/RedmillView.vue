@@ -34,50 +34,38 @@
     </div>
 
     <!-- 编辑模式 -->
-    <div v-else class="flex flex-1 overflow-hidden">
-      <!-- 左：页面列表 + 编辑 -->
-      <div class="flex w-[360px] flex-shrink-0 flex-col border-r border-[#dcd0b8] dark:border-[#2a1e14]">
-        <div class="border-b border-[#dcd0b8] px-4 py-3 dark:border-[#2a1e14]">
-          <div class="text-sm font-semibold text-[#5a4a38] dark:text-[#e8d4b8]">{{ project.topic }}</div>
-          <div class="mt-0.5 text-[11px] text-[#b8a888] dark:text-[#5a4a38]">{{ project.pages?.length || 0 }} 页</div>
-        </div>
-        <div class="flex-1 overflow-y-auto p-3">
-          <div class="space-y-2">
-            <div v-for="(page, i) in project.pages" :key="page.id"
-              class="cursor-pointer rounded-lg border p-3 transition"
-              :class="activePage === i ? 'border-[#c8a060] bg-[rgba(200,160,96,0.08)]' : 'border-[#dcd0b8] bg-[#fffdf8] hover:border-[#c8a060] dark:border-[#3a2a1a] dark:bg-[#221a12]'"
-              @click="activePage = i">
-              <div class="mb-1 flex items-center gap-2">
-                <span class="rounded bg-[#c8a060] px-1.5 py-0.5 text-[10px] font-bold text-[#1a1008]">P{{ i + 1 }}</span>
-                <span class="text-[10px] uppercase text-[#b8a888]">{{ page.pageType }}</span>
-              </div>
-              <div class="text-xs leading-relaxed text-[#5a4a38] dark:text-[#d4c0a0]" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                {{ page.content }}
-              </div>
-            </div>
-          </div>
-        </div>
+    <div v-else class="flex flex-1 flex-col overflow-hidden">
+      <!-- 页码切换条 -->
+      <div class="flex items-center gap-1.5 border-b border-[#dcd0b8] px-6 py-2.5 dark:border-[#2a1e14]">
+        <span class="mr-2 text-xs text-[#b8a888] dark:text-[#5a4a38]">{{ project.topic }}</span>
+        <button v-for="(page, i) in project.pages" :key="page.id"
+          @click="activePage = i"
+          class="rounded-md px-2.5 py-1 text-[11px] font-bold transition"
+          :class="activePage === i ? 'bg-[#c8a060] text-[#1a1008]' : 'text-[#8a7a60] hover:bg-[rgba(200,160,96,0.1)] dark:text-[#6a5840]'">
+          P{{ i + 1 }}
+        </button>
       </div>
 
-      <!-- 右：编辑 + 预览 -->
-      <div v-if="currentPage" class="flex flex-1 flex-col p-6">
-        <div class="mb-3 flex items-center gap-2">
-          <span class="rounded bg-[#c8a060] px-2 py-0.5 text-xs font-bold text-[#1a1008]">P{{ activePage + 1 }}</span>
-          <span class="text-xs uppercase text-[#b8a888]">{{ currentPage.pageType }}</span>
-        </div>
-        <!-- 预览卡片 -->
-        <div class="mx-auto mb-4 w-[280px] rounded-xl border border-[#dcd0b8] bg-gradient-to-b from-[#fffdf8] to-[#f5edd8] p-5 shadow-md dark:border-[#3a2a1a] dark:from-[#2a1e14] dark:to-[#221a10]"
-          style="aspect-ratio: 3/4;">
-          <div class="flex h-full flex-col justify-center text-center">
-            <div v-if="currentPage.pageType === 'cover'" class="text-xl font-bold leading-relaxed text-[#5a4a38] dark:text-[#e8d4b8]">{{ currentPage.content }}</div>
-            <div v-else-if="currentPage.pageType === 'summary'" class="text-sm leading-[2] text-[#8a7a60] dark:text-[#a08c70]">{{ currentPage.content }}</div>
-            <div v-else class="text-[13px] leading-[2] text-[#5a4a38] dark:text-[#d4c0a0]">{{ currentPage.content }}</div>
+      <!-- 预览 + 编辑 -->
+      <div v-if="currentPage" class="flex-1 overflow-y-auto p-6">
+        <div class="mx-auto max-w-[480px]">
+          <div class="mb-2 flex items-center gap-2">
+            <span class="text-xs uppercase text-[#b8a888]">{{ currentPage.pageType }}</span>
           </div>
+          <!-- 预览卡片 -->
+          <div class="mx-auto mb-4 w-[280px] rounded-xl border border-[#dcd0b8] bg-gradient-to-b from-[#fffdf8] to-[#f5edd8] p-5 shadow-md dark:border-[#3a2a1a] dark:from-[#2a1e14] dark:to-[#221a10]"
+            style="aspect-ratio: 3/4;">
+            <div class="flex h-full flex-col justify-center text-center">
+              <div v-if="currentPage.pageType === 'cover'" class="text-xl font-bold leading-relaxed text-[#5a4a38] dark:text-[#e8d4b8]">{{ currentPage.content }}</div>
+              <div v-else-if="currentPage.pageType === 'summary'" class="text-sm leading-[2] text-[#8a7a60] dark:text-[#a08c70]">{{ currentPage.content }}</div>
+              <div v-else class="text-[13px] leading-[2] text-[#5a4a38] dark:text-[#d4c0a0]">{{ currentPage.content }}</div>
+            </div>
+          </div>
+          <!-- 编辑 -->
+          <textarea v-model="currentPage.content" rows="6"
+            class="w-full resize-none rounded-lg border border-[#dcd0b8] bg-[#fffdf8] px-4 py-3 text-sm leading-relaxed text-[#5a4a38] outline-none focus:border-[#c8a060] dark:border-[#3a2a1a] dark:bg-[#1a1410] dark:text-[#e8d4b8]"
+            @blur="savePage(currentPage)" />
         </div>
-        <!-- 编辑 -->
-        <textarea v-model="currentPage.content" rows="5"
-          class="w-full flex-1 resize-none rounded-lg border border-[#dcd0b8] bg-[#fffdf8] px-4 py-3 text-sm leading-relaxed text-[#5a4a38] outline-none focus:border-[#c8a060] dark:border-[#3a2a1a] dark:bg-[#1a1410] dark:text-[#e8d4b8]"
-          @blur="savePage(currentPage)" />
       </div>
     </div>
   </div>

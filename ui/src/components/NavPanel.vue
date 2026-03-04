@@ -55,7 +55,7 @@
 
     <!-- 底部 -->
     <div class="border-t border-white/10 px-3 pb-3 pt-2">
-      <button @click="go('/community')" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(is('/community'))">
+      <button @click="openCommunity" class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150" :class="btnClass(false)">
         <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">👥</span>
         {{ t('app_sidebar_community') }}
       </button>
@@ -113,6 +113,12 @@ const goLastChat = async () => {
 const goHistory = async () => {
   emit('navigate');
   await router.push('/history');
+};
+
+const openCommunity = () => {
+  emit('navigate');
+  const url = localStorage.getItem('communityUrl') || 'https://aios.chatnext.ai';
+  window.open(url, '_blank', 'noopener,noreferrer');
 };
 
 

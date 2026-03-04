@@ -48,9 +48,19 @@
 
         <div class="my-2.5 whitespace-pre-wrap break-words bg-[repeating-linear-gradient(transparent,transparent_27px,rgba(180,160,130,0.12)_27px,rgba(180,160,130,0.12)_28px)] bg-[position:0_2px] text-sm leading-[1.8] text-[#6a5e50]">{{ m.content }}</div>
 
+        <!-- 建议回复 -->
+        <div v-if="m.reply_suggestion" class="mt-2 rounded border border-[#e0d8cc] bg-[#f5efe6] px-4 py-3">
+          <div class="mb-1.5 flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-[1px] text-[#b8a898]">建议回复</span>
+            <button class="text-[11px] text-[#a89888] transition-colors hover:text-[#8a7a68]" :disabled="suggesting[m.id]" @click="suggest(m.id)">{{ suggesting[m.id] ? '生成中...' : '重新生成' }}</button>
+          </div>
+          <div class="whitespace-pre-wrap text-[13px] leading-[1.8] text-[#6a5e50]">{{ m.reply_suggestion }}</div>
+        </div>
+
         <div class="mt-2.5 flex items-center justify-between">
           <span class="text-[11px] text-[#c4b8a8]">📅 {{ formatDate(m.created_at) }} · 🌐 {{ m.source_ip || 'unknown' }}</span>
           <div class="flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <button v-if="!m.reply_suggestion" class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#8a7a68] hover:bg-[#8a7a68] hover:text-[#faf6f0]" :disabled="suggesting[m.id]" @click="suggest(m.id)">{{ suggesting[m.id] ? '生成中...' : '建议回复' }}</button>
             <button class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#8a7a68] hover:bg-[#8a7a68] hover:text-[#faf6f0]" @click="toggleRead(m)">{{ m.is_read ? '标未读' : '标已读' }}</button>
             <button class="rounded border-[1.5px] border-[#e0d4c8] bg-white/50 px-3.5 py-1 text-[11px] text-[#a89888] transition-all hover:border-[#d4756a] hover:bg-[#d4756a] hover:text-white" @click="remove(m.id)">删除</button>
           </div>
@@ -63,7 +73,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
 const API_BASE = '/apps/inbox';
 const publicUrl = `${window.location.origin}/apps/inbox/submit`;
@@ -72,6 +82,7 @@ const messages = ref([]);
 const unread = ref(0);
 const readFilter = ref('all');
 const copied = ref(false);
+const suggesting = reactive({});
 
 const fetchMessages = async () => {
   const params = new URLSearchParams({ read: readFilter.value });
@@ -97,6 +108,23 @@ const remove = async (id) => {
     body: JSON.stringify({ id })
   });
   fetchMessages();
+};
+
+const suggest = async (id) => {
+  suggesting[id] = true;
+  try {
+    const res = await fetch(`${API_BASE}/suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const msg = messages.value.find(m => m.id === id);
+      if (msg) msg.reply_suggestion = data.suggestion;
+    }
+  } catch {}
+  suggesting[id] = false;
 };
 
 const copySubmitUrl = async () => {

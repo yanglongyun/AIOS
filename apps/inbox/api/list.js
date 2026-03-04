@@ -6,7 +6,7 @@ export const listHandler = ({ read = 'all' } = {}) => {
   if (read === 'read') where = 'WHERE is_read = 1';
 
   const items = db.prepare(`
-    SELECT id, name, email, content, source_ip, is_read, created_at
+    SELECT id, name, email, content, source_ip, is_read, reply_suggestion, created_at
     FROM inbox_messages
     ${where}
     ORDER BY is_read ASC, id DESC

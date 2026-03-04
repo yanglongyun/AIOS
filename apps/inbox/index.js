@@ -7,6 +7,7 @@ import { listHandler } from './api/list.js';
 import { submitHandler } from './api/submit.js';
 import { readHandler } from './api/read.js';
 import { deleteHandler } from './api/delete.js';
+import { suggestHandler } from './api/suggest.js';
 
 export { initInboxDatabase };
 
@@ -46,6 +47,13 @@ export const handleInboxApi = async (req, res, pathName) => {
   if (pathName === '/apps/inbox/delete' && req.method === 'POST') {
     const body = await readBody(req);
     const data = deleteHandler(body);
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
+  }
+
+  if (pathName === '/apps/inbox/suggest' && req.method === 'POST') {
+    const body = await readBody(req);
+    const data = await suggestHandler(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

@@ -20,7 +20,14 @@ export const initInboxDatabase = () => {
       content TEXT NOT NULL,
       source_ip TEXT DEFAULT '',
       is_read INTEGER NOT NULL DEFAULT 0,
+      reply_suggestion TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
+
+  // migration: add reply_suggestion column
+  const cols = db.prepare("PRAGMA table_info(inbox_messages)").all();
+  if (!cols.find(c => c.name === 'reply_suggestion')) {
+    db.exec("ALTER TABLE inbox_messages ADD COLUMN reply_suggestion TEXT DEFAULT ''");
+  }
 };

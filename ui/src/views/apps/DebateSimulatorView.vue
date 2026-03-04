@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#f4f3f0] font-serif">
     <!-- ===== 开始页面 ===== -->
-    <div v-if="!debateStarted" class="flex min-h-screen items-center justify-center p-4 bg-[#eceae5]">
-      <div class="w-full max-w-[480px] overflow-hidden rounded-md bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+    <div v-if="!debateStarted" class="h-full min-h-0 overflow-y-auto bg-[#eceae5] p-4">
+      <div class="mx-auto w-full max-w-[480px] overflow-hidden rounded-md bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
         <!-- 深蓝金顶栏 -->
         <div class="relative bg-[#1c2841] px-8 pb-7 pt-8 text-center text-[#c9b06b] after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-[linear-gradient(90deg,transparent,#c9b06b,transparent)]">
           <h1 class="mb-1.5 text-[26px] font-bold tracking-[3px]">🃏 纸牌屋</h1>

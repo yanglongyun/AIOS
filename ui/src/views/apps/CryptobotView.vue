@@ -1,162 +1,140 @@
 <template>
-  <div class="flex h-full flex-col bg-[#0c0f14] font-['SF_Mono','Menlo','Monaco',monospace] text-[#e0e4ea]">
+  <div class="flex h-full flex-col bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif] dark:bg-[#1a1410]">
 
-    <!-- 顶栏：ticker + 状态 -->
-    <div class="flex items-center justify-between border-b border-[#1e2530] bg-[#111419] px-5 py-2.5">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <span class="text-base font-bold text-[#f0b90b]">₿</span>
-          <span class="text-[15px] font-bold tracking-wide">{{ status.config.inst_id || 'BTC-USDT' }}</span>
-        </div>
-        <div class="text-[22px] font-bold tabular-nums">
-          {{ status.state.last_price ? fmtNum(status.state.last_price, 2) : '--' }}
-        </div>
-        <div class="text-[13px] font-semibold tabular-nums" :class="status.equity.today_change >= 0 ? 'text-[#00c076]' : 'text-[#f6465d]'">
-          {{ status.equity.today_change >= 0 ? '+' : '' }}{{ fmtNum(status.equity.today_change) }} U
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5">
-          <div class="h-[7px] w-[7px] rounded-full" :class="status.state.running ? 'bg-[#00c076] shadow-[0_0_6px_rgba(0,192,118,0.4)]' : 'bg-[#3a3f4a]'"></div>
-          <span class="text-[11px] text-[#6b7280]">{{ status.state.running ? 'RUNNING' : 'STOPPED' }}</span>
-        </div>
-        <div class="flex items-center gap-1 text-[11px] text-[#6b7280]">
-          <select v-model="intervalMin" class="rounded border border-[#1e2530] bg-[#0c0f14] px-1.5 py-0.5 text-[11px] text-[#e0e4ea] outline-none" @change="onIntervalChange">
-            <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ m }}m</option>
-          </select>
-        </div>
-        <button v-if="status.state.running" @click="doStop" class="rounded bg-[#f6465d]/10 px-3 py-1 text-[11px] font-bold text-[#f6465d] transition hover:bg-[#f6465d]/20">STOP</button>
-        <button v-else @click="doStart" class="rounded bg-[#00c076]/10 px-3 py-1 text-[11px] font-bold text-[#00c076] transition hover:bg-[#00c076]/20">START</button>
+    <!-- 顶栏 -->
+    <div class="flex items-center justify-between border-b border-[#dcd0b8] bg-[#fffdf8] px-5 py-3 dark:border-[#2a1e14] dark:bg-[#221a12]">
+      <div class="flex items-center gap-2">
+        <span class="text-base font-bold text-[#c8a060]">₿</span>
+        <h1 class="text-lg font-bold text-[#5a4a38] dark:text-[#e8d4b8]">炒币机</h1>
       </div>
     </div>
 
     <!-- Error -->
-    <div v-if="error" class="border-b border-[#f6465d]/20 bg-[#f6465d]/5 px-5 py-2 text-[11px] text-[#f6465d]">{{ error }}</div>
+    <div v-if="error" class="border-b border-[#e0b8a0] bg-[#fdf5ef] px-5 py-2 text-[11px] text-[#c04030] dark:border-[#5a2020] dark:bg-[#2a1410]">{{ error }}</div>
 
-    <div class="flex min-h-0 flex-1">
-      <!-- 左侧：图表 + 决策 -->
-      <div class="flex min-w-0 flex-1 flex-col">
+    <!-- 单列滚动 -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-[720px]">
 
-        <!-- 账户概览 -->
-        <div class="flex items-end gap-6 border-b border-[#1e2530] px-5 py-3">
-          <div>
-            <div class="text-[10px] uppercase tracking-[2px] text-[#4a5060]">Equity</div>
-            <div class="mt-0.5 text-[28px] font-bold leading-none tabular-nums">{{ fmtNum(status.equity.current, 0) }}<span class="ml-1 text-sm font-normal text-[#4a5060]">U</span></div>
+        <!-- 交易所 -->
+        <div class="border-b border-[#dcd0b8] px-5 py-3 dark:border-[#2a1e14]">
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">交易所</span>
+            <span class="text-sm font-extrabold text-[#5a4a38] dark:text-[#e8d4b8]">OKX</span>
+            <span v-if="status.config.has_keys" class="rounded-md bg-[#d8f0d0] px-2 py-0.5 text-[9px] font-bold text-[#2a7030]">已连接</span>
+            <span v-else class="rounded-md bg-[#ece4d8] px-2 py-0.5 text-[9px] font-bold text-[#9a8a70]">未配置</span>
+            <span v-if="status.config.api_key" class="text-[10px] text-[#b0a088]">{{ status.config.api_key }}</span>
+            <span class="ml-auto cursor-pointer text-[11px] text-[#8a7a60] underline decoration-dotted underline-offset-2 hover:text-[#4a3a20]" @click="showExPanel = !showExPanel">{{ showExPanel ? '收起' : '修改' }}</span>
           </div>
-          <div>
-            <div class="text-[10px] uppercase tracking-[2px] text-[#4a5060]">P&L</div>
-            <div class="mt-0.5 text-lg font-bold tabular-nums" :class="status.equity.pnl >= 0 ? 'text-[#00c076]' : 'text-[#f6465d]'">
-              {{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl) }}
-              <span class="text-[11px] font-normal">({{ status.equity.pnl_ratio >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl_ratio, 1) }}%)</span>
-            </div>
-          </div>
-          <div v-if="status.state.running" class="text-[11px] text-[#4a5060]">
-            {{ status.state.tick_count }} ticks · {{ status.state.trade_count }} trades · {{ runDuration }}
-          </div>
-        </div>
-
-        <!-- 权益曲线 -->
-        <div class="border-b border-[#1e2530] px-5 py-3">
-          <svg viewBox="0 0 580 120" class="h-[120px] w-full">
-            <line v-for="y in [30, 60, 90]" :key="y" x1="0" :y1="y" x2="580" :y2="y" stroke="#1e2530" stroke-width="1"/>
-            <defs>
-              <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" :stop-color="eqColor" stop-opacity="0.15"/>
-                <stop offset="100%" :stop-color="eqColor" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <polygon v-if="eqPolyline" :points="eqFillPts" fill="url(#eqFill)" />
-            <polyline v-if="eqPolyline" fill="none" :stroke="eqColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" :points="eqPolyline" />
-            <template v-for="dot in tradeDots" :key="dot.id">
-              <circle :cx="dot.x" :cy="dot.y" r="3" :fill="dot.action === 'buy' ? '#00c076' : '#f6465d'" />
-            </template>
-            <text v-if="!eqPolyline" x="290" y="65" text-anchor="middle" fill="#2a3040" font-size="12" font-family="inherit">NO DATA</text>
-          </svg>
-          <div class="mt-1 flex justify-between text-[10px] text-[#3a4050]">
-            <span><span class="text-[#00c076]">●</span> BUY <span class="ml-2 text-[#f6465d]">●</span> SELL</span>
-            <span v-if="eqTimespan">{{ eqTimespan }}</span>
-          </div>
-        </div>
-
-        <!-- 运行记录 -->
-        <div class="min-h-0 flex-1 overflow-y-auto">
-          <div class="px-5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[2px] text-[#3a4050]">Decisions</div>
-          <div v-if="!decisions.length" class="px-5 py-8 text-center text-[12px] text-[#2a3040]">启动后，AI 的每次思考和决策会显示在这里</div>
-          <div v-for="(d, idx) in decisions" :key="d.id" class="flex gap-3 px-5">
-            <div class="w-10 flex-shrink-0 pt-3 text-right">
-              <span class="text-[10px] tabular-nums text-[#3a4050]">{{ fmtShort(d.created_at) }}</span>
-            </div>
-            <div class="flex w-3 flex-shrink-0 flex-col items-center">
-              <div class="mt-3 h-2 w-2 flex-shrink-0 rounded-full" :class="dotCls(d.action)"></div>
-              <div v-if="idx < decisions.length - 1" class="w-px flex-1 bg-[#1e2530]"></div>
-            </div>
-            <div class="min-w-0 flex-1 pb-3.5 pt-2">
-              <div class="text-[10px] font-bold uppercase tracking-[1px]" :class="actCls(d.action)">{{ actLabel(d.action) }}</div>
-              <div class="mt-0.5 text-[12px] font-sans leading-[1.7] text-[#8a90a0]">{{ d.reason }}</div>
-              <div v-if="d.action !== 'hold' && d.amount_usdt > 0" class="mt-1 inline-block rounded bg-[#141820] px-2 py-0.5 text-[10px] tabular-nums text-[#6b7280]">
-                {{ status.config.inst_id }} <span class="text-[#e0e4ea]">{{ fmtNum(d.price) }}</span> × {{ Number(d.size_coin).toFixed(6) }} = <span class="text-[#e0e4ea]">{{ fmtNum(d.amount_usdt) }} U</span>
+          <div v-if="showExPanel" class="mt-3 grid grid-cols-2 gap-2">
+            <input v-model="exForm.api_key" placeholder="API Key" class="ex-input" />
+            <input v-model="exForm.api_secret" type="password" placeholder="API Secret" class="ex-input" />
+            <input v-model="exForm.passphrase" type="password" placeholder="Passphrase" class="ex-input" />
+            <input v-model="exForm.base_url" placeholder="API URL（默认 https://www.okx.com）" class="ex-input" />
+            <div class="col-span-2 flex items-center justify-between pt-1">
+              <div class="flex items-center gap-2">
+                <button class="btn-ghost" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? '测试中...' : '测试连接' }}</button>
+                <span v-if="testResult" class="text-[11px]" :class="testResult.ok ? 'text-[#2a7030]' : 'text-[#c05030]'">{{ testResult.msg }}</span>
               </div>
-            </div>
-          </div>
-          <div v-if="hasMore" class="cursor-pointer py-3 text-center text-[11px] text-[#3a4050] hover:text-[#6b7280]" @click="loadMoreDecisions">LOAD MORE ↓</div>
-        </div>
-      </div>
-
-      <!-- 右侧面板 -->
-      <div class="flex w-[280px] flex-shrink-0 flex-col gap-0 border-l border-[#1e2530]">
-
-        <!-- 交易所连接 -->
-        <div class="border-b border-[#1e2530] p-4">
-          <div class="mb-2.5 flex items-center justify-between">
-            <div class="text-[10px] font-bold uppercase tracking-[2px] text-[#3a4050]">Exchange</div>
-            <span class="cursor-pointer text-[10px] text-[#4a5060] hover:text-[#e0e4ea]" @click="showExPanel = !showExPanel">{{ showExPanel ? 'CLOSE' : 'EDIT' }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-[13px] font-bold">OKX</span>
-            <span v-if="status.config.has_keys" class="rounded bg-[#00c076]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#00c076]">CONNECTED</span>
-            <span v-else class="rounded bg-[#f6465d]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#f6465d]">NO KEY</span>
-          </div>
-          <div v-if="status.config.api_key" class="mt-1 text-[10px] text-[#3a4050]">{{ status.config.api_key }}</div>
-          <div v-if="showExPanel" class="mt-3 space-y-2">
-            <input v-model="exForm.api_key" placeholder="API Key" class="term-input" />
-            <input v-model="exForm.api_secret" type="password" placeholder="API Secret" class="term-input" />
-            <input v-model="exForm.passphrase" type="password" placeholder="Passphrase" class="term-input" />
-            <input v-model="exForm.base_url" placeholder="API URL" class="term-input" />
-            <div class="flex items-center justify-between pt-1">
-              <div class="flex items-center gap-1.5">
-                <button class="term-btn-outline" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? '...' : 'TEST' }}</button>
-                <span v-if="testResult" class="text-[10px]" :class="testResult.ok ? 'text-[#00c076]' : 'text-[#f6465d]'">{{ testResult.msg }}</span>
-              </div>
-              <button class="term-btn" @click="doSaveExchange">SAVE</button>
+              <button class="btn-dark" @click="doSaveExchange">保存</button>
             </div>
           </div>
         </div>
 
         <!-- 交易指令 -->
-        <div class="flex min-h-0 flex-1 flex-col border-b border-[#1e2530] p-4">
-          <div class="mb-2.5 text-[10px] font-bold uppercase tracking-[2px] text-[#3a4050]">Directive</div>
+        <div class="border-b border-[#dcd0b8] px-5 py-3 dark:border-[#2a1e14]">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">交易指令</div>
           <textarea
             v-model="directive"
-            class="term-textarea flex-1"
+            class="dir-area"
+            rows="3"
             placeholder="告诉 AI 你想怎么交易...&#10;&#10;例如：帮我盯 BTC，保守操作，单次不超过 50U，跌 5% 止损。"
           ></textarea>
           <div class="mt-2 flex items-center justify-between">
-            <span class="text-[10px] text-[#2a3040]">{{ status.config.updated_at ? fmtTime(status.config.updated_at) : '' }}</span>
-            <button class="term-btn" @click="doSaveDirective">SAVE</button>
+            <span class="text-[10px] text-[#b0a088]">{{ status.config.updated_at ? `上次保存 ${fmtTime(status.config.updated_at)}` : '' }}</span>
+            <button class="btn-dark" @click="doSaveDirective">保存</button>
           </div>
         </div>
 
-        <!-- 快速信息 -->
-        <div class="p-4">
-          <div class="mb-2 text-[10px] font-bold uppercase tracking-[2px] text-[#3a4050]">Stats</div>
-          <div class="space-y-1.5 text-[11px]">
-            <div class="flex justify-between"><span class="text-[#4a5060]">Initial</span><span class="tabular-nums">{{ fmtNum(status.equity.initial, 0) }} U</span></div>
-            <div class="flex justify-between"><span class="text-[#4a5060]">Current</span><span class="tabular-nums">{{ fmtNum(status.equity.current, 0) }} U</span></div>
-            <div class="flex justify-between"><span class="text-[#4a5060]">Today</span><span class="tabular-nums" :class="status.equity.today_change >= 0 ? 'text-[#00c076]' : 'text-[#f6465d]'">{{ status.equity.today_change >= 0 ? '+' : '' }}{{ fmtNum(status.equity.today_change) }} U</span></div>
-            <div class="flex justify-between"><span class="text-[#4a5060]">Ticks</span><span class="tabular-nums">{{ status.state.tick_count }}</span></div>
-            <div class="flex justify-between"><span class="text-[#4a5060]">Trades</span><span class="tabular-nums">{{ status.state.trade_count }}</span></div>
+        <!-- 自动运行 -->
+        <div class="border-b border-[#dcd0b8] px-5 py-3 dark:border-[#2a1e14]">
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">自动运行</div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <div class="h-[7px] w-[7px] rounded-full" :class="status.state.running ? 'bg-[#4a9a40] shadow-[0_0_6px_rgba(74,154,64,0.35)]' : 'bg-[#c0b098]'"></div>
+              <span class="text-[11px] text-[#9a8a70] dark:text-[#6a5840]">{{ status.state.running ? '运行中' : '已停止' }}</span>
+            </div>
+            <span class="text-[11px] text-[#b0a088]">间隔</span>
+            <select v-model="intervalMin" class="rounded-md border border-[#dcd0b8] bg-[#fffdf8] px-1.5 py-0.5 text-[11px] text-[#5a4a38] outline-none dark:border-[#3a2a1a] dark:bg-[#1a1410] dark:text-[#e8d4b8]" @change="onIntervalChange">
+              <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ m }}分钟</option>
+            </select>
+            <span v-if="status.state.running" class="text-[10px] text-[#9a8a70]">{{ status.state.tick_count }} 次思考 · {{ status.state.trade_count }} 笔交易 · {{ runDuration }}</span>
+            <button v-if="status.state.running" @click="doStop" class="ml-auto rounded-lg border border-[#e0b8a0] bg-white px-3 py-1 text-[11px] font-bold text-[#c04030] transition hover:bg-[#fdf5ef] dark:border-[#5a2020] dark:bg-[#2a1410]">停止</button>
+            <button v-else @click="doStart" class="ml-auto rounded-lg bg-[#c8a060] px-3 py-1 text-[11px] font-bold text-[#1a1008] transition hover:bg-[#d4b070]">启动</button>
           </div>
         </div>
+
+        <!-- 账户概览 -->
+        <div class="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-[#dcd0b8] px-5 py-3 dark:border-[#2a1e14]">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">总权益</div>
+            <div class="mt-0.5 font-['SF_Mono','Menlo',monospace] text-[28px] font-bold leading-none tabular-nums text-[#3a2e20] dark:text-[#e8d4b8]">{{ fmtNum(status.equity.current, 0) }}<span class="ml-1 text-sm font-normal text-[#a09078]">U</span></div>
+          </div>
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">盈亏</div>
+            <div class="mt-0.5 font-['SF_Mono','Menlo',monospace] text-lg font-bold tabular-nums" :class="status.equity.pnl >= 0 ? 'text-[#2a7a3a]' : 'text-[#c04030]'">
+              {{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl) }}
+              <span class="text-[11px] font-normal">({{ status.equity.pnl_ratio >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl_ratio, 1) }}%)</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-[#9a8a70] dark:text-[#6a5840]">
+            <span>初始 {{ fmtNum(status.equity.initial, 0) }}U</span>
+          </div>
+        </div>
+
+        <!-- 权益曲线 -->
+        <div class="border-b border-[#dcd0b8] px-5 py-3 dark:border-[#2a1e14]">
+          <svg viewBox="0 0 580 120" class="h-[120px] w-full">
+            <line v-for="y in [30, 60, 90]" :key="y" x1="0" :y1="y" x2="580" :y2="y" stroke="#ece4d8" stroke-width="1"/>
+            <defs>
+              <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" :stop-color="eqColor" stop-opacity="0.12"/>
+                <stop offset="100%" :stop-color="eqColor" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <polygon v-if="eqPolyline" :points="eqFillPts" fill="url(#eqFill)" />
+            <polyline v-if="eqPolyline" fill="none" :stroke="eqColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :points="eqPolyline" />
+            <template v-for="dot in tradeDots" :key="dot.id">
+              <circle :cx="dot.x" :cy="dot.y" r="3.5" :fill="dot.action === 'buy' ? '#2a7a3a' : '#c04030'" />
+            </template>
+            <text v-if="!eqPolyline" x="290" y="65" text-anchor="middle" fill="#b8a890" font-size="12">暂无数据</text>
+          </svg>
+          <div class="mt-1 flex justify-between text-[10px] text-[#b0a088]">
+            <span><span class="text-[#2a7a3a]">●</span> 买入 <span class="ml-2 text-[#c04030]">●</span> 卖出</span>
+            <span v-if="eqTimespan">最近 {{ eqTimespan }}</span>
+          </div>
+        </div>
+
+        <!-- 运行记录 -->
+        <div class="mb-2 px-5 pt-3 text-[10px] font-bold uppercase tracking-[2px] text-[#a09078]">运行记录</div>
+        <div v-if="!decisions.length" class="py-8 text-center text-[13px] text-[#b0a090]">启动后，AI 的每次思考和决策会显示在这里</div>
+        <div v-for="(d, idx) in decisions" :key="d.id" class="flex gap-3 px-5">
+          <div class="w-10 flex-shrink-0 pt-3.5 text-right">
+            <span class="font-['SF_Mono','Menlo',monospace] text-[11px] font-semibold tabular-nums text-[#b0a088]">{{ fmtShort(d.created_at) }}</span>
+          </div>
+          <div class="flex w-3.5 flex-shrink-0 flex-col items-center">
+            <div class="mt-3.5 h-2.5 w-2.5 flex-shrink-0 rounded-full" :class="dotCls(d.action)"></div>
+            <div v-if="idx < decisions.length - 1" class="w-px flex-1 bg-[#e0d8cc] dark:bg-[#2a1e14]"></div>
+          </div>
+          <div class="min-w-0 flex-1 pb-4 pt-2.5">
+            <div class="text-[11px] font-extrabold uppercase tracking-[0.5px]" :class="actCls(d.action)">{{ actLabel(d.action) }}</div>
+            <div class="mt-1 text-[13px] leading-[1.8] text-[#4a3e28] dark:text-[#d4c0a0]">{{ d.reason }}</div>
+            <div v-if="d.action !== 'hold' && d.amount_usdt > 0" class="mt-1.5 inline-block rounded-md bg-[#faf6f0] px-2.5 py-1 font-['SF_Mono','Menlo',monospace] text-[11px] tabular-nums text-[#6a5a44] dark:bg-[#221a12]">
+              {{ status.config.inst_id }} <b class="text-[#3a2e20] dark:text-[#e8d4b8]">{{ fmtNum(d.price) }}</b> × {{ Number(d.size_coin).toFixed(6) }} = <b class="text-[#3a2e20] dark:text-[#e8d4b8]">{{ fmtNum(d.amount_usdt) }} U</b>
+            </div>
+          </div>
+        </div>
+        <div v-if="hasMore" class="cursor-pointer py-4 text-center text-[11px] text-[#9a8a70] hover:text-[#5a4a30]" @click="loadMoreDecisions">加载更多 ↓</div>
       </div>
     </div>
   </div>
@@ -231,7 +209,7 @@ const doTestExchange = async () => {
   testResult.value = null;
   try {
     await post('/exchange/test', exForm);
-    testResult.value = { ok: true, msg: '✓ OK' };
+    testResult.value = { ok: true, msg: '✓ 连接成功' };
   } catch (e) {
     testResult.value = { ok: false, msg: e.message };
   } finally {
@@ -278,17 +256,17 @@ const onIntervalChange = () => {
   if (status.state.running) doStart();
 };
 
-const eqColor = computed(() => status.equity.pnl >= 0 ? '#00c076' : '#f6465d');
+const eqColor = computed(() => status.equity.pnl >= 0 ? '#4a9a40' : '#c04030');
 
 const runDuration = computed(() => {
   if (!status.state.started_at) return '';
   const ms = Date.now() - new Date(status.state.started_at).getTime();
   if (ms < 0) return '';
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return `${mins}m`;
+  if (mins < 60) return `${mins} 分钟`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+  if (hours < 24) return `${hours} 小时`;
+  return `${Math.floor(hours / 24)} 天`;
 });
 
 const eqPolyline = computed(() => {
@@ -339,8 +317,8 @@ const eqTimespan = computed(() => {
   const last = new Date(pts[pts.length - 1].created_at).getTime();
   const hours = Math.round((last - first) / 3600000);
   if (hours <= 0) return '';
-  if (hours < 24) return `${hours}h`;
-  return `${Math.round(hours / 24)}d`;
+  if (hours < 24) return `${hours} 小时`;
+  return `${Math.round(hours / 24)} 天`;
 });
 
 const fmtNum = (v, dec = 2) => {
@@ -364,21 +342,21 @@ const fmtShort = (v) => {
 };
 
 const dotCls = (a) => ({
-  'bg-[#00c076]': a === 'buy',
-  'bg-[#f6465d]': a === 'sell',
-  'border border-[#2a3040] bg-transparent': a !== 'buy' && a !== 'sell'
+  'bg-[#2a7a3a]': a === 'buy',
+  'bg-[#c04030]': a === 'sell',
+  'border-2 border-[#d4c4b0] bg-transparent': a !== 'buy' && a !== 'sell'
 });
 
 const actCls = (a) => ({
-  'text-[#00c076]': a === 'buy',
-  'text-[#f6465d]': a === 'sell',
-  'text-[#3a4050]': a !== 'buy' && a !== 'sell'
+  'text-[#2a7a3a]': a === 'buy',
+  'text-[#c04030]': a === 'sell',
+  'text-[#b0a090]': a !== 'buy' && a !== 'sell'
 });
 
 const actLabel = (a) => {
-  if (a === 'buy') return 'BUY';
-  if (a === 'sell') return 'SELL';
-  return 'HOLD';
+  if (a === 'buy') return '买入';
+  if (a === 'sell') return '卖出';
+  return '观望';
 };
 
 onMounted(async () => {
@@ -399,62 +377,58 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.term-input {
+.ex-input {
   width: 100%;
-  padding: 5px 8px;
-  border: 1px solid #1e2530;
-  border-radius: 4px;
+  padding: 6px 10px;
+  border: 1px solid #e0d8cc;
+  border-radius: 8px;
   font-size: 11px;
-  font-family: 'SF Mono', Menlo, Monaco, monospace;
+  font-family: inherit;
   outline: none;
-  background: #0c0f14;
-  color: #e0e4ea;
+  background: #faf6f0;
+  color: #3a2e20;
 }
-.term-input:focus { border-color: #3a4050; }
-.term-input::placeholder { color: #2a3040; }
-.term-btn {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 10px;
+.ex-input:focus { border-color: #b89860; }
+.btn-dark {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
-  border: none;
-  background: #f0b90b;
-  color: #0c0f14;
+  border: 1px solid #3a2e20;
+  background: #3a2e20;
+  color: #f5efe4;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;
 }
-.term-btn:hover { background: #fcd535; }
-.term-btn-outline {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 10px;
+.btn-dark:hover { background: #4a3e30; }
+.btn-ghost {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
-  border: 1px solid #2a3040;
+  border: 1px solid #c0b098;
   background: transparent;
-  color: #6b7280;
+  color: #6a5a40;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;
 }
-.term-btn-outline:hover { border-color: #4a5060; color: #e0e4ea; }
-.term-btn-outline:disabled { opacity: 0.4; cursor: not-allowed; }
-.term-textarea {
+.btn-ghost:hover { background: #f0e8d8; color: #3a2e20; }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+.dir-area {
   width: 100%;
-  border: 1px solid #1e2530;
-  border-radius: 4px;
-  background: #0c0f14;
-  padding: 8px 10px;
-  font-size: 12px;
-  line-height: 1.7;
-  font-family: 'PingFang SC', 'SF Mono', sans-serif;
-  color: #e0e4ea;
+  border: 1px solid #e0d8cc;
+  border-radius: 10px;
+  background: #faf6f0;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  font-family: inherit;
+  color: #3a2e20;
   resize: none;
   outline: none;
-  min-height: 60px;
 }
-.term-textarea:focus { border-color: #3a4050; }
-.term-textarea::placeholder { color: #2a3040; font-size: 11px; }
+.dir-area:focus { border-color: #b89860; }
+.dir-area::placeholder { color: #c4b8a4; font-size: 12px; }
 </style>

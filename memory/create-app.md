@@ -129,6 +129,16 @@ db.pragma('journal_mode = WAL');
 - Agent 跑脚本改 DB
 - API 做编排与权限边界
 
+## Instant JSON 约束（必须）
+
+- 当应用调用 `POST /api/task/create/instant` 且使用 `schema`（或显式 `response_format: { type: 'json_object' }`）时：
+  - `prompt` 或 `messages` 中必须出现 `JSON/json` 关键词
+  - 必须明确写“只输出 JSON，不要额外文本”
+- 推荐写法：
+  - system: `只输出 JSON：{"field":"..."}`
+  - prompt: `按 schema 输出 JSON`
+- 禁止只写“结构化输出”而不出现 `JSON/json` 字样（部分供应商会直接 400）
+
 ## 主题适配规范
 
 - 应用页面样式必须同时提供浅色/深色样式，统一使用 Tailwind `dark:` 变体

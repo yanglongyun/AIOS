@@ -55,7 +55,8 @@ export const debateHandler = async (body = {}, req) => {
 不要透露下一个议题内容。
 进入下一议题前，主持人先做简短收尾过渡，再调用 next。
 如果整体发言超过 8 条，必须尽快调用 next。
-对手发言要口语化，有情绪、动作、语气（放在括号里）。`
+对手发言要口语化，有情绪、动作、语气（放在括号里）。
+输出必须符合 JSON 结构，禁止输出 JSON 以外的文本。`
     },
     {
       role: 'user',
@@ -67,7 +68,7 @@ export const debateHandler = async (body = {}, req) => {
     const data = await instantTaskJson({
       app: 'debate',
       title: '辩论推进决策',
-      prompt: '基于当前辩论信息，调用合适工具推进流程。',
+      prompt: '基于当前辩论信息，调用合适工具推进流程，并以 JSON 结构返回。',
       schema: { required: ['tool_calls'] },
       messages,
       tools,

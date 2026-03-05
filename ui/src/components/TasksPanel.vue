@@ -22,12 +22,14 @@
         >
           <div class="flex items-center gap-2">
             <span class="rounded bg-[#4a3828] px-1.5 py-0.5 text-[10px] text-[#c8a060]">{{ r.app }}</span>
-            <span v-if="r.mode" class="rounded bg-[#3a2a1c] px-1.5 py-0.5 text-[10px] text-[#a8c890]">{{ r.mode }}</span>
             <span :class="r.status === 'done' ? 'text-[#7a9a6a]' : r.status === 'error' ? 'text-[#c07060]' : 'text-[#c8a060]'" class="text-[10px]">{{ r.status }}</span>
             <span class="ml-auto text-[10px] text-[#6a5840]">{{ formatTime(r.created_at) }}</span>
           </div>
           <div class="mt-1 line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ r.title || '未命名任务' }}</div>
-          <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#b8a080]">{{ r.response || r.prompt?.slice(0, 80) }}</div>
+          <div class="mt-0.5 flex items-end gap-2">
+            <div class="line-clamp-2 flex-1 text-[11px] leading-relaxed text-[#b8a080]">{{ r.response || r.prompt?.slice(0, 80) }}</div>
+            <span v-if="r.mode" class="shrink-0 rounded bg-[#3a2a1c] px-1.5 py-0.5 text-[10px] text-[#a8c890]">{{ r.mode }}</span>
+          </div>
         </button>
       </div>
     </div>

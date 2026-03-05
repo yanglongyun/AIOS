@@ -26,6 +26,7 @@
   - `POST /api/task/create/instant`（一次性结构化生成，不走工具循环）
   - `POST /api/task/create/agent`（需要工具与多步执行的任务）
 - 任务创建时应提供清晰 `title`，便于任务中心展示与追踪
+- 当 `instant` 使用 `schema` 或 `response_format.type = 'json_object'` 时，`prompt/messages` 中必须明确出现 `JSON/json` 关键词，并要求“只输出 JSON”，避免供应商参数校验报错
 
 ## 记忆系统
 

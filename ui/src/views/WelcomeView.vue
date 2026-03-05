@@ -6,7 +6,6 @@
     <!-- 顶栏 -->
     <div class="relative z-10 flex h-12 items-center border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28,#4a3020)] px-6 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
       <span class="text-[15px] font-bold tracking-[0.12em] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
-      <span class="ml-auto text-[11px] text-[#a08c70]">{{ t('welcome_init') }} · {{ step }} / 4</span>
     </div>
 
     <!-- 内容 -->

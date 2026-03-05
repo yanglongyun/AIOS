@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const finishHandler = async (body = {}, req) => {
   const debateId = String(body.debateId || '').trim();
@@ -44,10 +44,18 @@ export const finishHandler = async (body = {}, req) => {
   }
 
   try {
-    const llm = await callLlmChat(req, { messages });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-    return { content: String(data.message?.content || '').trim() };
+    const data = await instantTaskJson({
+      app: 'debate',
+      title: '辩论结束陈述',
+      prompt: '输出结束陈述内容。',
+      schema: { required: ['content'] },
+      messages: [
+        ...messages,
+        { role: 'system', content: '只输出 JSON：{"content":"..."}' }
+      ],
+      req
+    });
+    return { content: String(data.content || '').trim() };
   } catch (error) {
     return { status: 500, message: error.message || '结束辩论失败' };
   }

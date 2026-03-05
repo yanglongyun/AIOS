@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { taskAgentJson } from '../../app_shared/taskAgent.js';
+import { agentTaskJson } from '../../app_shared/agentTask.js';
 
 const toDateKey = (date = new Date()) => {
   const y = date.getFullYear();
@@ -9,8 +9,9 @@ const toDateKey = (date = new Date()) => {
 };
 
 const taskAgent = async (req) => {
-  const parsed = await taskAgentJson({
+  const parsed = await agentTaskJson({
     app: 'dailycheck',
+    title: '每日打卡-刷新问题',
     prompt: [
       '你在处理 dailycheck 的换题请求。',
       '你可以自行使用 shell 查询上下文信息。',

@@ -1,6 +1,5 @@
 import { db, getPokerEconomy, setPokerBalances } from '../db.js';
-import { callLlmChat } from '../../app_shared/chatLlm.js';
-import { parseJsonObject } from '../../app_shared/utils/parseJsonObject.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 const RANK_VALUE = { '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14 };
 
@@ -185,21 +184,21 @@ const aiDecideByLlm = async ({ req, aiCards, round, aiChips, playerChips, pot, p
 
 请根据胜率与风险做决策，注意外在话术与内心分析要区分。仅返回JSON。`;
 
-  const llm = await callLlmChat(req, {
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
-    ]
-  });
-  if (!llm.ok) return { status: llm.status || 503, message: llm.message || 'LLM 决策失败' };
-
-  const raw = String(llm.data?.message?.content || '').trim();
   let parsed;
   try {
-    parsed = parseJsonObject(raw);
+    parsed = await instantTaskJson({
+      app: 'poker',
+      title: `炸金花AI决策-第${round}轮`,
+      prompt: '根据牌局状态做跟注/弃牌决策。',
+      schema: { required: ['action', 'speech', 'expression', 'thinking'] },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      req
+    });
   } catch {
-    return { status: 502, message: 'LLM 决策解析失败' };
+    return { status: 502, message: 'LLM 决策失败' };
   }
 
   const action = String(parsed?.action || '').toLowerCase();
@@ -236,21 +235,21 @@ const aiSpeakOnCompareByLlm = async ({ req, actionHistory, winner, round, potBef
 - 押注记录：${JSON.stringify(actionHistory)}
 请根据比牌结果给一条结算时的真人感台词。赢了就得意，输了就不甘，平局就感慨。`;
 
-  const llm = await callLlmChat(req, {
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
-    ]
-  });
-  if (!llm.ok) return { status: llm.status || 503, message: llm.message || 'LLM 台词生成失败' };
-
-  const raw = String(llm.data?.message?.content || '').trim();
   let parsed;
   try {
-    parsed = parseJsonObject(raw);
+    parsed = await instantTaskJson({
+      app: 'poker',
+      title: `炸金花比牌台词-第${round}轮`,
+      prompt: '根据比牌上下文生成外在台词和内心想法。',
+      schema: { required: ['speech', 'expression', 'thinking'] },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      req
+    });
   } catch {
-    return { status: 502, message: 'LLM 台词解析失败' };
+    return { status: 502, message: 'LLM 台词生成失败' };
   }
 
   const speech = String(parsed?.speech || parsed?.line || '').trim();

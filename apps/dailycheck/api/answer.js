@@ -1,9 +1,10 @@
 import { db } from '../db.js';
-import { taskAgentJson } from '../../app_shared/taskAgent.js';
+import { agentTaskJson } from '../../app_shared/agentTask.js';
 
 const taskAgent = async ({ date, question, answer, note, req }) => {
-  const parsed = await taskAgentJson({
+  const parsed = await agentTaskJson({
     app: 'dailycheck',
+    title: `每日打卡-回答分析 ${date}`,
     prompt: [
       '你在处理 dailycheck 的回答请求。',
       '你可以自行使用 shell 查询上下文信息。',

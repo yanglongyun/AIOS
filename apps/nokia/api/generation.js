@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const generationHandler = async (body = {}, req) => {
   const { history, now, choices, next } = body;
@@ -34,21 +34,14 @@ export const generationHandler = async (body = {}, req) => {
   }
 
   try {
-    const llm = await callLlmChat(req, {
-      response_format: { type: 'json_object' },
-      messages
+    const parsed = await instantTaskJson({
+      app: 'nokia',
+      title: '老手机界面生成',
+      schema: { required: ['content', 'options'] },
+      prompt: '根据上下文生成下一屏老手机界面。',
+      messages,
+      req
     });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-
-    const raw = String(data.message?.content || '').trim();
-    let parsed;
-    try {
-      const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-      parsed = JSON.parse(fenced ? fenced[1].trim() : raw);
-    } catch {
-      return { status: 500, message: '解析 AI 响应失败' };
-    }
 
     const result = {
       content: String(parsed.content || ''),

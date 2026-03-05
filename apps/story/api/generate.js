@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { taskAgentJson } from '../../app_shared/taskAgent.js';
+import { agentTaskJson } from '../../app_shared/agentTask.js';
 
 const normalizeChoices = (choices = []) => {
   const out = [];
@@ -13,8 +13,9 @@ const normalizeChoices = (choices = []) => {
 };
 
 const taskAgent = async ({ sessionId, action, req }) => {
-  return await taskAgentJson({
+  return await agentTaskJson({
     app: 'story',
+    title: `故事推进 #${sessionId}`,
     prompt: [
       '你在处理 story 的章节推进请求。',
       '数据库路径：database/apps/story.db',

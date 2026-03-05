@@ -2,19 +2,11 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, resolve } from 'path';
 import { db } from '../db.js';
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../../..');
 const UPLOAD_DIR = join(ROOT, 'files', 'uploads', 'treasure');
-
-const parseModelJson = (raw = '') => {
-  const text = String(raw || '').trim();
-  if (!text) return null;
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const payload = fenced ? fenced[1].trim() : text;
-  return JSON.parse(payload);
-};
 
 export const appraiseHandler = async (body = {}, req) => {
   const rawPath = String(body.imagePath || '').trim();
@@ -54,11 +46,14 @@ comment(string, 80-180字点评)
   }];
 
   try {
-    const llm = await callLlmChat(req, { response_format: { type: 'json_object' }, messages });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-
-    const parsed = parseModelJson(data.message?.content || '');
+    const parsed = await instantTaskJson({
+      app: 'treasure',
+      title: '鉴宝估值',
+      prompt: '根据图片完成鉴宝估值，按 schema 输出。',
+      schema: { required: ['name', 'category', 'condition', 'summary_tag', 'value', 'comment'] },
+      messages,
+      req
+    });
     if (!parsed || typeof parsed !== 'object') return { status: 500, message: 'AI 返回格式错误' };
 
     const name = String(parsed.name || '').trim() || '未识别物品';

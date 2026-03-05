@@ -34,8 +34,10 @@
         <div class="mb-2 flex flex-wrap items-center gap-2">
           <span class="rounded bg-[#f0e5d5] px-2 py-0.5 text-[11px] font-semibold text-[#7a6a58]">#{{ task.id || taskId }}</span>
           <span class="rounded bg-[#f0e5d5] px-2 py-0.5 text-[11px] font-semibold text-[#7a6a58]">{{ task.app || '-' }}</span>
+          <span v-if="task.mode" class="rounded bg-[#e8f5e4] px-2 py-0.5 text-[11px] font-semibold text-[#4a8a38]">{{ task.mode }}</span>
           <span class="rounded px-2 py-0.5 text-[11px] font-semibold" :class="statusClass">{{ task.status || '-' }}</span>
         </div>
+        <div class="mb-2 text-sm font-semibold text-[#4a3a28]">{{ task.title || '未命名任务' }}</div>
         <div class="grid gap-2 text-xs text-[#7a6a58] md:grid-cols-2">
           <div>创建时间：{{ task.created_at || '-' }}</div>
           <div>完成时间：{{ task.finished_at || '-' }}</div>

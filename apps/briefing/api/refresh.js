@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { taskAgentJson } from '../../app_shared/taskAgent.js';
+import { agentTaskJson } from '../../app_shared/agentTask.js';
 
 const toDateKey = (date = new Date()) => {
   const y = date.getFullYear();
@@ -9,8 +9,9 @@ const toDateKey = (date = new Date()) => {
 };
 
 const taskAgent = async ({ date, focus, note, req }) => {
-  const parsed = await taskAgentJson({
+  const parsed = await agentTaskJson({
     app: 'briefing',
+    title: `简报刷新 ${date}`,
     prompt: [
       '你在处理 briefing 的今日新闻简报生成请求。',
       '你可以自行使用 shell 搜索和阅读网页，再整理结果。',

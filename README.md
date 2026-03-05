@@ -54,14 +54,14 @@ bash install.sh
 
 | 服务 | 端口 | 职责 |
 |------|------|------|
-| `server/` | 9700 | 聊天、WebSocket、LLM 网关、设置、UI 托管 |
+| `server/` | 9700 | 聊天、WebSocket、任务中心、设置、UI 托管 |
 | `apps/` | 9701 | 各应用的 API |
 
-应用若需调用大模型，统一走主服务网关，无需自行配置 Key：
+应用若需调用 AI，统一走任务中心，无需自行配置 Key：
 
 ```
-POST http://localhost:9700/api/llm/chat
-{ "messages": [...] }
+POST http://localhost:9700/api/task
+{ "app":"xxx", "title":"任务标题", "mode":"instant|agent", "prompt":"..." }
 ```
 
 ## 内置应用
@@ -76,7 +76,7 @@ POST http://localhost:9700/api/llm/chat
 ```
 server/          # 主服务（9700）
   agent/         # Agent 循环、LLM 调用、shell 执行
-  api/           # chat / settings / llm 网关
+  api/           # chat / settings / task 任务中心
   system/        # HTTP、WebSocket、事件处理
   db/
 

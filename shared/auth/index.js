@@ -19,7 +19,7 @@ const allowServerPublic = (req, path, method) => {
 
 const allowServerDuringSetup = (path, method) => {
   return (path === '/api/settings' && (method === 'GET' || method === 'POST'))
-    || (path === '/api/llm/chat' && method === 'POST');
+    || (path === '/api/task' && method === 'POST');
 };
 
 const allowAppsPublic = (path) => {

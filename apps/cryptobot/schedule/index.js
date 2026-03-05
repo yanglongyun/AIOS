@@ -11,7 +11,13 @@ const askAI = async (prompt) => {
   const resp = await fetch('http://localhost:9700/api/task', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ app: 'cryptobot', prompt })
+    body: JSON.stringify({
+      app: 'cryptobot',
+      title: '炒币策略决策',
+      mode: 'instant',
+      prompt,
+      schema: { required: ['action', 'reason', 'amount_usdt'] }
+    })
   });
   const data = await resp.json();
   if (!resp.ok) throw new Error(data.error || `request failed ${resp.status}`);

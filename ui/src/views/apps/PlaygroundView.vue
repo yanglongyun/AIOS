@@ -259,11 +259,15 @@ const submitPrompt = async () => {
       `用户新需求：${content}`
     ].join('\n');
 
-    const res = await fetch('/api/llm/chat', {
+    const res = await fetch('/api/task', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        response_format: { type: 'json_object' },
+        app: 'playground',
+        title: '3D 场景生成',
+        mode: 'instant',
+        prompt: '根据当前场景和需求生成新版本 HTML',
+        schema: { required: ['name', 'html', 'suggestions'] },
         messages: [
           {
             role: 'system',
@@ -279,12 +283,12 @@ const submitPrompt = async () => {
 
     let name = '', html = '', nextSuggestions = [];
     try {
-      const structured = parseStructuredOutput(data.message?.content || '');
+      const structured = parseStructuredOutput(String(data.response || ''));
       name = structured.name;
       html = structured.html;
       nextSuggestions = structured.suggestions || [];
     } catch {
-      html = normalizeModelText(data.message?.content || '');
+      html = normalizeModelText(String(data.response || ''));
       nextSuggestions = [];
     }
 

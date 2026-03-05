@@ -1,6 +1,6 @@
 import { parseJsonObject } from './utils/parseJsonObject.js';
 
-export const taskAgent = async ({ app, prompt, req }) => {
+const requestTask = async (body = {}, req) => {
   const cookie = typeof req?.headers?.cookie === 'string' ? req.headers.cookie : '';
   const resp = await fetch('http://localhost:9700/api/task', {
     method: 'POST',
@@ -8,7 +8,7 @@ export const taskAgent = async ({ app, prompt, req }) => {
       'Content-Type': 'application/json',
       ...(cookie ? { cookie } : {})
     },
-    body: JSON.stringify({ app, prompt })
+    body: JSON.stringify(body)
   });
   const data = await resp.json();
   if (!resp.ok || data.success === false) {
@@ -17,7 +17,17 @@ export const taskAgent = async ({ app, prompt, req }) => {
   return data;
 };
 
-export const taskAgentJson = async ({ app, prompt, req }) => {
-  const data = await taskAgent({ app, prompt, req });
+export const agentTask = async ({ app, title, prompt, req, meta = null }) => {
+  return await requestTask({
+    app,
+    title,
+    mode: 'agent',
+    prompt,
+    meta
+  }, req);
+};
+
+export const agentTaskJson = async (args = {}) => {
+  const data = await agentTask(args);
   return parseJsonObject(data.response || '');
 };

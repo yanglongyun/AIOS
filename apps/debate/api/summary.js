@@ -1,4 +1,4 @@
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const summaryHandler = async (body = {}, req) => {
   const topicInfo = String(body.topicInfo || '').trim();
@@ -27,15 +27,14 @@ export const summaryHandler = async (body = {}, req) => {
   }];
 
   try {
-    const llm = await callLlmChat(req, {
-      response_format: { type: 'json_object' },
-      messages
+    const parsed = await instantTaskJson({
+      app: 'debate',
+      title: '辩论议题总结',
+      prompt: '生成总结、主张和支持率。',
+      schema: { required: ['summary', 'policy', 'poll'] },
+      messages,
+      req
     });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-    const raw = String(data.message?.content || '').trim();
-    const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-    const parsed = JSON.parse(fenced ? fenced[1].trim() : raw);
     return {
       summary: String(parsed.summary || '').trim(),
       policy: String(parsed.policy || '').trim(),

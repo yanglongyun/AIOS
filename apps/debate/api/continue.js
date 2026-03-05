@@ -1,4 +1,4 @@
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const continueHandler = async (body = {}, req) => {
   const prevTopic = String(body.prevTopic || '').trim();
@@ -21,10 +21,18 @@ export const continueHandler = async (body = {}, req) => {
   ];
 
   try {
-    const llm = await callLlmChat(req, { messages });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-    return { content: String(data.message?.content || '').trim() };
+    const data = await instantTaskJson({
+      app: 'debate',
+      title: '辩论过渡发言',
+      prompt: '生成下一议题过渡开场。',
+      schema: { required: ['content'] },
+      messages: [
+        ...messages,
+        { role: 'system', content: '只输出 JSON：{"content":"..."}' }
+      ],
+      req
+    });
+    return { content: String(data.content || '').trim() };
   } catch (error) {
     return { status: 500, message: error.message || '继续下一议题失败' };
   }

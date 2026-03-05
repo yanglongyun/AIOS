@@ -154,11 +154,20 @@ const smartFill = async () => {
   smartFilling.value = true
   error.value = ''
   try {
-    const res = await fetch('/api/llm/chat', {
+    const res = await fetch('/api/task', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        app: 'finance',
+        title: '智能记账识别',
+        mode: 'instant',
+        prompt: '把自然语言记账描述提取成结构化字段',
+        schema: { required: ['type', 'amount', 'note'] },
         messages: [
+          {
+            role: 'system',
+            content: '只返回 JSON：{"type":"income|expense","amount":数字,"note":"备注"}'
+          },
           {
             role: 'system',
             content: '你是记账助手。把用户的一句话记账描述提取成 JSON：{"type":"income|expense","amount":数字,"note":"备注"}。只返回 JSON，不要解释，不要代码块。'
@@ -170,8 +179,7 @@ const smartFill = async () => {
     const data = await res.json()
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`)
 
-    const raw = String(data.message?.content || '').trim().replace(/^```json\s*|```$/g, '')
-    const parsed = JSON.parse(raw)
+    const parsed = JSON.parse(String(data.response || '{}'))
     const type = parsed.type === 'income' ? 'income' : 'expense'
     const amount = Number(parsed.amount)
     const note = String(parsed.note || '').trim()

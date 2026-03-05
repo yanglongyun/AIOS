@@ -33,10 +33,12 @@
           >
             <div class="flex items-center gap-2">
               <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[10px] text-[#7a6a58]">{{ r.app }}</span>
+              <span v-if="r.mode" class="rounded bg-[#eef7ea] px-1.5 py-0.5 text-[10px] text-[#4a8a38]">{{ r.mode }}</span>
               <span :class="statusClass(r.status)" class="text-[10px]">{{ r.status }}</span>
               <span class="ml-auto text-[10px] text-[#8a7860]">{{ r.created_at || '' }}</span>
             </div>
-            <div class="mt-1 line-clamp-2 text-[12px] leading-relaxed text-[#5a4a38]">{{ r.response || r.prompt || '-' }}</div>
+            <div class="mt-1 line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || '未命名任务' }}</div>
+            <div class="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[#5a4a38]">{{ r.response || r.prompt || '-' }}</div>
           </button>
         </div>
       </div>

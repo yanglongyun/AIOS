@@ -214,11 +214,20 @@ const optimizeDraft = async () => {
   error.value = '';
   optimizedDraft.value = '';
   try {
-    const res = await fetch('/api/llm/chat', {
+    const res = await fetch('/api/task', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        app: 'notebook',
+        title: '笔记优化',
+        mode: 'instant',
+        prompt: '优化笔记表达并返回结构化结果',
+        schema: { required: ['optimized'] },
         messages: [
+          {
+            role: 'system',
+            content: '只返回 JSON：{"optimized":"..."}'
+          },
           {
             role: 'system',
             content: '你是用户的记事本写作助手。下面内容是用户准备保存到记事本的一条笔记。请在不改变原意的前提下，优化表达、结构和可读性，保留关键信息与语气。只返回可直接保存的优化后笔记正文，不要解释、不要加标题、不要使用代码块。'
@@ -229,7 +238,8 @@ const optimizeDraft = async () => {
     });
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
-    const improved = (data.message?.content || '').trim();
+    const parsed = JSON.parse(String(data.response || '{}'));
+    const improved = String(parsed.optimized || '').trim();
     if (!improved) throw new Error(t('notebook_optimize_empty'));
     optimizedDraft.value = improved;
   } catch (e) {

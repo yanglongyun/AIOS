@@ -1,4 +1,4 @@
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const debateHandler = async (body = {}, req) => {
   const topicInfo = String(body.topicInfo || '').trim();
@@ -64,21 +64,22 @@ export const debateHandler = async (body = {}, req) => {
   ];
 
   try {
-    const llm = await callLlmChat(req, {
+    const data = await instantTaskJson({
+      app: 'debate',
+      title: '辩论推进决策',
+      prompt: '基于当前辩论信息，调用合适工具推进流程。',
+      schema: { required: ['tool_calls'] },
       messages,
       tools,
       tool_choice: 'auto',
-      parallel_tool_calls: false
+      parallel_tool_calls: false,
+      req
     });
-    if (!llm.ok) return { status: llm.status, message: llm.message };
-    const data = llm.data;
-
-    const message = data.message || {};
-    if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) {
+    if (!Array.isArray(data.tool_calls) || !data.tool_calls.length) {
       return { status: 500, message: 'AI 未调用工具' };
     }
 
-    const toolCall = message.tool_calls[0];
+    const toolCall = data.tool_calls[0];
     const functionName = toolCall.function?.name;
     const args = JSON.parse(toolCall.function?.arguments || '{}');
     const result = { action: functionName };

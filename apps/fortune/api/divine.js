@@ -1,14 +1,5 @@
 import { db } from '../db.js';
-import { callLlmChat } from '../../app_shared/chatLlm.js';
-
-const parseModelJson = (raw = '') => {
-  const text = String(raw || '').trim();
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const source = fenced ? fenced[1] : text;
-  const matched = source.match(/\{[\s\S]*\}/);
-  if (!matched) throw new Error('AI 返回不是 JSON');
-  return JSON.parse(matched[0]);
-};
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 export const divineHandler = async (body = {}, req) => {
   const question = String(body.question || '').trim();
@@ -18,8 +9,11 @@ export const divineHandler = async (body = {}, req) => {
   const yaos = String(body.yaos || '').trim();
 
   try {
-    const llm = await callLlmChat(req, {
-      response_format: { type: 'json_object' },
+    const parsed = await instantTaskJson({
+      app: 'fortune',
+      title: '周易解卦',
+      schema: { required: ['signName', 'signPoem', 'good', 'bad', 'advice'] },
+      prompt: '请根据给定卦象完成解卦，按 schema 输出 JSON。',
       messages: [{
         role: 'system',
         content: `你是一位精通周易六爻的卦师，学识渊博、文笔古雅。
@@ -40,11 +34,9 @@ export const divineHandler = async (body = {}, req) => {
         role: 'user',
         content: `我的问题：${question}\n所得卦象：${hexagram}\n爻象（初爻到上爻）：${yaos}`
       }]
+      ,
+      req
     });
-    if (!llm.ok) return { status: llm.status, message: llm.message || '卦象解读失败' };
-    const data = llm.data;
-
-    const parsed = parseModelJson(data.message?.content || '');
     const record = {
       question,
       signName: String(parsed.signName || '').trim() || '未知',

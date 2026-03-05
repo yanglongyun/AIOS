@@ -216,12 +216,21 @@ const saveModelAndTest = async () => {
 
     setLocale(model.value.language);
     const isZh = model.value.language === 'zh';
-    const testRes = await fetch('/api/llm/chat', {
+    const testRes = await fetch('/api/task', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
+        app: 'setup',
+        title: '初始化欢迎语',
+        mode: 'instant',
+        prompt: isZh ? '生成初始化欢迎介绍。' : 'Generate onboarding intro.',
+        schema: { required: ['intro'] },
         messages: [
+          {
+            role: 'system',
+            content: '只输出 JSON：{"intro":"..."}'
+          },
           {
             role: 'system',
             content: isZh
@@ -236,9 +245,10 @@ const saveModelAndTest = async () => {
     if (!testRes.ok || testData?.success === false) {
       throw new Error(testData?.message || t('welcome_err_test'));
     }
+    const parsed = JSON.parse(String(testData.response || '{}'));
 
     step.value = 4;
-    startTypewriter(testData?.message?.content || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.'));
+    startTypewriter(parsed?.intro || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.'));
   } catch (e) {
     error.value = e?.message || t('welcome_err_test');
   } finally {

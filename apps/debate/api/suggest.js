@@ -1,4 +1,4 @@
-import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { instantTaskJson } from '../../app_shared/instantTask.js';
 
 const normalizeSuggestions = (list = []) => {
   const out = [];
@@ -21,23 +21,6 @@ const normalizeSuggestions = (list = []) => {
     });
   }
   return out;
-};
-
-const parseSuggestionsContent = (raw = '') => {
-  const text = String(raw || '').trim();
-  if (!text) return [];
-
-  try {
-    const parsed = JSON.parse(text);
-    if (Array.isArray(parsed)) return parsed;
-    if (Array.isArray(parsed?.suggestions)) return parsed.suggestions;
-  } catch {}
-
-  const lineItems = text
-    .split('\n')
-    .map((line) => line.replace(/^[\s\-*0-9.、)\](]+/, '').trim())
-    .filter(Boolean);
-  return lineItems;
 };
 
 export const suggestHandler = async (body = {}, req) => {
@@ -63,9 +46,17 @@ export const suggestHandler = async (body = {}, req) => {
     }
   ];
 
-  const llm = await callLlmChat(req, { messages });
-  if (!llm.ok) return { suggestions: normalizeSuggestions([]) };
-  const raw = String(llm.data?.message?.content || '').trim();
-  return { suggestions: normalizeSuggestions(parseSuggestionsContent(raw)) };
+  try {
+    const data = await instantTaskJson({
+      app: 'debate',
+      title: '辩论发言建议',
+      prompt: '生成三条结构化发言建议。',
+      schema: { required: ['suggestions'] },
+      messages,
+      req
+    });
+    return { suggestions: normalizeSuggestions(data.suggestions || []) };
+  } catch {
+    return { suggestions: normalizeSuggestions([]) };
+  }
 };
-

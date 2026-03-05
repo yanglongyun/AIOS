@@ -1,7 +1,6 @@
 import { json } from './utils/json.js';
 import { handleChatApi } from './chat/index.js';
 import { handleSettingsApi } from './settings/index.js';
-import { handleLlmApi } from './llm/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
 import { handleNotificationsApi } from './notifications/index.js';
@@ -41,11 +40,6 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/settings')) {
       await handleSettingsApi(req, res, path);
-      return true;
-    }
-
-    if (path.startsWith('/api/llm')) {
-      await handleLlmApi(req, res, path);
       return true;
     }
 

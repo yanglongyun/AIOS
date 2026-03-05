@@ -1,9 +1,10 @@
 import { db } from '../db.js';
-import { taskAgentJson } from '../../app_shared/taskAgent.js';
+import { agentTaskJson } from '../../app_shared/agentTask.js';
 
 const taskAgent = async ({ complaint, poopCount, req }) => {
-  const parsed = await taskAgentJson({
+  const parsed = await agentTaskJson({
     app: 'blackroom',
+    title: '黑屋反馈处理',
     prompt: [
       '你在处理 blackroom 的用户不满反馈。',
       '请把用户反馈当成正式改进输入，必要时可使用 shell 更新记忆或执行调整动作。',

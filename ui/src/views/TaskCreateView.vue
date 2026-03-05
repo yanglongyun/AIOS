@@ -42,45 +42,15 @@
             >
           </div>
 
-          <!-- 立即执行：app + title -->
-          <div v-if="form.execType === 'now'" class="flex gap-4">
-            <div class="flex-1">
-              <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">应用名称</label>
-              <input
-                v-model="form.app"
-                type="text"
-                placeholder="notebook"
-                class="w-full rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
-              >
-            </div>
-            <div class="flex-1">
-              <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">任务标题</label>
-              <input
-                v-model="form.title"
-                type="text"
-                placeholder="提取摘要"
-                class="w-full rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
-              >
-            </div>
-          </div>
-
-          <!-- 立即执行：mode -->
+          <!-- 立即执行：标题 -->
           <div v-if="form.execType === 'now'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">模式</label>
-            <div class="flex gap-2">
-              <button
-                v-for="m in ['instant', 'agent']"
-                :key="m"
-                type="button"
-                class="cursor-pointer rounded-lg border px-4 py-1.5 text-xs transition"
-                :class="form.mode === m
-                  ? 'border-[#c8a060] bg-[#f8f0e0] font-semibold text-[#7a5a28]'
-                  : 'border-[#e8dcc8] bg-[#fcfaf6] text-[#7a6a58] hover:bg-[#f6ecde]'"
-                @click="form.mode = m"
-              >
-                {{ m }}
-              </button>
-            </div>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">任务标题</label>
+            <input
+              v-model="form.title"
+              type="text"
+              placeholder="提取摘要"
+              class="w-full rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
+            >
           </div>
 
           <!-- 提示词 -->
@@ -89,19 +59,8 @@
             <textarea
               v-model="form.prompt"
               rows="6"
-              :placeholder="form.execType === 'now' ? '输入任务提示词...' : '告诉 AI 到时候做什么...'"
+              placeholder="告诉 AI 做什么..."
               class="w-full resize-y rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] leading-relaxed text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
-            />
-          </div>
-
-          <!-- Schema（仅 instant） -->
-          <div v-if="form.execType === 'now' && form.mode === 'instant'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">Schema（JSON，可选）</label>
-            <textarea
-              v-model="form.schema"
-              rows="3"
-              placeholder='{"required": ["summary"]}'
-              class="w-full resize-y rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 font-mono text-[12px] leading-relaxed text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
             />
           </div>
 
@@ -191,11 +150,8 @@ const execTypes = [
 const form = reactive({
   execType: 'now',
   name: '',
-  app: '',
   title: '',
-  mode: 'agent',
   prompt: '',
-  schema: '',
   runAt: '',
   cron: ''
 });
@@ -217,7 +173,6 @@ const submit = async () => {
   if (!form.prompt.trim()) { error.value = '请填写提示词'; return; }
 
   if (form.execType === 'now') {
-    if (!form.app.trim()) { error.value = '请填写应用名称'; return; }
     return submitNow();
   }
 
@@ -230,11 +185,8 @@ const submit = async () => {
 const submitNow = async () => {
   submitting.value = true;
   try {
-    const body = { app: form.app.trim(), title: form.title.trim() || form.app.trim(), prompt: form.prompt.trim() };
-    if (form.mode === 'instant' && form.schema.trim()) {
-      body.schema = JSON.parse(form.schema.trim());
-    }
-    const res = await fetch(`/api/task/create/${form.mode}`, {
+    const body = { app: 'task', title: form.title.trim() || '任务', prompt: form.prompt.trim() };
+    const res = await fetch('/api/task/create/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)

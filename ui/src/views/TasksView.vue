@@ -16,7 +16,7 @@
             class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]"
             @click="router.push('/tasks/create')"
           >
-            + 安排
+            + 创建
           </button>
         </div>
       </div>

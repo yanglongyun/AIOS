@@ -12,7 +12,7 @@ export { initRedmillDatabase };
 export const handleRedmillApi = async (req, res, path) => {
   if (path === '/apps/redmill/create' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await createHandler(body);
+    const data = await createHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

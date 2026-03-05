@@ -12,7 +12,7 @@ const normalizeChoices = (choices = []) => {
   return out;
 };
 
-const taskAgent = async ({ sessionId, action }) => {
+const taskAgent = async ({ sessionId, action, req }) => {
   return await taskAgentJson({
     app: 'story',
     prompt: [
@@ -24,11 +24,12 @@ const taskAgent = async ({ sessionId, action }) => {
       `用户行动：${action}`,
       '最终只输出 JSON：{"content":"本章正文(120-260字)","choices":["选项1","选项2","选项3"],"summary":"更新后的累积梗概(80-140字)","progress":"第N章：副标题"}',
       'choices 恰好3条，每条都能推动剧情向不同方向分叉，不要输出其它文字。'
-    ].join('\n')
+    ].join('\n'),
+    req
   });
 };
 
-export const generateHandler = async (body = {}) => {
+export const generateHandler = async (body = {}, req) => {
   const sessionId = Number(body.sessionId);
   const action = String(body.action || '').trim() || '开始故事';
 
@@ -39,7 +40,7 @@ export const generateHandler = async (body = {}) => {
   const session = db.prepare('SELECT id FROM apps_story_sessions WHERE id = ?').get(sessionId);
   if (!session) return { status: 404, message: '故事不存在' };
 
-  const result = await taskAgent({ sessionId, action });
+  const result = await taskAgent({ sessionId, action, req });
 
   const content = String(result.content || '').trim();
   const choices = normalizeChoices(result.choices);

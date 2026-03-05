@@ -8,23 +8,24 @@ const toDateKey = (date = new Date()) => {
   return `${y}-${m}-${d}`;
 };
 
-const taskAgent = async () => {
+const taskAgent = async (req) => {
   const parsed = await taskAgentJson({
     app: 'dailycheck',
     prompt: [
       '你在处理 dailycheck 的换题请求。',
       '你可以自行使用 shell 查询上下文信息。',
       '最终只输出 JSON：{"question":"..."}，不要输出任何其它文字。'
-    ].join('\n')
+    ].join('\n'),
+    req
   });
   const question = String(parsed.question || '').trim();
   if (!question) throw new Error('question 为空');
   return question;
 };
 
-export const refreshHandler = async () => {
+export const refreshHandler = async (req) => {
   const date = toDateKey();
-  const question = await taskAgent();
+  const question = await taskAgent(req);
 
   db.prepare(`
     INSERT INTO apps_dailycheck_daily (date, question, answer, response, updated_at)

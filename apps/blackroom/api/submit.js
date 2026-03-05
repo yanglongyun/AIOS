@@ -1,7 +1,7 @@
 import { db } from '../db.js';
 import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
-const taskAgent = async ({ complaint, poopCount }) => {
+const taskAgent = async ({ complaint, poopCount, req }) => {
   const parsed = await taskAgentJson({
     app: 'blackroom',
     prompt: [
@@ -11,7 +11,8 @@ const taskAgent = async ({ complaint, poopCount }) => {
       'JSON 格式必须是：{"response":"给用户看的简短回应","note":"给自己看的内部备注"}。',
       `用户不满内容：${complaint || '（未填写文本，仅表达情绪）'}`,
       `用户投掷大便 emoji 数量：${poopCount}`
-    ].join('\n')
+    ].join('\n'),
+    req
   });
 
   return {
@@ -20,7 +21,7 @@ const taskAgent = async ({ complaint, poopCount }) => {
   };
 };
 
-export const submitHandler = async (body = {}) => {
+export const submitHandler = async (body = {}, req) => {
   const complaint = String(body.complaint || '').trim();
   const poopCount = Math.max(0, Number(body.poopCount) || 0);
 
@@ -31,7 +32,7 @@ export const submitHandler = async (body = {}) => {
   let agentResponse = '';
   let note = '';
   try {
-    const result = await taskAgent({ complaint, poopCount });
+    const result = await taskAgent({ complaint, poopCount, req });
     agentResponse = result.response;
     note = result.note;
   } catch {}

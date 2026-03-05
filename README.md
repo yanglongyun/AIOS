@@ -91,7 +91,7 @@ ui/src/
 
 cli/aios.js      # 命令行入口
 database/        # SQLite 数据库
-library/         # AI 知识库
+memory/         # AI 知识库
 ```
 
 ## 技术栈

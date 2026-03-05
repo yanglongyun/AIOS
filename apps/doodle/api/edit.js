@@ -2,12 +2,13 @@ import { readFile, mkdir, writeFile } from 'fs/promises';
 import { join, resolve, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../../..');
 const UPLOAD_DIR = join(ROOT, 'files', 'uploads', 'doodle');
 
-export const editHandler = async (body = {}) => {
+export const editHandler = async (body = {}, req) => {
   const imagePath = String(body.imagePath || '').trim();
   const prompt = String(body.prompt || '').trim();
   const region = body.region || {};
@@ -32,15 +33,9 @@ export const editHandler = async (body = {}) => {
   }];
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
-    });
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || '编辑失败' };
-    }
+    const llm = await callLlmChat(req, { messages });
+    if (!llm.ok) return { status: llm.status, message: llm.message || '编辑失败' };
+    const data = llm.data;
 
     const description = data.message?.content || '';
 

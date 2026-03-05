@@ -1,4 +1,5 @@
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
 const parseModelJson = (raw = '') => {
   const text = String(raw || '').trim();
@@ -9,19 +10,16 @@ const parseModelJson = (raw = '') => {
   return JSON.parse(matched[0]);
 };
 
-export const createHandler = async (body = {}) => {
+export const createHandler = async (body = {}, req) => {
   const topic = String(body.topic || '').trim();
   if (!topic) return { status: 400, message: '请输入创作主题' };
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_format: { type: 'json_object' },
-        messages: [{
-          role: 'system',
-          content: `你是小红书爆款文案专家。根据用户主题，生成 4-6 页的小红书图文内容。
+    const llm = await callLlmChat(req, {
+      response_format: { type: 'json_object' },
+      messages: [{
+        role: 'system',
+        content: `你是小红书爆款文案专家。根据用户主题，生成 4-6 页的小红书图文内容。
 必须返回 JSON：
 {
   "pages": [
@@ -35,17 +33,13 @@ export const createHandler = async (body = {}) => {
 - 第一页必须是 cover（封面），最后一页是 summary（总结）
 - 文案要有小红书风格：口语化、有emoji、有吸引力
 - 每页内容独立完整，适合单页展示`
-        }, {
-          role: 'user',
-          content: `主题：${topic}`
-        }]
-      })
+      }, {
+        role: 'user',
+        content: `主题：${topic}`
+      }]
     });
-
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || '生成失败' };
-    }
+    if (!llm.ok) return { status: llm.status, message: llm.message || '生成失败' };
+    const data = llm.data;
 
     const parsed = parseModelJson(data.message?.content || '');
     const pages = parsed.pages || [];

@@ -34,16 +34,10 @@
               </div>
 
               <!-- 助手消息 -->
-              <div v-else-if="m.role === 'assistant'" class="group flex items-start gap-2.5">
+              <div v-else-if="m.role === 'assistant'" class="flex items-start gap-2.5">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)] dark:bg-[#2a1e14]">🤖</div>
                 <div class="min-w-0 flex-1">
                   <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-[#e8dcc8] bg-[#fffdf8] px-4 py-3 text-[#4a3a28] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#3a2a18] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-[#e8dcc8] prose-pre:bg-[#f5ead8] prose-code:rounded prose-code:bg-[rgba(90,62,40,0.08)] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-[#d4c0a0] prose-blockquote:text-[#8a7a60] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#d4c0a0] dark:shadow-[0_1px_4px_rgba(0,0,0,0.2)] dark:prose-headings:text-[#e8dcc8] dark:prose-pre:border-[#2a1e14] dark:prose-pre:bg-[#1a1410] dark:prose-code:bg-[rgba(200,160,96,0.1)] dark:prose-blockquote:border-[#3a2a1a] dark:prose-blockquote:text-[#8a7a60]" v-html="renderMd(m.content)" />
-                  <div class="mt-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button @click="copyText(m.content)" class="flex cursor-pointer items-center gap-1 rounded-md border-none bg-transparent px-2 py-0.5 text-[11px] text-[#a0907a] transition-all hover:bg-[#f0e8d8] hover:text-[#5a4a38] dark:text-[#6a5840] dark:hover:bg-[rgba(200,160,96,0.1)] dark:hover:text-[#c8a060]">
-                      <Copy class="h-3.5 w-3.5" />
-                      {{ t('chat_copy') }}
-                    </button>
-                  </div>
                 </div>
               </div>
 
@@ -226,6 +220,9 @@ const parseMessages = (raw) => {
     const base = m && m._id != null ? `db:${m._id}` : null;
 
     if (m.role === 'assistant' && m.tool_calls?.length) {
+      if (m.content) {
+        list.push({ role: 'assistant', content: m.content, _key: base ? `${base}:assistant` : undefined });
+      }
       let tcIdx = 0;
       for (const tc of m.tool_calls) {
         list.push(mapToolCallMessage(tc, base ? `${base}:tool_call:${tcIdx}` : undefined));

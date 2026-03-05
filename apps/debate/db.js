@@ -3,6 +3,9 @@ import { mkdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+const DEMOCRAT_OLD_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/DemocraticParty.svg/200px-DemocraticParty.svg.png';
+const DEMOCRAT_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/DemocraticLogo.svg/200px-DemocraticLogo.svg.png';
+
 const DEFAULT_PARTIES = [
   {
     name: '共和党',
@@ -18,7 +21,7 @@ const DEFAULT_PARTIES = [
     name: '民主党',
     candidate_name: '拜登',
     policy: '加税富人、环保政策、多元化、扩大政府项目、国际合作',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/DemocraticParty.svg/200px-DemocraticParty.svg.png',
+    logo: DEMOCRAT_LOGO,
     support_rate: 47,
     difficulty: '中等',
     win_count: 0,
@@ -93,4 +96,11 @@ export const initDebateDatabase = () => {
     });
     tx();
   }
+
+  // migration: fix broken democratic party logo URL in existing databases
+  db.prepare(`
+    UPDATE apps_debate_parties
+    SET logo = ?
+    WHERE name = '民主党' AND logo = ?
+  `).run(DEMOCRAT_LOGO, DEMOCRAT_OLD_LOGO);
 };

@@ -8,7 +8,7 @@ const toDateKey = (date = new Date()) => {
   return `${y}-${m}-${d}`;
 };
 
-const taskAgent = async ({ date, focus, note }) => {
+const taskAgent = async ({ date, focus, note, req }) => {
   const parsed = await taskAgentJson({
     app: 'briefing',
     prompt: [
@@ -20,7 +20,8 @@ const taskAgent = async ({ date, focus, note }) => {
       `日期：${date}`,
       `用户关注方向：${focus}`,
       `当前 note：${note || ''}`
-    ].join('\n')
+    ].join('\n'),
+    req
   });
 
   return {
@@ -31,7 +32,7 @@ const taskAgent = async ({ date, focus, note }) => {
   };
 };
 
-export const refreshHandler = async (body = {}) => {
+export const refreshHandler = async (body = {}, req) => {
   const profile = db.prepare(`
     SELECT focus
     FROM apps_briefing_profile
@@ -60,7 +61,7 @@ export const refreshHandler = async (body = {}) => {
     LIMIT 1
   `).get(date);
 
-  const result = await taskAgent({ date, focus, note: prev?.note || '' });
+  const result = await taskAgent({ date, focus, note: prev?.note || '', req });
   if (!result.title || !result.brief || !result.content) {
     return { status: 500, message: '生成结果不完整' };
   }

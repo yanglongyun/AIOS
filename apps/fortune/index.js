@@ -9,7 +9,7 @@ export { initFortuneDatabase };
 export const handleFortuneApi = async (req, res, path) => {
   if (path === '/apps/fortune/divine' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await divineHandler(body);
+    const data = await divineHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#f4f3f0] font-serif">
+  <div class="relative h-full w-full overflow-hidden bg-[#f4f3f0] font-serif">
     <!-- ===== 开始页面 ===== -->
     <div v-if="!debateStarted" class="h-full min-h-0 overflow-y-auto bg-[#eceae5] p-4">
       <div class="mx-auto w-full max-w-[480px] overflow-hidden rounded-md bg-white shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
@@ -26,7 +26,12 @@
                 ? 'border-[#c9b06b] bg-[#f0efe8] shadow-[inset_3px_0_0_#c9b06b]'
                 : 'border-[#e8e6e0] hover:border-[#ccc] hover:bg-[#f8f7f4]'"
             >
-              <img v-if="party.logo" :src="party.logo" class="h-7 w-7 object-contain" />
+              <img
+                v-if="party.logo && !failedLogoIds.has(party.id)"
+                :src="party.logo"
+                @error="markLogoFailed(party.id)"
+                class="h-7 w-7 object-contain"
+              />
               <span v-else class="text-2xl">🏛️</span>
               <div class="flex-1">
                 <div class="text-sm font-bold text-[#1c2841]">{{ party.name }}</div>
@@ -60,7 +65,7 @@
     </div>
 
     <!-- ===== 辩论页面 ===== -->
-    <div v-if="debateStarted" class="fixed inset-0 flex flex-col bg-[#f4f3f0]">
+    <div v-if="debateStarted" class="absolute inset-0 flex flex-col bg-[#f4f3f0]">
       <!-- 顶部深蓝栏 -->
       <div class="shrink-0 border-b-[3px] border-[#c9b06b] bg-[#1c2841] text-[#c9b06b]">
         <div class="border-b border-white/[0.06] py-1.5 text-center text-[11px] tracking-[4px] text-[#8a9ab5]">
@@ -169,10 +174,6 @@
       <div class="shrink-0 border-t border-[#e0ddd6] bg-white px-5 pb-3.5 pt-2.5">
         <!-- 输入状态 -->
         <div v-if="isMyTurn" class="flex items-end gap-2 rounded-xl border border-[#e0ddd6] bg-[#f8f7f4] py-1 pl-3.5 pr-1">
-          <button @click="optimizeSpeech" class="group flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-[#e8e6e0] transition-colors hover:bg-[#d8d6d0]">
-            <Sparkles class="h-5 w-5 text-[#6a7a8a] transition-colors group-hover:text-[#c9b06b]" />
-          </button>
-
           <textarea
             ref="messageInput"
             v-model="newMessage"
@@ -217,7 +218,7 @@
     </div>
 
     <!-- ===== 结果弹窗 ===== -->
-    <div v-if="showResults" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
+    <div v-if="showResults" class="absolute inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
       <div class="w-full max-w-[440px] overflow-hidden rounded-md bg-white shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
         <!-- 顶部色条 -->
         <div class="h-[3px]" :class="won ? 'bg-[linear-gradient(90deg,transparent,#c9b06b,transparent)]' : 'bg-[linear-gradient(90deg,transparent,#8b2020,transparent)]'"></div>
@@ -258,7 +259,7 @@
     </div>
 
     <!-- ===== 准备中 ===== -->
-    <div v-if="preparing" class="fixed inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
+    <div v-if="preparing" class="absolute inset-0 z-50 flex items-center justify-center bg-[#1c2841]/50 p-4 backdrop-blur-sm">
       <div class="rounded-md bg-white px-8 py-6 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="h-7 w-7 animate-spin rounded-full border-2 border-[#c9b06b] border-t-transparent"></div>
@@ -271,7 +272,7 @@
 
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
-import { SendHorizontal, Sparkles, X } from 'lucide-vue-next';
+import { SendHorizontal, X } from 'lucide-vue-next';
 
 const API_BASE = '/apps/debate';
 const parties = ref([]);
@@ -295,17 +296,25 @@ const victorySpeech = ref('');
 const failureReason = ref('');
 const chatContainer = ref(null);
 const messageInput = ref(null);
+const failedLogoIds = ref(new Set());
+
+const markLogoFailed = (id) => {
+  if (!id) return;
+  const next = new Set(failedLogoIds.value);
+  next.add(id);
+  failedLogoIds.value = next;
+};
 
 onMounted(() => {
   debateId.value = generateDebateId(16);
-  loadParties();
+  loadParties().then(() => restoreLatestDebate());
 });
 
-const request = async (url, body = {}) => {
+const request = async (url, body = {}, method = 'POST') => {
   const res = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    ...(method === 'GET' ? {} : { body: JSON.stringify(body) })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
@@ -323,6 +332,33 @@ const loadParties = async () => {
 const selectPartyItem = (party) => {
   candidateParty.value = party.name;
   selectedParty.value = party;
+};
+
+const restoreLatestDebate = async () => {
+  try {
+    const data = await request(`${API_BASE}/latest`, {}, 'GET');
+    if (!data?.success || !data?.session || !Array.isArray(data.topics) || !data.topics.length) return;
+
+    debateId.value = data.session.debateId || generateDebateId(16);
+    candidateName.value = data.session.candidateName || '';
+    candidateParty.value = data.session.candidateParty || '';
+    opponentName.value = data.session.opponentName || '';
+    opponentParty.value = data.session.opponentParty || '';
+    selectedParty.value = parties.value.find((p) => p.name === candidateParty.value) || null;
+
+    topics.value = data.topics;
+    currentTopic.value = Number(data.currentTopic || topics.value.length || 1);
+    debateStarted.value = true;
+    preparing.value = false;
+    debateEnded.value = Boolean(data.sessionEnded);
+    isMyTurn.value = false;
+    aiThinking.value = false;
+
+    await scrollToBottom();
+    if (!debateEnded.value) startDebateLoop();
+  } catch (error) {
+    console.error('恢复最近辩论失败:', error);
+  }
 };
 
 const startDebate = async () => {
@@ -401,24 +437,6 @@ const speak = async () => {
   newMessage.value = '';
   await scrollToBottom();
   startDebateLoop();
-};
-
-const optimizeSpeech = async () => {
-  if (!newMessage.value.trim()) return;
-  aiThinking.value = true;
-  try {
-    const data = await request(`${API_BASE}/optimize`, {
-      topicInfo: getTopicInfo(),
-      party: candidateParty.value,
-      name: candidateName.value,
-      draft: newMessage.value
-    });
-    newMessage.value = data.content || '';
-    await autoResize();
-  } catch (error) {
-    console.error('优化发言失败:', error);
-  }
-  aiThinking.value = false;
 };
 
 const summaryCurrentTopic = async () => {

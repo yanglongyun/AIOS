@@ -23,13 +23,13 @@ export const handleDailycheckApi = async (req, res, path) => {
   }
 
   if (path === '/apps/dailycheck/refresh' && req.method === 'POST') {
-    const data = await refreshHandler();
+    const data = await refreshHandler(req);
     return json(res, data);
   }
 
   if (path === '/apps/dailycheck/answer' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await answerHandler(body);
+    const data = await answerHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

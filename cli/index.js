@@ -39,6 +39,26 @@ if (arg === 'start') {
   process.exit(0);
 }
 
+if (arg === 'restart') {
+  stopServices();
+
+  startServices();
+  process.stdout.write(chalk.dim('  等待服务就绪'));
+  const serverOk = await waitReadyUrl(`${API_URL}/health`);
+  const appsOk = await waitReadyUrl(`${APPS_URL}/apps/health`);
+  console.log();
+
+  if (!serverOk || !appsOk) {
+    console.error(chalk.red('重启失败: 服务未就绪'));
+    process.exit(1);
+  }
+
+  console.log(chalk.green('AIOS 服务已重启'));
+  console.log(chalk.dim(`  主服务: ${WEB_URL}`));
+  console.log(chalk.dim(`  应用服务: ${APPS_URL}`));
+  process.exit(0);
+}
+
 if (arg === 'stop') {
   const stopped = stopServices();
   if (stopped) console.log(chalk.green('AIOS 服务已停止'));

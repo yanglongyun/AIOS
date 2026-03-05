@@ -2,6 +2,7 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, resolve } from 'path';
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../../..');
@@ -15,7 +16,7 @@ const parseModelJson = (raw = '') => {
   return JSON.parse(payload);
 };
 
-export const appraiseHandler = async (body = {}) => {
+export const appraiseHandler = async (body = {}, req) => {
   const rawPath = String(body.imagePath || '').trim();
   const imagePath = resolve(rawPath);
   if (!imagePath) return { status: 400, message: '缺少 imagePath' };
@@ -53,16 +54,9 @@ comment(string, 80-180字点评)
   }];
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ response_format: { type: 'json_object' }, messages })
-    });
-
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || `LLM request failed: ${res.status}` };
-    }
+    const llm = await callLlmChat(req, { response_format: { type: 'json_object' }, messages });
+    if (!llm.ok) return { status: llm.status, message: llm.message };
+    const data = llm.data;
 
     const parsed = parseModelJson(data.message?.content || '');
     if (!parsed || typeof parsed !== 'object') return { status: 500, message: 'AI 返回格式错误' };

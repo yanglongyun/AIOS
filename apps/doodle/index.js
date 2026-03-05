@@ -18,7 +18,7 @@ export const handleDoodleApi = async (req, res, path) => {
 
   if (path === '/apps/doodle/edit' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await editHandler(body);
+    const data = await editHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

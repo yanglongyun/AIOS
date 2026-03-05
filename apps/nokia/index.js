@@ -9,7 +9,7 @@ export { initNokiaDatabase };
 export const handleNokiaApi = async (req, res, path) => {
   if (path === '/apps/nokia/generation' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await generationHandler(body);
+    const data = await generationHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

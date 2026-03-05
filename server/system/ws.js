@@ -3,6 +3,14 @@ import { createSession } from '../chat/session.js';
 import { getAuthUser } from '../../shared/auth/guard.js';
 
 const clients = new Set();
+const isLoopback = (req) => {
+  const ip = String(req?.socket?.remoteAddress || '');
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+};
+
+const isLocalCliBypass = (req) => {
+  return String(req?.headers?.['x-aios-cli'] || '') === '1' && isLoopback(req);
+};
 
 export const broadcast = (msg) => {
   const payload = JSON.stringify(msg);
@@ -18,7 +26,7 @@ export const setupWebSocket = (httpServer) => {
 
   wss.on('connection', (ws, req) => {
     const user = getAuthUser(req);
-    if (!user) {
+    if (!user && !isLocalCliBypass(req)) {
       ws.close(1008, 'Unauthorized');
       return;
     }

@@ -1,4 +1,5 @@
 import { execSync, spawn } from 'child_process';
+import readline from 'readline';
 import chalk from 'chalk';
 import { ROOT, API_URL, APPS_URL } from './config.js';
 
@@ -75,32 +76,113 @@ export const getServiceStatus = async () => {
   };
 };
 
+let authCookie = '';
+
+const readJsonSafe = async (res) => {
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
+};
+
+const getSetCookieHeader = (res) => {
+  if (typeof res?.headers?.getSetCookie === 'function') {
+    const values = res.headers.getSetCookie();
+    if (Array.isArray(values) && values.length > 0) return values[0];
+  }
+  return res?.headers?.get?.('set-cookie') || '';
+};
+
+const pickCookiePair = (setCookie = '') => {
+  const first = String(setCookie).split(';')[0].trim();
+  return first || '';
+};
+
+const ask = (question) => new Promise((resolve) => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  rl.question(question, (answer) => {
+    rl.close();
+    resolve(String(answer || '').trim());
+  });
+});
+
+const login = async () => {
+  let username = String(process.env.AIOS_USERNAME || '').trim();
+  let password = String(process.env.AIOS_PASSWORD || '').trim();
+
+  if (!username) username = await ask('AIOS 用户名: ');
+  if (!password) password = await ask('AIOS 密码: ');
+
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await readJsonSafe(res);
+  if (!res.ok || data?.success === false) {
+    throw new Error(data?.message || '登录失败');
+  }
+
+  const cookiePair = pickCookiePair(getSetCookieHeader(res));
+  if (!cookiePair) throw new Error('登录成功但未获取会话 cookie');
+  authCookie = cookiePair;
+};
+
+const createConversation = async () => {
+  const res = await fetch(`${API_URL}/chat/create`, {
+    method: 'POST',
+    headers: {
+      'x-aios-cli': '1',
+      'Content-Type': 'application/json',
+      ...(authCookie ? { cookie: authCookie } : {})
+    },
+    body: JSON.stringify({})
+  });
+  const data = await readJsonSafe(res);
+  return { res, data };
+};
+
+export const getAuthCookie = () => authCookie;
+
 export const createSession = async () => {
-  const waitReady = async (retries = 15, delay = 800) => {
+  const waitServiceReady = async (retries = 15, delay = 800) => {
     for (let i = 0; i < retries; i++) {
-      try {
-        const res = await fetch(`${API_URL}/chat/create`, { method: 'POST' });
-        if (res.ok) {
-          const { sessionId } = await res.json();
-          return sessionId;
-        }
-      } catch {}
+      const ready = await isReady(`${API_URL}/health`);
+      if (ready) return true;
       await new Promise(r => setTimeout(r, delay));
       process.stdout.write('.');
     }
-    throw new Error('服务启动超时');
+    return false;
   };
 
-  try {
-    const res = await fetch(`${API_URL}/chat/create`, { method: 'POST' });
-    if (!res.ok) throw new Error(`${res.status}`);
-    const { sessionId } = await res.json();
-    return sessionId;
-  } catch {
+  const tryCreateConversation = async () => {
+    const { res, data } = await createConversation();
+    if (res.ok && data?.conversationId) return data.conversationId;
+    if (res.ok && data?.sessionId) return data.sessionId;
+
+    if (res.status === 401) {
+      await login();
+      const second = await createConversation();
+      if (second.res.ok && second.data?.conversationId) return second.data.conversationId;
+      if (second.res.ok && second.data?.sessionId) return second.data.sessionId;
+      throw new Error(second.data?.message || `创建会话失败: ${second.res.status}`);
+    }
+
+    throw new Error(data?.message || `创建会话失败: ${res.status}`);
+  };
+
+  const readyNow = await isReady(`${API_URL}/health`);
+  if (!readyNow) {
     startServices();
     process.stdout.write(chalk.dim('  等待服务就绪'));
-    const sessionId = await waitReady();
+    const ready = await waitServiceReady();
+    if (!ready) throw new Error('服务启动超时');
     console.log(chalk.dim(' 就绪\n'));
-    return sessionId;
   }
+
+  return await tryCreateConversation();
 };

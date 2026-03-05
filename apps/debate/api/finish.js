@@ -1,6 +1,7 @@
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
-export const finishHandler = async (body = {}) => {
+export const finishHandler = async (body = {}, req) => {
   const debateId = String(body.debateId || '').trim();
   const candidateParty = String(body.candidateParty || '').trim();
   const candidateName = String(body.candidateName || '').trim();
@@ -43,15 +44,9 @@ export const finishHandler = async (body = {}) => {
   }
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
-    });
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || `LLM request failed: ${res.status}` };
-    }
+    const llm = await callLlmChat(req, { messages });
+    if (!llm.ok) return { status: llm.status, message: llm.message };
+    const data = llm.data;
     return { content: String(data.message?.content || '').trim() };
   } catch (error) {
     return { status: 500, message: error.message || '结束辩论失败' };

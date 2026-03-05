@@ -16,11 +16,10 @@ export const handleBlackroomApi = async (req, res, path) => {
 
   if (path === '/apps/blackroom/submit' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await submitHandler(body);
+    const data = await submitHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   return false;
 };
-

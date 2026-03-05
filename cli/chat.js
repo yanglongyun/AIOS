@@ -2,11 +2,17 @@ import readline from 'readline';
 import { WebSocket } from 'ws';
 import chalk from 'chalk';
 import { WS_URL } from './config.js';
-import { createSession } from './service.js';
+import { createSession, getAuthCookie } from './service.js';
 import { print } from './print.js';
 
 const connect = (onReady) => {
-  const ws = new WebSocket(WS_URL);
+  const cookie = getAuthCookie();
+  const ws = new WebSocket(WS_URL, {
+    headers: {
+      'x-aios-cli': '1',
+      ...(cookie ? { cookie } : {})
+    }
+  });
 
   ws.on('error', (e) => {
     console.error(chalk.red('连接失败，请确认 AIOS 守护进程正在运行'));
@@ -22,9 +28,9 @@ export const startChat = async () => {
   console.log(chalk.bold('\n  AIOS') + chalk.dim(' — AI Agent CLI'));
   console.log(chalk.dim('  输入消息开始对话，Ctrl+C 退出\n'));
 
-  let sessionId;
+  let conversationId;
   try {
-    sessionId = await createSession();
+    conversationId = await createSession();
   } catch (e) {
     console.error(chalk.red('启动失败: ' + e.message));
     process.exit(1);
@@ -32,6 +38,27 @@ export const startChat = async () => {
 
   let busy = false;
   let pendingConfirm = null;
+  let replyBuffer = '';
+
+  const parseToolCall = (toolCall) => {
+    const name = toolCall?.function?.name || 'tool';
+    let args = {};
+    try {
+      args = JSON.parse(toolCall?.function?.arguments || '{}');
+    } catch {}
+
+    if (name === 'shell') {
+      return {
+        cmd: args.command || 'shell',
+        reason: args.reason || ''
+      };
+    }
+
+    return {
+      cmd: name,
+      reason: Object.keys(args).length ? JSON.stringify(args) : ''
+    };
+  };
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -59,7 +86,8 @@ export const startChat = async () => {
 
       if (data.type === 'tool_call') {
         print.clearThinking();
-        print.tool(data.command, data.reason);
+        const parsed = parseToolCall(data.toolCall);
+        print.tool(parsed.cmd, parsed.reason);
         return;
       }
 
@@ -76,9 +104,15 @@ export const startChat = async () => {
         return;
       }
 
-      if (data.type === 'reply') {
+      if (data.type === 'delta') {
+        replyBuffer += data.delta || '';
+        return;
+      }
+
+      if (data.type === 'done' || data.type === 'reply') {
         print.clearThinking();
-        print.reply(data.content);
+        print.reply(replyBuffer || data.content || '');
+        replyBuffer = '';
         busy = false;
         rl.prompt();
         return;
@@ -120,11 +154,12 @@ export const startChat = async () => {
       }
 
       busy = true;
+      replyBuffer = '';
       print.thinking();
 
       socket.send(JSON.stringify({
         type: 'message',
-        sessionId,
+        conversationId,
         content: input,
         mode: 'auto',
       }));

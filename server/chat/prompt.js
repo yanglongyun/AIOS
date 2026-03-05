@@ -5,7 +5,7 @@ import { getSettings } from '../db/settings.js';
 import { getAppsCatalog } from './apps.js';
 import { getRecentChats } from './chats.js';
 
-const INSTRUCTION_PATH = join(process.cwd(), 'instruction.md');
+const INSTRUCTION_PATH = join(process.cwd(), 'INSTRUCTION.md');
 
 const getInstruction = () => {
   try {
@@ -17,7 +17,7 @@ const getInstruction = () => {
 
 const getOverview = () => {
   try {
-    return readFileSync(join(process.cwd(), 'library/overview.md'), 'utf8').trim();
+    return readFileSync(join(process.cwd(), 'memory/index.md'), 'utf8').trim();
   } catch {
     return null;
   }
@@ -29,6 +29,7 @@ export const buildSystemPrompt = (currentConversationId = '') => {
     apiUrl,
     model,
     provider,
+    language,
     enableToolResultTruncate,
     toolResultMaxChars,
     enableToolLoopLimit,
@@ -39,6 +40,8 @@ export const buildSystemPrompt = (currentConversationId = '') => {
   const cwd = process.cwd();
 
   let prompt = getInstruction();
+
+  prompt += `\n\n## 语言\n使用 ${language || 'zh'} 与用户交流。`;
 
   const overview = getOverview();
   if (overview) {
@@ -52,7 +55,7 @@ export const buildSystemPrompt = (currentConversationId = '') => {
 - 文件系统目录：${cwd}/files/
 - 上传目录：${cwd}/files/uploads/
 - 下载目录：${cwd}/files/downloads/
-- 记忆文件：${cwd}/library/overview.md`;
+- 记忆目录：${cwd}/memory/（index.md 为索引，按需 cat 具体文件）`;
 
   prompt += `\n\n## 当前模型配置
 - 供应方：${provider || '-'}

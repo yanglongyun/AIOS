@@ -1,7 +1,7 @@
 import { db } from '../db.js';
 import { taskAgentJson } from '../../app_shared/taskAgent.js';
 
-const taskAgent = async ({ date, question, answer, note }) => {
+const taskAgent = async ({ date, question, answer, note, req }) => {
   const parsed = await taskAgentJson({
     app: 'dailycheck',
     prompt: [
@@ -12,7 +12,8 @@ const taskAgent = async ({ date, question, answer, note }) => {
       `问题：${question}`,
       `回答：${answer}`,
       `当前 note：${note || ''}`
-    ].join('\n')
+    ].join('\n'),
+    req
   });
   return {
     response: String(parsed.response || '').trim(),
@@ -20,7 +21,7 @@ const taskAgent = async ({ date, question, answer, note }) => {
   };
 };
 
-export const answerHandler = async (body = {}) => {
+export const answerHandler = async (body = {}, req) => {
   const dailyId = Number(body.dailyId);
   const answer = String(body.answer || '').trim();
 
@@ -54,7 +55,8 @@ export const answerHandler = async (body = {}) => {
       date: exists.date,
       question: exists.question,
       answer,
-      note: exists.note
+      note: exists.note,
+      req
     });
     response = result.response;
     note = result.note;

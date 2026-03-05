@@ -20,7 +20,7 @@ export const handleTreasureApi = async (req, res, path) => {
 
   if (path === '/apps/treasure/appraise' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await appraiseHandler(body);
+    const data = await appraiseHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

@@ -29,7 +29,7 @@ export const handleStoryApi = async (req, res, path) => {
 
   if (path === '/apps/story/generate' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await generateHandler(body);
+    const data = await generateHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

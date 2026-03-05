@@ -1,4 +1,5 @@
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
 const parseModelJson = (raw = '') => {
   const text = String(raw || '').trim();
@@ -9,19 +10,16 @@ const parseModelJson = (raw = '') => {
   return JSON.parse(matched[0]);
 };
 
-export const divineHandler = async (body = {}) => {
+export const divineHandler = async (body = {}, req) => {
   const question = String(body.question || '').trim();
   if (!question) return { status: 400, message: '请输入你的问题' };
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_format: { type: 'json_object' },
-        messages: [{
-          role: 'system',
-          content: `你是一位古风算卦大师，精通易经八卦、诗词歌赋。用户提出问题后，你需要：
+    const llm = await callLlmChat(req, {
+      response_format: { type: 'json_object' },
+      messages: [{
+        role: 'system',
+        content: `你是一位古风算卦大师，精通易经八卦、诗词歌赋。用户提出问题后，你需要：
 1. 给出一个签名（如"上上签"、"中吉签"、"下下签"等）
 2. 写一句四言或七言签诗（原创，有古韵）
 3. 给出"宜"（2-3项，简短）
@@ -30,17 +28,13 @@ export const divineHandler = async (body = {}) => {
 
 必须返回 JSON：
 {"signName":"签名","signPoem":"签诗","good":"宜做的事，逗号分隔","bad":"忌做的事，逗号分隔","advice":"解签建议"}`
-        }, {
-          role: 'user',
-          content: question
-        }]
-      })
+      }, {
+        role: 'user',
+        content: question
+      }]
     });
-
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || '卦象解读失败' };
-    }
+    if (!llm.ok) return { status: llm.status, message: llm.message || '卦象解读失败' };
+    const data = llm.data;
 
     const parsed = parseModelJson(data.message?.content || '');
     const record = {

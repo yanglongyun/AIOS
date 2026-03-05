@@ -24,21 +24,24 @@
         />
       </div>
 
-      <div class="mt-5 grid grid-cols-2 gap-2.5">
+      <div class="mt-5">
         <button
           @click="submitLogin"
           :disabled="pending"
-          class="rounded-xl bg-[#c8a060] px-4 py-2 text-sm font-semibold text-[#24140a] transition hover:bg-[#d8b070] disabled:cursor-not-allowed disabled:opacity-50"
+          class="w-full rounded-xl bg-[#c8a060] px-4 py-2 text-sm font-semibold text-[#24140a] transition hover:bg-[#d8b070] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {{ pending ? '处理中...' : '登录' }}
         </button>
         <button
-          @click="submitRegister"
-          :disabled="pending"
-          class="rounded-xl border border-[#6a503a] bg-[#352316] px-4 py-2 text-sm font-semibold text-[#e8d4b8] transition hover:bg-[#40291a] disabled:cursor-not-allowed disabled:opacity-50"
+          type="button"
+          @click="showResetHint = !showResetHint"
+          class="mt-2 w-full text-center text-xs text-[#b89a72] transition-colors hover:text-[#d8b890]"
         >
-          {{ pending ? '处理中...' : '注册并登录' }}
+          忘记密码？
         </button>
+        <div v-if="showResetHint" class="mt-2 rounded-lg border border-[#5a4030] bg-[#26180f] px-3 py-2 text-xs leading-relaxed text-[#c8b090]">
+          请在系统终端使用 CLI 重置密码，然后返回此页面登录。
+        </div>
       </div>
     </div>
   </div>
@@ -54,6 +57,7 @@ const username = ref('');
 const password = ref('');
 const pending = ref(false);
 const error = ref('');
+const showResetHint = ref(false);
 
 const requestAuth = async (url) => {
   pending.value = true;
@@ -85,7 +89,4 @@ const submitLogin = async () => {
   await requestAuth('/api/auth/login');
 };
 
-const submitRegister = async () => {
-  await requestAuth('/api/auth/register');
-};
 </script>

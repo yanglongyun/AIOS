@@ -1,6 +1,7 @@
 import { db } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
 
-export const startHandler = async (body = {}) => {
+export const startHandler = async (body = {}, req) => {
   const debateId = String(body.debateId || '').trim();
   const candidateName = String(body.candidateName || '').trim();
   const candidateParty = String(body.candidateParty || '').trim();
@@ -32,18 +33,12 @@ export const startHandler = async (body = {}) => {
   }];
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        response_format: { type: 'json_object' },
-        messages
-      })
+    const llm = await callLlmChat(req, {
+      response_format: { type: 'json_object' },
+      messages
     });
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || `LLM request failed: ${res.status}` };
-    }
+    if (!llm.ok) return { status: llm.status, message: llm.message };
+    const data = llm.data;
 
     const raw = String(data.message?.content || '').trim();
     const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);

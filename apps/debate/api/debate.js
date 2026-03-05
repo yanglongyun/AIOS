@@ -1,4 +1,6 @@
-export const debateHandler = async (body = {}) => {
+import { callLlmChat } from '../../app_shared/chatLlm.js';
+
+export const debateHandler = async (body = {}, req) => {
   const topicInfo = String(body.topicInfo || '').trim();
   if (!topicInfo) return { status: 400, message: '缺少 topicInfo' };
 
@@ -62,20 +64,14 @@ export const debateHandler = async (body = {}) => {
   ];
 
   try {
-    const res = await fetch('http://localhost:9700/api/llm/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages,
-        tools,
-        tool_choice: 'auto',
-        parallel_tool_calls: false
-      })
+    const llm = await callLlmChat(req, {
+      messages,
+      tools,
+      tool_choice: 'auto',
+      parallel_tool_calls: false
     });
-    const data = await res.json();
-    if (!res.ok || data.success === false) {
-      return { status: 500, message: data.message || `LLM request failed: ${res.status}` };
-    }
+    if (!llm.ok) return { status: llm.status, message: llm.message };
+    const data = llm.data;
 
     const message = data.message || {};
     if (!Array.isArray(message.tool_calls) || !message.tool_calls.length) {

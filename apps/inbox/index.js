@@ -53,7 +53,7 @@ export const handleInboxApi = async (req, res, pathName) => {
 
   if (pathName === '/apps/inbox/suggest' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await suggestHandler(body);
+    const data = await suggestHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

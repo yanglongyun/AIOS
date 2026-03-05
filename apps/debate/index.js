@@ -2,9 +2,9 @@ import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
 import { initDebateDatabase } from './db.js';
 import { partiesHandler } from './api/parties.js';
+import { latestHandler } from './api/latest.js';
 import { startHandler } from './api/start.js';
 import { debateHandler } from './api/debate.js';
-import { optimizeHandler } from './api/optimize.js';
 import { summaryHandler } from './api/summary.js';
 import { continueHandler } from './api/continue.js';
 import { finishHandler } from './api/finish.js';
@@ -18,44 +18,41 @@ export const handleDebateApi = async (req, res, path) => {
     return json(res, partiesHandler(body));
   }
 
+  if (path === '/apps/debate/latest' && req.method === 'GET') {
+    return json(res, latestHandler());
+  }
+
   if (path === '/apps/debate/start' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await startHandler(body);
+    const data = await startHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/debate/debate' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await debateHandler(body);
-    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
-    return json(res, data);
-  }
-
-  if (path === '/apps/debate/optimize' && req.method === 'POST') {
-    const body = await readBody(req);
-    const data = await optimizeHandler(body);
+    const data = await debateHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/debate/summary' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await summaryHandler(body);
+    const data = await summaryHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/debate/continue' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await continueHandler(body);
+    const data = await continueHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/debate/finish' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await finishHandler(body);
+    const data = await finishHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

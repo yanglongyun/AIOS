@@ -30,7 +30,7 @@ export const handleBriefingApi = async (req, res, path) => {
 
   if (path === '/apps/briefing/refresh' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await refreshHandler(body);
+    const data = await refreshHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

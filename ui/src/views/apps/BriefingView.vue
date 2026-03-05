@@ -3,7 +3,8 @@
     <div class="mx-auto w-full max-w-4xl px-4 py-8">
       <header class="mb-6 border-b-2 border-[#3a2e20] pb-4">
         <p class="text-[10px] uppercase tracking-[.35em] text-[#a09080]">AI-Powered Personal</p>
-        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">看新闻</h1>
+        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">新闻头条</h1>
+        <p class="mt-1 text-sm italic text-[#b0a088]">我关心的，才是头条。</p>
         <p class="mt-1.5 text-xs tracking-wide text-[#9a8a70]">{{ todayText }}</p>
       </header>
 

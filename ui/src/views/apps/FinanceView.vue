@@ -3,23 +3,22 @@
     <div class="pointer-events-none absolute inset-0">
       <div class="absolute inset-0 [background-image:repeating-linear-gradient(transparent,transparent_31px,#e8ddd0_31px,#e8ddd0_32px)] [background-position:0_100px] opacity-30"></div>
     </div>
-    <div class="relative z-[1] flex shrink-0 items-end justify-between px-6 pb-2 pt-6">
+    <div class="relative z-[1] flex shrink-0 items-end px-6 pb-2 pt-6">
       <h1 class="text-2xl font-extrabold text-[#5a4030]">记账本</h1>
-      <span class="rounded-full bg-[#f0e8dd] px-3 py-1 text-xs text-[#b8a090]">{{ currentMonth }}</span>
     </div>
 
     <div class="relative z-[1] flex shrink-0 gap-3 px-6 pb-5 pt-4">
-      <div class="flex-1 rounded-2xl border-2 border-dashed border-[#b8d8b0] bg-[#f5faf3] p-4">
+      <div class="min-w-0 flex-1 rounded-2xl border-2 border-dashed border-[#b8d8b0] bg-[#f5faf3] p-4">
         <div class="text-[11px] font-medium text-[#a09080]">收入</div>
-        <div class="mt-1 font-mono text-[20px] font-extrabold text-[#5a9a4a]">+{{ totalIncome.toLocaleString() }}</div>
+        <div class="mt-1 break-all font-mono text-[20px] font-extrabold leading-tight text-[#5a9a4a]">+{{ totalIncome.toLocaleString() }}</div>
       </div>
-      <div class="flex-1 rounded-2xl border-2 border-dashed border-[#e8b8a0] bg-[#fdf5f0] p-4">
+      <div class="min-w-0 flex-1 rounded-2xl border-2 border-dashed border-[#e8b8a0] bg-[#fdf5f0] p-4">
         <div class="text-[11px] font-medium text-[#a09080]">支出</div>
-        <div class="mt-1 font-mono text-[20px] font-extrabold text-[#c06040]">-{{ totalExpense.toLocaleString() }}</div>
+        <div class="mt-1 break-all font-mono text-[20px] font-extrabold leading-tight text-[#c06040]">-{{ totalExpense.toLocaleString() }}</div>
       </div>
-      <div class="flex-1 rounded-2xl border-2 border-dashed border-[#c0b8d8] bg-[#f5f3fa] p-4">
+      <div class="min-w-0 flex-1 rounded-2xl border-2 border-dashed border-[#c0b8d8] bg-[#f5f3fa] p-4">
         <div class="text-[11px] font-medium text-[#a09080]">结余</div>
-        <div class="mt-1 font-mono text-[20px] font-extrabold text-[#6a5a8a]">{{ (totalIncome - totalExpense).toLocaleString() }}</div>
+        <div class="mt-1 break-all font-mono text-[20px] font-extrabold leading-tight text-[#6a5a8a]">{{ (totalIncome - totalExpense).toLocaleString() }}</div>
       </div>
     </div>
 
@@ -66,8 +65,9 @@
           @keyup.enter="smartFill"
           class="flex-1 rounded-xl border-[1.5px] border-dashed border-[#d4c8b8] bg-white px-4 py-3 text-sm text-[#4a3f35] outline-none transition-colors placeholder:text-[#c4b8a8] focus:border-solid focus:border-[#c09060]"
         />
-        <button class="whitespace-nowrap rounded-xl bg-[#5a4030] px-4 text-[13px] font-semibold text-[#f5efe8] transition-colors hover:bg-[#6a5040] disabled:cursor-not-allowed disabled:opacity-40" :disabled="smartFilling || !smartInput.trim()" @click="smartFill">
-          {{ smartFilling ? '识别中...' : '✨ 智能识别' }}
+        <button class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-[#5a4030] bg-transparent px-4 text-[13px] font-semibold text-[#5a4030] transition-colors hover:bg-[#f3ece2] disabled:cursor-not-allowed disabled:opacity-40" :disabled="smartFilling || !smartInput.trim()" @click="smartFill">
+          <Zap v-if="!smartFilling" class="h-3.5 w-3.5" />
+          {{ smartFilling ? '识别中...' : '智能识别' }}
         </button>
       </div>
 
@@ -78,7 +78,7 @@
         </select>
         <input v-model="newItem.amount" type="number" placeholder="金额" class="w-20 rounded-[10px] border-[1.5px] border-[#e0d4c4] bg-white px-3 py-2.5 text-[13px] outline-none placeholder:text-[#c4b8a8]" />
         <input v-model="newItem.note" placeholder="备注" @keyup.enter="add" class="min-w-0 flex-1 rounded-[10px] border-[1.5px] border-[#e0d4c4] bg-white px-3 py-2.5 text-[13px] outline-none placeholder:text-[#c4b8a8]" />
-        <button class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border-2 border-[#5a4030] bg-transparent text-[#5a4030] transition-all hover:bg-[#5a4030] hover:text-[#f5efe8] disabled:cursor-not-allowed disabled:opacity-30" :disabled="!newItem.amount" @click="add"><Plus class="h-4 w-4" /></button>
+        <button class="shrink-0 rounded-[10px] border-2 border-[#5a4030] bg-[#5a4030] px-3 py-2.5 text-[13px] font-semibold text-[#f5efe8] transition-all hover:bg-[#6a5040] hover:border-[#6a5040] disabled:cursor-not-allowed disabled:opacity-30" :disabled="!newItem.amount" @click="add">保存</button>
       </div>
     </div>
   </div>
@@ -86,7 +86,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { Plus } from 'lucide-vue-next'
+import { Zap } from 'lucide-vue-next'
 
 const items = ref([])
 const newItem = ref({ type: 'expense', amount: '', note: '' })
@@ -97,11 +97,6 @@ const API_BASE = '/apps/finance'
 
 const totalIncome = computed(() => items.value.filter(i => i.type === 'income').reduce((s, i) => s + i.amount, 0))
 const totalExpense = computed(() => items.value.filter(i => i.type === 'expense').reduce((s, i) => s + i.amount, 0))
-
-const currentMonth = computed(() => {
-  const now = new Date()
-  return `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`
-})
 
 const groupedItems = computed(() => {
   const groups = {}

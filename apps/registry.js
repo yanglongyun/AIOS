@@ -21,6 +21,13 @@ export const appRegistry = [
     dbInit: ['initInboxDatabase']
   },
   {
+    name: 'weibo',
+    match: (path) => path.startsWith('/apps/weibo/'),
+    load: () => import('./weibo/index.js'),
+    apiHandler: 'handleWeiboApi',
+    dbInit: ['initWeiboDatabase']
+  },
+  {
     name: 'playground',
     match: (path) => path.startsWith('/apps/playground/'),
     load: () => import('./playground/index.js'),
@@ -97,19 +104,5 @@ export const appRegistry = [
     load: () => import('./poker/index.js'),
     apiHandler: 'handlePokerApi',
     dbInit: ['initPokerDatabase']
-  },
-  {
-    name: 'doodle',
-    match: (path) => path.startsWith('/apps/doodle/'),
-    load: () => import('./doodle/index.js'),
-    apiHandler: 'handleDoodleApi',
-    dbInit: ['initDoodleDatabase']
-  },
-  {
-    name: 'redmill',
-    match: (path) => path.startsWith('/apps/redmill/'),
-    load: () => import('./redmill/index.js'),
-    apiHandler: 'handleRedmillApi',
-    dbInit: ['initRedmillDatabase']
   }
 ];

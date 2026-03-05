@@ -5,15 +5,21 @@
       <span v-if="unread > 0" class="rounded-full bg-[#d4756a] px-3 py-1 text-[13px] font-bold text-white shadow-[0_2px_6px_rgba(212,117,106,0.25)]">{{ unread }} 封未读</span>
     </div>
 
-    <div class="relative z-[1] mx-6 mt-4 flex shrink-0 flex-col gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4] sm:flex-row sm:items-center sm:justify-between">
+    <div class="relative z-[1] mx-6 mt-4 flex shrink-0 flex-col gap-3 rounded bg-[#faf6f0] px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ring-1 ring-[#e8e0d4]">
       <div class="min-w-0 flex-1">
-        <div class="text-xs text-[#b8a898]">📮 外部提交入口</div>
-        <div class="mt-0.5 text-[11px] leading-relaxed text-[#a59686]">把这个地址发给他人，他们可以在网页上提交留言，提交后会自动进入你的收件箱。</div>
-        <div class="mt-1 break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
+        <div class="break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
+        <div class="mt-1 text-[11px] leading-relaxed text-[#a59686]">你可以把这个地址发给他人，他们可以在网页上提交留言，提交后会自动进入你的收件箱。</div>
       </div>
-      <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
+      <div class="min-w-0 flex-1 border-t border-dashed border-[#eadfce] pt-3">
+        <div class="break-all font-mono text-[11px] text-[#9a8a78]">{{ feedUrl }}</div>
+        <div class="mt-1 text-[11px] leading-relaxed text-[#a59686]">这是你的微博动态公开页，外部用户可以浏览并点击私信进入留言页。</div>
+      </div>
+      <div class="flex w-full flex-wrap items-center justify-end gap-2">
         <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openSubmitUrl">打开</button>
         <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copySubmitUrl">{{ copied ? '已复制 ✓' : '复制地址' }}</button>
+        <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openFeedUrl">微博动态</button>
+        <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copyFeedUrl">{{ feedCopied ? '已复制 ✓' : '复制动态页' }}</button>
+        <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openWeiboApp">管理微博</button>
       </div>
     </div>
 
@@ -77,11 +83,13 @@ import { onMounted, reactive, ref } from 'vue';
 
 const API_BASE = '/apps/inbox';
 const publicUrl = `${window.location.origin}/apps/inbox/submit`;
+const feedUrl = `${window.location.origin}/apps/weibo/feed`;
 
 const messages = ref([]);
 const unread = ref(0);
 const readFilter = ref('all');
 const copied = ref(false);
+const feedCopied = ref(false);
 const suggesting = reactive({});
 
 const fetchMessages = async () => {
@@ -139,6 +147,22 @@ const openSubmitUrl = () => {
   window.open(publicUrl, '_blank', 'noopener,noreferrer');
 };
 
+const copyFeedUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(feedUrl);
+    feedCopied.value = true;
+    setTimeout(() => { feedCopied.value = false; }, 1500);
+  } catch {}
+};
+
+const openFeedUrl = () => {
+  window.open(feedUrl, '_blank', 'noopener,noreferrer');
+};
+
+const openWeiboApp = () => {
+  window.location.href = '/weibo';
+};
+
 const formatDate = (v) => {
   if (!v) return '';
   const d = new Date(v.replace(' ', 'T'));
@@ -152,5 +176,7 @@ const formatDate = (v) => {
   return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
 };
 
-onMounted(fetchMessages);
+onMounted(() => {
+  fetchMessages();
+});
 </script>

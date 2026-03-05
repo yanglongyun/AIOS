@@ -9,6 +9,7 @@ import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FinanceView from '../views/apps/FinanceView.vue';
 import InboxView from '../views/apps/InboxView.vue';
+import WeiboView from '../views/apps/WeiboView.vue';
 import PlaygroundView from '../views/apps/PlaygroundView.vue';
 import CommunityView from '../views/CommunityView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
@@ -22,8 +23,6 @@ import StoryView from '../views/apps/StoryView.vue';
 import BlackroomView from '../views/apps/BlackroomView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
 import PokerView from '../views/apps/PokerView.vue';
-import DoodleView from '../views/apps/DoodleView.vue';
-import RedmillView from '../views/apps/RedmillView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
 
@@ -39,6 +38,7 @@ const routes = [
   { path: '/notebook', component: NotebookView },
   { path: '/finance', component: FinanceView },
   { path: '/inbox', component: InboxView },
+  { path: '/weibo', component: WeiboView },
   { path: '/playground', component: PlaygroundView },
   { path: '/debate-simulator', component: DebateSimulatorView },
   { path: '/treasure', component: TreasureView },
@@ -50,8 +50,6 @@ const routes = [
   { path: '/blackroom', component: BlackroomView },
   { path: '/fortune', component: FortuneView },
   { path: '/poker', component: PokerView },
-  { path: '/doodle', component: DoodleView },
-  { path: '/redmill', component: RedmillView },
   { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }
 ];

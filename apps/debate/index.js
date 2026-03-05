@@ -5,6 +5,7 @@ import { partiesHandler } from './api/parties.js';
 import { latestHandler } from './api/latest.js';
 import { startHandler } from './api/start.js';
 import { debateHandler } from './api/debate.js';
+import { suggestHandler } from './api/suggest.js';
 import { summaryHandler } from './api/summary.js';
 import { continueHandler } from './api/continue.js';
 import { finishHandler } from './api/finish.js';
@@ -32,6 +33,13 @@ export const handleDebateApi = async (req, res, path) => {
   if (path === '/apps/debate/debate' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await debateHandler(body, req);
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
+  }
+
+  if (path === '/apps/debate/suggest' && req.method === 'POST') {
+    const body = await readBody(req);
+    const data = await suggestHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

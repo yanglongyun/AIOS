@@ -8,17 +8,14 @@ const root = resolve(__dirname, '..', '..');
 const dir = join(root, 'database', 'apps');
 mkdirSync(dir, { recursive: true });
 
-export const db = new Database(join(dir, 'doodle.db'));
+export const db = new Database(join(dir, 'weibo.db'));
 db.pragma('journal_mode = WAL');
 
-export const initDoodleDatabase = () => {
+export const initWeiboDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_doodle_works (
+    CREATE TABLE IF NOT EXISTS weibo_posts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      original_path TEXT NOT NULL DEFAULT '',
-      edited_path TEXT NOT NULL DEFAULT '',
-      prompt TEXT NOT NULL DEFAULT '',
-      region TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);

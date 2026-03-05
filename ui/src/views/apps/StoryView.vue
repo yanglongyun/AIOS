@@ -1,155 +1,165 @@
 <template>
-  <div class="flex h-full flex-col bg-[#f5f0e8] font-['PingFang_SC',-apple-system,sans-serif] text-[#4a3a28]">
+  <div class="story-root">
 
-    <!-- ========== 列表页 ========== -->
-    <template v-if="!activeSession">
-      <!-- 顶栏 -->
-      <div class="shrink-0 border-b border-[#d4b896] bg-[#f0e6d4] px-5 py-3">
-        <div class="mx-auto flex max-w-[800px] items-center justify-between">
-          <div>
-            <div class="text-[15px] font-extrabold text-[#3a2010]">故事会</div>
-            <p class="text-[10px] text-[#9a7a5a]">互动式章节故事</p>
-          </div>
-          <button @click="showCreate = !showCreate" class="rounded-lg border border-[#c4a070] bg-[#e8d4b0] px-3 py-1.5 text-[12px] font-semibold text-[#5a3a18] transition hover:bg-[#dcc8a0]">+ 新建故事</button>
-        </div>
-        <div v-if="showCreate" class="mx-auto mt-3 max-w-[800px] space-y-2 border-t border-[#d4c0a0] pt-3">
-          <input v-model="newTitle" placeholder="故事标题" class="w-full rounded-lg border border-[#d4c0a0] bg-white/80 px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
-          <textarea v-model="newPremise" rows="2" placeholder="世界观设定（可选）" class="w-full rounded-lg border border-[#d4c0a0] bg-white/80 px-3 py-2 text-[13px] leading-5 outline-none placeholder:text-[#c0b098] focus:border-[#c8a060]" />
-          <div class="flex justify-end">
-            <button @click="createStory" :disabled="creating" class="rounded-lg bg-[#5a3e28] px-5 py-1.5 text-[12px] font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40">{{ creating ? '创建中...' : '确认创建' }}</button>
-          </div>
-        </div>
+    <!-- ========== 列表页：书架 ========== -->
+    <template v-if="view === 'list'">
+      <div class="beam">
+        <span class="beam-t">书 架</span>
+        <button @click="view = 'create'" class="beam-btn">+ 新故事</button>
       </div>
-
-      <!-- 书架区域 -->
-      <div class="shelf-room flex-1 overflow-y-auto">
-        <div v-if="!sessions.length" class="flex h-full items-center justify-center text-[13px] text-[#a08060]">还没有故事，新建一个开始吧</div>
-        <div v-else class="px-10 pt-10 pb-4">
-          <div class="shelf-row">
-            <!-- 书脊 -->
-            <button
-              v-for="(s, i) in sessions" :key="s.id"
-              class="book-spine"
-              :style="{
-                background: bookColor(i).bg,
-                height: bookHeight(i) + 'px',
-                '--text-color': bookColor(i).text,
-                '--accent-color': bookColor(i).accent,
-              }"
-              @click="selectSession(s.id)"
-            >
-              <span class="book-label">{{ s.title }}</span>
-              <span class="book-meta">{{ s.chapterCount }}章</span>
-            </button>
+      <div class="shelf-area wood-dark">
+        <div v-if="!sessions.length" class="empty-hint">还没有故事，新建一个开始吧</div>
+        <template v-else>
+          <div v-for="(tier, ti) in shelfTiers" :key="ti" class="shelf-tier">
+            <div class="book-row">
+              <button
+                v-for="(s, i) in tier" :key="s.id"
+                class="book" @click="selectSession(s.id)"
+              >
+                <div class="book-cover" :class="'c' + ((ti * 4 + i) % 9)">
+                  <div class="cover-frame"></div>
+                  <div class="cv-body">
+                    <div class="cv-title">{{ s.title }}</div>
+                    <div class="cv-line"></div>
+                    <div class="cv-sub">{{ s.chapterCount || 0 }} 章</div>
+                  </div>
+                </div>
+                <div class="book-name">{{ s.title }}</div>
+              </button>
+              <!-- 最后一层末尾加新建按钮 -->
+              <button v-if="ti === shelfTiers.length - 1" class="book book-add" @click="view = 'create'">
+                <div class="book-cover"><span class="add-icon">+</span></div>
+                <div class="book-name" style="color:#5a4828">新建</div>
+              </button>
+            </div>
+            <div class="plank wood-plank"></div>
+            <div class="plank-shadow"></div>
           </div>
-          <!-- 木板 -->
-          <div class="shelf-board"></div>
-          <div class="shelf-shadow"></div>
-        </div>
+        </template>
       </div>
     </template>
 
     <!-- ========== 详情页 ========== -->
-    <template v-else>
-      <!-- 顶栏 + 面包屑 -->
-      <div class="shrink-0 border-b border-[#e0d4c4] bg-[#fffdf8] px-5 py-3">
-        <div class="mx-auto max-w-[680px] flex items-center justify-between">
-          <div class="flex items-center gap-1.5 text-[13px]">
-            <button @click="activeSession = null" class="text-[#a0907a] hover:text-[#5a4030] transition">故事会</button>
-            <span class="text-[#d4c0a0]">/</span>
-            <span class="font-semibold text-[#4a3020] truncate max-w-[200px]">{{ activeSession.title }}</span>
-            <span class="ml-2 rounded-full border border-[#d4c0a0] bg-[#f5ead8] px-2 py-0.5 text-[10px] font-semibold text-[#7a5a38]">{{ activeSession.progress || '第0章' }}</span>
-          </div>
-          <button @click="resetStory" :disabled="loading" class="rounded-lg border border-[#e0d4c4] px-2.5 py-1 text-[11px] text-[#b0a080] transition hover:border-[#c8a060] hover:text-[#a07040] disabled:opacity-40">重置</button>
-        </div>
+    <template v-if="view === 'detail' && activeSession">
+      <div class="beam">
+        <button class="beam-back" @click="backToList">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          书架
+        </button>
+        <span class="beam-title">{{ activeSession.title }}</span>
+        <button @click="resetStory" :disabled="loading" class="beam-btn" style="font-size:11px;padding:4px 10px">重置</button>
       </div>
-
-      <!-- 章节流 -->
-      <div ref="timelineRef" class="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-        <div class="mx-auto max-w-[680px] space-y-5">
-          <div v-if="!chapters.length" class="rounded-2xl border border-dashed border-[#e0d4c4] py-14 text-center text-[13px] text-[#b0a090]">
-            还没有章节，点击下面"开始故事"即可生成第一章
+      <div ref="timelineRef" class="detail-area wood-dark">
+        <div class="detail-inner">
+          <!-- 章节列表 -->
+          <div v-if="!chapters.length" class="empty-chapter">
+            还没有章节，点击下面「开始故事」即可生成第一章
           </div>
-          <div v-for="ch in chapters" :key="ch.id">
-            <div v-if="ch.action && ch.action !== '开始故事'" class="mb-2 flex items-center gap-2">
-              <span class="h-px flex-1 bg-[#e8e0d4]" />
-              <span class="rounded-full border border-[#e0d4c4] bg-[#ede8e0] px-2.5 py-0.5 text-[10px] text-[#8a7a60]">{{ ch.action }}</span>
-              <span class="h-px flex-1 bg-[#e8e0d4]" />
+          <div v-for="ch in chapters" :key="ch.id" class="chapter-card">
+            <div v-if="ch.action && ch.action !== '开始故事'" class="chapter-action">
+              <span class="chapter-action-line"></span>
+              <span class="chapter-action-text">{{ ch.action }}</span>
+              <span class="chapter-action-line"></span>
             </div>
-            <article class="rounded-2xl border border-[#e8dcc8] bg-[#fffaf2] px-5 py-4">
-              <div class="mb-2.5 flex items-center justify-between text-[10px] text-[#b0a080]">
-                <span class="font-bold tracking-wider">第 {{ ch.idx }} 章</span>
-                <span>{{ ch.progress }}</span>
+            <div class="chapter-body">
+              <div class="chapter-head">
+                <span class="chapter-idx">第 {{ ch.idx }} 章</span>
+                <span class="chapter-progress">{{ ch.progress }}</span>
               </div>
-              <p class="whitespace-pre-wrap text-[14px] leading-[1.9] text-[#3a2e1e]">{{ ch.content }}</p>
-            </article>
+              <p class="chapter-text">{{ ch.content }}</p>
+            </div>
           </div>
-          <div v-if="loading" class="flex items-center gap-3 py-4 text-[12px] text-[#b0a080]">
-            <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#e8e0d4] border-t-[#c8a060]" />
+
+          <div v-if="loading" class="loading-hint">
+            <div class="loading-spinner"></div>
             Agent 正在推进剧情...
           </div>
         </div>
       </div>
 
-      <!-- 底部操作区 -->
-      <div class="shrink-0 border-t border-[#e0d4c4] bg-[#fffdf8] px-5 py-4">
-        <div class="mx-auto max-w-[680px]">
-          <div v-if="error" class="mb-3 rounded-xl border border-[#e8c0b0] bg-[#fdf5f0] px-3 py-2 text-[11px] text-[#c06040]">{{ error }}</div>
-          <div v-if="currentChoices.length" class="mb-3 grid grid-cols-3 gap-2">
+      <!-- 底部操作 -->
+      <div class="detail-action">
+        <div class="detail-action-inner">
+          <div v-if="error" class="error-bar">{{ error }}</div>
+          <div v-if="currentChoices.length" class="choices-row">
             <button
               v-for="(c, i) in currentChoices" :key="`${i}-${c}`"
               @click="runGenerate(c)" :disabled="loading"
-              class="rounded-xl border border-[#d4c0a0] bg-[#f5ead8] px-3 py-2.5 text-left text-[12px] leading-snug text-[#5a4a38] transition hover:border-[#c8a060] hover:bg-[#ece0c8] disabled:opacity-40"
+              class="choice-btn"
             >{{ c }}</button>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="input-row">
             <input
               v-model="customAction"
-              placeholder="自定义行动，或直接开始故事..."
+              :placeholder="chapters.length ? '自定义行动...' : '描述开场，或直接开始...'"
               @keyup.enter="chapters.length ? runCustom() : runGenerate('开始故事')"
-              class="min-w-0 flex-1 rounded-xl border border-[#e0d4c4] bg-white px-4 py-2.5 text-[13px] outline-none transition placeholder:text-[#c0b098] focus:border-[#c8a060]"
+              class="action-input"
             />
             <button
               @click="chapters.length ? runCustom() : runGenerate('开始故事')"
-              :disabled="loading"
-              class="shrink-0 rounded-xl bg-[#5a3e28] px-5 py-2.5 text-[13px] font-semibold text-[#f5efe8] transition hover:bg-[#6a4e38] disabled:opacity-40"
+              :disabled="loading" class="action-go"
             >{{ loading ? '生成中...' : (chapters.length ? '行动' : '开始故事') }}</button>
           </div>
         </div>
       </div>
     </template>
+
+    <!-- ========== 创建页 ========== -->
+    <template v-if="view === 'create'">
+      <div class="beam">
+        <button class="beam-back" @click="view = 'list'">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          书架
+        </button>
+        <span></span>
+      </div>
+      <div class="create-area wood-dark">
+        <div class="create-card">
+          <div class="create-title">新建故事</div>
+          <div class="create-field">
+            <div class="create-label">故事标题</div>
+            <input v-model="newTitle" class="create-input" placeholder="给你的故事起个名字" />
+          </div>
+          <div class="create-field">
+            <div class="create-label">世界观设定（可选）</div>
+            <textarea v-model="newPremise" class="create-input create-textarea" placeholder="描述故事的背景、时代、主角特征..."></textarea>
+          </div>
+          <button @click="createStory" :disabled="creating" class="create-submit">
+            {{ creating ? '创建中...' : '开始创作' }}
+          </button>
+        </div>
+      </div>
+    </template>
+
   </div>
 </template>
 
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-const SPINE_COLORS = [
-  { bg: 'linear-gradient(to right, #6b2323, #8b3a3a, #7a2a2a)', text: '#f5dcc8', accent: '#e8a878' },
-  { bg: 'linear-gradient(to right, #1c3f6e, #2c5f8a, #1e4878)', text: '#d8eaf8', accent: '#88b8e8' },
-  { bg: 'linear-gradient(to right, #1e4d30, #2d6a4f, #224038)', text: '#d0f0e0', accent: '#78c898' },
-  { bg: 'linear-gradient(to right, #5a3010, #7a4820, #623818)', text: '#f5e0c8', accent: '#d89858' },
-  { bg: 'linear-gradient(to right, #3d2060, #5a3a7a, #442868)', text: '#e8d8f8', accent: '#b890e8' },
-  { bg: 'linear-gradient(to right, #7a3010, #b85c2a, #8a3818)', text: '#f8e8d8', accent: '#e8a878' },
-  { bg: 'linear-gradient(to right, #283858, #3a4a6a, #2e4060)', text: '#d8e8f8', accent: '#8898c8' },
-  { bg: 'linear-gradient(to right, #1a4848, #2a6868, #1e5050)', text: '#d0f0f0', accent: '#78c8c8' },
-];
-const bookColor = (i) => SPINE_COLORS[i % SPINE_COLORS.length];
-const bookHeight = (i) => 148 + (i % 4) * 18;
-
+const BOOKS_PER_SHELF = 4;
 const API_BASE = '/apps/story';
 
+const view = ref('list');
 const sessions = ref([]);
 const activeSession = ref(null);
 const chapters = ref([]);
 const error = ref('');
 const creating = ref(false);
 const loading = ref(false);
-const showCreate = ref(false);
 const newTitle = ref('');
 const newPremise = ref('');
 const customAction = ref('');
 const timelineRef = ref(null);
+
+const shelfTiers = computed(() => {
+  const tiers = [];
+  for (let i = 0; i < sessions.value.length; i += BOOKS_PER_SHELF) {
+    tiers.push(sessions.value.slice(i, i + BOOKS_PER_SHELF));
+  }
+  if (!tiers.length) tiers.push([]);
+  return tiers;
+});
 
 const currentChoices = computed(() => {
   for (let i = chapters.value.length - 1; i >= 0; i--) {
@@ -181,7 +191,14 @@ const selectSession = async (id) => {
   activeSession.value = data.session;
   chapters.value = data.chapters || [];
   error.value = '';
+  view.value = 'detail';
   await scrollToBottom();
+};
+
+const backToList = async () => {
+  view.value = 'list';
+  activeSession.value = null;
+  await loadSessions();
 };
 
 const createStory = async () => {
@@ -195,7 +212,6 @@ const createStory = async () => {
     });
     newTitle.value = '';
     newPremise.value = '';
-    showCreate.value = false;
     await loadSessions();
     await selectSession(data.session.id);
   } catch (e) {
@@ -216,7 +232,6 @@ const runGenerate = async (action) => {
       body: JSON.stringify({ sessionId: activeSession.value.id, action })
     });
     await selectSession(activeSession.value.id);
-    await loadSessions();
   } catch (e) {
     error.value = e.message || '生成失败';
   } finally {
@@ -243,7 +258,6 @@ const resetStory = async () => {
       body: JSON.stringify({ sessionId: activeSession.value.id })
     });
     await selectSession(activeSession.value.id);
-    await loadSessions();
   } catch (e) {
     error.value = e.message || '重置失败';
   } finally {
@@ -254,7 +268,6 @@ const resetStory = async () => {
 onMounted(async () => {
   try {
     await loadSessions();
-    if (sessions.value.length > 0) await selectSession(sessions.value[0].id);
   } catch (e) {
     error.value = e.message || '初始化失败';
   }
@@ -262,161 +275,512 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ===== 书房背景 ===== */
-.shelf-room {
-  background:
-    radial-gradient(ellipse at top, #2a1a0a 0%, #1a0e05 60%, #0e0805 100%);
-  position: relative;
+/* ======================================================
+   根容器
+   ====================================================== */
+.story-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: 'PingFang SC', -apple-system, serif;
+  background: #e8ddd0;
+  color: #3a2e20;
 }
-.shelf-room::before {
+
+/* ======================================================
+   木纹工具类
+   ====================================================== */
+.wood-dark {
+  background-color: #d8c8ae;
+  background-image:
+    repeating-linear-gradient(92deg, transparent 0px, transparent 18px, rgba(160,120,60,.06) 18px, rgba(160,120,60,.06) 20px, transparent 20px, transparent 46px, rgba(120,80,30,.04) 46px, rgba(120,80,30,.04) 48px),
+    repeating-linear-gradient(88deg, transparent 0px, transparent 5px, rgba(160,120,60,.04) 5px, rgba(160,120,60,.04) 6px, transparent 6px, transparent 12px),
+    repeating-linear-gradient(180deg, rgba(160,120,60,.02) 0px, rgba(160,120,60,.02) 1px, transparent 1px, transparent 40px);
+}
+.wood-plank {
+  background-color: #b89868;
+  background-image:
+    linear-gradient(180deg, rgba(255,240,200,.2) 0%, transparent 25%, rgba(0,0,0,.08) 80%, rgba(255,220,160,.1) 100%),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 32px, rgba(0,0,0,.05) 32px, rgba(0,0,0,.05) 33px, transparent 33px, transparent 68px);
+}
+
+/* ======================================================
+   顶梁
+   ====================================================== */
+.beam {
+  flex-shrink: 0;
+  height: 50px;
+  background-color: #b89060;
+  background-image:
+    linear-gradient(180deg, rgba(255,240,200,.18) 0%, transparent 40%, rgba(0,0,0,.1) 100%),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 24px, rgba(0,0,0,.05) 24px, rgba(0,0,0,.05) 26px, transparent 26px, transparent 58px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 7px, rgba(0,0,0,.03) 7px, rgba(0,0,0,.03) 8px);
+  box-shadow: 0 3px 0 #8a6438, 0 4px 0 #a07848, 0 6px 16px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: relative;
+  z-index: 20;
+}
+.beam::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 80px,
-      rgba(255,220,160,0.03) 80px,
-      rgba(255,220,160,0.03) 81px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 120px,
-      rgba(255,220,160,0.02) 120px,
-      rgba(255,220,160,0.02) 121px
-    );
-  pointer-events: none;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(180deg, rgba(255,240,200,.1), transparent);
 }
-
-/* ===== 书架行 ===== */
-.shelf-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  padding: 0 4px;
-  flex-wrap: wrap;
+.beam-t {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff8ee;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+  letter-spacing: .06em;
+  font-family: serif;
 }
-
-/* ===== 书脊 ===== */
-.book-spine {
-  position: relative;
-  width: 42px;
-  border-radius: 2px 4px 4px 2px;
+.beam-btn {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff8ee;
   cursor: pointer;
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
-  box-shadow:
-    inset -3px 0 6px rgba(0,0,0,0.4),
-    inset 2px 0 4px rgba(255,255,255,0.08),
-    2px 4px 12px rgba(0,0,0,0.6),
-    1px 0 0 rgba(0,0,0,0.5);
-  flex-shrink: 0;
+  transition: background .15s;
+}
+.beam-btn:hover { background: rgba(255,255,255,.25); }
+.beam-btn:disabled { opacity: .4; cursor: default; }
+.beam-back {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: rgba(255,255,255,.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+}
+.beam-back:hover { color: #fff; }
+.beam-back svg { width: 14px; height: 14px; fill: currentColor; }
+.beam-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff8ee;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+  font-family: serif;
+  max-width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ======================================================
+   书架区
+   ====================================================== */
+.shelf-area { flex: 1; overflow-y: auto; }
+.shelf-tier { position: relative; }
+.book-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px 10px;
+  padding: 32px 20px 18px;
+  position: relative;
+  z-index: 2;
+}
+.plank {
+  height: 22px;
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 3px 0 #8a6030, 0 4px 0 #a07840, 0 6px 14px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,240,200,.15);
+}
+.plank-shadow {
+  height: 18px;
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(0,0,0,.08) 0%, transparent 70%);
+  z-index: 1;
+  position: relative;
+}
+
+.empty-hint {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #9a8060;
+}
+
+/* ======================================================
+   书本封面
+   ====================================================== */
+.book {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 0 8px;
-  overflow: hidden;
+  gap: 6px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  color: inherit;
 }
-.book-spine::before {
+.book-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 2px 6px 6px 2px;
+  position: relative;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px 9px 9px;
+  box-shadow: -2px 1px 0 rgba(0,0,0,.15), -4px 2px 0 rgba(0,0,0,.06), 2px 4px 12px rgba(0,0,0,.12);
+}
+.book:hover .book-cover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: -2px 1px 0 rgba(0,0,0,.15), -5px 3px 0 rgba(0,0,0,.06), 4px 14px 20px rgba(0,0,0,.16);
+}
+.book-cover::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 5px;
-  background: rgba(0,0,0,0.35);
+  left: 0; top: 0; bottom: 0;
+  width: 7px;
+  background: linear-gradient(90deg, rgba(0,0,0,.2), rgba(0,0,0,.06) 50%, rgba(255,255,255,.08));
   border-radius: 2px 0 0 2px;
 }
-.book-spine::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: rgba(255,255,255,0.07);
-}
-.book-spine:hover {
-  transform: translateY(-14px) scale(1.04);
-  box-shadow:
-    inset -3px 0 6px rgba(0,0,0,0.4),
-    inset 2px 0 4px rgba(255,255,255,0.1),
-    4px 18px 24px rgba(0,0,0,0.7),
-    1px 0 0 rgba(0,0,0,0.5);
-  z-index: 10;
-}
-
-/* ===== 书名标签（竖排） ===== */
-.book-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  color: var(--text-color, #f0e0c8);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  max-height: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 0 2px;
-}
-
-/* ===== 章节数标记 ===== */
-.book-meta {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  color: var(--accent-color, #d8a878);
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  opacity: 0.85;
-  flex-shrink: 0;
-}
-
-/* ===== 木板 ===== */
-.shelf-board {
-  height: 18px;
-  margin: 0 -4px;
-  background: linear-gradient(
-    to bottom,
-    #c89040 0%,
-    #a06820 30%,
-    #7a4e10 60%,
-    #906030 80%,
-    #c89040 100%
-  );
-  border-radius: 0 0 3px 3px;
-  box-shadow:
-    0 3px 0 #5a3008,
-    0 6px 16px rgba(0,0,0,0.5);
-  position: relative;
-  z-index: 1;
-}
-.shelf-board::before {
+.book-cover::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 40px,
-    rgba(0,0,0,0.08) 40px,
-    rgba(0,0,0,0.08) 41px
-  );
+  background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 45%, rgba(0,0,0,.1) 100%);
+  pointer-events: none;
+  border-radius: 2px 6px 6px 2px;
 }
 
-/* ===== 木板阴影 ===== */
-.shelf-shadow {
-  height: 20px;
-  margin: 0 8px;
-  background: radial-gradient(ellipse at top, rgba(0,0,0,0.45) 0%, transparent 70%);
-  position: relative;
-  z-index: 0;
+/* 封面线框装饰 */
+.cover-frame {
+  position: absolute;
+  inset: 8px 7px 8px 12px;
+  border: 1px solid rgba(255,220,160,.15);
+  border-radius: 2px;
+  pointer-events: none;
 }
+.cover-frame::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(255,220,160,.08);
+  border-radius: 1px;
+}
+
+.cv-body { position: relative; z-index: 1; }
+.cv-title {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  font-family: serif;
+  text-align: left;
+}
+.cv-line {
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  opacity: .35;
+  margin: 4px 0 3px;
+}
+.cv-sub {
+  font-size: 9px;
+  opacity: .55;
+  letter-spacing: .06em;
+}
+.book-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6a5838;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* 新建按钮 */
+.book-add .book-cover {
+  background: rgba(0,0,0,.02) !important;
+  border: 2px dashed rgba(0,0,0,.1);
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.book-add .book-cover::before,
+.book-add .book-cover::after,
+.book-add .cover-frame { display: none; }
+.book-add:hover .book-cover {
+  border-color: rgba(0,0,0,.2);
+  background: rgba(0,0,0,.04) !important;
+  transform: none;
+  box-shadow: none;
+}
+.add-icon { font-size: 28px; color: rgba(0,0,0,.15); }
+
+/* 封面配色 */
+.c0 { background: linear-gradient(160deg, #d4564c, #e87870 50%, #c84840); color: #fff8f4; }
+.c1 { background: linear-gradient(160deg, #4878b8, #6098d8 50%, #4070b0); color: #f0f6ff; }
+.c2 { background: linear-gradient(160deg, #48906a, #60b088 50%, #408060); color: #f0fff6; }
+.c3 { background: linear-gradient(160deg, #b88840, #d0a858 50%, #a87830); color: #fffaf0; }
+.c4 { background: linear-gradient(160deg, #8060b8, #9878d0 50%, #7050a8); color: #f6f0ff; }
+.c5 { background: linear-gradient(160deg, #d87848, #e89868 50%, #c86838); color: #fff6f0; }
+.c6 { background: linear-gradient(160deg, #5080a0, #6898b8 50%, #487898); color: #f0f8ff; }
+.c7 { background: linear-gradient(160deg, #408888, #58a8a8 50%, #387878); color: #f0ffff; }
+.c8 { background: linear-gradient(160deg, #c86088, #d878a0 50%, #b85078); color: #fff0f6; }
+
+/* ======================================================
+   详情页
+   ====================================================== */
+.detail-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 140px;
+}
+.detail-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+/* 章节 */
+.empty-chapter {
+  border: 1px dashed rgba(0,0,0,.1);
+  border-radius: 12px;
+  padding: 48px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #9a8060;
+}
+.chapter-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.chapter-action-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.08), transparent);
+}
+.chapter-action-text {
+  font-size: 10px;
+  color: #8a7050;
+  white-space: nowrap;
+  padding: 2px 10px;
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 20px;
+  background: rgba(255,255,255,.3);
+}
+.chapter-body {
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgba(0,0,0,.04);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.chapter-body:hover { background: rgba(255,255,255,.65); }
+.chapter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.chapter-idx {
+  font-size: 10px;
+  font-weight: 700;
+  color: #b08040;
+  letter-spacing: .08em;
+}
+.chapter-progress {
+  font-size: 10px;
+  color: #a09070;
+}
+.chapter-text {
+  font-size: 13px;
+  color: #4a3a28;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.loading-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0;
+  font-size: 12px;
+  color: #9a8060;
+}
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,.08);
+  border-top-color: #b08040;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 底部操作 */
+.detail-action {
+  flex-shrink: 0;
+  padding: 12px 20px 16px;
+  position: relative;
+  background: #c8b898;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+.detail-action-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.error-bar {
+  font-size: 11px;
+  color: #e07050;
+  padding: 6px 12px;
+  background: rgba(200,60,40,.08);
+  border: 1px solid rgba(200,60,40,.12);
+  border-radius: 8px;
+}
+.choices-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.choice-btn {
+  background: rgba(255,255,255,.4);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 8px;
+  padding: 8px 6px;
+  font-size: 11px;
+  color: #5a4828;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.4;
+  transition: background .15s, border-color .15s;
+  font-family: inherit;
+}
+.choice-btn:hover {
+  background: rgba(255,255,255,.6);
+  border-color: rgba(0,0,0,.1);
+}
+.choice-btn:disabled { opacity: .4; cursor: default; }
+.input-row { display: flex; gap: 8px; }
+.action-input {
+  flex: 1;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #3a2a18;
+  outline: none;
+  font-family: inherit;
+}
+.action-input::placeholder { color: rgba(0,0,0,.25); }
+.action-input:focus { border-color: rgba(160,120,60,.4); }
+.action-go {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #b08040, #8a5c28);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff8ee;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: transform .12s;
+  font-family: inherit;
+}
+.action-go:hover { transform: scale(1.03); }
+.action-go:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* ======================================================
+   创建页
+   ====================================================== */
+.create-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 20px 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.create-card {
+  width: 100%;
+  max-width: 460px;
+  background: rgba(255,255,255,.45);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+.create-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #3a2a18;
+  margin-bottom: 20px;
+  font-family: serif;
+}
+.create-field { margin-bottom: 16px; }
+.create-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a8060;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+.create-input {
+  width: 100%;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #3a2a18;
+  outline: none;
+  font-family: inherit;
+}
+.create-input:focus { border-color: rgba(160,120,60,.35); }
+.create-input::placeholder { color: rgba(0,0,0,.22); }
+.create-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+.create-submit {
+  width: 100%;
+  background: linear-gradient(135deg, #b08040, #8a5c28);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff8ee;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  margin-top: 4px;
+  transition: transform .12s;
+  font-family: inherit;
+}
+.create-submit:hover { transform: scale(1.02); }
+.create-submit:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.08); border-radius: 3px; }
 </style>

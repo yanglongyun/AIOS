@@ -30,4 +30,5 @@ export const initInboxDatabase = () => {
   if (!cols.find(c => c.name === 'reply_suggestion')) {
     db.exec("ALTER TABLE inbox_messages ADD COLUMN reply_suggestion TEXT DEFAULT ''");
   }
+
 };

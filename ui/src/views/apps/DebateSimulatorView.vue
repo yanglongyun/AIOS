@@ -172,8 +172,27 @@
 
       <!-- 输入区域 -->
       <div class="shrink-0 border-t border-[#e0ddd6] bg-white px-5 pb-3.5 pt-2.5">
+        <div v-if="isMyTurn && suggestions.length" class="mb-2 flex flex-wrap gap-2">
+          <button
+            v-for="(tip, idx) in suggestions"
+            :key="`${idx}-${tip.title}`"
+            @click="applySuggestion(tip)"
+            class="rounded-full border border-[#d7cfbe] bg-[#f8f7f4] px-3 py-1 text-xs text-[#5b6880] transition-colors hover:border-[#c9b06b] hover:text-[#1c2841]"
+          >
+            {{ tip.title }}
+          </button>
+        </div>
+
         <!-- 输入状态 -->
         <div v-if="isMyTurn" class="flex items-end gap-2 rounded-xl border border-[#e0ddd6] bg-[#f8f7f4] py-1 pl-3.5 pr-1">
+          <button
+            @click="generateSuggestions"
+            :disabled="generatingSuggestions"
+            class="mb-1 shrink-0 rounded-full border border-[#d7cfbe] bg-white px-3 py-1 text-xs text-[#5b6880] transition-colors hover:border-[#c9b06b] hover:text-[#1c2841] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ generatingSuggestions ? '生成中...' : '建议' }}
+          </button>
+
           <textarea
             ref="messageInput"
             v-model="newMessage"
@@ -292,6 +311,8 @@ const debateEnded = ref(false);
 const won = ref(false);
 const showResults = ref(false);
 const newMessage = ref('');
+const suggestions = ref([]);
+const generatingSuggestions = ref(false);
 const victorySpeech = ref('');
 const failureReason = ref('');
 const chatContainer = ref(null);
@@ -406,7 +427,10 @@ const startDebateLoop = async () => {
     try {
       const data = await request(`${API_BASE}/debate`, { topicInfo });
       if (data.action === 'candidate') {
+        suggestions.value = [];
         isMyTurn.value = true;
+        await nextTick();
+        messageInput.value?.focus();
         break;
       } else if (data.action === 'opponent') {
         addMessage('opponent', opponentName.value, data.content);
@@ -431,6 +455,7 @@ const startDebateLoop = async () => {
 const speak = async () => {
   if (!newMessage.value.trim()) return;
   isMyTurn.value = false;
+  suggestions.value = [];
   const message = newMessage.value.trim();
   addMessage('candidate', candidateName.value, message);
   await saveMessage('candidate', candidateName.value, '', message);
@@ -551,6 +576,44 @@ const autoResize = async () => {
   el.style.height = `${el.scrollHeight}px`;
 };
 
+const normalizeSuggestionItems = (list = []) => {
+  const out = [];
+  for (const item of Array.isArray(list) ? list : []) {
+    if (item && typeof item === 'object') {
+      const title = String(item.title || '').trim();
+      const content = String(item.content || '').trim();
+      if (title && content) out.push({ title, content });
+    } else {
+      const text = String(item || '').trim();
+      if (text) out.push({ title: `建议 ${out.length + 1}`, content: text });
+    }
+    if (out.length >= 3) break;
+  }
+  return out;
+};
+
+const generateSuggestions = async () => {
+  if (generatingSuggestions.value) return;
+  generatingSuggestions.value = true;
+  try {
+    const data = await request(`${API_BASE}/suggest`, {
+      topicInfo: getTopicInfo(),
+      draft: newMessage.value
+    });
+    suggestions.value = normalizeSuggestionItems(data?.suggestions);
+  } catch (error) {
+    console.error('生成建议失败:', error);
+  } finally {
+    generatingSuggestions.value = false;
+  }
+};
+
+const applySuggestion = async (tip) => {
+  newMessage.value = String(tip?.content || '').trim();
+  await autoResize();
+  messageInput.value?.focus();
+};
+
 const scrollToBottom = async () => {
   await nextTick();
   if (chatContainer.value) chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
@@ -576,6 +639,8 @@ const resetGame = () => {
   won.value = false;
   showResults.value = false;
   newMessage.value = '';
+  suggestions.value = [];
+  generatingSuggestions.value = false;
   victorySpeech.value = '';
   failureReason.value = '';
   candidateName.value = '';

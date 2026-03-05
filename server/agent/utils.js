@@ -51,5 +51,11 @@ export const normalizeAgentMessages = (messages = []) => {
     out.push(normalized);
   }
 
+  let firstNonSystem = out.findIndex((m) => m.role !== 'system');
+  while (firstNonSystem >= 0 && out[firstNonSystem]?.role === 'tool') {
+    out.splice(firstNonSystem, 1);
+    firstNonSystem = out.findIndex((m) => m.role !== 'system');
+  }
+
   return out;
 };

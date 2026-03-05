@@ -35,13 +35,6 @@ export const appRegistry = [
     dbInit: ['initPlaygroundDatabase']
   },
   {
-    name: 'nokia',
-    match: (path) => path.startsWith('/apps/nokia/'),
-    load: () => import('./nokia/index.js'),
-    apiHandler: 'handleNokiaApi',
-    dbInit: ['initNokiaDatabase']
-  },
-  {
     name: 'debate',
     match: (path) => path.startsWith('/apps/debate/'),
     load: () => import('./debate/index.js'),
@@ -104,5 +97,12 @@ export const appRegistry = [
     load: () => import('./poker/index.js'),
     apiHandler: 'handlePokerApi',
     dbInit: ['initPokerDatabase']
+  },
+  {
+    name: 'nokia',
+    match: (path) => path.startsWith('/apps/nokia/'),
+    load: () => import('./nokia/index.js'),
+    apiHandler: 'handleNokiaApi',
+    dbInit: ['initNokiaDatabase']
   }
 ];

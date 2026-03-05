@@ -1,4 +1,6 @@
-import { db } from '../db.js';
+import { db, getPokerEconomy, setPokerBalances } from '../db.js';
+import { callLlmChat } from '../../app_shared/chatLlm.js';
+import { parseJsonObject } from '../../app_shared/utils/parseJsonObject.js';
 
 const RANK_VALUE = { '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14 };
 
@@ -30,7 +32,7 @@ const compareHands = (a, b) => {
   return 0;
 };
 
-export const actionHandler = (body = {}) => {
+export const actionHandler = async (body = {}, req) => {
   const id = Number(body.id || 0);
   const action = String(body.action || '');
   if (!id) return { status: 400, message: '缺少 id' };
@@ -41,24 +43,51 @@ export const actionHandler = (body = {}) => {
 
   const playerCards = JSON.parse(row.player_cards);
   const aiCards = JSON.parse(row.ai_cards);
+  let actionHistory = [];
+  try {
+    actionHistory = JSON.parse(row.action_history || '[]');
+    if (!Array.isArray(actionHistory)) actionHistory = [];
+  } catch {
+    actionHistory = [];
+  }
   let playerChips = row.player_chips;
   let aiChips = row.ai_chips;
   let pot = row.pot;
   let round = row.round;
   let status = 'playing';
   let winner = '';
+  let aiAction = '';
+  let aiBet = 0;
+  let aiSpeech = '';
+  let aiExpression = '';
+  let aiThinking = '';
 
   if (action === 'fold') {
+    actionHistory.push({ actor: 'player', action: 'fold', text: '玩家弃牌' });
     status = 'done';
     winner = 'ai';
     aiChips += pot;
     pot = 0;
   } else if (action === 'compare') {
+    actionHistory.push({ actor: 'player', action: 'compare', text: '玩家发起比牌' });
     status = 'done';
     const cmp = compareHands(playerCards, aiCards);
     if (cmp > 0) { winner = 'player'; playerChips += pot; }
     else if (cmp < 0) { winner = 'ai'; aiChips += pot; }
     else { winner = 'draw'; playerChips += Math.floor(pot / 2); aiChips += pot - Math.floor(pot / 2); }
+    const compareLine = await aiSpeakOnCompareByLlm({
+      req,
+      actionHistory,
+      winner,
+      round,
+      potBeforeOpen: pot,
+      aiCards
+    });
+    if (compareLine?.status) return compareLine;
+    aiSpeech = compareLine.speech || '';
+    aiExpression = compareLine.expression || '';
+    aiThinking = compareLine.thinking || '';
+    actionHistory.push({ actor: 'ai', action: 'talk', text: [aiSpeech, aiExpression].filter(Boolean).join(' ') });
     pot = 0;
   } else if (action === 'bet') {
     const betAmount = Math.min(Number(body.amount || 20), playerChips);
@@ -66,25 +95,55 @@ export const actionHandler = (body = {}) => {
     playerChips -= betAmount;
     pot += betAmount;
     round++;
+    actionHistory.push({ actor: 'player', action: 'bet', amount: betAmount, text: `玩家下注 ${betAmount}` });
 
-    const aiAction = aiDecide(aiCards, round, aiChips, pot);
+    const aiDecision = await aiDecideByLlm({
+      req,
+      aiCards,
+      round,
+      aiChips,
+      playerChips,
+      pot,
+      playerBet: betAmount
+    });
+    if (aiDecision?.status) return aiDecision;
+    aiAction = aiDecision.action;
+    aiSpeech = aiDecision.speech || '';
+    aiExpression = aiDecision.expression || '';
+    aiThinking = aiDecision.thinking || '';
+
     if (aiAction === 'fold') {
+      actionHistory.push({
+        actor: 'ai',
+        action: 'fold',
+        text: [aiSpeech || '不玩了', aiExpression || '（把牌扣在桌上）'].filter(Boolean).join(' ')
+      });
       status = 'done';
       winner = 'player';
       playerChips += pot;
       pot = 0;
     } else {
-      const aiBet = Math.min(betAmount, aiChips);
+      aiBet = Math.min(betAmount, aiChips);
       aiChips -= aiBet;
       pot += aiBet;
+      actionHistory.push({
+        actor: 'ai',
+        action: 'call',
+        amount: aiBet,
+        text: [aiSpeech || `跟注 ${aiBet}`, aiExpression].filter(Boolean).join(' ')
+      });
     }
   } else {
     return { status: 400, message: '无效操作' };
   }
 
   db.prepare(`
-    UPDATE apps_poker_games SET player_chips=?, ai_chips=?, pot=?, round=?, status=?, winner=? WHERE id=?
-  `).run(playerChips, aiChips, pot, round, status, winner, id);
+    UPDATE apps_poker_games
+    SET player_chips=?, ai_chips=?, pot=?, round=?, status=?, winner=?, action_history=?
+    WHERE id=?
+  `).run(playerChips, aiChips, pot, round, status, winner, JSON.stringify(actionHistory), id);
+  setPokerBalances({ playerBalance: playerChips, aiBalance: aiChips });
+  const economy = getPokerEconomy();
 
   return {
     success: true,
@@ -93,14 +152,110 @@ export const actionHandler = (body = {}) => {
       playerCards,
       aiCards: status === 'done' ? aiCards : [null, null, null],
       playerChips, aiChips, pot, round, status, winner
-    }
+    },
+    meta: {
+      playerAction: action,
+      aiAction: action === 'bet' ? aiAction : '',
+      aiBet,
+      aiSpeech,
+      aiExpression,
+      aiThinking
+    },
+    economy
   };
 };
 
-const aiDecide = (cards, round, chips, pot) => {
-  const hr = handRank(cards);
-  if (hr.type >= 4) return 'call';
-  if (hr.type >= 2) return 'call';
-  if (round > 5 && hr.type <= 1) return Math.random() < 0.4 ? 'fold' : 'call';
-  return 'call';
+const aiDecideByLlm = async ({ req, aiCards, round, aiChips, playerChips, pot, playerBet }) => {
+  const systemPrompt = `你是一个有鲜明人设的炸金花玩家。你只返回JSON，不要返回其它内容。
+你必须在 call / fold 中二选一。
+要求：
+1. speech 是对外说的话（短句，接地气，带压迫感或迷惑性）
+2. expression 是表情/动作（例如："(眯眼敲桌)"）
+3. thinking 是内心独白（理性分析，不对外展示）
+返回格式：
+{"action":"call","speech":"...", "expression":"(...)", "thinking":"..."}`;
+
+  const userPrompt = `牌局状态：
+- 回合: ${round}
+- 你的筹码: ${aiChips}
+- 对手筹码: ${playerChips}
+- 当前底池: ${pot}
+- 对手本轮下注: ${playerBet}
+- 你的手牌: ${JSON.stringify(aiCards)}
+
+请根据胜率与风险做决策，注意外在话术与内心分析要区分。仅返回JSON。`;
+
+  const llm = await callLlmChat(req, {
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ]
+  });
+  if (!llm.ok) return { status: llm.status || 503, message: llm.message || 'LLM 决策失败' };
+
+  const raw = String(llm.data?.message?.content || '').trim();
+  let parsed;
+  try {
+    parsed = parseJsonObject(raw);
+  } catch {
+    return { status: 502, message: 'LLM 决策解析失败' };
+  }
+
+  const action = String(parsed?.action || '').toLowerCase();
+  if (action !== 'call' && action !== 'fold') {
+    return { status: 502, message: 'LLM 决策无效' };
+  }
+
+  return {
+    action,
+    speech: String(parsed?.speech || parsed?.action || '').trim(),
+    expression: String(parsed?.expression || '').trim(),
+    thinking: String(parsed?.thinking || parsed?.reason || parsed?.thought || '').trim()
+  };
+};
+
+const aiSpeakOnCompareByLlm = async ({ req, actionHistory, winner, round, potBeforeOpen, aiCards }) => {
+  const systemPrompt = `你是炸金花里的AI对手。现在进入比牌结算，请生成“外在表现 + 内心想法”。
+要求：
+1. 只返回 JSON，不要其它内容
+2. speech 句子长度 12-30 个中文字符
+3. expression 是一个动作或表情，放在括号里
+4. thinking 是简短内心判断（10-30字）
+5. 语气像真人，避免模板化
+返回格式：
+{"speech":"...", "expression":"(...)", "thinking":"..."}
+`;
+
+  const resultText = winner === 'ai' ? '你（AI）赢了，你赢得了底池' : winner === 'player' ? '你（AI）输了，对手赢得了底池' : '平局，双方平分底池';
+  const userPrompt = `对局信息：
+- 回合：${round}
+- 比牌前底池：${potBeforeOpen}
+- 比牌结果：${resultText}
+- AI手牌：${JSON.stringify(aiCards)}
+- 押注记录：${JSON.stringify(actionHistory)}
+请根据比牌结果给一条结算时的真人感台词。赢了就得意，输了就不甘，平局就感慨。`;
+
+  const llm = await callLlmChat(req, {
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ]
+  });
+  if (!llm.ok) return { status: llm.status || 503, message: llm.message || 'LLM 台词生成失败' };
+
+  const raw = String(llm.data?.message?.content || '').trim();
+  let parsed;
+  try {
+    parsed = parseJsonObject(raw);
+  } catch {
+    return { status: 502, message: 'LLM 台词解析失败' };
+  }
+
+  const speech = String(parsed?.speech || parsed?.line || '').trim();
+  const expression = String(parsed?.expression || '').trim();
+  const thinking = String(parsed?.thinking || '').trim();
+  if (!speech) return { status: 502, message: 'LLM 台词为空' };
+  return { speech, expression, thinking };
 };

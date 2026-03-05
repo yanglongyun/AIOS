@@ -21,7 +21,9 @@ export const initFortuneDatabase = () => {
       good TEXT NOT NULL DEFAULT '',
       bad TEXT NOT NULL DEFAULT '',
       advice TEXT NOT NULL DEFAULT '',
+      hexagram TEXT NOT NULL DEFAULT '',
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
+  try { db.exec(`ALTER TABLE apps_fortune_records ADD COLUMN hexagram TEXT NOT NULL DEFAULT ''`); } catch(e) {}
 };

@@ -7,7 +7,7 @@ export const listHandler = (query = {}) => {
 
   const total = db.prepare('SELECT COUNT(*) AS c FROM apps_fortune_records').get().c;
   const items = db.prepare(`
-    SELECT id, question, sign_name AS signName, sign_poem AS signPoem, good, bad, advice, created_at AS createdAt
+    SELECT id, question, sign_name AS signName, sign_poem AS signPoem, good, bad, advice, hexagram, created_at AS createdAt
     FROM apps_fortune_records ORDER BY id DESC LIMIT ? OFFSET ?
   `).all(pageSize, offset);
 

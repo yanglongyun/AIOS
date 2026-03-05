@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db, getPokerEconomy } from '../db.js';
 
 export const stateHandler = (query = {}) => {
   const id = Number(query.id || 0);
@@ -22,6 +22,7 @@ export const stateHandler = (query = {}) => {
       round: row.round,
       status: row.status,
       winner: row.winner
-    }
+    },
+    economy: getPokerEconomy()
   };
 };

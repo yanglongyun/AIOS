@@ -1,6 +1,6 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
-import { initPokerDatabase } from './db.js';
+import { initPokerDatabase, grantDailyAllowanceIfNeeded, getPokerEconomy } from './db.js';
 import { startHandler } from './api/start.js';
 import { actionHandler } from './api/action.js';
 import { stateHandler } from './api/state.js';
@@ -9,13 +9,21 @@ import { listHandler } from './api/list.js';
 export { initPokerDatabase };
 
 export const handlePokerApi = async (req, res, path) => {
+  if (path === '/apps/poker/status' && req.method === 'GET') {
+    const grant = grantDailyAllowanceIfNeeded();
+    const economy = getPokerEconomy();
+    return json(res, { success: true, economy, grant });
+  }
+
   if (path === '/apps/poker/start' && req.method === 'POST') {
-    return json(res, startHandler());
+    const data = startHandler();
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
   }
 
   if (path === '/apps/poker/action' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = actionHandler(body);
+    const data = await actionHandler(body, req);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

@@ -90,10 +90,6 @@
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/blackroom'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⬛</span>小黑屋</button>
-          <button @click="go('/nokia')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(is('/nokia'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
           <button @click="go('/poker')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/poker'))"><span
@@ -102,6 +98,10 @@
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/fortune'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>算一卦</button>
+          <button @click="go('/nokia')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(is('/nokia'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
         </div>
         <div v-if="thumbVisible"
           class="pointer-events-none absolute bottom-1 right-0 top-0 w-[3px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">

@@ -71,7 +71,15 @@
             <div>
               <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_provider') }}</label>
               <select v-model="model.provider" class="wiz-input" @change="applyProviderDefault">
-                <option v-for="p in PROVIDERS" :key="p.id" :value="p.id">{{ p.name }}</option>
+                <optgroup label="默认">
+                  <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                </optgroup>
+                <optgroup label="Coding Plan">
+                  <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                </optgroup>
+                <optgroup label="自定义">
+                  <option v-for="p in customProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                </optgroup>
               </select>
             </div>
             <div>
@@ -116,7 +124,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue';
+import { computed, ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { PROVIDERS, getProvider } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
@@ -144,7 +152,11 @@ const model = ref({
   language: detectedLanguage
 });
 
-watch(() => model.value.language, (lang) => setLocale(lang));
+watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
+
+const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding'));
+const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
+const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);

@@ -68,7 +68,7 @@
           暂无消息
         </div>
         <div v-else class="space-y-2">
-          <div v-for="item in messages" :key="item.id" class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] p-3">
+          <div v-for="item in displayMessages" :key="item.id" class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] p-3">
             <div class="mb-1 flex items-center gap-2 text-[11px] text-[#8a7a68]">
               <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5">#{{ item.id }}</span>
               <span>{{ item.message?.role || 'unknown' }}</span>
@@ -101,6 +101,8 @@ const statusClass = computed(() => {
   if (status === 'error' || status === 'aborted') return 'bg-[#fbe7e3] text-[#b04030]';
   return 'bg-[#f4ecd8] text-[#9a7a30]';
 });
+
+const displayMessages = computed(() => [...messages.value].reverse());
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);

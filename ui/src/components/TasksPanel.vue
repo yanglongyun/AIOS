@@ -8,7 +8,7 @@
           class="cursor-pointer rounded bg-[#4a3828] px-2 py-1 text-[10px] text-[#c8a060] transition-colors hover:bg-[#5a4838]"
           @click="createTask"
         >
-          + 创建
+          {{ t('tasks_create') }}
         </button>
       </div>
       <div class="flex-1 overflow-y-auto">
@@ -24,7 +24,7 @@
             {{ r.status === 'done' ? '✓' : r.status === 'error' || r.status === 'aborted' ? '✗' : '◔' }}
           </span>
           <div class="min-w-0 flex-1">
-            <div class="line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ r.title || '未命名任务' }}</div>
+            <div class="line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ r.title || t('tasks_unnamed') }}</div>
             <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#b8a080]">{{ r.response || r.prompt?.slice(0, 80) }}</div>
             <div class="mt-1 text-[10px] text-[#6a5840]">{{ formatTime(r.created_at) }}</div>
           </div>

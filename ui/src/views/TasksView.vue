@@ -2,21 +2,21 @@
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
     <div class="mx-auto max-w-[960px]">
       <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">任务中心</h1>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_center') }}</h1>
         <div class="flex gap-2">
           <button
             type="button"
             class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
             @click="loadAll"
           >
-            刷新
+            {{ t('tasks_refresh') }}
           </button>
           <button
             type="button"
             class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]"
             @click="router.push('/tasks/create')"
           >
-            + 创建
+            {{ t('tasks_create') }}
           </button>
         </div>
       </div>
@@ -45,7 +45,7 @@
       <!-- 未来任务 -->
       <div v-if="activeTab === 'scheduled'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="schedules.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          暂无未来任务
+          {{ t('tasks_no_scheduled') }}
         </div>
         <div v-else class="space-y-2">
           <div
@@ -67,14 +67,14 @@
                     : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'"
                   @click="toggleSchedule(s)"
                 >
-                  {{ s.enabled ? '启用' : '停用' }}
+                  {{ s.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
                 </button>
                 <button
                   type="button"
                   class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]"
                   @click="removeSchedule(s.id)"
                 >
-                  删除
+                  {{ t('tasks_delete') }}
                 </button>
               </div>
             </div>
@@ -83,7 +83,7 @@
               <span v-if="s.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[10px] text-[#5a6a8a]">{{ s.cron }}</span>
               <span v-if="s.run_at" class="text-[10px] text-[#7a6a58]">{{ s.run_at }}</span>
               <span v-if="s.creator && s.creator !== 'user'" class="rounded bg-[#f8f0e0] px-1.5 py-0.5 text-[10px] text-[#9a7a40]">{{ s.creator }}</span>
-              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">上次：{{ s.last_run_at.slice(0, 16) }}</span>
+              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">{{ t('tasks_last_run', { time: s.last_run_at.slice(0, 16) }) }}</span>
               <button v-if="s.last_task_id" type="button" class="cursor-pointer text-[10px] text-[#7a6a58] underline hover:text-[#4a3a28]" @click="openTask(s.last_task_id)">
                 #{{ s.last_task_id }}
               </button>
@@ -95,7 +95,7 @@
       <!-- 进行中 -->
       <div v-if="activeTab === 'running'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="runningTasks.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          暂无进行中的任务
+          {{ t('tasks_no_running') }}
         </div>
         <div v-else class="space-y-2">
           <button
@@ -107,7 +107,7 @@
           >
             <span class="mt-0.5 shrink-0 animate-spin text-sm text-[#c8a060]">◔</span>
             <div class="min-w-0 flex-1">
-              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || '未命名任务' }}</div>
+              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || t('tasks_unnamed') }}</div>
               <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">{{ r.prompt || '-' }}</div>
               <div class="mt-1 flex items-center gap-2 text-[10px] text-[#8a7860]">
                 <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ r.app }}</span>
@@ -121,7 +121,7 @@
       <!-- 历史任务 -->
       <div v-if="activeTab === 'history'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="historyTasks.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          暂无历史任务
+          {{ t('tasks_no_history') }}
         </div>
         <div v-else class="space-y-2">
           <button
@@ -135,7 +135,7 @@
               {{ r.status === 'done' ? '✓' : '✗' }}
             </span>
             <div class="min-w-0 flex-1">
-              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || '未命名任务' }}</div>
+              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || t('tasks_unnamed') }}</div>
               <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">{{ r.response || r.prompt || '-' }}</div>
               <div class="mt-1 flex items-center gap-2 text-[10px] text-[#8a7860]">
                 <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ r.app }}</span>
@@ -152,9 +152,11 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from '../i18n/index.js';
 import { on } from '../ws.js';
 
 const router = useRouter();
+const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);
 const error = ref('');
@@ -164,15 +166,15 @@ const runningTasks = computed(() => tasks.value.filter(t => t.status === 'pendin
 const historyTasks = computed(() => tasks.value.filter(t => t.status !== 'pending'));
 
 const tabs = computed(() => [
-  { key: 'scheduled', label: '未来任务', count: schedules.value.length },
-  { key: 'running', label: '进行中', count: runningTasks.value.length },
-  { key: 'history', label: '历史任务', count: historyTasks.value.length }
+  { key: 'scheduled', label: t('tasks_tab_scheduled'), count: schedules.value.length },
+  { key: 'running', label: t('tasks_tab_running'), count: runningTasks.value.length },
+  { key: 'history', label: t('tasks_tab_history'), count: historyTasks.value.length }
 ]);
 
 const scheduleTypeLabel = (s) => {
-  if (s.cron) return '循环';
-  if (s.run_at) return '定时';
-  return '排队';
+  if (s.cron) return t('tasks_type_repeat');
+  if (s.run_at) return t('tasks_type_once');
+  return t('tasks_type_queue');
 };
 
 const loadTasks = async () => {
@@ -192,7 +194,7 @@ const loadAll = async () => {
   try {
     await Promise.all([loadTasks(), loadSchedules()]);
   } catch (e) {
-    error.value = e.message || '加载失败';
+    error.value = e.message || t('tasks_load_fail');
   }
 };
 

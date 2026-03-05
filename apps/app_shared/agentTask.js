@@ -1,8 +1,8 @@
-import { parseJsonObject } from './utils/parseJsonObject.js';
+import { parseJsonObject } from '../../shared/ai/json.js';
 
 const requestTask = async (body = {}, req) => {
   const cookie = typeof req?.headers?.cookie === 'string' ? req.headers.cookie : '';
-  const resp = await fetch('http://localhost:9700/api/task', {
+  const resp = await fetch('http://localhost:9700/api/task/create/agent', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -21,7 +21,6 @@ export const agentTask = async ({ app, title, prompt, req, meta = null }) => {
   return await requestTask({
     app,
     title,
-    mode: 'agent',
     prompt,
     meta
   }, req);

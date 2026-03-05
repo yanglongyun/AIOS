@@ -44,7 +44,7 @@ dailycheck 不走纯 LLM 直出，而是走核心 agent task 流程。
 
 ### 1) 生成问题（提问阶段）
 
-- dailycheck 向 `/api/task` 提交任务（`app: "dailycheck"`）
+- dailycheck 向 `/api/task/create/agent` 提交任务（`app: "dailycheck"`）
 - agent 通过 `shell` 查询历史回答、近期对话摘要、相关应用数据
 - agent 输出结构化 JSON：
 
@@ -61,7 +61,7 @@ dailycheck 不走纯 LLM 直出，而是走核心 agent task 流程。
 
 ### 3) 生成回应（回应阶段）
 
-- 再向 `/api/task` 提交任务
+- 再向 `/api/task/create/agent` 提交任务
 - agent 基于当天 `question + answer + 既有 note` 生成：
 
 ```json

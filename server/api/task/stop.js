@@ -1,6 +1,6 @@
 import { db } from '../../db/client.js';
 import { broadcast } from '../../system/ws.js';
-import { stopTaskExecution } from './create.js';
+import { stopTaskExecution } from './create/index.js';
 
 export const stopTask = ({ id }) => {
   const task = db.prepare('SELECT id, status FROM tasks WHERE id = ? LIMIT 1').get(id);

@@ -259,13 +259,12 @@ const submitPrompt = async () => {
       `用户新需求：${content}`
     ].join('\n');
 
-    const res = await fetch('/api/task', {
+    const res = await fetch('/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         app: 'playground',
         title: '3D 场景生成',
-        mode: 'instant',
         prompt: '根据当前场景和需求生成新版本 HTML',
         schema: { required: ['name', 'html', 'suggestions'] },
         messages: [

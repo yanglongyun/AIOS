@@ -68,14 +68,4 @@ export const initDatabase = () => {
     );
 
   `);
-
-  const taskCols = db.prepare(`PRAGMA table_info(tasks)`).all();
-  const hasTitle = taskCols.some((c) => c.name === 'title');
-  const hasMode = taskCols.some((c) => c.name === 'mode');
-  const hasSchema = taskCols.some((c) => c.name === 'schema');
-  const hasMeta = taskCols.some((c) => c.name === 'meta');
-  if (!hasTitle) db.exec(`ALTER TABLE tasks ADD COLUMN title TEXT NOT NULL DEFAULT ''`);
-  if (!hasMode) db.exec(`ALTER TABLE tasks ADD COLUMN mode TEXT NOT NULL DEFAULT 'agent'`);
-  if (!hasSchema) db.exec(`ALTER TABLE tasks ADD COLUMN schema TEXT`);
-  if (!hasMeta) db.exec(`ALTER TABLE tasks ADD COLUMN meta TEXT`);
 };

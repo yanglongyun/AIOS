@@ -216,14 +216,13 @@ const saveModelAndTest = async () => {
 
     setLocale(model.value.language);
     const isZh = model.value.language === 'zh';
-    const testRes = await fetch('/api/task', {
+    const testRes = await fetch('/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
         app: 'setup',
         title: '初始化欢迎语',
-        mode: 'instant',
         prompt: isZh ? '生成初始化欢迎介绍。' : 'Generate onboarding intro.',
         schema: { required: ['intro'] },
         messages: [

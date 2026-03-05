@@ -154,13 +154,12 @@ const smartFill = async () => {
   smartFilling.value = true
   error.value = ''
   try {
-    const res = await fetch('/api/task', {
+    const res = await fetch('/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         app: 'finance',
         title: '智能记账识别',
-        mode: 'instant',
         prompt: '把自然语言记账描述提取成结构化字段',
         schema: { required: ['type', 'amount', 'note'] },
         messages: [

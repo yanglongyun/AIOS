@@ -214,13 +214,12 @@ const optimizeDraft = async () => {
   error.value = '';
   optimizedDraft.value = '';
   try {
-    const res = await fetch('/api/task', {
+    const res = await fetch('/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         app: 'notebook',
         title: '笔记优化',
-        mode: 'instant',
         prompt: '优化笔记表达并返回结构化结果',
         schema: { required: ['optimized'] },
         messages: [

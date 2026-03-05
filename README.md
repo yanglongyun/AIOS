@@ -1,20 +1,13 @@
 # AIOS
 
-> *Cogito, ergo sum.* — 我思故我在
+本地运行的 AI 系统。一个核心理念：应用里的 AI 能力统一走任务中心。
 
-你的 AI，你的系统。
+## 核心特性
 
-AIOS 是一个运行在本地的开源 AI 系统。它能控制你的计算机、创建属于你的应用、记住你的一切——越用越懂你。
-
-## 哲学
-
-大多数 AI 产品在做加法——更多工具、更多插件、更多抽象层。AIOS 反其道而行。
-
-**一个工具：shell。** 搜索、编码、部署、读写文件、操作数据库——任何你在终端能做的事，AI 都能做。不需要 MCP，不需要插件体系，shell 本身就是万能工具。有了 shell，你就有了一切。
-
-**对话不能取代图形界面。** 你不会用对话来记账，不会用对话管理待办。未来不会流于无形，依然留于物形。AIOS 左侧不是无用的对话历史，而是一个个有形的应用——由 AI 按照你的意图构建，体现着你的需求、习惯和偏好。
-
-**共生，而非使用。** AI 了解你的应用、你的数据、你的偏好。你在改造它，它也在积累经验。这不是一个工具，是一个与你共生的系统。
+- 本地双服务架构：`server` + `apps`
+- 统一任务中心（Task Center）
+- 两种任务模式：`instant` / `agent`
+- 应用可独立演进，统一鉴权与任务追踪
 
 ## 快速开始
 
@@ -23,79 +16,103 @@ git clone https://github.com/valueriver/aios.git
 cd aios
 npm install
 npm run build
-npm start              # 主服务，端口 9700
-node apps/index.js     # 应用服务，端口 9701
+npm start        # 主服务: 9700
+npm run start:apps   # 应用服务: 9701
 ```
 
-打开 http://localhost:9700，在设置页配置 API Key 和模型即可使用。
-
-### CLI
-
-```bash
-npm install -g .
-aios    # 在终端直接与 AI 对话
-aios start  # 启动主服务(9700)和应用服务(9701)
-aios stop   # 停止主服务和应用服务
-```
-
-CLI 会自动检测并拉起本地服务。
-
-### 一键安装（服务器）
-
-```bash
-git clone https://github.com/valueriver/aios.git
-cd aios
-bash install.sh
-```
+打开：`http://localhost:9700`
 
 ## 运行架构
 
-两个独立进程，可分别启停：
+- `server/`（9700）：聊天、任务中心、设置、鉴权、WebSocket、静态 UI
+- `apps/`（9701）：各业务应用 API（notebook、finance、poker、dailycheck 等）
 
-| 服务 | 端口 | 职责 |
-|------|------|------|
-| `server/` | 9700 | 聊天、WebSocket、任务中心、设置、UI 托管 |
-| `apps/` | 9701 | 各应用的 API |
+## AI 任务中心
 
-应用若需调用 AI，统一走任务中心，无需自行配置 Key：
+应用侧 AI 调用统一通过：
 
+- `POST /api/task/create/instant`
+- `POST /api/task/create/agent`
+
+任务记录统一进入任务中心，支持查看列表、详情、消息与停止。
+
+### Instant 模式
+
+一次性结构化生成，适合可直接返回结果的任务。
+
+示例：
+
+```http
+POST /api/task/create/instant
+Content-Type: application/json
+
+{
+  "app": "notebook",
+  "title": "提取摘要",
+  "prompt": "把下面内容压缩成 3 条要点...",
+  "schema": { "required": ["summary"] }
+}
 ```
-POST http://localhost:9700/api/task
-{ "app":"xxx", "title":"任务标题", "mode":"instant|agent", "prompt":"..." }
+
+### Agent 模式
+
+可走工具与多步执行，适合复杂任务。
+
+示例：
+
+```http
+POST /api/task/create/agent
+Content-Type: application/json
+
+{
+  "app": "dailycheck",
+  "title": "生成今日提问",
+  "prompt": "基于历史记录生成今天的问题，输出 JSON"
+}
 ```
 
-## 内置应用
+## 目录结构
 
-当前内置：
-
-- **记事本** — 笔记记录与整理
-- **记账本** — 收支记录
-
-## 项目结构
-
-```
-server/          # 主服务（9700）
-  agent/         # Agent 循环、LLM 调用、shell 执行
-  api/           # chat / settings / task 任务中心
-  system/        # HTTP、WebSocket、事件处理
+```text
+server/
+  api/
+    task/
+      create/
+        instant.js
+        agent.js
+        index.js
+  agent/
   db/
+  system/
 
-apps/            # 应用服务（9701）
+apps/
+  app_shared/
   notebook/
   finance/
+  poker/
+  dailycheck/
+  ...
 
-ui/src/
-  App.vue        # 顶部栏 + NavPanel + RouterView
-  components/NavPanel.vue
-  views/
+shared/
+  ai/
+  auth/
+  http/
+  json/
+  time/
 
-cli/aios.js      # 命令行入口
-database/        # SQLite 数据库
-memory/         # AI 知识库
+ui/
 ```
 
-## 技术栈
+## 开发命令
 
-- Vue 3 + Vite + Tailwind CSS v4
-- Node.js + WebSocket + SQLite
-- OpenAI Chat Completions 兼容格式（支持 OpenRouter / OpenAI / 任意兼容供应方）
+```bash
+npm run dev        # server + apps + ui dev
+npm run build      # 构建前端
+npm start          # 启动主服务
+npm run start:apps # 启动应用服务
+```
+
+## 说明
+
+- 开发阶段不保留兼容迁移逻辑，数据库结构变化按重建处理。
+- 文档与代码需保持同名与同链路一致。

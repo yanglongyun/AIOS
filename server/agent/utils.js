@@ -57,5 +57,18 @@ export const normalizeAgentMessages = (messages = []) => {
     firstNonSystem = out.findIndex((m) => m.role !== 'system');
   }
 
+  const last = out[out.length - 1];
+  if (last?.role === 'assistant' && Array.isArray(last.tool_calls) && last.tool_calls.length > 0) {
+    for (const tc of last.tool_calls) {
+      const toolCallId = String(tc?.id || '').trim();
+      if (!toolCallId) continue;
+      out.push({
+        role: 'tool',
+        tool_call_id: toolCallId,
+        content: '工具调用未返回结果：可能因系统中断、服务重启、超时或其它未知原因，导致本次执行结果未被记录。'
+      });
+    }
+  }
+
   return out;
 };

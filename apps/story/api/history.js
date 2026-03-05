@@ -1,4 +1,5 @@
 import { db } from '../db.js';
+import { parseJson } from '../../../shared/json/parse.js';
 
 export const historyHandler = ({ sessionId }) => {
   const id = Number(sessionId);
@@ -35,7 +36,7 @@ export const historyHandler = ({ sessionId }) => {
       idx: c.idx,
       action: c.action || '',
       content: c.content || '',
-      choices: (() => { try { return JSON.parse(c.choices_json || '[]'); } catch { return []; } })(),
+      choices: parseJson(c.choices_json || '[]', []),
       summary: c.summary || '',
       progress: c.progress || '',
       createdAt: c.created_at

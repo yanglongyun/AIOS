@@ -1,8 +1,5 @@
 import { buildLlmHeaders, writeLlmErrorLog } from './common.js';
-
-const safeJson = (text) => {
-  try { return JSON.parse(text); } catch { return null; }
-};
+import { parseJson } from '../../shared/json/parse.js';
 
 const ensureToolCall = (toolCalls, index) => {
   if (!toolCalls[index]) {
@@ -86,7 +83,7 @@ export const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal,
         const raw = dataLines.join('\n');
         if (!raw || raw === '[DONE]') continue;
 
-        const json = safeJson(raw);
+        const json = parseJson(raw, null);
         if (!json) continue;
         parseOpenAiDelta(json, state, onDelta);
       }

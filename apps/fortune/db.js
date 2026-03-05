@@ -1,15 +1,6 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'fortune.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('fortune.db');
 
 export const initFortuneDatabase = () => {
   db.exec(`
@@ -25,5 +16,4 @@ export const initFortuneDatabase = () => {
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
-  try { db.exec(`ALTER TABLE apps_fortune_records ADD COLUMN hexagram TEXT NOT NULL DEFAULT ''`); } catch(e) {}
 };

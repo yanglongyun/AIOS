@@ -1,13 +1,7 @@
 import { db } from '../db.js';
+import { toDateKey } from '../../../shared/time/dateKey.js';
 
 const DEFAULT_QUESTION = '今天你最想推进的一件事是什么？为什么它重要？';
-
-const toDateKey = (date = new Date()) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
 
 const calcStreak = () => {
   const rows = db.prepare(`

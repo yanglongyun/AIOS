@@ -1,15 +1,6 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'blackroom.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('blackroom.db');
 
 export const initBlackroomDatabase = () => {
   db.exec(`

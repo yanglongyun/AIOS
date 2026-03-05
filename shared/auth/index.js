@@ -1,16 +1,6 @@
 import { countUsers } from './repository.js';
 import { getAuthUser } from './guard.js';
-
-const isLoopback = (req) => {
-  const ip = String(req?.socket?.remoteAddress || '');
-  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
-};
-
-const isLocalCliBypass = (req, path, method) => {
-  if (String(req?.headers?.['x-aios-cli'] || '') !== '1') return false;
-  if (!isLoopback(req)) return false;
-  return path === '/api/chat/create' && method === 'POST';
-};
+import { isLocalCliBypass } from './network.js';
 
 const allowServerPublic = (req, path, method) => {
   if (isLocalCliBypass(req, path, method)) return true;
@@ -19,7 +9,8 @@ const allowServerPublic = (req, path, method) => {
 
 const allowServerDuringSetup = (path, method) => {
   return (path === '/api/settings' && (method === 'GET' || method === 'POST'))
-    || (path === '/api/task' && method === 'POST');
+    || (path === '/api/task/create/instant' && method === 'POST')
+    || (path === '/api/task/create/agent' && method === 'POST');
 };
 
 const allowAppsPublic = (path) => {

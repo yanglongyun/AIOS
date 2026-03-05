@@ -1,15 +1,6 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'finance.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('finance.db');
 
 export const initFinanceDatabase = () => {
   db.exec(`
@@ -21,14 +12,6 @@ export const initFinanceDatabase = () => {
       date DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
-  // 迁移：删除旧 category 列
-  try {
-    const cols = db.prepare('PRAGMA table_info(finance_transactions)').all();
-    if (cols.some(c => c.name === 'category')) {
-      db.exec('ALTER TABLE finance_transactions DROP COLUMN category');
-    }
-  } catch {}
 
   // 预置数据
   const count = db.prepare('SELECT COUNT(*) as c FROM finance_transactions').get().c;

@@ -1,15 +1,6 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'story.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('story.db');
 
 export const initStoryDatabase = () => {
   db.exec(`
@@ -39,21 +30,6 @@ export const initStoryDatabase = () => {
       FOREIGN KEY(session_id) REFERENCES apps_story_sessions(id) ON DELETE CASCADE
     )
   `);
-
-  // migration: 旧表字段兼容
-  try {
-    const cols = db.prepare('PRAGMA table_info(apps_story_sessions)').all().map(c => c.name);
-    if (!cols.includes('chapter_count') && cols.includes('total_chapters')) {
-      db.exec('ALTER TABLE apps_story_sessions RENAME COLUMN total_chapters TO chapter_count');
-    } else if (!cols.includes('chapter_count')) {
-      db.exec('ALTER TABLE apps_story_sessions ADD COLUMN chapter_count INTEGER NOT NULL DEFAULT 0');
-    }
-    if (!cols.includes('premise') && cols.includes('story_prompt')) {
-      db.exec('ALTER TABLE apps_story_sessions RENAME COLUMN story_prompt TO premise');
-    } else if (!cols.includes('premise')) {
-      db.exec('ALTER TABLE apps_story_sessions ADD COLUMN premise TEXT NOT NULL DEFAULT \'\'');
-    }
-  } catch {}
 
   // 预置书籍
   const count = db.prepare('SELECT COUNT(*) as c FROM apps_story_sessions').get().c;

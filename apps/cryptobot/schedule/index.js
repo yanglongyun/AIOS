@@ -2,26 +2,24 @@ import { db, getConfig, getState, saveState, recordDecision, calcEquity, persist
 import { fetchCandles } from './okx.js';
 import { buildPrompt } from './prompt.js';
 import { simulateTrade } from './trade.js';
+import { parseJson } from '../../../shared/json/parse.js';
 
 let timer = null;
 
-const jsonParse = (raw, fallback) => { try { return JSON.parse(raw); } catch { return fallback; } };
-
 const askAI = async (prompt) => {
-  const resp = await fetch('http://localhost:9700/api/task', {
+  const resp = await fetch('http://localhost:9700/api/task/create/instant', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       app: 'cryptobot',
       title: '炒币策略决策',
-      mode: 'instant',
       prompt,
       schema: { required: ['action', 'reason', 'amount_usdt'] }
     })
   });
   const data = await resp.json();
   if (!resp.ok) throw new Error(data.error || `request failed ${resp.status}`);
-  const parsed = jsonParse(data.response || '{}', {});
+  const parsed = parseJson(data.response || '{}', {});
   const action = String(parsed.action || 'hold').toLowerCase();
   if (!['buy', 'sell', 'hold'].includes(action)) return { action: 'hold', reason: 'AI 返回非法动作', amount_usdt: 0 };
 

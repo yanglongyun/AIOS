@@ -1,23 +1,9 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
+import { toDateKey } from '../../shared/time/dateKey.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'poker.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('poker.db');
 
 export const DAILY_GRANT = 1000;
-
-const pad2 = (n) => String(n).padStart(2, '0');
-const todayKey = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-};
 
 export const initPokerDatabase = () => {
   db.exec(`
@@ -44,13 +30,6 @@ export const initPokerDatabase = () => {
       last_grant_date TEXT NOT NULL DEFAULT ''
     )
   `);
-
-  const cols = db.prepare(`PRAGMA table_info(apps_poker_games)`).all();
-  const hasActionHistory = cols.some((c) => c.name === 'action_history');
-  if (!hasActionHistory) {
-    db.exec(`ALTER TABLE apps_poker_games ADD COLUMN action_history TEXT NOT NULL DEFAULT '[]'`);
-  }
-
   db.prepare(`
     INSERT OR IGNORE INTO apps_poker_accounts (role, balance, total_granted, last_grant_date)
     VALUES ('player', 0, 0, '')
@@ -62,7 +41,7 @@ export const initPokerDatabase = () => {
 };
 
 export const grantDailyAllowanceIfNeeded = () => {
-  const today = todayKey();
+  const today = toDateKey();
   const roles = ['player', 'ai'];
   const granted = { player: 0, ai: 0 };
 

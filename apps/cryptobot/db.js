@@ -1,15 +1,7 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
+import { toDateKey } from '../../shared/time/dateKey.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'cryptobot.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('cryptobot.db');
 
 export const parseNum = (v, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
 export const nowIso = () => new Date().toISOString();
@@ -71,8 +63,7 @@ export const persistEquity = (equity) => {
 };
 
 export const getTodayChange = (currentEquity) => {
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayStr = toDateKey();
   const first = db.prepare("SELECT equity FROM apps_cryptobot_equity WHERE date(created_at) = ? ORDER BY id ASC LIMIT 1").get(todayStr);
   if (!first) return 0;
   return currentEquity - first.equity;

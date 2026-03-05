@@ -1,9 +1,5 @@
-import Database from 'better-sqlite3';
-import { mkdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createAppDb } from '../app_shared/db/createAppDb.js';
 
-const DEMOCRAT_OLD_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/DemocraticParty.svg/200px-DemocraticParty.svg.png';
 const DEMOCRAT_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/DemocraticLogo.svg/200px-DemocraticLogo.svg.png';
 
 const DEFAULT_PARTIES = [
@@ -29,13 +25,7 @@ const DEFAULT_PARTIES = [
   }
 ];
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..', '..');
-const dir = join(root, 'database', 'apps');
-mkdirSync(dir, { recursive: true });
-
-export const db = new Database(join(dir, 'debate.db'));
-db.pragma('journal_mode = WAL');
+export const db = createAppDb('debate.db');
 
 export const initDebateDatabase = () => {
   db.exec(`
@@ -96,11 +86,4 @@ export const initDebateDatabase = () => {
     });
     tx();
   }
-
-  // migration: fix broken democratic party logo URL in existing databases
-  db.prepare(`
-    UPDATE apps_debate_parties
-    SET logo = ?
-    WHERE name = '民主党' AND logo = ?
-  `).run(DEMOCRAT_LOGO, DEMOCRAT_OLD_LOGO);
 };

@@ -23,6 +23,7 @@ import StoryView from '../views/apps/StoryView.vue';
 import BlackroomView from '../views/apps/BlackroomView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
 import PokerView from '../views/apps/PokerView.vue';
+import TaskCreateView from '../views/TaskCreateView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
 
@@ -32,7 +33,9 @@ const routes = [
   { path: '/login', component: LoginView },
   { path: '/chat/:id?', component: ChatView },
   { path: '/tasks', component: TasksView },
+  { path: '/tasks/create', component: TaskCreateView },
   { path: '/task/:id', component: TaskDetailView },
+  { path: '/schedules', redirect: '/tasks' },
   { path: '/history', component: HistoryView },
   { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },

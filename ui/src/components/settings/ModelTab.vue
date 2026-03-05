@@ -8,7 +8,15 @@
         class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] outline-none focus:border-[#b08a40] transition-colors cursor-pointer appearance-none dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
         style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;"
       >
-        <option v-for="p in PROVIDERS" :key="p.id" :value="p.id">{{ p.name }}</option>
+        <optgroup label="默认">
+          <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </optgroup>
+        <optgroup label="Coding Plan">
+          <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </optgroup>
+        <optgroup label="自定义">
+          <option v-for="p in customProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </optgroup>
       </select>
     </div>
 
@@ -50,6 +58,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { PROVIDERS } from '../../data/providers.js';
 import { useI18n } from '../../i18n/index.js';
 
@@ -74,4 +83,8 @@ const onProviderChange = (e) => {
   const value = e.target.value;
   emit('update:provider', value);
 };
+
+const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding'));
+const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
+const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 </script>

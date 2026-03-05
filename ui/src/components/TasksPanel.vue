@@ -5,10 +5,10 @@
         <span class="text-sm font-bold text-[#e8d0a8]">{{ t('tasks_title') }}</span>
         <button
           type="button"
-          class="cursor-pointer text-[10px] text-[#8a7860] transition-colors hover:text-[#c8a060]"
-          @click="openAllTasks"
+          class="cursor-pointer rounded bg-[#4a3828] px-2 py-1 text-[10px] text-[#c8a060] transition-colors hover:bg-[#5a4838]"
+          @click="createTask"
         >
-          {{ t('tasks_view_all') }}
+          + 创建
         </button>
       </div>
       <div class="flex-1 overflow-y-auto">
@@ -17,21 +17,26 @@
           v-for="r in previewTasks"
           :key="r.id"
           type="button"
-          class="block w-full cursor-pointer border-b border-[#3a2818] px-4 py-2.5 text-left transition-colors hover:bg-[#3a2a1c] last:border-b-0"
+          class="flex w-full cursor-pointer items-start gap-2.5 border-b border-[#3a2818] px-4 py-2.5 text-left transition-colors hover:bg-[#3a2a1c] last:border-b-0"
           @click="openTask(r.id)"
         >
-          <div class="flex items-center gap-2">
-            <span class="rounded bg-[#4a3828] px-1.5 py-0.5 text-[10px] text-[#c8a060]">{{ r.app }}</span>
-            <span :class="r.status === 'done' ? 'text-[#7a9a6a]' : r.status === 'error' ? 'text-[#c07060]' : 'text-[#c8a060]'" class="text-[10px]">{{ r.status }}</span>
-            <span class="ml-auto text-[10px] text-[#6a5840]">{{ formatTime(r.created_at) }}</span>
-          </div>
-          <div class="mt-1 line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ r.title || '未命名任务' }}</div>
-          <div class="mt-0.5 flex items-end gap-2">
-            <div class="line-clamp-2 flex-1 text-[11px] leading-relaxed text-[#b8a080]">{{ r.response || r.prompt?.slice(0, 80) }}</div>
-            <span v-if="r.mode" class="shrink-0 rounded bg-[#3a2a1c] px-1.5 py-0.5 text-[10px] text-[#a8c890]">{{ r.mode }}</span>
+          <span class="mt-0.5 shrink-0 text-sm" :class="r.status === 'done' ? 'text-[#7a9a6a]' : r.status === 'error' || r.status === 'aborted' ? 'text-[#c07060]' : 'animate-spin text-[#c8a060]'">
+            {{ r.status === 'done' ? '✓' : r.status === 'error' || r.status === 'aborted' ? '✗' : '◔' }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ r.title || '未命名任务' }}</div>
+            <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#b8a080]">{{ r.response || r.prompt?.slice(0, 80) }}</div>
+            <div class="mt-1 text-[10px] text-[#6a5840]">{{ formatTime(r.created_at) }}</div>
           </div>
         </button>
       </div>
+      <button
+        type="button"
+        class="block w-full cursor-pointer border-t border-[#4a3828] px-4 py-2.5 text-center text-[11px] text-[#8a7860] transition-colors hover:bg-[#3a2a1c] hover:text-[#c8a060]"
+        @click="openAllTasks"
+      >
+        {{ t('tasks_view_all') }}
+      </button>
     </div>
   </div>
 </template>
@@ -59,6 +64,11 @@ const openTask = async (id) => {
 const openAllTasks = async () => {
   emit('close');
   await router.push('/tasks');
+};
+
+const createTask = async () => {
+  emit('close');
+  await router.push('/tasks/create');
 };
 
 const formatTime = (t) => {

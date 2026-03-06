@@ -204,7 +204,7 @@ const model = ref({
 watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
 
 const aggregatorProviders = computed(() => PROVIDERS.filter((p) => p.id === 'openrouter' || p.id === 'together' || p.id === 'fireworks'));
-const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding' || p.id === 'ark-coding'));
+const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding' || p.id === 'ark-coding' || p.id === 'kimi-coding' || p.id === 'tencent-coding'));
 const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
 const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && !aggregatorProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 

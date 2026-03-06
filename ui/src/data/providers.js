@@ -108,6 +108,18 @@ export const PROVIDERS = [
     defaultModel: 'doubao-seed-2.0-pro',
   },
   {
+    id: 'tencent-coding',
+    name: '腾讯云 Coding Plan',
+    apiUrl: 'https://api.lkeap.cloud.tencent.com/coding/v3/chat/completions',
+    defaultModel: 'minimax-m2.5',
+  },
+  {
+    id: 'kimi-coding',
+    name: 'Kimi Coding Plan',
+    apiUrl: 'https://api.kimi.com/coding/v1/chat/completions',
+    defaultModel: 'kimi-for-coding',
+  },
+  {
     id: 'custom',
     name: '自定义',
     apiUrl: '',

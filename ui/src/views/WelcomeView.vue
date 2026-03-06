@@ -98,17 +98,8 @@
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_provider')
                 }}</label>
                 <select v-model="model.provider" class="wiz-input" @change="applyProviderDefault">
-                  <optgroup label="默认">
-                    <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </optgroup>
-                  <optgroup label="聚合平台">
-                    <option v-for="p in aggregatorProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </optgroup>
-                  <optgroup label="Coding Plan">
-                    <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </optgroup>
-                  <optgroup label="自定义">
-                    <option v-for="p in customProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
+                    <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </optgroup>
                 </select>
               </div>
@@ -175,7 +166,7 @@
 <script setup>
 import { computed, ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { PROVIDERS, getProvider } from '../data/providers.js';
+import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
 import { setLocale, useI18n } from '../i18n/index.js';
 
@@ -203,10 +194,6 @@ const model = ref({
 
 watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
 
-const aggregatorProviders = computed(() => PROVIDERS.filter((p) => p.id === 'openrouter' || p.id === 'together' || p.id === 'fireworks'));
-const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding' || p.id === 'ark-coding' || p.id === 'kimi-coding' || p.id === 'tencent-coding'));
-const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
-const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && !aggregatorProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);

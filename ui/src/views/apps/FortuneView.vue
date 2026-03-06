@@ -5,8 +5,8 @@
 
         <!-- 标题 -->
         <div class="header">
-          <h1 class="header-title">算 一 卦</h1>
-          <p class="header-sub">诚心正意 · 六爻问天</p>
+          <h1 class="header-title">{{ t('fortune_title') }}</h1>
+          <p class="header-sub">{{ t('fortune_subtitle') }}</p>
         </div>
 
         <!-- 卦象区 -->
@@ -20,11 +20,17 @@
             <div v-for="(yao, i) in displayYaos" :key="i" class="yao-row"
               :style="{ opacity: yao !== null ? 1 : 0, transform: yao !== null ? 'none' : 'translateY(6px)' }">
               <span class="yao-label">{{ yaoLabels[i] }}</span>
-              <div v-if="yao === 1" class="yao-yang"><div></div></div>
-              <div v-else-if="yao === 0" class="yao-yin"><div></div><div></div></div>
+              <div v-if="yao === 1" class="yao-yang">
+                <div></div>
+              </div>
+              <div v-else-if="yao === 0" class="yao-yin">
+                <div></div>
+                <div></div>
+              </div>
               <div v-else class="yao-empty"></div>
               <span class="yao-coins">
-                <span v-for="(c, j) in (coins[i] || [])" :key="j" class="coin" :class="c ? 'yang' : 'yin'">{{ c ? '字' : '背' }}</span>
+                <span v-for="(c, j) in (coins[i] || [])" :key="j" class="coin" :class="c ? 'yang' : 'yin'">{{ c ? t('fortune_coin_char') :
+                  t('fortune_coin_back') }}</span>
               </span>
             </div>
           </div>
@@ -32,15 +38,15 @@
           <!-- 空状态 -->
           <div v-if="!shaking && !hexagramName && !result" class="hex-empty">
             <div class="hex-empty-icon">☰</div>
-            <div>心中默念所问之事，起卦求解</div>
+            <div>{{ t('fortune_empty_prompt') }}</div>
           </div>
         </div>
 
         <!-- 输入 -->
         <div class="input-area">
-          <textarea v-model="question" rows="2" placeholder="心中所惑，落笔此处..." :disabled="shaking || loading"></textarea>
+          <textarea v-model="question" rows="2" :placeholder="t('fortune_input_placeholder')" :disabled="shaking || loading"></textarea>
           <button class="divine-btn" @click="divine" :disabled="shaking || loading || !question.trim()">
-            {{ shaking ? '摇卦中...' : loading ? '解卦中...' : '起 卦' }}
+            {{ shaking ? t('fortune_shaking') : loading ? t('fortune_reading') : t('fortune_divine') }}
           </button>
         </div>
 
@@ -51,11 +57,11 @@
           <div class="scroll-divider"></div>
           <div class="scroll-yj">
             <div class="scroll-yj-item">
-              <div class="scroll-yj-label good">宜</div>
+              <div class="scroll-yj-label good">{{ t('fortune_good') }}</div>
               <div class="scroll-yj-text">{{ result.good }}</div>
             </div>
             <div class="scroll-yj-item">
-              <div class="scroll-yj-label bad">忌</div>
+              <div class="scroll-yj-label bad">{{ t('fortune_bad') }}</div>
               <div class="scroll-yj-text">{{ result.bad }}</div>
             </div>
           </div>
@@ -64,7 +70,7 @@
 
         <!-- 历史 -->
         <div v-if="history.length" class="history-section">
-          <div class="history-title">历 史 卦 象</div>
+          <div class="history-title">{{ t('fortune_history') }}</div>
           <div v-for="item in history" :key="item.id" class="history-item">
             <div class="history-top">
               <span class="history-hex">{{ item.hexagram || '' }}</span>
@@ -75,7 +81,12 @@
             <div class="history-poem">"{{ item.signPoem }}"</div>
           </div>
         </div>
-        <div v-else-if="!result" class="empty-hint">尚无卦象记录</div>
+        <div v-else-if="!result" class="empty-hint">{{ t('fortune_empty_history') }}</div>
+
+        <!-- 免责声明 -->
+        <div class="disclaimer-box">
+          <p>{{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}</p>
+        </div>
 
       </div>
     </div>
@@ -84,6 +95,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from '../../i18n/index.js';
+
+const { t } = useI18n();
 
 /* ── 八卦 & 六十四卦表 ── */
 const TRIGRAM_NAMES = ['坤', '艮', '坎', '巽', '震', '离', '兑', '乾'];
@@ -98,7 +112,7 @@ const HEXAGRAM_TABLE = [
   ['泽地萃', '泽山咸', '泽水困', '泽风大过', '泽雷随', '泽火革', '兑为泽', '泽天夬'],
   ['天地否', '天山遁', '天水讼', '天风姤', '天雷无妄', '天火同人', '天泽履', '乾为天'],
 ];
-const yaoLabels = ['上', '五', '四', '三', '二', '初'];
+const yaoLabels = [t('fortune_yao_top'), t('fortune_yao_five'), t('fortune_yao_four'), t('fortune_yao_three'), t('fortune_yao_two'), t('fortune_yao_one')];
 
 const trigramIndex = (y0, y1, y2) => y0 * 4 + y1 * 2 + y2; // bottom, mid, top
 
@@ -184,7 +198,7 @@ const divine = async () => {
 
   // 调 API 解卦
   loading.value = true;
-  const yaoDesc = allYaos.map((y, i) => `${['初','二','三','四','五','上'][i]}爻:${y ? '阳' : '阴'}`).join('，');
+  const yaoDesc = allYaos.map((y, i) => `${['初', '二', '三', '四', '五', '上'][i]}爻:${y ? '阳' : '阴'}`).join('，');
 
   const data = await request('/apps/fortune/divine', {
     method: 'POST',
@@ -216,10 +230,12 @@ onMounted(loadHistory);
   font-family: 'PingFang SC', serif;
   color: #3a2e20;
 }
+
 .fortune-scroll {
   height: 100%;
   overflow-y: auto;
 }
+
 .fortune-body {
   max-width: 460px;
   margin: 0 auto;
@@ -231,6 +247,7 @@ onMounted(loadHistory);
   text-align: center;
   margin-bottom: 28px;
 }
+
 .header-title {
   font-size: 28px;
   font-weight: 900;
@@ -238,6 +255,7 @@ onMounted(loadHistory);
   letter-spacing: .15em;
   color: #5a4020;
 }
+
 .header-sub {
   font-size: 12px;
   color: #a09070;
@@ -249,34 +267,37 @@ onMounted(loadHistory);
 .hex-area {
   background:
     repeating-linear-gradient(90deg,
-      rgba(160,120,60,.06) 0px, rgba(160,120,60,.06) 1px,
-      transparent 1px, transparent 28px
-    ),
+      rgba(160, 120, 60, .06) 0px, rgba(160, 120, 60, .06) 1px,
+      transparent 1px, transparent 28px),
     linear-gradient(180deg, #f0e4d0, #e8dcc4);
   border: 2px solid #c8a868;
   border-radius: 4px;
   padding: 24px 20px;
   margin-bottom: 20px;
   position: relative;
-  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
 }
+
 /* 卷轴边缘 */
 .hex-area::before,
 .hex-area::after {
   content: '';
   position: absolute;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   height: 10px;
   pointer-events: none;
 }
+
 .hex-area::before {
   top: 0;
-  background: linear-gradient(180deg, rgba(200,168,96,.25), transparent);
+  background: linear-gradient(180deg, rgba(200, 168, 96, .25), transparent);
   border-radius: 4px 4px 0 0;
 }
+
 .hex-area::after {
   bottom: 0;
-  background: linear-gradient(0deg, rgba(200,168,96,.25), transparent);
+  background: linear-gradient(0deg, rgba(200, 168, 96, .25), transparent);
   border-radius: 0 0 4px 4px;
 }
 
@@ -289,6 +310,7 @@ onMounted(loadHistory);
   letter-spacing: .15em;
   margin-bottom: 4px;
 }
+
 .hex-sign {
   text-align: center;
   font-size: 13px;
@@ -305,12 +327,14 @@ onMounted(loadHistory);
   gap: 8px;
   padding: 8px 0;
 }
+
 .yao-row {
   display: flex;
   align-items: center;
   gap: 10px;
   transition: all .4s ease;
 }
+
 .yao-label {
   width: 16px;
   font-size: 11px;
@@ -318,32 +342,38 @@ onMounted(loadHistory);
   text-align: right;
   font-family: serif;
 }
-.yao-yang > div {
+
+.yao-yang>div {
   width: 100px;
   height: 10px;
   border-radius: 2px;
   background: linear-gradient(180deg, #8a5c28, #6a4420);
-  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
 }
+
 .yao-yin {
   display: flex;
   gap: 14px;
 }
-.yao-yin > div {
+
+.yao-yin>div {
   width: 43px;
   height: 10px;
   border-radius: 2px;
   background: linear-gradient(180deg, #8a5c28, #6a4420);
-  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
 }
+
 .yao-empty {
   width: 100px;
   height: 10px;
 }
+
 .yao-coins {
   display: flex;
   gap: 3px;
 }
+
 .coin {
   display: inline-flex;
   align-items: center;
@@ -355,10 +385,12 @@ onMounted(loadHistory);
   font-weight: 700;
   border: 1.5px solid #b09050;
 }
+
 .coin.yang {
   background: #d4b870;
   color: #5a4020;
 }
+
 .coin.yin {
   background: #f0e4d0;
   color: #8a7a58;
@@ -370,6 +402,7 @@ onMounted(loadHistory);
   color: #b0a080;
   font-size: 13px;
 }
+
 .hex-empty-icon {
   font-size: 36px;
   margin-bottom: 8px;
@@ -378,12 +411,13 @@ onMounted(loadHistory);
 
 /* ── 输入 ── */
 .input-area {
-  background: rgba(255,255,255,.4);
-  border: 1px solid rgba(0,0,0,.06);
+  background: rgba(255, 255, 255, .4);
+  border: 1px solid rgba(0, 0, 0, .06);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 20px;
 }
+
 .input-area textarea {
   width: 100%;
   border: none;
@@ -395,8 +429,15 @@ onMounted(loadHistory);
   outline: none;
   font-family: inherit;
 }
-.input-area textarea::placeholder { color: #b0a080; }
-.input-area textarea:disabled { opacity: .5; }
+
+.input-area textarea::placeholder {
+  color: #b0a080;
+}
+
+.input-area textarea:disabled {
+  opacity: .5;
+}
+
 .divine-btn {
   width: 100%;
   margin-top: 10px;
@@ -410,45 +451,56 @@ onMounted(loadHistory);
   cursor: pointer;
   font-family: serif;
   letter-spacing: .15em;
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
   transition: opacity .2s;
 }
-.divine-btn:hover:not(:disabled) { opacity: .9; }
-.divine-btn:disabled { opacity: .45; cursor: default; }
+
+.divine-btn:hover:not(:disabled) {
+  opacity: .9;
+}
+
+.divine-btn:disabled {
+  opacity: .45;
+  cursor: default;
+}
 
 /* ── 结果卡片 - 竹简 ── */
 .scroll-card {
   background:
     repeating-linear-gradient(90deg,
-      rgba(160,120,60,.06) 0px, rgba(160,120,60,.06) 1px,
-      transparent 1px, transparent 28px
-    ),
+      rgba(160, 120, 60, .06) 0px, rgba(160, 120, 60, .06) 1px,
+      transparent 1px, transparent 28px),
     linear-gradient(180deg, #f0e4d0, #e8dcc4);
   border: 2px solid #c8a868;
   border-radius: 4px;
   padding: 24px 20px;
   margin-bottom: 20px;
   position: relative;
-  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
 }
+
 .scroll-card::before,
 .scroll-card::after {
   content: '';
   position: absolute;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   height: 10px;
   pointer-events: none;
 }
+
 .scroll-card::before {
   top: 0;
-  background: linear-gradient(180deg, rgba(200,168,96,.25), transparent);
+  background: linear-gradient(180deg, rgba(200, 168, 96, .25), transparent);
   border-radius: 4px 4px 0 0;
 }
+
 .scroll-card::after {
   bottom: 0;
-  background: linear-gradient(0deg, rgba(200,168,96,.25), transparent);
+  background: linear-gradient(0deg, rgba(200, 168, 96, .25), transparent);
   border-radius: 0 0 4px 4px;
 }
+
 .scroll-sign {
   text-align: center;
   font-size: 28px;
@@ -457,6 +509,7 @@ onMounted(loadHistory);
   color: #8a5c28;
   letter-spacing: .1em;
 }
+
 .scroll-poem {
   text-align: center;
   font-size: 13px;
@@ -465,31 +518,45 @@ onMounted(loadHistory);
   line-height: 2;
   font-style: italic;
 }
+
 .scroll-divider {
   width: 60px;
   height: 1px;
   background: #c8a868;
   margin: 16px auto;
 }
+
 .scroll-yj {
   display: flex;
   justify-content: center;
   gap: 48px;
 }
-.scroll-yj-item { text-align: center; }
+
+.scroll-yj-item {
+  text-align: center;
+}
+
 .scroll-yj-label {
   font-size: 13px;
   font-weight: 800;
   letter-spacing: .1em;
   font-family: serif;
 }
-.scroll-yj-label.good { color: #6a9a50; }
-.scroll-yj-label.bad { color: #b05040; }
+
+.scroll-yj-label.good {
+  color: #6a9a50;
+}
+
+.scroll-yj-label.bad {
+  color: #b05040;
+}
+
 .scroll-yj-text {
   font-size: 12px;
   color: #5a4a30;
   margin-top: 4px;
 }
+
 .scroll-advice {
   margin-top: 16px;
   font-size: 13px;
@@ -500,7 +567,10 @@ onMounted(loadHistory);
 }
 
 /* ── 历史 ── */
-.history-section { margin-top: 4px; }
+.history-section {
+  margin-top: 4px;
+}
+
 .history-title {
   font-size: 11px;
   font-weight: 700;
@@ -508,48 +578,73 @@ onMounted(loadHistory);
   letter-spacing: .15em;
   margin-bottom: 10px;
 }
+
 .history-item {
-  background: rgba(255,255,255,.4);
-  border: 1px solid rgba(0,0,0,.04);
+  background: rgba(255, 255, 255, .4);
+  border: 1px solid rgba(0, 0, 0, .04);
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 6px;
 }
+
 .history-top {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .history-hex {
   font-size: 12px;
   font-weight: 700;
   color: #5a4020;
   font-family: serif;
 }
+
 .history-sign {
   font-size: 12px;
   color: #8a6a30;
 }
+
 .history-time {
   font-size: 10px;
   color: #b0a088;
   margin-left: auto;
 }
+
 .history-q {
   font-size: 12px;
   color: #7a6a48;
   margin-top: 4px;
 }
+
 .history-poem {
   font-size: 11px;
   color: #a09070;
   margin-top: 2px;
   font-style: italic;
 }
+
 .empty-hint {
   padding: 32px 0;
   text-align: center;
   font-size: 13px;
   color: #b0a080;
+}
+
+/* ── 底部声名 ── */
+.disclaimer-box {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px dashed rgba(160, 140, 110, 0.3);
+  text-align: center;
+}
+
+.disclaimer-box p {
+  font-size: 11px;
+  color: #a09070;
+  line-height: 1.8;
+  letter-spacing: .05em;
+  font-family: 'PingFang SC', sans-serif;
+  opacity: 0.8;
 }
 </style>

@@ -10,7 +10,7 @@
           @change="loadSelectedVersion"
           class="rounded-md border border-white/8 bg-white/5 px-2 py-1 text-[11px] text-[#9a8060] outline-none"
         >
-          <option :value="0">最新</option>
+          <option :value="0">{{ t('playground_latest') }}</option>
           <option v-for="v in versions" :key="v.id" :value="v.id">{{ v.name }} #{{ v.id }}</option>
         </select>
       </div>
@@ -28,7 +28,7 @@
         <div v-if="loading" class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div class="flex flex-col items-center gap-3">
             <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-[#d4b880]"></div>
-            <span class="text-[13px] text-[#d4b880]">AI 生成中...</span>
+            <span class="text-[13px] text-[#d4b880]">{{ t('playground_generating_ai') }}</span>
           </div>
         </div>
       </Transition>
@@ -51,7 +51,7 @@
         <input
           v-model="prompt"
           @keyup.enter="submitPrompt()"
-          placeholder="描述你想要的 3D 场景..."
+          :placeholder="t('playground_input_placeholder')"
           class="flex-1 rounded-xl border border-white/8 bg-white/5 px-4 py-2.5 text-[13px] text-[#e8d8b8] outline-none transition-all placeholder:text-[#3a2e1a] focus:border-[#d4b880]/30 focus:bg-white/7"
         />
         <button
@@ -60,7 +60,7 @@
           class="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#c8a050] px-5 py-2.5 text-[13px] font-semibold text-[#0e0a06] transition-all hover:bg-[#d4ac60] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Zap class="h-3.5 w-3.5" />
-          生成
+          {{ t('playground_generate') }}
         </button>
       </div>
       <p v-if="error" class="mt-2 text-[11px] text-[#c06050]">{{ error }}</p>
@@ -71,13 +71,16 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { Zap } from 'lucide-vue-next';
+import { useI18n } from '../../i18n/index.js';
+
+const { t } = useI18n();
 
 const prompt = ref('');
 const loading = ref(false);
 const error = ref('');
 const versions = ref([]);
 const selectedVersionId = ref(0);
-const currentVersionName = ref('默认场景');
+const currentVersionName = ref(t('playground_default_scene'));
 const suggestions = ref([]);
 
 const defaultHtml = `<!doctype html>
@@ -223,8 +226,8 @@ const loadLatestVersion = async () => {
   const res = await fetch('/apps/playground/latest');
   const data = await res.json();
   const row = data.data;
-  if (!row) { currentVersionName.value = '默认场景'; return; }
-  currentVersionName.value = row.name || '未命名场景';
+  if (!row) { currentVersionName.value = t('playground_default_scene'); return; }
+  currentVersionName.value = row.name || t('playground_untitled_scene');
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = [];
 };
@@ -235,7 +238,7 @@ const loadSelectedVersion = async () => {
   const data = await res.json();
   if (!data?.success || !data?.data) return;
   const row = data.data;
-  currentVersionName.value = row.name || '未命名场景';
+  currentVersionName.value = row.name || t('playground_untitled_scene');
   sceneHtml.value = row.html || defaultHtml;
   suggestions.value = [];
 };
@@ -252,11 +255,11 @@ const submitPrompt = async () => {
 
   try {
     const contextBlock = [
-      `当前场景名称：${currentVersionName.value || '未命名场景'}`,
-      '当前场景完整 HTML：',
+      `${t('playground_ctx_scene_name')}${currentVersionName.value || t('playground_untitled_scene')}`,
+      t('playground_ctx_scene_html'),
       String(sceneHtml.value || defaultHtml),
       '',
-      `用户新需求：${content}`
+      `${t('playground_ctx_user_need')}${content}`
     ].join('\n');
 
     const res = await fetch('/api/task/create/instant', {
@@ -264,13 +267,13 @@ const submitPrompt = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         app: 'playground',
-        title: '3D 场景生成',
-        prompt: '根据当前场景和需求生成新版本 HTML',
+        title: t('playground_task_title'),
+        prompt: t('playground_task_prompt'),
         schema: { required: ['name', 'html', 'suggestions'] },
         messages: [
           {
             role: 'system',
-            content: '你是 3D 网页生成助手。你会收到"当前场景名称 + 当前场景完整HTML + 用户新需求"。默认在当前 HTML 基础上修改，尽量保留无关部分不变。返回结构化 JSON：{"name":"版本名称","html":"完整可运行的HTML（包含head/body/script，使用Three.js CDN）","suggestions":["后续建议1","后续建议2","后续建议3"]}。suggestions 必须是 3 条简短、可执行的下一步改造建议。name 要简短明确。只返回 JSON，不要解释，不要 markdown。'
+            content: t('playground_task_system')
           },
           { role: 'user', content: contextBlock }
         ]
@@ -291,7 +294,7 @@ const submitPrompt = async () => {
       nextSuggestions = [];
     }
 
-    if (!html.toLowerCase().includes('<html')) throw new Error('模型未返回完整 HTML');
+    if (!html.toLowerCase().includes('<html')) throw new Error(t('playground_missing_html'));
     sceneHtml.value = html;
     currentVersionName.value = name || content.slice(0, 24);
     suggestions.value = nextSuggestions;
@@ -305,7 +308,7 @@ const submitPrompt = async () => {
     await fetchVersions();
     selectedVersionId.value = 0;
   } catch (e) {
-    error.value = e.message || '生成失败';
+    error.value = e.message || t('playground_generate_failed');
   } finally {
     loading.value = false;
   }

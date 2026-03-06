@@ -9,6 +9,7 @@ export default {
   notebook_optimized: 'Optimized',
   notebook_use: 'Use',
   notebook_input_placeholder: 'Write something...',
+  notebook_sync_to_ai: 'Sync to AI (notify AI after save)',
   notebook_optimize: 'AI Polish',
   notebook_create_failed: 'Save failed',
   notebook_load_failed: 'Load failed',
@@ -18,4 +19,3 @@ export default {
   notebook_optimize_failed: 'Optimize failed',
   notebook_optimize_empty: 'Optimization is empty'
 };
-

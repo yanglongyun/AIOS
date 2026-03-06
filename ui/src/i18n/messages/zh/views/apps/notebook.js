@@ -9,6 +9,7 @@ export default {
   notebook_optimized: '优化结果',
   notebook_use: '使用',
   notebook_input_placeholder: '写点什么...',
+  notebook_sync_to_ai: '同步给 AI（创建后提醒 AI）',
   notebook_optimize: 'AI 优化',
   notebook_create_failed: '保存失败',
   notebook_load_failed: '加载失败',
@@ -18,4 +19,3 @@ export default {
   notebook_optimize_failed: '优化失败',
   notebook_optimize_empty: '优化结果为空'
 };
-

@@ -1,0 +1,22 @@
+export default {
+  blackroom_title: 'Blackroom',
+  blackroom_subtitle: 'Write down what you dislike about AI, or throw 💩 to vent. Submissions will be sent to the Agent.',
+  blackroom_label: 'Complaint',
+  blackroom_placeholder: 'Example: You keep answering off-topic and acting before confirming...',
+  blackroom_throw: 'Throw 💩',
+  blackroom_clear: 'Clear',
+  blackroom_current_count: 'Current {n}',
+  blackroom_submitting: 'Submitting...',
+  blackroom_submit: 'Submit to Agent',
+  blackroom_stats: 'Stats',
+  blackroom_total_complaints: 'Total Complaints',
+  blackroom_total_poop: 'Total 💩',
+  blackroom_records: 'Records',
+  blackroom_page: 'Page {page} / {total}',
+  blackroom_empty: 'No records yet',
+  blackroom_no_text: '(No text, emotion throw only)',
+  blackroom_agent_prefix: 'Agent: ',
+  blackroom_prev: '← Prev',
+  blackroom_next: 'Next →',
+  blackroom_submit_failed: 'Submit failed'
+};

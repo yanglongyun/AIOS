@@ -84,6 +84,15 @@
     <div v-if="error" class="mx-4 mb-2 shrink-0 rounded-lg bg-[#fef0f0] px-3 py-2 text-xs text-[#e85d5d]">{{ error }}</div>
 
     <div class="shrink-0 bg-[#eee8dd] px-4 pb-5 pt-2.5">
+      <label class="mb-2.5 flex cursor-pointer items-center gap-2 text-[12px] text-[#8a7a68]">
+        <input
+          type="checkbox"
+          :checked="syncToAi"
+          class="h-3.5 w-3.5 accent-[#e8a44a]"
+          @change="toggleSyncToAi"
+        />
+        <span>{{ t('notebook_sync_to_ai') }}</span>
+      </label>
       <div class="flex items-center gap-2">
         <textarea
           ref="inputEl"
@@ -134,6 +143,7 @@ const total = ref(0);
 const totalPages = ref(1);
 const inputEl = ref(null);
 const searchInputEl = ref(null);
+const syncToAi = ref(localStorage.getItem('notebook.syncToAi') !== '0');
 let searchTimer = null;
 
 const stickyClass = (idx) => {
@@ -191,7 +201,7 @@ const saveNote = async () => {
     const res = await fetch(`${API_BASE}/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content, syncToAi: syncToAi.value })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -204,6 +214,11 @@ const saveNote = async () => {
   } finally {
     creating.value = false;
   }
+};
+
+const toggleSyncToAi = (event) => {
+  syncToAi.value = Boolean(event.target?.checked);
+  localStorage.setItem('notebook.syncToAi', syncToAi.value ? '1' : '0');
 };
 
 const optimizeDraft = async () => {

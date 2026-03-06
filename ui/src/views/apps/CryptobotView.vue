@@ -6,7 +6,7 @@
       <div class="flex items-center gap-3">
         <span class="text-xl font-bold text-[#f0b90b]">₿</span>
         <div>
-          <h1 class="text-sm font-bold text-[#eaecef]">炒币机</h1>
+          <h1 class="text-sm font-bold text-[#eaecef]">{{ t('cryptobot_title') }}</h1>
           <div class="text-[10px] text-[#848e9c]">AI Trading Bot · OKX</div>
         </div>
       </div>
@@ -17,7 +17,7 @@
         </div>
         <div class="flex items-center gap-1.5">
           <div class="h-1.5 w-1.5 rounded-full" :class="status.state.running ? 'bg-[#0ecb81] shadow-[0_0_6px_#0ecb81]' : 'bg-[#2b2f36]'"></div>
-          <span class="text-[11px]" :class="status.state.running ? 'text-[#0ecb81]' : 'text-[#848e9c]'">{{ status.state.running ? '运行中' : '已停止' }}</span>
+          <span class="text-[11px]" :class="status.state.running ? 'text-[#0ecb81]' : 'text-[#848e9c]'">{{ status.state.running ? t('cryptobot_running') : t('cryptobot_stopped') }}</span>
         </div>
       </div>
     </div>
@@ -32,28 +32,28 @@
         <!-- 账户概览 -->
         <div class="flex flex-wrap items-end gap-x-8 gap-y-3 px-5 py-4">
           <div>
-            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">总权益</div>
+            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_equity_total') }}</div>
             <div class="font-['SF_Mono','Menlo',monospace] text-[30px] font-bold leading-none tabular-nums text-[#eaecef]">
               {{ fmtNum(status.equity.current, 0) }}<span class="ml-1 text-sm font-normal text-[#848e9c]">USDT</span>
             </div>
           </div>
           <div>
-            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">总盈亏</div>
+            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_pnl_total') }}</div>
             <div class="font-['SF_Mono','Menlo',monospace] text-xl font-bold tabular-nums" :class="status.equity.pnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'">
               {{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl) }}
               <span class="text-[12px] font-normal opacity-80">({{ status.equity.pnl_ratio >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl_ratio, 1) }}%)</span>
             </div>
           </div>
-          <div class="text-[11px] text-[#848e9c]">初始 {{ fmtNum(status.equity.initial, 0) }} USDT</div>
+          <div class="text-[11px] text-[#848e9c]">{{ t('cryptobot_initial', { v: fmtNum(status.equity.initial, 0) }) }} USDT</div>
           <div v-if="status.state.running" class="ml-auto text-right text-[11px] text-[#848e9c]">
-            <div>{{ status.state.tick_count }} 次思考</div>
-            <div>{{ status.state.trade_count }} 笔交易 · {{ runDuration }}</div>
+            <div>{{ t('cryptobot_ticks', { n: status.state.tick_count }) }}</div>
+            <div>{{ t('cryptobot_trades', { n: status.state.trade_count }) }} · {{ runDuration }}</div>
           </div>
         </div>
 
         <!-- 权益曲线 -->
         <div class="px-5 py-4">
-          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">权益曲线</div>
+          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_equity_curve') }}</div>
           <svg viewBox="0 0 580 100" class="h-[100px] w-full">
             <line v-for="y in [25, 50, 75]" :key="y" x1="0" :y1="y" x2="580" :y2="y" stroke="#2b2f36" stroke-width="1"/>
             <defs>
@@ -67,72 +67,72 @@
             <template v-for="dot in tradeDots" :key="dot.id">
               <circle :cx="dot.x" :cy="dot.y" r="3" :fill="dot.action === 'buy' ? '#0ecb81' : '#f6465d'" />
             </template>
-            <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#4b5563" font-size="12">暂无数据</text>
+            <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#4b5563" font-size="12">{{ t('cryptobot_no_data') }}</text>
           </svg>
           <div class="mt-1 flex justify-between text-[10px] text-[#848e9c]">
-            <span><span class="text-[#0ecb81]">●</span> 买入 <span class="ml-2 text-[#f6465d]">●</span> 卖出</span>
-            <span v-if="eqTimespan">最近 {{ eqTimespan }}</span>
+            <span><span class="text-[#0ecb81]">●</span> {{ t('cryptobot_buy') }} <span class="ml-2 text-[#f6465d]">●</span> {{ t('cryptobot_sell') }}</span>
+            <span v-if="eqTimespan">{{ t('cryptobot_recent') }} {{ eqTimespan }}</span>
           </div>
         </div>
 
         <!-- 自动运行 -->
         <div class="px-5 py-4">
-          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">自动运行</div>
+          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_auto_run') }}</div>
           <div class="flex items-center gap-3">
-            <span class="text-[11px] text-[#848e9c]">间隔</span>
+            <span class="text-[11px] text-[#848e9c]">{{ t('cryptobot_interval') }}</span>
             <select v-model="intervalMin" class="rounded border border-[#2b2f36] bg-[#1c2026] px-2 py-1 text-[11px] text-[#eaecef] outline-none" @change="onIntervalChange">
-              <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ m }} 分钟</option>
+              <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ t('cryptobot_minutes', { n: m }) }}</option>
             </select>
-            <button v-if="status.state.running" @click="doStop" class="btn-danger ml-auto">停止</button>
-            <button v-else @click="doStart" class="btn-success ml-auto">启动</button>
+            <button v-if="status.state.running" @click="doStop" class="btn-danger ml-auto">{{ t('cryptobot_stop') }}</button>
+            <button v-else @click="doStart" class="btn-success ml-auto">{{ t('cryptobot_start') }}</button>
           </div>
         </div>
 
         <!-- 交易所配置 -->
         <div class="px-5 py-4">
           <div class="flex items-center gap-3">
-            <div class="text-[10px] uppercase tracking-[2px] text-[#848e9c]">交易所</div>
+            <div class="text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_exchange') }}</div>
             <span class="text-[11px] font-bold text-[#eaecef]">OKX</span>
-            <span v-if="status.config.has_keys" class="rounded bg-[#0ecb81]/10 px-2 py-0.5 text-[9px] font-bold text-[#0ecb81]">已连接</span>
-            <span v-else class="rounded bg-[#2b2f36] px-2 py-0.5 text-[9px] font-bold text-[#848e9c]">未配置</span>
+            <span v-if="status.config.has_keys" class="rounded bg-[#0ecb81]/10 px-2 py-0.5 text-[9px] font-bold text-[#0ecb81]">{{ t('cryptobot_connected') }}</span>
+            <span v-else class="rounded bg-[#2b2f36] px-2 py-0.5 text-[9px] font-bold text-[#848e9c]">{{ t('cryptobot_not_configured') }}</span>
             <span v-if="status.config.api_key" class="font-['SF_Mono','Menlo',monospace] text-[10px] text-[#848e9c]">{{ status.config.api_key }}</span>
-            <button class="ml-auto text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="showExPanel = !showExPanel">{{ showExPanel ? '收起' : '修改' }}</button>
+            <button class="ml-auto text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="showExPanel = !showExPanel">{{ showExPanel ? t('cryptobot_collapse') : t('cryptobot_edit') }}</button>
           </div>
           <div v-if="showExPanel" class="mt-3 grid grid-cols-2 gap-2">
             <input v-model="exForm.api_key" placeholder="API Key" class="ex-input" />
             <input v-model="exForm.api_secret" type="password" placeholder="API Secret" class="ex-input" />
             <input v-model="exForm.passphrase" type="password" placeholder="Passphrase" class="ex-input" />
-            <input v-model="exForm.base_url" placeholder="API URL（默认 https://www.okx.com）" class="ex-input" />
+            <input v-model="exForm.base_url" :placeholder="t('cryptobot_api_url_placeholder')" class="ex-input" />
             <div class="col-span-2 flex items-center justify-between pt-1">
               <div class="flex items-center gap-2">
-                <button class="btn-ghost" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? '测试中...' : '测试连接' }}</button>
+                <button class="btn-ghost" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
                 <span v-if="testResult" class="text-[11px]" :class="testResult.ok ? 'text-[#0ecb81]' : 'text-[#f6465d]'">{{ testResult.msg }}</span>
               </div>
-              <button class="btn-primary" @click="doSaveExchange">保存</button>
+              <button class="btn-primary" @click="doSaveExchange">{{ t('common_save') }}</button>
             </div>
           </div>
         </div>
 
         <!-- 交易指令 -->
         <div class="px-5 py-4">
-          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">交易指令</div>
+          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_directive') }}</div>
           <textarea
             v-model="directive"
             class="dir-area"
             rows="3"
-            placeholder="告诉 AI 你想怎么交易...&#10;&#10;例如：帮我盯 BTC，保守操作，单次不超过 50U，跌 5% 止损。"
+            :placeholder="t('cryptobot_directive_placeholder')"
           ></textarea>
           <div class="mt-2 flex items-center justify-between">
-            <span class="text-[10px] text-[#848e9c]">{{ status.config.updated_at ? `上次保存 ${fmtTime(status.config.updated_at)}` : '' }}</span>
-            <button class="btn-primary" @click="doSaveDirective">保存</button>
+            <span class="text-[10px] text-[#848e9c]">{{ status.config.updated_at ? t('cryptobot_last_saved', { t: fmtTime(status.config.updated_at) }) : '' }}</span>
+            <button class="btn-primary" @click="doSaveDirective">{{ t('common_save') }}</button>
           </div>
         </div>
 
         <!-- 运行记录 -->
         <div class="px-5 pt-4">
-          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">运行记录</div>
+          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_logs') }}</div>
         </div>
-        <div v-if="!decisions.length" class="py-10 text-center text-[13px] text-[#4b5563]">启动后，AI 的每次思考和决策会显示在这里</div>
+        <div v-if="!decisions.length" class="py-10 text-center text-[13px] text-[#4b5563]">{{ t('cryptobot_logs_empty') }}</div>
         <div v-for="(d, idx) in decisions" :key="d.id" class="flex gap-3 px-5">
           <div class="w-10 flex-shrink-0 pt-3.5 text-right">
             <span class="font-['SF_Mono','Menlo',monospace] text-[11px] tabular-nums text-[#4b5563]">{{ fmtShort(d.created_at) }}</span>
@@ -154,7 +154,7 @@
             </div>
           </div>
         </div>
-        <div v-if="hasMore" class="cursor-pointer py-4 text-center text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="loadMoreDecisions">加载更多 ↓</div>
+        <div v-if="hasMore" class="cursor-pointer py-4 text-center text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="loadMoreDecisions">{{ t('cryptobot_load_more') }}</div>
       </div>
     </div>
   </div>
@@ -162,6 +162,9 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { useI18n } from '../../i18n/index.js';
+
+const { t } = useI18n();
 
 const API = '/apps/cryptobot';
 
@@ -229,7 +232,7 @@ const doTestExchange = async () => {
   testResult.value = null;
   try {
     await post('/exchange/test', exForm);
-    testResult.value = { ok: true, msg: '✓ 连接成功' };
+    testResult.value = { ok: true, msg: t('cryptobot_test_success') };
   } catch (e) {
     testResult.value = { ok: false, msg: e.message };
   } finally {
@@ -283,10 +286,10 @@ const runDuration = computed(() => {
   const ms = Date.now() - new Date(status.state.started_at).getTime();
   if (ms < 0) return '';
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return `${mins} 分钟`;
+  if (mins < 60) return t('cryptobot_minutes', { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} 小时`;
-  return `${Math.floor(hours / 24)} 天`;
+  if (hours < 24) return t('cryptobot_hours', { n: hours });
+  return t('cryptobot_days', { n: Math.floor(hours / 24) });
 });
 
 const eqPolyline = computed(() => {
@@ -337,8 +340,8 @@ const eqTimespan = computed(() => {
   const last = new Date(pts[pts.length - 1].created_at).getTime();
   const hours = Math.round((last - first) / 3600000);
   if (hours <= 0) return '';
-  if (hours < 24) return `${hours} 小时`;
-  return `${Math.round(hours / 24)} 天`;
+  if (hours < 24) return t('cryptobot_hours', { n: hours });
+  return t('cryptobot_days', { n: Math.round(hours / 24) });
 });
 
 const fmtNum = (v, dec = 2) => {
@@ -374,9 +377,9 @@ const actCls = (a) => ({
 });
 
 const actLabel = (a) => {
-  if (a === 'buy') return '买入';
-  if (a === 'sell') return '卖出';
-  return '观望';
+  if (a === 'buy') return t('cryptobot_buy');
+  if (a === 'sell') return t('cryptobot_sell');
+  return t('cryptobot_hold');
 };
 
 onMounted(async () => {
@@ -387,7 +390,7 @@ onMounted(async () => {
     exForm.base_url = status.config.base_url || 'https://www.okx.com';
     poller = setInterval(() => loadAll().catch(() => {}), 5000);
   } catch (e) {
-    error.value = e.message || '初始化失败';
+    error.value = e.message || t('cryptobot_init_failed');
   }
 });
 

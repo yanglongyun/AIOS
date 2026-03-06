@@ -4,8 +4,8 @@
       <!-- 顶部 -->
       <div class="flex items-center justify-between pb-2 pt-7">
         <div>
-          <h1 class="text-xl font-bold text-[#3a2e1e]">我的宝贝</h1>
-          <p class="mt-1 text-[11px] tracking-wide text-[#9a8a70]">已陪伴你 {{ daysSinceFirst }} 天</p>
+          <h1 class="text-xl font-bold text-[#3a2e1e]">{{ t('treasure_title') }}</h1>
+          <p class="mt-1 text-[11px] tracking-wide text-[#9a8a70]">{{ t('treasure_with_you_days', { n: daysSinceFirst }) }}</p>
         </div>
         <button
           @click="pickImage"
@@ -14,7 +14,7 @@
         >
           <Camera v-if="!loading" class="h-4 w-4" />
           <LoaderCircle v-else class="inline h-4 w-4 animate-spin" />
-          {{ loading ? '鉴宝中...' : '鉴宝入库' }}
+          {{ loading ? t('treasure_appraising') : t('treasure_add') }}
         </button>
         <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onFileChange" />
       </div>
@@ -23,7 +23,7 @@
       <div class="mb-4 border-b border-[#e4ddd0] pb-5 pt-3">
         <div class="text-[34px] font-bold text-[#5a3e28]">¥{{ formatValue(totalWealth) }}</div>
         <div class="mt-1.5 flex items-center gap-4">
-          <span class="rounded-full bg-[#5a3e28] px-2 py-0.5 text-[11px] text-white">{{ items.length }} 件藏品</span>
+          <span class="rounded-full bg-[#5a3e28] px-2 py-0.5 text-[11px] text-white">{{ t('treasure_items_count', { n: items.length }) }}</span>
           <span class="text-[11px] text-[#9a8a70]">{{ summaryText }}</span>
         </div>
       </div>
@@ -33,21 +33,21 @@
 
       <!-- 列表头 -->
       <div class="mb-1 flex items-center justify-between">
-        <div class="text-[11px] tracking-[2px] text-[#9a8a70]">全部藏品</div>
+        <div class="text-[11px] tracking-[2px] text-[#9a8a70]">{{ t('treasure_all_items') }}</div>
         <div class="flex gap-1">
           <button
             v-for="s in sortOptions" :key="s.key"
             @click="sortBy = s.key"
             class="rounded px-2.5 py-1 text-[11px] transition-colors"
             :class="sortBy === s.key ? 'bg-[#5a3e28] text-[#e8d8b8]' : 'text-[#9a8a70] hover:text-[#5a3e28]'"
-          >{{ s.label }}</button>
+          >{{ t(s.label) }}</button>
         </div>
       </div>
 
       <!-- 空状态 -->
       <div v-if="items.length === 0 && !loading" class="py-16 text-center">
         <div class="text-4xl">📦</div>
-        <p class="mt-3 text-[13px] leading-relaxed text-[#9a8a70]">还没有藏品<br>点击下方「鉴宝入库」开始</p>
+        <p class="mt-3 text-[13px] leading-relaxed text-[#9a8a70]">{{ t('treasure_empty') }}<br>{{ t('treasure_empty_hint') }}</p>
       </div>
 
       <!-- 藏品列表 -->
@@ -63,7 +63,7 @@
           <div class="mt-0.5 text-[11px] text-[#9a8a70]">{{ item.category }} · {{ item.condition_text }} · {{ item.summary_tag }}</div>
           <div class="mt-1.5 flex items-center justify-between">
             <div class="text-base font-bold text-[#5a3e28]">¥{{ formatValue(item.value) }}</div>
-            <div class="text-[10px] text-[#b8a890]">{{ formatDate(item.created_at) }} 入库</div>
+            <div class="text-[10px] text-[#b8a890]">{{ formatDate(item.created_at) }} {{ t('treasure_added') }}</div>
           </div>
         </div>
       </div>
@@ -77,14 +77,14 @@
         <img :src="imageUrl(detailItem.id)" class="h-[260px] w-full object-cover" />
         <div class="px-5 pb-7 pt-4">
           <div class="text-xl font-bold text-[#3a2e1e]">{{ detailItem.name }}</div>
-          <div class="mt-1 text-xs text-[#9a8a70]">{{ detailItem.category }} · {{ detailItem.condition_text }} · {{ detailItem.summary_tag }} · 入库于 {{ formatDate(detailItem.created_at) }}</div>
+          <div class="mt-1 text-xs text-[#9a8a70]">{{ detailItem.category }} · {{ detailItem.condition_text }} · {{ detailItem.summary_tag }} · {{ t('treasure_added_at', { d: formatDate(detailItem.created_at) }) }}</div>
           <div class="mt-3 text-[28px] font-bold text-[#5a3e28]">¥{{ formatValue(detailItem.value) }}</div>
           <div class="mt-3 rounded-lg border-l-2 border-[#c8a06040] bg-[#f5f0e8] p-3.5 text-[13px] leading-relaxed text-[#7a6a50]">
-            "{{ detailItem.comment || '暂无点评' }}"
+            "{{ detailItem.comment || t('treasure_no_comment') }}"
           </div>
           <div class="mt-4 flex gap-2.5">
-            <button @click="detailItem = null" class="flex-1 rounded-lg bg-[#f0ebe0] py-3 font-serif text-[13px] font-semibold text-[#7a6a50]">关闭</button>
-            <button @click="removeFromDetail" class="flex-1 rounded-lg bg-[#fdf0f0] py-3 font-serif text-[13px] font-semibold text-[#c06040]">删除</button>
+            <button @click="detailItem = null" class="flex-1 rounded-lg bg-[#f0ebe0] py-3 font-serif text-[13px] font-semibold text-[#7a6a50]">{{ t('common_close') }}</button>
+            <button @click="removeFromDetail" class="flex-1 rounded-lg bg-[#fdf0f0] py-3 font-serif text-[13px] font-semibold text-[#c06040]">{{ t('common_delete') }}</button>
           </div>
         </div>
       </div>
@@ -95,6 +95,9 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Camera, LoaderCircle } from 'lucide-vue-next';
+import { useI18n } from '../../i18n/index.js';
+
+const { t, locale } = useI18n();
 
 const API_BASE = '/apps/treasure';
 const fileInput = ref(null);
@@ -105,8 +108,8 @@ const totalWealth = ref(0);
 const detailItem = ref(null);
 const sortBy = ref('latest');
 const sortOptions = [
-  { key: 'latest', label: '最新' },
-  { key: 'value', label: '最贵' }
+  { key: 'latest', label: 'treasure_sort_latest' },
+  { key: 'value', label: 'treasure_sort_value' }
 ];
 
 const sortedItems = computed(() => {
@@ -133,14 +136,14 @@ const daysSinceFirst = computed(() => {
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
   const data = await res.json();
-  if (!res.ok || data.success === false) throw new Error(data.message || '请求失败');
+  if (!res.ok || data.success === false) throw new Error(data.message || t('treasure_request_failed'));
   return data;
 };
 
 const toDataUrl = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(String(reader.result || ''));
-  reader.onerror = () => reject(new Error('读取图片失败'));
+  reader.onerror = () => reject(new Error(t('treasure_read_image_failed')));
   reader.readAsDataURL(file);
 });
 
@@ -171,7 +174,7 @@ const onFileChange = async (e) => {
     });
     await loadItems();
   } catch (err) {
-    error.value = err.message || '鉴宝失败';
+    error.value = err.message || t('treasure_appraise_failed');
   } finally {
     loading.value = false;
     if (fileInput.value) fileInput.value.value = '';
@@ -187,7 +190,7 @@ const remove = async (id) => {
     });
     await loadItems();
   } catch (err) {
-    error.value = err.message || '删除失败';
+    error.value = err.message || t('treasure_delete_failed');
   }
 };
 
@@ -199,12 +202,12 @@ const removeFromDetail = async () => {
 
 const openDetail = (item) => { detailItem.value = item; };
 const imageUrl = (id) => `${API_BASE}/image?id=${id}`;
-const formatValue = (v) => Number(v || 0).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
+const formatValue = (v) => Number(v || 0).toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { maximumFractionDigits: 0 });
 const formatDate = (d) => {
   if (!d) return '';
   const date = new Date(d);
   return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
-loadItems().catch((err) => { error.value = err.message || '加载失败'; });
+loadItems().catch((err) => { error.value = err.message || t('treasure_load_failed'); });
 </script>

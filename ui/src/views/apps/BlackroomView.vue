@@ -2,16 +2,16 @@
   <div class="h-full w-full overflow-y-auto bg-black text-[#d6d6d6] [scrollbar-color:#5a5a5a_#151515] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-[#151515] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#5a5a5a] [&::-webkit-scrollbar-thumb:hover]:bg-[#7a7a7a]">
     <div class="mx-auto w-full max-w-4xl px-5 py-8">
       <header class="mb-6 border-b border-white/10 pb-4">
-        <h1 class="text-3xl font-extrabold text-white">小黑屋</h1>
-        <p class="mt-2 text-sm text-[#8a8a8a]">对 AI 不满意就写下来，也可以投掷 💩 发泄情绪。提交后会交给 Agent 处理。</p>
+        <h1 class="text-3xl font-extrabold text-white">{{ t('blackroom_title') }}</h1>
+        <p class="mt-2 text-sm text-[#8a8a8a]">{{ t('blackroom_subtitle') }}</p>
       </header>
 
       <section class="mb-5 rounded-xl border border-white/10 bg-[#0c0c0c] p-4">
-        <label class="mb-2 block text-xs uppercase tracking-widest text-[#888]">不满内容</label>
+        <label class="mb-2 block text-xs uppercase tracking-widest text-[#888]">{{ t('blackroom_label') }}</label>
         <textarea
           v-model="complaint"
           rows="5"
-          placeholder="例如：你最近总是答非所问，执行动作前也没先确认..."
+          :placeholder="t('blackroom_placeholder')"
           class="w-full resize-none rounded-lg border border-white/10 bg-[#131313] px-3 py-2.5 text-sm leading-relaxed text-[#e8e8e8] outline-none placeholder:text-[#666] focus:border-[#888]"
         />
 
@@ -21,15 +21,15 @@
               class="rounded-lg border border-[#5a5a5a] bg-[#1b1b1b] px-3 py-1.5 text-sm text-[#d8d8d8] transition hover:bg-[#252525]"
               @click="addPoop"
             >
-              投掷 💩
+              {{ t('blackroom_throw') }}
             </button>
             <button
               class="rounded-lg border border-white/10 bg-[#151515] px-3 py-1.5 text-xs text-[#999] transition hover:bg-[#1e1e1e]"
               @click="resetPoop"
             >
-              清空
+              {{ t('blackroom_clear') }}
             </button>
-            <span class="text-xs text-[#9a9a9a]">当前 {{ poopCount }} 个</span>
+            <span class="text-xs text-[#9a9a9a]">{{ t('blackroom_current_count', { n: poopCount }) }}</span>
           </div>
 
           <button
@@ -37,7 +37,7 @@
             :disabled="submitting || (!complaint.trim() && poopCount <= 0)"
             @click="submit"
           >
-            {{ submitting ? '提交中...' : '提交给 Agent' }}
+            {{ submitting ? t('blackroom_submitting') : t('blackroom_submit') }}
           </button>
         </div>
 
@@ -45,27 +45,27 @@
       </section>
 
       <section class="mb-5 rounded-xl border border-white/10 bg-[#0c0c0c] p-4">
-        <div class="mb-2 text-xs uppercase tracking-widest text-[#888]">统计</div>
+        <div class="mb-2 text-xs uppercase tracking-widest text-[#888]">{{ t('blackroom_stats') }}</div>
         <div class="flex gap-2">
           <div class="flex-1 rounded-lg border border-white/10 bg-[#141414] px-3 py-2">
             <div class="text-xl font-bold text-white">{{ stats.totalCount }}</div>
-            <div class="text-[11px] text-[#8d8d8d]">累计不满</div>
+            <div class="text-[11px] text-[#8d8d8d]">{{ t('blackroom_total_complaints') }}</div>
           </div>
           <div class="flex-1 rounded-lg border border-white/10 bg-[#141414] px-3 py-2">
             <div class="text-xl font-bold text-white">{{ stats.totalPoop }}</div>
-            <div class="text-[11px] text-[#8d8d8d]">累计 💩</div>
+            <div class="text-[11px] text-[#8d8d8d]">{{ t('blackroom_total_poop') }}</div>
           </div>
         </div>
       </section>
 
       <section>
         <div class="mb-2 flex items-center justify-between">
-          <div class="text-xs uppercase tracking-widest text-[#888]">记录</div>
-          <div class="text-[11px] text-[#666]">第 {{ page }} / {{ totalPages }} 页</div>
+          <div class="text-xs uppercase tracking-widest text-[#888]">{{ t('blackroom_records') }}</div>
+          <div class="text-[11px] text-[#666]">{{ t('blackroom_page', { page, total: totalPages }) }}</div>
         </div>
 
         <div v-if="items.length === 0" class="rounded-xl border border-dashed border-white/15 py-10 text-center text-sm text-[#666]">
-          还没有记录
+          {{ t('blackroom_empty') }}
         </div>
 
         <div v-else class="space-y-2">
@@ -75,17 +75,17 @@
               <span class="text-xs text-[#aaa]">💩 x {{ item.poopCount }}</span>
             </div>
             <div v-if="item.complaint" class="whitespace-pre-wrap text-sm leading-relaxed text-[#ddd]">{{ item.complaint }}</div>
-            <div v-else class="text-sm text-[#777]">（无文本，仅情绪投掷）</div>
+            <div v-else class="text-sm text-[#777]">{{ t('blackroom_no_text') }}</div>
             <div v-if="item.agentResponse" class="mt-2 rounded-lg border border-white/10 bg-[#171717] px-2.5 py-2 text-xs leading-relaxed text-[#bbb]">
-              Agent：{{ item.agentResponse }}
+              {{ t('blackroom_agent_prefix') }}{{ item.agentResponse }}
             </div>
           </div>
         </div>
 
         <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-4">
-          <button class="text-xs text-[#999] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">← 上一页</button>
+          <button class="text-xs text-[#999] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">{{ t('blackroom_prev') }}</button>
           <span class="text-[10px] text-[#666]">{{ page }} / {{ totalPages }}</span>
-          <button class="text-xs text-[#999] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">下一页 →</button>
+          <button class="text-xs text-[#999] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">{{ t('blackroom_next') }}</button>
         </div>
       </section>
     </div>
@@ -94,6 +94,9 @@
 
 <script setup>
 import { onMounted, ref, reactive } from 'vue';
+import { useI18n } from '../../i18n/index.js';
+
+const { t, locale } = useI18n();
 
 const API_BASE = '/apps/blackroom';
 
@@ -150,7 +153,7 @@ const submit = async () => {
     page.value = 1;
     await loadList();
   } catch (e) {
-    error.value = e.message || '提交失败';
+    error.value = e.message || t('blackroom_submit_failed');
   } finally {
     submitting.value = false;
   }
@@ -166,7 +169,7 @@ const formatTime = (value) => {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleString('zh-CN', { hour12: false });
+  return d.toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { hour12: false });
 };
 
 onMounted(loadList);

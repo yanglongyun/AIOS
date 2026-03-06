@@ -104,5 +104,12 @@ export const appRegistry = [
     load: () => import('./nokia/index.js'),
     apiHandler: 'handleNokiaApi',
     dbInit: ['initNokiaDatabase']
+  },
+  {
+    name: 'beach',
+    match: (path) => path.startsWith('/apps/beach/'),
+    load: () => import('./beach/index.js'),
+    apiHandler: 'handleBeachApi',
+    dbInit: ['initBeachDatabase']
   }
 ];

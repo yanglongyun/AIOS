@@ -1,0 +1,20 @@
+export default {
+  treasure_title: 'My Treasures',
+  treasure_with_you_days: 'With you for {n} days',
+  treasure_appraising: 'Appraising...',
+  treasure_add: 'Appraise',
+  treasure_items_count: '{n} items',
+  treasure_all_items: 'All Items',
+  treasure_sort_latest: 'Latest',
+  treasure_sort_value: 'Highest Value',
+  treasure_empty: 'No items yet',
+  treasure_empty_hint: 'Tap "Appraise" below to start',
+  treasure_added: 'added',
+  treasure_added_at: 'added at {d}',
+  treasure_no_comment: 'No comment',
+  treasure_request_failed: 'Request failed',
+  treasure_read_image_failed: 'Failed to read image',
+  treasure_appraise_failed: 'Appraisal failed',
+  treasure_delete_failed: 'Delete failed',
+  treasure_load_failed: 'Load failed'
+};

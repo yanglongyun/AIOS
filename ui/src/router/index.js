@@ -22,6 +22,7 @@ import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
 import BlackroomView from '../views/apps/BlackroomView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
+import BeachView from '../views/apps/BeachView.vue';
 import PokerView from '../views/apps/PokerView.vue';
 import TaskCreateView from '../views/TaskCreateView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
@@ -52,6 +53,7 @@ const routes = [
   { path: '/story', component: StoryView },
   { path: '/blackroom', component: BlackroomView },
   { path: '/fortune', component: FortuneView },
+  { path: '/beach', component: BeachView },
   { path: '/poker', component: PokerView },
   { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }

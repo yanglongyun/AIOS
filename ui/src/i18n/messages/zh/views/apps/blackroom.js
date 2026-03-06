@@ -1,0 +1,22 @@
+export default {
+  blackroom_title: '小黑屋',
+  blackroom_subtitle: '对 AI 不满意就写下来，也可以投掷 💩 发泄情绪。提交后会交给 Agent 处理。',
+  blackroom_label: '不满内容',
+  blackroom_placeholder: '例如：你最近总是答非所问，执行动作前也没先确认...',
+  blackroom_throw: '投掷 💩',
+  blackroom_clear: '清空',
+  blackroom_current_count: '当前 {n} 个',
+  blackroom_submitting: '提交中...',
+  blackroom_submit: '提交给 Agent',
+  blackroom_stats: '统计',
+  blackroom_total_complaints: '累计不满',
+  blackroom_total_poop: '累计 💩',
+  blackroom_records: '记录',
+  blackroom_page: '第 {page} / {total} 页',
+  blackroom_empty: '还没有记录',
+  blackroom_no_text: '（无文本，仅情绪投掷）',
+  blackroom_agent_prefix: 'Agent：',
+  blackroom_prev: '← 上一页',
+  blackroom_next: '下一页 →',
+  blackroom_submit_failed: '提交失败'
+};

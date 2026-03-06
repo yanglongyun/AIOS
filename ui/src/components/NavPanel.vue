@@ -53,55 +53,73 @@
           <button @click="go('/finance')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/finance'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>记账本</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>{{
+                t('app_sidebar_finance') }}</button>
           <button @click="go('/inbox')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/inbox'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>收件箱</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>{{
+                t('app_sidebar_inbox') }}</button>
           <button @click="go('/weibo')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/weibo'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🪶</span>微博</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🪶</span>{{
+                t('app_sidebar_weibo') }}</button>
           <button @click="go('/playground')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/playground'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌌</span>3D游乐园</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌌</span>{{
+                t('app_sidebar_playground') }}</button>
           <button @click="go('/debate-simulator')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/debate-simulator'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>竞选模拟器</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>{{
+                t('app_sidebar_debate') }}</button>
           <button @click="go('/treasure')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/treasure'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔍</span>藏宝阁</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔍</span>{{
+                t('app_sidebar_treasure') }}</button>
           <button @click="go('/briefing')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/briefing'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📰</span>新闻头条</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📰</span>{{
+                t('app_sidebar_briefing') }}</button>
           <button @click="go('/cryptobot')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/cryptobot'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>炒币机</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>{{
+                t('app_sidebar_cryptobot') }}</button>
           <button @click="go('/story')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/story'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>书架</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>{{
+                t('app_sidebar_story') }}</button>
           <button @click="go('/blackroom')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/blackroom'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⬛</span>小黑屋</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⬛</span>{{
+                t('app_sidebar_blackroom') }}</button>
           <button @click="go('/poker')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/poker'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>炸金花</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>{{
+                t('app_sidebar_poker') }}</button>
           <button @click="go('/fortune')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/fortune'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>算一卦</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>{{
+                t('app_sidebar_fortune') }}</button>
+          <button @click="go('/beach')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(route.path.startsWith('/beach'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🏖️</span>{{
+                t('app_sidebar_beach') }}</button>
           <button @click="go('/nokia')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/nokia'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>{{
+                t('app_sidebar_nokia') }}</button>
         </div>
         <div v-if="thumbVisible"
           class="pointer-events-none absolute bottom-1 right-0 top-0 w-[3px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">

@@ -20,7 +20,7 @@ export const handleNotebookApi = async (req, res, path) => {
 
   if (path === '/apps/notebook/create' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, createHandler(body));
+    return json(res, await createHandler(body, req));
   }
 
   if (path === '/apps/notebook/update' && req.method === 'POST') {

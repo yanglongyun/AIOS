@@ -1,5 +1,5 @@
-import { readBody } from '../utils/readBody.js';
-import { json } from '../utils/json.js';
+import { readBody } from '../../../shared/http/readBody.js';
+import { json } from '../../../shared/http/json.js';
 import { countUsers, createAuthSession, createUser, findUserByUsername } from '../../../shared/auth/repository.js';
 import { hashPassword } from '../../../shared/auth/password.js';
 import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL_SECONDS } from '../../../shared/auth/session.js';

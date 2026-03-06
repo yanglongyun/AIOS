@@ -1,5 +1,5 @@
-import { readBody } from '../utils/readBody.js';
-import { json } from '../utils/json.js';
+import { readBody } from '../../../shared/http/readBody.js';
+import { json } from '../../../shared/http/json.js';
 import { getSettings } from './get.js';
 import { updateSettings } from './update.js';
 

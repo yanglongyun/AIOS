@@ -1,4 +1,4 @@
-import { json } from '../utils/json.js';
+import { json } from '../../../shared/http/json.js';
 import { getSetupStatus } from './status.js';
 
 export const handleSetupApi = async (req, res, path) => {

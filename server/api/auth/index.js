@@ -1,4 +1,4 @@
-import { json } from '../utils/json.js';
+import { json } from '../../../shared/http/json.js';
 import { login } from './login.js';
 import { register } from './register.js';
 import { logout } from './logout.js';

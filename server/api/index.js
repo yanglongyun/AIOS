@@ -1,4 +1,4 @@
-import { json } from './utils/json.js';
+import { json } from '../../shared/http/json.js';
 import { handleChatApi } from './chat/index.js';
 import { handleSettingsApi } from './settings/index.js';
 import { handleFilesApi } from './files/index.js';

@@ -1,5 +1,5 @@
-import { readBody } from '../utils/readBody.js';
-import { json } from '../utils/json.js';
+import { readBody } from '../../../shared/http/readBody.js';
+import { json } from '../../../shared/http/json.js';
 import { uploadHandler } from './upload.js';
 
 export const handleFilesApi = async (req, res, path) => {

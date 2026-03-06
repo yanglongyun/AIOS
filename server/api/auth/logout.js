@@ -1,4 +1,4 @@
-import { json } from '../utils/json.js';
+import { json } from '../../../shared/http/json.js';
 import { deleteAuthSessionByTokenHash } from '../../../shared/auth/repository.js';
 import { buildClearSessionCookie, getSessionTokenFromRequest, hashSessionToken } from '../../../shared/auth/session.js';
 

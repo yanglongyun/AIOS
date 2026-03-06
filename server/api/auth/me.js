@@ -1,4 +1,4 @@
-import { json } from '../utils/json.js';
+import { json } from '../../../shared/http/json.js';
 import { getAuthUser } from './require.js';
 
 export const me = async (req, res) => {

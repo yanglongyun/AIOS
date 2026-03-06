@@ -3,8 +3,8 @@ import { randomUUID } from 'crypto';
 import { db } from '../../../db/client.js';
 import { getSettings } from '../../../db/settings.js';
 import { broadcast } from '../../../system/ws.js';
-import { readBody } from '../../utils/readBody.js';
-import { json } from '../../utils/json.js';
+import { readBody } from '../../../../shared/http/readBody.js';
+import { json } from '../../../../shared/http/json.js';
 import { parseJsonObject, validateBySchema } from '../../../../shared/ai/json.js';
 
 export const runInstantTask = async ({

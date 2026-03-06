@@ -10,6 +10,7 @@ const PUBLIC_DIR = join(ROOT_DIR, 'ui', 'dist');
 const FILES_DIR = join(ROOT_DIR, 'files');
 const FILES_UPLOADS_DIR = join(FILES_DIR, 'uploads');
 const FILES_DOWNLOADS_DIR = join(FILES_DIR, 'downloads');
+const FILES_TMP_DIR = join(FILES_DIR, 'tmp');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -29,6 +30,7 @@ const APPS_PORT = 9701;
 
 mkdirSync(FILES_UPLOADS_DIR, { recursive: true });
 mkdirSync(FILES_DOWNLOADS_DIR, { recursive: true });
+mkdirSync(FILES_TMP_DIR, { recursive: true });
 
 const readRawBody = async (req) => {
   const chunks = [];

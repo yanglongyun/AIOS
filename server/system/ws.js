@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { createSession } from '../chat/session.js';
+import { createSession } from '../chat/index.js';
 import { getAuthUser } from '../../shared/auth/guard.js';
 import { isLocalCliBypass } from '../../shared/auth/network.js';
 

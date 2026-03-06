@@ -1,6 +1,6 @@
 import { chat } from '../agent/handler.js';
 import { getSettings } from '../db/settings.js';
-import { buildSystemPrompt } from './prompt.js';
+import { buildSystemPrompt } from './prompt/index.js';
 import { injectAttachmentsMessage } from './attachments.js';
 import { getMessages, saveMessage } from './messages.js';
 

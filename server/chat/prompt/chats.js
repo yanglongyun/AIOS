@@ -1,4 +1,4 @@
-import { db } from '../db/client.js';
+import { db } from '../../db/client.js';
 
 export const getRecentChats = () => {
   return db.prepare(`

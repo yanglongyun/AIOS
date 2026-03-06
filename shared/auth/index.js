@@ -18,6 +18,7 @@ const allowAppsPublic = (path) => {
     || path === '/apps/inbox/submit'
     || path === '/apps/weibo/feed'
     || path === '/apps/weibo/list'
+    || path === '/apps/weibo/profile'
     || path.startsWith('/public/');
 };
 

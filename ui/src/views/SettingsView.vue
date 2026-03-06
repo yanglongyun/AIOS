@@ -18,8 +18,20 @@
 
     <div class="flex-1 overflow-y-auto px-4 py-5">
       <div class="max-w-lg mx-auto">
+        <AccountTab
+          v-if="activeTab === 'account'"
+          :username="accountUsername"
+          :old-password="oldPassword"
+          :new-password="newPassword"
+          :confirm-password="confirmPassword"
+          @update:old-password="oldPassword = $event"
+          @update:new-password="newPassword = $event"
+          @update:confirm-password="confirmPassword = $event"
+          @change-password="changePassword"
+          @logout="logout"
+        />
         <ModelTab
-          v-if="activeTab === 'model'"
+          v-else-if="activeTab === 'model'"
           :provider="provider"
           :api-url="editApiUrl"
           :api-key="editApiKey"
@@ -63,6 +75,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import AccountTab from '../components/settings/AccountTab.vue';
 import ModelTab from '../components/settings/ModelTab.vue';
 import ContextTab from '../components/settings/ContextTab.vue';
 import ToolTab from '../components/settings/ToolTab.vue';
@@ -72,15 +86,17 @@ import { toast } from '../stores/toast.js';
 import { useI18n } from '../i18n/index.js';
 
 const { t, setLocale } = useI18n();
+const router = useRouter();
 
 const tabs = [
+  { key: 'account', label: 'settings_tab_account' },
   { key: 'model', label: 'settings_tab_model' },
   { key: 'messages', label: 'settings_tab_messages' },
   { key: 'tools', label: 'settings_tab_tools' },
   { key: 'general', label: 'settings_tab_general' }
 ];
 
-const activeTab = ref('model');
+const activeTab = ref('account');
 const theme = ref(localStorage.getItem('theme') || 'dark');
 const language = ref('zh');
 const provider = ref('openai');
@@ -92,6 +108,10 @@ const toolMaxRounds = ref(50);
 const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
+const accountUsername = ref('');
+const oldPassword = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
 const providerConfigs = ref({});
 
 const PROVIDER_CONFIGS_KEY = 'aios.providerConfigs.v1';
@@ -99,7 +119,7 @@ const PROVIDER_CONFIGS_KEY = 'aios.providerConfigs.v1';
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
+  if (!res.ok) throw new Error(data.message || data.error || `${res.status} ${res.statusText}`);
   return data;
 };
 
@@ -163,6 +183,11 @@ const fetchSettings = async () => {
   saveProviderConfigs();
 };
 
+const fetchMe = async () => {
+  const data = await request('/api/auth/me');
+  accountUsername.value = data?.user?.username || '';
+};
+
 const setTheme = (nextTheme) => {
   theme.value = nextTheme;
   localStorage.setItem('theme', nextTheme);
@@ -210,8 +235,47 @@ const save = async () => {
   }
 };
 
+const changePassword = async () => {
+  try {
+    if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
+      throw new Error(t('settings_password_required'));
+    }
+    if (newPassword.value !== confirmPassword.value) {
+      throw new Error(t('settings_password_mismatch'));
+    }
+
+    await request('/api/auth/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        oldPassword: oldPassword.value,
+        newPassword: newPassword.value
+      })
+    });
+
+    oldPassword.value = '';
+    newPassword.value = '';
+    confirmPassword.value = '';
+    toast.show(t('settings_password_changed_relogin'));
+    await logout();
+  } catch (e) {
+    toast.show(t('settings_save_failed', { message: e.message }), { type: 'error' });
+  }
+};
+
+const logout = async () => {
+  try {
+    await request('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch {}
+  await router.push('/login');
+};
+
 onMounted(async () => {
   loadProviderConfigs();
+  await fetchMe();
   await fetchSettings();
 });
 </script>

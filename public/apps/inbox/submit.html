@@ -104,6 +104,33 @@ body::before {
   margin-top: 6px;
 }
 
+.entry-row {
+  margin: 0 0 18px;
+  display: flex;
+  justify-content: center;
+}
+.entry-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #d4c8b8;
+  border-radius: 6px;
+  background: #f7f1e8;
+  color: #8a7a68;
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.entry-link:hover {
+  background: #efe4d6;
+  border-color: #c8b8a0;
+  color: #7a6a58;
+}
+
 .airmail-stripe {
   display: flex;
   height: 8px;
@@ -228,6 +255,10 @@ body::before {
       <div class="title">
         <h1>给我写封信 ✉️</h1>
         <p>你的来信会送到我的收件箱</p>
+      </div>
+
+      <div class="entry-row">
+        <a class="entry-link" href="/apps/weibo/feed">🪶 查看微博动态</a>
       </div>
 
       <div class="letter-field">

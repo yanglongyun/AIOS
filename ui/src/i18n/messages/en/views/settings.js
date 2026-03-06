@@ -1,4 +1,5 @@
 export default {
+  settings_tab_account: 'Account',
   settings_tab_model: 'Model',
   settings_tab_messages: 'Messages',
   settings_tab_context: 'Context',
@@ -22,6 +23,16 @@ export default {
   settings_language: 'Language',
   settings_language_zh: '中文',
   settings_language_en: 'English',
+  settings_current_user: 'Current User',
+  settings_change_password: 'Change Password',
+  settings_old_password: 'Old Password',
+  settings_new_password: 'New Password',
+  settings_confirm_password: 'Confirm New Password',
+  settings_change_password_btn: 'Update Password',
+  settings_logout: 'Log Out',
+  settings_password_required: 'Please complete all password fields',
+  settings_password_mismatch: 'New passwords do not match',
+  settings_password_changed_relogin: 'Password changed. Please log in again',
   settings_saved: 'Saved',
   settings_save_failed: 'Save failed: {message}'
 };

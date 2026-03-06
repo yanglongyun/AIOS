@@ -19,6 +19,10 @@ export const findUserById = (id) => db.prepare(
   'SELECT id, username, created_at FROM users WHERE id = ?'
 ).get(id);
 
+export const findUserAuthById = (id) => db.prepare(
+  'SELECT id, username, password_hash, created_at FROM users WHERE id = ?'
+).get(id);
+
 export const countUsers = () => {
   const row = db.prepare('SELECT COUNT(1) AS count FROM users').get();
   return Number(row?.count || 0);
@@ -28,6 +32,10 @@ export const createUser = (username, passwordHash) => {
   const stmt = db.prepare('INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, datetime(\'now\'))');
   const info = stmt.run(username, passwordHash);
   return findUserById(Number(info.lastInsertRowid));
+};
+
+export const updateUserPasswordById = (id, passwordHash) => {
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, id);
 };
 
 export const createAuthSession = (userId, tokenHash, ttlSeconds) => {
@@ -52,6 +60,10 @@ export const touchAuthSession = (id) => {
 
 export const deleteAuthSessionByTokenHash = (tokenHash) => {
   db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(tokenHash);
+};
+
+export const deleteAuthSessionsByUserId = (userId) => {
+  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
 };
 
 export const deleteExpiredAuthSessions = () => {

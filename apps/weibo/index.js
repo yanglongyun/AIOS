@@ -6,6 +6,8 @@ import { initWeiboDatabase } from './db.js';
 import { listHandler } from './api/list.js';
 import { createHandler } from './api/create.js';
 import { deleteHandler } from './api/delete.js';
+import { getProfileHandler } from './api/profile/get.js';
+import { saveProfileHandler } from './api/profile/save.js';
 
 export { initWeiboDatabase };
 
@@ -20,6 +22,17 @@ export const handleWeiboApi = async (req, res, pathName) => {
   if (pathName === '/apps/weibo/list' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
     return json(res, listHandler({ limit: Number(url.searchParams.get('limit') || 50) }));
+  }
+
+  if (pathName === '/apps/weibo/profile' && req.method === 'GET') {
+    return json(res, getProfileHandler());
+  }
+
+  if (pathName === '/apps/weibo/profile/save' && req.method === 'POST') {
+    const body = await readBody(req);
+    const data = saveProfileHandler(body);
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
   }
 
   if (pathName === '/apps/weibo/create' && req.method === 'POST') {

@@ -14,6 +14,28 @@
           </div>
         </div>
 
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <img v-if="avatarPreview" :src="avatarPreview" class="profile-avatar" alt="avatar" />
+            <div v-else class="profile-avatar profile-avatar-empty">T</div>
+            <button class="profile-upload-btn" :disabled="uploadingAvatar" @click="openAvatarPicker">
+              {{ uploadingAvatar ? t('weibo_avatar_uploading') : t('weibo_upload_avatar') }}
+            </button>
+            <input ref="avatarInputRef" type="file" accept="image/png,image/jpeg,image/webp" class="hidden-file" @change="onAvatarSelected" />
+          </div>
+          <div class="profile-fields">
+            <div class="profile-label">{{ t('weibo_name') }}</div>
+            <input v-model="profileName" class="profile-input" :placeholder="t('weibo_name_placeholder')" maxlength="40" />
+            <div class="profile-label">{{ t('weibo_signature') }}</div>
+            <input v-model="profileSignature" class="profile-input" :placeholder="t('weibo_signature_placeholder')" maxlength="160" />
+          </div>
+          <div class="profile-save-row">
+            <button class="compose-btn" :disabled="savingProfile" @click="saveProfile()">
+              {{ savingProfile ? t('weibo_profile_saving') : t('weibo_save_profile') }}
+            </button>
+          </div>
+        </div>
+
         <!-- 发布区 -->
         <div class="compose">
           <textarea
@@ -52,6 +74,7 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
 import { useI18n } from '../../i18n/index.js';
+import { toast } from '../../stores/toast.js';
 
 const { t } = useI18n();
 const API_BASE = '/apps/weibo';
@@ -62,6 +85,13 @@ const draft = ref('');
 const posting = ref(false);
 const copied = ref(false);
 const textareaRef = ref(null);
+const avatarInputRef = ref(null);
+const uploadingAvatar = ref(false);
+const savingProfile = ref(false);
+const profileName = ref('twitter');
+const profileSignature = ref('');
+const avatarPreview = ref('');
+const avatarPath = ref('');
 
 const autoResize = () => {
   const el = textareaRef.value;
@@ -74,6 +104,25 @@ const fetchPosts = async () => {
   const res = await fetch(`${API_BASE}/list?limit=100`);
   const data = await res.json();
   posts.value = Array.isArray(data.data) ? data.data : [];
+};
+
+const toPublicFileUrl = (input = '') => {
+  const text = String(input || '').trim();
+  if (!text) return '';
+  if (text.startsWith('/files/')) return text;
+  const idx = text.indexOf('/files/');
+  if (idx >= 0) return text.slice(idx);
+  return text;
+};
+
+const fetchProfile = async () => {
+  const res = await fetch(`${API_BASE}/profile`);
+  const data = await res.json().catch(() => ({}));
+  const profile = data?.profile || {};
+  profileName.value = String(profile.displayName || 'twitter');
+  profileSignature.value = String(profile.signature || '');
+  avatarPath.value = String(profile.avatarUrl || '');
+  avatarPreview.value = toPublicFileUrl(avatarPath.value);
 };
 
 const createPost = async () => {
@@ -117,6 +166,72 @@ const openPublicFeed = () => {
   window.open(publicFeedUrl, '_blank', 'noopener,noreferrer');
 };
 
+const openAvatarPicker = () => {
+  avatarInputRef.value?.click();
+};
+
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result || ''));
+  reader.onerror = () => reject(new Error('read failed'));
+  reader.readAsDataURL(file);
+});
+
+const onAvatarSelected = async (e) => {
+  const file = e.target?.files?.[0];
+  e.target.value = '';
+  if (!file) return;
+  uploadingAvatar.value = true;
+  try {
+    const dataUrl = await fileToBase64(file);
+    const res = await fetch('/api/files/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: file.name, data: dataUrl })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false || !data?.file?.path) {
+      throw new Error(data.message || 'upload failed');
+    }
+    avatarPath.value = toPublicFileUrl(data.file.path);
+    avatarPreview.value = avatarPath.value;
+  } catch (e2) {
+    toast.show(t('weibo_upload_failed'), { type: 'error' });
+  } finally {
+    uploadingAvatar.value = false;
+  }
+};
+
+const saveProfile = async () => {
+  if (savingProfile.value) return;
+  savingProfile.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/profile/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        displayName: profileName.value,
+        signature: profileSignature.value,
+        avatarPath: avatarPath.value
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'save failed');
+    }
+    const profile = data?.profile || {};
+    profileName.value = String(profile.displayName || profileName.value);
+    profileSignature.value = String(profile.signature || '');
+    avatarPath.value = String(profile.avatarUrl || avatarPath.value);
+    avatarPreview.value = toPublicFileUrl(avatarPath.value);
+    toast.show(t('weibo_profile_saved'));
+  } catch (e2) {
+    toast.show(t('weibo_profile_save_failed'), { type: 'error' });
+  } finally {
+    savingProfile.value = false;
+  }
+};
+
 const formatDate = (v) => {
   if (!v) return '';
   const d = new Date(String(v).replace(' ', 'T'));
@@ -130,7 +245,9 @@ const formatDate = (v) => {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
 
-onMounted(fetchPosts);
+onMounted(async () => {
+  await Promise.all([fetchPosts(), fetchProfile()]);
+});
 </script>
 
 <style scoped>
@@ -206,6 +323,74 @@ onMounted(fetchPosts);
   border-color: transparent;
 }
 .feed-btn.primary:hover { opacity: .9; }
+
+.profile-card {
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+.profile-avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+}
+.profile-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #8a6a48;
+}
+.profile-upload-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: 7px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.62);
+  color: #5a4828;
+  cursor: pointer;
+}
+.profile-upload-btn:disabled {
+  opacity: .45;
+  cursor: default;
+}
+.hidden-file { display: none; }
+.profile-fields { margin-top: 10px; }
+.profile-label {
+  font-size: 11px;
+  color: #9a8a78;
+  margin: 6px 0 4px;
+}
+.profile-input {
+  width: 100%;
+  border: 1px solid rgba(0,0,0,.08);
+  outline: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #3a2e20;
+  background: rgba(255,255,255,.7);
+  font-family: inherit;
+}
+.profile-input:focus { border-color: #b08040; }
+.profile-save-row {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start;
+}
 
 /* 发布区 */
 .compose {

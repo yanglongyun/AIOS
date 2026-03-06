@@ -10,16 +10,9 @@
         <div class="break-all font-mono text-[11px] text-[#9a8a78]">{{ publicUrl }}</div>
         <div class="mt-1 text-[11px] leading-relaxed text-[#a59686]">{{ t('inbox_submit_desc') }}</div>
       </div>
-      <div class="min-w-0 flex-1 border-t border-dashed border-[#eadfce] pt-3">
-        <div class="break-all font-mono text-[11px] text-[#9a8a78]">{{ feedUrl }}</div>
-        <div class="mt-1 text-[11px] leading-relaxed text-[#a59686]">{{ t('inbox_feed_desc') }}</div>
-      </div>
       <div class="flex w-full flex-wrap items-center justify-end gap-2">
         <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openSubmitUrl">{{ t('inbox_open') }}</button>
         <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copySubmitUrl">{{ copied ? t('inbox_copied') : t('inbox_copy_submit') }}</button>
-        <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openFeedUrl">{{ t('inbox_weibo_feed') }}</button>
-        <button class="whitespace-nowrap rounded bg-[#8a7a68] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#faf6f0] transition-colors hover:bg-[#9a8a78]" @click="copyFeedUrl">{{ feedCopied ? t('inbox_copied') : t('inbox_copy_feed') }}</button>
-        <button class="whitespace-nowrap rounded border border-[#d4c8b8] bg-[#f7f1e8] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#8a7a68] transition-colors hover:bg-[#efe4d6]" @click="openWeiboApp">{{ t('inbox_manage_weibo') }}</button>
       </div>
     </div>
 
@@ -86,13 +79,11 @@ const { t, locale } = useI18n();
 
 const API_BASE = '/apps/inbox';
 const publicUrl = `${window.location.origin}/apps/inbox/submit`;
-const feedUrl = `${window.location.origin}/apps/weibo/feed`;
 
 const messages = ref([]);
 const unread = ref(0);
 const readFilter = ref('all');
 const copied = ref(false);
-const feedCopied = ref(false);
 const suggesting = reactive({});
 
 const fetchMessages = async () => {
@@ -148,22 +139,6 @@ const copySubmitUrl = async () => {
 
 const openSubmitUrl = () => {
   window.open(publicUrl, '_blank', 'noopener,noreferrer');
-};
-
-const copyFeedUrl = async () => {
-  try {
-    await navigator.clipboard.writeText(feedUrl);
-    feedCopied.value = true;
-    setTimeout(() => { feedCopied.value = false; }, 1500);
-  } catch {}
-};
-
-const openFeedUrl = () => {
-  window.open(feedUrl, '_blank', 'noopener,noreferrer');
-};
-
-const openWeiboApp = () => {
-  window.location.href = '/weibo';
 };
 
 const formatDate = (v) => {

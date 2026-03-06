@@ -1,4 +1,5 @@
 export default {
+  settings_tab_account: '账户',
   settings_tab_model: '模型',
   settings_tab_messages: '消息',
   settings_tab_context: '上下文',
@@ -22,6 +23,16 @@ export default {
   settings_language: '语言',
   settings_language_zh: '中文',
   settings_language_en: 'English',
+  settings_current_user: '当前用户',
+  settings_change_password: '修改密码',
+  settings_old_password: '旧密码',
+  settings_new_password: '新密码',
+  settings_confirm_password: '确认新密码',
+  settings_change_password_btn: '修改密码',
+  settings_logout: '退出登录',
+  settings_password_required: '请填写完整密码信息',
+  settings_password_mismatch: '两次新密码不一致',
+  settings_password_changed_relogin: '密码已修改，请重新登录',
   settings_saved: '配置已保存',
   settings_save_failed: '保存失败：{message}'
 };

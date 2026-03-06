@@ -54,7 +54,7 @@
       />
     </div>
 
-    <div class="pt-2 flex justify-end">
+    <div class="pt-2 flex justify-start">
       <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">{{ t('common_save') }}</button>
     </div>
   </section>

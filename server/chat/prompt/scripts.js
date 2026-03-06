@@ -48,10 +48,10 @@ const parseScriptMeta = (filePath) => {
   return meta;
 };
 
-export const getVisibleScriptsCatalog = () => {
-  if (!existsSync(SCRIPTS_ROOT)) return [];
+export const scripts = () => {
+  if (!existsSync(SCRIPTS_ROOT)) return '';
 
-  const items = [];
+  const list = [];
   for (const name of readdirSync(SCRIPTS_ROOT)) {
     const dir = join(SCRIPTS_ROOT, name);
     let isDir = false;
@@ -64,9 +64,17 @@ export const getVisibleScriptsCatalog = () => {
 
     const meta = parseScriptMeta(join(dir, 'SCRIPT.md'));
     if (!meta) continue;
-    items.push(meta);
+    list.push(meta);
   }
+  list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
 
-  items.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-  return items;
+  if (!Array.isArray(list) || list.length === 0) return '';
+
+  const lines = list.map((script, i) => {
+    return `${i + 1}. name: ${script.name || '-'} | description: ${
+      script.description || '-'
+    } | usage: ${script.usage || '-'}`;
+  });
+  return `\n\n## 可见脚本
+以下脚本已标记为可见，可按需建议用户使用（仅展示 name/description/usage）：\n${lines.join('\n')}`;
 };

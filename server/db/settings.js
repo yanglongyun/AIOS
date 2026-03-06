@@ -1,5 +1,13 @@
 import { db } from './client.js';
 
+export const normalizeContextRounds = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return 100;
+  if (num <= 30) return 30;
+  if (num <= 100) return 100;
+  return 500;
+};
+
 export const getSettings = () => {
   const rows = db.prepare('SELECT key, value FROM settings').all();
   const obj = {};
@@ -10,7 +18,7 @@ export const getSettings = () => {
     provider: obj.provider || 'openai',
     systemPrompt: obj.systemPrompt || '',
     language: obj.language || 'zh',
-    contextRounds: Number(obj.contextRounds) || 30,
+    contextRounds: normalizeContextRounds(obj.contextRounds),
     apiUrl: obj.apiUrl || 'https://api.openai.com/v1/chat/completions',
     apiKey: obj.apiKey || '',
     model: obj.model || 'gpt-5.2',

@@ -60,6 +60,12 @@ export const PROVIDERS = [
     defaultModel: 'kimi-k2.5',
   },
   {
+    id: 'stepfun',
+    name: 'StepFun (阶跃星辰)',
+    apiUrl: 'https://api.stepfun.com/v1/chat/completions',
+    defaultModel: 'step-3.5-flash',
+  },
+  {
     id: 'minimax',
     name: 'MiniMax',
     apiUrl: 'https://api.minimaxi.com/v1/chat/completions',
@@ -78,10 +84,28 @@ export const PROVIDERS = [
     defaultModel: 'google/gemini-3-flash-preview',
   },
   {
+    id: 'together',
+    name: 'Together AI',
+    apiUrl: 'https://api.together.xyz/v1/chat/completions',
+    defaultModel: 'moonshotai/Kimi-K2.5',
+  },
+  {
+    id: 'fireworks',
+    name: 'Fireworks AI',
+    apiUrl: 'https://api.fireworks.ai/inference/v1/chat/completions',
+    defaultModel: 'glm-5',
+  },
+  {
     id: 'aliyun-coding',
     name: '阿里云 Coding Plan',
     apiUrl: 'https://coding.dashscope.aliyuncs.com/v1/chat/completions',
     defaultModel: 'qwen3-coder-plus',
+  },
+  {
+    id: 'ark-coding',
+    name: '方舟 Coding Plan',
+    apiUrl: 'https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions',
+    defaultModel: 'doubao-seed-2.0-pro',
   },
   {
     id: 'custom',

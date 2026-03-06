@@ -3,7 +3,7 @@
     <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840]">{{ t('settings_context_rounds') }}</div>
     <div class="flex gap-2">
       <button
-        v-for="n in [10, 30, 100]"
+        v-for="n in [30, 100, 500]"
         :key="n"
         @click="$emit('update:context-rounds', n)"
         class="flex-1 px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-all border"
@@ -26,7 +26,7 @@ import { useI18n } from '../../i18n/index.js';
 const { t } = useI18n();
 
 defineProps({
-  contextRounds: { type: Number, default: 30 }
+  contextRounds: { type: Number, default: 100 }
 });
 
 defineEmits(['update:context-rounds', 'save']);

@@ -5,6 +5,7 @@ let ws = null;
 let pingTimer = null;
 let pongTimer = null;
 let reconnectTimer = null;
+let reconnectBlocked = false;
 
 // 响应式状态
 export const wsStatus = ref('disconnected'); // connected | disconnected | connecting
@@ -20,6 +21,7 @@ const getDefaultWsUrl = () => {
 export const wsUrl = ref(getDefaultWsUrl());
 
 const scheduleReconnect = (delay = 3000) => {
+  if (reconnectBlocked) return;
   clearTimeout(reconnectTimer);
   reconnectTimer = setTimeout(() => {
     if (wsStatus.value === 'disconnected') connect();
@@ -30,6 +32,8 @@ export const connect = (url) => {
   if (url) {
     wsUrl.value = url;
   }
+
+  reconnectBlocked = false;
 
   if (ws) {
     ws.onclose = null;
@@ -68,11 +72,15 @@ export const connect = (url) => {
     emit(data.type, data);
   };
 
-  ws.onclose = () => {
+  ws.onclose = (event) => {
     wsStatus.value = 'disconnected';
     clearInterval(pingTimer);
     clearTimeout(pongTimer);
     emit('close');
+    if (event?.code === 1008) {
+      reconnectBlocked = true;
+      return;
+    }
     scheduleReconnect();
   };
 
@@ -82,6 +90,7 @@ export const connect = (url) => {
 };
 
 export const disconnect = () => {
+  reconnectBlocked = true;
   clearInterval(pingTimer);
   clearTimeout(pongTimer);
   clearTimeout(reconnectTimer);

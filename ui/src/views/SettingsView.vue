@@ -84,7 +84,7 @@ const activeTab = ref('model');
 const theme = ref(localStorage.getItem('theme') || 'dark');
 const language = ref('zh');
 const provider = ref('openai');
-const editRounds = ref(30);
+const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);
 const toolResultMaxChars = ref(12000);
 const enableToolLoopLimit = ref(true);
@@ -147,7 +147,7 @@ const fetchSettings = async () => {
   provider.value = data.provider || 'openai';
   language.value = data.language === 'en' ? 'en' : 'zh';
   setLocale(language.value);
-  editRounds.value = data.contextRounds || 30;
+  editRounds.value = data.contextRounds || 100;
   enableToolResultTruncate.value = data.enableToolResultTruncate !== false;
   toolResultMaxChars.value = Number(data.toolResultMaxChars) || 12000;
   enableToolLoopLimit.value = data.enableToolLoopLimit !== false;

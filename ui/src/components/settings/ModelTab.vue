@@ -11,6 +11,9 @@
         <optgroup label="默认">
           <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
         </optgroup>
+        <optgroup label="聚合平台">
+          <option v-for="p in aggregatorProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </optgroup>
         <optgroup label="Coding Plan">
           <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
         </optgroup>
@@ -84,7 +87,8 @@ const onProviderChange = (e) => {
   emit('update:provider', value);
 };
 
-const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding'));
+const aggregatorProviders = computed(() => PROVIDERS.filter((p) => p.id === 'openrouter' || p.id === 'together' || p.id === 'fireworks'));
+const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding' || p.id === 'ark-coding'));
 const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
-const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
+const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && !aggregatorProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 </script>

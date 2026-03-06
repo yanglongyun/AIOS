@@ -80,8 +80,23 @@
       <!-- 底部输入 -->
       <div class="shrink-0 bg-[linear-gradient(to_top,#f5f0e8_60%,transparent)] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-0 dark:bg-[linear-gradient(to_top,#1a1410_60%,transparent)]">
         <div class="mx-auto max-w-[720px]">
-          <form @submit.prevent="handleSend" class="relative flex flex-col rounded-2xl border border-[#dcd0b8] bg-[#fffdf8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+          <form
+            @submit.prevent="handleSend"
+            @dragenter="onDragEnter"
+            @dragover.prevent="onDragOver"
+            @dragleave="onDragLeave"
+            @drop.prevent="onDropFiles"
+            class="relative flex flex-col rounded-2xl border border-[#dcd0b8] bg-[#fffdf8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+            :class="dragActive ? 'ring-2 ring-[#c8a060] ring-offset-2 ring-offset-[#f5f0e8] dark:ring-offset-[#1a1410]' : ''"
+          >
             <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
+
+            <div
+              v-if="dragActive"
+              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#c8a060] bg-[rgba(200,160,96,0.14)] px-6 text-center text-sm font-semibold text-[#5a3e28] dark:bg-[rgba(200,160,96,0.1)] dark:text-[#e8dcc8]"
+            >
+              {{ uploading ? t('chat_uploading') : t('chat_drop_files') }}
+            </div>
 
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
               <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full border border-[#dcd0b8] bg-[#f5ead8] px-2.5 py-0.5 text-[11px] text-[#5a4a38] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.4)] dark:text-[#d4c0a0]">
@@ -161,6 +176,8 @@ const uploading = ref(false);
 const uploadError = ref('');
 const pendingFiles = ref([]);
 const streamingAssistantKey = ref('');
+const dragActive = ref(false);
+const dragCounter = ref(0);
 
 const seenKeys = ref(new Set());
 
@@ -399,8 +416,7 @@ const uploadSingleFile = async (file) => {
   return res.file;
 };
 
-const onPickFiles = async (e) => {
-  const files = Array.from(e.target?.files || []);
+const appendFiles = async (files = []) => {
   if (!files.length) return;
   uploadError.value = '';
   uploading.value = true;
@@ -413,8 +429,44 @@ const onPickFiles = async (e) => {
     uploadError.value = err.message || '上传失败';
   } finally {
     uploading.value = false;
-    if (fileInput.value) fileInput.value.value = '';
   }
+};
+
+const onPickFiles = async (e) => {
+  const files = Array.from(e.target?.files || []);
+  await appendFiles(files);
+  if (fileInput.value) fileInput.value.value = '';
+};
+
+const hasDraggedFiles = (event) => {
+  const types = event?.dataTransfer?.types;
+  return !!types && Array.from(types).includes('Files');
+};
+
+const onDragEnter = (event) => {
+  if (!hasDraggedFiles(event) || busy.value) return;
+  dragCounter.value += 1;
+  dragActive.value = true;
+};
+
+const onDragOver = (event) => {
+  if (!hasDraggedFiles(event) || busy.value) return;
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+  dragActive.value = true;
+};
+
+const onDragLeave = (event) => {
+  if (!hasDraggedFiles(event)) return;
+  dragCounter.value = Math.max(0, dragCounter.value - 1);
+  if (dragCounter.value === 0) dragActive.value = false;
+};
+
+const onDropFiles = async (event) => {
+  dragCounter.value = 0;
+  dragActive.value = false;
+  if (busy.value) return;
+  const files = Array.from(event.dataTransfer?.files || []);
+  await appendFiles(files);
 };
 
 watch(() => messages.value.length, (newLen, oldLen) => {

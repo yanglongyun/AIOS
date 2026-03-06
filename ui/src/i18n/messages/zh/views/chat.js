@@ -10,6 +10,7 @@ export default {
   chat_input_placeholder: '输入消息...',
   chat_uploading: '上传中...',
   chat_upload_file: '上传文件',
+  chat_drop_files: '拖拽文件到这里即可添加附件',
   chat_ws_error: '错误: WebSocket 未连接，请检查服务是否启动',
   chat_send_error: '错误: {message}',
   chat_attachment_only_prompt: '请先阅读附件并总结关键信息'

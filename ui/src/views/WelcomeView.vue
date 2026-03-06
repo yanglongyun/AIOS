@@ -1,121 +1,170 @@
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#1a1410] text-[#e8d4b8] font-['Georgia','PingFang_SC',serif]">
     <!-- 背景纹理 -->
-    <div class="pointer-events-none fixed inset-0 bg-[repeating-linear-gradient(180deg,transparent_0,transparent_6px,rgba(255,255,255,0.015)_6px,rgba(255,255,255,0.015)_7px),radial-gradient(ellipse_at_50%_0%,rgba(200,160,96,0.12),transparent_60%)]"></div>
+    <div
+      class="pointer-events-none fixed inset-0 bg-[repeating-linear-gradient(180deg,transparent_0,transparent_6px,rgba(255,255,255,0.015)_6px,rgba(255,255,255,0.015)_7px),radial-gradient(ellipse_at_50%_0%,rgba(200,160,96,0.12),transparent_60%)]">
+    </div>
 
     <!-- 顶栏 -->
-    <div class="relative z-10 flex h-12 items-center border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28,#4a3020)] px-6 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+    <div
+      class="relative z-10 flex h-12 items-center border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28,#4a3020)] px-6 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
       <span class="text-[15px] font-bold tracking-[0.12em] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
     </div>
 
     <!-- 内容 -->
     <div class="relative z-[1] flex h-[calc(100vh-48px)] items-center justify-center p-5">
-      <div class="w-[540px] max-w-[96vw] overflow-hidden rounded-[14px] border border-[#3a2a18] bg-[linear-gradient(180deg,#2e2218,#261c14)] shadow-[0_16px_60px_rgba(0,0,0,0.6)]">
+      <div
+        class="w-[540px] max-w-[96vw] overflow-hidden rounded-[14px] border border-[#3a2a18] bg-[linear-gradient(180deg,#2e2218,#261c14)] shadow-[0_16px_60px_rgba(0,0,0,0.6)]">
         <!-- 进度条 -->
         <div class="h-[3px] bg-[#2a1e14]">
-          <div class="h-full bg-[linear-gradient(90deg,#c8a060,#d4b878)] transition-all duration-400" :style="{ width: step / 4 * 100 + '%' }"></div>
+          <div class="h-full bg-[linear-gradient(90deg,#c8a060,#d4b878)] transition-all duration-500"
+            :style="{ width: step / 4 * 100 + '%' }"></div>
         </div>
 
         <!-- Step 1: 欢迎 -->
-        <div v-if="step === 1" class="px-10 py-12 text-center">
-          <h2 class="bg-gradient-to-b from-[#e8d4b8] from-20% to-[#c8a060] bg-clip-text text-[56px] font-extrabold leading-none tracking-[0.08em] text-transparent">AIOS</h2>
-          <div class="mx-auto mt-6 h-[2px] w-10 rounded-full bg-[#c8a060] opacity-50"></div>
-          <p class="mt-6 text-[13px] leading-[2] tracking-[0.02em] text-[#8a7a60]">{{ t('welcome_desc') }}</p>
-          <div class="mt-7 flex items-center justify-between border-t border-[#3a2a1a] pt-6">
-            <div class="flex gap-2">
-              <button
-                v-for="lang in [{ id: 'zh', label: '中文' }, { id: 'en', label: 'English' }]"
-                :key="lang.id"
-                class="rounded-lg border px-4 py-1.5 text-[13px] transition-all"
-                :class="model.language === lang.id ? 'border-[#c8a060] bg-[rgba(200,160,96,0.12)] text-[#c8a060] font-semibold' : 'border-[#3a2a1a] text-[#6a5840] hover:border-[#5a4a30] hover:text-[#a08c70]'"
-                @click="model.language = lang.id"
-              >{{ lang.label }}</button>
+        <div v-if="step === 1" class="px-10 py-12">
+          <h2
+            class="bg-gradient-to-r from-[#e8d4b8] to-[#c8a060] bg-clip-text text-[60px] font-extrabold leading-none tracking-tight text-transparent">
+            AIOS</h2>
+          <div class="mt-8 h-px w-full bg-gradient-to-r from-[#c8a060] to-transparent opacity-30"></div>
+          <p class="mt-8 space-y-3 text-[14px] leading-relaxed tracking-wide text-[#a09078] max-w-[450px]">
+            <span>{{ t('welcome_desc_1') }}</span><br>
+            <span>{{ t('welcome_desc_2') }}</span><br>
+            <span>{{ t('welcome_desc_3') }}</span>
+          </p>
+          <div class="mt-12 flex items-end justify-between">
+            <div class="flex flex-col gap-2">
+              <div class="flex gap-4">
+                <button v-for="lang in [{ id: 'zh', label: '中文' }, { id: 'en', label: 'English' }]" :key="lang.id"
+                  class="text-[13px] tracking-wider transition-colors relative"
+                  :class="model.language === lang.id ? 'text-[#c8a060] font-bold after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-[#c8a060]' : 'text-[#6a5840] hover:text-[#a08c70]'"
+                  @click="model.language = lang.id">{{ lang.label }}</button>
+              </div>
             </div>
-            <button class="rounded-lg bg-[#c8a060] px-7 py-2.5 text-[13px] font-semibold text-[#1a1008] hover:bg-[#d4b070]" @click="step = 2">{{ t('welcome_start') }}</button>
+            <button
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all"
+              @click="step = 2">{{ t('welcome_next') }}</button>
           </div>
         </div>
 
         <!-- Step 2: 创建管理员 -->
-        <div v-if="step === 2" class="p-8">
-          <h2 class="text-lg font-bold">{{ t('welcome_admin_title') }}</h2>
-          <div class="mt-1 mb-6 text-xs text-[#8a7860]">{{ t('welcome_admin_hint') }}</div>
-          <div class="mb-3.5">
-            <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_username') }}</label>
-            <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="wiz-input" />
-          </div>
-          <div class="grid grid-cols-2 gap-2.5">
+        <div v-if="step === 2" class="px-10 py-10">
+          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_admin_title') }}</h2>
+          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_admin_hint') }}</p>
+
+          <div class="mt-8 space-y-5">
             <div>
-              <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_password') }}</label>
-              <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')" class="wiz-input" />
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_username')
+                }}</label>
+              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="wiz-input" />
             </div>
-            <div>
-              <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_confirm') }}</label>
-              <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')" class="wiz-input" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_password')
+                }}</label>
+                <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')"
+                  class="wiz-input" />
+              </div>
+              <div>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_confirm')
+                }}</label>
+                <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')"
+                  class="wiz-input" />
+              </div>
             </div>
           </div>
-          <div v-if="error" class="mt-3 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
-          <div class="mt-6 h-px bg-[#3a2a1a]"></div>
-          <div class="mt-6 flex items-center justify-between">
-            <button class="text-[13px] text-[#6a5840] hover:text-[#c8a060]" @click="step = 1">← {{ t('welcome_back') }}</button>
-            <button class="rounded-lg bg-[#c8a060] px-5 py-2.5 text-[13px] font-semibold text-[#1a1008] hover:bg-[#d4b070] disabled:opacity-40" :disabled="pending" @click="createAdmin">
-              {{ pending ? t('welcome_creating') : t('welcome_create_continue') }}
+          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error
+          }}</div>
+
+          <div class="mt-10 flex items-center justify-between">
+            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
+              @click="step = 1">{{ t('welcome_prev') }}</button>
+            <button
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40"
+              :disabled="pending" @click="createAdmin">
+              {{ pending ? t('welcome_creating') : t('welcome_next') }}
             </button>
           </div>
         </div>
 
         <!-- Step 3: 配置模型 -->
-        <div v-if="step === 3" class="p-8">
-          <h2 class="text-lg font-bold">{{ t('welcome_model_title') }}</h2>
-          <div class="mt-1 mb-6 text-xs text-[#8a7860]">{{ t('welcome_model_hint') }}</div>
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_provider') }}</label>
-              <select v-model="model.provider" class="wiz-input" @change="applyProviderDefault">
-                <optgroup label="默认">
-                  <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                </optgroup>
-                <optgroup label="Coding Plan">
-                  <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                </optgroup>
-                <optgroup label="自定义">
-                  <option v-for="p in customProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
-                </optgroup>
-              </select>
+        <div v-if="step === 3" class="px-10 py-10">
+          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_model_title') }}</h2>
+          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_model_hint') }}</p>
+
+          <div class="mt-8 space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_provider')
+                }}</label>
+                <select v-model="model.provider" class="wiz-input" @change="applyProviderDefault">
+                  <optgroup label="默认">
+                    <option v-for="p in defaultProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </optgroup>
+                  <optgroup label="聚合平台">
+                    <option v-for="p in aggregatorProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </optgroup>
+                  <optgroup label="Coding Plan">
+                    <option v-for="p in codingProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </optgroup>
+                  <optgroup label="自定义">
+                    <option v-for="p in customProviders" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_model')
+                }}</label>
+                <input v-model.trim="model.model" placeholder="gpt-5.2" class="wiz-input" />
+              </div>
             </div>
             <div>
-              <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">{{ t('welcome_model') }}</label>
-              <input v-model.trim="model.model" placeholder="gpt-5.2" class="wiz-input" />
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_url')
+              }}</label>
+              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
+            </div>
+            <div>
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_key')
+              }}</label>
+              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
             </div>
           </div>
-          <div class="mt-3.5">
-            <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">API {{ t('welcome_api_url') }}</label>
-            <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
-          </div>
-          <div class="mt-3.5">
-            <label class="mb-1 block text-[11px] uppercase tracking-wider text-[#6a5840]">API Key</label>
-            <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
-          </div>
-          <div v-if="error" class="mt-3 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
-          <div class="mt-6 h-px bg-[#3a2a1a]"></div>
-          <div class="mt-6 flex items-center justify-between">
-            <button class="text-[13px] text-[#6a5840] hover:text-[#c8a060]" @click="step = 2">← {{ t('welcome_back') }}</button>
-            <button class="rounded-lg bg-[#c8a060] px-5 py-2.5 text-[13px] font-semibold text-[#1a1008] hover:bg-[#d4b070] disabled:opacity-40" :disabled="pending" @click="saveModelAndTest">
+          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error
+          }}</div>
+
+          <div class="mt-10 flex items-center justify-between">
+            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
+              @click="step = 2">{{ t('welcome_prev') }}</button>
+            <button
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40"
+              :disabled="pending" @click="saveModelAndTest">
               {{ pending ? t('welcome_testing') : t('welcome_save_test') }}
             </button>
           </div>
         </div>
 
         <!-- Step 4: 完成 -->
-        <div v-if="step === 4" class="p-8 text-center">
-          <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#7a9a6a] bg-[rgba(122,154,106,0.15)] text-xl">✓</div>
-          <h2 class="text-lg font-bold">{{ t('welcome_intro_title') }}</h2>
-          <div class="mt-1 mb-5 text-xs text-[#8a7860]">{{ t('welcome_intro_hint') }}</div>
-          <div class="min-h-[80px] rounded-[10px] border border-[#3a2a1a] bg-[#1a1410] px-6 py-5 text-left text-sm leading-8 text-[#c8b898]">
-            <span>{{ displayedText }}</span><span v-if="typing" class="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#c8a060] align-text-bottom"></span>
+        <div v-if="step === 4" class="px-10 py-12">
+          <div class="flex items-start gap-6">
+            <div>
+              <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_intro_title') }}</h2>
+              <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_intro_hint') }}</p>
+            </div>
           </div>
-          <div class="mt-6 h-px bg-[#3a2a1a]"></div>
-          <div class="mt-6 transition-opacity duration-500" :class="typing ? 'opacity-0' : 'opacity-100'">
-            <button class="rounded-lg bg-[#c8a060] px-8 py-2.5 text-[13px] font-semibold text-[#1a1008] hover:bg-[#d4b070]" @click="enterSystem">{{ t('welcome_enter') }}</button>
+
+          <div
+            class="mt-8 min-h-[100px] rounded-lg border border-[rgba(200,160,96,0.2)] bg-[rgba(0,0,0,0.3)] p-6 text-[14px] leading-relaxed tracking-wide text-[#c8b898]">
+            <span>{{ displayedText }}</span><span v-if="typing"
+              class="ml-0.5 inline-block h-[1em] w-[4px] animate-pulse bg-[#c8a060] align-text-bottom"></span>
+          </div>
+
+          <div class="mt-12 flex items-center justify-between transition-opacity duration-500"
+            :class="typing ? 'opacity-0' : 'opacity-100'">
+            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
+              @click="step = 3">{{ t('welcome_prev') }}</button>
+            <button
+              class="rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all"
+              @click="enterSystem">{{ t('welcome_enter') }}</button>
           </div>
         </div>
       </div>
@@ -154,9 +203,10 @@ const model = ref({
 
 watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
 
-const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding'));
+const aggregatorProviders = computed(() => PROVIDERS.filter((p) => p.id === 'openrouter' || p.id === 'together' || p.id === 'fireworks'));
+const codingProviders = computed(() => PROVIDERS.filter((p) => p.id === 'glm-coding' || p.id === 'aliyun-coding' || p.id === 'ark-coding'));
 const customProviders = computed(() => PROVIDERS.filter((p) => p.id === 'custom'));
-const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
+const defaultProviders = computed(() => PROVIDERS.filter((p) => !codingProviders.value.some((c) => c.id === p.id) && !aggregatorProviders.value.some((c) => c.id === p.id) && p.id !== 'custom'));
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);
@@ -279,16 +329,32 @@ onUnmounted(() => {
 <style scoped>
 .wiz-input {
   width: 100%;
-  border-radius: 8px;
-  border: 1px solid #3a2a1a;
-  background: #1a1410;
-  padding: 9px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 16px;
   font-size: 13px;
   color: #e8d4b8;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
-.wiz-input::placeholder { color: #4a3a28; }
-.wiz-input:focus { border-color: #c8a060; }
+
+.wiz-input::placeholder {
+  color: #5a4a35;
+}
+
+.wiz-input:focus {
+  border-color: #c8a060;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+select.wiz-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238a7860'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
 </style>

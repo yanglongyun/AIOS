@@ -1,10 +1,13 @@
 import { db } from '../../db/client.js';
+import { normalizeContextRounds } from '../../db/settings.js';
 
 export const updateSettings = (body) => {
   if (body.provider !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('provider', body.provider);
   if (body.systemPrompt !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('systemPrompt', body.systemPrompt);
   if (body.language !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('language', body.language === 'en' ? 'en' : 'zh');
-  if (body.contextRounds !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('contextRounds', String(Number(body.contextRounds)));
+  if (body.contextRounds !== undefined) {
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('contextRounds', String(normalizeContextRounds(body.contextRounds)));
+  }
   if (body.apiUrl !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('apiUrl', body.apiUrl);
   if (body.apiKey !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('apiKey', body.apiKey);
   if (body.model !== undefined) db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('model', body.model);

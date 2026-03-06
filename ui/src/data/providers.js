@@ -103,7 +103,7 @@ export const PROVIDERS = [
   },
   {
     id: 'ark-coding',
-    name: '方舟 Coding Plan',
+    name: '火山引擎 Coding Plan',
     apiUrl: 'https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions',
     defaultModel: 'doubao-seed-2.0-pro',
   },

@@ -4,6 +4,7 @@ import { countUnread } from '../api/notifications/list.js';
 import { getSettings } from '../db/settings.js';
 import { getAppsCatalog } from './apps.js';
 import { getRecentChats } from './chats.js';
+import { getVisibleScriptsCatalog } from './scripts.js';
 
 const INSTRUCTION_PATH = join(process.cwd(), 'INSTRUCTION.md');
 
@@ -36,6 +37,7 @@ export const buildSystemPrompt = (currentConversationId = '') => {
     toolMaxRounds
   } = settings;
   const appsCatalog = getAppsCatalog();
+  const scriptsCatalog = getVisibleScriptsCatalog();
   const recentChats = getRecentChats();
   const cwd = process.cwd();
 
@@ -76,6 +78,16 @@ export const buildSystemPrompt = (currentConversationId = '') => {
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。\n${lines.join('\n')}`;
   } else {
     prompt += `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。`;
+  }
+
+  if (Array.isArray(scriptsCatalog) && scriptsCatalog.length > 0) {
+    const lines = scriptsCatalog.map((script, i) => {
+      return `${i + 1}. name: ${script.name || '-'} | description: ${
+        script.description || '-'
+      } | usage: ${script.usage || '-'}`;
+    });
+    prompt += `\n\n## 可见脚本
+以下脚本已标记为可见，可按需建议用户使用（仅展示 name/description/usage）：\n${lines.join('\n')}`;
   }
 
   const currentId = String(currentConversationId || '').trim();

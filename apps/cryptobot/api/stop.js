@@ -1,4 +1,4 @@
-import { stopBot } from '../schedule/index.js';
+import { stopBot } from '../runtime/index.js';
 
 export const stopHandler = () => {
   stopBot();

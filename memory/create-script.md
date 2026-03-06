@@ -6,13 +6,13 @@
 
 ## 目录结构（硬规则）
 
-每个应用的每个脚本必须使用独立目录，并包含 `SCRIPT.md`：
+每个脚本必须使用独立目录，并包含 `SCRIPT.md`：
 
 ```
-apps/{appname}/scripts/
+scripts/
 └── {script_name}/
     ├── SCRIPT.md
-    ├── index.sh      # 或 index.js（二选一）
+    ├── index.mjs     # 或 index.js / index.sh（三选一）
     └── ...           # 脚本内部依赖文件（可选）
 ```
 
@@ -22,30 +22,20 @@ apps/{appname}/scripts/
 ---
 name: sync_positions
 description: 同步持仓并写入 apps_cryptobot_positions
+visibility: true
+usage: node scripts/sync_positions/index.mjs --dry-run
 ---
-
-## 输入
-- key: API key
-- secret: API secret
-
-## 输出
-- JSON: { success: boolean, count: number }
-
-## 副作用
-- 写数据库表：apps_cryptobot_positions
-- 读取文件：files/uploads/...
-
-## 执行
-- sh apps/cryptobot/scripts/sync_positions/index.sh
-
-## 安全
-- 禁止删除数据库文件
-- 禁止写入应用目录外的任意路径
 ```
 
 ## 约定
 
+- `SCRIPT.md` 前置元数据必须包含 4 个字段：
+  - `name`
+  - `description`
+  - `visibility`（`true` / `false`）
+  - `usage`（完整执行方式）
 - Agent 先读取 `SCRIPT.md` 再执行脚本。
-- 执行入口固定 `index.sh` 或 `index.js`。
+- `visibility: true` 的脚本会注入系统提示词；`false` 不注入。
+- 执行入口为 `index.mjs` / `index.js` / `index.sh` 任一即可。
 - 不允许无文档脚本（没有 `SCRIPT.md` 的脚本目录视为无效）。
 - 脚本只做一件事，保持单一职责。

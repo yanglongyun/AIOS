@@ -1,6 +1,8 @@
 ---
 name: search
 description: 多搜索引擎统一检索（失败自动轮换，全部失败则返回错误详情）。
+visibility: true
+usage: node scripts/search/index.mjs "OpenAI API" 5 --engines=duck,bing,google,you,baidu,sogou,yandex --timeoutMs=8000
 ---
 
 ## 输入

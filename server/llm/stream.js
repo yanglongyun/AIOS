@@ -1,4 +1,4 @@
-import { buildLlmHeaders, writeLlmErrorLog } from './common.js';
+import { buildLlmHeaders } from './common.js';
 import { parseJson } from '../../shared/json/parse.js';
 
 const ensureToolCall = (toolCalls, index) => {
@@ -49,14 +49,6 @@ export const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal,
 
     if (!res.ok) {
       const text = await res.text();
-      writeLlmErrorLog({
-        provider,
-        apiUrl,
-        payload: streamPayload,
-        status: res.status,
-        responseText: text,
-        error: new Error(`LLM ${res.status}: ${text}`)
-      });
       throw new Error(`LLM ${res.status}: ${text}`);
     }
 
@@ -98,7 +90,6 @@ export const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal,
     }
     return { role: 'assistant', content: state.content };
   } catch (error) {
-    writeLlmErrorLog({ provider, apiUrl, payload: streamPayload, error });
     throw error;
   }
 };

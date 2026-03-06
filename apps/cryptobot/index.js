@@ -1,7 +1,7 @@
 import { readBody } from '../app_shared/utils/readBody.js';
 import { json } from '../app_shared/utils/json.js';
 import { initDatabase } from './db.js';
-import { initRuntime } from './schedule/index.js';
+import { initRuntime } from './runtime/index.js';
 import { getStatusHandler } from './api/get/status.js';
 import { saveExchangeHandler } from './api/save/exchange.js';
 import { testExchangeHandler } from './api/test/exchange.js';

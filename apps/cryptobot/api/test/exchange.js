@@ -1,5 +1,5 @@
 import { getConfig } from '../../db.js';
-import { okxRequest } from '../../schedule/okx.js';
+import { okxRequest } from '../../runtime/okx.js';
 
 export const testExchangeHandler = async (body = {}) => {
   const saved = getConfig();

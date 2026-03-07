@@ -14,7 +14,7 @@
           <button
             type="button"
             class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]"
-            @click="router.push('/tasks/create')"
+            @click="router.push('/schedule/create')"
           >
             {{ t('tasks_create') }}
           </button>
@@ -33,7 +33,8 @@
           <div
             v-for="s in schedules"
             :key="s.id"
-            class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5"
+            class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5 cursor-pointer transition hover:shadow-md"
+            @click="editSchedule(s.id)"
           >
             <div class="flex items-start justify-between gap-2">
               <div class="flex-1">
@@ -47,6 +48,7 @@
                   :class="s.enabled
                     ? 'border-[#c8d8c0] bg-[#f0f8ec] text-[#5a8a48] hover:bg-[#e0f0d8]'
                     : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'"
+                  @click.stop="editSchedule(s.id)"
                   @click="toggleSchedule(s)"
                 >
                   {{ s.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
@@ -80,8 +82,8 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from '../i18n/index.js';
-import { on } from '../ws.js';
+import { useI18n } from '../../i18n/index.js';
+import { on } from '../../ws.js';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -106,6 +108,7 @@ const loadSchedules = async () => {
 };
 
 const openTask = (id) => { if (id) router.push(`/task/${id}`); };
+const editSchedule = (id) => { if (id) router.push(`/schedule/edit/${id}`); };
 
 const toggleSchedule = async (s) => {
   try {

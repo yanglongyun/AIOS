@@ -2,7 +2,7 @@
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
     <div class="mx-auto max-w-[960px]">
       <div class="mb-5">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_create_title') }}</h1>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ isEdit ? t('tasks_edit_title') : t('tasks_create_title') }}</h1>
         <p class="mt-0.5 text-xs text-[#a0907a]">{{ t('tasks_create_subtitle') }}</p>
       </div>
 
@@ -32,7 +32,7 @@
           </div>
 
           <!-- 名称（定时任务需要） -->
-          <div v-if="form.execType !== 'now'">
+          <div v-if="form.execType === 'once' || form.execType === 'repeat'">
             <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_task_name') }}</label>
             <input
               v-model="form.name"
@@ -43,17 +43,7 @@
           </div>
 
           <!-- 立即执行：标题 -->
-          <div v-if="form.execType === 'now'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_task_title') }}</label>
-            <input
-              v-model="form.title"
-              type="text"
-              placeholder="提取摘要"
-              class="w-full rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
-            >
-          </div>
-
-          <!-- 提示词 -->
+                    <!-- 提示词 -->
           <div>
             <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_prompt') }}</label>
             <textarea
@@ -93,7 +83,7 @@
             <button
               type="button"
               class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-4 py-2 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
-              @click="$router.push('/tasks')"
+              @click="goSchedule"
             >
               {{ t('tasks_cancel') }}
             </button>
@@ -129,7 +119,7 @@
           v-if="result.scheduled"
           type="button"
           class="mt-3 cursor-pointer text-xs text-[#7a6a58] underline transition hover:text-[#4a3a28]"
-          @click="$router.push('/tasks')"
+          @click="goSchedule"
         >
           {{ t('tasks_view_schedules') }}
         </button>
@@ -139,21 +129,24 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue';
-import { useI18n } from '../i18n/index.js';
+import { computed, reactive, ref, watch } from 'vue';
+import { useI18n } from '../../i18n/index.js';
+import { useRoute, useRouter } from 'vue-router';
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
-const execTypes = computed(() => [
-  { value: 'now', label: t('tasks_exec_now') },
-  { value: 'once', label: t('tasks_exec_once') },
-  { value: 'repeat', label: t('tasks_exec_repeat') }
-]);
+const execTypes = computed(() => {
+  return [
+    { value: 'once', label: t('tasks_exec_once') },
+    { value: 'repeat', label: t('tasks_exec_repeat') }
+  ];
+});
 
 const form = reactive({
-  execType: 'now',
+  execType: 'once',
   name: '',
-  title: '',
   prompt: '',
   runAt: '',
   cron: ''
@@ -161,10 +154,11 @@ const form = reactive({
 
 const error = ref('');
 const submitting = ref(false);
+const isEdit = ref(false);
+const editId = ref(null);
 const result = ref(null);
 
 const submitLabel = computed(() => {
-  if (form.execType === 'now') return t('tasks_submit_now');
   if (form.execType === 'once') return t('tasks_submit_once');
   return t('tasks_submit_repeat');
 });
@@ -175,48 +169,28 @@ const submit = async () => {
 
   if (!form.prompt.trim()) { error.value = t('tasks_fill_prompt'); return; }
 
-  if (form.execType === 'now') {
-    return submitNow();
-  }
-
   if (!form.name.trim()) { error.value = t('tasks_fill_name'); return; }
   if (form.execType === 'once' && !form.runAt) { error.value = t('tasks_fill_time'); return; }
   if (form.execType === 'repeat' && !form.cron.trim()) { error.value = t('tasks_fill_cron'); return; }
   return submitSchedule();
 };
 
-const submitNow = async () => {
-  submitting.value = true;
-  try {
-    const body = { app: 'task', title: form.title.trim() || '任务', prompt: form.prompt.trim() };
-    const res = await fetch('/api/task/create/agent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.error) throw new Error(data.error || data.message || `HTTP ${res.status}`);
-    result.value = { id: data.id, taskId: data.id, response: data.response };
-  } catch (e) {
-    error.value = e.message || t('tasks_submit_fail');
-  } finally {
-    submitting.value = false;
-  }
-};
-
 const submitSchedule = async () => {
   submitting.value = true;
   try {
-    const body = { name: form.name.trim(), prompt: form.prompt.trim() };
+    const apiUrl = isEdit.value ? '/api/schedule/update' : '/api/schedule/create';
+    const reqBody = isEdit.value ? { id: editId.value, name: form.name.trim(), prompt: form.prompt.trim() } : { name: form.name.trim(), prompt: form.prompt.trim() };
     if (form.execType === 'once') {
-      body.run_at = form.runAt.replace('T', ' ');
+      reqBody.run_at = form.runAt.replace('T', ' ');
+      reqBody.cron = null;
     } else {
-      body.cron = form.cron.trim();
+      reqBody.cron = form.cron.trim();
+      reqBody.run_at = null;
     }
-    const res = await fetch('/api/schedule/create', {
+    const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(reqBody)
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.success) throw new Error(data.message || `HTTP ${res.status}`);
@@ -227,4 +201,55 @@ const submitSchedule = async () => {
     submitting.value = false;
   }
 };
+
+const toLocalDatetime = (value) => {
+  if (!value) return '';
+  return String(value).replace(' ', 'T').slice(0, 16);
+};
+
+const goSchedule = () => {
+  router.push('/schedule');
+};
+
+const initFromRoute = async () => {
+  error.value = '';
+  result.value = null;
+
+  const id = Number(route.params.id || 0);
+  isEdit.value = id > 0;
+  editId.value = id > 0 ? id : null;
+
+  if (!isEdit.value) {
+    form.execType = 'once';
+    form.name = '';
+    form.prompt = '';
+    form.runAt = '';
+    form.cron = '';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/schedule/detail?id=${id}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success || !data.schedule) throw new Error(data.message || `HTTP ${res.status}`);
+    const schedule = data.schedule;
+    form.name = schedule.name || '';
+    form.prompt = schedule.prompt || '';
+    if (schedule.cron) {
+      form.execType = 'repeat';
+      form.cron = schedule.cron;
+      form.runAt = '';
+    } else {
+      form.execType = 'once';
+      form.runAt = toLocalDatetime(schedule.run_at);
+      form.cron = '';
+    }
+  } catch (e) {
+    error.value = e.message || t('tasks_submit_fail');
+  }
+};
+
+watch(() => route.params.id, () => {
+  initFromRoute();
+}, { immediate: true });
 </script>

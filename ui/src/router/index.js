@@ -11,7 +11,6 @@ import FinanceView from '../views/apps/FinanceView.vue';
 import InboxView from '../views/apps/InboxView.vue';
 import WeiboView from '../views/apps/WeiboView.vue';
 import PlaygroundView from '../views/apps/PlaygroundView.vue';
-import CommunityView from '../views/CommunityView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
 import DebateSimulatorView from '../views/apps/DebateSimulatorView.vue';
 import TreasureView from '../views/apps/TreasureView.vue';
@@ -24,10 +23,10 @@ import BlackroomView from '../views/apps/BlackroomView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
 import BeachView from '../views/apps/BeachView.vue';
 import PokerView from '../views/apps/PokerView.vue';
-import TaskCreateView from '../views/TaskCreateView.vue';
+import ScheduleCreateView from '../views/apps/ScheduleCreateView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
-import ScheduleView from '../views/ScheduleView.vue';
+import ScheduleView from '../views/apps/ScheduleView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -35,7 +34,8 @@ const routes = [
   { path: '/login', component: LoginView },
   { path: '/chat/:id?', component: ChatView },
   { path: '/tasks', component: TasksView },
-  { path: '/tasks/create', component: TaskCreateView },
+  { path: '/schedule/create', component: ScheduleCreateView },
+  { path: '/schedule/edit/:id', component: ScheduleCreateView },
   { path: '/task/:id', component: TaskDetailView },
   { path: '/schedule', component: ScheduleView },
   { path: '/schedules', redirect: '/schedule' },
@@ -57,7 +57,6 @@ const routes = [
   { path: '/fortune', component: FortuneView },
   { path: '/beach', component: BeachView },
   { path: '/poker', component: PokerView },
-  { path: '/community', component: CommunityView },
   { path: '/settings', component: SettingsView }
 ];
 

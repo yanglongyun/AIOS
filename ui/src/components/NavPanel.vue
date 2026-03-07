@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="group flex h-full flex-col overflow-hidden bg-gradient-to-b from-[#3a2a1a] to-[#2e2014] font-['Georgia','PingFang_SC',serif]">
+    class="group flex h-full flex-col overflow-hidden bg-transparent font-['Georgia','PingFang_SC',serif]">
     <!-- 对话区域 -->
     <div class="px-3 pb-2 pt-4">
       <div class="mb-1 flex items-center justify-between px-2">

@@ -4,8 +4,8 @@
       <div class="mb-5 flex items-center gap-3">
         <span class="text-[28px]">📜</span>
         <div>
-          <h1 class="m-0 text-xl font-bold text-[#4a3a28] dark:text-[#e8dcc8]">历史会话</h1>
-          <p class="mt-0.5 text-xs text-[#a0907a] dark:text-[#6a5840]">选择一个会话继续对话</p>
+          <h1 class="m-0 text-xl font-bold text-[#4a3a28] dark:text-[#e8dcc8]">{{ t('history_title') }}</h1>
+          <p class="mt-0.5 text-xs text-[#a0907a] dark:text-[#6a5840]">{{ t('history_subtitle') }}</p>
         </div>
       </div>
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
@@ -18,7 +18,9 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import HistoryPanel from '../components/chat/History.vue';
+import { useI18n } from '../i18n/index.js';
 
+const { t } = useI18n();
 const router = useRouter();
 
 const openChatFromHistory = async (chat) => {

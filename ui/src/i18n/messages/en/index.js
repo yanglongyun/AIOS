@@ -14,6 +14,7 @@ import story from './views/apps/story.js';
 import treasure from './views/apps/treasure.js';
 import weibo from './views/apps/weibo.js';
 import poker from './views/apps/poker.js';
+import history from './views/history.js';
 import settings from './views/settings.js';
 import welcome from './views/welcome.js';
 
@@ -21,6 +22,7 @@ export default {
   ...common,
   ...framework,
   ...chat,
+  ...history,
   ...notebook,
   ...blackroom,
   ...cryptobot,

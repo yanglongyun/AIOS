@@ -19,6 +19,7 @@ export default {
   app_sidebar_poker: '炸金花',
   app_sidebar_fortune: '算一卦',
   app_sidebar_nokia: '老手机',
+  app_sidebar_schedule: '定时任务',
   app_sidebar_settings: '设置',
   app_sidebar_community: '社区',
   app_top_tasks: '任务',

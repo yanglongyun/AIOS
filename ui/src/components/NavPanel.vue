@@ -38,7 +38,14 @@
 
       <div class="relative min-h-0 flex-1">
         <div ref="appListRef" class="app-list h-full space-y-0.5 overflow-y-auto pb-2 pr-2">
-          <!-- 每日打卡 - 第一位 -->
+          <!-- 定时任务 - 第一位 -->
+          <button @click="go('/schedule')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(route.path.startsWith('/schedule'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⏰</span>{{
+                t('app_sidebar_schedule') }}</button>
+
+          <!-- 每日打卡 -->
           <button @click="go('/dailycheck')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/dailycheck'))"><span

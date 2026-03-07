@@ -162,12 +162,13 @@ marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
 const conversationId = ref(null);
+const CHAT_INPUT_CACHE_KEY = 'chatInputCache';
 const chatTitle = ref('');
 const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
 const loadedOffset = ref(0);
-const input = ref('');
+const input = ref(localStorage.getItem(CHAT_INPUT_CACHE_KEY) || '');
 const msgBox = ref(null);
 const textarea = ref(null);
 const fileInput = ref(null);
@@ -177,6 +178,9 @@ const uploadError = ref('');
 const pendingFiles = ref([]);
 const streamingAssistantKey = ref('');
 const dragActive = ref(false);
+
+// 保存输入到 localStorage
+watch(input, (val) => { localStorage.setItem(CHAT_INPUT_CACHE_KEY, val); });
 const dragCounter = ref(0);
 
 const seenKeys = ref(new Set());
@@ -377,6 +381,7 @@ const handleSend = async () => {
       attachments: outgoingAttachments
     });
     input.value = '';
+    localStorage.removeItem(CHAT_INPUT_CACHE_KEY);
     pendingFiles.value = [];
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
   }).catch((e) => { messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) }); busy.value = false; });

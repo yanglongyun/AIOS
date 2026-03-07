@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-[#f5f0e8] font-['PingFang_SC',-apple-system,sans-serif] text-[#4a3f35]">
+  <div class="bg-[#f5f0e8] h-full overflow-y-auto font-['PingFang_SC',-apple-system,sans-serif] text-[#4a3f35]">
 
     <!-- 格线背景 -->
     <div class="pointer-events-none absolute inset-0 opacity-30 [background-image:repeating-linear-gradient(transparent,transparent_31px,#e8ddd0_31px,#e8ddd0_32px)]" />

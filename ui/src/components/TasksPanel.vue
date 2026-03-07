@@ -1,15 +1,8 @@
 <template>
   <div class="fixed inset-0 z-[90]" @click.self="$emit('close')">
     <div class="absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-      <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
+      <div class="flex items-center border-b border-[#4a3828] px-4 py-2.5">
         <span class="text-sm font-bold text-[#e8d0a8]">{{ t('tasks_title') }}</span>
-        <button
-          type="button"
-          class="cursor-pointer rounded bg-[#4a3828] px-2 py-1 text-[10px] text-[#c8a060] transition-colors hover:bg-[#5a4838]"
-          @click="createTask"
-        >
-          {{ t('tasks_create') }}
-        </button>
       </div>
       <div class="flex-1 overflow-y-auto">
         <div v-if="previewTasks.length === 0" class="px-4 py-8 text-center text-xs text-[#6a5840]">{{ t('tasks_empty') }}</div>
@@ -64,11 +57,6 @@ const openTask = async (id) => {
 const openAllTasks = async () => {
   emit('close');
   await router.push('/tasks');
-};
-
-const createTask = async () => {
-  emit('close');
-  await router.push('/tasks/create');
 };
 
 const formatTime = (t) => {

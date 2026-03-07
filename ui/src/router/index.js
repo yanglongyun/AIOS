@@ -27,6 +27,7 @@ import PokerView from '../views/apps/PokerView.vue';
 import TaskCreateView from '../views/TaskCreateView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
+import ScheduleView from '../views/ScheduleView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -36,7 +37,8 @@ const routes = [
   { path: '/tasks', component: TasksView },
   { path: '/tasks/create', component: TaskCreateView },
   { path: '/task/:id', component: TaskDetailView },
-  { path: '/schedules', redirect: '/tasks' },
+  { path: '/schedule', component: ScheduleView },
+  { path: '/schedules', redirect: '/schedule' },
   { path: '/history', component: HistoryView },
   { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },

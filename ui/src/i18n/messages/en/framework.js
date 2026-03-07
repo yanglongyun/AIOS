@@ -19,6 +19,7 @@ export default {
   app_sidebar_poker: 'Poker',
   app_sidebar_fortune: 'Divination',
   app_sidebar_nokia: 'Old Phone',
+  app_sidebar_schedule: 'Scheduled Tasks',
   app_sidebar_settings: 'Settings',
   app_sidebar_community: 'Community',
   app_top_tasks: 'Tasks',

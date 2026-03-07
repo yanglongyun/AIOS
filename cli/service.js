@@ -132,18 +132,18 @@ const login = async () => {
   authCookie = cookiePair;
 };
 
-const createConversation = async () => {
-  const res = await fetch(`${API_URL}/chat/create`, {
-    method: 'POST',
-    headers: {
-      'x-aios-cli': '1',
-      'Content-Type': 'application/json',
-      ...(authCookie ? { cookie: authCookie } : {})
-    },
-    body: JSON.stringify({})
+const ensureAuth = async () => {
+  if (!authCookie) {
+    await login();
+    return;
+  }
+
+  const res = await fetch(`${API_URL}/auth/me`, {
+    method: 'GET',
+    headers: { cookie: authCookie }
   });
-  const data = await readJsonSafe(res);
-  return { res, data };
+  if (res.ok) return;
+  await login();
 };
 
 export const getAuthCookie = () => authCookie;
@@ -159,20 +159,11 @@ export const createSession = async () => {
     return false;
   };
 
-  const tryCreateConversation = async () => {
-    const { res, data } = await createConversation();
-    if (res.ok && data?.conversationId) return data.conversationId;
-    if (res.ok && data?.sessionId) return data.sessionId;
-
-    if (res.status === 401) {
-      await login();
-      const second = await createConversation();
-      if (second.res.ok && second.data?.conversationId) return second.data.conversationId;
-      if (second.res.ok && second.data?.sessionId) return second.data.sessionId;
-      throw new Error(second.data?.message || `创建会话失败: ${second.res.status}`);
-    }
-
-    throw new Error(data?.message || `创建会话失败: ${res.status}`);
+  const createConversationLocally = async () => {
+    const mod = await import('../server/chat/conversations.js');
+    const data = mod.createConversation('CLI 会话');
+    if (data?.conversationId) return data.conversationId;
+    throw new Error('创建会话失败');
   };
 
   const readyNow = await isReady(`${API_URL}/health`);
@@ -184,5 +175,6 @@ export const createSession = async () => {
     console.log(chalk.dim(' 就绪\n'));
   }
 
-  return await tryCreateConversation();
+  await ensureAuth();
+  return await createConversationLocally();
 };

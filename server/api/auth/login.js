@@ -1,6 +1,6 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { countUsers, findUserByUsername, createAuthSession } from '../../../shared/auth/repository.js';
+import { countUsers, findUserByUsername, createAuthSession, ensureInternalApiToken } from '../../../shared/auth/repository.js';
 import { verifyPassword } from '../../../shared/auth/password.js';
 import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL_SECONDS } from '../../../shared/auth/session.js';
 import { normalizeUsername } from '../../../shared/auth/normalize.js';
@@ -25,6 +25,7 @@ export const login = async (req, res) => {
 
   const token = generateSessionToken();
   createAuthSession(user.id, hashSessionToken(token), SESSION_TTL_SECONDS);
+  ensureInternalApiToken();
   res.setHeader('Set-Cookie', buildSessionCookie(token));
   return json(res, { success: true, user: { id: user.id, username: user.username } });
 };

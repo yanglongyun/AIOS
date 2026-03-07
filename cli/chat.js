@@ -9,7 +9,6 @@ const connect = (onReady) => {
   const cookie = getAuthCookie();
   const ws = new WebSocket(WS_URL, {
     headers: {
-      'x-aios-cli': '1',
       ...(cookie ? { cookie } : {})
     }
   });

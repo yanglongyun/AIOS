@@ -1,7 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { createSession } from '../chat/index.js';
 import { getAuthUser } from '../../shared/auth/guard.js';
-import { isLocalCliBypass } from '../../shared/auth/network.js';
 
 const clients = new Set();
 
@@ -19,7 +18,7 @@ export const setupWebSocket = (httpServer) => {
 
   wss.on('connection', (ws, req) => {
     const user = getAuthUser(req);
-    if (!user && !isLocalCliBypass(req)) {
+    if (!user) {
       ws.close(1008, 'Unauthorized');
       return;
     }

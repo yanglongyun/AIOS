@@ -5,6 +5,7 @@
 - `memory/create-app.md` — 创建应用完整规范，创建应用前必须阅读
 - `memory/create-script.md` — 创建脚本完整规范，创建脚本前必须阅读
 - `memory/user.md` — 用户的信息和偏好，沟通风格、工作习惯、技术栈偏好
+- `memory/dev-experience.md` — 开发经验记录（构建命令、问题排查等）
 
 ## 目录规则（必须）
 

@@ -2,8 +2,8 @@
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
     <div class="mx-auto max-w-[960px]">
       <div class="mb-5">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ isEdit ? t('tasks_edit_title') : t('tasks_create_title') }}</h1>
-        <p class="mt-0.5 text-xs text-[#a0907a]">{{ t('tasks_create_subtitle') }}</p>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ isEdit ? t('schedule_edit_title') : t('schedule_create_title') }}</h1>
+        <p class="mt-0.5 text-xs text-[#a0907a]">{{ t('schedule_create_subtitle') }}</p>
       </div>
 
       <div v-if="error" class="mb-4 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">
@@ -14,7 +14,7 @@
         <div class="space-y-4">
           <!-- 执行方式 -->
           <div>
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_exec_type') }}</label>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('schedule_exec_type') }}</label>
             <div class="flex gap-2">
               <button
                 v-for="tp in execTypes"
@@ -33,7 +33,7 @@
 
           <!-- 名称（定时任务需要） -->
           <div v-if="form.execType === 'once' || form.execType === 'repeat'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_task_name') }}</label>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('schedule_name') }}</label>
             <input
               v-model="form.name"
               type="text"
@@ -45,18 +45,18 @@
           <!-- 立即执行：标题 -->
                     <!-- 提示词 -->
           <div>
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_prompt') }}</label>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('schedule_prompt') }}</label>
             <textarea
               v-model="form.prompt"
               rows="6"
-              :placeholder="t('tasks_prompt_placeholder')"
+              :placeholder="t('schedule_prompt_placeholder')"
               class="w-full resize-y rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 text-[13px] leading-relaxed text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
             />
           </div>
 
           <!-- 定时：执行时间 -->
           <div v-if="form.execType === 'once'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_exec_time') }}</label>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('schedule_exec_time') }}</label>
             <input
               v-model="form.runAt"
               type="datetime-local"
@@ -66,7 +66,7 @@
 
           <!-- 循环：cron -->
           <div v-if="form.execType === 'repeat'">
-            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('tasks_cron_expr') }}</label>
+            <label class="mb-1 block text-[11px] font-semibold text-[#a0907a]">{{ t('schedule_cron_expr') }}</label>
             <input
               v-model="form.cron"
               type="text"
@@ -74,7 +74,7 @@
               class="w-full rounded-lg border border-[#e8dcc8] bg-[#fcfaf6] px-3 py-2 font-mono text-[13px] text-[#4a3a28] outline-none transition focus:border-[#c8a060]"
             >
             <div class="mt-1 text-[10px] text-[#a0907a]">
-              {{ t('tasks_cron_help') }} &nbsp;|&nbsp; 例：<span class="font-mono">0 8 * * *</span> {{ t('tasks_cron_example_daily') }}，<span class="font-mono">*/5 * * * *</span> {{ t('tasks_cron_example_interval') }}
+              {{ t('schedule_cron_help') }} &nbsp;|&nbsp; 例：<span class="font-mono">0 8 * * *</span> {{ t('schedule_cron_example_daily') }}，<span class="font-mono">*/5 * * * *</span> {{ t('schedule_cron_example_interval') }}
             </div>
           </div>
 
@@ -85,7 +85,7 @@
               class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-4 py-2 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
               @click="goSchedule"
             >
-              {{ t('tasks_cancel') }}
+              {{ t('schedule_cancel') }}
             </button>
             <button
               type="button"
@@ -93,7 +93,7 @@
               :disabled="submitting"
               @click="submit"
             >
-              {{ submitting ? t('tasks_submitting') : submitLabel }}
+              {{ submitting ? t('schedule_submitting') : submitLabel }}
             </button>
           </div>
         </div>
@@ -102,18 +102,18 @@
       <!-- 立即执行结果 -->
       <div v-if="result" class="mt-4 rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="mb-2 flex items-center gap-2">
-          <span class="text-sm font-bold text-[#4a8a38]">{{ result.scheduled ? t('tasks_scheduled') : t('tasks_done') }}</span>
+          <span class="text-sm font-bold text-[#4a8a38]">{{ result.scheduled ? t('schedule_scheduled') : t('schedule_done') }}</span>
           <span class="rounded bg-[#f0e5d5] px-2 py-0.5 text-[10px] text-[#7a6a58]">#{{ result.id }}</span>
         </div>
         <div v-if="result.response" class="whitespace-pre-wrap rounded-lg bg-[#eef7ea] px-3 py-2 text-[13px] leading-relaxed text-[#2d4a30]">{{ result.response }}</div>
-        <div v-if="result.scheduled" class="text-[13px] text-[#4a8a38]">{{ t('tasks_queued') }}</div>
+        <div v-if="result.scheduled" class="text-[13px] text-[#4a8a38]">{{ t('schedule_queued') }}</div>
         <button
           v-if="result.taskId"
           type="button"
           class="mt-3 cursor-pointer text-xs text-[#7a6a58] underline transition hover:text-[#4a3a28]"
           @click="$router.push(`/task/${result.taskId}`)"
         >
-          {{ t('tasks_view_detail') }}
+          {{ t('schedule_view_detail') }}
         </button>
         <button
           v-if="result.scheduled"
@@ -121,7 +121,7 @@
           class="mt-3 cursor-pointer text-xs text-[#7a6a58] underline transition hover:text-[#4a3a28]"
           @click="goSchedule"
         >
-          {{ t('tasks_view_schedules') }}
+          {{ t('schedule_view_list') }}
         </button>
       </div>
     </div>
@@ -139,8 +139,8 @@ const router = useRouter();
 
 const execTypes = computed(() => {
   return [
-    { value: 'once', label: t('tasks_exec_once') },
-    { value: 'repeat', label: t('tasks_exec_repeat') }
+    { value: 'once', label: t('schedule_exec_once') },
+    { value: 'repeat', label: t('schedule_exec_repeat') }
   ];
 });
 
@@ -159,19 +159,19 @@ const editId = ref(null);
 const result = ref(null);
 
 const submitLabel = computed(() => {
-  if (form.execType === 'once') return t('tasks_submit_once');
-  return t('tasks_submit_repeat');
+  if (form.execType === 'once') return t('schedule_submit_once');
+  return t('schedule_submit_repeat');
 });
 
 const submit = async () => {
   error.value = '';
   result.value = null;
 
-  if (!form.prompt.trim()) { error.value = t('tasks_fill_prompt'); return; }
+  if (!form.prompt.trim()) { error.value = t('schedule_fill_prompt'); return; }
 
-  if (!form.name.trim()) { error.value = t('tasks_fill_name'); return; }
-  if (form.execType === 'once' && !form.runAt) { error.value = t('tasks_fill_time'); return; }
-  if (form.execType === 'repeat' && !form.cron.trim()) { error.value = t('tasks_fill_cron'); return; }
+  if (!form.name.trim()) { error.value = t('schedule_fill_name'); return; }
+  if (form.execType === 'once' && !form.runAt) { error.value = t('schedule_fill_time'); return; }
+  if (form.execType === 'repeat' && !form.cron.trim()) { error.value = t('schedule_fill_cron'); return; }
   return submitSchedule();
 };
 
@@ -196,7 +196,7 @@ const submitSchedule = async () => {
     if (!res.ok || !data.success) throw new Error(data.message || `HTTP ${res.status}`);
     result.value = { id: data.id, scheduled: true };
   } catch (e) {
-    error.value = e.message || t('tasks_submit_fail');
+    error.value = e.message || t('schedule_submit_fail');
   } finally {
     submitting.value = false;
   }
@@ -245,7 +245,7 @@ const initFromRoute = async () => {
       form.cron = '';
     }
   } catch (e) {
-    error.value = e.message || t('tasks_submit_fail');
+    error.value = e.message || t('schedule_submit_fail');
   }
 };
 

@@ -16,7 +16,7 @@
             class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]"
             @click="router.push('/schedule/create')"
           >
-            {{ t('tasks_create') }}
+            {{ t('schedule_create') }}
           </button>
         </div>
       </div>
@@ -27,7 +27,7 @@
 
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="schedules.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          {{ t('tasks_no_scheduled') }}
+          {{ t('schedule_empty') }}
         </div>
         <div v-else class="space-y-2">
           <div
@@ -51,14 +51,14 @@
                   @click.stop="editSchedule(s.id)"
                   @click="toggleSchedule(s)"
                 >
-                  {{ s.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
+                  {{ s.enabled ? t('schedule_enabled') : t('schedule_disabled') }}
                 </button>
                 <button
                   type="button"
                   class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]"
                   @click="removeSchedule(s.id)"
                 >
-                  {{ t('tasks_delete') }}
+                  {{ t('schedule_delete') }}
                 </button>
               </div>
             </div>
@@ -67,7 +67,7 @@
               <span v-if="s.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[10px] text-[#5a6a8a]">{{ s.cron }}</span>
               <span v-if="s.run_at" class="text-[10px] text-[#7a6a58]">{{ s.run_at }}</span>
               <span v-if="s.creator && s.creator !== 'user'" class="rounded bg-[#f8f0e0] px-1.5 py-0.5 text-[10px] text-[#9a7a40]">{{ s.creator }}</span>
-              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">{{ t('tasks_last_run', { time: s.last_run_at.slice(0, 16) }) }}</span>
+              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">{{ t('schedule_last_run', { time: s.last_run_at.slice(0, 16) }) }}</span>
               <button v-if="s.last_task_id" type="button" class="cursor-pointer text-[10px] text-[#7a6a58] underline hover:text-[#4a3a28]" @click="openTask(s.last_task_id)">
                 #{{ s.last_task_id }}
               </button>
@@ -91,9 +91,9 @@ const schedules = ref([]);
 const error = ref('');
 
 const scheduleTypeLabel = (s) => {
-  if (s.cron) return t('tasks_type_repeat');
-  if (s.run_at) return t('tasks_type_once');
-  return t('tasks_type_queue');
+  if (s.cron) return t('schedule_type_repeat');
+  if (s.run_at) return t('schedule_type_once');
+  return t('schedule_type_queue');
 };
 
 const loadSchedules = async () => {

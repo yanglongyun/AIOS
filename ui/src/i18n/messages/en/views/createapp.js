@@ -1,0 +1,5 @@
+export default {
+  createapp_title: 'Create New App',
+  createapp_description: 'Describe the app you want in the chat, and AI will help you build it.',
+  createapp_start_button: 'Start Creating',
+};

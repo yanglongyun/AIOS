@@ -15,6 +15,12 @@ import treasure from './views/apps/treasure.js';
 import weibo from './views/apps/weibo.js';
 import poker from './views/apps/poker.js';
 import history from './views/history.js';
+import login from './views/login.js';
+import taskdetail from './views/taskdetail.js';
+import briefing from './views/briefing.js';
+import createapp from './views/createapp.js';
+import dailycheck from './views/dailycheck.js';
+import debate from './views/debate.js';
 import settings from './views/settings.js';
 import welcome from './views/welcome.js';
 
@@ -23,6 +29,12 @@ export default {
   ...framework,
   ...chat,
   ...history,
+  ...login,
+  ...taskdetail,
+  ...briefing,
+  ...createapp,
+  ...dailycheck,
+  ...debate,
   ...notebook,
   ...blackroom,
   ...cryptobot,

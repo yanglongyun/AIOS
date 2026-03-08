@@ -11,9 +11,9 @@
 
         <div class="px-7 pb-8 pt-7">
           <div class="mb-5 rounded border border-[#e8e6e0] bg-[#f8f7f4] px-4 py-3.5 text-[13px] leading-[1.8] text-[#4a5568]">
-            想竞选总统？先来纸牌屋练练。选择你的党派，与 AI 对手展开多轮辩论，争夺选民支持率。主持人提问、媒体快评、实时民调——每一句话都可能改变选情。超过 50% 即可入主白宫。
+            {{ t('debate_intro') }}
           </div>
-          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">选择党派</div>
+          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">{{ t('debate_select_party') }}</div>
 
           <!-- 党派列表 -->
           <div class="mb-6">
@@ -35,20 +35,20 @@
               <span v-else class="text-2xl">🏛️</span>
               <div class="flex-1">
                 <div class="text-sm font-bold text-[#1c2841]">{{ party.name }}</div>
-                <div class="text-[11px] text-[#8a9ab5]">{{ party.difficulty }} · 胜场 {{ party.win_count }}</div>
+                <div class="text-[11px] text-[#8a9ab5]">{{ party.difficulty }} · {{ t('debate_wins') }} {{ party.win_count }}</div>
               </div>
               <div class="text-right">
                 <div class="text-base font-bold text-[#1c2841]">{{ party.support_rate }}%</div>
-                <div class="text-[10px] text-[#8a9ab5]">支持率</div>
+                <div class="text-[10px] text-[#8a9ab5]">{{ t('debate_support_rate') }}</div>
               </div>
             </div>
           </div>
 
-          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">候选人姓名</div>
+          <div class="mb-2.5 text-[10px] font-semibold uppercase tracking-[3px] text-[#8a9ab5]">{{ t('debate_candidate_name') }}</div>
           <input
             v-model="candidateName"
             type="text"
-            placeholder="输入姓名"
+            :placeholder="t('debate_enter_name')"
             class="mb-5 w-full rounded border border-[#d8d6d0] bg-white px-3.5 py-3 font-serif text-[15px] text-[#1c2841] outline-none placeholder:text-[#bbb] focus:border-[#c9b06b]"
           />
 
@@ -57,8 +57,8 @@
             :disabled="!candidateParty || !candidateName || preparing"
             class="w-full rounded bg-[#1c2841] py-3.5 font-serif text-base font-bold tracking-[2px] text-[#c9b06b] transition-colors hover:bg-[#263556] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span v-if="preparing">准备中...</span>
-            <span v-else>开始辩论</span>
+            <span v-if="preparing">{{ t('debate_preparing') }}</span>
+            <span v-else>{{ t('debate_start') }}</span>
           </button>
         </div>
       </div>
@@ -69,7 +69,7 @@
       <!-- 顶部深蓝栏 -->
       <div class="shrink-0 border-b-[3px] border-[#c9b06b] bg-[#1c2841] text-[#c9b06b]">
         <div class="border-b border-white/[0.06] py-1.5 text-center text-[11px] tracking-[4px] text-[#8a9ab5]">
-          2026 总统竞选辩论 · 全国直播
+          {{ t('debate_title') }} · {{ t('debate_nationwide') }}
         </div>
 
         <div class="flex items-stretch">
@@ -84,7 +84,7 @@
             </div>
             <div class="ml-auto text-2xl font-bold text-[#c9b06b]">
               {{ getCurrentSupportRate('candidate') }}%
-              <small class="block text-[10px] font-normal text-[#8a9ab5]">支持率</small>
+              <small class="block text-[10px] font-normal text-[#8a9ab5]">{{ t('debate_support_rate') }}</small>
             </div>
           </div>
           <!-- 对方 -->
@@ -98,7 +98,7 @@
             </div>
             <div class="mr-auto text-2xl font-bold text-[#c9b06b]">
               {{ getCurrentSupportRate('opponent') }}%
-              <small class="block text-[10px] font-normal text-[#8a9ab5]">支持率</small>
+              <small class="block text-[10px] font-normal text-[#8a9ab5]">{{ t('debate_support_rate') }}</small>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@
             />
           </template>
           <span class="ml-1 text-[11px] text-[#8a9ab5]">
-            议题 {{ currentTopic }}/{{ topics.length }} · {{ topics[currentTopic - 1]?.topicName }}
+            {{ t('debate_topic') }} {{ currentTopic }}/{{ topics.length }} · {{ topics[currentTopic - 1]?.topicName }}
           </span>
         </div>
       </div>
@@ -154,14 +154,14 @@
               <!-- 主持人 -->
               <div v-else-if="message.role === 'moderator'" class="mx-auto mb-3 max-w-[88%]">
                 <div class="rounded-lg border border-[#e0ddd6] bg-[#f8f7f4] px-3.5 py-2.5 text-center text-sm leading-relaxed text-[#6a7a8a]">
-                  <div class="mb-0.5 text-[10px] font-bold not-italic text-[#8a9ab5]">主持人</div>
+                  <div class="mb-0.5 text-[10px] font-bold not-italic text-[#8a9ab5]">{{ t('debate_moderator') }}</div>
                   {{ message.content }}
                 </div>
               </div>
               <!-- 媒体 -->
               <div v-else-if="message.role === 'media'" class="mx-auto mb-3 max-w-[88%]">
                 <div class="rounded-r-lg border-l-[3px] border-[#c9b06b] bg-white px-3.5 py-2.5 text-center text-sm leading-relaxed text-[#6a7a8a]">
-                  <div class="mb-0.5 text-[10px] font-bold text-[#8a9ab5]">📺 媒体快评</div>
+                  <div class="mb-0.5 text-[10px] font-bold text-[#8a9ab5]">📺 {{ t('debate_media') }}</div>
                   {{ message.content }}
                 </div>
               </div>
@@ -190,14 +190,14 @@
             :disabled="generatingSuggestions"
             class="mb-1 shrink-0 rounded-full border border-[#d7cfbe] bg-white px-3 py-1 text-xs text-[#5b6880] transition-colors hover:border-[#c9b06b] hover:text-[#1c2841] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {{ generatingSuggestions ? '生成中...' : '建议' }}
+            {{ generatingSuggestions ? t('debate_generating') : t('debate_suggest') }}
           </button>
 
           <textarea
             ref="messageInput"
             v-model="newMessage"
             rows="1"
-            placeholder="输入你的发言..."
+            :placeholder="t('debate_enter_statement')"
             @input="autoResize"
             @keydown.enter.prevent="speak"
             class="max-h-[120px] min-h-[22px] flex-1 resize-none border-none bg-transparent py-2 font-serif text-sm text-[#1c2841] outline-none placeholder:text-[#bbb]"
@@ -225,13 +225,13 @@
         <!-- 辩论结束 -->
         <div v-else-if="debateEnded" class="flex items-center justify-center rounded-xl py-1" :class="won ? 'bg-[#1c2841]' : 'bg-[#8b2020]'">
           <button @click="showResults = true" class="min-h-[36px] font-serif font-bold leading-[36px] tracking-wide text-[#c9b06b]">
-            {{ won ? '打开就职演讲' : '查看失败原因' }}
+            {{ won ? t('debate_show_victory_speech') : t('debate_show_failure_reason') }}
           </button>
         </div>
 
         <!-- 等待状态 -->
         <div v-else class="flex items-center justify-center rounded-xl border border-dashed border-[#e0ddd6] bg-[#f8f7f4] py-3.5">
-          <span class="text-sm text-[#8a9ab5]">等待他人发言</span>
+          <span class="text-sm text-[#8a9ab5]">{{ t('debate_waiting') }}</span>
         </div>
       </div>
     </div>
@@ -248,10 +248,10 @@
             <X class="h-5 w-5" />
           </button>
           <div class="mb-2 text-5xl">{{ won ? '🏛️' : '📉' }}</div>
-          <div class="mb-1 text-[22px] font-bold tracking-[2px]">{{ won ? '恭喜当选总统！' : '很遗憾，未能胜出' }}</div>
+          <div class="mb-1 text-[22px] font-bold tracking-[2px]">{{ won ? t('debate_victory') : t('debate_failure') }}</div>
           <div class="mt-4 text-[44px] font-bold">
             {{ getCurrentSupportRate('candidate') }}%
-            <small class="mt-1 block text-xs font-normal text-[#8a9ab5]">最终支持率</small>
+            <small class="mt-1 block text-xs font-normal text-[#8a9ab5]">{{ t('debate_final_support_rate') }}</small>
           </div>
         </div>
 
@@ -268,10 +268,10 @@
         <!-- 操作按钮 -->
         <div class="flex gap-2.5 px-7 pb-6 pt-4">
           <button @click="closeResults" class="flex-1 rounded border border-[#d8d6d0] bg-[#f4f3f0] py-3 font-serif text-sm font-bold text-[#6a7a8a]">
-            关闭
+            {{ t('debate_close') }}
           </button>
           <button @click="resetGame" class="flex-1 rounded bg-[#1c2841] py-3 font-serif text-sm font-bold text-[#c9b06b]">
-            {{ won ? '再次挑战' : '再试一次' }}
+            {{ won ? t('debate_challenge_again') : t('debate_try_again') }}
           </button>
         </div>
       </div>
@@ -282,7 +282,7 @@
       <div class="rounded-md bg-white px-8 py-6 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="h-7 w-7 animate-spin rounded-full border-2 border-[#c9b06b] border-t-transparent"></div>
-          <span class="font-serif text-lg text-[#1c2841]">准备辩论中...</span>
+          <span class="font-serif text-lg text-[#1c2841]">{{ t('debate_preparing_debate') }}</span>
         </div>
       </div>
     </div>
@@ -292,6 +292,9 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
 import { SendHorizontal, X } from 'lucide-vue-next';
+import { useI18n } from '../../i18n/index.js';
+
+const { t } = useI18n();
 
 const API_BASE = '/apps/debate';
 const parties = ref([]);
@@ -346,7 +349,7 @@ const loadParties = async () => {
   try {
     parties.value = await request(`${API_BASE}/parties`, { lang: 'zh' });
   } catch (error) {
-    console.error('加载政党失败:', error);
+    console.error(t('debate_load_parties_failed'), error);
   }
 };
 
@@ -378,7 +381,7 @@ const restoreLatestDebate = async () => {
     await scrollToBottom();
     if (!debateEnded.value) startDebateLoop();
   } catch (error) {
-    console.error('恢复最近辩论失败:', error);
+    console.error(t('debate_restore_failed'), error);
   }
 };
 
@@ -409,14 +412,14 @@ const startDebate = async () => {
       candidatePolicy: ''
     }));
 
-    topics.value[0].messages.push({ role: 'moderator', name: '主持人', content: data.prologue || '' });
-    await saveMessage('moderator', '主持人', data.prologue || '');
+    topics.value[0].messages.push({ role: 'moderator', name: t('debate_moderator'), content: data.prologue || '' });
+    await saveMessage('moderator', t('debate_moderator'), data.prologue || '');
     debateStarted.value = true;
     preparing.value = false;
     await scrollToBottom();
     startDebateLoop();
   } catch (error) {
-    console.error('开始辩论失败:', error);
+    console.error(t('debate_start_failed'), error);
     preparing.value = false;
   }
 };
@@ -436,8 +439,8 @@ const startDebateLoop = async () => {
         addMessage('opponent', opponentName.value, data.content);
         await saveMessage('opponent', opponentName.value, data.content);
       } else if (data.action === 'moderator') {
-        addMessage('moderator', '主持人', data.content);
-        await saveMessage('moderator', '主持人', data.content);
+        addMessage('moderator', t('debate_moderator'), data.content);
+        await saveMessage('moderator', t('debate_moderator'), data.content);
       } else if (data.action === 'next') {
         await summaryCurrentTopic();
         break;
@@ -446,7 +449,7 @@ const startDebateLoop = async () => {
       }
       await scrollToBottom();
     } catch (error) {
-      console.error('辩论循环错误:', error);
+      console.error(t('debate_loop_error'), error);
       break;
     }
   }
@@ -467,8 +470,8 @@ const speak = async () => {
 const summaryCurrentTopic = async () => {
   try {
     const data = await request(`${API_BASE}/summary`, { topicInfo: getTopicInfo() });
-    addMessage('media', '媒体', data.summary || '');
-    await saveMessage('media', '媒体', data.summary || '');
+    addMessage('media', t('debate_media_label'), data.summary || '');
+    await saveMessage('media', t('debate_media_label'), data.summary || '');
     const currentTopicIndex = currentTopic.value - 1;
     topics.value[currentTopicIndex].candidatePolicy = data.policy || '';
 
@@ -480,30 +483,30 @@ const summaryCurrentTopic = async () => {
       await continueToNextTopic();
     }
   } catch (error) {
-    console.error('议题总结失败:', error);
+    console.error(t('debate_summary_failed'), error);
   }
 };
 
 const continueToNextTopic = async () => {
   const prevTopic = topics.value[currentTopic.value - 1].topicName;
   const newTopic = topics.value[currentTopic.value].topicName;
-  const candidateInfo = `候选人：${candidateParty.value} - ${candidateName.value}，支持率：${topics.value[currentTopic.value].candidateSupportRate}%\n对手：${opponentParty.value} - ${opponentName.value}，支持率：${topics.value[currentTopic.value].opponentSupportRate}%`;
+  const candidateInfo = `${t('debate_candidate')}：${candidateParty.value} - ${candidateName.value}，${t('debate_support_rate')}：${topics.value[currentTopic.value].candidateSupportRate}%\n${t('debate_opponent')}：${opponentParty.value} - ${opponentName.value}，${t('debate_support_rate')}：${topics.value[currentTopic.value].opponentSupportRate}%`;
   try {
     const data = await request(`${API_BASE}/continue`, { prevTopic, newTopic, candidateInfo });
     topics.value[currentTopic.value].status = true;
-    topics.value[currentTopic.value].messages.push({ role: 'moderator', name: '主持人', content: data.content || '' });
+    topics.value[currentTopic.value].messages.push({ role: 'moderator', name: t('debate_moderator'), content: data.content || '' });
     currentTopic.value++;
     await scrollToBottom();
     startDebateLoop();
   } catch (error) {
-    console.error('继续下一议题失败:', error);
+    console.error(t('debate_continue_failed'), error);
   }
 };
 
 const finishDebate = async () => {
   const idx = currentTopic.value - 1;
   const finalSupportRate = Number(topics.value[idx].candidateSupportRate || 0);
-  const policy = topics.value.map((topic) => `议题: ${topic.topicName} - 主张: ${topic.candidatePolicy} - 支持率: ${topic.candidateSupportRate}% - 对手支持率: ${topic.opponentSupportRate}%`).join('\n');
+  const policy = topics.value.map((topic) => `${t('debate_topic')}: ${topic.topicName} - ${t('debate_position')}: ${topic.candidatePolicy} - ${t('debate_support_rate')}: ${topic.candidateSupportRate}% - ${t('debate_opponent_support_rate')}: ${topic.opponentSupportRate}%`).join('\n');
   try {
     const data = await request(`${API_BASE}/finish`, {
       debateId: debateId.value,
@@ -524,7 +527,7 @@ const finishDebate = async () => {
     debateEnded.value = true;
     showResults.value = true;
   } catch (error) {
-    console.error('结束辩论失败:', error);
+    console.error(t('debate_finish_failed'), error);
   }
 };
 
@@ -550,15 +553,15 @@ const saveMessage = async (speakerRole, speakerName, content, draft = '') => {
 
 const getTopicInfo = () => {
   const idx = currentTopic.value - 1;
-  const currentCandidateInfo = `${candidateParty.value} - ${candidateName.value}，党派主张：${selectedParty.value?.policy}，当前支持率：${topics.value[idx].candidateSupportRate}%`;
-  const opponentInfo = `${opponentParty.value} - ${opponentName.value}，当前支持率：${topics.value[idx].opponentSupportRate}%`;
-  const candidateInfo = `当前候选人信息:\n${currentCandidateInfo}\n对手候选人信息:\n${opponentInfo}\n\n`;
-  const topicInfo = `议题:\n${topics.value[idx].topicName}\n\n`;
+  const currentCandidateInfo = `${candidateParty.value} - ${candidateName.value}，${t('debate_party_position')}：${selectedParty.value?.policy}，${t('debate_current_support_rate')}：${topics.value[idx].candidateSupportRate}%`;
+  const opponentInfo = `${opponentParty.value} - ${opponentName.value}，${t('debate_current_support_rate')}：${topics.value[idx].opponentSupportRate}%`;
+  const candidateInfo = `${t('debate_candidate_info_label')}:\n${currentCandidateInfo}\n${t('debate_opponent_info_label')}:\n${opponentInfo}\n\n`;
+  const topicInfo = `${t('debate_topic')}:\n${topics.value[idx].topicName}\n\n`;
   const messages = topics.value[idx].messages;
   const latest = messages.length > 0 ? messages[messages.length - 1] : null;
-  const latestInfo = latest ? `最新的发言:\n${latest.name}: ${latest.content}\n` : '';
+  const latestInfo = latest ? `${t('debate_latest_statement')}:\n${latest.name}: ${latest.content}\n` : '';
   const recent = messages.slice(0, -1).map((m, i) => `${i + 1}. ${m.name}: ${m.content}`).join('\n');
-  return `${candidateInfo}${topicInfo}最近的发言:\n${recent}\n\n${latestInfo}`;
+  return `${candidateInfo}${topicInfo}${t('debate_recent_statements')}:\n${recent}\n\n${latestInfo}`;
 };
 
 const getCurrentSupportRate = (type) => {
@@ -585,7 +588,7 @@ const normalizeSuggestionItems = (list = []) => {
       if (title && content) out.push({ title, content });
     } else {
       const text = String(item || '').trim();
-      if (text) out.push({ title: `建议 ${out.length + 1}`, content: text });
+      if (text) out.push({ title: `${t('debate_suggest')} ${out.length + 1}`, content: text });
     }
     if (out.length >= 3) break;
   }
@@ -602,7 +605,7 @@ const generateSuggestions = async () => {
     });
     suggestions.value = normalizeSuggestionItems(data?.suggestions);
   } catch (error) {
-    console.error('生成建议失败:', error);
+    console.error(t('debate_generate_suggestions_failed'), error);
   } finally {
     generatingSuggestions.value = false;
   }

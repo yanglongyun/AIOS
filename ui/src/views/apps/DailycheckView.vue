@@ -140,7 +140,7 @@
               <span
                 class="rounded-full px-1.5 py-px text-[9px] font-bold"
                 :class="item.answered ? 'bg-[#e8f5e4] text-[#4a8a38]' : 'bg-[#f0ebe0] text-[#b0a080]'"
-              >{{ item.answered ? '已答' : '未答' }}</span>
+              >{{ item.answered ? t('dailycheck_answered_label') : t('dailycheck_unanswered_text') }}</span>
             </div>
             <div class="mb-1 text-[13px] font-semibold leading-snug text-[#4a3a28]">{{ item.question }}</div>
             <div v-if="item.answer" class="text-xs leading-relaxed text-[#7a6a58]">{{ item.answer }}</div>
@@ -182,7 +182,7 @@ const pageSize = 10;
 const totalPages = ref(1);
 const now = new Date();
 const weekday = computed(() => {
-  const days = ['周日','周一','周二','周三','周四','周五','周六'];
+  const days = [t('dailycheck_weekday_0'),t('dailycheck_weekday_1'),t('dailycheck_weekday_2'),t('dailycheck_weekday_3'),t('dailycheck_weekday_4'),t('dailycheck_weekday_5'),t('dailycheck_weekday_6')];
   return days[now.getDay()];
 });
 const monthDay = computed(() => `${now.getMonth() + 1}${t('dailycheck_month_label')}${now.getDate()}${t('dailycheck_day_suffix')}`);

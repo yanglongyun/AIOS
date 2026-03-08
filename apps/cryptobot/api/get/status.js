@@ -1,10 +1,29 @@
-import { getConfig, getState, calcEquity, getTodayChange, maskKey, parseNum } from '../../db.js';
+import { getConfig, getState, getTodayChange, parseNum } from '../../db.js';
+import { fetchCandles, fetchSpotBalances } from '../../runtime/okx.js';
 
-export const getStatusHandler = () => {
+export const getStatusHandler = async () => {
   const cfg = getConfig();
   const state = getState();
-  const lastPrice = parseNum(state.last_price);
-  const equity = lastPrice > 0 ? calcEquity(cfg, lastPrice) : parseNum(cfg.virtual_usdt);
+  let lastPrice = parseNum(state.last_price);
+  let usdt = parseNum(cfg.virtual_usdt);
+  let coin = parseNum(cfg.virtual_coin);
+
+  if (cfg.api_key && cfg.api_secret && cfg.passphrase) {
+    try {
+      const [candles, balances] = await Promise.all([
+        fetchCandles(cfg),
+        fetchSpotBalances(cfg, cfg.inst_id)
+      ]);
+      const last = candles[candles.length - 1];
+      if (last?.close) lastPrice = parseNum(last.close);
+      usdt = parseNum(balances.quoteCash);
+      coin = parseNum(balances.baseCash);
+    } catch {
+      // keep cached values when OKX temporarily unavailable
+    }
+  }
+
+  const equity = lastPrice > 0 ? (usdt + coin * lastPrice) : parseNum(usdt);
   const initialEq = parseNum(cfg.initial_equity, equity) || 1;
   const pnl = equity - initialEq;
 
@@ -12,7 +31,12 @@ export const getStatusHandler = () => {
     success: true,
     config: {
       base_url: cfg.base_url,
-      api_key: maskKey(cfg.api_key),
+      api_key: cfg.api_key || '',
+      api_secret: cfg.api_secret || '',
+      passphrase: cfg.passphrase || '',
+      has_api_key: Boolean(cfg.api_key),
+      has_api_secret: Boolean(cfg.api_secret),
+      has_passphrase: Boolean(cfg.passphrase),
       has_keys: Boolean(cfg.api_key && cfg.api_secret && cfg.passphrase),
       directive: cfg.directive,
       interval_sec: cfg.interval_sec,

@@ -1,160 +1,187 @@
 <template>
-  <div class="flex h-full flex-col bg-[#0b0e11] font-['Inter','PingFang_SC',system-ui,sans-serif] text-[#eaecef]">
-
-    <!-- 顶栏 -->
-    <div class="flex items-center justify-between border-b border-[#2b2f36] bg-[#0b0e11] px-5 py-3">
-      <div class="flex items-center gap-3">
-        <span class="text-xl font-bold text-[#f0b90b]">₿</span>
-        <div>
-          <h1 class="text-sm font-bold text-[#eaecef]">{{ t('cryptobot_title') }}</h1>
-          <div class="text-[10px] text-[#848e9c]">AI Trading Bot · OKX</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <div v-if="status.state.last_price > 0" class="text-right">
-          <div class="font-['SF_Mono','Menlo',monospace] text-sm font-bold text-[#eaecef] tabular-nums">{{ fmtNum(status.state.last_price) }}</div>
-          <div class="text-[10px] text-[#848e9c]">{{ status.config.inst_id || 'BTC-USDT' }}</div>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="h-1.5 w-1.5 rounded-full" :class="status.state.running ? 'bg-[#0ecb81] shadow-[0_0_6px_#0ecb81]' : 'bg-[#2b2f36]'"></div>
-          <span class="text-[11px]" :class="status.state.running ? 'text-[#0ecb81]' : 'text-[#848e9c]'">{{ status.state.running ? t('cryptobot_running') : t('cryptobot_stopped') }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Error -->
-    <div v-if="error" class="border-b border-[#f6465d]/30 bg-[#f6465d]/10 px-5 py-2 text-[11px] text-[#f6465d]">{{ error }}</div>
-
-    <!-- 单列滚动 -->
-    <div class="flex-1 overflow-y-auto">
-      <div class="mx-auto max-w-[720px] divide-y divide-[#2b2f36]">
-
-        <!-- 账户概览 -->
-        <div class="flex flex-wrap items-end gap-x-8 gap-y-3 px-5 py-4">
-          <div>
-            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_equity_total') }}</div>
-            <div class="font-['SF_Mono','Menlo',monospace] text-[30px] font-bold leading-none tabular-nums text-[#eaecef]">
-              {{ fmtNum(status.equity.current, 0) }}<span class="ml-1 text-sm font-normal text-[#848e9c]">USDT</span>
+  <div class="h-full overflow-y-auto bg-[#d2c5b3] bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_8px)] p-4 font-['PingFang_SC','Microsoft_YaHei',sans-serif] text-[#3e3223]">
+    <div class="mx-auto h-full w-full max-w-[560px] rounded-2xl border border-[#e2dbd6] bg-[#f1edeb] p-5 shadow-[inset_0_4px_6px_rgba(255,255,255,1),inset_0_-4px_6px_rgba(0,0,0,0.05),0_15px_25px_rgba(100,80,60,0.2),0_5px_10px_rgba(100,80,60,0.1)]">
+      <div class="h-full overflow-y-auto pr-1 pb-8">
+        <div class="mb-5 flex items-center justify-between border-b-2 border-[#dcd4cb] pb-3">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded border-2 border-[#91251c] bg-[#cb3e32] text-2xl font-black text-[#fffdfa] shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.2)]">₿</div>
+            <div>
+              <h1 class="mt-1 text-xl font-black tracking-widest">自动交易系统</h1>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-[#8a7f72]">AIOS TRADING BOT · OKX</p>
             </div>
           </div>
-          <div>
-            <div class="mb-1 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_pnl_total') }}</div>
-            <div class="font-['SF_Mono','Menlo',monospace] text-xl font-bold tabular-nums" :class="status.equity.pnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'">
-              {{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl) }}
-              <span class="text-[12px] font-normal opacity-80">({{ status.equity.pnl_ratio >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl_ratio, 1) }}%)</span>
+
+          <div class="flex items-end gap-3">
+            <div class="flex flex-col items-center gap-1">
+              <div class="text-[9px] font-black text-[#8a7f72]">交易所</div>
+              <button class="metal-btn flex h-[32px] w-[32px] items-center justify-center text-sm" @click="showExPanel = !showExPanel">🔧</button>
             </div>
-          </div>
-          <div class="text-[11px] text-[#848e9c]">{{ t('cryptobot_initial', { v: fmtNum(status.equity.initial, 0) }) }} USDT</div>
-          <div v-if="status.state.running" class="ml-auto text-right text-[11px] text-[#848e9c]">
-            <div>{{ t('cryptobot_ticks', { n: status.state.tick_count }) }}</div>
-            <div>{{ t('cryptobot_trades', { n: status.state.trade_count }) }} · {{ runDuration }}</div>
-          </div>
-        </div>
-
-        <!-- 权益曲线 -->
-        <div class="px-5 py-4">
-          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_equity_curve') }}</div>
-          <svg viewBox="0 0 580 100" class="h-[100px] w-full">
-            <line v-for="y in [25, 50, 75]" :key="y" x1="0" :y1="y" x2="580" :y2="y" stroke="#2b2f36" stroke-width="1"/>
-            <defs>
-              <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" :stop-color="eqColor" stop-opacity="0.15"/>
-                <stop offset="100%" :stop-color="eqColor" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <polygon v-if="eqPolyline" :points="eqFillPts" fill="url(#eqFill)" />
-            <polyline v-if="eqPolyline" fill="none" :stroke="eqColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" :points="eqPolyline" />
-            <template v-for="dot in tradeDots" :key="dot.id">
-              <circle :cx="dot.x" :cy="dot.y" r="3" :fill="dot.action === 'buy' ? '#0ecb81' : '#f6465d'" />
-            </template>
-            <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#4b5563" font-size="12">{{ t('cryptobot_no_data') }}</text>
-          </svg>
-          <div class="mt-1 flex justify-between text-[10px] text-[#848e9c]">
-            <span><span class="text-[#0ecb81]">●</span> {{ t('cryptobot_buy') }} <span class="ml-2 text-[#f6465d]">●</span> {{ t('cryptobot_sell') }}</span>
-            <span v-if="eqTimespan">{{ t('cryptobot_recent') }} {{ eqTimespan }}</span>
-          </div>
-        </div>
-
-        <!-- 自动运行 -->
-        <div class="px-5 py-4">
-          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_auto_run') }}</div>
-          <div class="flex items-center gap-3">
-            <span class="text-[11px] text-[#848e9c]">{{ t('cryptobot_interval') }}</span>
-            <select v-model="intervalMin" class="rounded border border-[#2b2f36] bg-[#1c2026] px-2 py-1 text-[11px] text-[#eaecef] outline-none" @change="onIntervalChange">
-              <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ t('cryptobot_minutes', { n: m }) }}</option>
-            </select>
-            <button v-if="status.state.running" @click="doStop" class="btn-danger ml-auto">{{ t('cryptobot_stop') }}</button>
-            <button v-else @click="doStart" class="btn-success ml-auto">{{ t('cryptobot_start') }}</button>
-          </div>
-        </div>
-
-        <!-- 交易所配置 -->
-        <div class="px-5 py-4">
-          <div class="flex items-center gap-3">
-            <div class="text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_exchange') }}</div>
-            <span class="text-[11px] font-bold text-[#eaecef]">OKX</span>
-            <span v-if="status.config.has_keys" class="rounded bg-[#0ecb81]/10 px-2 py-0.5 text-[9px] font-bold text-[#0ecb81]">{{ t('cryptobot_connected') }}</span>
-            <span v-else class="rounded bg-[#2b2f36] px-2 py-0.5 text-[9px] font-bold text-[#848e9c]">{{ t('cryptobot_not_configured') }}</span>
-            <span v-if="status.config.api_key" class="font-['SF_Mono','Menlo',monospace] text-[10px] text-[#848e9c]">{{ status.config.api_key }}</span>
-            <button class="ml-auto text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="showExPanel = !showExPanel">{{ showExPanel ? t('cryptobot_collapse') : t('cryptobot_edit') }}</button>
-          </div>
-          <div v-if="showExPanel" class="mt-3 grid grid-cols-2 gap-2">
-            <input v-model="exForm.api_key" placeholder="API Key" class="ex-input" />
-            <input v-model="exForm.api_secret" type="password" placeholder="API Secret" class="ex-input" />
-            <input v-model="exForm.passphrase" type="password" placeholder="Passphrase" class="ex-input" />
-            <input v-model="exForm.base_url" :placeholder="t('cryptobot_api_url_placeholder')" class="ex-input" />
-            <div class="col-span-2 flex items-center justify-between pt-1">
-              <div class="flex items-center gap-2">
-                <button class="btn-ghost" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
-                <span v-if="testResult" class="text-[11px]" :class="testResult.ok ? 'text-[#0ecb81]' : 'text-[#f6465d]'">{{ testResult.msg }}</span>
+            <div class="flex flex-col items-center gap-1">
+              <div class="text-[9px] font-black" :class="status.state.running ? 'text-[#5c996b]' : 'text-[#8a7f72]'">
+                {{ status.state.running ? t('cryptobot_running') : t('cryptobot_stopped') }}
               </div>
-              <button class="btn-primary" @click="doSaveExchange">{{ t('common_save') }}</button>
+              <button
+                class="rocker-switch flex items-center justify-center text-[11px] tracking-widest"
+                :class="status.state.running ? 'on' : 'off'"
+                @click="status.state.running ? doStop() : doStart()"
+              >
+                {{ status.state.running ? '运行中' : '已停止' }}
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- 交易指令 -->
-        <div class="px-5 py-4">
-          <div class="mb-2 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_directive') }}</div>
-          <textarea
-            v-model="directive"
-            class="dir-area"
-            rows="3"
-            :placeholder="t('cryptobot_directive_placeholder')"
-          ></textarea>
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-[10px] text-[#848e9c]">{{ status.config.updated_at ? t('cryptobot_last_saved', { t: fmtTime(status.config.updated_at) }) : '' }}</span>
-            <button class="btn-primary" @click="doSaveDirective">{{ t('common_save') }}</button>
-          </div>
-        </div>
+        <div v-if="error" class="mb-4 rounded-lg border border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">{{ error }}</div>
 
-        <!-- 运行记录 -->
-        <div class="px-5 pt-4">
-          <div class="mb-3 text-[10px] uppercase tracking-[2px] text-[#848e9c]">{{ t('cryptobot_logs') }}</div>
-        </div>
-        <div v-if="!decisions.length" class="py-10 text-center text-[13px] text-[#4b5563]">{{ t('cryptobot_logs_empty') }}</div>
-        <div v-for="(d, idx) in decisions" :key="d.id" class="flex gap-3 px-5">
-          <div class="w-10 flex-shrink-0 pt-3.5 text-right">
-            <span class="font-['SF_Mono','Menlo',monospace] text-[11px] tabular-nums text-[#4b5563]">{{ fmtShort(d.created_at) }}</span>
+        <div v-if="showExPanel || !status.config.has_keys" class="maintenance-panel mb-6 p-4" id="config-panel">
+          <div class="mb-3 flex items-center justify-between border-b border-[#bbaea0] pb-2">
+            <h2 class="text-[13px] font-black tracking-widest text-[#4a3e30]">交易所连接配置 (OKX)</h2>
+            <div class="flex items-center gap-1.5 rounded border px-2 py-0.5" :class="status.config.has_keys ? 'border-[#b8dab2] bg-[#d8eed3]' : 'border-[#d5c9bc] bg-[#efe6dc]'">
+              <div class="h-1.5 w-1.5 rounded-full" :class="status.config.has_keys ? 'bg-green-600 shadow-[0_0_4px_#16a34a]' : 'bg-[#9f8f7d]'"></div>
+              <span class="text-[9px] font-bold" :class="status.config.has_keys ? 'text-green-800' : 'text-[#7b6b59]'">{{ status.config.has_keys ? t('cryptobot_connected') : t('cryptobot_not_configured') }}</span>
+            </div>
           </div>
-          <div class="flex w-3.5 flex-shrink-0 flex-col items-center">
-            <div class="mt-3.5 h-2 w-2 flex-shrink-0 rounded-full" :class="dotCls(d.action)"></div>
-            <div v-if="idx < decisions.length - 1" class="w-px flex-1 bg-[#2b2f36]"></div>
+
+          <div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">API Key</label>
+              <input v-model="exForm.api_key" type="text" placeholder="API Key" class="etched-input w-full p-2 text-[11px]" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">API Secret</label>
+              <input v-model="exForm.api_secret" type="text" placeholder="API Secret" class="etched-input w-full p-2 text-[11px] tracking-widest" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">Passphrase</label>
+              <input v-model="exForm.passphrase" type="text" placeholder="Passphrase" class="etched-input w-full p-2 text-[11px] tracking-widest" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">接口地址</label>
+              <input v-model="exForm.base_url" type="text" :placeholder="t('cryptobot_api_url_placeholder')" class="etched-input w-full p-2 text-[11px]" />
+            </div>
           </div>
-          <div class="min-w-0 flex-1 pb-4 pt-2.5">
-            <div class="text-[11px] font-bold uppercase tracking-wider" :class="actCls(d.action)">{{ actLabel(d.action) }}</div>
-            <div class="mt-1 text-[13px] leading-relaxed text-[#848e9c]">{{ d.reason }}</div>
-            <div v-if="d.action !== 'hold' && d.amount_usdt > 0" class="mt-2 inline-flex items-center gap-1.5 rounded border border-[#2b2f36] bg-[#141518] px-2.5 py-1 font-['SF_Mono','Menlo',monospace] text-[11px] tabular-nums text-[#848e9c]">
-              <span>{{ status.config.inst_id }}</span>
-              <span class="text-[#eaecef] font-bold">{{ fmtNum(d.price) }}</span>
-              <span>×</span>
-              <span>{{ Number(d.size_coin).toFixed(6) }}</span>
-              <span>=</span>
-              <span class="font-bold" :class="d.action === 'buy' ? 'text-[#0ecb81]' : 'text-[#f6465d]'">{{ fmtNum(d.amount_usdt) }} U</span>
+
+          <div class="mb-3 text-[10px] font-bold text-[#7b6b59]">当前配置为明文显示</div>
+
+          <div v-if="testResult" class="mb-2 text-[11px]" :class="testResult.ok ? 'text-[#2f7c3d]' : 'text-[#b84735]'">{{ testResult.msg }}</div>
+
+          <div class="flex items-center justify-between gap-3 border-t border-[#bbaea0] pt-2">
+            <button class="metal-btn px-3 py-1 text-[11px]" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
+            <div class="flex items-center gap-3">
+              <button class="metal-btn px-4 py-1.5 text-[11px] text-[#5e5448]" @click="showExPanel = false">关闭</button>
+              <button class="metal-btn px-4 py-1.5 text-[11px] text-green-800" @click="doSaveExchange">{{ t('common_save') }}</button>
             </div>
           </div>
         </div>
-        <div v-if="hasMore" class="cursor-pointer py-4 text-center text-[11px] text-[#848e9c] hover:text-[#eaecef]" @click="loadMoreDecisions">{{ t('cryptobot_load_more') }}</div>
+
+        <div class="mb-8">
+          <div class="mb-3 rounded-lg border-2 border-[#c9a84a] bg-[#fff3c8] px-3 py-2 text-[11px] font-bold leading-relaxed text-[#6f4f00] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+            风险提示：当前为实盘交易模式，AI 的策略判断和自动下单可能导致资金损失。请仅在充分理解风险并可承受损失的前提下启用自动运行。
+          </div>
+          <div class="mb-2 flex items-end justify-between px-1">
+            <h2 class="flex items-center gap-2 text-sm font-black tracking-widest text-[#594c3d]">
+              <span class="text-lg text-[#c94c4c]">●</span>
+              核心交易目标
+            </h2>
+            <div class="flex items-center gap-2">
+              <label class="text-[11px] font-bold text-[#7b6c5a]">运行周期</label>
+              <select v-model="intervalMin" class="etched-input cursor-pointer px-2 py-1 text-[11px]" @change="onIntervalChange">
+                <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">每 {{ m }} 分钟运行一次</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="target-board">
+            <textarea v-model="directive" rows="3" spellcheck="false" :placeholder="t('cryptobot_directive_placeholder')"></textarea>
+
+            <div class="mt-2 flex items-center justify-between border-t border-[#544d45] pt-2">
+              <div class="text-[10px] font-bold text-[#968978]">
+                {{ status.config.updated_at ? t('cryptobot_last_saved', { t: fmtTime(status.config.updated_at) }) : '未保存' }}
+              </div>
+              <button class="text-[11px] font-bold text-[#8a7f72] underline decoration-dashed transition hover:text-[#c94c4c]" @click="doSaveDirective">{{ t('common_save') }}</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lcd-screen mb-6 p-4">
+          <div class="relative z-10 flex items-start justify-between">
+            <div>
+              <div class="mb-1 text-[11px] font-bold tracking-widest text-[#46543b]">账户总权益 (USDT)</div>
+              <div class="mechanical-roller mt-1 text-xl font-bold tabular-nums">{{ fmtNum(status.equity.current, 0) }}</div>
+            </div>
+          </div>
+
+          <div class="relative z-0 mt-2 h-[64px] border-b border-[#8a997a] opacity-85">
+            <svg viewBox="0 0 580 100" class="h-full w-full" preserveAspectRatio="none">
+              <line v-for="y in [25, 50, 75]" :key="y" x1="0" :y1="y" x2="580" :y2="y" stroke="#8a997a" stroke-width="0.8" stroke-dasharray="2,2" />
+              <defs>
+                <linearGradient id="eqFillRetro" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" :stop-color="eqColor" stop-opacity="0.18"/>
+                  <stop offset="100%" :stop-color="eqColor" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <polygon v-if="eqPolyline" :points="eqFillPts" fill="url(#eqFillRetro)" />
+              <polyline v-if="eqPolyline" :points="eqPolyline" fill="none" :stroke="eqColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" />
+              <template v-for="dot in tradeDots" :key="dot.id">
+                <circle :cx="dot.x" :cy="dot.y" r="3" :fill="dot.action === 'buy' ? '#1f2619' : '#5f2d25'" />
+              </template>
+              <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#5f6d52" font-size="12">{{ t('cryptobot_no_data') }}</text>
+            </svg>
+          </div>
+
+          <div class="relative z-10 flex items-center justify-between pt-3 text-[10px] font-bold text-[#46543b]">
+            <span>全局盯盘: {{ status.state.tick_count }}次 · 已出手: {{ status.state.trade_count }}次</span>
+            <span class="rounded bg-[#8a997a] px-1.5 py-0.5 text-[#d7dfcd]">{{ eqTimespan ? `${t('cryptobot_recent')} ${eqTimespan}` : '图表：近日净值走势' }}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="mb-2 px-1 text-[12px] font-black text-[#594c3d]">最新交易记录</div>
+
+          <div class="relative px-2 pt-1">
+            <div class="receipt-paper p-4 pb-6 pt-5">
+              <div class="mb-4 border-b-2 border-dashed border-[#d1c8bb] pb-2 text-center text-[12px] font-black tracking-widest text-[#756755]">
+                === 交易执行日志 ===
+              </div>
+
+              <div v-if="!decisions.length" class="py-6 text-center text-[11px] font-bold text-[#9c9081]">{{ t('cryptobot_logs_empty') }}</div>
+
+              <div v-for="d in decisions" :key="d.id" class="mb-4 border-b border-dashed border-[#e6e0d5] pb-3 last:mb-1 last:border-b-0 last:pb-0">
+                <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-[#8a7f72]">
+                  <span>{{ fmtTime(d.created_at) }}</span>
+                  <span>单号 #{{ d.id }}</span>
+                </div>
+                <div class="mb-1 flex items-center justify-between font-black">
+                  <span
+                    class="rounded border px-1.5 py-0.5 text-[11px]"
+                    :class="d.action === 'buy'
+                      ? 'border-[#bbf7d0] bg-[#dcfce7] text-[#166534]'
+                      : d.action === 'sell'
+                        ? 'border-[#fecaca] bg-[#fee2e2] text-[#991b1b]'
+                        : 'border-[#d6ccbe] bg-[#f2ece2] text-[#7b6f62]'"
+                  >
+                    {{ actLabel(d.action) }} {{ status.config.inst_id || '未设置交易对' }}
+                  </span>
+                  <span class="text-xs text-[#594c3d]">
+                    <template v-if="d.action !== 'hold' && d.amount_usdt > 0">{{ fmtNum(d.amount_usdt) }} U</template>
+                    <template v-else>无成交</template>
+                  </span>
+                </div>
+                <div class="pr-2 text-[11px] font-bold leading-relaxed text-[#7a6f61]">{{ d.reason || '-' }}</div>
+              </div>
+
+              <button
+                v-if="hasMore"
+                type="button"
+                class="mt-2 w-full cursor-pointer text-center text-[10px] font-bold text-[#9c9081] transition hover:text-[#c94c4c]"
+                @click="loadMoreDecisions"
+              >
+                查看更多记录
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -172,7 +199,7 @@ const error = ref('');
 let poller = null;
 
 const status = reactive({
-  config: { api_key: '', has_keys: false, directive: '', interval_sec: 300, inst_id: 'BTC-USDT', updated_at: '', base_url: '' },
+  config: { api_key: '', has_api_key: false, has_api_secret: false, has_passphrase: false, has_keys: false, directive: '', interval_sec: 300, inst_id: '', updated_at: '', base_url: '' },
   state: { running: false, tick_count: 0, trade_count: 0, started_at: '', last_run_at: '', last_price: 0 },
   equity: { current: 10000, initial: 10000, pnl: 0, pnl_ratio: 0, today_change: 0 }
 });
@@ -206,6 +233,10 @@ const loadStatus = async () => {
   Object.assign(status.config, d.config || {});
   Object.assign(status.state, d.state || {});
   Object.assign(status.equity, d.equity || {});
+  exForm.base_url = status.config.base_url || '';
+  exForm.api_key = status.config.api_key || '';
+  exForm.api_secret = status.config.api_secret || '';
+  exForm.passphrase = status.config.passphrase || '';
 };
 
 const loadDecisions = async () => {
@@ -246,9 +277,10 @@ const doSaveExchange = async () => {
     await post('/exchange', exForm);
     showExPanel.value = false;
     testResult.value = null;
-    exForm.api_key = ''; exForm.api_secret = ''; exForm.passphrase = '';
     await loadStatus();
-  } catch (e) { error.value = e.message; }
+  } catch (e) {
+    error.value = e.message;
+  }
 };
 
 const doSaveDirective = async () => {
@@ -256,7 +288,9 @@ const doSaveDirective = async () => {
   try {
     await post('/directive', { directive: directive.value });
     await loadStatus();
-  } catch (e) { error.value = e.message; }
+  } catch (e) {
+    error.value = e.message;
+  }
 };
 
 const doStart = async () => {
@@ -264,7 +298,9 @@ const doStart = async () => {
   try {
     await post('/start', { interval_sec: intervalMin.value * 60 });
     await loadAll();
-  } catch (e) { error.value = e.message; }
+  } catch (e) {
+    error.value = e.message;
+  }
 };
 
 const doStop = async () => {
@@ -272,14 +308,16 @@ const doStop = async () => {
   try {
     await post('/stop');
     await loadAll();
-  } catch (e) { error.value = e.message; }
+  } catch (e) {
+    error.value = e.message;
+  }
 };
 
 const onIntervalChange = () => {
   if (status.state.running) doStart();
 };
 
-const eqColor = computed(() => status.equity.pnl >= 0 ? '#4a9a40' : '#c04030');
+const eqColor = computed(() => (status.equity.pnl >= 0 ? '#1f2619' : '#6a3a30'));
 
 const runDuration = computed(() => {
   if (!status.state.started_at) return '';
@@ -295,39 +333,44 @@ const runDuration = computed(() => {
 const eqPolyline = computed(() => {
   const pts = equityPts.value;
   if (pts.length < 2) return '';
-  const vals = pts.map(p => Number(p.equity)).filter(Number.isFinite);
+  const vals = pts.map((p) => Number(p.equity)).filter(Number.isFinite);
   if (vals.length < 2) return '';
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const span = max - min || 1;
-  return pts.map((p, i) => {
-    const x = (i / (pts.length - 1)) * 580;
-    const y = 5 + (1 - (Number(p.equity) - min) / span) * 110;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
+  return pts
+    .map((p, i) => {
+      const x = (i / (pts.length - 1)) * 580;
+      const y = 5 + (1 - (Number(p.equity) - min) / span) * 90;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
 });
 
-const eqFillPts = computed(() => eqPolyline.value ? `0,115 ${eqPolyline.value} 580,115` : '');
+const eqFillPts = computed(() => (eqPolyline.value ? `0,95 ${eqPolyline.value} 580,95` : ''));
 
 const tradeDots = computed(() => {
   const pts = equityPts.value;
   if (pts.length < 2) return [];
-  const vals = pts.map(p => Number(p.equity));
+  const vals = pts.map((p) => Number(p.equity));
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const span = max - min || 1;
   return decisions.value
-    .filter(d => d.action === 'buy' || d.action === 'sell')
-    .map(d => {
+    .filter((d) => d.action === 'buy' || d.action === 'sell')
+    .map((d) => {
       const dTime = new Date(d.created_at).getTime();
       let closest = 0;
       let minDiff = Infinity;
       pts.forEach((p, i) => {
         const diff = Math.abs(new Date(p.created_at).getTime() - dTime);
-        if (diff < minDiff) { minDiff = diff; closest = i; }
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = i;
+        }
       });
       const x = (closest / (pts.length - 1)) * 580;
-      const y = 5 + (1 - (vals[closest] - min) / span) * 110;
+      const y = 5 + (1 - (vals[closest] - min) / span) * 90;
       return { id: d.id, x: x.toFixed(1), y: y.toFixed(1), action: d.action };
     })
     .slice(0, 20);
@@ -353,28 +396,9 @@ const fmtNum = (v, dec = 2) => {
 const fmtTime = (v) => {
   if (!v) return '';
   const d = new Date(v);
-  if (isNaN(d.getTime())) return String(v);
+  if (Number.isNaN(d.getTime())) return String(v);
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 };
-
-const fmtShort = (v) => {
-  if (!v) return '';
-  const d = new Date(v);
-  if (isNaN(d.getTime())) return '';
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
-
-const dotCls = (a) => ({
-  'bg-[#2a7a3a]': a === 'buy',
-  'bg-[#c04030]': a === 'sell',
-  'border-2 border-[#d4c4b0] bg-transparent': a !== 'buy' && a !== 'sell'
-});
-
-const actCls = (a) => ({
-  'text-[#2a7a3a]': a === 'buy',
-  'text-[#c04030]': a === 'sell',
-  'text-[#b0a090]': a !== 'buy' && a !== 'sell'
-});
 
 const actLabel = (a) => {
   if (a === 'buy') return t('cryptobot_buy');
@@ -388,6 +412,7 @@ onMounted(async () => {
     directive.value = status.config.directive || '';
     intervalMin.value = Math.round((status.config.interval_sec || 300) / 60);
     exForm.base_url = status.config.base_url || 'https://www.okx.com';
+    if (!status.config.has_keys) showExPanel.value = true;
     poller = setInterval(() => loadAll().catch(() => {}), 5000);
   } catch (e) {
     error.value = e.message || t('cryptobot_init_failed');
@@ -395,90 +420,156 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (poller) { clearInterval(poller); poller = null; }
+  if (poller) {
+    clearInterval(poller);
+    poller = null;
+  }
 });
 </script>
 
 <style scoped>
-.ex-input {
-  width: 100%;
-  padding: 6px 10px;
-  border: 1px solid #2b2f36;
-  border-radius: 6px;
-  font-size: 11px;
-  font-family: inherit;
+.maintenance-panel {
+  background-color: #e3ddd7;
+  border: 2px solid #bbaea0;
+  border-radius: 8px;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 0 rgba(255, 255, 255, 0.8);
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.etched-input {
+  background-color: #f6f3f0;
+  border: 1px solid #c2b9b0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  color: #594c3d;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
   outline: none;
-  background: #1c2026;
-  color: #eaecef;
 }
-.ex-input::placeholder { color: #4b5563; }
-.ex-input:focus { border-color: #3d8eff; }
-.btn-primary {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  border: none;
-  background: #3d8eff;
-  color: #fff;
+
+.etched-input:focus {
+  border-color: #a89883;
+  background-color: #ffffff;
+}
+
+.lcd-screen {
+  background-color: #b7c2ab;
+  border-radius: 8px;
+  border: 3px solid #8c857d;
+  box-shadow: inset 4px 4px 8px rgba(70, 80, 60, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.5), 0 2px 0 rgba(255, 255, 255, 0.8);
+  font-family: 'Courier New', Courier, monospace;
+  color: #242b1c;
+}
+
+.mechanical-roller {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #3b5a3f;
+  color: #e2ecd9;
+  border: 1px solid #1e2e1f;
+  box-shadow: inset 0 8px 10px rgba(0, 0, 0, 0.5), inset 0 -4px 6px rgba(0, 0, 0, 0.3), 0 2px 0 rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.receipt-paper {
+  background-color: #fbfbf9;
+  background-image: linear-gradient(0deg, transparent 27px, #f2efe9 28px);
+  background-size: 100% 28px;
+  border: 1px solid #e8e3dc;
+  box-shadow: 0 10px 15px -3px rgba(100, 80, 60, 0.15);
+  border-bottom: 3px dotted #d1c8bb;
+  position: relative;
+  font-family: 'Courier New', Courier, monospace;
+  color: #4a4136;
+}
+
+.receipt-paper::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  right: 10px;
+  height: 10px;
+  background: #2a2522;
+  border-radius: 4px 4px 0 0;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+}
+
+.rocker-switch {
+  width: 54px;
+  height: 32px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 900;
+  transition: all 0.1s;
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
+  position: relative;
 }
-.btn-primary:hover { background: #5a9fff; }
-.btn-success {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  border: none;
-  background: #0ecb81;
-  color: #0b0e11;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
+
+.rocker-switch.on {
+  background-color: #5c996b;
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.3), inset 0 -4px 0 rgba(0, 0, 0, 0.2), 0 4px 0 #284730, 0 6px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid #284730;
 }
-.btn-success:hover { background: #20d990; }
-.btn-danger {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 1px solid #f6465d;
+
+.rocker-switch.off {
+  background-color: #948a80;
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.25), inset 0 -4px 0 rgba(0, 0, 0, 0.2), 0 4px 0 #61574d, 0 6px 6px rgba(0, 0, 0, 0.25);
+  border: 2px solid #61574d;
+}
+
+.rocker-switch:active {
+  transform: translateY(3px);
+}
+
+.metal-btn {
+  background: linear-gradient(180deg, #e8e3dd 0%, #c4bcb2 100%);
+  border: 1px solid #9c9288;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 0 #8c8378, 0 4px 4px rgba(0, 0, 0, 0.2);
+  color: #4a4136;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.1s;
+}
+
+.metal-btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 0 #8c8378, 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.metal-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.target-board {
+  background-color: #3b3631;
+  border-radius: 8px;
+  border: 4px solid #b5a999;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5), 0 4px 0 #ffffff;
+  padding: 12px;
+}
+
+.target-board textarea {
   background: transparent;
-  color: #f6465d;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.btn-danger:hover { background: #f6465d18; }
-.btn-ghost {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 1px solid #2b2f36;
-  background: transparent;
-  color: #848e9c;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.btn-ghost:hover { border-color: #848e9c; color: #eaecef; }
-.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
-.dir-area {
-  width: 100%;
-  border: 1px solid #2b2f36;
-  border-radius: 6px;
-  background: #1c2026;
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.8;
-  font-family: inherit;
-  color: #eaecef;
+  color: #dfcd8c;
+  font-family: 'PingFang SC', serif;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.6;
+  border: none;
+  outline: none;
   resize: none;
-  outline: none;
+  width: 100%;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
-.dir-area:focus { border-color: #3d8eff; }
-.dir-area::placeholder { color: #4b5563; font-size: 12px; }
+
+.target-board textarea::placeholder {
+  color: #8c826c;
+}
 </style>

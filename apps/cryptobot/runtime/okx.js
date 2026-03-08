@@ -40,3 +40,57 @@ export const fetchCandles = async (cfg) => {
     volume: Number(x[5])
   })).filter(c => Number.isFinite(c.close)).reverse();
 };
+
+export const parseInstPair = (instId = 'BTC-USDT') => {
+  const [base = 'BTC', quote = 'USDT'] = String(instId || 'BTC-USDT').toUpperCase().split('-');
+  return { base, quote };
+};
+
+export const fetchSpotBalances = async (cfg, instId) => {
+  const { base, quote } = parseInstPair(instId);
+  const data = await okxRequest(cfg, 'GET', `/api/v5/account/balance?ccy=${encodeURIComponent(`${quote},${base}`)}`);
+  const details = (data?.data?.[0]?.details || []);
+  const findBal = (ccy) => {
+    const row = details.find((x) => String(x.ccy || '').toUpperCase() === ccy);
+    if (!row) return { avail: 0, cash: 0 };
+    return {
+      avail: Number(row.availBal || row.cashBal || 0) || 0,
+      cash: Number(row.cashBal || row.availBal || 0) || 0
+    };
+  };
+
+  const q = findBal(quote);
+  const b = findBal(base);
+  return {
+    base,
+    quote,
+    quoteAvail: q.avail,
+    quoteCash: q.cash,
+    baseAvail: b.avail,
+    baseCash: b.cash
+  };
+};
+
+export const placeSpotMarketOrder = async ({ cfg, instId, side, size }) => {
+  const { quote } = parseInstPair(instId);
+  const payload = {
+    instId,
+    tdMode: 'cash',
+    side,
+    ordType: 'market',
+    sz: String(size)
+  };
+
+  if (side === 'buy') {
+    payload.tgtCcy = quote.toLowerCase();
+  }
+
+  const data = await okxRequest(cfg, 'POST', '/api/v5/trade/order', payload);
+  const row = data?.data?.[0] || {};
+  return {
+    ordId: row.ordId || '',
+    clOrdId: row.clOrdId || '',
+    sCode: row.sCode || '0',
+    sMsg: row.sMsg || ''
+  };
+};

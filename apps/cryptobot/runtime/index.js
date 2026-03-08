@@ -1,7 +1,7 @@
-import { db, getConfig, getState, saveState, recordDecision, calcEquity, persistEquity, parseNum, nowIso } from '../db.js';
-import { fetchCandles } from './okx.js';
+import { db, getConfig, getState, saveState, recordDecision, persistEquity, parseNum, nowIso } from '../db.js';
+import { fetchCandles, fetchSpotBalances } from './okx.js';
 import { buildPrompt } from './prompt.js';
-import { simulateTrade } from './trade.js';
+import { executeRealTrade } from './trade.js';
 import { parseJson } from '../../../shared/json/parse.js';
 
 let timer = null;
@@ -33,29 +33,49 @@ const askAI = async (prompt) => {
 const runBotOnce = async () => {
   const cfg = getConfig();
   if (!cfg.directive) throw new Error('请先设置交易指令');
+  if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) throw new Error('请先配置 OKX API Key/Secret/Passphrase');
 
   const candles = await fetchCandles(cfg);
   const last = candles[candles.length - 1];
   if (!last?.close) throw new Error('无法获取价格');
   const lastPrice = last.close;
 
-  const equity = calcEquity(cfg, lastPrice);
-  const pnl = equity - parseNum(cfg.initial_equity, equity);
+  const balancesBefore = await fetchSpotBalances(cfg, cfg.inst_id);
+  const usdtBefore = parseNum(balancesBefore.quoteCash);
+  const coinBefore = parseNum(balancesBefore.baseCash);
+  const equity = usdtBefore + coinBefore * lastPrice;
+  const initEq = parseNum(cfg.initial_equity, equity);
+  const pnl = equity - initEq;
+
+  db.prepare(`
+    UPDATE apps_cryptobot_config
+    SET virtual_usdt = ?, virtual_coin = ?, updated_at = datetime('now')
+    WHERE id = 1
+  `).run(usdtBefore, coinBefore);
 
   const recentDecisions = db.prepare('SELECT * FROM apps_cryptobot_decisions ORDER BY id DESC LIMIT 10').all().reverse();
-  const prompt = buildPrompt(cfg, candles, equity, pnl, recentDecisions);
+  const prompt = buildPrompt({ ...cfg, virtual_usdt: usdtBefore, virtual_coin: coinBefore }, candles, equity, pnl, recentDecisions);
   const decision = await askAI(prompt);
 
   let trade = { executed: false, sizeCoin: 0, amountUsdt: 0 };
   if (decision.action !== 'hold' && decision.amount_usdt > 0) {
-    trade = simulateTrade(cfg, decision, lastPrice);
+    trade = await executeRealTrade({ cfg, decision, lastPrice, balances: balancesBefore });
   }
 
-  const cfgAfter = getConfig();
-  const equityAfter = calcEquity(cfgAfter, lastPrice);
+  const balancesAfter = await fetchSpotBalances(cfg, cfg.inst_id);
+  const usdtAfter = parseNum(balancesAfter.quoteCash);
+  const coinAfter = parseNum(balancesAfter.baseCash);
+  const equityAfter = usdtAfter + coinAfter * lastPrice;
+
+  db.prepare(`
+    UPDATE apps_cryptobot_config
+    SET virtual_usdt = ?, virtual_coin = ?, updated_at = datetime('now')
+    WHERE id = 1
+  `).run(usdtAfter, coinAfter);
+
   persistEquity(equityAfter);
 
-  const reasonSuffix = (decision.action !== 'hold' && !trade.executed) ? '（余额不足）' : '';
+  const reasonSuffix = (decision.action !== 'hold' && !trade.executed) ? `（${trade.reason || '未成交'}）` : '';
   recordDecision({
     action: decision.action,
     reason: decision.reason + reasonSuffix,
@@ -78,12 +98,19 @@ const runBotOnce = async () => {
 
 export const startBot = (intervalSec) => {
   const cfg = getConfig();
+  if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
+    throw new Error('请先配置 OKX API Key/Secret/Passphrase');
+  }
+  if (!cfg.directive) {
+    throw new Error('请先设置交易指令');
+  }
   const sec = Math.max(60, parseInt(intervalSec || cfg.interval_sec || 300));
 
   if (timer) clearInterval(timer);
 
   db.prepare("UPDATE apps_cryptobot_config SET interval_sec = ?, updated_at = datetime('now') WHERE id = 1").run(sec);
-  saveState({ ...getState(), running: 1, started_at: nowIso(), tick_count: 0, trade_count: 0 });
+  const oldState = getState();
+  saveState({ ...oldState, running: 1, started_at: nowIso(), tick_count: oldState.tick_count || 0, trade_count: oldState.trade_count || 0 });
 
   timer = setInterval(async () => {
     try { await runBotOnce(); } catch (e) { console.error('[cryptobot]', e.message); }
@@ -102,6 +129,10 @@ export const initRuntime = () => {
   const state = getState();
   if (state.running) {
     const cfg = getConfig();
-    startBot(cfg.interval_sec);
+    if (cfg.api_key && cfg.api_secret && cfg.passphrase && cfg.directive) {
+      startBot(cfg.interval_sec);
+    } else {
+      saveState({ ...state, running: 0 });
+    }
   }
 };

@@ -16,7 +16,7 @@ export const initCryptobotRuntime = initRuntime;
 
 export const handleCryptobotApi = async (req, res, path) => {
   if (path === '/apps/cryptobot/status' && req.method === 'GET') {
-    return json(res, getStatusHandler());
+    return json(res, await getStatusHandler());
   }
 
   if (path === '/apps/cryptobot/exchange' && req.method === 'POST') {
@@ -36,7 +36,7 @@ export const handleCryptobotApi = async (req, res, path) => {
 
   if (path === '/apps/cryptobot/start' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, startHandler(body));
+    return json(res, await startHandler(body));
   }
 
   if (path === '/apps/cryptobot/stop' && req.method === 'POST') {

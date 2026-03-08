@@ -25,7 +25,7 @@ export const buildPrompt = (cfg, candles, equity, pnl, recentDecisions) => {
 ## 用户交易指令
 ${cfg.directive || '默认保守策略，盯 BTC-USDT'}
 
-## 当前账户
+## 当前账户（OKX 实盘）
 可用 USDT: ${parseNum(cfg.virtual_usdt).toFixed(2)}
 持有 ${cfg.inst_id}: ${parseNum(cfg.virtual_coin).toFixed(6)}（≈ ${coinValue.toFixed(2)} U）
 总权益: ${equity.toFixed(2)} U（初始 ${parseNum(cfg.initial_equity)} U，累计 ${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} U）

@@ -3,11 +3,16 @@ import { okxRequest } from '../../runtime/okx.js';
 
 export const testExchangeHandler = async (body = {}) => {
   const saved = getConfig();
+  const pick = (input, fallback) => {
+    if (input === undefined || input === null) return fallback;
+    const text = String(input).trim();
+    return text ? text : fallback;
+  };
   const cfg = {
-    base_url: String(body.base_url || saved.base_url || 'https://www.okx.com').trim(),
-    api_key: String(body.api_key ?? saved.api_key).trim(),
-    api_secret: String(body.api_secret ?? saved.api_secret).trim(),
-    passphrase: String(body.passphrase ?? saved.passphrase).trim(),
+    base_url: pick(body.base_url, saved.base_url || 'https://www.okx.com'),
+    api_key: pick(body.api_key, saved.api_key),
+    api_secret: pick(body.api_secret, saved.api_secret),
+    passphrase: pick(body.passphrase, saved.passphrase),
   };
 
   if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {

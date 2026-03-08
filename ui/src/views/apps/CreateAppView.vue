@@ -17,6 +17,6 @@ const router = useRouter();
 const { t } = useI18n();
 
 const goChat = () => {
-  router.push({ path: '/chat', query: { new: String(Date.now()) } });
+  router.push('/chat');
 };
 </script>

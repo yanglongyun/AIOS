@@ -120,7 +120,7 @@
           {{ t('poker_call') }}
         </button>
         <button @click="handleAction('raise')" :disabled="busy"
-          class="flex-1 rounded-xl bg-[#a07a4a] py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(160,122,74,0.3)] transition-all hover:-translate-y-1 hover:bg-[#b58c58] disabled:opacity-40 disabled:hover:translate-y-0">
+          class="flex-1 rounded-xl bg-[#c89050] py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,144,80,0.35)] transition-all hover:-translate-y-1 hover:bg-[#d7a060] disabled:opacity-40 disabled:hover:translate-y-0">
           {{ t('poker_raise') }}
         </button>
         <button @click="handleAction('fold')" :disabled="busy"

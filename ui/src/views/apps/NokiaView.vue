@@ -1,17 +1,18 @@
 <template>
   <div class="flex h-full w-full items-center justify-center overflow-hidden bg-gray-900">
-    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div class="flex flex-col items-center gap-3">
-        <div class="flex gap-1.5">
-          <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:0ms]" />
-          <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:200ms]" />
-          <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:400ms]" />
-        </div>
-        <span class="font-mono text-sm text-gray-400">{{ toast }}</span>
-      </div>
-    </div>
 
-    <div class="flex max-h-[calc(100vh-32px)] w-[320px] flex-col items-center overflow-y-auto rounded-[36px] bg-[linear-gradient(145deg,#2a2d35,#1a1d25)] px-4 pb-6 pt-5 shadow-[0_0_0_2px_#3a3d45,0_20px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] max-[700px]:rounded-[28px] max-[700px]:px-3.5 max-[700px]:pb-[18px] max-[700px]:pt-3.5">
+    <div class="relative flex max-h-[calc(100vh-32px)] w-[320px] flex-col items-center overflow-y-auto rounded-[36px] bg-[linear-gradient(145deg,#2a2d35,#1a1d25)] px-4 pb-6 pt-5 shadow-[0_0_0_2px_#3a3d45,0_20px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] max-[700px]:rounded-[28px] max-[700px]:px-3.5 max-[700px]:pb-[18px] max-[700px]:pt-3.5">
+      <div v-if="isLoading" class="absolute inset-0 z-50 flex items-center justify-center rounded-[36px] bg-black/60 max-[700px]:rounded-[28px]">
+        <div class="flex flex-col items-center gap-3">
+          <div class="flex gap-1.5">
+            <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:0ms]" />
+            <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:200ms]" />
+            <span class="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:400ms]" />
+          </div>
+          <span class="font-mono text-sm text-gray-400">{{ toast }}</span>
+        </div>
+      </div>
+
       <div class="mb-2 h-1.5 w-[60px] rounded bg-[#111] shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"></div>
       <div class="mb-2.5 font-['Arial_Black',sans-serif] text-sm uppercase tracking-[0.25em] text-[#555]">NOKIA</div>
 
@@ -81,7 +82,14 @@ onMounted(() => {
 
 async function goHomePage() {
   timeLine.value = [{
-    content: '',
+    content: `<div style="padding:8px 10px; font-family: monospace; font-size: 12px; line-height: 1.5; color:#102010;">
+  <div style="font-weight:700; margin-bottom:6px;">NOKIA</div>
+  <div>主屏幕</div>
+  <div style="margin-top:6px;">请选择：</div>
+  <div>1) 短信</div>
+  <div>2) 新闻</div>
+  <div>3) 漂流瓶</div>
+</div>`,
     options: [
       { text: t('nokia_option_sms') },
       { text: t('nokia_option_news') },

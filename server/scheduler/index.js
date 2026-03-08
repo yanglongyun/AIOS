@@ -45,6 +45,13 @@ const tick = async () => {
 
       broadcast({ type: 'schedules_changed' });
     } catch (e) {
+      db.prepare('UPDATE schedules SET last_run_at = ? WHERE id = ?').run(iso, s.id);
+
+      if (!s.cron) {
+        db.prepare('UPDATE schedules SET enabled = 0 WHERE id = ?').run(s.id);
+      }
+
+      broadcast({ type: 'schedules_changed' });
       console.error(`[scheduler] #${s.id} failed:`, e.message);
     }
   }

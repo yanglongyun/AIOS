@@ -371,6 +371,8 @@ const handleSend = async () => {
   }));
 
   ensureChatId(content).then((id) => {
+    // 首条消息创建会话后，切换到 /chat/:id，保证刷新可回溯历史
+    router.replace({ path: `/chat/${id}` }).catch(() => {});
     const _key = `client:${Date.now()}:user`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'user', content, attachments: outgoingAttachments, _key });
@@ -486,7 +488,9 @@ watch(() => messages.value.length, (newLen, oldLen) => {
 
 watch(() => route.fullPath, async () => {
   if (!route.path.startsWith('/chat')) return;
-  if (route.query.new) {
+  const id = route.params.id ? String(route.params.id) : null;
+  if (!id) {
+    // /chat 作为默认入口：展示一个干净的新对话 UI；真正的会话在发送第一条消息时创建
     conversationId.value = null;
     chatTitle.value = '新对话';
     messages.value = [];
@@ -494,12 +498,6 @@ watch(() => route.fullPath, async () => {
     loadedOffset.value = 0;
     seenKeys.value = new Set();
     busy.value = false;
-    return;
-  }
-  const id = route.params.id ? String(route.params.id) : null;
-  if (!id) {
-    const lastId = localStorage.getItem(LAST_CHAT_KEY);
-    if (lastId) await router.replace({ path: `/chat/${lastId}` });
     return;
   }
   conversationId.value = id; saveLastChatId(id);

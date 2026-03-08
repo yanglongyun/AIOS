@@ -186,7 +186,7 @@ const go = (path) => {
 
 const goNewSession = async () => {
   emit('navigate');
-  await router.push({ path: '/chat', query: { new: String(Date.now()) } });
+  await router.push('/chat');
 };
 
 const goLastChat = async () => {
@@ -195,7 +195,7 @@ const goLastChat = async () => {
   if (lastId) {
     await router.push(`/chat/${lastId}`);
   } else {
-    await router.push({ path: '/chat', query: { new: String(Date.now()) } });
+    await router.push('/chat');
   }
 };
 

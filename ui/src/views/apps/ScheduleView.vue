@@ -1,80 +1,150 @@
 <template>
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
-    <div class="mx-auto max-w-[960px]">
-      <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('app_sidebar_schedule') }}</h1>
-        <div class="flex gap-2">
+    <div class="mx-auto max-w-[780px]">
+
+      <!-- Header -->
+      <div class="mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">⏰</span>
+          <div>
+            <h1 class="text-xl font-bold text-[#3a2e20]">{{ t('app_sidebar_schedule') }}</h1>
+            <p class="text-xs text-[#9a8a74]">
+              {{ t('schedule_summary', { total: schedules.length, enabled: schedules.filter(s => s.enabled).length }) }}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
           <button
             type="button"
-            class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
+            class="rounded-lg border border-[#d8cebb] bg-white px-3 py-1.5 text-xs text-[#7a6a54] hover:bg-[#f0e8d8] transition"
             @click="loadSchedules"
           >
             {{ t('tasks_refresh') }}
           </button>
           <button
             type="button"
-            class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]"
+            class="flex items-center gap-1.5 rounded-xl bg-[#4a3520] px-4 py-2 text-sm font-semibold text-[#f0e4cc] shadow-sm hover:bg-[#5a4530] transition"
             @click="router.push('/schedule/create')"
           >
-            {{ t('schedule_create') }}
+            <span class="text-base leading-none">+</span> {{ t('schedule_create') }}
           </button>
         </div>
       </div>
 
-      <div v-if="error" class="mb-3 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">
+      <!-- Error -->
+      <div v-if="error" class="mb-4 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-4 py-2.5 text-xs text-[#c06040]">
         {{ error }}
       </div>
 
-      <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div v-if="schedules.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          {{ t('schedule_empty') }}
-        </div>
-        <div v-else class="space-y-2">
-          <div
-            v-for="s in schedules"
-            :key="s.id"
-            class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5 cursor-pointer transition hover:shadow-md"
-            @click="editSchedule(s.id)"
-          >
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1">
-                <div class="text-[12px] font-semibold text-[#4a3a28]">{{ s.name }}</div>
-                <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#8a7a68]">{{ s.prompt }}</div>
-              </div>
-              <div class="flex shrink-0 items-center gap-1.5">
+      <!-- Empty -->
+      <div v-if="schedules.length === 0" class="flex flex-col items-center justify-center gap-3 py-20 text-center">
+        <div class="text-5xl opacity-30">⏰</div>
+        <p class="text-sm text-[#9a8a74]">{{ t('schedule_empty') }}</p>
+        <button
+          type="button"
+          class="mt-1 rounded-xl bg-[#4a3520] px-5 py-2 text-sm font-semibold text-[#f0e4cc] hover:bg-[#5a4530] transition"
+          @click="router.push('/schedule/create')"
+        >
+          {{ t('schedule_create') }}
+        </button>
+      </div>
+
+      <!-- List -->
+      <div v-else class="space-y-3">
+        <div
+          v-for="s in schedules"
+          :key="s.id"
+          class="rounded-2xl border border-[#e4d8c4] shadow-sm transition-shadow hover:shadow-md"
+          :class="s.enabled ? 'bg-white' : 'bg-[#faf8f4] opacity-70 hover:opacity-90'"
+        >
+          <div class="flex items-start gap-4 p-4">
+            <!-- 类型图标 -->
+            <div
+              class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg"
+              :class="[s.cron ? 'bg-[#e8f0e0]' : 'bg-[#eef0f8]', s.enabled ? '' : 'grayscale']"
+            >
+              {{ s.cron ? '🔄' : '📅' }}
+            </div>
+
+            <!-- 主体 -->
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-[#3a2e20]">{{ s.name }}</span>
+                    <span
+                      v-if="!s.enabled"
+                      class="rounded-full bg-[#f0ece4] px-2 py-0.5 text-[10px] font-medium text-[#9a8a74]"
+                    >{{ t('schedule_disabled') }}</span>
+                    <span
+                      v-else-if="s.cron"
+                      class="rounded-full bg-[#e8f0e0] px-2 py-0.5 text-[10px] font-medium text-[#4a7a38]"
+                    >{{ t('schedule_type_repeat') }}</span>
+                    <span
+                      v-else
+                      class="rounded-full bg-[#eef0f8] px-2 py-0.5 text-[10px] font-medium text-[#4a5a8a]"
+                    >{{ t('schedule_type_once') }}</span>
+                  </div>
+                  <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-[#8a7a64]">{{ s.prompt }}</p>
+                </div>
+                <!-- Toggle -->
                 <button
                   type="button"
-                  class="cursor-pointer rounded border px-2 py-0.5 text-[10px] transition"
-                  :class="s.enabled
-                    ? 'border-[#c8d8c0] bg-[#f0f8ec] text-[#5a8a48] hover:bg-[#e0f0d8]'
-                    : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'"
-                  @click.stop="editSchedule(s.id)"
+                  class="relative mt-0.5 h-[18px] w-8 shrink-0 rounded-full transition-colors duration-200"
+                  :class="s.enabled ? 'bg-[#6a9c58]' : 'bg-[#d1c9bb]'"
                   @click="toggleSchedule(s)"
                 >
-                  {{ s.enabled ? t('schedule_enabled') : t('schedule_disabled') }}
-                </button>
-                <button
-                  type="button"
-                  class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]"
-                  @click="removeSchedule(s.id)"
-                >
-                  {{ t('schedule_delete') }}
+                  <span
+                    class="absolute top-[3px] h-3 w-3 rounded-full bg-white shadow transition-all duration-200"
+                    :class="s.enabled ? 'left-[17px]' : 'left-[3px]'"
+                  />
                 </button>
               </div>
+
+              <!-- 元信息 -->
+              <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#9a8a74]">
+                <span v-if="s.cron" class="flex items-center gap-1">
+                  <span>🕗</span>
+                  <span class="font-mono text-[#5a6a8a]">{{ s.cron }}</span>
+                </span>
+                <span v-if="s.run_at" class="flex items-center gap-1">
+                  <span>📆</span> {{ s.run_at.slice(0, 16) }}
+                </span>
+                <span v-if="s.last_run_at" class="flex items-center gap-1">
+                  <span>✅</span> {{ t('schedule_last_run', { time: s.last_run_at.slice(0, 16) }) }}
+                </span>
+                <span v-if="s.creator && s.creator !== 'user'" class="rounded bg-[#f8f0e0] px-1.5 py-0.5 text-[#9a7a40]">{{ s.creator }}</span>
+              </div>
             </div>
-            <div class="mt-1.5 flex flex-wrap items-center gap-2">
-              <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[10px] text-[#7a6a58]">{{ scheduleTypeLabel(s) }}</span>
-              <span v-if="s.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[10px] text-[#5a6a8a]">{{ s.cron }}</span>
-              <span v-if="s.run_at" class="text-[10px] text-[#7a6a58]">{{ s.run_at }}</span>
-              <span v-if="s.creator && s.creator !== 'user'" class="rounded bg-[#f8f0e0] px-1.5 py-0.5 text-[10px] text-[#9a7a40]">{{ s.creator }}</span>
-              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">{{ t('schedule_last_run', { time: s.last_run_at.slice(0, 16) }) }}</span>
-              <button v-if="s.last_task_id" type="button" class="cursor-pointer text-[10px] text-[#7a6a58] underline hover:text-[#4a3a28]" @click="openTask(s.last_task_id)">
-                #{{ s.last_task_id }}
-              </button>
+          </div>
+
+          <!-- 操作栏 -->
+          <div class="flex items-center justify-between border-t border-[#f0e8d8] px-4 py-2">
+            <button
+              v-if="s.last_task_id"
+              type="button"
+              class="text-[11px] text-[#7a6a54] underline-offset-2 hover:underline hover:text-[#4a3a28] transition"
+              @click="openTask(s.last_task_id)"
+            >
+              {{ t('schedule_view_last_task', { id: s.last_task_id }) }}
+            </button>
+            <span v-else class="text-[11px] text-[#b0a08a]">{{ t('schedule_not_run_yet') }}</span>
+            <div class="flex gap-4">
+              <button
+                type="button"
+                class="text-[11px] text-[#7a6a54] hover:text-[#4a3a28] transition"
+                @click="editSchedule(s.id)"
+              >{{ t('schedule_edit') }}</button>
+              <button
+                type="button"
+                class="text-[11px] text-[#c06040] hover:text-[#9a3020] transition"
+                @click="removeSchedule(s.id)"
+              >{{ t('schedule_delete') }}</button>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -89,12 +159,6 @@ const router = useRouter();
 const { t } = useI18n();
 const schedules = ref([]);
 const error = ref('');
-
-const scheduleTypeLabel = (s) => {
-  if (s.cron) return t('schedule_type_repeat');
-  if (s.run_at) return t('schedule_type_once');
-  return t('schedule_type_queue');
-};
 
 const loadSchedules = async () => {
   error.value = '';

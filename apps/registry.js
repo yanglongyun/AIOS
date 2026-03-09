@@ -35,32 +35,11 @@ export const appRegistry = [
     dbInit: ['initPlaygroundDatabase']
   },
   {
-    name: 'debate',
-    match: (path) => path.startsWith('/apps/debate/'),
-    load: () => import('./debate/api/index.js'),
-    apiHandler: 'handleDebateApi',
-    dbInit: ['initDebateDatabase']
-  },
-  {
-    name: 'treasure',
-    match: (path) => path.startsWith('/apps/treasure/'),
-    load: () => import('./treasure/api/index.js'),
-    apiHandler: 'handleTreasureApi',
-    dbInit: ['initTreasureDatabase']
-  },
-  {
     name: 'briefing',
     match: (path) => path.startsWith('/apps/briefing/'),
     load: () => import('./briefing/api/index.js'),
     apiHandler: 'handleBriefingApi',
     dbInit: ['initBriefingDatabase']
-  },
-  {
-    name: 'dailycheck',
-    match: (path) => path.startsWith('/apps/dailycheck/'),
-    load: () => import('./dailycheck/api/index.js'),
-    apiHandler: 'handleDailycheckApi',
-    dbInit: ['initDailycheckDatabase']
   },
   {
     name: 'cryptobot',
@@ -76,13 +55,6 @@ export const appRegistry = [
     load: () => import('./story/api/index.js'),
     apiHandler: 'handleStoryApi',
     dbInit: ['initStoryDatabase']
-  },
-  {
-    name: 'blackroom',
-    match: (path) => path.startsWith('/apps/blackroom/'),
-    load: () => import('./blackroom/api/index.js'),
-    apiHandler: 'handleBlackroomApi',
-    dbInit: ['initBlackroomDatabase']
   },
   {
     name: 'fortune',
@@ -105,11 +77,4 @@ export const appRegistry = [
     apiHandler: 'handleNokiaApi',
     dbInit: ['initNokiaDatabase']
   },
-  {
-    name: 'beach',
-    match: (path) => path.startsWith('/apps/beach/'),
-    load: () => import('./beach/api/index.js'),
-    apiHandler: 'handleBeachApi',
-    dbInit: ['initBeachDatabase']
-  }
 ];

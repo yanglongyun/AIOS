@@ -38,18 +38,6 @@
 
       <div class="relative min-h-0 flex-1">
         <div ref="appListRef" class="app-list h-full space-y-0.5 overflow-y-auto pb-2 pr-2">
-          <!-- 定时任务 - 第一位 -->
-          <button @click="go('/schedule')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/schedule'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⏰</span>定时任务</button>
-
-          <!-- 每日打卡 -->
-          <button @click="go('/dailycheck')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/dailycheck'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌱</span>每日打卡</button>
-
           <button @click="go('/notebook')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/notebook'))"><span
@@ -66,46 +54,34 @@
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/weibo'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🪶</span>微博</button>
-          <button @click="go('/playground')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(is('/playground'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌌</span>3D游乐园</button>
-          <button @click="go('/debate-simulator')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/debate-simulator'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>竞选模拟器</button>
-          <button @click="go('/treasure')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/treasure'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔍</span>藏宝阁</button>
           <button @click="go('/briefing')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/briefing'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📰</span>新闻头条</button>
-          <button @click="go('/cryptobot')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/cryptobot'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>炒币机</button>
           <button @click="go('/story')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/story'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>书架</button>
-          <button @click="go('/blackroom')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/blackroom'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⬛</span>小黑屋</button>
-          <button @click="go('/poker')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/poker'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>炸金花</button>
           <button @click="go('/fortune')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/fortune'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>算一卦</button>
-          <button @click="go('/beach')"
+          <button @click="go('/playground')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/beach'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🏖️</span>沙滩</button>
+            :class="btnClass(is('/playground'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🌌</span>3D游乐园</button>
+          <button @click="go('/poker')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(route.path.startsWith('/poker'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>炸金花</button>
+          <button @click="go('/schedule')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(route.path.startsWith('/schedule'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⏰</span>定时器</button>
+          <button @click="go('/cryptobot')"
+            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+            :class="btnClass(route.path.startsWith('/cryptobot'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>炒币机</button>
           <button @click="go('/nokia')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/nokia'))"><span

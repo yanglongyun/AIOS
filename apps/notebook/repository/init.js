@@ -35,7 +35,7 @@ const initNotebookTables = () => {
     CREATE TABLE IF NOT EXISTS apps_notes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       content TEXT NOT NULL DEFAULT '',
-      pinned INTEGER NOT NULL DEFAULT 0,
+      style INTEGER NOT NULL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
@@ -47,11 +47,11 @@ const seedNotebookIfEmpty = () => {
   if (count !== 0) return;
 
   const insert = db.prepare(`
-    INSERT INTO apps_notes (content, pinned, created_at, updated_at)
-    VALUES (?, 0, datetime('now'), datetime('now'))
+    INSERT INTO apps_notes (content, style, created_at, updated_at)
+    VALUES (?, ?, datetime('now'), datetime('now'))
   `);
   for (const content of SEED_NOTES) {
-    insert.run(content);
+    insert.run(content, Math.floor(Math.random() * 8));
   }
 };
 

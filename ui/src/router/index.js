@@ -12,18 +12,14 @@ import InboxView from '../views/apps/InboxView.vue';
 import WeiboView from '../views/apps/WeiboView.vue';
 import PlaygroundView from '../views/apps/PlaygroundView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
-import DebateSimulatorView from '../views/apps/DebateSimulatorView.vue';
-import TreasureView from '../views/apps/TreasureView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
 import BriefingView from '../views/apps/BriefingView.vue';
-import DailycheckView from '../views/apps/DailycheckView.vue';
 import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
-import BlackroomView from '../views/apps/BlackroomView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
-import BeachView from '../views/apps/BeachView.vue';
 import PokerView from '../views/apps/PokerView.vue';
 import ScheduleCreateView from '../views/apps/ScheduleCreateView.vue';
+import ScheduleLogsView from '../views/apps/ScheduleLogsView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
 import ScheduleView from '../views/apps/ScheduleView.vue';
@@ -36,6 +32,7 @@ const routes = [
   { path: '/tasks', component: TasksView },
   { path: '/schedule/create', component: ScheduleCreateView },
   { path: '/schedule/edit/:id', component: ScheduleCreateView },
+  { path: '/schedule/logs/:id', component: ScheduleLogsView },
   { path: '/task/:id', component: TaskDetailView },
   { path: '/schedule', component: ScheduleView },
   { path: '/schedules', redirect: '/schedule' },
@@ -46,16 +43,11 @@ const routes = [
   { path: '/inbox', component: InboxView },
   { path: '/weibo', component: WeiboView },
   { path: '/playground', component: PlaygroundView },
-  { path: '/debate-simulator', component: DebateSimulatorView },
-  { path: '/treasure', component: TreasureView },
   { path: '/nokia', component: NokiaView },
   { path: '/briefing', component: BriefingView },
-  { path: '/dailycheck', component: DailycheckView },
   { path: '/cryptobot', component: CryptobotView },
   { path: '/story', component: StoryView },
-  { path: '/blackroom', component: BlackroomView },
   { path: '/fortune', component: FortuneView },
-  { path: '/beach', component: BeachView },
   { path: '/poker', component: PokerView },
   { path: '/settings', component: SettingsView }
 ];

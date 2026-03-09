@@ -12,7 +12,7 @@ export const listNotes = ({ keyword = '', page = 1, pageSize = 10 } = {}) => {
   const listQuery = `
     SELECT * FROM apps_notes
     ${where}
-    ORDER BY pinned DESC, updated_at DESC, id DESC
+    ORDER BY updated_at DESC, id DESC
     LIMIT ? OFFSET ?
   `;
 

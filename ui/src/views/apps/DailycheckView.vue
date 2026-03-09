@@ -7,7 +7,7 @@
 
     <!-- topbar -->
     <div class="relative z-10 mx-auto flex max-w-[720px] items-center justify-between px-6 pb-3 pt-6">
-      <div class="text-[22px] font-extrabold text-[#5a4030]">{{ t('dailycheck_title') }}</div>
+      <div class="text-[22px] font-extrabold text-[#5a4030]">每日打卡</div>
       <div class="rounded-[10px] bg-[#ede7dc] px-3 py-1.5 text-right">
         <div class="text-[10px] leading-none tracking-widest text-[#b8a090]">{{ weekday }}</div>
         <div class="mt-0.5 text-[15px] font-bold leading-snug text-[#7a6050]">{{ monthDay }}</div>
@@ -34,22 +34,22 @@
           class="flex items-center gap-2.5 border-b border-[#f0e4c4] bg-gradient-to-r from-[#fdf4e3] to-[#fdf8ee] px-4 py-2.5"
         >
           <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e8a44a] text-[12px] font-bold text-white">✓</div>
-          <span class="text-[13px] font-bold text-[#a07030]">{{ t('dailycheck_completed_banner') }}</span>
+          <span class="text-[13px] font-bold text-[#a07030]">今日打卡完成</span>
           <span class="ml-auto rounded-full bg-[#fdf0d8] px-2 py-0.5 text-[11px] font-semibold text-[#c8902a]">
-            {{ t('dailycheck_streak_prefix') }}{{ stats.streak }}{{ t('dailycheck_streak_suffix') }}
+            🔥 连续 {{ stats.streak }} 天
           </span>
         </div>
 
         <!-- card head -->
         <div class="flex items-center justify-between px-4 pt-3">
-          <span class="text-[11px] font-bold tracking-wider text-[#c09060]">{{ t('dailycheck_today_label') }}</span>
+          <span class="text-[11px] font-bold tracking-wider text-[#c09060]">今日</span>
           <button
             v-if="!today.answered"
             class="rounded-lg border border-[#e8ddd0] px-2.5 py-1 text-[11px] text-[#b0a080] transition hover:border-[#c09060] hover:text-[#c09060] disabled:opacity-40"
             :disabled="refreshing"
             @click="refreshQuestionByAgent"
           >
-            {{ refreshing ? t('dailycheck_refreshing') : t('dailycheck_refresh_button') }}
+            {{ refreshing ? '生成中...' : '换一题 ↻' }}
           </button>
         </div>
 
@@ -62,64 +62,64 @@
         <div v-if="!today.answered" class="border-t border-dotted border-[#e8e0d4] px-4 pb-4 pt-3">
           <textarea
             v-model="answerDraft"
-            :placeholder="t('dailycheck_answer_placeholder')"
+            placeholder="写下你的回答..."
             rows="4"
             class="w-full rounded-xl border-[1.5px] border-dashed border-[#d4c8b8] bg-[#fafaf8] px-3.5 py-2.5 text-sm leading-relaxed text-[#4a3f35] outline-none transition placeholder:text-[#c4b8a8] focus:border-solid focus:border-[#c09060] focus:bg-white"
             @keydown.meta.enter.prevent="submitAnswer"
             @keydown.ctrl.enter.prevent="submitAnswer"
           />
           <div class="mt-2 flex items-center justify-between">
-            <span class="text-[11px] text-[#c4b8a8]">{{ t('dailycheck_shortcut_hint') }}</span>
+            <span class="text-[11px] text-[#c4b8a8]">⌘ + ↵ 提交</span>
             <button
               class="rounded-xl bg-[#e8a44a] px-5 py-2 text-[13px] font-semibold text-white shadow-[0_2px_6px_rgba(232,164,74,0.3)] transition hover:bg-[#d49440] disabled:cursor-not-allowed disabled:opacity-35 disabled:shadow-none"
               :disabled="saving || !answerDraft.trim()"
               @click="submitAnswer"
             >
-              {{ saving ? t('dailycheck_submitting') : t('dailycheck_submit_button') }}
+              {{ saving ? '提交中...' : '提交回答' }}
             </button>
           </div>
         </div>
 
         <!-- answered display -->
         <div v-if="today.answered && today.answer" class="border-t border-dotted border-[#e8e0d4] px-4 py-3">
-          <div class="mb-1.5 text-[10px] font-bold tracking-widest text-[#b0a080]">{{ t('dailycheck_my_answer_label') }}</div>
+          <div class="mb-1.5 text-[10px] font-bold tracking-widest text-[#b0a080]">我的回答</div>
           <div class="whitespace-pre-wrap text-sm leading-relaxed text-[#5a4a38]">{{ today.answer }}</div>
         </div>
 
         <!-- ai response -->
         <div v-if="today.response" class="mx-4 mb-4 rounded-xl border border-[#f0e4c4] bg-[#fdf8ee] px-3.5 py-3">
-          <div class="mb-1.5 text-[10px] font-bold tracking-widest text-[#c8902a]">{{ t('dailycheck_ai_response_label') }}</div>
+          <div class="mb-1.5 text-[10px] font-bold tracking-widest text-[#c8902a]">✨ AI 回应</div>
           <div class="whitespace-pre-wrap text-[13px] leading-relaxed text-[#7a5a30]">{{ today.response }}</div>
         </div>
       </div>
 
       <!-- 无今日记录 -->
       <div v-else class="mb-4 rounded-2xl border border-dashed border-[#d4c8b8] py-12 text-center text-sm text-[#b0a090]">
-        {{ t('dailycheck_preparing_question') }}
+        正在准备今日问题...
       </div>
 
       <!-- stats -->
       <div class="mb-4 flex gap-2">
         <div class="flex-1 rounded-xl border border-[#e8e0d4] bg-white py-2 text-center">
           <div class="text-[18px] font-extrabold text-[#5a4030]">{{ stats.totalDays }}</div>
-          <div class="text-[10px] text-[#b8a898]">{{ t('dailycheck_total_days_label') }}</div>
+          <div class="text-[10px] text-[#b8a898]">累计</div>
         </div>
         <div class="flex-1 rounded-xl border border-[#e8e0d4] bg-white py-2 text-center">
           <div class="text-[18px] font-extrabold text-[#5a4030]">{{ stats.totalAnswers }}</div>
-          <div class="text-[10px] text-[#b8a898]">{{ t('dailycheck_answered_label') }}</div>
+          <div class="text-[10px] text-[#b8a898]">已答</div>
         </div>
         <div class="flex-1 rounded-xl border border-[#e8e0d4] bg-white py-2 text-center">
           <div class="text-[18px] font-extrabold text-[#5a4030]">{{ stats.streak }}</div>
-          <div class="text-[10px] text-[#b8a898]">{{ t('dailycheck_streak_label') }}</div>
+          <div class="text-[10px] text-[#b8a898]">连续天</div>
         </div>
       </div>
 
       <!-- history -->
       <div v-if="items.length">
         <div class="mb-2.5 flex items-center gap-2">
-          <span class="text-[13px] font-bold text-[#c09060]">{{ t('dailycheck_history_title') }}</span>
+          <span class="text-[13px] font-bold text-[#c09060]">历史</span>
           <span class="h-px flex-1 bg-[#e0d4c4]" />
-          <span class="text-[11px] text-[#c4b8a8]">{{ total }}{{ t('dailycheck_history_count_label') }}</span>
+          <span class="text-[11px] text-[#c4b8a8]">{{ total }} 条</span>
         </div>
 
         <div
@@ -140,11 +140,11 @@
               <span
                 class="rounded-full px-1.5 py-px text-[9px] font-bold"
                 :class="item.answered ? 'bg-[#e8f5e4] text-[#4a8a38]' : 'bg-[#f0ebe0] text-[#b0a080]'"
-              >{{ item.answered ? t('dailycheck_answered_label') : t('dailycheck_unanswered_text') }}</span>
+              >{{ item.answered ? '已答' : '当天未回答' }}</span>
             </div>
             <div class="mb-1 text-[13px] font-semibold leading-snug text-[#4a3a28]">{{ item.question }}</div>
             <div v-if="item.answer" class="text-xs leading-relaxed text-[#7a6a58]">{{ item.answer }}</div>
-            <div v-else class="text-xs text-[#c0b098]">{{ t('dailycheck_unanswered_text') }}</div>
+            <div v-else class="text-xs text-[#c0b098]">当天未回答</div>
             <div v-if="item.response" class="mt-1.5 rounded-lg bg-[#fdf8ee] px-2.5 py-2 text-xs leading-relaxed text-[#9a7a48]">
               {{ item.response }}
             </div>
@@ -152,9 +152,9 @@
         </div>
 
         <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-4">
-          <button class="text-xs text-[#a09080] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">{{ t('dailycheck_prev_page') }}</button>
+          <button class="text-xs text-[#a09080] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">← 上一页</button>
           <span class="text-[10px] text-[#b0a088]">{{ page }} / {{ totalPages }}</span>
-          <button class="text-xs text-[#a09080] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">{{ t('dailycheck_next_page') }}</button>
+          <button class="text-xs text-[#a09080] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">下一页 →</button>
         </div>
       </div>
 
@@ -164,11 +164,7 @@
 
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
 const API_BASE = '/apps/dailycheck';
-const { t } = useI18n();
-
 const today = reactive({ id: 0, date: '', question: '', answered: false, answer: '', response: '' });
 const stats = reactive({ totalDays: 0, totalAnswers: 0, streak: 0 });
 const error = ref('');
@@ -182,10 +178,10 @@ const pageSize = 10;
 const totalPages = ref(1);
 const now = new Date();
 const weekday = computed(() => {
-  const days = [t('dailycheck_weekday_0'),t('dailycheck_weekday_1'),t('dailycheck_weekday_2'),t('dailycheck_weekday_3'),t('dailycheck_weekday_4'),t('dailycheck_weekday_5'),t('dailycheck_weekday_6')];
+  const days = ['周日','周一','周二','周三','周四','周五','周六'];
   return days[now.getDay()];
 });
-const monthDay = computed(() => `${now.getMonth() + 1}${t('dailycheck_month_label')}${now.getDate()}${t('dailycheck_day_suffix')}`);
+const monthDay = computed(() => `${now.getMonth() + 1}${'月'}${now.getDate()}${'号'}`);
 
 const request = async (url, options = {}) => {
   const resp = await fetch(url, options);
@@ -272,7 +268,7 @@ const submitAnswer = async () => {
     launchConfetti();
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('dailycheck_submit_failed');
+    error.value = e.message || '提交失败';
   } finally {
     saving.value = false;
   }
@@ -287,7 +283,7 @@ const refreshQuestionByAgent = async () => {
     answerDraft.value = '';
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('dailycheck_refresh_failed');
+    error.value = e.message || '换题失败';
   } finally {
     refreshing.value = false;
   }
@@ -304,7 +300,7 @@ onMounted(async () => {
     await loadToday();
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('dailycheck_init_failed');
+    error.value = e.message || '初始化失败';
   }
 });
 </script>

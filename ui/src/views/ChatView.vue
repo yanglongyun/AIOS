@@ -7,14 +7,14 @@
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
             <div class="mb-4 text-[40px] grayscale-[0.2]">💬</div>
-            <h2 class="mb-2 text-xl font-bold text-[#5a4a38] dark:text-[#e8dcc8]">{{ t('chat_empty_title') }}</h2>
-            <p class="max-w-[320px] text-[13px] leading-relaxed text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+            <h2 class="mb-2 text-xl font-bold text-[#5a4a38] dark:text-[#e8dcc8]">有什么可以帮你？</h2>
+            <p class="max-w-[320px] text-[13px] leading-relaxed text-[#a0907a] dark:text-[#6a5840]">输入任意内容开始对话，支持自动执行命令或手动确认模式。</p>
           </div>
 
           <!-- 消息列表 -->
           <template v-else>
             <div v-if="hasMore" class="py-2 text-center text-xs text-[#a0907a] dark:text-[#6a5840]">
-              <span>{{ t('chat_load_more') }}</span>
+              <span>加载更多...</span>
             </div>
 
             <div v-for="(m, i) in messages" :key="m._key || i" class="mb-5">
@@ -24,7 +24,7 @@
                 <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#5a3e28] px-4 py-3 text-sm leading-relaxed text-[#f0e8d8] shadow-[0_2px_8px_rgba(0,0,0,0.1)] dark:bg-[#c8a060] dark:text-[#1a1410] dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
-                    <div class="mb-1 text-[10px] uppercase tracking-[0.08em] text-[#c0a878] dark:text-[#5a4a38]">{{ t('chat_attachment') }}</div>
+                    <div class="mb-1 text-[10px] uppercase tracking-[0.08em] text-[#c0a878] dark:text-[#5a4a38]">附件</div>
                     <div v-for="(f, idx) in m.attachments" :key="`${f.path}-${idx}`" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1 dark:border-black/15 dark:bg-black/10">
                       <div class="text-[11px] font-semibold">{{ f.name }}</div>
                       <div class="break-all text-[10px] text-[#c0a878] dark:text-[#5a4a38]">{{ f.path }}</div>
@@ -47,8 +47,8 @@
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-[#dcd0b8] bg-[#fffdf8] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)]">
                   <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-[#f5ead8] px-3 py-2 text-left transition-colors hover:bg-[#ece0c8] dark:bg-[rgba(30,22,14,0.4)] dark:hover:bg-[rgba(30,22,14,0.6)]">
                     <ChevronRight class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform dark:text-[#6a5840]" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38] dark:text-[#d4c0a0]">{{ m.title || t('chat_tool_call') }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_done') }}</span>
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38] dark:text-[#d4c0a0]">{{ m.title || '工具调用' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a] dark:text-[#6a5840]">完成</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#e8dcc8] dark:border-[#2a1e14]">
                     <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#f5ead8] px-3 py-2.5 font-mono text-xs text-[#2d6a30] dark:bg-[rgba(30,22,14,0.4)] dark:text-[#4ade80]"><span class="select-none text-[#a0907a] dark:text-[#6a5840]">$ </span>{{ m.command }}</div>
@@ -71,7 +71,7 @@
             <!-- 思考中 -->
             <div v-if="busy" class="flex items-start gap-2.5">
               <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)] dark:bg-[#2a1e14]">🤖</div>
-              <div class="py-2 text-sm text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
+              <div class="py-2 text-sm text-[#a0907a] dark:text-[#6a5840]">思考中<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
@@ -95,7 +95,7 @@
               v-if="dragActive"
               class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#c8a060] bg-[rgba(200,160,96,0.14)] px-6 text-center text-sm font-semibold text-[#5a3e28] dark:bg-[rgba(200,160,96,0.1)] dark:text-[#e8dcc8]"
             >
-              {{ uploading ? t('chat_uploading') : t('chat_drop_files') }}
+              {{ uploading ? '上传中...' : '拖拽文件到这里即可添加附件' }}
             </div>
 
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
@@ -113,7 +113,7 @@
               @keydown.enter.exact="onEnter"
               @compositionstart="composing = true"
               @compositionend="composing = false"
-              :placeholder="t('chat_input_placeholder')"
+              placeholder="输入消息..."
               rows="1"
               :disabled="busy"
               class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#4a3a28] outline-none placeholder:text-[#c0b098] disabled:opacity-50 dark:text-[#d4c0a0] dark:placeholder:text-[#4a3a28]"
@@ -122,7 +122,7 @@
             <div class="flex items-center px-3.5 pb-2.5">
               <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-[#a0907a] transition-all hover:bg-[#f5ead8] hover:text-[#5a4a38] disabled:cursor-not-allowed disabled:opacity-50 dark:text-[#6a5840] dark:hover:bg-[rgba(200,160,96,0.1)] dark:hover:text-[#c8a060]">
                 <Paperclip class="h-3.5 w-3.5" />
-                {{ uploading ? t('chat_uploading') : t('chat_upload_file') }}
+                {{ uploading ? '上传中...' : '上传文件' }}
               </button>
             </div>
 
@@ -138,7 +138,7 @@
         </div>
         <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#b0a090] dark:text-[#5a4a38]">
           <span class="h-1.5 w-1.5 rounded-full bg-[#ccc]" :class="wsStatus === 'connected' ? 'bg-[#6a9a4a]' : wsStatus === 'connecting' ? 'animate-pulse bg-[#d4a840]' : 'bg-[#c04040]'"></span>
-          <span>{{ wsStatus === 'connected' ? t('common_connected') : wsStatus === 'connecting' ? t('common_connecting') : t('common_disconnected') }}</span>
+          <span>{{ wsStatus === 'connected' ? '已连接' : wsStatus === 'connecting' ? '连接中...' : '未连接' }}</span>
         </div>
       </div>
     </div>
@@ -151,13 +151,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, Copy, Paperclip, Square } from 'lucide-vue-next';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
-import { useI18n } from '../i18n/index.js';
-
-
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
-
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
@@ -229,7 +224,7 @@ const mapToolCallMessage = (toolCall, _key) => {
   return {
     type: 'tool_call',
     toolCall,
-    title: name || t('chat_tool_call'),
+    title: name || '工具调用',
     detail: args ? JSON.stringify(args, null, 2) : '',
     _key
   };
@@ -358,12 +353,12 @@ const handleSend = async () => {
   try {
     await ensureConnected();
   } catch {
-    messages.value.push({ role: 'assistant', content: t('chat_ws_error') });
+    messages.value.push({ role: 'assistant', content: '错误: WebSocket 未连接，请检查服务是否启动' });
     busy.value = false;
     return;
   }
 
-  const content = text || t('chat_attachment_only_prompt');
+  const content = text || '请先阅读附件并总结关键信息';
   const outgoingAttachments = pendingFiles.value.map((f) => ({
     name: f.name,
     path: f.path,
@@ -386,7 +381,7 @@ const handleSend = async () => {
     localStorage.removeItem(CHAT_INPUT_CACHE_KEY);
     pendingFiles.value = [];
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
-  }).catch((e) => { messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) }); busy.value = false; });
+  }).catch((e) => { messages.value.push({ role: 'assistant', content: `错误: ${e.message}` }); busy.value = false; });
 };
 
 const stopBusy = () => {
@@ -508,7 +503,7 @@ watch(() => route.fullPath, async () => {
     await loadChatPage(id, 0, 20);
     scrollToBottom(false);
   } catch (e) {
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) });
+    messages.value.push({ role: 'assistant', content: `错误: ${e.message}` });
   }
 }, { immediate: true });
 
@@ -563,7 +558,7 @@ onMounted(() => {
   unsubs.push(on('error', (data) => {
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
+    messages.value.push({ role: 'assistant', content: `错误: ${data.content}`, _key });
     streamingAssistantKey.value = '';
     busy.value = false;
   }));

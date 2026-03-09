@@ -27,9 +27,8 @@
         <div class="ui-layer">
             <!-- Title -->
             <div class="header">
-                <h1 class="font-bold text-2xl text-white drop-shadow-md">🏖️ {{ t('beach_title') }}</h1>
-                <p class="text-white/80 text-sm mt-1 drop-shadow-sm font-semibold tracking-wide">{{ t('beach_subtitle')
-                    }}</p>
+                <h1 class="font-bold text-2xl text-white drop-shadow-md">🏖️ 沙滩散步</h1>
+                <p class="text-white/80 text-sm mt-1 drop-shadow-sm font-semibold tracking-wide">阳光、海浪与你</p>
             </div>
 
             <!-- AI Reaction Box (Like Poker's) -->
@@ -41,7 +40,7 @@
                 </div>
             </div>
             <div v-else class="reaction-box empty-hint">
-                {{ t('beach_empty_hint') }}
+                还没有互动记录，点击下方动作开始吧！
             </div>
 
             <!-- Error Message -->
@@ -54,25 +53,25 @@
             <div class="actions">
                 <!-- Interactive Panel -->
                 <button @click="interact('散步')" :disabled="loading" class="btn-action bg-blue-400">
-                    👟 {{ t('beach_btn_walk') }}
+                    👟 散步
                 </button>
                 <button @click="interact('倾听')" :disabled="loading" class="btn-action bg-teal-400">
-                    👂 {{ t('beach_btn_listen') }}
+                    👂 倾听
                 </button>
                 <button @click="interact('划船')" :disabled="loading" class="btn-action bg-cyan-500">
-                    🛶 {{ t('beach_btn_boat') }}
+                    🛶 划船
                 </button>
                 <button @click="interact('送椰子')" :disabled="loading" class="btn-action bg-green-500">
-                    🥥 {{ t('beach_btn_coconut') }}
+                    🥥 送椰子
                 </button>
                 <button @click="interact('捡贝壳')" :disabled="loading" class="btn-action bg-yellow-400 text-yellow-900">
-                    🐚 {{ t('beach_btn_shell') }}
+                    🐚 捡贝壳
                 </button>
             </div>
 
             <!-- Loading overlay for buttons -->
             <div v-if="loading" class="interacting-float">
-                {{ t('beach_interacting') }}
+                互动中...
             </div>
         </div>
     </div>
@@ -80,9 +79,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t } = useI18n();
 const loading = ref(false);
 const errorMsg = ref('');
 const aiResponse = ref('');
@@ -107,10 +103,10 @@ const interact = async (action) => {
             aiResponse.value = data.item.aiResponse;
             aiReaction.value = data.item.aiReaction;
         } else {
-            errorMsg.value = data.message || t('beach_action_failed');
+            errorMsg.value = data.message || '互动失败，请重试';
         }
     } catch (err) {
-        errorMsg.value = t('beach_network_error');
+        errorMsg.value = '网络出错了，海风没吹到~';
     } finally {
         loading.value = false;
     }

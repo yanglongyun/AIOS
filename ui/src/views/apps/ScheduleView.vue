@@ -7,9 +7,9 @@
         <div class="flex items-center gap-3">
           <span class="text-2xl">⏰</span>
           <div>
-            <h1 class="text-xl font-bold text-[#3a2e20]">{{ t('app_sidebar_schedule') }}</h1>
+            <h1 class="text-xl font-bold text-[#3a2e20]">定时任务</h1>
             <p class="text-xs text-[#9a8a74]">
-              {{ t('schedule_summary', { total: schedules.length, enabled: schedules.filter(s => s.enabled).length }) }}
+              共 {{ schedules.length }} 个任务，{{ schedules.filter(s => s.enabled).length }} 个启用中
             </p>
           </div>
         </div>
@@ -19,14 +19,14 @@
             class="rounded-lg border border-[#d8cebb] bg-white px-3 py-1.5 text-xs text-[#7a6a54] hover:bg-[#f0e8d8] transition"
             @click="loadSchedules"
           >
-            {{ t('tasks_refresh') }}
+            刷新
           </button>
           <button
             type="button"
             class="flex items-center gap-1.5 rounded-xl bg-[#4a3520] px-4 py-2 text-sm font-semibold text-[#f0e4cc] shadow-sm hover:bg-[#5a4530] transition"
             @click="router.push('/schedule/create')"
           >
-            <span class="text-base leading-none">+</span> {{ t('schedule_create') }}
+            <span class="text-base leading-none">+</span> 新建任务
           </button>
         </div>
       </div>
@@ -39,13 +39,13 @@
       <!-- Empty -->
       <div v-if="schedules.length === 0" class="flex flex-col items-center justify-center gap-3 py-20 text-center">
         <div class="text-5xl opacity-30">⏰</div>
-        <p class="text-sm text-[#9a8a74]">{{ t('schedule_empty') }}</p>
+        <p class="text-sm text-[#9a8a74]">暂无定时任务</p>
         <button
           type="button"
           class="mt-1 rounded-xl bg-[#4a3520] px-5 py-2 text-sm font-semibold text-[#f0e4cc] hover:bg-[#5a4530] transition"
           @click="router.push('/schedule/create')"
         >
-          {{ t('schedule_create') }}
+          新建任务
         </button>
       </div>
 
@@ -75,15 +75,15 @@
                     <span
                       v-if="!s.enabled"
                       class="rounded-full bg-[#f0ece4] px-2 py-0.5 text-[10px] font-medium text-[#9a8a74]"
-                    >{{ t('schedule_disabled') }}</span>
+                    >已停用</span>
                     <span
                       v-else-if="s.cron"
                       class="rounded-full bg-[#e8f0e0] px-2 py-0.5 text-[10px] font-medium text-[#4a7a38]"
-                    >{{ t('schedule_type_repeat') }}</span>
+                    >循环</span>
                     <span
                       v-else
                       class="rounded-full bg-[#eef0f8] px-2 py-0.5 text-[10px] font-medium text-[#4a5a8a]"
-                    >{{ t('schedule_type_once') }}</span>
+                    >定时</span>
                   </div>
                   <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-[#8a7a64]">{{ s.prompt }}</p>
                 </div>
@@ -111,7 +111,7 @@
                   <span>📆</span> {{ s.run_at.slice(0, 16) }}
                 </span>
                 <span v-if="s.last_run_at" class="flex items-center gap-1">
-                  <span>✅</span> {{ t('schedule_last_run', { time: s.last_run_at.slice(0, 16) }) }}
+                  <span>✅</span> 上次运行：{{ s.last_run_at.slice(0, 16) }}
                 </span>
                 <span v-if="s.creator && s.creator !== 'user'" class="rounded bg-[#f8f0e0] px-1.5 py-0.5 text-[#9a7a40]">{{ s.creator }}</span>
               </div>
@@ -126,20 +126,20 @@
               class="text-[11px] text-[#7a6a54] underline-offset-2 hover:underline hover:text-[#4a3a28] transition"
               @click="openTask(s.last_task_id)"
             >
-              {{ t('schedule_view_last_task', { id: s.last_task_id }) }}
+              查看上次记录 #{{ s.last_task_id }}
             </button>
-            <span v-else class="text-[11px] text-[#b0a08a]">{{ t('schedule_not_run_yet') }}</span>
+            <span v-else class="text-[11px] text-[#b0a08a]">尚未运行</span>
             <div class="flex gap-4">
               <button
                 type="button"
                 class="text-[11px] text-[#7a6a54] hover:text-[#4a3a28] transition"
                 @click="editSchedule(s.id)"
-              >{{ t('schedule_edit') }}</button>
+              >编辑</button>
               <button
                 type="button"
                 class="text-[11px] text-[#c06040] hover:text-[#9a3020] transition"
                 @click="removeSchedule(s.id)"
-              >{{ t('schedule_delete') }}</button>
+              >删除</button>
             </div>
           </div>
         </div>
@@ -152,11 +152,9 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from '../../i18n/index.js';
 import { on } from '../../ws.js';
 
 const router = useRouter();
-const { t } = useI18n();
 const schedules = ref([]);
 const error = ref('');
 
@@ -167,7 +165,7 @@ const loadSchedules = async () => {
     const data = await res.json().catch(() => []);
     schedules.value = Array.isArray(data) ? data : [];
   } catch (e) {
-    error.value = e.message || t('tasks_load_fail');
+    error.value = e.message || '加载失败';
   }
 };
 

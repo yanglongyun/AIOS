@@ -10,8 +10,8 @@
           @click="goSchedule"
         >←</button>
         <div>
-          <h1 class="text-xl font-bold text-[#3a2e20]">{{ isEdit ? t('schedule_edit_title') : t('schedule_create_title') }}</h1>
-          <p class="text-xs text-[#9a8a74]">{{ t('schedule_create_subtitle') }}</p>
+          <h1 class="text-xl font-bold text-[#3a2e20]">{{ isEdit ? '编辑定时任务' : '创建定时任务' }}</h1>
+          <p class="text-xs text-[#9a8a74]">设定 AI 自动执行的周期性任务</p>
         </div>
       </div>
 
@@ -24,7 +24,7 @@
 
         <!-- 1. 执行方式 -->
         <div class="rounded-2xl border border-[#e4d8c4] bg-white p-5 shadow-sm">
-          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">{{ t('schedule_exec_type') }}</div>
+          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">执行方式</div>
           <div class="grid grid-cols-2 gap-3">
             <button
               v-for="tp in execTypes"
@@ -45,44 +45,46 @@
 
         <!-- 2. 基本信息 -->
         <div class="rounded-2xl border border-[#e4d8c4] bg-white p-5 shadow-sm">
-          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">{{ t('schedule_section_basic') }}</div>
+          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">基本信息</div>
           <div class="space-y-4">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">{{ t('schedule_name') }}</label>
+              <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">任务名称</label>
               <input
                 v-model="form.name"
                 type="text"
-                :placeholder="t('schedule_name_placeholder')"
+                placeholder="给任务起个名字，如：每日新闻早报"
                 class="w-full rounded-xl border border-[#ddd0bc] bg-[#faf8f4] px-4 py-2.5 text-sm text-[#3a2e20] outline-none transition focus:border-[#b08040] focus:bg-white focus:ring-2 focus:ring-[#b0804020]"
               >
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">{{ t('schedule_prompt') }}</label>
+              <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">任务提示词</label>
               <textarea
                 v-model="form.prompt"
                 rows="5"
-                :placeholder="t('schedule_prompt_placeholder')"
+                placeholder="告诉 AI 需要做什么...
+
+例：读取今日 AI、科技、加密货币新闻，整理成简报，并推送通知"
                 class="w-full resize-y rounded-xl border border-[#ddd0bc] bg-[#faf8f4] px-4 py-2.5 text-sm leading-relaxed text-[#3a2e20] outline-none transition focus:border-[#b08040] focus:bg-white focus:ring-2 focus:ring-[#b0804020]"
               />
-              <p class="mt-1.5 text-[11px] text-[#9a8a74]">{{ t('schedule_prompt_hint') }}</p>
+              <p class="mt-1.5 text-[11px] text-[#9a8a74]">支持多行，可包含具体的操作指令和输出要求</p>
             </div>
           </div>
         </div>
 
         <!-- 3a. 执行时间（定时模式） -->
         <div v-if="form.execType === 'once'" class="rounded-2xl border border-[#e4d8c4] bg-white p-5 shadow-sm">
-          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">{{ t('schedule_section_time') }}</div>
+          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">执行时间</div>
           <input
             v-model="form.runAt"
             type="datetime-local"
             class="w-full rounded-xl border border-[#ddd0bc] bg-[#faf8f4] px-4 py-2.5 text-sm text-[#3a2e20] outline-none transition focus:border-[#b08040] focus:ring-2 focus:ring-[#b0804020] [color-scheme:light]"
           >
-          <p class="mt-1.5 text-[11px] text-[#9a8a74]">{{ t('schedule_exec_time_hint') }}</p>
+          <p class="mt-1.5 text-[11px] text-[#9a8a74]">选择一个未来的时间点，到时自动触发</p>
         </div>
 
         <!-- 3b. Cron 规则（循环模式） -->
         <div v-if="form.execType === 'repeat'" class="rounded-2xl border border-[#e4d8c4] bg-white p-5 shadow-sm">
-          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">{{ t('schedule_section_rule') }}</div>
+          <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-[#9a8a74]">执行规则</div>
 
           <!-- 快捷预设 -->
           <div class="mb-4 grid grid-cols-3 gap-2">
@@ -101,7 +103,7 @@
             </button>
           </div>
 
-          <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">{{ t('schedule_cron_custom') }}</label>
+          <label class="mb-1.5 block text-sm font-medium text-[#5a4a38]">自定义 Cron</label>
           <input
             v-model="form.cron"
             type="text"
@@ -109,7 +111,7 @@
             class="w-full rounded-xl border border-[#ddd0bc] bg-[#faf8f4] px-4 py-2.5 font-mono text-sm text-[#3a2e20] outline-none transition focus:border-[#b08040] focus:ring-2 focus:ring-[#b0804020]"
           >
           <div class="mt-2 flex items-center gap-3 text-[11px] text-[#9a8a74]">
-            <span>{{ t('schedule_cron_help') }}</span>
+            <span>格式：分 时 日 月 周</span>
             <span v-if="cronDescription" class="rounded-full bg-[#e8f0e0] px-2 py-0.5 font-medium text-[#4a7a38]">{{ cronDescription }}</span>
           </div>
         </div>
@@ -121,7 +123,7 @@
             class="rounded-xl border border-[#d8cebb] bg-white px-5 py-2.5 text-sm text-[#7a6a54] hover:bg-[#f0e8d8] transition"
             @click="goSchedule"
           >
-            {{ t('schedule_cancel') }}
+            取消
           </button>
           <button
             type="button"
@@ -129,30 +131,30 @@
             :disabled="submitting"
             @click="submit"
           >
-            {{ submitting ? t('schedule_submitting') : submitLabel }}
+            {{ submitting ? '提交中...' : submitLabel }}
           </button>
         </div>
 
         <!-- 结果 -->
         <div v-if="result" class="rounded-2xl border border-[#e4d8c4] bg-white p-5 shadow-sm">
           <div class="mb-2 flex items-center gap-2">
-            <span class="text-sm font-bold text-[#4a8a38]">{{ result.scheduled ? t('schedule_scheduled') : t('schedule_done') }}</span>
+            <span class="text-sm font-bold text-[#4a8a38]">{{ result.scheduled ? '已安排' : '执行完成' }}</span>
             <span class="rounded bg-[#f0e5d5] px-2 py-0.5 text-[10px] text-[#7a6a58]">#{{ result.id }}</span>
           </div>
           <div v-if="result.response" class="whitespace-pre-wrap rounded-lg bg-[#eef7ea] px-3 py-2 text-[13px] leading-relaxed text-[#2d4a30]">{{ result.response }}</div>
-          <div v-if="result.scheduled" class="text-[13px] text-[#4a8a38]">{{ t('schedule_queued') }}</div>
+          <div v-if="result.scheduled" class="text-[13px] text-[#4a8a38]">已加入调度队列</div>
           <button
             v-if="result.taskId"
             type="button"
             class="mt-3 text-xs text-[#7a6a58] underline underline-offset-2 hover:text-[#4a3a28] transition"
             @click="$router.push(`/task/${result.taskId}`)"
-          >{{ t('schedule_view_detail') }}</button>
+          >查看任务详情</button>
           <button
             v-if="result.scheduled"
             type="button"
             class="mt-3 text-xs text-[#7a6a58] underline underline-offset-2 hover:text-[#4a3a28] transition"
             @click="goSchedule"
-          >{{ t('schedule_view_list') }}</button>
+          >查看调度列表</button>
         </div>
 
       </div>
@@ -162,25 +164,23 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
-import { useI18n } from '../../i18n/index.js';
 import { useRoute, useRouter } from 'vue-router';
 
-const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const execTypes = computed(() => [
-  { value: 'once', icon: '📅', label: t('schedule_exec_once'), desc: t('schedule_exec_once_desc') },
-  { value: 'repeat', icon: '🔄', label: t('schedule_exec_repeat'), desc: t('schedule_exec_repeat_desc') }
+  { value: 'once', icon: '📅', label: '定时执行', desc: '在指定的某个时间点执行一次' },
+  { value: 'repeat', icon: '🔄', label: '循环执行', desc: '按照 Cron 规则周期性重复执行' }
 ]);
 
 const cronPresets = computed(() => [
-  { label: t('schedule_preset_daily'), cron: '0 8 * * *' },
-  { label: t('schedule_preset_weekly'), cron: '0 9 * * 1' },
-  { label: t('schedule_preset_monthly'), cron: '0 8 1 * *' },
-  { label: t('schedule_preset_hourly'), cron: '0 * * * *' },
-  { label: t('schedule_preset_5min'), cron: '*/5 * * * *' },
-  { label: t('schedule_preset_weekday'), cron: '0 9 * * 1-5' }
+  { label: '每天', cron: '0 8 * * *' },
+  { label: '每周一', cron: '0 9 * * 1' },
+  { label: '每月1号', cron: '0 8 1 * *' },
+  { label: '每小时', cron: '0 * * * *' },
+  { label: '每 5 分钟', cron: '*/5 * * * *' },
+  { label: '工作日', cron: '0 9 * * 1-5' }
 ]);
 
 const form = reactive({
@@ -198,18 +198,18 @@ const editId = ref(null);
 const result = ref(null);
 
 const submitLabel = computed(() => {
-  if (form.execType === 'once') return t('schedule_submit_once');
-  return t('schedule_submit_repeat');
+  if (form.execType === 'once') return '安排任务';
+  return '创建循环';
 });
 
 const cronDescription = computed(() => {
   const map = {
-    '0 8 * * *': t('schedule_cron_example_daily'),
-    '0 9 * * 1': t('schedule_preset_weekly'),
-    '0 8 1 * *': t('schedule_preset_monthly'),
-    '0 * * * *': t('schedule_preset_hourly'),
-    '*/5 * * * *': t('schedule_preset_5min'),
-    '0 9 * * 1-5': t('schedule_preset_weekday')
+    '0 8 * * *': '每天8点',
+    '0 9 * * 1': '每周一',
+    '0 8 1 * *': '每月1号',
+    '0 * * * *': '每小时',
+    '*/5 * * * *': '每 5 分钟',
+    '0 9 * * 1-5': '工作日'
   };
   return map[form.cron.trim()] || '';
 });
@@ -218,10 +218,10 @@ const submit = async () => {
   error.value = '';
   result.value = null;
 
-  if (!form.prompt.trim()) { error.value = t('schedule_fill_prompt'); return; }
-  if (!form.name.trim()) { error.value = t('schedule_fill_name'); return; }
-  if (form.execType === 'once' && !form.runAt) { error.value = t('schedule_fill_time'); return; }
-  if (form.execType === 'repeat' && !form.cron.trim()) { error.value = t('schedule_fill_cron'); return; }
+  if (!form.prompt.trim()) { error.value = '请填写提示词'; return; }
+  if (!form.name.trim()) { error.value = '请填写任务名称'; return; }
+  if (form.execType === 'once' && !form.runAt) { error.value = '请选择执行时间'; return; }
+  if (form.execType === 'repeat' && !form.cron.trim()) { error.value = '请填写 cron 表达式'; return; }
   return submitSchedule();
 };
 
@@ -248,7 +248,7 @@ const submitSchedule = async () => {
     if (!res.ok || !data.success) throw new Error(data.message || `HTTP ${res.status}`);
     result.value = { id: data.id, scheduled: true };
   } catch (e) {
-    error.value = e.message || t('schedule_submit_fail');
+    error.value = e.message || '提交失败';
   } finally {
     submitting.value = false;
   }
@@ -297,7 +297,7 @@ const initFromRoute = async () => {
       form.cron = '';
     }
   } catch (e) {
-    error.value = e.message || t('schedule_submit_fail');
+    error.value = e.message || '提交失败';
   }
 };
 

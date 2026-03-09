@@ -6,15 +6,15 @@
         <!-- 顶部：个人主页链接卡 -->
         <div class="bg-white/40 border border-black/5 rounded-[14px] p-3 mb-6 flex justify-between items-center shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),0_2px_4px_rgba(0,0,0,0.02)]">
           <div class="flex flex-col min-w-0 flex-1 mr-4">
-            <span class="text-[12px] font-semibold text-[#7a6a58]">{{ t('weibo_feed_desc') }}</span>
+            <span class="text-[12px] font-semibold text-[#7a6a58]">你的公开主页，外部用户可访问这个地址查看您的主页</span>
             <span class="text-[11px] text-[#9a8a78] font-mono truncate bg-black/5 px-2 py-1.5 rounded-md mt-1.5 select-all">{{ publicFeedUrl }}</span>
           </div>
           <div class="flex gap-2 flex-shrink-0">
-            <button @click="copyPublicFeed" class="bg-white/60 hover:bg-white text-[#7a6a58] hover:text-[#b08040] hover:-translate-y-[1px] border border-black/5 rounded-lg w-8 h-8 flex items-center justify-center transition shadow-sm" :title="copied ? t('weibo_feed_copied') : t('weibo_feed_copy')">
+            <button @click="copyPublicFeed" class="bg-white/60 hover:bg-white text-[#7a6a58] hover:text-[#b08040] hover:-translate-y-[1px] border border-black/5 rounded-lg w-8 h-8 flex items-center justify-center transition shadow-sm" :title="copied ? '已复制' : '复制链接'">
               <svg v-if="copied" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <svg v-else viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
-            <button @click="openPublicFeed" class="bg-white/60 hover:bg-white text-[#7a6a58] hover:text-[#b08040] hover:-translate-y-[1px] border border-black/5 rounded-lg w-8 h-8 flex items-center justify-center transition shadow-sm" :title="t('weibo_feed_open')">
+            <button @click="openPublicFeed" class="bg-white/60 hover:bg-white text-[#7a6a58] hover:text-[#b08040] hover:-translate-y-[1px] border border-black/5 rounded-lg w-8 h-8 flex items-center justify-center transition shadow-sm" title="打开">
               <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
             </button>
           </div>
@@ -38,7 +38,7 @@
             v-model="draft"
             rows="2"
             maxlength="280"
-            :placeholder="t('weibo_compose_placeholder')"
+            placeholder="有什么新鲜事？"
             class="w-full bg-transparent border-none outline-none resize-none text-[15px] leading-relaxed text-[#3a2e20] placeholder-[#c0b098] min-h-[48px]"
             @input="autoResize"
             ref="textareaRef"
@@ -51,14 +51,14 @@
               class="text-[14px] font-bold px-6 py-2 rounded-full border border-white/20 bg-gradient-to-br from-[#b88d55] to-[#9c6f35] text-[#fff8ee] shadow-[0_4px_8px_rgba(156,111,53,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all hover:-translate-y-[1px] hover:shadow-[0_6px_12px_rgba(156,111,53,0.25),inset_0_1px_1px_rgba(255,255,255,0.4)] active:translate-y-[1px] active:shadow-[0_2px_4px_rgba(156,111,53,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               :disabled="posting || !draft.trim()"
               @click="createPost"
-            >{{ posting ? t('weibo_publishing') : t('weibo_publish') }}</button>
+            >{{ posting ? '发布中...' : '发布' }}</button>
           </div>
         </div>
 
         <!-- 帖子信息流 -->
         <div class="flex flex-col gap-4">
           <div v-if="!posts.length" class="py-10 text-center text-[14px] text-[#a89070] bg-white/30 rounded-xl border border-black/5 border-dashed">
-            {{ t('weibo_empty') }}
+            还没有内容，发一条试试
           </div>
           
           <div v-for="p in posts" :key="p.id" class="bg-[#fdfbf7]/60 hover:bg-[#fdfbf7]/95 border border-black/5 rounded-[14px] p-4 sm:p-5 transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-[1px]">
@@ -71,7 +71,7 @@
                   <span class="text-[11px] text-[#9a8a78] mt-0.5">{{ formatDate(p.created_at) }}</span>
                 </div>
               </div>
-              <button @click="deletePost(p.id)" class="text-[#c8b898] hover:text-[#d06040] hover:bg-[#d06040]/10 p-1 rounded transition" :title="t('weibo_delete')">
+              <button @click="deletePost(p.id)" class="text-[#c8b898] hover:text-[#d06040] hover:bg-[#d06040]/10 p-1 rounded transition" title="删除">
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
@@ -107,17 +107,17 @@
 
         <div class="flex flex-col gap-3 relative z-10">
           <div>
-            <label class="block text-[11px] text-[#9a8a78] mb-1.5 ml-1">{{ t('weibo_name') }}</label>
-            <input v-model="profileName" class="w-full bg-white/60 border border-black/5 rounded-xl px-3.5 py-2 text-[14px] text-[#3a2e20] focus:bg-white focus:border-[#b08040] focus:ring-1 focus:ring-[#b08040] outline-none transition shadow-inner font-bold" :placeholder="t('weibo_name_placeholder')" maxlength="40" />
+            <label class="block text-[11px] text-[#9a8a78] mb-1.5 ml-1">微博名称</label>
+            <input v-model="profileName" class="w-full bg-white/60 border border-black/5 rounded-xl px-3.5 py-2 text-[14px] text-[#3a2e20] focus:bg-white focus:border-[#b08040] focus:ring-1 focus:ring-[#b08040] outline-none transition shadow-inner font-bold" placeholder="输入显示名称（如 twitter）" maxlength="40" />
           </div>
           <div>
-            <label class="block text-[11px] text-[#9a8a78] mb-1.5 ml-1">{{ t('weibo_signature') }}</label>
-            <textarea v-model="profileSignature" rows="2" class="w-full bg-white/60 border border-black/5 rounded-xl px-3.5 py-2 text-[13px] text-[#5a4828] focus:bg-white focus:border-[#b08040] focus:ring-1 focus:ring-[#b08040] outline-none resize-none transition shadow-inner" :placeholder="t('weibo_signature_placeholder')" maxlength="160"></textarea>
+            <label class="block text-[11px] text-[#9a8a78] mb-1.5 ml-1">签名</label>
+            <textarea v-model="profileSignature" rows="2" class="w-full bg-white/60 border border-black/5 rounded-xl px-3.5 py-2 text-[13px] text-[#5a4828] focus:bg-white focus:border-[#b08040] focus:ring-1 focus:ring-[#b08040] outline-none resize-none transition shadow-inner" placeholder="一句话介绍自己" maxlength="160"></textarea>
           </div>
         </div>
 
         <button @click="saveProfile" :disabled="savingProfile" class="w-full mt-2 py-2.5 rounded-xl text-[14px] font-bold text-[#fff8ee] bg-gradient-to-br from-[#b88d55] to-[#9c6f35] shadow-[0_4px_8px_rgba(156,111,53,0.2)] hover:-translate-y-[1px] hover:shadow-lg transition-all active:translate-y-0 relative z-10 disabled:opacity-60">
-          {{ savingProfile ? t('weibo_profile_saving') || '保存中...' : t('weibo_save_profile') || '保存并关闭' }}
+          {{ savingProfile ? '保存中...' || '保存中...' : '保存资料' || '保存并关闭' }}
         </button>
       </div>
     </div>
@@ -127,10 +127,8 @@
 
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
 import { toast } from '../../stores/toast.js';
 
-const { t } = useI18n();
 const API_BASE = '/apps/weibo';
 const publicFeedUrl = `${window.location.origin}/apps/weibo/feed`;
 
@@ -253,7 +251,7 @@ const onAvatarSelected = async (e) => {
     avatarPath.value = toPublicFileUrl(data.file.path);
     avatarPreview.value = avatarPath.value;
   } catch (e2) {
-    toast.show(t('weibo_upload_failed') || 'Upload failed', { type: 'error' });
+    toast.show('头像上传失败' || 'Upload failed', { type: 'error' });
   } finally {
     uploadingAvatar.value = false;
   }
@@ -282,10 +280,10 @@ const saveProfile = async () => {
     avatarPath.value = String(profile.avatarUrl || avatarPath.value);
     avatarPreview.value = toPublicFileUrl(avatarPath.value);
     
-    toast.show(t('weibo_profile_saved') || 'Profile Saved');
+    toast.show('资料已保存' || 'Profile Saved');
     showProfileModal.value = false; // 关闭弹窗
   } catch (e2) {
-    toast.show(t('weibo_profile_save_failed') || 'Failed to save', { type: 'error' });
+    toast.show('保存资料失败' || 'Failed to save', { type: 'error' });
   } finally {
     savingProfile.value = false;
   }
@@ -297,10 +295,10 @@ const formatDate = (v) => {
   if (Number.isNaN(d.getTime())) return v;
   const now = new Date();
   const diff = (now - d) / 1000;
-  if (diff < 60) return t('weibo_just_now') || 'just now';
-  if (diff < 3600) return (t('weibo_minutes_ago') || '{n}min').replace('{n}', Math.floor(diff / 60));
-  if (diff < 86400) return (t('weibo_hours_ago') || '{n}h').replace('{n}', Math.floor(diff / 3600));
-  if (diff < 604800) return (t('weibo_days_ago') || '{n}d').replace('{n}', Math.floor(diff / 86400));
+  if (diff < 60) return '刚刚' || 'just now';
+  if (diff < 3600) return ('{n}分钟前' || '{n}min').replace('{n}', Math.floor(diff / 60));
+  if (diff < 86400) return ('{n}小时前' || '{n}h').replace('{n}', Math.floor(diff / 3600));
+  if (diff < 604800) return ('{n}天前' || '{n}d').replace('{n}', Math.floor(diff / 86400));
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
 

@@ -4,11 +4,11 @@
     <!-- ========== 列表页：书架 ========== -->
     <template v-if="view === 'list'">
       <div class="beam">
-        <span class="beam-t">{{ t('story_shelf_spaced') }}</span>
-        <button @click="view = 'create'" class="beam-btn">+ {{ t('story_new_story') }}</button>
+        <span class="beam-t">书 架</span>
+        <button @click="view = 'create'" class="beam-btn">+ 新故事</button>
       </div>
       <div class="shelf-area wood-dark">
-        <div v-if="!sessions.length" class="empty-hint">{{ t('story_empty') }}</div>
+        <div v-if="!sessions.length" class="empty-hint">还没有故事，新建一个开始吧</div>
         <template v-else>
           <div v-for="(tier, ti) in shelfTiers" :key="ti" class="shelf-tier">
             <div class="book-row">
@@ -21,7 +21,7 @@
                   <div class="cv-body">
                     <div class="cv-title">{{ s.title }}</div>
                     <div class="cv-line"></div>
-                    <div class="cv-sub">{{ t('story_chapter_count', { n: s.chapterCount || 0 }) }}</div>
+                    <div class="cv-sub">{{ s.chapterCount || 0 }} 章</div>
                   </div>
                 </div>
                 <div class="book-name">{{ s.title }}</div>
@@ -29,7 +29,7 @@
               <!-- 最后一层末尾加新建按钮 -->
               <button v-if="ti === shelfTiers.length - 1" class="book book-add" @click="view = 'create'">
                 <div class="book-cover"><span class="add-icon">+</span></div>
-                <div class="book-name" style="color:#5a4828">{{ t('story_create') }}</div>
+                <div class="book-name" style="color:#5a4828">新建</div>
               </button>
             </div>
             <div class="plank wood-plank"></div>
@@ -44,16 +44,16 @@
       <div class="beam">
         <button class="beam-back" @click="backToList">
           <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-          {{ t('story_shelf') }}
+          书架
         </button>
         <span class="beam-title">{{ activeSession.title }}</span>
-        <button @click="resetStory" :disabled="loading" class="beam-btn" style="font-size:11px;padding:4px 10px">{{ t('story_reset') }}</button>
+        <button @click="resetStory" :disabled="loading" class="beam-btn" style="font-size:11px;padding:4px 10px">重置</button>
       </div>
       <div ref="timelineRef" class="detail-area wood-dark">
         <div class="detail-inner">
           <!-- 章节列表 -->
           <div v-if="!chapters.length" class="empty-chapter">
-            {{ t('story_empty_chapter') }}
+            还没有章节，点击下面「开始故事」即可生成第一章
           </div>
           <div v-for="ch in chapters" :key="ch.id" class="chapter-card">
             <div v-if="ch.action && !isStartAction(ch.action)" class="chapter-action">
@@ -63,7 +63,7 @@
             </div>
             <div class="chapter-body">
               <div class="chapter-head">
-                <span class="chapter-idx">{{ t('story_chapter_index', { n: ch.idx }) }}</span>
+                <span class="chapter-idx">第 {{ ch.idx }} 章</span>
                 <span class="chapter-progress">{{ ch.progress }}</span>
               </div>
               <p class="chapter-text">{{ ch.content }}</p>
@@ -72,7 +72,7 @@
 
           <div v-if="loading" class="loading-hint">
             <div class="loading-spinner"></div>
-            {{ t('story_loading_hint') }}
+            Agent 正在推进剧情...
           </div>
         </div>
       </div>
@@ -91,14 +91,14 @@
           <div class="input-row">
             <input
               v-model="customAction"
-              :placeholder="chapters.length ? t('story_custom_action') : t('story_opening_placeholder')"
+              :placeholder="chapters.length ? '自定义行动...' : '描述开场，或直接开始...'"
               @keyup.enter="chapters.length ? runCustom() : runGenerate(START_ACTION)"
               class="action-input"
             />
             <button
               @click="chapters.length ? runCustom() : runGenerate(START_ACTION)"
               :disabled="loading" class="action-go"
-            >{{ loading ? t('story_generating') : (chapters.length ? t('story_action') : t('story_start_story')) }}</button>
+            >{{ loading ? '生成中...' : (chapters.length ? '行动' : '开始故事') }}</button>
           </div>
         </div>
       </div>
@@ -109,23 +109,23 @@
       <div class="beam">
         <button class="beam-back" @click="view = 'list'">
           <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-          {{ t('story_shelf') }}
+          书架
         </button>
         <span></span>
       </div>
       <div class="create-area wood-dark">
         <div class="create-card">
-          <div class="create-title">{{ t('story_create_title') }}</div>
+          <div class="create-title">新建故事</div>
           <div class="create-field">
-            <div class="create-label">{{ t('story_title_label') }}</div>
-            <input v-model="newTitle" class="create-input" :placeholder="t('story_title_placeholder')" />
+            <div class="create-label">故事标题</div>
+            <input v-model="newTitle" class="create-input" placeholder="给你的故事起个名字" />
           </div>
           <div class="create-field">
-            <div class="create-label">{{ t('story_worldview_label') }}</div>
-            <textarea v-model="newPremise" class="create-input create-textarea" :placeholder="t('story_worldview_placeholder')"></textarea>
+            <div class="create-label">世界观设定（可选）</div>
+            <textarea v-model="newPremise" class="create-input create-textarea" placeholder="描述故事的背景、时代、主角特征..."></textarea>
           </div>
           <button @click="createStory" :disabled="creating" class="create-submit">
-            {{ creating ? t('story_creating') : t('story_start_creating') }}
+            {{ creating ? '创建中...' : '开始创作' }}
           </button>
         </div>
       </div>
@@ -136,10 +136,6 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t } = useI18n();
-
 const BOOKS_PER_SHELF = 4;
 const API_BASE = '/apps/story';
 
@@ -219,7 +215,7 @@ const createStory = async () => {
     await loadSessions();
     await selectSession(data.session.id);
   } catch (e) {
-    error.value = e.message || t('story_create_failed');
+    error.value = e.message || '创建失败';
   } finally {
     creating.value = false;
   }
@@ -237,7 +233,7 @@ const runGenerate = async (action) => {
     });
     await selectSession(activeSession.value.id);
   } catch (e) {
-    error.value = e.message || t('story_generate_failed');
+    error.value = e.message || '生成失败';
   } finally {
     loading.value = false;
     customAction.value = '';
@@ -254,7 +250,7 @@ const isStartAction = (action) => action === START_ACTION || action === 'Start S
 
 const resetStory = async () => {
   if (!activeSession.value || loading.value) return;
-  if (!confirm(t('story_reset_confirm', { title: activeSession.value.title }))) return;
+  if (!confirm(`重置「${activeSession.value.title}」？所有章节将被清除。`)) return;
   error.value = '';
   loading.value = true;
   try {
@@ -265,7 +261,7 @@ const resetStory = async () => {
     });
     await selectSession(activeSession.value.id);
   } catch (e) {
-    error.value = e.message || t('story_reset_failed');
+    error.value = e.message || '重置失败';
   } finally {
     loading.value = false;
   }
@@ -275,7 +271,7 @@ onMounted(async () => {
   try {
     await loadSessions();
   } catch (e) {
-    error.value = e.message || t('story_init_failed');
+    error.value = e.message || '初始化失败';
   }
 });
 </script>

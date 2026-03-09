@@ -10,7 +10,7 @@
       <header class="w-full flex justify-between items-center mb-10">
         <div class="text-[11px] font-black tracking-widest text-[#444] uppercase flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_#dc2626]"></div>
-          {{ t('blackroom_title') }}
+          小黑屋
         </div>
 
       </header>
@@ -18,7 +18,7 @@
       <!-- Poop Trigger Zone -->
       <div class="flex flex-col items-center mb-6">
         <div class="text-[80px] leading-none cursor-pointer select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] transition-transform duration-100 ease-in-out active:scale-90 active:translate-y-1 hover:drop-shadow-[0_15px_25px_rgba(250,204,21,0.1)]" @click="hitPoop" ref="mainPoopBtn">💩</div>
-        <div class="mt-3 text-[11px] text-[#555] tracking-widest uppercase font-bold">{{ t('blackroom_instruction') }}</div>
+        <div class="mt-3 text-[11px] text-[#555] tracking-widest uppercase font-bold">点击记录</div>
       </div>
       
       <!-- Slip Island (Top Down Layout) -->
@@ -30,7 +30,7 @@
 
           
           <div class="flex-1 px-4 py-3 flex flex-wrap content-start gap-[6px] overflow-y-auto [scrollbar-color:#333_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#333]" ref="poopGridContainer">
-            <div v-if="poopCount === 0" class="text-[#444] text-[11px] w-full text-center mt-4">{{ t('blackroom_waiting_poop') }}</div>
+            <div v-if="poopCount === 0" class="text-[#444] text-[11px] w-full text-center mt-4">暂无记录...</div>
             <div v-for="n in poopCount" :key="n" class="text-[16px] leading-none poop-anim">💩</div>
           </div>
         </div>
@@ -40,7 +40,7 @@
           <textarea
             v-model="complaint"
             class="w-full bg-transparent border-none p-4 text-[#e5e5e5] text-[14px] leading-relaxed font-medium resize-none outline-none min-h-[120px] placeholder:text-[#555]"
-            :placeholder="t('blackroom_placeholder')"
+            placeholder="请在此描述 AI 的问题或错误，提交后将作为记忆进行更新..."
             @input="error = ''"
           />
           
@@ -52,7 +52,7 @@
               :disabled="!isSubmitEnabled || submitting"
               @click="submit"
             >
-              {{ submitting ? t('blackroom_submitting') : t('blackroom_submit') }}
+              {{ submitting ? '提交中...' : '提交记录' }}
             </button>
           </div>
         </div>
@@ -109,10 +109,6 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t, locale } = useI18n();
-
 const API_BASE = '/apps/blackroom';
 
 const complaint = ref('');
@@ -199,7 +195,7 @@ const submit = async () => {
     complaint.value = '';
     poopCount.value = 0;
   } catch (e) {
-    error.value = e.message || t('blackroom_submit_failed');
+    error.value = e.message || '提交失败';
   } finally {
     submitting.value = false;
   }

@@ -39,7 +39,7 @@
         <div class="flex gap-1.5">
           <input
             v-model="customOption"
-            :placeholder="t('nokia_input_placeholder')"
+            placeholder="输入你的选择..."
             class="flex-1 rounded-lg border border-[#3a3d45] bg-[#1a1d25] px-3 py-2 text-xs text-gray-400 outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-400"
             @keydown.enter.prevent="customOption.trim() && chooseOption({ text: customOption })"
           />
@@ -47,14 +47,14 @@
             class="whitespace-nowrap rounded-lg border border-[#3a3d45] bg-[#2a2d35] px-3.5 py-2 text-xs text-gray-400 transition-all hover:bg-[#3a3d45] hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
             @click="chooseOption({ text: customOption })"
             :disabled="!customOption.trim() || isChoosing"
-          >{{ t('nokia_send') }}</button>
+          >发送</button>
         </div>
       </div>
 
       <div class="mt-3 flex w-[260px] items-center justify-between gap-2">
-        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-500 transition-colors hover:text-gray-300 disabled:cursor-not-allowed disabled:text-gray-700" @click="prevStory" :disabled="currentIndex >= timeLine.length - 1">{{ t('nokia_prev') }}</button>
-        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-400 transition-colors hover:text-gray-300" @click="goHomePage">{{ t('nokia_home') }}</button>
-        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-500 transition-colors hover:text-gray-300 disabled:cursor-not-allowed disabled:text-gray-700" @click="nextStory" :disabled="currentIndex <= 0">{{ t('nokia_next') }}</button>
+        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-500 transition-colors hover:text-gray-300 disabled:cursor-not-allowed disabled:text-gray-700" @click="prevStory" :disabled="currentIndex >= timeLine.length - 1">◀ 上一步</button>
+        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-400 transition-colors hover:text-gray-300" @click="goHomePage">● 主页</button>
+        <button class="whitespace-nowrap border-none bg-transparent px-2.5 py-1.5 text-[11px] text-gray-500 transition-colors hover:text-gray-300 disabled:cursor-not-allowed disabled:text-gray-700" @click="nextStory" :disabled="currentIndex <= 0">下一步 ▶</button>
       </div>
     </div>
   </div>
@@ -62,10 +62,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t } = useI18n();
-
 const API_BASE = '/apps/nokia';
 
 const homePage = ref(true);
@@ -91,9 +87,9 @@ async function goHomePage() {
   <div>3) 漂流瓶</div>
 </div>`,
     options: [
-      { text: t('nokia_option_sms') },
-      { text: t('nokia_option_news') },
-      { text: t('nokia_option_bottle') }
+      { text: '查看通话记录' },
+      { text: '写一条备忘录' },
+      { text: '看看今日运势' }
     ],
     choices: null
   }];
@@ -115,7 +111,7 @@ function nextStory() {
 
 async function init() {
   isLoading.value = true;
-  toast.value = t('nokia_booting');
+  toast.value = '正在开机...';
 
   try {
     const res = await fetch(`${API_BASE}/progress`);
@@ -137,8 +133,8 @@ async function init() {
 
   try {
     const result = await api('/generation', {
-      now: t('nokia_boot_screen'),
-      next: t('nokia_enter_home')
+      now: '开机画面',
+      next: '进入主屏幕'
     });
 
     if (result.content) {
@@ -169,7 +165,7 @@ async function chooseOption(option) {
   timeLine.value[currentIndex.value].choices = option.text;
 
   const history = timeLine.value.slice(1, 3).reverse().map(item => {
-    return `${t('nokia_ctx_screen')}${item.content}` + (item.choices ? `${t('nokia_ctx_choice')}${item.choices}` : '');
+    return `${'界面：'}${item.content}` + (item.choices ? `${'，选择：'}${item.choices}` : '');
   });
 
   try {

@@ -2,13 +2,13 @@
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
     <div class="mx-auto max-w-[960px]">
       <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_center') }}</h1>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">任务中心</h1>
         <button
           type="button"
           class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
           @click="loadAll"
         >
-          {{ t('tasks_refresh') }}
+          刷新
         </button>
       </div>
 
@@ -18,7 +18,7 @@
 
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="allTasks.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          {{ t('tasks_empty') }}
+          暂无任务
         </div>
         <div v-else class="space-y-2">
           <button
@@ -32,7 +32,7 @@
               {{ r.status === 'pending' ? '◔' : r.status === 'done' ? '✓' : '✗' }}
             </span>
             <div class="min-w-0 flex-1">
-              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || t('tasks_unnamed') }}</div>
+              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || '未命名任务' }}</div>
               <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">{{ r.response || r.prompt || '-' }}</div>
               <div class="mt-1 flex items-center gap-2 text-[10px] text-[#8a7860]">
                 <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ r.app }}</span>
@@ -49,11 +49,9 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from '../i18n/index.js';
 import { on } from '../ws.js';
 
 const router = useRouter();
-const { t } = useI18n();
 const tasks = ref([]);
 const error = ref('');
 
@@ -72,7 +70,7 @@ const loadAll = async () => {
   try {
     await loadTasks();
   } catch (e) {
-    error.value = e.message || t('tasks_load_fail');
+    error.value = e.message || '加载失败';
   }
 };
 

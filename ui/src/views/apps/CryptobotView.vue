@@ -18,7 +18,7 @@
             </div>
             <div class="flex flex-col items-center gap-1">
               <div class="text-[9px] font-black" :class="status.state.running ? 'text-[#5c996b]' : 'text-[#8a7f72]'">
-                {{ status.state.running ? t('cryptobot_running') : t('cryptobot_stopped') }}
+                {{ status.state.running ? '运行中' : '已停止' }}
               </div>
               <button
                 class="rocker-switch flex items-center justify-center text-[11px] tracking-widest"
@@ -38,7 +38,7 @@
             <h2 class="text-[13px] font-black tracking-widest text-[#4a3e30]">交易所连接配置 (OKX)</h2>
             <div class="flex items-center gap-1.5 rounded border px-2 py-0.5" :class="status.config.has_keys ? 'border-[#b8dab2] bg-[#d8eed3]' : 'border-[#d5c9bc] bg-[#efe6dc]'">
               <div class="h-1.5 w-1.5 rounded-full" :class="status.config.has_keys ? 'bg-green-600 shadow-[0_0_4px_#16a34a]' : 'bg-[#9f8f7d]'"></div>
-              <span class="text-[9px] font-bold" :class="status.config.has_keys ? 'text-green-800' : 'text-[#7b6b59]'">{{ status.config.has_keys ? t('cryptobot_connected') : t('cryptobot_not_configured') }}</span>
+              <span class="text-[9px] font-bold" :class="status.config.has_keys ? 'text-green-800' : 'text-[#7b6b59]'">{{ status.config.has_keys ? '已连接' : '未配置' }}</span>
             </div>
           </div>
 
@@ -57,7 +57,7 @@
             </div>
             <div>
               <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">接口地址</label>
-              <input v-model="exForm.base_url" type="text" :placeholder="t('cryptobot_api_url_placeholder')" class="etched-input w-full p-2 text-[11px]" />
+              <input v-model="exForm.base_url" type="text" placeholder="API URL（默认 https://www.okx.com）" class="etched-input w-full p-2 text-[11px]" />
             </div>
           </div>
 
@@ -66,10 +66,10 @@
           <div v-if="testResult" class="mb-2 text-[11px]" :class="testResult.ok ? 'text-[#2f7c3d]' : 'text-[#b84735]'">{{ testResult.msg }}</div>
 
           <div class="flex items-center justify-between gap-3 border-t border-[#bbaea0] pt-2">
-            <button class="metal-btn px-3 py-1 text-[11px]" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
+            <button class="metal-btn px-3 py-1 text-[11px]" :disabled="testingEx" @click="doTestExchange">{{ testingEx ? '测试中...' : '测试连接' }}</button>
             <div class="flex items-center gap-3">
               <button class="metal-btn px-4 py-1.5 text-[11px] text-[#5e5448]" @click="showExPanel = false">关闭</button>
-              <button class="metal-btn px-4 py-1.5 text-[11px] text-green-800" @click="doSaveExchange">{{ t('common_save') }}</button>
+              <button class="metal-btn px-4 py-1.5 text-[11px] text-green-800" @click="doSaveExchange">保存</button>
             </div>
           </div>
         </div>
@@ -92,13 +92,15 @@
           </div>
 
           <div class="target-board">
-            <textarea v-model="directive" rows="3" spellcheck="false" :placeholder="t('cryptobot_directive_placeholder')"></textarea>
+            <textarea v-model="directive" rows="3" spellcheck="false" placeholder="告诉 AI 你想怎么交易...
+
+例如：帮我盯 BTC，保守操作，单次不超过 50U，跌 5% 止损。"></textarea>
 
             <div class="mt-2 flex items-center justify-between border-t border-[#544d45] pt-2">
               <div class="text-[10px] font-bold text-[#968978]">
-                {{ status.config.updated_at ? t('cryptobot_last_saved', { t: fmtTime(status.config.updated_at) }) : '未保存' }}
+                {{ status.config.updated_at ? `上次保存 ${fmtTime(status.config.updated_at)}` : '未保存' }}
               </div>
-              <button class="text-[11px] font-bold text-[#8a7f72] underline decoration-dashed transition hover:text-[#c94c4c]" @click="doSaveDirective">{{ t('common_save') }}</button>
+              <button class="text-[11px] font-bold text-[#8a7f72] underline decoration-dashed transition hover:text-[#c94c4c]" @click="doSaveDirective">保存</button>
             </div>
           </div>
         </div>
@@ -125,13 +127,13 @@
               <template v-for="dot in tradeDots" :key="dot.id">
                 <circle :cx="dot.x" :cy="dot.y" r="3" :fill="dot.action === 'buy' ? '#1f2619' : '#5f2d25'" />
               </template>
-              <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#5f6d52" font-size="12">{{ t('cryptobot_no_data') }}</text>
+              <text v-if="!eqPolyline" x="290" y="55" text-anchor="middle" fill="#5f6d52" font-size="12">暂无数据</text>
             </svg>
           </div>
 
           <div class="relative z-10 flex items-center justify-between pt-3 text-[10px] font-bold text-[#46543b]">
             <span>全局盯盘: {{ status.state.tick_count }}次 · 已出手: {{ status.state.trade_count }}次</span>
-            <span class="rounded bg-[#8a997a] px-1.5 py-0.5 text-[#d7dfcd]">{{ eqTimespan ? `${t('cryptobot_recent')} ${eqTimespan}` : '图表：近日净值走势' }}</span>
+            <span class="rounded bg-[#8a997a] px-1.5 py-0.5 text-[#d7dfcd]">{{ eqTimespan ? `${'最近'} ${eqTimespan}` : '图表：近日净值走势' }}</span>
           </div>
         </div>
 
@@ -144,7 +146,7 @@
                 === 交易执行日志 ===
               </div>
 
-              <div v-if="!decisions.length" class="py-6 text-center text-[11px] font-bold text-[#9c9081]">{{ t('cryptobot_logs_empty') }}</div>
+              <div v-if="!decisions.length" class="py-6 text-center text-[11px] font-bold text-[#9c9081]">启动后，AI 的每次思考和决策会显示在这里</div>
 
               <div v-for="d in decisions" :key="d.id" class="mb-4 border-b border-dashed border-[#e6e0d5] pb-3 last:mb-1 last:border-b-0 last:pb-0">
                 <div class="mb-1 flex items-center justify-between text-[10px] font-bold text-[#8a7f72]">
@@ -189,10 +191,6 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t } = useI18n();
-
 const API = '/apps/cryptobot';
 
 const error = ref('');
@@ -263,7 +261,7 @@ const doTestExchange = async () => {
   testResult.value = null;
   try {
     await post('/exchange/test', exForm);
-    testResult.value = { ok: true, msg: t('cryptobot_test_success') };
+    testResult.value = { ok: true, msg: '✓ 连接成功' };
   } catch (e) {
     testResult.value = { ok: false, msg: e.message };
   } finally {
@@ -324,10 +322,10 @@ const runDuration = computed(() => {
   const ms = Date.now() - new Date(status.state.started_at).getTime();
   if (ms < 0) return '';
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return t('cryptobot_minutes', { n: mins });
+  if (mins < 60) return `${mins} 分钟`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return t('cryptobot_hours', { n: hours });
-  return t('cryptobot_days', { n: Math.floor(hours / 24) });
+  if (hours < 24) return `${hours} 小时`;
+  return `${Math.floor(hours / 24)} 天`;
 });
 
 const eqPolyline = computed(() => {
@@ -383,8 +381,8 @@ const eqTimespan = computed(() => {
   const last = new Date(pts[pts.length - 1].created_at).getTime();
   const hours = Math.round((last - first) / 3600000);
   if (hours <= 0) return '';
-  if (hours < 24) return t('cryptobot_hours', { n: hours });
-  return t('cryptobot_days', { n: Math.round(hours / 24) });
+  if (hours < 24) return `${hours} 小时`;
+  return `${Math.round(hours / 24)} 天`;
 });
 
 const fmtNum = (v, dec = 2) => {
@@ -401,9 +399,9 @@ const fmtTime = (v) => {
 };
 
 const actLabel = (a) => {
-  if (a === 'buy') return t('cryptobot_buy');
-  if (a === 'sell') return t('cryptobot_sell');
-  return t('cryptobot_hold');
+  if (a === 'buy') return '买入';
+  if (a === 'sell') return '卖出';
+  return '观望';
 };
 
 onMounted(async () => {
@@ -415,7 +413,7 @@ onMounted(async () => {
     if (!status.config.has_keys) showExPanel.value = true;
     poller = setInterval(() => loadAll().catch(() => {}), 5000);
   } catch (e) {
-    error.value = e.message || t('cryptobot_init_failed');
+    error.value = e.message || '初始化失败';
   }
 });
 

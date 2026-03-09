@@ -5,8 +5,8 @@
 
         <!-- 标题 -->
         <div class="header">
-          <h1 class="header-title">{{ t('fortune_title') }}</h1>
-          <p class="header-sub">{{ t('fortune_subtitle') }}</p>
+          <h1 class="header-title">算 一 卦</h1>
+          <p class="header-sub">诚心正意 · 六爻问天</p>
         </div>
 
         <!-- 卦象区 -->
@@ -29,8 +29,8 @@
               </div>
               <div v-else class="yao-empty"></div>
               <span class="yao-coins">
-                <span v-for="(c, j) in (coins[i] || [])" :key="j" class="coin" :class="c ? 'yang' : 'yin'">{{ c ? t('fortune_coin_char') :
-                  t('fortune_coin_back') }}</span>
+                <span v-for="(c, j) in (coins[i] || [])" :key="j" class="coin" :class="c ? 'yang' : 'yin'">{{ c ? '字' :
+                  '背' }}</span>
               </span>
             </div>
           </div>
@@ -38,15 +38,15 @@
           <!-- 空状态 -->
           <div v-if="!shaking && !hexagramName && !result" class="hex-empty">
             <div class="hex-empty-icon">☰</div>
-            <div>{{ t('fortune_empty_prompt') }}</div>
+            <div>心中默念所问之事，起卦求解</div>
           </div>
         </div>
 
         <!-- 输入 -->
         <div class="input-area">
-          <textarea v-model="question" rows="2" :placeholder="t('fortune_input_placeholder')" :disabled="shaking || loading"></textarea>
+          <textarea v-model="question" rows="2" placeholder="心中所惑，落笔此处..." :disabled="shaking || loading"></textarea>
           <button class="divine-btn" @click="divine" :disabled="shaking || loading || !question.trim()">
-            {{ shaking ? t('fortune_shaking') : loading ? t('fortune_reading') : t('fortune_divine') }}
+            {{ shaking ? '摇卦中...' : loading ? '解卦中...' : '起 卦' }}
           </button>
         </div>
 
@@ -57,11 +57,11 @@
           <div class="scroll-divider"></div>
           <div class="scroll-yj">
             <div class="scroll-yj-item">
-              <div class="scroll-yj-label good">{{ t('fortune_good') }}</div>
+              <div class="scroll-yj-label good">宜</div>
               <div class="scroll-yj-text">{{ result.good }}</div>
             </div>
             <div class="scroll-yj-item">
-              <div class="scroll-yj-label bad">{{ t('fortune_bad') }}</div>
+              <div class="scroll-yj-label bad">忌</div>
               <div class="scroll-yj-text">{{ result.bad }}</div>
             </div>
           </div>
@@ -70,7 +70,7 @@
 
         <!-- 历史 -->
         <div v-if="history.length" class="history-section">
-          <div class="history-title">{{ t('fortune_history') }}</div>
+          <div class="history-title">历 史 卦 象</div>
           <div v-for="item in history" :key="item.id" class="history-item">
             <div class="history-top">
               <span class="history-hex">{{ item.hexagram || '' }}</span>
@@ -81,11 +81,11 @@
             <div class="history-poem">"{{ item.signPoem }}"</div>
           </div>
         </div>
-        <div v-else-if="!result" class="empty-hint">{{ t('fortune_empty_history') }}</div>
+        <div v-else-if="!result" class="empty-hint">尚无卦象记录</div>
 
         <!-- 免责声明 -->
         <div class="disclaimer-box">
-          <p>{{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}</p>
+          <p>天行健，君子以自强不息。<br>AI 赛博算卦仅供娱乐与参考，切勿过度迷信当真。命运的笔杆，始终握在您自己手中。</p>
         </div>
 
       </div>
@@ -95,10 +95,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
-const { t } = useI18n();
-
 /* ── 八卦 & 六十四卦表 ── */
 const TRIGRAM_NAMES = ['坤', '艮', '坎', '巽', '震', '离', '兑', '乾'];
 // HEXAGRAM_TABLE[upperTrigramIndex][lowerTrigramIndex]
@@ -112,7 +108,7 @@ const HEXAGRAM_TABLE = [
   ['泽地萃', '泽山咸', '泽水困', '泽风大过', '泽雷随', '泽火革', '兑为泽', '泽天夬'],
   ['天地否', '天山遁', '天水讼', '天风姤', '天雷无妄', '天火同人', '天泽履', '乾为天'],
 ];
-const yaoLabels = [t('fortune_yao_top'), t('fortune_yao_five'), t('fortune_yao_four'), t('fortune_yao_three'), t('fortune_yao_two'), t('fortune_yao_one')];
+const yaoLabels = ['上', '五', '四', '三', '二', '初'];
 
 const trigramIndex = (y0, y1, y2) => y0 * 4 + y1 * 2 + y2; // bottom, mid, top
 

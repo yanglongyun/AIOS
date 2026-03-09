@@ -3,18 +3,18 @@
     <div class="mx-auto w-full max-w-4xl px-4 py-8">
       <header class="mb-6 border-b-2 border-[#3a2e20] pb-4">
         <p class="text-[10px] uppercase tracking-[.35em] text-[#a09080]">AI-Powered Personal</p>
-        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">{{ t('briefing_title') }}</h1>
-        <p class="mt-1 text-sm italic text-[#b0a088]">{{ t('briefing_subtitle') }}</p>
+        <h1 class="mt-1 text-4xl font-black tracking-tight text-[#3a2e20]">新闻头条</h1>
+        <p class="mt-1 text-sm italic text-[#b0a088]">我关心的，才是头条。</p>
         <p class="mt-1.5 text-xs tracking-wide text-[#9a8a70]">{{ todayText }}</p>
       </header>
 
       <section class="mb-6 rounded-xl border border-[#ddd2c2] bg-[#fffdf8] p-4">
-        <label class="mb-2 block text-[11px] font-bold uppercase tracking-widest text-[#a09078]">{{ t('briefing_focus_label') }}</label>
+        <label class="mb-2 block text-[11px] font-bold uppercase tracking-widest text-[#a09078]">关注方向</label>
         <textarea
           v-model="focus"
           rows="2"
           class="w-full resize-none rounded-lg border border-[#e8e0d4] bg-[#faf6f0] px-3 py-2.5 text-sm leading-relaxed text-[#3a2e20] outline-none transition placeholder:text-[#c4b8a4] focus:border-[#b89860] focus:ring-1 focus:ring-[#b89860]/30"
-          :placeholder="t('briefing_focus_placeholder')"
+          placeholder="例如：AI 编程工具、全球科技公司动态、加密市场趋势"
         ></textarea>
 
         <div class="mt-3 flex items-center justify-between">
@@ -22,15 +22,15 @@
             <button
               class="text-[11px] font-semibold text-[#8a7a60] underline decoration-dotted underline-offset-2 transition hover:text-[#5a4a30]"
               @click="saveFocus"
-            >{{ t('briefing_save_button') }}</button>
-            <span v-if="focusUpdatedAt" class="text-[10px] text-[#b8a890]">{{ t('briefing_saved') }}{{ formatTime(focusUpdatedAt) }}</span>
+            >保存</button>
+            <span v-if="focusUpdatedAt" class="text-[10px] text-[#b8a890]">已保存 {{ formatTime(focusUpdatedAt) }}</span>
           </div>
           <button
             class="rounded-lg bg-[#3a2e20] px-5 py-2 text-xs font-bold tracking-wide text-[#f5efe4] transition hover:bg-[#4a3e30] disabled:opacity-40"
             :disabled="refreshing"
             @click="refreshToday"
           >
-            {{ refreshing ? t('briefing_refreshing') : t('briefing_refresh_button') }}
+            {{ refreshing ? '生成中' : '刷新今日早报' }}
           </button>
         </div>
       </section>
@@ -49,13 +49,13 @@
       </section>
 
       <section v-else class=”mb-8 rounded-xl border border-dashed border-[#d8d0c0] py-12 text-center”>
-        <p class=”text-sm text-[#b0a090]”>{{ t('briefing_fill_focus_hint') }}</p>
+        <p class=”text-sm text-[#b0a090]”>填写关注方向后，点击"刷新今日早报"生成内容</p>
       </section>
 
       <section>
         <div class="mb-3 flex items-baseline justify-between border-b border-[#e0d8cc] pb-2">
-          <h2 class="text-xs font-bold uppercase tracking-widest text-[#a09078]">{{ t('briefing_history_title') }}</h2>
-          <span class="text-[10px] text-[#b8a890]">{{ t('briefing_total_label') }}{{ total }} 期</span>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-[#a09078]">历史早报</h2>
+          <span class="text-[10px] text-[#b8a890]">共 {{ total }} 期</span>
         </div>
 
         <div class="space-y-1">
@@ -75,9 +75,9 @@
         </div>
 
         <div v-if="totalPages > 1" class="mt-3 flex items-center justify-center gap-4">
-          <button class="text-xs text-[#8a7a60] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">{{ t('briefing_prev_page') }}</button>
+          <button class="text-xs text-[#8a7a60] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">← 上一页</button>
           <span class="text-[10px] text-[#b0a088]">{{ page }} / {{ totalPages }}</span>
-          <button class="text-xs text-[#8a7a60] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">{{ t('briefing_next_page') }}</button>
+          <button class="text-xs text-[#8a7a60] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">下一页 →</button>
         </div>
       </section>
     </div>
@@ -86,11 +86,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-
 const API_BASE = '/apps/briefing';
-const { t } = useI18n();
-
 const focus = ref('');
 const focusUpdatedAt = ref('');
 const refreshing = ref(false);
@@ -142,7 +138,7 @@ const saveFocus = async () => {
     focus.value = data.profile?.focus || '';
     focusUpdatedAt.value = data.profile?.updatedAt || '';
   } catch (e) {
-    error.value = e.message || t('briefing_save_failed');
+    error.value = e.message || '保存失败';
   }
 };
 
@@ -150,7 +146,7 @@ const refreshToday = async () => {
   error.value = '';
   refreshing.value = true;
   try {
-    if (!focus.value.trim()) throw new Error(t('briefing_fill_focus_error'));
+    if (!focus.value.trim()) throw new Error('请先填写关注方向');
     await saveFocus();
     const data = await request(`${API_BASE}/refresh`, {
       method: 'POST',
@@ -161,7 +157,7 @@ const refreshToday = async () => {
     page.value = 1;
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('briefing_generate_failed');
+    error.value = e.message || '生成失败';
   } finally {
     refreshing.value = false;
   }
@@ -185,7 +181,7 @@ onMounted(async () => {
     await loadToday();
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('briefing_init_failed');
+    error.value = e.message || '初始化失败';
   }
 });
 </script>

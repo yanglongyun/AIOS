@@ -1,4 +1,4 @@
-import { parseNum } from '../db.js';
+import { parseNum } from '../repository/client.js';
 
 const formatCandles = (candles) => {
   return candles.slice(-20).map(c => {

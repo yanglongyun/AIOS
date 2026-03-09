@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { nowIso } from '../db.js';
+import { nowIso } from '../repository/client.js';
 
 const signOkx = ({ ts, method, path, body, secret }) => {
   const prehash = `${ts}${method.toUpperCase()}${path}${body || ''}`;

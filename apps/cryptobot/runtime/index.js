@@ -1,4 +1,8 @@
-import { db, getConfig, getState, saveState, recordDecision, persistEquity, parseNum, nowIso } from '../db.js';
+import { parseNum, nowIso } from '../repository/client.js';
+import { getConfig, saveConfig } from '../repository/config.js';
+import { getState, saveState } from '../repository/state.js';
+import { recordDecision, recentDecisions } from '../repository/decisions.js';
+import { persistEquity } from '../repository/equity.js';
 import { fetchCandles, fetchSpotBalances } from './okx.js';
 import { buildPrompt } from './prompt.js';
 import { executeRealTrade } from './trade.js';
@@ -47,14 +51,10 @@ const runBotOnce = async () => {
   const initEq = parseNum(cfg.initial_equity, equity);
   const pnl = equity - initEq;
 
-  db.prepare(`
-    UPDATE apps_cryptobot_config
-    SET virtual_usdt = ?, virtual_coin = ?, updated_at = datetime('now')
-    WHERE id = 1
-  `).run(usdtBefore, coinBefore);
+  saveConfig({ virtual_usdt: usdtBefore, virtual_coin: coinBefore });
 
-  const recentDecisions = db.prepare('SELECT * FROM apps_cryptobot_decisions ORDER BY id DESC LIMIT 10').all().reverse();
-  const prompt = buildPrompt({ ...cfg, virtual_usdt: usdtBefore, virtual_coin: coinBefore }, candles, equity, pnl, recentDecisions);
+  const recent = recentDecisions(10);
+  const prompt = buildPrompt({ ...cfg, virtual_usdt: usdtBefore, virtual_coin: coinBefore }, candles, equity, pnl, recent);
   const decision = await askAI(prompt);
 
   let trade = { executed: false, sizeCoin: 0, amountUsdt: 0 };
@@ -67,11 +67,7 @@ const runBotOnce = async () => {
   const coinAfter = parseNum(balancesAfter.baseCash);
   const equityAfter = usdtAfter + coinAfter * lastPrice;
 
-  db.prepare(`
-    UPDATE apps_cryptobot_config
-    SET virtual_usdt = ?, virtual_coin = ?, updated_at = datetime('now')
-    WHERE id = 1
-  `).run(usdtAfter, coinAfter);
+  saveConfig({ virtual_usdt: usdtAfter, virtual_coin: coinAfter });
 
   persistEquity(equityAfter);
 
@@ -108,7 +104,7 @@ export const startBot = (intervalSec) => {
 
   if (timer) clearInterval(timer);
 
-  db.prepare("UPDATE apps_cryptobot_config SET interval_sec = ?, updated_at = datetime('now') WHERE id = 1").run(sec);
+  saveConfig({ interval_sec: sec });
   const oldState = getState();
   saveState({ ...oldState, running: 1, started_at: nowIso(), tick_count: oldState.tick_count || 0, trade_count: oldState.trade_count || 0 });
 

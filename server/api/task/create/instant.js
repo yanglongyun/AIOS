@@ -1,7 +1,7 @@
 import { callLlmRegular } from '../../../llm/regular.js';
 import { randomUUID } from 'crypto';
 import { db } from '../../../db/client.js';
-import { getSettings } from '../../../db/settings.js';
+import { getSettings } from '../../../service/settings/get.js';
 import { broadcast } from '../../../system/ws.js';
 import { readBody } from '../../../../shared/http/readBody.js';
 import { json } from '../../../../shared/http/json.js';

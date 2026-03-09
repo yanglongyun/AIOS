@@ -1,10 +1,10 @@
 import { json } from '../../../shared/http/json.js';
 import { readBody } from '../../../shared/http/readBody.js';
-import { listSchedules } from './list.js';
-import { getScheduleDetail } from './detail.js';
-import { createSchedule } from './create.js';
-import { updateSchedule } from './update.js';
-import { deleteSchedule } from './delete.js';
+import { listSchedules } from '../../service/schedule/list.js';
+import { getScheduleDetail } from '../../service/schedule/detail.js';
+import { createSchedule } from '../../service/schedule/create.js';
+import { updateSchedule } from '../../service/schedule/update.js';
+import { deleteSchedule } from '../../service/schedule/delete.js';
 
 export const handleScheduleApi = async (req, res, path, url) => {
   if (path === '/api/schedule' && req.method === 'GET') {

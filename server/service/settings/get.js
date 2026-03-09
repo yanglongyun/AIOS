@@ -1,4 +1,4 @@
-import { db } from './client.js';
+import { listSettingRows } from '../../repository/settings/get.js';
 
 export const normalizeContextRounds = (value) => {
   const num = Number(value);
@@ -9,11 +9,13 @@ export const normalizeContextRounds = (value) => {
 };
 
 export const getSettings = () => {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
+  const rows = listSettingRows();
   const obj = {};
   for (const r of rows) obj[r.key] = r.value;
+
   const toolResultMaxChars = Math.max(1000, Math.min(50000, Number(obj.toolResultMaxChars) || 12000));
   const toolMaxRounds = Math.max(1, Math.min(500, Number(obj.toolMaxRounds) || 50));
+
   return {
     provider: obj.provider || 'openai',
     systemPrompt: obj.systemPrompt || '',

@@ -1,8 +1,8 @@
 import { json } from '../../../shared/http/json.js';
 import { readBody } from '../../../shared/http/readBody.js';
-import { createNotification } from './create.js';
-import { listNotifications } from './list.js';
-import { markRead } from './read.js';
+import { createNotification } from '../../service/notifications/create.js';
+import { listNotifications } from '../../service/notifications/list.js';
+import { markRead } from '../../service/notifications/read.js';
 
 export const handleNotificationsApi = async (req, res, path, url) => {
   if (path === '/api/notifications' && req.method === 'GET') {

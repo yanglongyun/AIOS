@@ -13,8 +13,10 @@ const firstForwardedIp = (req) => {
 };
 
 const isTrustedLocalRequest = (req) => {
+  // Internal token is only for direct local calls from runtime itself.
+  // Never trust X-Forwarded-For here; it can be client-controlled in many deployments.
   const forwarded = firstForwardedIp(req);
-  if (forwarded) return isLoopbackIp(forwarded);
+  if (forwarded) return false;
   return isLoopbackIp(req?.socket?.remoteAddress || '');
 };
 

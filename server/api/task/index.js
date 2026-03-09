@@ -1,10 +1,10 @@
 import { json } from '../../../shared/http/json.js';
 import { readBody } from '../../../shared/http/readBody.js';
-import { listTaskRecords } from './list.js';
+import { listTaskRecords } from '../../service/task/list.js';
 import { handleTaskCreateApi } from './create/index.js';
-import { getTaskDetail } from './detail.js';
-import { listTaskMessages } from './messages.js';
-import { stopTask } from './stop.js';
+import { getTaskDetail } from '../../service/task/detail.js';
+import { listTaskMessages } from '../../service/task/messages.js';
+import { stopTask } from '../../service/task/stop.js';
 
 export const handleTaskApi = async (req, res, path, url) => {
   if (path === '/api/task' && req.method === 'GET') {

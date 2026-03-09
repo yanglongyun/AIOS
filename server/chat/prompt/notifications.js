@@ -1,4 +1,4 @@
-import { countUnread } from '../../api/notifications/list.js';
+import { countUnread } from '../../service/notifications/list.js';
 
 export const notifications = () => {
   const unread = countUnread();

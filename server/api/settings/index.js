@@ -1,7 +1,7 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { getSettings } from './get.js';
-import { updateSettings } from './update.js';
+import { getSettings } from '../../service/settings/get.js';
+import { updateSettings } from '../../service/settings/update.js';
 
 export const handleSettingsApi = async (req, res, path) => {
   if (path === '/api/settings' && req.method === 'GET') {

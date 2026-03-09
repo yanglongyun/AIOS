@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { getSettings } from '../../db/settings.js';
+import { getSettings } from '../../service/settings/get.js';
 import { apps as appsSection } from './apps.js';
 import { chats as chatsSection } from './chats.js';
 import { environment as environmentSection } from './environment.js';

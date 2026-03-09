@@ -16,7 +16,7 @@ export const handleStoryApi = async (req, res, path) => {
 
   if (path === '/apps/story/create' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, createHandler(body));
+    return json(res, await createHandler(body, req));
   }
 
   if (path === '/apps/story/history' && req.method === 'GET') {

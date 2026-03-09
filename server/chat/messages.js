@@ -1,5 +1,5 @@
 import { db } from '../db/client.js';
-import { normalizeContextRounds } from '../db/settings.js';
+import { normalizeContextRounds } from '../service/settings/get.js';
 
 export const getMessages = (conversationId, messageLimit = 100) => {
   const limit = normalizeContextRounds(messageLimit);

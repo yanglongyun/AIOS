@@ -9,7 +9,9 @@ export { initFinanceDatabase };
 
 export async function handleFinanceApi(req, res, path) {
   if (path === '/apps/finance/list' && req.method === 'GET') {
-    return json(res, listHandler());
+    const url = new URL(req.url, 'http://localhost');
+    const query = Object.fromEntries(url.searchParams);
+    return json(res, listHandler(query));
   }
 
   if (path === '/apps/finance/create' && req.method === 'POST') {

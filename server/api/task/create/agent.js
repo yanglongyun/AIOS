@@ -66,17 +66,19 @@ const createAgentTaskRecord = ({
   app,
   title,
   prompt,
-  meta = null
+  meta = null,
+  schedule_id = null
 }) => {
   const conversationId = `task:${randomUUID().slice(0, 8)}`;
   const row = db.prepare(
-    "INSERT INTO tasks (conversation_id, app, title, mode, prompt, schema, meta, status) VALUES (?, ?, ?, 'agent', ?, NULL, ?, 'pending') RETURNING id"
+    "INSERT INTO tasks (conversation_id, app, title, mode, prompt, schema, meta, status, schedule_id) VALUES (?, ?, ?, 'agent', ?, NULL, ?, 'pending', ?) RETURNING id"
   ).get(
     conversationId,
     app,
     String(title || ''),
     prompt,
-    meta ? JSON.stringify(meta) : null
+    meta ? JSON.stringify(meta) : null,
+    schedule_id
   );
   broadcast({ type: 'tasks_changed' });
   return { conversationId, taskId: row.id };
@@ -108,7 +110,8 @@ export const createAgentTask = async ({
   app,
   title = '',
   prompt,
-  meta = null
+  meta = null,
+  schedule_id = null
 }) => {
   const {
     apiUrl,
@@ -125,7 +128,8 @@ export const createAgentTask = async ({
     app,
     title,
     prompt,
-    meta
+    meta,
+    schedule_id
   });
 
   const send = (msg) => {

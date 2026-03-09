@@ -21,20 +21,6 @@ export const appRegistry = [
     dbInit: ['initInboxDatabase']
   },
   {
-    name: 'weibo',
-    match: (path) => path.startsWith('/apps/weibo/'),
-    load: () => import('./weibo/api/index.js'),
-    apiHandler: 'handleWeiboApi',
-    dbInit: ['initWeiboDatabase']
-  },
-  {
-    name: 'playground',
-    match: (path) => path.startsWith('/apps/playground/'),
-    load: () => import('./playground/api/index.js'),
-    apiHandler: 'handlePlaygroundApi',
-    dbInit: ['initPlaygroundDatabase']
-  },
-  {
     name: 'briefing',
     match: (path) => path.startsWith('/apps/briefing/'),
     load: () => import('./briefing/api/index.js'),

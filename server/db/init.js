@@ -1,5 +1,9 @@
 import { db } from './client.js';
 
+const safeAddColumn = (table, column, type) => {
+  try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`); } catch {}
+};
+
 export const initDatabase = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
@@ -65,19 +69,6 @@ export const initDatabase = () => {
       created_at TEXT DEFAULT (datetime('now')),
       last_seen_at TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS schedules (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      prompt TEXT NOT NULL,
-      creator TEXT NOT NULL DEFAULT 'user',
-      run_at TEXT,
-      cron TEXT,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      last_run_at TEXT,
-      last_task_id INTEGER,
-      created_at TEXT DEFAULT (datetime('now'))
     );
 
   `);

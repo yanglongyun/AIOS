@@ -9,8 +9,6 @@ import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FinanceView from '../views/apps/FinanceView.vue';
 import InboxView from '../views/apps/InboxView.vue';
-import WeiboView from '../views/apps/WeiboView.vue';
-import PlaygroundView from '../views/apps/PlaygroundView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
 import BriefingView from '../views/apps/BriefingView.vue';
@@ -18,11 +16,8 @@ import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
 import PokerView from '../views/apps/PokerView.vue';
-import ScheduleCreateView from '../views/apps/ScheduleCreateView.vue';
-import ScheduleLogsView from '../views/apps/ScheduleLogsView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
 import TasksView from '../views/TasksView.vue';
-import ScheduleView from '../views/apps/ScheduleView.vue';
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -30,19 +25,12 @@ const routes = [
   { path: '/login', component: LoginView },
   { path: '/chat/:id?', component: ChatView },
   { path: '/tasks', component: TasksView },
-  { path: '/schedule/create', component: ScheduleCreateView },
-  { path: '/schedule/edit/:id', component: ScheduleCreateView },
-  { path: '/schedule/logs/:id', component: ScheduleLogsView },
   { path: '/task/:id', component: TaskDetailView },
-  { path: '/schedule', component: ScheduleView },
-  { path: '/schedules', redirect: '/schedule' },
   { path: '/history', component: HistoryView },
   { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },
   { path: '/finance', component: FinanceView },
   { path: '/inbox', component: InboxView },
-  { path: '/weibo', component: WeiboView },
-  { path: '/playground', component: PlaygroundView },
   { path: '/nokia', component: NokiaView },
   { path: '/briefing', component: BriefingView },
   { path: '/cryptobot', component: CryptobotView },

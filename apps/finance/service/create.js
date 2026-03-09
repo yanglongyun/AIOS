@@ -12,6 +12,7 @@ export const createFinance = (body = {}) => {
     return { success: false, message: 'amount 必须是大于 0 的数字' };
   }
 
-  createTransaction({ type, amount, note });
+  const date = body.date ? String(body.date) : undefined;
+  createTransaction({ type, amount, note, date });
   return { success: true };
 };

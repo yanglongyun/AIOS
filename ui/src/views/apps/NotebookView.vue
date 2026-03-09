@@ -137,17 +137,22 @@ const CARD_STYLES = [
   { cardCls: 'card-orange-ruled min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#6a3000]', padCls: 'pad-orange-ruled', inkCls: 'text-[#6a3000]' },
   { cardCls: 'card-kraft min-h-[200px] w-[220px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#3a2a1a]', padCls: 'pad-kraft', inkCls: 'text-[#3a2a1a]' },
   { cardCls: 'card-pink-lined min-h-[200px] w-[220px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#5a2040]', padCls: 'pad-pink-lined', inkCls: 'text-[#5a2040]' },
+  { cardCls: 'card-lavender-diag min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#4a2080]', padCls: 'pad-lavender-diag', inkCls: 'text-[#4a2080]' },
+  { cardCls: 'card-mint-check min-h-[200px] w-[210px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#1a5a4a]', padCls: 'pad-mint-check', inkCls: 'text-[#1a5a4a]' },
+  { cardCls: 'card-cream-cross min-h-[200px] w-[210px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#6a4a00]', padCls: 'pad-cream-cross', inkCls: 'text-[#6a4a00]' },
+  { cardCls: 'card-sky-ruled min-h-[200px] w-[220px] pt-[30px] px-[15px] pb-[15px]', textCls: 'text-[#1a3a6a]', padCls: 'pad-sky-ruled', inkCls: 'text-[#1a3a6a]' },
 ];
 const PIN_COLORS = ['pin-red', 'pin-blue', 'pin-yellow', 'pin-metal'];
 const ROTATIONS = [3, -1, -4, 1, -3, 2, 6, -2];
 
-const cardStyle = (s) => CARD_STYLES[(Number(s) || 0) % 8];
+const TOTAL_STYLES = CARD_STYLES.length;
+const cardStyle = (s) => CARD_STYLES[(Number(s) || 0) % TOTAL_STYLES];
 
 // 避免连续新建出相同样式
 let lastStyle = -1;
 const randomStyle = () => {
   let s;
-  do { s = Math.floor(Math.random() * 8); } while (s === lastStyle);
+  do { s = Math.floor(Math.random() * TOTAL_STYLES); } while (s === lastStyle);
   lastStyle = s;
   return s;
 };
@@ -346,6 +351,58 @@ onMounted(fetchNotes);
   background: rgba(200,80,120,0.3); z-index: -1;
 }
 
+/* 8: 薰衣草斜线纸 */
+.card-lavender-diag {
+  background-color: #e8daef;
+  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 10px, rgba(100,50,150,0.08) 10px, rgba(100,50,150,0.08) 11px);
+  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
+  border-radius: 2px;
+}
+.card-lavender-diag::after {
+  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
+  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
+}
+
+/* 9: 薄荷棋盘格纸 */
+.card-mint-check {
+  background-color: #c8f7e1;
+  background-image:
+    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%),
+    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
+  border-radius: 2px;
+}
+
+/* 10: 奶油十字纹纸 */
+.card-cream-cross {
+  background-color: #faf0d8;
+  background-image:
+    radial-gradient(circle, rgba(160,120,40,0.12) 1px, transparent 1px),
+    linear-gradient(rgba(160,120,40,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160,120,40,0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+  border-radius: 2px;
+}
+
+/* 11: 天蓝横线信笺 - 类似黄色信笺但天蓝底 + 深蓝横线 + 撕裂顶边 */
+.card-sky-ruled {
+  background-color: #dceefb;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 24px, #90b8d8 24px, #90b8d8 25px);
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
+  border-radius: 2px 2px 4px 6px;
+}
+.card-sky-ruled::before {
+  content: ''; position: absolute; top: -4px; left: 0; right: 0; height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Cpath d='M0 8 L4 2 L8 6 L12 0 L16 8 Z' fill='%23dceefb'/%3E%3C/svg%3E") repeat-x;
+}
+.card-sky-ruled::after {
+  content: ''; position: absolute; top: 4px; bottom: 0; left: 30px; width: 1px;
+  background: rgba(80,120,180,0.35); z-index: -1;
+}
+
 /* ── 夹板编辑器（多层阴影+渐变，Tailwind写不了或太长） ── */
 .clipboard-board {
   background: linear-gradient(135deg, #5c412a, #3a2515);
@@ -429,6 +486,44 @@ onMounted(fetchNotes);
 .pad-pink-lined::after {
   content: ''; position: absolute; top: 0; bottom: 0; left: 45px; width: 1px;
   background: rgba(200,80,120,0.3); pointer-events: none;
+}
+
+/* 8: 薰衣草斜线 */
+.pad-lavender-diag {
+  background-color: #e8daef;
+  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 14px, rgba(100,50,150,0.08) 14px, rgba(100,50,150,0.08) 15px);
+}
+
+/* 9: 薄荷棋盘格 */
+.pad-mint-check {
+  background-color: #c8f7e1;
+  background-image:
+    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%),
+    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+/* 10: 奶油十字纹 */
+.pad-cream-cross {
+  background-color: #faf0d8;
+  background-image:
+    radial-gradient(circle, rgba(160,120,40,0.12) 1px, transparent 1px),
+    linear-gradient(rgba(160,120,40,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160,120,40,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 50px;
+}
+
+/* 11: 天蓝横线 */
+.pad-sky-ruled {
+  background-color: #dceefb;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 29px, #90b8d8 29px, #90b8d8 30px);
+  background-position: 0 50px;
+}
+.pad-sky-ruled::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 45px; width: 2px;
+  background: rgba(80,120,180,0.4); box-shadow: 4px 0 0 rgba(80,120,180,0.12); pointer-events: none;
 }
 
 .pad-binding {

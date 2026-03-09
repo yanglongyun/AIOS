@@ -3,7 +3,7 @@ import { json } from '../../../shared/http/json.js';
 import { countUsers, createAuthSession, createUser, findUserByUsername, ensureInternalApiToken } from '../../../shared/auth/repository.js';
 import { hashPassword } from '../../../shared/auth/password.js';
 import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL_SECONDS } from '../../../shared/auth/session.js';
-import { normalizeUsername } from '../../../shared/auth/normalize.js';
+import { normalizeUsername } from '../../../shared/auth/index.js';
 
 export const register = async (req, res) => {
   if (countUsers() > 0) {

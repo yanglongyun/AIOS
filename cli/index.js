@@ -2,7 +2,7 @@
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { WEB_URL, API_URL, APPS_URL } from './config.js';
-import { getServiceStatus, startServices, stopServices, isReady, waitReadyUrl } from './service.js';
+import { getServiceStatus, startServices, stopServices, buildUI, isReady, waitReadyUrl } from './service.js';
 import { startChat } from './chat.js';
 
 const arg = process.argv[2];
@@ -41,6 +41,13 @@ if (arg === 'start') {
 
 if (arg === 'restart') {
   stopServices();
+
+  console.log(chalk.dim('  构建前端...'));
+  if (buildUI()) {
+    console.log(chalk.dim('  构建完成'));
+  } else {
+    console.log(chalk.yellow('  构建失败，使用已有版本'));
+  }
 
   startServices();
   process.stdout.write(chalk.dim('  等待服务就绪'));

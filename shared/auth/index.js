@@ -1,6 +1,8 @@
 import { countUsers, getInternalApiToken } from './repository.js';
 import { getAuthUser } from './guard.js';
 
+export const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
+
 const isLoopbackIp = (ip) => {
   const value = String(ip || '').trim();
   return value === '127.0.0.1' || value === '::1' || value === '::ffff:127.0.0.1';

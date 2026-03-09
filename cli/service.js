@@ -3,6 +3,15 @@ import readline from 'readline';
 import chalk from 'chalk';
 import { ROOT, API_URL, APPS_URL } from './config.js';
 
+export const buildUI = () => {
+  try {
+    execSync('npm run build', { cwd: ROOT, stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const startServices = () => {
   console.log(chalk.dim('  启动 AIOS 服务...'));
   const opts = { cwd: ROOT, detached: true, stdio: 'ignore' };

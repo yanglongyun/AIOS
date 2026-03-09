@@ -1,10 +1,12 @@
 node_modules
 .DS_Store
 database/
+memory/
 dev/
 uploads/
 files/
 
+ui/dist/
 AGENT.md
 .claude/
 think/

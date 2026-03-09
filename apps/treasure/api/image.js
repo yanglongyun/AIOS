@@ -1,13 +1,4 @@
-import { existsSync, readFileSync } from 'fs';
-import { extname } from 'path';
-import { db } from '../db.js';
-
-const MIME = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.webp': 'image/webp'
-};
+import { fetchImage } from '../service/image.js';
 
 export const imageHandler = (res, query = {}) => {
   const id = Number(query.id || 0);
@@ -17,15 +8,14 @@ export const imageHandler = (res, query = {}) => {
     return true;
   }
 
-  const row = db.prepare('SELECT image_path FROM apps_treasures WHERE id = ?').get(id);
-  if (!row?.image_path || !existsSync(row.image_path)) {
-    res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ success: false, message: '图片不存在' }));
+  const result = fetchImage(id);
+  if (result.error) {
+    res.writeHead(result.status, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: false, message: result.message }));
     return true;
   }
 
-  const ext = extname(row.image_path).toLowerCase();
-  res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
-  res.end(readFileSync(row.image_path));
+  res.writeHead(200, { 'Content-Type': result.contentType });
+  res.end(result.buffer);
   return true;
 };

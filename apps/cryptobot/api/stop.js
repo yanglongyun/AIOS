@@ -1,6 +1,3 @@
-import { stopBot } from '../runtime/index.js';
+import { stop } from '../service/stop.js';
 
-export const stopHandler = () => {
-  stopBot();
-  return { success: true };
-};
+export const stopHandler = () => stop();

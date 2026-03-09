@@ -1,0 +1,27 @@
+import { db } from './client.js';
+
+export const getProfile = () => {
+  return db.prepare(`
+    SELECT focus, updated_at AS updatedAt
+    FROM apps_briefing_profile
+    WHERE id = 1
+    LIMIT 1
+  `).get();
+};
+
+export const getLatestDaily = () => {
+  return db.prepare(`
+    SELECT
+      id,
+      date,
+      focus,
+      title,
+      brief,
+      content,
+      created_at AS createdAt,
+      updated_at AS updatedAt
+    FROM apps_briefing_daily
+    ORDER BY date DESC
+    LIMIT 1
+  `).get();
+};

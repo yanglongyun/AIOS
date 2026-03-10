@@ -36,7 +36,6 @@ export const startChat = async () => {
   }
 
   let busy = false;
-  let pendingConfirm = null;
   let replyBuffer = '';
 
   const parseToolCall = (toolCall) => {
@@ -79,7 +78,12 @@ export const startChat = async () => {
     });
 
     socket.on('message', (raw) => {
-      const data = JSON.parse(raw);
+      let data = null;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        return;
+      }
 
       if (data.type === 'pong') return;
 
@@ -87,14 +91,6 @@ export const startChat = async () => {
         print.clearThinking();
         const parsed = parseToolCall(data.toolCall);
         print.tool(parsed.cmd, parsed.reason);
-        return;
-      }
-
-      if (data.type === 'tool_confirm') {
-        print.clearThinking();
-        pendingConfirm = data;
-        print.confirm(data.command, data.reason);
-        process.stdout.write(chalk.yellow('确认执行? [y/N] '));
         return;
       }
 
@@ -138,13 +134,6 @@ export const startChat = async () => {
     rl.on('line', (line) => {
       const input = line.trim();
       if (!input) { rl.prompt(); return; }
-
-      if (pendingConfirm) {
-        const approved = input.toLowerCase() === 'y';
-        socket.send(JSON.stringify({ type: approved ? 'tool_approve' : 'tool_reject' }));
-        pendingConfirm = null;
-        return;
-      }
 
       if (busy) {
         console.log(chalk.dim('（等待上一条回复完成）'));

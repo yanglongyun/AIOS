@@ -1,9 +1,8 @@
 import chalk from 'chalk';
 
 export const print = {
-  user: (text) => console.log(chalk.cyan('\nYou: ') + text),
   reply: (text) => {
-    const clean = text.replace(/<suggestions>[\s\S]*?<\/suggestions>/g, '').trim();
+    const clean = String(text || '').trim();
     if (clean) process.stdout.write('\n' + clean + '\n');
   },
   tool: (cmd, reason) => {
@@ -18,12 +17,9 @@ export const print = {
     }
   },
   error: (msg) => console.log(chalk.red('\n✗ ' + msg)),
-  confirm: (cmd, reason) => {
-    console.log(chalk.yellow('\n⚡ 执行命令: ') + cmd);
-    if (reason) console.log(chalk.dim('   原因: ' + reason));
-  },
   thinking: () => process.stdout.write(chalk.dim('\n思考中...')),
   clearThinking: () => {
+    if (!process.stdout.isTTY) return;
     process.stdout.clearLine(0);
     process.stdout.cursorTo(0);
   },

@@ -62,12 +62,7 @@ const allowServerDuringSetup = (path, method) => {
 };
 
 const allowAppsPublic = (path) => {
-  return path === '/apps/health'
-    || path === '/apps/inbox/submit'
-    || path === '/apps/weibo/feed'
-    || path === '/apps/weibo/list'
-    || path === '/apps/weibo/profile'
-    || path.startsWith('/public/');
+  return path === '/apps/health';
 };
 
 // 唯一对外入口：调用方只需要 access(...) 即可完成鉴权/初始化门禁。

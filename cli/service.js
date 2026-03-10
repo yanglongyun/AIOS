@@ -1,7 +1,12 @@
 import { execSync, spawn } from 'child_process';
 import readline from 'readline';
 import chalk from 'chalk';
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import path from 'path';
 import { ROOT, API_URL, APPS_URL } from './config.js';
+
+const PID_DIR = path.join(ROOT, 'files', 'tmp');
+const PID_FILE = path.join(PID_DIR, 'aios-service-pids.json');
 
 export const buildUI = () => {
   try {
@@ -12,27 +17,102 @@ export const buildUI = () => {
   }
 };
 
+const ensurePidDir = () => {
+  if (!existsSync(PID_DIR)) mkdirSync(PID_DIR, { recursive: true });
+};
+
+const readPidState = () => {
+  try {
+    if (!existsSync(PID_FILE)) return null;
+    const raw = readFileSync(PID_FILE, 'utf8');
+    const data = JSON.parse(raw);
+    return data && typeof data === 'object' ? data : null;
+  } catch {
+    return null;
+  }
+};
+
+const writePidState = (state) => {
+  try {
+    ensurePidDir();
+    writeFileSync(PID_FILE, JSON.stringify(state, null, 2), 'utf8');
+  } catch {}
+};
+
+const clearPidState = () => {
+  try {
+    if (existsSync(PID_FILE)) unlinkSync(PID_FILE);
+  } catch {}
+};
+
+const isPidRunning = (pid) => {
+  const n = Number(pid);
+  if (!Number.isInteger(n) || n <= 0) return false;
+  try {
+    process.kill(n, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const killPid = (pid) => {
+  const n = Number(pid);
+  if (!Number.isInteger(n) || n <= 0) return false;
+  if (!isPidRunning(n)) return false;
+
+  try {
+    if (process.platform === 'win32') {
+      execSync(`taskkill /PID ${n} /T /F`, { stdio: 'ignore' });
+      return true;
+    }
+
+    process.kill(n, 'SIGTERM');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const startServices = () => {
   console.log(chalk.dim('  启动 AIOS 服务...'));
   const opts = { cwd: ROOT, detached: true, stdio: 'ignore' };
-  spawn('node', ['server/index.js'], opts).unref();
-  spawn('node', ['apps/index.js'], opts).unref();
+  const serverProc = spawn('node', ['server/index.js'], opts);
+  const appsProc = spawn('node', ['apps/index.js'], opts);
+  serverProc.unref();
+  appsProc.unref();
+
+  writePidState({
+    serverPid: Number(serverProc.pid) || 0,
+    appsPid: Number(appsProc.pid) || 0,
+    startedAt: new Date().toISOString()
+  });
 };
 
 export const stopServices = () => {
   console.log(chalk.dim('  停止 AIOS 服务...'));
-  const patterns = ['node server/index.js', 'node apps/index.js'];
   let stoppedAny = false;
+  const state = readPidState();
 
-  for (const pattern of patterns) {
-    try {
-      execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
+  if (state?.serverPid) {
+    if (killPid(state.serverPid)) {
       stoppedAny = true;
-      console.log(chalk.dim(`  已停止: ${pattern}`));
-    } catch {
-      console.log(chalk.dim(`  未运行: ${pattern}`));
+      console.log(chalk.dim(`  已停止: server(${state.serverPid})`));
+    } else {
+      console.log(chalk.dim(`  未运行: server(${state.serverPid})`));
     }
   }
+
+  if (state?.appsPid) {
+    if (killPid(state.appsPid)) {
+      stoppedAny = true;
+      console.log(chalk.dim(`  已停止: apps(${state.appsPid})`));
+    } else {
+      console.log(chalk.dim(`  未运行: apps(${state.appsPid})`));
+    }
+  }
+
+  if (state?.serverPid || state?.appsPid) clearPidState();
 
   return stoppedAny;
 };
@@ -55,31 +135,26 @@ export const waitReadyUrl = async (url, method = 'GET', retries = 15, delay = 80
   return false;
 };
 
-const findPids = (pattern) => {
-  try {
-    const out = execSync(`pgrep -f "${pattern}"`, { encoding: 'utf8' }).trim();
-    if (!out) return [];
-    return out.split('\n').map((line) => Number(line.trim())).filter((n) => Number.isInteger(n) && n > 0);
-  } catch {
-    return [];
-  }
-};
-
 export const getServiceStatus = async () => {
-  const serverPattern = 'node server/index.js';
-  const appsPattern = 'node apps/index.js';
-  const serverPids = findPids(serverPattern);
-  const appsPids = findPids(appsPattern);
+  const state = readPidState() || {};
+  const serverPid = Number(state.serverPid) || 0;
+  const appsPid = Number(state.appsPid) || 0;
+  const serverRunning = isPidRunning(serverPid);
+  const appsRunning = isPidRunning(appsPid);
+
+  if (!serverRunning && !appsRunning && (state.serverPid || state.appsPid)) {
+    clearPidState();
+  }
 
   return {
     server: {
-      running: serverPids.length > 0,
-      pids: serverPids,
+      running: serverRunning,
+      pids: serverRunning ? [serverPid] : [],
       ready: await isReady(`${API_URL}/health`)
     },
     apps: {
-      running: appsPids.length > 0,
-      pids: appsPids,
+      running: appsRunning,
+      pids: appsRunning ? [appsPid] : [],
       ready: await isReady(`${APPS_URL}/apps/health`)
     }
   };
@@ -168,11 +243,20 @@ export const createSession = async () => {
     return false;
   };
 
-  const createConversationLocally = async () => {
-    const mod = await import('../server/chat/conversations.js');
-    const data = mod.createConversation('CLI 会话');
-    if (data?.conversationId) return data.conversationId;
-    throw new Error('创建会话失败');
+  const createConversation = async () => {
+    const res = await fetch(`${API_URL}/chat/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: authCookie
+      },
+      body: JSON.stringify({ title: 'CLI 会话' })
+    });
+    const data = await readJsonSafe(res);
+    if (!res.ok || !data?.conversationId) {
+      throw new Error(data?.error || data?.message || '创建会话失败');
+    }
+    return data.conversationId;
   };
 
   const readyNow = await isReady(`${API_URL}/health`);
@@ -185,5 +269,5 @@ export const createSession = async () => {
   }
 
   await ensureAuth();
-  return await createConversationLocally();
+  return await createConversation();
 };

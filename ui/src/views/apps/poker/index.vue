@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div class="flex h-full min-h-full w-full flex-col items-center overflow-hidden bg-[#0a150a]">
     <PokerTableView
+      class="w-full flex-1"
       :ai-speech="aiSpeech"
       :ai-expression="aiExpression"
       :game="game"
@@ -10,13 +11,15 @@
       :suit-icon="suitIcon"
       :rank-label="rankLabel"
     />
-    <PokerControlPanel
-      :last-action-text="lastActionText"
-      :game="game"
-      :busy="busy"
-      @start="startGame"
-      @action="handleAction"
-    />
+    <div class="relative z-10 -mt-4 flex w-full justify-center px-4 pb-6">
+      <PokerControlPanel
+        :last-action-text="lastActionText"
+        :game="game"
+        :busy="busy"
+        @start="startGame"
+        @action="handleAction"
+      />
+    </div>
   </div>
 </template>
 

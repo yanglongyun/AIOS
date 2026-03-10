@@ -1,6 +1,5 @@
 <template>
-  <div class="flex h-full flex-col items-center overflow-y-auto bg-[#1a3a1a] py-2 font-['Georgia','PingFang_SC',serif] sm:py-4" style="background-image: radial-gradient(ellipse at 50% 30%, #224422 0%, #0a150a 100%);">
-    <div class="flex-1"></div>
+  <div class="flex h-full min-h-0 flex-col items-center justify-center overflow-y-auto bg-[#1a3a1a] py-4 font-['Georgia','PingFang_SC',serif] sm:py-6" style="background-image: radial-gradient(ellipse at 50% 30%, #224422 0%, #0a150a 100%);">
 
     <div v-if="aiSpeech || aiExpression" class="relative z-10 -mb-4 w-[500px] max-w-[90vw] rounded-2xl border border-[#c8a060]/30 bg-gradient-to-b from-[#2a1e10]/90 to-[#150f08]/90 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md sm:p-4">
       <div class="flex items-start gap-3 sm:gap-4">
@@ -64,8 +63,6 @@
         </div>
       </div>
     </div>
-
-    <div class="flex-1"></div>
   </div>
 </template>
 

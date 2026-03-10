@@ -1,6 +1,4 @@
 import { createServer } from 'http';
-import { existsSync, readFileSync, statSync } from 'fs';
-import { extname, join, resolve } from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { json } from './app_shared/utils/json.js';
@@ -9,23 +7,6 @@ import { access } from '../shared/auth/index.js';
 
 const APPS_PORT = 9701;
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = resolve(__dirname, '..');
-const PUBLIC_DIR = join(ROOT_DIR, 'public');
-const PUBLIC_BASE = resolve(PUBLIC_DIR);
-
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'application/javascript',
-  '.css': 'text/css',
-  '.md': 'text/markdown; charset=utf-8',
-  '.txt': 'text/plain; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.pdf': 'application/pdf',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp'
-};
 
 const moduleCache = new Map();
 const dbInitCache = new Set();
@@ -83,25 +64,6 @@ const appsServer = createServer(async (req, res) => {
     const gate = access(req, path, req.method || 'GET', 'apps');
     if (!gate.ok) {
       json(res, { success: false, message: gate.message }, gate.status || 401);
-      return;
-    }
-
-    if (path.startsWith('/public/')) {
-      const requested = path.slice('/public/'.length);
-      const filePath = resolve(PUBLIC_DIR, requested);
-      if (!filePath.startsWith(PUBLIC_BASE)) {
-        res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('Forbidden');
-        return;
-      }
-      if (!existsSync(filePath) || !statSync(filePath).isFile()) {
-        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('Not Found');
-        return;
-      }
-      const ext = extname(filePath).toLowerCase();
-      res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
-      res.end(readFileSync(filePath));
       return;
     }
 

@@ -54,10 +54,6 @@
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/cryptobot'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>{{ t('app_sidebar_cryptobot') }}</button>
-          <button @click="go('/inbox')"
-            class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(is('/inbox'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>{{ t('app_sidebar_inbox') }}</button>
           <button @click="go('/reader')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/reader'))"><span

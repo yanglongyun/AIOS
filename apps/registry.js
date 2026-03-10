@@ -14,13 +14,6 @@ export const appRegistry = [
     dbInit: ['initFinanceDatabase']
   },
   {
-    name: 'inbox',
-    match: (path) => path.startsWith('/apps/inbox/'),
-    load: () => import('./inbox/api/index.js'),
-    apiHandler: 'handleInboxApi',
-    dbInit: ['initInboxDatabase']
-  },
-  {
     name: 'subscriber',
     match: (path) => path.startsWith('/apps/subscriber/'),
     load: () => import('./subscriber/api/index.js'),

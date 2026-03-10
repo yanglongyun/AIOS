@@ -4,6 +4,7 @@
     <!-- ========== 列表页 ========== -->
     <template v-if="view === 'list'">
       <div class="beam shrink-0 relative z-20 flex h-[50px] items-center justify-between px-5">
+        <span></span>
         <span class="font-serif text-[15px] font-extrabold tracking-wider text-[#fff8ee] [text-shadow:0_1px_3px_rgba(0,0,0,.3)]">阅 读 器</span>
         <span></span>
       </div>
@@ -43,12 +44,12 @@
     <!-- ========== 详情页 ========== -->
     <template v-if="view === 'detail' && activeSession">
       <div class="beam shrink-0 relative z-20 flex h-[50px] items-center justify-between px-5">
-        <button class="beam-back flex items-center gap-1 rounded-md border border-black/20 px-3 py-1 pl-2 text-xs font-semibold text-[#fff8ee] cursor-pointer font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.4)]" @click="backToList">
+        <button class="relative top-0 flex cursor-pointer items-center gap-1 rounded-md border border-black/20 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.08))] px-3 py-1 pl-2 text-xs font-semibold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.4)] shadow-[0_2px_0_rgba(0,0,0,.25),inset_0_1px_0_rgba(255,240,200,.12)] transition-all hover:bg-[linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.04))] active:top-[2px] active:shadow-[0_0_0_rgba(0,0,0,.25),inset_0_1px_3px_rgba(0,0,0,.2)]" @click="backToList">
           <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
           阅读器
         </button>
         <span class="beam-title absolute left-1/2 -translate-x-1/2 max-w-[50%] truncate font-serif text-sm font-extrabold text-[#fff8ee] [text-shadow:0_1px_3px_rgba(0,0,0,.3)]">{{ activeSession.title }}</span>
-        <button @click="resetReader" :disabled="loading" class="beam-back rounded-md border border-black/20 px-2.5 py-1 text-[11px] font-semibold text-[#fff8ee] cursor-pointer font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.4)] disabled:opacity-40 disabled:cursor-default">重置</button>
+        <button @click="resetReader" :disabled="loading" class="relative top-0 cursor-pointer rounded-md border border-black/20 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.08))] px-2.5 py-1 text-[11px] font-semibold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.4)] shadow-[0_2px_0_rgba(0,0,0,.25),inset_0_1px_0_rgba(255,240,200,.12)] transition-all hover:bg-[linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.04))] active:top-[2px] active:shadow-[0_0_0_rgba(0,0,0,.25),inset_0_1px_3px_rgba(0,0,0,.2)] disabled:cursor-default disabled:opacity-40">重置</button>
       </div>
       <div ref="timelineRef" class="wood-dark flex-1 overflow-y-auto px-5 py-6 pb-10">
         <div class="mx-auto max-w-[640px]">
@@ -57,9 +58,9 @@
           </div>
           <div v-for="ch in chapters" :key="ch.id">
             <div v-if="ch.action && !isStartReaderAction(ch.action)" class="mb-2 flex items-center gap-2">
-              <span class="chapter-action-line flex-1 h-px"></span>
+              <span class="h-px flex-1 bg-[linear-gradient(90deg,transparent,rgba(0,0,0,.08),transparent)]"></span>
               <span class="whitespace-nowrap rounded-full border border-black/[.06] bg-white/30 px-2.5 py-0.5 text-[10px] text-[#8a7050]">{{ ch.action }}</span>
-              <span class="chapter-action-line flex-1 h-px"></span>
+              <span class="h-px flex-1 bg-[linear-gradient(90deg,transparent,rgba(0,0,0,.08),transparent)]"></span>
             </div>
             <div class="chapter-body mb-3 rounded-[10px] border border-black/[.04] bg-white/50 px-4 py-3.5 hover:bg-white/[.65]">
               <div class="mb-1.5 flex items-center justify-between">
@@ -71,22 +72,22 @@
           </div>
 
           <div v-if="loading" class="flex items-center gap-2.5 py-4 text-xs text-[#9a8060]">
-            <div class="loading-spinner h-4 w-4 rounded-full border-2 border-black/[.08] border-t-[#b08040]"></div>
+            <div class="h-4 w-4 animate-spin rounded-full border-2 border-black/[.08] border-t-[#b08040]"></div>
             Agent 正在推进剧情...
           </div>
 
           <div v-if="!loading" class="action-panel mt-5 flex flex-col gap-3 rounded-xl px-4 py-4 pb-5">
             <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-[#9a7848]">
-              <span class="action-divider h-px flex-1"></span>
+              <span class="h-px flex-1 bg-[linear-gradient(90deg,transparent,rgba(160,120,60,.2),transparent)]"></span>
               {{ chapters.length ? '接下来...' : '开始旅程' }}
-              <span class="action-divider h-px flex-1"></span>
+              <span class="h-px flex-1 bg-[linear-gradient(90deg,transparent,rgba(160,120,60,.2),transparent)]"></span>
             </div>
             <div v-if="error" class="rounded-lg border border-[rgba(200,60,40,.12)] bg-[rgba(200,60,40,.08)] px-3 py-1.5 text-[11px] text-[#e07050]">{{ error }}</div>
             <div v-if="currentChoices.length" class="grid grid-cols-3 gap-2">
               <button
                 v-for="(c, i) in currentChoices" :key="`${i}-${c}`"
                 @click="runGenerate(c)" :disabled="loading"
-                class="choice-btn relative rounded-lg border border-[rgba(120,80,30,.15)] px-2 py-2.5 text-left font-inherit text-[11px] leading-snug text-[#4a3820] cursor-pointer disabled:opacity-40 disabled:cursor-default"
+                class="relative top-0 cursor-pointer rounded-lg border border-[rgba(120,80,30,.15)] bg-[linear-gradient(180deg,rgba(255,250,235,.7),rgba(240,225,195,.6))] px-2 py-2.5 text-left text-[11px] leading-snug text-[#4a3820] shadow-[0_2px_0_rgba(120,80,30,.1),inset_0_1px_0_rgba(255,255,255,.5)] transition-all hover:border-[rgba(120,80,30,.25)] hover:bg-[linear-gradient(180deg,rgba(255,252,240,.85),rgba(245,230,200,.75))] hover:shadow-[0_2px_0_rgba(120,80,30,.15),inset_0_1px_0_rgba(255,255,255,.6)] active:top-[2px] active:shadow-[0_0_0_rgba(120,80,30,.1),inset_0_1px_3px_rgba(0,0,0,.08)] disabled:cursor-default disabled:opacity-40"
               >{{ c }}</button>
             </div>
             <div class="flex gap-2">
@@ -94,11 +95,11 @@
                 v-model="customAction"
                 :placeholder="chapters.length ? '自定义行动...' : '描述开场，或直接开始...'"
                 @keyup.enter="chapters.length ? runCustom() : runGenerate(START_ACTION)"
-                class="action-input flex-1 rounded-lg border border-[rgba(120,80,30,.15)] px-3.5 py-2.5 text-[13px] text-[#3a2a18] outline-none font-inherit placeholder:text-black/20"
+                class="flex-1 rounded-lg border border-[rgba(120,80,30,.15)] bg-[rgba(255,252,240,.7)] px-3.5 py-2.5 text-[13px] text-[#3a2a18] font-inherit outline-none placeholder:text-black/20 shadow-[inset_0_1px_3px_rgba(0,0,0,.05)] transition-[border-color,box-shadow] focus:border-[rgba(160,120,60,.35)] focus:shadow-[inset_0_1px_3px_rgba(0,0,0,.06),0_0_0_2px_rgba(160,120,60,.08)]"
               />
               <button
                 @click="chapters.length ? runCustom() : runGenerate(START_ACTION)"
-                :disabled="loading" class="action-go relative shrink-0 rounded-lg border border-black/20 px-5 py-2.5 text-[13px] font-bold text-[#fff8ee] cursor-pointer font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.3)] disabled:opacity-40 disabled:cursor-default"
+                :disabled="loading" class="relative top-0 shrink-0 cursor-pointer rounded-lg border border-black/20 bg-[linear-gradient(180deg,#c09048,#9a6c28)] px-5 py-2.5 text-[13px] font-bold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.3)] shadow-[0_3px_0_rgba(100,60,10,.35),inset_0_1px_0_rgba(255,240,200,.2)] transition-all hover:bg-[linear-gradient(180deg,#d0a058,#aa7c38)] active:top-[3px] active:shadow-[0_0_0_rgba(100,60,10,.35),inset_0_2px_4px_rgba(0,0,0,.2)] disabled:cursor-default disabled:opacity-40 disabled:top-0"
               >{{ loading ? '生成中...' : (chapters.length ? '继续' : '开始阅读') }}</button>
             </div>
           </div>
@@ -109,7 +110,7 @@
     <!-- ========== 创建页 ========== -->
     <template v-if="view === 'create'">
       <div class="beam shrink-0 relative z-20 flex h-[50px] items-center justify-between px-5">
-        <button class="beam-back flex items-center gap-1 rounded-md border border-black/20 px-3 py-1 pl-2 text-xs font-semibold text-[#fff8ee] cursor-pointer font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.4)]" @click="view = 'list'">
+        <button class="relative top-0 flex cursor-pointer items-center gap-1 rounded-md border border-black/20 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.08))] px-3 py-1 pl-2 text-xs font-semibold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.4)] shadow-[0_2px_0_rgba(0,0,0,.25),inset_0_1px_0_rgba(255,240,200,.12)] transition-all hover:bg-[linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.04))] active:top-[2px] active:shadow-[0_0_0_rgba(0,0,0,.25),inset_0_1px_3px_rgba(0,0,0,.2)]" @click="view = 'list'">
           <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
           阅读器
         </button>
@@ -122,13 +123,13 @@
             <div class="mb-5 font-serif text-[17px] font-extrabold text-[#3a2a18] [text-shadow:0_1px_0_rgba(255,240,200,.5)]">新建书籍</div>
             <div class="mb-4">
               <div class="mb-1.5 text-[11px] font-semibold tracking-wider text-[#8a6840]">书名</div>
-              <input v-model="newTitle" class="create-input w-full rounded border border-[rgba(160,120,60,.15)] bg-white/50 px-3.5 py-2.5 text-[13px] text-[#3a2a18] outline-none font-inherit placeholder:text-black/20 focus:border-[rgba(160,120,60,.4)]" placeholder="给你的书起个名字" />
+              <input v-model="newTitle" class="w-full rounded border border-[rgba(160,120,60,.15)] bg-white/50 px-3.5 py-2.5 text-[13px] text-[#3a2a18] font-inherit outline-none placeholder:text-black/20 shadow-[inset_0_1px_3px_rgba(0,0,0,.04)] focus:border-[rgba(160,120,60,.4)] focus:shadow-[inset_0_1px_3px_rgba(0,0,0,.06),0_0_0_2px_rgba(160,120,60,.1)]" placeholder="给你的书起个名字" />
             </div>
             <div class="mb-4">
               <div class="mb-1.5 text-[11px] font-semibold tracking-wider text-[#8a6840]">世界观设定（可选）</div>
-              <textarea v-model="newPremise" class="create-input w-full min-h-[80px] resize-y rounded border border-[rgba(160,120,60,.15)] bg-white/50 px-3.5 py-2.5 text-[13px] leading-relaxed text-[#3a2a18] outline-none font-inherit placeholder:text-black/20 focus:border-[rgba(160,120,60,.4)]" placeholder="描述故事的背景、时代、主角特征..."></textarea>
+              <textarea v-model="newPremise" class="w-full min-h-[80px] resize-y rounded border border-[rgba(160,120,60,.15)] bg-white/50 px-3.5 py-2.5 text-[13px] leading-relaxed text-[#3a2a18] font-inherit outline-none placeholder:text-black/20 shadow-[inset_0_1px_3px_rgba(0,0,0,.04)] focus:border-[rgba(160,120,60,.4)] focus:shadow-[inset_0_1px_3px_rgba(0,0,0,.06),0_0_0_2px_rgba(160,120,60,.1)]" placeholder="描述故事的背景、时代、主角特征..."></textarea>
             </div>
-            <button @click="createReader" :disabled="creating" class="create-submit relative mt-1 w-full rounded-md border border-black/20 py-3 text-sm font-bold text-[#fff8ee] cursor-pointer font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.3)] disabled:opacity-40 disabled:cursor-default">
+            <button @click="createReader" :disabled="creating" class="relative top-0 mt-1 w-full cursor-pointer rounded-md border border-black/20 bg-[linear-gradient(180deg,#c09048,#9a6c28)] py-3 text-sm font-bold text-[#fff8ee] font-inherit [text-shadow:0_1px_2px_rgba(0,0,0,.3)] shadow-[0_3px_0_rgba(100,60,10,.4),inset_0_1px_0_rgba(255,240,200,.2)] transition-all hover:bg-[linear-gradient(180deg,#d0a058,#aa7c38)] active:top-[3px] active:shadow-[0_0_0_rgba(100,60,10,.4),inset_0_2px_4px_rgba(0,0,0,.2)] disabled:cursor-default disabled:opacity-40">
               {{ creating ? '创建中...' : '开始创作' }}
             </button>
           </div>
@@ -315,15 +316,6 @@ onMounted(async () => {
 }
 
 /* ── 顶梁按钮（3D 凸起） ── */
-.beam-back {
-  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.08));
-  box-shadow: 0 2px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,240,200,.12);
-  position: relative;
-  top: 0;
-  transition: all .1s;
-}
-.beam-back:hover { background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,.04)); }
-.beam-back:active { top: 2px; box-shadow: 0 0 0 rgba(0,0,0,.25), inset 0 1px 3px rgba(0,0,0,.2); }
 
 /* ── 书架木板（多层阴影） ── */
 .plank {
@@ -402,14 +394,6 @@ onMounted(async () => {
 .c7 { background: linear-gradient(160deg, #408888, #58a8a8 50%, #387878); color: #f0ffff; }
 .c8 { background: linear-gradient(160deg, #c86088, #d878a0 50%, #b85078); color: #fff0f6; }
 
-/* ── 章节分隔线（渐变） ── */
-.chapter-action-line {
-  background: linear-gradient(90deg, transparent, rgba(0,0,0,.08), transparent);
-}
-
-/* ── loading 动画 ── */
-.loading-spinner { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── 操作面板（羊皮纸质感） ── */
 .action-panel {
@@ -423,50 +407,6 @@ onMounted(async () => {
     inset 0 -1px 3px rgba(0,0,0,.04),
     0 2px 8px rgba(0,0,0,.06);
 }
-.action-divider {
-  background: linear-gradient(90deg, transparent, rgba(160,120,60,.2), transparent);
-}
-
-/* 选项按钮（木质标签） */
-.choice-btn {
-  background: linear-gradient(180deg, rgba(255,250,235,.7), rgba(240,225,195,.6));
-  box-shadow:
-    0 2px 0 rgba(120,80,30,.1),
-    inset 0 1px 0 rgba(255,255,255,.5);
-  transition: all .12s;
-  top: 0;
-}
-.choice-btn:hover {
-  background: linear-gradient(180deg, rgba(255,252,240,.85), rgba(245,230,200,.75));
-  border-color: rgba(120,80,30,.25);
-  box-shadow: 0 2px 0 rgba(120,80,30,.15), inset 0 1px 0 rgba(255,255,255,.6);
-}
-.choice-btn:active {
-  top: 2px;
-  box-shadow: 0 0 0 rgba(120,80,30,.1), inset 0 1px 3px rgba(0,0,0,.08);
-}
-
-/* 输入框 */
-.action-input {
-  background: rgba(255,252,240,.7);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.05);
-  transition: border-color .15s, box-shadow .15s;
-}
-.action-input:focus {
-  border-color: rgba(160,120,60,.35);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.06), 0 0 0 2px rgba(160,120,60,.08);
-}
-
-/* 行动按钮（3D 木质） */
-.action-go {
-  background: linear-gradient(180deg, #c09048, #9a6c28);
-  box-shadow: 0 3px 0 rgba(100,60,10,.35), inset 0 1px 0 rgba(255,240,200,.2);
-  top: 0;
-  transition: all .1s;
-}
-.action-go:hover { background: linear-gradient(180deg, #d0a058, #aa7c38); }
-.action-go:active { top: 3px; box-shadow: 0 0 0 rgba(100,60,10,.35), inset 0 2px 4px rgba(0,0,0,.2); }
-.action-go:disabled { top: 0; }
 
 /* ── 创建卡片（书本造型，多层阴影） ── */
 .create-card {
@@ -493,21 +433,6 @@ onMounted(async () => {
   background: linear-gradient(90deg, rgba(0,0,0,.04), transparent);
   pointer-events: none;
 }
-.create-input {
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.04);
-}
-.create-input:focus {
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.06), 0 0 0 2px rgba(160,120,60,.1);
-}
-.create-submit {
-  background: linear-gradient(180deg, #c09048, #9a6c28);
-  box-shadow: 0 3px 0 rgba(100,60,10,.4), inset 0 1px 0 rgba(255,240,200,.2);
-  top: 0;
-  transition: all .1s;
-}
-.create-submit:hover { background: linear-gradient(180deg, #d0a058, #aa7c38); }
-.create-submit:active { top: 3px; box-shadow: 0 0 0 rgba(100,60,10,.4), inset 0 2px 4px rgba(0,0,0,.2); }
-
 /* 滚动条 */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

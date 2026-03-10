@@ -13,7 +13,7 @@
         <div class="spine-crease pointer-events-none absolute left-0 top-0 bottom-0 z-50 w-10"></div>
 
         <!-- 顶栏 -->
-        <div class="dot-matrix top-panel flex shrink-0 flex-col gap-4 px-4 pb-4 pt-5 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:pl-[60px] sm:pb-5 sm:pt-[30px]">
+        <div class="dot-matrix flex shrink-0 flex-col gap-4 px-4 pb-4 pt-5 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:pl-[60px] sm:pb-5 sm:pt-[30px]">
           <!-- 月份翻页 -->
           <div class="flex items-center gap-3 text-xl font-bold text-[#1a2a40] sm:gap-4 sm:text-2xl">
             <button class="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-black/5 active:scale-90 sm:h-9 sm:w-9"
@@ -47,68 +47,68 @@
           <table class="dot-matrix w-full border-collapse">
             <thead>
               <tr>
-                <th class="passbook-th w-[12%]">{{ t('finance_date') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DATE</span></th>
-                <th class="passbook-th">{{ t('finance_narrative') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">NARRATIVE</span></th>
-                <th class="passbook-th w-[15%]">{{ t('finance_withdrawal') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">WITHDRAWAL</span></th>
-                <th class="passbook-th w-[15%]">{{ t('finance_deposit') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DEPOSIT</span></th>
-                <th class="passbook-th w-[10%]">{{ t('finance_operation') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">OPR</span></th>
+                <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:text-sm sm:py-3 sm:px-2 w-[12%]">{{ t('finance_date') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DATE</span></th>
+                <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:text-sm sm:py-3 sm:px-2">{{ t('finance_narrative') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">NARRATIVE</span></th>
+                <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:text-sm sm:py-3 sm:px-2 w-[15%]">{{ t('finance_withdrawal') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">WITHDRAWAL</span></th>
+                <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:text-sm sm:py-3 sm:px-2 w-[15%]">{{ t('finance_deposit') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DEPOSIT</span></th>
+                <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:text-sm sm:py-3 sm:px-2 w-[10%]">{{ t('finance_operation') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">OPR</span></th>
               </tr>
             </thead>
             <tbody>
               <!-- 历史记录 -->
               <tr v-for="(row, i) in rows" :key="row.id" class="group transition-colors hover:bg-[rgba(82,113,255,0.05)]">
                 <!-- 日期 -->
-                <td class="passbook-td text-center" @dblclick="startEdit(row, 'date')">
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]" @dblclick="startEdit(row, 'date')">
                   <input v-if="editing?.id === row.id && editing?.field === 'date'" v-model="editing.value"
-                    class="inline-input text-center" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                   <span v-else>{{ fmtDate(row.date) }}</span>
                 </td>
                 <!-- 摘要 -->
-                <td class="passbook-td text-center" @dblclick="startEdit(row, 'note')">
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]" @dblclick="startEdit(row, 'note')">
                   <input v-if="editing?.id === row.id && editing?.field === 'note'" v-model="editing.value"
-                    class="inline-input text-center" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                   <span v-else>{{ row.note || (row.type === 'income' ? t('finance_default_income_note') : t('finance_default_expense_note')) }}</span>
                 </td>
                 <!-- 支出 -->
-                <td class="passbook-td text-right font-bold" :class="row.type === 'expense' ? 'text-red-700' : ''" @dblclick="row.type === 'expense' && startEdit(row, 'amount')">
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] font-bold sm:px-4 sm:py-3 sm:text-[15px]" :class="row.type === 'expense' ? 'text-red-700' : ''" @dblclick="row.type === 'expense' && startEdit(row, 'amount')">
                   <input v-if="editing?.id === row.id && editing?.field === 'amount' && row.type === 'expense'" v-model="editing.value"
-                    class="inline-input text-right font-bold text-red-700" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-red-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                   <span v-else>{{ row.type === 'expense' ? '-' + fmtAmt(row.amount) : '' }}</span>
                 </td>
                 <!-- 存入 -->
-                <td class="passbook-td text-right font-bold" :class="row.type === 'income' ? 'text-green-700' : ''" @dblclick="row.type === 'income' && startEdit(row, 'amount')">
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] font-bold sm:px-4 sm:py-3 sm:text-[15px]" :class="row.type === 'income' ? 'text-green-700' : ''" @dblclick="row.type === 'income' && startEdit(row, 'amount')">
                   <input v-if="editing?.id === row.id && editing?.field === 'amount' && row.type === 'income'" v-model="editing.value"
-                    class="inline-input text-right font-bold text-green-700" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                    class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-green-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
                   <span v-else>{{ row.type === 'income' ? '+' + fmtAmt(row.amount) : '' }}</span>
                 </td>
                 <!-- 操作 -->
-                <td class="passbook-td text-center">
-                  <button class="print-btn border-red-700 text-red-700 opacity-100 transition-opacity hover:bg-red-700 hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <button class="rounded border border-[#0b1c67] bg-transparent px-2 py-1 text-[11px] font-bold text-[#0b1c67] transition-all hover:bg-[#0b1c67] hover:text-white hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-px sm:px-3 sm:text-xs border-red-700 text-red-700 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                           @click="remove(row.id)">{{ t('common_delete') }}</button>
                 </td>
               </tr>
 
               <!-- 新建输入行 -->
               <tr class="bg-[rgba(82,113,255,0.08)]">
-                <td class="passbook-td text-center">
-                  <input v-model="newDate" type="text" class="inline-input text-center" :placeholder="todayStr" />
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <input v-model="newDate" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" :placeholder="todayStr" />
                 </td>
-                <td class="passbook-td text-center">
-                  <input ref="noteInput" v-model="newNote" type="text" class="inline-input text-center" :placeholder="t('finance_note_placeholder')" @keyup.enter="save" />
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <input ref="noteInput" v-model="newNote" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" :placeholder="t('finance_note_placeholder')" @keyup.enter="save" />
                 </td>
-                <td class="passbook-td text-right">
-                  <input v-model="newWithdraw" type="text" class="inline-input text-right font-bold text-red-700" placeholder="0.00" @keyup.enter="save" />
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <input v-model="newWithdraw" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-red-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" placeholder="0.00" @keyup.enter="save" />
                 </td>
-                <td class="passbook-td text-right">
-                  <input v-model="newDeposit" type="text" class="inline-input text-right font-bold text-green-700" placeholder="0.00" @keyup.enter="save" />
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <input v-model="newDeposit" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-green-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" placeholder="0.00" @keyup.enter="save" />
                 </td>
-                <td class="passbook-td text-center">
-                  <button class="print-btn" :disabled="saving || (!newWithdraw && !newDeposit)" @click="save">{{ t('common_save') }}</button>
+                <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
+                  <button class="rounded border border-[#0b1c67] bg-transparent px-2 py-1 text-[11px] font-bold text-[#0b1c67] transition-all hover:bg-[#0b1c67] hover:text-white hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-px sm:px-3 sm:text-xs disabled:cursor-not-allowed disabled:opacity-30" :disabled="saving || (!newWithdraw && !newDeposit)" @click="save">{{ t('common_save') }}</button>
                 </td>
               </tr>
 
               <!-- 空行缓冲 -->
-              <tr v-for="n in 6" :key="'e'+n"><td class="passbook-td h-8" v-for="c in 5" :key="c"></td></tr>
+              <tr v-for="n in 6" :key="'e'+n"><td class="border border-[rgba(82,113,255,0.3)] h-8 px-2 py-2 text-[13px] sm:px-4 sm:py-3 sm:text-[15px]" v-for="c in 5" :key="c"></td></tr>
             </tbody>
           </table>
         </div>
@@ -326,76 +326,6 @@ onMounted(fetchData);
   letter-spacing: 0.5px;
 }
 
-/* ── 表格 ── */
-.passbook-th {
-  background-color: rgba(82,113,255,0.15);
-  color: #1a2a40;
-  font-weight: bold;
-  text-align: center;
-  font-size: 14px;
-  padding: 12px 8px;
-  border: 1px solid rgba(82,113,255,0.4);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(4px);
-}
-.passbook-td {
-  border: 1px solid rgba(82,113,255,0.3);
-  padding: 12px 16px;
-  font-size: 15px;
-}
-
-/* ── 行内输入 ── */
-.inline-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-  text-shadow: inherit;
-  border-bottom: 1px dashed rgba(11,28,103,0.3);
-  padding: 2px 4px;
-  transition: all 0.2s;
-}
-.inline-input:focus {
-  border-bottom: 1px solid #0b1c67;
-  background: rgba(255,255,255,0.5);
-}
-.inline-input::placeholder {
-  color: rgba(11,28,103,0.3);
-  font-style: italic;
-}
-
-/* ── 印字按钮 ── */
-.print-btn {
-  padding: 4px 12px;
-  border: 1px solid #0b1c67;
-  color: #0b1c67;
-  background: transparent;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.1s;
-  text-shadow: none;
-  white-space: nowrap;
-}
-.print-btn:hover {
-  background: #0b1c67;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.print-btn:active {
-  transform: translateY(1px);
-}
-.print-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
 /* ── 自定义滚动条 ── */
 .passbook-table-wrapper::-webkit-scrollbar { width: 8px; }
 .passbook-table-wrapper::-webkit-scrollbar-track { background: transparent; }
@@ -408,9 +338,5 @@ onMounted(fetchData);
   .passbook-cover { width: 12px !important; border-radius: 0 !important; }
   .passbook-pages { border-radius: 0 !important; }
   .spine-crease { width: 20px !important; }
-  .passbook-th { padding: 8px 4px; font-size: 12px; }
-  .passbook-td { padding: 8px 6px; font-size: 13px; }
-  .inline-input { font-size: 13px; }
-  .print-btn { padding: 3px 8px; font-size: 11px; }
 }
 </style>

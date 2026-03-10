@@ -47,18 +47,18 @@
           <div class="mt-8 space-y-5">
             <div>
               <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_username') }}</label>
-              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="wiz-input" />
+              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_password') }}</label>
                 <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')"
-                  class="wiz-input" />
+                  class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
               </div>
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_confirm') }}</label>
                 <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')"
-                  class="wiz-input" />
+                  class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
               </div>
             </div>
           </div>
@@ -85,7 +85,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_provider') }}</label>
-                <select v-model="model.provider" class="wiz-input" @change="applyProviderDefault">
+                <select v-model="model.provider" class="wiz-select w-full appearance-none rounded-md border border-transparent bg-black/30 px-4 py-3 pr-10 text-[13px] text-[#e8d4b8] outline-none transition-all focus:border-[#c8a060] focus:bg-black/50" @change="applyProviderDefault">
                   <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
                     <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </optgroup>
@@ -93,16 +93,16 @@
               </div>
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_model') }}</label>
-                <input v-model.trim="model.model" placeholder="gpt-5.2" class="wiz-input" />
+                <input v-model.trim="model.model" placeholder="gpt-5.2" class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
               </div>
             </div>
             <div>
               <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_url') }}</label>
-              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
+              <input v-model.trim="model.apiUrl" placeholder="https://..." class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
             </div>
             <div>
               <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">API Key</label>
-              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
+              <input v-model.trim="model.apiKey" placeholder="sk-..." class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
             </div>
           </div>
           <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error
@@ -290,34 +290,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.wiz-input {
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 12px 16px;
-  font-size: 13px;
-  color: #e8d4b8;
-  font-family: inherit;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.wiz-input::placeholder {
-  color: #5a4a35;
-}
-
-.wiz-input:focus {
-  border-color: #c8a060;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-select.wiz-input {
+.wiz-select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238a7860'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-position: right 12px center;
   background-repeat: no-repeat;
   background-size: 16px;
-  padding-right: 40px;
 }
 </style>

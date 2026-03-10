@@ -49,19 +49,19 @@
           <div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">{{ t('cryptobot_api_key') }}</label>
-              <input v-model="exForm.api_key" type="password" autocomplete="off" :placeholder="t('cryptobot_api_key_placeholder')" class="etched-input w-full p-2 text-[11px]" @input="exDirty = true" />
+              <input v-model="exForm.api_key" type="password" autocomplete="off" :placeholder="t('cryptobot_api_key_placeholder')" class="w-full rounded border border-[#c2b9b0] bg-[#f6f3f0] p-2 font-['Courier_New',Courier,monospace] text-[11px] font-bold text-[#594c3d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] outline-none focus:border-[#a89883] focus:bg-white" @input="exDirty = true" />
             </div>
             <div>
               <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">{{ t('cryptobot_api_secret') }}</label>
-              <input v-model="exForm.api_secret" type="password" autocomplete="off" :placeholder="t('cryptobot_api_secret_placeholder')" class="etched-input w-full p-2 text-[11px] tracking-widest" @input="exDirty = true" />
+              <input v-model="exForm.api_secret" type="password" autocomplete="off" :placeholder="t('cryptobot_api_secret_placeholder')" class="w-full rounded border border-[#c2b9b0] bg-[#f6f3f0] p-2 font-['Courier_New',Courier,monospace] text-[11px] font-bold tracking-widest text-[#594c3d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] outline-none focus:border-[#a89883] focus:bg-white" @input="exDirty = true" />
             </div>
             <div>
               <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">{{ t('cryptobot_passphrase') }}</label>
-              <input v-model="exForm.passphrase" type="password" autocomplete="off" :placeholder="t('cryptobot_passphrase_placeholder')" class="etched-input w-full p-2 text-[11px] tracking-widest" @input="exDirty = true" />
+              <input v-model="exForm.passphrase" type="password" autocomplete="off" :placeholder="t('cryptobot_passphrase_placeholder')" class="w-full rounded border border-[#c2b9b0] bg-[#f6f3f0] p-2 font-['Courier_New',Courier,monospace] text-[11px] font-bold tracking-widest text-[#594c3d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] outline-none focus:border-[#a89883] focus:bg-white" @input="exDirty = true" />
             </div>
             <div>
               <label class="mb-1 block text-[10px] font-bold text-[#8a7f72]">{{ t('cryptobot_api_endpoint') }}</label>
-              <input v-model="exForm.base_url" type="text" :placeholder="t('cryptobot_api_url_placeholder')" class="etched-input w-full p-2 text-[11px]" @input="exDirty = true" />
+              <input v-model="exForm.base_url" type="text" :placeholder="t('cryptobot_api_url_placeholder')" class="w-full rounded border border-[#c2b9b0] bg-[#f6f3f0] p-2 font-['Courier_New',Courier,monospace] text-[11px] font-bold text-[#594c3d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] outline-none focus:border-[#a89883] focus:bg-white" @input="exDirty = true" />
             </div>
           </div>
 
@@ -86,7 +86,7 @@
             </div>
             <div class="mb-2 flex items-center justify-between gap-3">
               <label class="text-[11px] font-bold text-[#7b6c5a]">{{ t('cryptobot_interval_label') }}</label>
-              <select v-model="intervalMin" class="etched-input cursor-pointer px-2 py-1 text-[11px]" @change="onIntervalChange">
+              <select v-model="intervalMin" class="cursor-pointer rounded border border-[#c2b9b0] bg-[#f6f3f0] px-2 py-1 font-['Courier_New',Courier,monospace] text-[11px] font-bold text-[#594c3d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] outline-none focus:border-[#a89883] focus:bg-white" @change="onIntervalChange">
                 <option v-for="m in [1,2,3,5,10,15,30,60]" :key="m" :value="m">{{ t('cryptobot_every_n_minutes', { n: m }) }}</option>
               </select>
             </div>
@@ -499,22 +499,6 @@ onUnmounted(() => {
   box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 0 rgba(255, 255, 255, 0.8);
   background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 8px 8px;
-}
-
-.etched-input {
-  background-color: #f6f3f0;
-  border: 1px solid #c2b9b0;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  color: #594c3d;
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: 700;
-  outline: none;
-}
-
-.etched-input:focus {
-  border-color: #a89883;
-  background-color: #ffffff;
 }
 
 .lcd-screen {

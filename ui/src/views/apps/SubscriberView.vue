@@ -28,8 +28,8 @@
           <div class="needle-now" :style="{ left: nowPercent + '%' }"></div>
         </div>
         <!-- 右侧：设置按钮 -->
-        <button class="settings-btn" :class="{ 'is-open': showSettings }" @click="showSettings = !showSettings" :title="t('subscriber_focus_label')">
-          <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <button class="flex shrink-0 items-center bg-transparent p-1 text-[#806040] transition-colors duration-200 hover:text-[#e8c060]" @click="showSettings = !showSettings" :title="t('subscriber_focus_label')">
+          <svg class="h-[18px] w-[18px] transition-transform duration-300 [filter:drop-shadow(0_0_3px_rgba(232,192,96,0.3))]" :class="showSettings ? 'rotate-90' : ''" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
@@ -49,12 +49,12 @@
           <!-- 播出时间 -->
           <div class="mb-4">
             <div class="mb-1.5 text-[9px] font-black tracking-widest text-[#8a7a50]">{{ t('subscriber_schedule_label') }}</div>
-            <input type="time" v-model="scheduleTime" class="studio-input w-full px-3 py-2" />
+            <input type="time" v-model="scheduleTime" class="w-full rounded border-2 border-[#0a0804] bg-[#1a0e04] px-3 py-2 font-['Courier_New',monospace] text-[13px] font-bold text-[#e8c060] [text-shadow:0_0_6px_rgba(232,192,96,0.3)] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.04)] outline-none transition-all placeholder:text-[#4a3418] focus:border-[#3a2510] focus:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),0_0_0_1px_rgba(232,192,96,0.15)]" />
           </div>
           <!-- 两个按钮 -->
           <div class="flex gap-3">
-            <button class="save-btn flex-1 py-[9px]" @click="saveFocus">{{ t('subscriber_save_button') }}</button>
-            <button class="broadcast-btn flex-1 py-[9px] text-[12px]" :disabled="refreshing" @click="refreshToday">{{ t('subscriber_refresh_button') }}</button>
+            <button class="relative top-0 flex-1 whitespace-nowrap rounded-md border-2 border-[#3a2510] bg-[linear-gradient(180deg,#6a4a28_0%,#4a3218_100%)] py-[9px] text-xs font-black tracking-[0.08em] text-[#d8c090] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_3px_0_#2a1a08,0_4px_8px_rgba(0,0,0,0.4)] transition-all active:top-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_0_#2a1a08,0_1px_3px_rgba(0,0,0,0.3)]" @click="saveFocus">{{ t('subscriber_save_button') }}</button>
+            <button class="relative top-0 flex-1 whitespace-nowrap rounded-md border-2 border-[#701808] bg-[linear-gradient(180deg,#d84020_0%,#a02808_100%)] py-[9px] text-[12px] font-black tracking-[0.1em] text-[#fde8d8] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_2px_0_rgba(255,255,255,0.15),0_3px_0_#501008,0_4px_8px_rgba(0,0,0,0.4)] transition-all active:top-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_0_0_#501008,0_1px_3px_rgba(0,0,0,0.3)] disabled:cursor-not-allowed disabled:opacity-50 disabled:top-0" :disabled="refreshing" @click="refreshToday">{{ t('subscriber_refresh_button') }}</button>
           </div>
           <!-- 错误提示 -->
           <div v-if="error" class="mt-3 rounded border border-[#701808] bg-[#2a1008] px-3 py-2 text-[11px] text-[#e88060]">{{ error }}</div>
@@ -71,12 +71,12 @@
         </div>
 
         <!-- 当日文章 -->
-        <div v-if="today" class="article-section" :class="{ 'cursor-pointer': selectedId && selectedId !== today.id }" @click="selectArticle(today)">
-          <div class="timestamp">
+        <div v-if="today" class="relative mb-8 border-b-2 border-dashed border-[rgba(232,192,96,0.12)] pb-8" :class="{ 'cursor-pointer': selectedId && selectedId !== today.id }" @click="selectArticle(today)">
+          <div class="mb-[15px] font-['Courier_New',monospace] text-xs font-black uppercase tracking-[2px] text-[#a08040]">
             <span class="text-[#e84030]">>>> {{ today.date }} //</span> {{ formatTime(today.updatedAt || today.createdAt) }}
           </div>
-          <h2 class="article-title">{{ today.title }}</h2>
-          <div v-if="today.brief" class="article-synopsis">
+          <h2 class="mb-[14px] font-['Georgia',serif] text-2xl font-black leading-[1.3] tracking-[-0.3px] text-[#ece4cd]">{{ today.title }}</h2>
+          <div v-if="today.brief" class="mb-[22px] bg-[rgba(232,192,96,0.06)] px-[18px] py-[14px] text-sm font-bold leading-[1.65] text-[#c8b890] shadow-[3px_3px_0_rgba(0,0,0,0.1)] border border-[rgba(232,192,96,0.12)]">
             <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#e84030]">AI SYNOPSIS</span>
             {{ today.brief }}
           </div>
@@ -85,12 +85,12 @@
 
         <!-- 历史文章 -->
         <div v-for="item in visibleHistory" :key="item.id"
-             class="article-section historical cursor-pointer"
+             class="relative mb-8 cursor-pointer border-b-2 border-dashed border-[rgba(232,192,96,0.12)] pb-8 opacity-45 transition-opacity hover:opacity-100"
              :class="{ '!opacity-100': selectedId === item.id }"
              @click="selectArticle(item)">
-          <div class="timestamp">>>> {{ item.date }} // {{ formatTime(item.updatedAt || item.createdAt) }}</div>
-          <h2 class="article-title">{{ item.title }}</h2>
-          <div v-if="item.brief" class="article-synopsis">
+          <div class="mb-[15px] font-['Courier_New',monospace] text-xs font-black uppercase tracking-[2px] text-[#a08040]">>>> {{ item.date }} // {{ formatTime(item.updatedAt || item.createdAt) }}</div>
+          <h2 class="mb-[14px] font-['Georgia',serif] text-2xl font-black leading-[1.3] tracking-[-0.3px] text-[#ece4cd]">{{ item.title }}</h2>
+          <div v-if="item.brief" class="mb-[22px] bg-[rgba(232,192,96,0.06)] px-[18px] py-[14px] text-sm font-bold leading-[1.65] text-[#c8b890] shadow-[3px_3px_0_rgba(0,0,0,0.1)] border border-[rgba(232,192,96,0.12)]">
             <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#806040]">AI SYNOPSIS</span>
             {{ item.brief }}
           </div>
@@ -352,19 +352,6 @@ onUnmounted(() => {
   50%      { opacity: 0.4; text-shadow: 0 0 4px rgba(232,64,48,0.3); }
 }
 
-/* 设置齿轮按钮 */
-.settings-btn {
-  background: none; border: none; cursor: pointer;
-  color: #806040; transition: all 0.25s;
-  padding: 4px; display: flex; align-items: center; flex-shrink: 0;
-}
-.settings-btn:hover { color: #e8c060; }
-.settings-btn.is-open svg { transform: rotate(90deg); }
-.settings-btn svg {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 0 3px rgba(232,192,96,0.3));
-}
-
 /* ===== 展开面板 ===== */
 .expand-panel {
   flex-shrink: 0;
@@ -403,53 +390,6 @@ onUnmounted(() => {
 }
 .grille-textarea::placeholder { color: #604830; text-shadow: none; }
 
-/* 深槽输入框 */
-.studio-input {
-  background: #1a0e04;
-  border: 2px solid #0a0804; border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  color: #e8c060; font-weight: bold; font-size: 13px;
-  outline: none;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04);
-  transition: all 0.2s;
-  text-shadow: 0 0 6px rgba(232,192,96,0.3);
-}
-.studio-input::placeholder { color: #4a3418; text-shadow: none; }
-.studio-input:focus { border-color: #3a2510; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,192,96,0.15); }
-
-/* 保存按钮 */
-.save-btn {
-  background: linear-gradient(180deg, #6a4a28 0%, #4a3218 100%);
-  border: 2px solid #3a2510; border-radius: 6px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 0 #2a1a08, 0 4px 8px rgba(0,0,0,0.4);
-  color: #d8c090; font-weight: 900; font-size: 12px;
-  letter-spacing: 0.08em; cursor: pointer;
-  transition: all 0.1s;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  white-space: nowrap;
-}
-.save-btn:active {
-  transform: translateY(3px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 #2a1a08, 0 1px 3px rgba(0,0,0,0.3);
-}
-
-/* 红色广播按键 */
-.broadcast-btn {
-  background: linear-gradient(180deg, #d84020 0%, #a02808 100%);
-  border: 2px solid #701808; border-radius: 6px;
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.15), 0 3px 0 #501008, 0 4px 8px rgba(0,0,0,0.4);
-  color: #fde8d8; font-weight: 900;
-  letter-spacing: 0.1em; cursor: pointer;
-  transition: all 0.1s;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  white-space: nowrap;
-}
-.broadcast-btn:active {
-  transform: translateY(3px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 #501008, 0 1px 3px rgba(0,0,0,0.3);
-}
-.broadcast-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 /* ===== 扬声器格栅（阅读区） ===== */
 .speaker-grille {
   flex: 1; min-height: 0; margin-top: 14px;
@@ -473,35 +413,4 @@ onUnmounted(() => {
   z-index: 10; pointer-events: none;
 }
 
-/* ===== 文章样式 ===== */
-.article-section {
-  padding-bottom: 32px; margin-bottom: 32px;
-  border-bottom: 2px dashed rgba(232,192,96,0.12);
-  position: relative;
-}
-.article-section:last-child { border-bottom: none; margin-bottom: 0; }
-
-.timestamp {
-  font-family: 'Courier New', monospace;
-  font-size: 12px; font-weight: 900;
-  color: #a08040; text-transform: uppercase;
-  letter-spacing: 2px; margin-bottom: 15px;
-}
-.article-title {
-  font-family: 'Georgia', serif;
-  font-size: 24px; font-weight: 900;
-  color: #ece4cd; line-height: 1.3;
-  margin-bottom: 14px; letter-spacing: -0.3px;
-}
-.article-synopsis {
-  background: rgba(232,192,96,0.06);
-  border: 1px solid rgba(232,192,96,0.12);
-  padding: 14px 18px;
-  font-size: 14px; font-weight: bold;
-  color: #c8b890; margin-bottom: 22px;
-  line-height: 1.65;
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-}
-.historical { opacity: 0.45; transition: opacity 0.3s; }
-.historical:hover { opacity: 1; }
 </style>

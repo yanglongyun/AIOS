@@ -8,7 +8,6 @@ import WelcomeView from '../views/WelcomeView.vue';
 import NotebookView from '../views/apps/NotebookView.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FinanceView from '../views/apps/FinanceView.vue';
-import InboxView from '../views/apps/InboxView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
 import SubscriberView from '../views/apps/SubscriberView.vue';
@@ -30,7 +29,6 @@ const routes = [
   { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },
   { path: '/finance', component: FinanceView },
-  { path: '/inbox', component: InboxView },
   { path: '/nokia', component: NokiaView },
   { path: '/subscriber', component: SubscriberView },
   { path: '/cryptobot', component: CryptobotView },

@@ -1,93 +1,108 @@
 <template>
-  <div class="fortune-root">
-    <div class="fortune-scroll">
-      <div class="fortune-body">
-
-        <!-- 标题 -->
-        <div class="header">
-          <h1 class="header-title">{{ t('fortune_title') }}</h1>
-          <p class="header-sub">{{ t('fortune_subtitle') }}</p>
+  <div class="h-full bg-[#e8ddd0] font-['PingFang_SC',serif] text-[#3a2e20]">
+    <div class="h-full overflow-y-auto">
+      <div class="mx-auto max-w-[460px] px-5 pb-[60px] pt-7">
+        <div class="mb-7 text-center">
+          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">{{ t('fortune_title') }}</h1>
+          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">{{ t('fortune_subtitle') }}</p>
         </div>
 
-        <!-- 卦象区 -->
-        <div class="hex-area">
-          <!-- 卦名 -->
-          <div v-if="hexagramName" class="hex-name">{{ hexagramName }}</div>
-          <div v-if="result && result.signName" class="hex-sign">{{ result.signName }}</div>
+        <div class="hex-area mb-5 rounded border-2 border-[#c8a868] px-5 py-6 shadow-[0_4px_16px_rgba(0,0,0,.08)]">
+          <div v-if="hexagramName" class="mb-1 text-center font-serif text-xl font-black tracking-[0.15em] text-[#5a4020]">{{ hexagramName }}</div>
+          <div v-if="result && result.signName" class="mb-3.5 text-center text-[13px] tracking-[0.1em] text-[#8a6a30]">{{ result.signName }}</div>
 
-          <!-- 六爻线 (从下到上: 初爻→上爻) -->
-          <div class="yao-stack" v-if="displayYaos.some(y => y !== null)">
-            <div v-for="(yao, i) in displayYaos" :key="i" class="yao-row"
-              :style="{ opacity: yao !== null ? 1 : 0, transform: yao !== null ? 'none' : 'translateY(6px)' }">
-              <span class="yao-label">{{ yaoLabels[i] }}</span>
-              <div v-if="yao === 1" class="yao-yang">
-                <div></div>
+          <div v-if="displayYaos.some(y => y !== null)" class="flex flex-col items-center gap-2 py-2">
+            <div
+              v-for="(yao, i) in displayYaos"
+              :key="i"
+              class="flex items-center gap-2.5 transition-all duration-300"
+              :style="{ opacity: yao !== null ? 1 : 0, transform: yao !== null ? 'none' : 'translateY(6px)' }"
+            >
+              <span class="w-4 text-right font-serif text-[11px] text-[#a09070]">{{ yaoLabels[i] }}</span>
+              <div v-if="yao === 1">
+                <div class="h-2.5 w-[100px] rounded-[2px] bg-[linear-gradient(180deg,#8a5c28,#6a4420)] shadow-[0_1px_3px_rgba(0,0,0,.15)]"></div>
               </div>
-              <div v-else-if="yao === 0" class="yao-yin">
-                <div></div>
-                <div></div>
+              <div v-else-if="yao === 0" class="flex gap-3.5">
+                <div class="h-2.5 w-[43px] rounded-[2px] bg-[linear-gradient(180deg,#8a5c28,#6a4420)] shadow-[0_1px_3px_rgba(0,0,0,.15)]"></div>
+                <div class="h-2.5 w-[43px] rounded-[2px] bg-[linear-gradient(180deg,#8a5c28,#6a4420)] shadow-[0_1px_3px_rgba(0,0,0,.15)]"></div>
               </div>
-              <div v-else class="yao-empty"></div>
-              <span class="yao-coins">
-                <span v-for="(c, j) in (coins[i] || [])" :key="j" class="coin" :class="c ? 'yang' : 'yin'">{{ c ? t('fortune_coin_char') :
-                  t('fortune_coin_back') }}</span>
+              <div v-else class="h-2.5 w-[100px]"></div>
+              <span class="flex gap-[3px]">
+                <span
+                  v-for="(c, j) in (coins[i] || [])"
+                  :key="j"
+                  class="inline-flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] border-[#b09050] text-[8px] font-bold"
+                  :class="c ? 'bg-[#d4b870] text-[#5a4020]' : 'bg-[#f0e4d0] text-[#8a7a58]'"
+                >
+                  {{ c ? t('fortune_coin_char') : t('fortune_coin_back') }}
+                </span>
               </span>
             </div>
           </div>
 
-          <!-- 空状态 -->
-          <div v-if="!shaking && !hexagramName && !result" class="hex-empty">
-            <div class="hex-empty-icon">☰</div>
+          <div v-if="!shaking && !hexagramName && !result" class="py-7 text-center text-[13px] text-[#b0a080]">
+            <div class="mb-2 text-4xl opacity-35">☰</div>
             <div>{{ t('fortune_empty_prompt') }}</div>
           </div>
         </div>
 
-        <!-- 输入 -->
-        <div class="input-area">
-          <textarea v-model="question" rows="2" :placeholder="t('fortune_input_placeholder')" :disabled="shaking || loading"></textarea>
-          <button class="divine-btn" @click="divine" :disabled="shaking || loading || !question.trim()">
+        <div class="mb-5 rounded-[10px] border border-black/[.06] bg-white/40 p-3.5">
+          <textarea
+            v-model="question"
+            rows="2"
+            :placeholder="t('fortune_input_placeholder')"
+            :disabled="shaking || loading"
+            class="w-full resize-none border-none bg-transparent text-sm leading-[1.6] text-[#3a2e20] outline-none placeholder:text-[#b0a080] disabled:opacity-50"
+          ></textarea>
+          <button
+            class="mt-2.5 w-full rounded-lg bg-[linear-gradient(135deg,#c8a060,#a07830)] px-3 py-[11px] font-serif text-sm font-bold tracking-[0.15em] text-[#fff8ee] shadow-[0_2px_8px_rgba(0,0,0,.12)] transition-opacity hover:opacity-90 disabled:cursor-default disabled:opacity-45"
+            @click="divine"
+            :disabled="shaking || loading || !question.trim()"
+          >
             {{ shaking ? t('fortune_shaking') : loading ? t('fortune_reading') : t('fortune_divine') }}
           </button>
         </div>
 
-        <!-- 结果卡片 - 竹简卷轴 -->
-        <div v-if="result" class="scroll-card">
-          <div class="scroll-sign">{{ result.signName }}</div>
-          <div class="scroll-poem" v-html="formatPoem(result.signPoem)"></div>
-          <div class="scroll-divider"></div>
-          <div class="scroll-yj">
-            <div class="scroll-yj-item">
-              <div class="scroll-yj-label good">{{ t('fortune_good') }}</div>
-              <div class="scroll-yj-text">{{ result.good }}</div>
+        <div v-if="result" class="scroll-card mb-5 rounded border-2 border-[#c8a868] px-5 py-6 shadow-[0_4px_16px_rgba(0,0,0,.08)]">
+          <div class="text-center font-serif text-[28px] font-black tracking-[0.1em] text-[#8a5c28]">{{ result.signName }}</div>
+          <div class="mt-2.5 text-center text-[13px] italic leading-8 text-[#8a7a58]" v-html="formatPoem(result.signPoem)"></div>
+          <div class="mx-auto my-4 h-px w-[60px] bg-[#c8a868]"></div>
+          <div class="flex justify-center gap-12">
+            <div class="text-center">
+              <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#6a9a50]">{{ t('fortune_good') }}</div>
+              <div class="mt-1 text-xs text-[#5a4a30]">{{ result.good }}</div>
             </div>
-            <div class="scroll-yj-item">
-              <div class="scroll-yj-label bad">{{ t('fortune_bad') }}</div>
-              <div class="scroll-yj-text">{{ result.bad }}</div>
+            <div class="text-center">
+              <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#b05040]">{{ t('fortune_bad') }}</div>
+              <div class="mt-1 text-xs text-[#5a4a30]">{{ result.bad }}</div>
             </div>
           </div>
-          <div class="scroll-advice">{{ result.advice }}</div>
+          <div class="mt-4 px-2 text-center text-[13px] leading-8 text-[#7a6a48]">{{ result.advice }}</div>
         </div>
 
-        <!-- 历史 -->
-        <div v-if="history.length" class="history-section">
-          <div class="history-title">{{ t('fortune_history') }}</div>
-          <div v-for="item in history" :key="item.id" class="history-item">
-            <div class="history-top">
-              <span class="history-hex">{{ item.hexagram || '' }}</span>
-              <span class="history-sign">{{ item.signName }}</span>
-              <span class="history-time">{{ formatTime(item.createdAt) }}</span>
+        <div v-if="history.length" class="mt-1">
+          <div class="mb-2.5 text-[11px] font-bold tracking-[0.15em] text-[#a09070]">{{ t('fortune_history') }}</div>
+          <div
+            v-for="item in history"
+            :key="item.id"
+            class="mb-1.5 rounded-lg border border-black/[.04] bg-white/40 px-3.5 py-3"
+          >
+            <div class="flex items-center gap-2">
+              <span class="font-serif text-xs font-bold text-[#5a4020]">{{ item.hexagram || '' }}</span>
+              <span class="text-xs text-[#8a6a30]">{{ item.signName }}</span>
+              <span class="ml-auto text-[10px] text-[#b0a088]">{{ formatTime(item.createdAt) }}</span>
             </div>
-            <div class="history-q">{{ item.question }}</div>
-            <div class="history-poem">"{{ item.signPoem }}"</div>
+            <div class="mt-1 text-xs text-[#7a6a48]">{{ item.question }}</div>
+            <div class="mt-0.5 text-[11px] italic text-[#a09070]">"{{ item.signPoem }}"</div>
           </div>
         </div>
-        <div v-else-if="!result" class="empty-hint">{{ t('fortune_empty_history') }}</div>
+        <div v-else-if="!result" class="py-8 text-center text-[13px] text-[#b0a080]">{{ t('fortune_empty_history') }}</div>
 
-        <!-- 免责声明 -->
-        <div class="disclaimer-box">
-          <p>{{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}</p>
+        <div class="mt-10 border-t border-dashed border-[rgba(160,140,110,0.3)] pt-5 text-center">
+          <p class="font-['PingFang_SC',sans-serif] text-[11px] leading-[1.8] tracking-[0.05em] text-[#a09070] opacity-80">
+            {{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}
+          </p>
         </div>
-
       </div>
     </div>
   </div>
@@ -229,46 +244,6 @@ onMounted(loadHistory);
 </script>
 
 <style scoped>
-.fortune-root {
-  height: 100%;
-  background: #e8ddd0;
-  font-family: 'PingFang SC', serif;
-  color: #3a2e20;
-}
-
-.fortune-scroll {
-  height: 100%;
-  overflow-y: auto;
-}
-
-.fortune-body {
-  max-width: 460px;
-  margin: 0 auto;
-  padding: 28px 20px 60px;
-}
-
-/* ── 标题 ── */
-.header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.header-title {
-  font-size: 28px;
-  font-weight: 900;
-  font-family: serif;
-  letter-spacing: .15em;
-  color: #5a4020;
-}
-
-.header-sub {
-  font-size: 12px;
-  color: #a09070;
-  margin-top: 4px;
-  letter-spacing: .2em;
-}
-
-/* ── 卦象区 ── */
 .hex-area {
   background:
     repeating-linear-gradient(90deg,
@@ -306,170 +281,6 @@ onMounted(loadHistory);
   border-radius: 0 0 4px 4px;
 }
 
-.hex-name {
-  text-align: center;
-  font-size: 20px;
-  font-weight: 900;
-  font-family: serif;
-  color: #5a4020;
-  letter-spacing: .15em;
-  margin-bottom: 4px;
-}
-
-.hex-sign {
-  text-align: center;
-  font-size: 13px;
-  color: #8a6a30;
-  margin-bottom: 14px;
-  letter-spacing: .1em;
-}
-
-/* 六爻 */
-.yao-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-}
-
-.yao-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all .4s ease;
-}
-
-.yao-label {
-  width: 16px;
-  font-size: 11px;
-  color: #a09070;
-  text-align: right;
-  font-family: serif;
-}
-
-.yao-yang>div {
-  width: 100px;
-  height: 10px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #8a5c28, #6a4420);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
-}
-
-.yao-yin {
-  display: flex;
-  gap: 14px;
-}
-
-.yao-yin>div {
-  width: 43px;
-  height: 10px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #8a5c28, #6a4420);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
-}
-
-.yao-empty {
-  width: 100px;
-  height: 10px;
-}
-
-.yao-coins {
-  display: flex;
-  gap: 3px;
-}
-
-.coin {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  font-size: 8px;
-  font-weight: 700;
-  border: 1.5px solid #b09050;
-}
-
-.coin.yang {
-  background: #d4b870;
-  color: #5a4020;
-}
-
-.coin.yin {
-  background: #f0e4d0;
-  color: #8a7a58;
-}
-
-.hex-empty {
-  text-align: center;
-  padding: 28px 0;
-  color: #b0a080;
-  font-size: 13px;
-}
-
-.hex-empty-icon {
-  font-size: 36px;
-  margin-bottom: 8px;
-  opacity: .35;
-}
-
-/* ── 输入 ── */
-.input-area {
-  background: rgba(255, 255, 255, .4);
-  border: 1px solid rgba(0, 0, 0, .06);
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 20px;
-}
-
-.input-area textarea {
-  width: 100%;
-  border: none;
-  background: transparent;
-  resize: none;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #3a2e20;
-  outline: none;
-  font-family: inherit;
-}
-
-.input-area textarea::placeholder {
-  color: #b0a080;
-}
-
-.input-area textarea:disabled {
-  opacity: .5;
-}
-
-.divine-btn {
-  width: 100%;
-  margin-top: 10px;
-  padding: 11px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #c8a060, #a07830);
-  color: #fff8ee;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: serif;
-  letter-spacing: .15em;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
-  transition: opacity .2s;
-}
-
-.divine-btn:hover:not(:disabled) {
-  opacity: .9;
-}
-
-.divine-btn:disabled {
-  opacity: .45;
-  cursor: default;
-}
-
-/* ── 结果卡片 - 竹简 ── */
 .scroll-card {
   background:
     repeating-linear-gradient(90deg,
@@ -506,150 +317,4 @@ onMounted(loadHistory);
   border-radius: 0 0 4px 4px;
 }
 
-.scroll-sign {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 900;
-  font-family: serif;
-  color: #8a5c28;
-  letter-spacing: .1em;
-}
-
-.scroll-poem {
-  text-align: center;
-  font-size: 13px;
-  color: #8a7a58;
-  margin-top: 10px;
-  line-height: 2;
-  font-style: italic;
-}
-
-.scroll-divider {
-  width: 60px;
-  height: 1px;
-  background: #c8a868;
-  margin: 16px auto;
-}
-
-.scroll-yj {
-  display: flex;
-  justify-content: center;
-  gap: 48px;
-}
-
-.scroll-yj-item {
-  text-align: center;
-}
-
-.scroll-yj-label {
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .1em;
-  font-family: serif;
-}
-
-.scroll-yj-label.good {
-  color: #6a9a50;
-}
-
-.scroll-yj-label.bad {
-  color: #b05040;
-}
-
-.scroll-yj-text {
-  font-size: 12px;
-  color: #5a4a30;
-  margin-top: 4px;
-}
-
-.scroll-advice {
-  margin-top: 16px;
-  font-size: 13px;
-  line-height: 2;
-  color: #7a6a48;
-  text-align: center;
-  padding: 0 8px;
-}
-
-/* ── 历史 ── */
-.history-section {
-  margin-top: 4px;
-}
-
-.history-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: #a09070;
-  letter-spacing: .15em;
-  margin-bottom: 10px;
-}
-
-.history-item {
-  background: rgba(255, 255, 255, .4);
-  border: 1px solid rgba(0, 0, 0, .04);
-  border-radius: 8px;
-  padding: 12px 14px;
-  margin-bottom: 6px;
-}
-
-.history-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.history-hex {
-  font-size: 12px;
-  font-weight: 700;
-  color: #5a4020;
-  font-family: serif;
-}
-
-.history-sign {
-  font-size: 12px;
-  color: #8a6a30;
-}
-
-.history-time {
-  font-size: 10px;
-  color: #b0a088;
-  margin-left: auto;
-}
-
-.history-q {
-  font-size: 12px;
-  color: #7a6a48;
-  margin-top: 4px;
-}
-
-.history-poem {
-  font-size: 11px;
-  color: #a09070;
-  margin-top: 2px;
-  font-style: italic;
-}
-
-.empty-hint {
-  padding: 32px 0;
-  text-align: center;
-  font-size: 13px;
-  color: #b0a080;
-}
-
-/* ── 底部声名 ── */
-.disclaimer-box {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px dashed rgba(160, 140, 110, 0.3);
-  text-align: center;
-}
-
-.disclaimer-box p {
-  font-size: 11px;
-  color: #a09070;
-  line-height: 1.8;
-  letter-spacing: .05em;
-  font-family: 'PingFang SC', sans-serif;
-  opacity: 0.8;
-}
 </style>

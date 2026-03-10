@@ -6,7 +6,6 @@ export default {
   app_sidebar_create_app: '创建应用',
   app_sidebar_notebook: '记事本',
   app_sidebar_finance: '记账本',
-  app_sidebar_inbox: '收件箱',
   app_sidebar_subscriber: '订阅机',
   app_sidebar_cryptobot: '炒币机',
   app_sidebar_reader: '阅读器',

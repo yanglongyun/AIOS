@@ -93,13 +93,13 @@
             <div class="flex items-center border-b border-white/5 px-2.5 py-1.5">
               <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">AI 润色</div>
               <div v-if="aiResult && !aiLoading" class="ml-auto flex items-center gap-1.5">
-                <button class="ai-btn-apply cursor-pointer rounded px-3.5 py-1 text-[11px] font-bold tracking-wider border-none" @click="applyAI">应用</button>
-                <button class="ai-btn-close cursor-pointer rounded px-3.5 py-1 text-[11px] font-bold tracking-wider border-none" @click="closeAI">关闭</button>
+                <button class="cursor-pointer rounded border-none bg-[linear-gradient(180deg,#4a7a40,#306828)] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[#d0e8c0] [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_2px_0_rgba(20,50,10,0.5),inset_0_1px_0_rgba(200,255,200,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a8a50,#407838)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="applyAI">应用</button>
+                <button class="cursor-pointer rounded border-none bg-white/[0.06] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[rgba(200,160,100,0.5)] shadow-[0_2px_0_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.1] hover:text-[rgba(200,160,100,0.8)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="closeAI">关闭</button>
               </div>
             </div>
             <div v-if="aiLoading" class="ai-loading flex items-center justify-center gap-2.5 py-4 px-3">
               <div class="quill-anim relative h-[18px] w-[18px]"></div>
-              <div class="ai-loading-text text-[11px] font-semibold tracking-widest">正在润色...</div>
+              <div class="text-[11px] font-semibold tracking-widest text-[rgba(200,160,80,0.6)] animate-pulse">正在润色...</div>
             </div>
             <div v-else-if="aiResult" class="ai-body overflow-y-auto whitespace-pre-wrap px-3 py-2 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-sm leading-6 tracking-wide">{{ aiResult }}</div>
           </div>
@@ -107,10 +107,10 @@
 
         <!-- 按钮托盘 -->
         <div class="tray-buttons flex shrink-0 items-stretch gap-2.5 px-4 py-2.5 pb-3.5">
-          <button class="tray-btn tray-btn-back flex-1" @click="backToList">返回</button>
-          <button class="tray-btn tray-btn-ai flex-1" :disabled="!editorDraft.trim() || aiLoading" @click="startOptimize">优化</button>
-          <button v-if="editingNoteId" class="tray-btn tray-btn-del flex-1" @click="showDeleteConfirm = true">删除</button>
-          <button class="tray-btn tray-btn-save flex-1" :disabled="saving || !editorDraft.trim()" @click="saveEditor">
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="backToList">返回</button>
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="startOptimize">优化</button>
+          <button v-if="editingNoteId" class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="showDeleteConfirm = true">删除</button>
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#604010] bg-[linear-gradient(180deg,#d0a848,#a88028,#886818)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_3px_0_rgba(80,50,10,0.6),inset_0_1px_1px_rgba(255,255,200,0.25)] transition-all hover:bg-[linear-gradient(180deg,#e0b858,#b89038,#988028)] active:top-[3px] active:shadow-[0_0_0_rgba(80,50,10,0.6),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="saving || !editorDraft.trim()" @click="saveEditor">
             {{ saving ? '...' : '保存' }}
           </button>
         </div>
@@ -123,8 +123,8 @@
           <div class="ai-modal-card relative z-10 mx-8 flex w-full max-w-[320px] flex-col items-center overflow-hidden rounded-xl px-6 py-6">
             <div class="mb-4 text-sm font-semibold text-[rgba(255,200,160,0.8)]">确定要删除这条笔记吗？</div>
             <div class="flex w-full gap-3">
-              <button class="tray-btn tray-btn-back flex-1 text-center" @click="showDeleteConfirm = false">取消</button>
-              <button class="tray-btn tray-btn-del flex-1 text-center" @click="confirmDelete">删除</button>
+              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="showDeleteConfirm = false">取消</button>
+              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="confirmDelete">删除</button>
             </div>
           </div>
         </div>
@@ -647,25 +647,6 @@ onMounted(fetchNotes);
   box-shadow: 0 0 4px rgba(200,160,60,0.4);
 }
 
-.ai-btn-apply {
-  background: linear-gradient(180deg, #4a7a40, #306828);
-  color: #d0e8c0;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
-  box-shadow: 0 2px 0 rgba(20,50,10,0.5), inset 0 1px 0 rgba(200,255,200,0.12);
-  transition: all 0.1s;
-}
-.ai-btn-apply:hover { background: linear-gradient(180deg, #5a8a50, #407838); }
-.ai-btn-apply:active { box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
-
-.ai-btn-close {
-  background: rgba(255,255,255,0.06);
-  color: rgba(200,160,100,0.5);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: all 0.1s;
-}
-.ai-btn-close:hover { background: rgba(255,255,255,0.1); color: rgba(200,160,100,0.8); }
-.ai-btn-close:active { box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
-
 .ai-body {
   color: rgba(220,200,160,0.75);
   max-height: 28vh;
@@ -673,11 +654,6 @@ onMounted(fetchNotes);
 .ai-body::-webkit-scrollbar { width: 3px; }
 .ai-body::-webkit-scrollbar-thumb { background: rgba(200,160,80,0.15); border-radius: 2px; }
 
-/* loading */
-.ai-loading-text {
-  color: rgba(200,160,80,0.6);
-  animation: loadPulse 1.5s ease-in-out infinite;
-}
 .quill-anim::before {
   content: '\270D'; font-size: 14px; position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -690,65 +666,4 @@ onMounted(fetchNotes);
   50% { transform: rotate(-3deg) translateY(1px); }
   75% { transform: rotate(2deg) translateY(-1px); }
 }
-@keyframes loadPulse {
-  0%,100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* ── 托盘按钮 ── */
-.tray-btn {
-  padding: 10px 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: all 0.1s;
-  position: relative;
-  top: 0;
-  border: 1px solid rgba(0,0,0,0.3);
-  box-shadow: 0 3px 0 rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.12);
-}
-.tray-btn:active {
-  top: 3px;
-  box-shadow: 0 0 0 rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.4);
-}
-.tray-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.tray-btn-back {
-  background: linear-gradient(180deg, #6a5838, #4a3820, #3a2810);
-  color: rgba(255,220,180,0.5);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-  border-color: #2a1808;
-}
-.tray-btn-back:hover { background: linear-gradient(180deg, #7a6848, #5a4830, #4a3820); }
-
-.tray-btn-ai {
-  background: linear-gradient(180deg, #4a3848, #3a2838, #2a1828);
-  color: rgba(220,200,255,0.6);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-  border-color: #1a0828;
-}
-.tray-btn-ai:hover { background: linear-gradient(180deg, #5a4858, #4a3848, #3a2838); }
-
-.tray-btn-del {
-  background: linear-gradient(180deg, #8a3028, #6a1818, #501010);
-  color: rgba(255,200,180,0.7);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-  border-color: #3a0808;
-}
-.tray-btn-del:hover { background: linear-gradient(180deg, #9a4038, #7a2828, #601818); }
-
-.tray-btn-save {
-  background: linear-gradient(180deg, #d0a848, #a88028, #886818);
-  color: #fff;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
-  border-color: #604010;
-  box-shadow: 0 3px 0 rgba(80,50,10,0.6), inset 0 1px 1px rgba(255,255,200,0.25);
-}
-.tray-btn-save:hover { background: linear-gradient(180deg, #e0b858, #b89038, #988028); }
-.tray-btn-save:active { top: 3px; box-shadow: 0 0 0 rgba(80,50,10,0.6), inset 0 2px 4px rgba(0,0,0,0.4); }
 </style>

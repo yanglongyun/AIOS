@@ -1,11 +1,11 @@
 <template>
-  <div class="nokia-wrap">
-    <div class="machine-case">
+  <div class="flex h-full w-full items-center justify-center overflow-hidden bg-[#c8bcac] bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_8px)] font-['PingFang_SC','Microsoft_YaHei',sans-serif] text-[#3e3223]">
+    <div class="relative flex max-h-[calc(100vh-32px)] w-[280px] flex-col overflow-hidden rounded-[20px] border border-[#ddd6ce] bg-[#eeebe6] p-[14px] shadow-[inset_0_4px_6px_rgba(255,255,255,0.9),inset_0_-4px_6px_rgba(0,0,0,0.06),0_20px_40px_rgba(80,60,40,0.25),0_6px_12px_rgba(80,60,40,0.12)]">
 
       <!-- 听筒 + 品牌 -->
-      <div class="top-bar">
+      <div class="mb-3 flex flex-col items-center">
         <div class="earpiece"></div>
-        <div class="brand-name">banana</div>
+        <div class="font-['Pacifico',cursive] text-[22px] tracking-[2px] text-[#8a7a62] [text-shadow:0_2px_0_rgba(255,255,255,0.6),0_-1px_0_rgba(0,0,0,0.1)]">banana</div>
       </div>
 
       <!-- LCD 屏幕 -->
@@ -23,11 +23,11 @@
       </div>
 
       <!-- 选项按钮 -->
-      <div class="options-panel" v-if="timeLine.length > 0">
+      <div class="flex flex-1 flex-col gap-2.5 overflow-y-auto py-[10px] pb-2" v-if="timeLine.length > 0">
         <button
           v-for="(option, i) in timeLine[currentIndex].options"
           :key="i"
-          class="option-btn"
+          class="w-full rounded-md border border-[#9c9288] bg-[linear-gradient(180deg,#e6e0d8_0%,#c2b8ac_100%)] px-2.5 py-2 text-left text-[11px] font-extrabold text-[#4a4136] [text-shadow:0_1px_0_rgba(255,255,255,0.5)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_3px_0_#8a8076,0_4px_6px_rgba(0,0,0,0.18)] transition-all active:translate-y-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_0,0_1px_2px_rgba(0,0,0,0.15)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0"
           @click="chooseOption(option)"
           :disabled="isChoosing"
         >{{ option.text }}</button>
@@ -36,20 +36,20 @@
       <!-- 输入框 -->
       <input
         v-model="customOption"
-        class="custom-input"
+        class="mt-2 box-border w-full rounded-md border border-[#d4c8b4] bg-[#faf7f2] px-2.5 py-2 text-[11px] font-bold text-[#3e3223] shadow-[inset_0_3px_6px_rgba(0,0,0,0.12),0_2px_0_rgba(255,255,255,0.8)] outline-none placeholder:text-[#b8ad9e] focus:border-[#8a7f62]"
         placeholder="输入你的指令..."
         @keydown.enter.prevent="customOption.trim() && chooseOption({ text: customOption })"
       />
 
       <!-- 红色执行按钮 -->
       <button
-        class="exec-btn"
+        class="mt-2 w-full rounded-lg border-2 border-[#7a2810] bg-[linear-gradient(180deg,#d05a38_0%,#a83c20_100%)] py-2.5 text-[13px] font-black tracking-[2px] text-[#fdf0e8] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_2px_0_rgba(255,255,255,0.2),0_4px_0_#6a1e08,0_5px_8px_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_0_0_#6a1e08,0_1px_2px_rgba(0,0,0,0.3)] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0"
         @click="chooseOption({ text: customOption })"
         :disabled="!customOption.trim() || isChoosing"
       >执 行</button>
 
       <!-- 分割线 + 麦克风 -->
-      <div class="divider"></div>
+      <div class="mt-5 border-t-2 border-[#d4ccc0]"></div>
       <div class="mic"></div>
 
     </div>
@@ -188,45 +188,6 @@ async function api(path, body) {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-.nokia-wrap {
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background-color: #c8bcac;
-  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 8px);
-  width: 100%; height: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #3e3223;
-}
-
-/* ── 手机外壳 ── */
-.machine-case {
-  width: 280px;
-  max-height: calc(100vh - 32px);
-  background-color: #eeebe6;
-  border-radius: 20px;
-  box-shadow:
-    inset 0 4px 6px rgba(255,255,255,0.9),
-    inset 0 -4px 6px rgba(0,0,0,0.06),
-    0 20px 40px rgba(80,60,40,0.25),
-    0 6px 12px rgba(80,60,40,0.12);
-  border: 1px solid #ddd6ce;
-  display: flex;
-  flex-direction: column;
-  padding: 14px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ── 顶部 ── */
-.top-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
 .earpiece {
   width: 48px; height: 5px;
   background: linear-gradient(180deg, #5a5048, #3e3830);
@@ -241,14 +202,6 @@ async function api(path, body) {
   top: 1px; left: 6px; right: 6px; height: 2px;
   background: repeating-linear-gradient(90deg, transparent 0px, transparent 2px, #2a2420 2px, #2a2420 3px);
   border-radius: 1px;
-}
-
-.brand-name {
-  font-family: 'Pacifico', cursive;
-  font-size: 22px;
-  color: #8a7a62;
-  text-shadow: 0 2px 0 rgba(255,255,255,0.6), 0 -1px 0 rgba(0,0,0,0.1);
-  letter-spacing: 2px;
 }
 
 /* ── LCD 屏幕 ── */
@@ -335,86 +288,6 @@ async function api(path, body) {
   0% { width: 0%; }
   50% { width: 70%; }
   100% { width: 100%; }
-}
-
-/* ── 选项按钮 ── */
-.options-panel {
-  padding: 10px 0 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-  overflow-y: auto;
-}
-
-.option-btn {
-  width: 100%;
-  background: linear-gradient(180deg, #e6e0d8 0%, #c2b8ac 100%);
-  border: 1px solid #9c9288;
-  border-radius: 6px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 0 #8a8076, 0 4px 6px rgba(0,0,0,0.18);
-  padding: 8px 10px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 800;
-  color: #4a4136;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-  transition: all 0.1s;
-}
-.option-btn:active {
-  transform: translateY(3px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 0 0, 0 1px 2px rgba(0,0,0,0.15);
-}
-.option-btn:disabled {
-  opacity: 0.5; cursor: not-allowed;
-  transform: none !important;
-}
-
-/* ── 输入框 ── */
-.custom-input {
-  width: 100%;
-  background: #faf7f2;
-  border: 1px solid #d4c8b4;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 11px; font-weight: 700;
-  color: #3e3223;
-  outline: none;
-  box-shadow: inset 0 3px 6px rgba(0,0,0,0.12), 0 2px 0 rgba(255,255,255,0.8);
-  font-family: inherit;
-  margin-top: 8px;
-  box-sizing: border-box;
-}
-.custom-input::placeholder { color: #b8ad9e; }
-.custom-input:focus { border-color: #8a7f62; }
-
-/* ── 红色执行按钮 ── */
-.exec-btn {
-  width: 100%;
-  background: linear-gradient(180deg, #d05a38 0%, #a83c20 100%);
-  border: 2px solid #7a2810;
-  border-radius: 8px;
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), 0 4px 0 #6a1e08, 0 5px 8px rgba(0,0,0,0.3);
-  color: #fdf0e8;
-  font-weight: 900;
-  font-size: 13px;
-  padding: 10px 0;
-  cursor: pointer;
-  letter-spacing: 2px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  margin-top: 8px;
-}
-.exec-btn:active {
-  transform: translateY(4px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 #6a1e08, 0 1px 2px rgba(0,0,0,0.3);
-}
-.exec-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-
-/* ── 分割线 ── */
-.divider {
-  margin-top: 20px;
-  border-top: 2px solid #d4ccc0;
 }
 
 /* ── 麦克风 ── */

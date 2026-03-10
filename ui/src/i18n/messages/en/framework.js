@@ -6,7 +6,6 @@ export default {
   app_sidebar_create_app: 'Create App',
   app_sidebar_notebook: 'Notebook',
   app_sidebar_finance: 'Ledger',
-  app_sidebar_inbox: 'Inbox',
   app_sidebar_subscriber: 'Subscriber',
   app_sidebar_cryptobot: 'Crypto Bot',
   app_sidebar_reader: 'Reader',

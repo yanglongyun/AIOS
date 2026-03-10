@@ -59,5 +59,15 @@ export default {
   cryptobot_logs: 'Run Logs',
   cryptobot_logs_empty: 'After starting, each AI thought and decision will appear here',
   cryptobot_load_more: 'Load more ↓',
-  cryptobot_init_failed: 'Initialization failed'
+  cryptobot_init_failed: 'Initialization failed',
+  cryptobot_next_run: 'Next Run',
+  cryptobot_control_panel: 'Control Panel',
+  cryptobot_today: 'Today',
+  cryptobot_amount: 'Amount',
+  cryptobot_ai_reason: 'AI Reason',
+  cryptobot_min_unit: 'MIN',
+  cryptobot_decision_log: 'Decision Log',
+  cryptobot_save: 'Save',
+  cryptobot_test: 'Test',
+  cryptobot_exchange_config: 'Exchange Config · OKX'
 };

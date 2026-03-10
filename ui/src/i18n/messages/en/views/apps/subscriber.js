@@ -7,6 +7,7 @@ export default {
   subscriber_saved: 'Saved ',
   subscriber_refresh_button: 'Receive Now',
   subscriber_refreshing: 'Receiving...',
+  subscriber_tomorrow_prefix: 'TMR ',
   subscriber_schedule_label: 'SCHEDULE',
   subscriber_fill_focus_hint: 'Click the gear icon to set topics, then click "Receive Now" to generate content',
   subscriber_history_title: 'Archives',

@@ -59,5 +59,15 @@ export default {
   cryptobot_logs: '运行记录',
   cryptobot_logs_empty: '启动后，AI 的每次思考和决策会显示在这里',
   cryptobot_load_more: '加载更多 ↓',
-  cryptobot_init_failed: '初始化失败'
+  cryptobot_init_failed: '初始化失败',
+  cryptobot_next_run: '下次运行',
+  cryptobot_control_panel: '控制面板',
+  cryptobot_today: '今日',
+  cryptobot_amount: '金额',
+  cryptobot_ai_reason: 'AI 分析',
+  cryptobot_min_unit: '分钟',
+  cryptobot_decision_log: '决策日志',
+  cryptobot_save: '保存',
+  cryptobot_test: '测试',
+  cryptobot_exchange_config: '交易所配置 · OKX'
 };

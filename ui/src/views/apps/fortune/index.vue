@@ -1,0 +1,157 @@
+<template>
+  <div class="h-full bg-[#e8ddd0] font-['PingFang_SC',serif] text-[#3a2e20]">
+    <div class="h-full overflow-y-auto">
+      <div class="mx-auto max-w-[460px] px-5 pb-[60px] pt-7">
+        <div class="mb-7 text-center">
+          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">{{ t('fortune_title') }}</h1>
+          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">{{ t('fortune_subtitle') }}</p>
+        </div>
+
+        <FortuneHexagramPanel
+          :hexagram-name="hexagramName"
+          :result="result"
+          :display-yaos="displayYaos"
+          :yao-labels="yaoLabels"
+          :coins="coins"
+          :shaking="shaking"
+        />
+
+        <FortuneQuestionForm
+          v-model:question="question"
+          :shaking="shaking"
+          :loading="loading"
+          @divine="divine"
+        />
+
+        <FortuneResultCard :result="result" :format-poem="formatPoem" />
+        <FortuneHistoryList :history="history" :result="result" :format-time="formatTime" />
+
+        <div class="mt-10 border-t border-dashed border-[rgba(160,140,110,0.3)] pt-5 text-center">
+          <p class="font-['PingFang_SC',sans-serif] text-[11px] leading-[1.8] tracking-[0.05em] text-[#a09070] opacity-80">
+            {{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from '../../../i18n/index.js';
+import FortuneHexagramPanel from '../../../components/apps/fortune/FortuneHexagramPanel.vue';
+import FortuneQuestionForm from '../../../components/apps/fortune/FortuneQuestionForm.vue';
+import FortuneResultCard from '../../../components/apps/fortune/FortuneResultCard.vue';
+import FortuneHistoryList from '../../../components/apps/fortune/FortuneHistoryList.vue';
+
+const { t } = useI18n();
+
+const HEXAGRAM_TABLE = [
+  ['坤为地', '地山谦', '地水师', '地风升', '地雷复', '地火明夷', '地泽临', '地天泰'],
+  ['山地剥', '艮为山', '山水蒙', '山风蛊', '山雷颐', '山火贲', '山泽损', '山天大畜'],
+  ['水地比', '水山蹇', '坎为水', '水风井', '水雷屯', '水火既济', '水泽节', '水天需'],
+  ['风地观', '风山渐', '风水涣', '巽为风', '风雷益', '风火家人', '风泽中孚', '风天小畜'],
+  ['雷地豫', '雷山小过', '雷水解', '雷风恒', '震为雷', '雷火丰', '雷泽归妹', '雷天大壮'],
+  ['火地晋', '火山旅', '火水未济', '火风鼎', '火雷噬嗑', '离为火', '火泽睽', '火天大有'],
+  ['泽地萃', '泽山咸', '泽水困', '泽风大过', '泽雷随', '泽火革', '兑为泽', '泽天夬'],
+  ['天地否', '天山遁', '天水讼', '天风姤', '天雷无妄', '天火同人', '天泽履', '乾为天']
+];
+
+const yaoLabels = computed(() => [
+  t('fortune_yao_top'),
+  t('fortune_yao_five'),
+  t('fortune_yao_four'),
+  t('fortune_yao_three'),
+  t('fortune_yao_two'),
+  t('fortune_yao_one')
+]);
+
+const trigramIndex = (y0, y1, y2) => y0 * 4 + y1 * 2 + y2;
+
+const lookupHexagram = (yaos) => {
+  const lower = trigramIndex(yaos[0], yaos[1], yaos[2]);
+  const upper = trigramIndex(yaos[3], yaos[4], yaos[5]);
+  return HEXAGRAM_TABLE[upper][lower];
+};
+
+const question = ref('');
+const shaking = ref(false);
+const loading = ref(false);
+const result = ref(null);
+const history = ref([]);
+const hexagramName = ref('');
+const displayYaos = ref([null, null, null, null, null, null]);
+const coins = ref([[], [], [], [], [], []]);
+
+const request = async (url, opts) => {
+  const res = await fetch(url, { credentials: 'include', ...opts });
+  return res.json();
+};
+
+const formatTime = (v) => {
+  if (!v) return '';
+  return v.replace('T', ' ').slice(5, 16);
+};
+
+const formatPoem = (poem) => {
+  if (!poem) return '';
+  return poem.replace(/[，。；,;]/g, (m) => `${m}<br>`);
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const shakeOnce = () => {
+  const c = [Math.random() < 0.5 ? 1 : 0, Math.random() < 0.5 ? 1 : 0, Math.random() < 0.5 ? 1 : 0];
+  const sum = c.reduce((s, v) => s + (v ? 2 : 3), 0);
+  const isYang = sum === 7 || sum === 9 ? 1 : 0;
+  return { coins: c, yao: isYang };
+};
+
+const divine = async () => {
+  if (!question.value.trim() || shaking.value || loading.value) return;
+
+  result.value = null;
+  hexagramName.value = '';
+  displayYaos.value = [null, null, null, null, null, null];
+  coins.value = [[], [], [], [], [], []];
+  shaking.value = true;
+
+  const allYaos = [];
+  for (let i = 0; i < 6; i += 1) {
+    const { coins: c, yao } = shakeOnce();
+    allYaos.push(yao);
+
+    const displayIdx = 5 - i;
+    coins.value[displayIdx] = c;
+    displayYaos.value[displayIdx] = yao;
+
+    await sleep(500);
+  }
+
+  const name = lookupHexagram(allYaos);
+  hexagramName.value = name;
+  shaking.value = false;
+
+  loading.value = true;
+  const yaoDesc = allYaos.map((y, i) => `${['初', '二', '三', '四', '五', '上'][i]}爻:${y ? '阳' : '阴'}`).join('，');
+  const data = await request('/apps/fortune/divine', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: question.value.trim(), hexagram: name, yaos: yaoDesc })
+  });
+  loading.value = false;
+
+  if (data.success) {
+    result.value = data.item;
+    history.value.unshift(data.item);
+    question.value = '';
+  }
+};
+
+const loadHistory = async () => {
+  const data = await request('/apps/fortune/list?page=1&pageSize=30');
+  if (data.success) history.value = data.items;
+};
+
+onMounted(loadHistory);
+</script>

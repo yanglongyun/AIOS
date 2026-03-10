@@ -1,6 +1,11 @@
 export default {
-  nokia_input_placeholder: '输入你的选择...',
-  nokia_send: '发送',
+  nokia_input_placeholder: '输入你的指令...',
+  nokia_send: '执行',
+  nokia_welcome: '欢迎使用',
+  nokia_choose_prompt: '请选择：',
+  nokia_menu_sms: '1) 短信',
+  nokia_menu_news: '2) 新闻',
+  nokia_menu_bottle: '3) 漂流瓶',
   nokia_prev: '◀ 上一步',
   nokia_home: '● 主页',
   nokia_next: '下一步 ▶',

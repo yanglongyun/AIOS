@@ -1,137 +1,57 @@
 <template>
   <div class="flex h-full w-full flex-col items-center overflow-hidden p-4 font-['PingFang_SC','Georgia',serif]"
        style="background-color:#2a1f10; background-image:linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px); background-size:20px 20px;">
-
-    <!-- 全高胡桃木收音机 -->
     <div class="radio-cabinet">
-
-      <!-- 应用标题 -->
-      <div class="mb-3 flex shrink-0 items-center justify-center">
-        <div class="text-[10px] font-black uppercase tracking-[0.3em] text-[#a08040]" style="text-shadow:0 1px 0 rgba(0,0,0,0.3);">{{ t('subscriber_title') }}</div>
-      </div>
-
-      <!-- 调频显示条 -->
-      <div class="dial-strip">
-        <!-- 左侧：状态显示 -->
-        <div class="shrink-0 text-center" :class="{ 'status-receiving': refreshing }">
-          <div class="na-label text-[8px] tracking-widest leading-none text-[#806040]">
-            {{ refreshing ? 'ON AIR' : 'NEXT ON AIR' }}
-          </div>
-          <div class="na-value mt-0.5 text-[14px] font-black text-[#e8c060]" style="text-shadow:0 0 10px rgba(232,192,96,0.5);">
-            {{ refreshing ? t('subscriber_refreshing') : scheduleTimeStr }}
-          </div>
-        </div>
-        <!-- 中间：刻度（双针） -->
-        <div class="dial-scale">
-          <div class="dial-scale-inner"></div>
-          <div class="needle-schedule" :style="{ left: schedulePercent + '%' }"></div>
-          <div class="needle-now" :style="{ left: nowPercent + '%' }"></div>
-        </div>
-        <!-- 右侧：设置按钮 -->
-        <button class="flex shrink-0 items-center bg-transparent p-1 text-[#806040] transition-colors duration-200 hover:text-[#e8c060]" @click="showSettings = !showSettings" :title="t('subscriber_focus_label')">
-          <svg class="h-[18px] w-[18px] transition-transform duration-300 [filter:drop-shadow(0_0_3px_rgba(232,192,96,0.3))]" :class="showSettings ? 'rotate-90' : ''" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- 展开面板 -->
-      <div class="expand-panel" :class="{ 'is-open': showSettings }">
-        <div class="control-panel mt-3">
-          <!-- 订阅主题 -->
-          <div class="mb-3">
-            <div class="mb-1.5 text-[9px] font-black tracking-widest text-[#8a7a50]">{{ t('subscriber_focus_label') }}</div>
-            <div class="speaker-grille-input">
-              <textarea v-model="focus" rows="2" class="grille-textarea" :placeholder="t('subscriber_focus_placeholder')"></textarea>
-            </div>
-          </div>
-          <!-- 播出时间 -->
-          <div class="mb-4">
-            <div class="mb-1.5 text-[9px] font-black tracking-widest text-[#8a7a50]">{{ t('subscriber_schedule_label') }}</div>
-            <input type="time" v-model="scheduleTime" class="w-full rounded border-2 border-[#0a0804] bg-[#1a0e04] px-3 py-2 font-['Courier_New',monospace] text-[13px] font-bold text-[#e8c060] [text-shadow:0_0_6px_rgba(232,192,96,0.3)] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.04)] outline-none transition-all placeholder:text-[#4a3418] focus:border-[#3a2510] focus:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),0_0_0_1px_rgba(232,192,96,0.15)]" />
-          </div>
-          <!-- 两个按钮 -->
-          <div class="flex gap-3">
-            <button class="relative top-0 flex-1 whitespace-nowrap rounded-md border-2 border-[#3a2510] bg-[linear-gradient(180deg,#6a4a28_0%,#4a3218_100%)] py-[9px] text-xs font-black tracking-[0.08em] text-[#d8c090] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_3px_0_#2a1a08,0_4px_8px_rgba(0,0,0,0.4)] transition-all active:top-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_0_#2a1a08,0_1px_3px_rgba(0,0,0,0.3)]" @click="saveFocus">{{ t('subscriber_save_button') }}</button>
-            <button class="relative top-0 flex-1 whitespace-nowrap rounded-md border-2 border-[#701808] bg-[linear-gradient(180deg,#d84020_0%,#a02808_100%)] py-[9px] text-[12px] font-black tracking-[0.1em] text-[#fde8d8] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_2px_0_rgba(255,255,255,0.15),0_3px_0_#501008,0_4px_8px_rgba(0,0,0,0.4)] transition-all active:top-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_0_0_#501008,0_1px_3px_rgba(0,0,0,0.3)] disabled:cursor-not-allowed disabled:opacity-50 disabled:top-0" :disabled="refreshing" @click="refreshToday">{{ t('subscriber_refresh_button') }}</button>
-          </div>
-          <!-- 错误提示 -->
-          <div v-if="error" class="mt-3 rounded border border-[#701808] bg-[#2a1008] px-3 py-2 text-[11px] text-[#e88060]">{{ error }}</div>
-        </div>
-      </div>
-
-      <!-- 扬声器格栅（内容阅读区） -->
-      <div class="speaker-grille" ref="grilleRef">
-        <div class="grille-shadow"></div>
-
-        <!-- 无内容提示 -->
-        <div v-if="!today && !items.length" class="flex flex-1 items-center justify-center py-20">
-          <p class="text-center text-[13px] text-[#604830]">{{ t('subscriber_fill_focus_hint') }}</p>
-        </div>
-
-        <!-- 当日文章 -->
-        <div v-if="today" class="relative mb-8 border-b-2 border-dashed border-[rgba(232,192,96,0.12)] pb-8" :class="{ 'cursor-pointer': selectedId && selectedId !== today.id }" @click="selectArticle(today)">
-          <div class="mb-[15px] font-['Courier_New',monospace] text-xs font-black uppercase tracking-[2px] text-[#a08040]">
-            <span class="text-[#e84030]">>>> {{ today.date }} //</span> {{ formatTime(today.updatedAt || today.createdAt) }}
-          </div>
-          <h2 class="mb-[14px] font-['Georgia',serif] text-2xl font-black leading-[1.3] tracking-[-0.3px] text-[#ece4cd]">{{ today.title }}</h2>
-          <div v-if="today.brief" class="mb-[22px] bg-[rgba(232,192,96,0.06)] px-[18px] py-[14px] text-sm font-bold leading-[1.65] text-[#c8b890] shadow-[3px_3px_0_rgba(0,0,0,0.1)] border border-[rgba(232,192,96,0.12)]">
-            <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#e84030]">AI SYNOPSIS</span>
-            {{ today.brief }}
-          </div>
-          <div v-if="selectedId === today.id || !selectedId" class="article-content whitespace-pre-wrap text-[15px] leading-[1.8] text-[#9a8a68]" style="text-align:justify;">{{ today.content }}</div>
-        </div>
-
-        <!-- 历史文章 -->
-        <div v-for="item in visibleHistory" :key="item.id"
-             class="relative mb-8 cursor-pointer border-b-2 border-dashed border-[rgba(232,192,96,0.12)] pb-8 opacity-45 transition-opacity hover:opacity-100"
-             :class="{ '!opacity-100': selectedId === item.id }"
-             @click="selectArticle(item)">
-          <div class="mb-[15px] font-['Courier_New',monospace] text-xs font-black uppercase tracking-[2px] text-[#a08040]">>>> {{ item.date }} // {{ formatTime(item.updatedAt || item.createdAt) }}</div>
-          <h2 class="mb-[14px] font-['Georgia',serif] text-2xl font-black leading-[1.3] tracking-[-0.3px] text-[#ece4cd]">{{ item.title }}</h2>
-          <div v-if="item.brief" class="mb-[22px] bg-[rgba(232,192,96,0.06)] px-[18px] py-[14px] text-sm font-bold leading-[1.65] text-[#c8b890] shadow-[3px_3px_0_rgba(0,0,0,0.1)] border border-[rgba(232,192,96,0.12)]">
-            <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#806040]">AI SYNOPSIS</span>
-            {{ item.brief }}
-          </div>
-          <div v-if="selectedId === item.id" class="article-content whitespace-pre-wrap text-[15px] leading-[1.8] text-[#9a8a68]" style="text-align:justify;">{{ item.content }}</div>
-        </div>
-
-        <!-- 分页 -->
-        <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-6 pb-4">
-          <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page <= 1" @click="changePage(page - 1)">{{ t('subscriber_prev_page') }}</button>
-          <span class="text-[10px] text-[#604830]">{{ page }} / {{ totalPages }}</span>
-          <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page >= totalPages" @click="changePage(page + 1)">{{ t('subscriber_next_page') }}</button>
-        </div>
-      </div>
-
+      <SubscriberControlPanel
+        :refreshing="refreshing"
+        :schedule-time-str="scheduleTimeStr"
+        :schedule-percent="schedulePercent"
+        :now-percent="nowPercent"
+        :show-settings="showSettings"
+        v-model:focus="focus"
+        v-model:scheduleTime="scheduleTime"
+        :error="error"
+        @toggle-settings="showSettings = !showSettings"
+        @save-focus="saveFocus"
+        @refresh="refreshToday"
+      />
+      <SubscriberArticlePanel
+        :today="today"
+        :items="items"
+        :visible-history="visibleHistory"
+        :selected-id="selectedId"
+        :page="page"
+        :total-pages="totalPages"
+        :format-time="formatTime"
+        @select-article="selectArticle"
+        @change-page="changePage"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
+import { useI18n } from '../../../i18n/index.js';
+import SubscriberArticlePanel from '../../../components/apps/subscriber/SubscriberArticlePanel.vue';
+import SubscriberControlPanel from '../../../components/apps/subscriber/SubscriberControlPanel.vue';
 
 const { locale, t } = useI18n();
 const API_BASE = '/apps/subscriber';
 
 // 状态
 const focus = ref('');
-const focusUpdatedAt = ref('');
 const refreshing = ref(false);
 const error = ref('');
 const showSettings = ref(false);
 const selectedId = ref(null);
 const scheduleTime = ref('08:00');
-const grilleRef = ref(null);
 
 // 数据
 const today = ref(null);
 const items = ref([]);
 const page = ref(1);
 const pageSize = 10;
-const total = ref(0);
 const totalPages = ref(1);
 
 // 时间针
@@ -148,7 +68,7 @@ const scheduleTimeStr = computed(() => {
   if (sched <= now) sched.setDate(sched.getDate() + 1);
   const isToday = sched.getDate() === now.getDate();
   const str = scheduleTime.value;
-  return isToday ? str : (locale.value === 'en' ? 'TMR ' : '明天 ') + str;
+  return isToday ? str : t('subscriber_tomorrow_prefix') + str;
 });
 
 // 历史列表（排除 today）
@@ -175,14 +95,12 @@ const request = async (url, options = {}) => {
 const loadToday = async () => {
   const data = await request(`${API_BASE}/today`);
   focus.value = data.profile?.focus || '';
-  focusUpdatedAt.value = data.profile?.updatedAt || '';
   today.value = data.today || null;
 };
 
 const loadHistory = async () => {
   const data = await request(`${API_BASE}/history?page=${page.value}&pageSize=${pageSize}`);
   items.value = data.items || [];
-  total.value = data.total || 0;
   totalPages.value = data.totalPages || 1;
 };
 
@@ -195,7 +113,6 @@ const saveFocus = async () => {
       body: JSON.stringify({ focus: focus.value })
     });
     focus.value = data.profile?.focus || '';
-    focusUpdatedAt.value = data.profile?.updatedAt || '';
   } catch (e) {
     error.value = e.message || t('subscriber_save_failed');
   }
@@ -218,7 +135,6 @@ const refreshToday = async () => {
     page.value = 1;
     await loadHistory();
     // 滚动到顶部
-    if (grilleRef.value) grilleRef.value.scrollTop = 0;
   } catch (e) {
     error.value = e.message || t('subscriber_generate_failed');
   } finally {
@@ -264,7 +180,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 /* ===== 全高木质机壳 ===== */
 .radio-cabinet {
   width: 100%; max-width: 680px;

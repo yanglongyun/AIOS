@@ -1,141 +1,49 @@
 <template>
-  <!-- ======== 软木板列表视图（全屏铺满） ======== -->
-  <div v-if="view === 'list'" class="cork-surface relative flex h-full w-full flex-wrap content-start gap-[30px] overflow-y-auto overflow-x-hidden p-10">
-
-    <!-- 新建按钮 -->
-    <div class="group z-20 flex h-[240px] w-[200px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-t-lg rounded-b-xl border border-[#3a2515] bg-[#5c412a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),4px_8px_15px_rgba(0,0,0,0.6)] transition-all hover:scale-[1.02] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),6px_12px_20px_rgba(0,0,0,0.7)]"
-         style="transform:rotate(-2deg)" @click="openEditor(null)">
-      <div class="absolute top-[5px] h-4 w-[60px] rounded-sm bg-[#888] shadow-[0_4px_6px_rgba(0,0,0,0.6)]"></div>
-      <div class="mt-5 flex h-[85%] w-[85%] items-center justify-center rounded-sm bg-[rgba(253,245,211,0.9)] shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
-        <span class="text-[40px] font-bold text-[#a33] opacity-70">＋</span>
-      </div>
-    </div>
-
-    <!-- 卡片列表 -->
-    <div v-for="(note, idx) in notes" :key="note.id"
-         class="memo-card group relative z-10 shrink-0 cursor-pointer transition-all hover:z-40 hover:!scale-105 hover:!-translate-y-1"
-         :class="cardStyle(note.style).cardCls"
-         :style="{ transform: `rotate(${ROTATIONS[idx % 8]}deg)` }"
-         @click="openEditor(note)">
-
-      <!-- 图钉 -->
-      <div v-if="idx % 3 !== 1" class="pushpin absolute left-1/2 top-[10px] z-20 h-3.5 w-3.5 -translate-x-1/2 rounded-full shadow-[inset_-2px_-2px_4px_rgba(0,0,0,0.4),inset_2px_2px_4px_rgba(255,255,255,0.6),3px_10px_6px_rgba(0,0,0,0.3)]"
-           :class="PIN_COLORS[note.style % 4]"></div>
-      <!-- 胶带 -->
-      <div v-else class="pointer-events-none absolute -top-2.5 left-1/2 z-10 h-5 w-[50px] border-x-2 border-dashed border-white/60 bg-white/35 shadow-sm backdrop-blur-[1px]"
-           :style="{ transform: `translateX(-50%) rotate(${idx % 2 ? 5 : -5}deg)` }"></div>
-
-      <!-- 内容 -->
-      <div class="line-clamp-[8] whitespace-pre-wrap break-words px-3 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-base leading-[25px]"
-           :class="cardStyle(note.style).textCls">
-        {{ note.content || '（空）' }}
-      </div>
-
-      <!-- 时间戳 -->
-      <div class="absolute bottom-2 right-2.5 font-mono text-[10px] font-bold text-black/40">
-        {{ formatTime(note.updated_at || note.created_at) }}
-      </div>
-
-      <!-- 删除 -->
-      <button class="absolute -right-2 -top-2 z-30 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 shadow-md transition-all hover:scale-110 hover:bg-red-700 group-hover:opacity-100"
-              @click.stop="deleteNote(note.id)">✕</button>
-    </div>
-
-    <div class="h-10 w-full"></div>
-
-    <!-- 分页 -->
-    <div v-if="totalPages > 1" class="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-4 rounded-lg bg-black/40 px-4 py-1.5 text-xs text-[#d4c0a0] backdrop-blur-sm">
-      <button class="px-2 py-0.5 text-lg hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="page <= 1 || loading" @click="goPrevPage">‹</button>
-      <span>{{ page }} / {{ totalPages }}</span>
-      <button class="px-2 py-0.5 text-lg hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="page >= totalPages || loading" @click="goNextPage">›</button>
-    </div>
-  </div>
-
-  <!-- ======== 夹板编辑器视图 ======== -->
-  <div v-else class="flex h-full w-full items-center justify-center bg-[#2b1d14]">
-    <div class="clipboard-board relative flex w-full max-w-[500px] flex-col items-center rounded-t-2xl rounded-b-3xl" style="height:90%">
-
-      <!-- 金属弹簧夹 -->
-      <div class="absolute top-[10px] z-30 flex w-[140px] flex-col items-center">
-        <div class="clip-base relative h-[25px] w-full rounded border border-[#555]">
-          <div class="rivet absolute left-[15px] top-[7px] h-2.5 w-2.5 rounded-full"></div>
-          <div class="rivet absolute right-[15px] top-[7px] h-2.5 w-2.5 rounded-full"></div>
-        </div>
-        <div class="clip-jaw -mt-[5px] z-[35] h-5 w-[120px] rounded-b-[10px] border border-t-0 border-[#666]"></div>
-      </div>
-
-      <!-- 信笺纸（根据 style 变纹理） -->
-      <div class="legal-pad relative z-10 mt-10 min-h-0 flex-1 w-[90%] overflow-hidden rounded-b"
-           :class="cardStyle(editorStyle).padCls">
-        <div class="pad-binding absolute inset-x-0 top-0 h-4 border-b border-dashed border-white/20 shadow-[0_2px_3px_rgba(0,0,0,0.4)]"></div>
-
-        <!-- 日期戳 -->
-        <div class="absolute right-4 top-[25px] rotate-2 font-mono text-[13px] font-bold opacity-50"
-             :class="cardStyle(editorStyle).inkCls">
-          REC: {{ currentDate }}
-        </div>
-
-        <!-- 编辑区 -->
-        <textarea ref="editorRef"
-          v-model="editorDraft"
-          class="absolute inset-0 resize-none border-none bg-transparent pl-[55px] pr-4 pt-[50px] pb-4 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-lg leading-[30px] tracking-wide outline-none placeholder:italic placeholder:opacity-30"
-          :class="cardStyle(editorStyle).inkCls"
-          placeholder="在这里记下你的灵感碎片..."
-          spellcheck="false"
-        ></textarea>
-      </div>
-
-      <!-- 底部区域：AI抽屉 + 按钮托盘，统一绒面 -->
-      <div class="bottom-zone w-full shrink-0 z-40 flex flex-col overflow-hidden rounded-b-3xl">
-        <!-- AI 抽屉 -->
-        <div class="ai-drawer overflow-hidden" :class="{ show: aiDrawerOpen }">
-          <div class="ai-well mx-3 mt-2.5 flex flex-col overflow-hidden rounded">
-            <div class="flex items-center border-b border-white/5 px-2.5 py-1.5">
-              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">AI 润色</div>
-              <div v-if="aiResult && !aiLoading" class="ml-auto flex items-center gap-1.5">
-                <button class="cursor-pointer rounded border-none bg-[linear-gradient(180deg,#4a7a40,#306828)] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[#d0e8c0] [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_2px_0_rgba(20,50,10,0.5),inset_0_1px_0_rgba(200,255,200,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a8a50,#407838)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="applyAI">应用</button>
-                <button class="cursor-pointer rounded border-none bg-white/[0.06] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[rgba(200,160,100,0.5)] shadow-[0_2px_0_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.1] hover:text-[rgba(200,160,100,0.8)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="closeAI">关闭</button>
-              </div>
-            </div>
-            <div v-if="aiLoading" class="ai-loading flex items-center justify-center gap-2.5 py-4 px-3">
-              <div class="quill-anim relative h-[18px] w-[18px]"></div>
-              <div class="text-[11px] font-semibold tracking-widest text-[rgba(200,160,80,0.6)] animate-pulse">正在润色...</div>
-            </div>
-            <div v-else-if="aiResult" class="ai-body overflow-y-auto whitespace-pre-wrap px-3 py-2 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-sm leading-6 tracking-wide">{{ aiResult }}</div>
-          </div>
-        </div>
-
-        <!-- 按钮托盘 -->
-        <div class="tray-buttons flex shrink-0 items-stretch gap-2.5 px-4 py-2.5 pb-3.5">
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="backToList">返回</button>
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="startOptimize">优化</button>
-          <button v-if="editingNoteId" class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="showDeleteConfirm = true">删除</button>
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#604010] bg-[linear-gradient(180deg,#d0a848,#a88028,#886818)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_3px_0_rgba(80,50,10,0.6),inset_0_1px_1px_rgba(255,255,200,0.25)] transition-all hover:bg-[linear-gradient(180deg,#e0b858,#b89038,#988028)] active:top-[3px] active:shadow-[0_0_0_rgba(80,50,10,0.6),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="saving || !editorDraft.trim()" @click="saveEditor">
-            {{ saving ? '...' : '保存' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- 删除确认弹窗 -->
-      <Transition name="ai-modal">
-        <div v-if="showDeleteConfirm" class="absolute inset-0 z-50 flex items-center justify-center rounded-t-2xl rounded-b-3xl" @click.self="showDeleteConfirm = false">
-          <div class="ai-modal-backdrop absolute inset-0 rounded-t-2xl rounded-b-3xl"></div>
-          <div class="ai-modal-card relative z-10 mx-8 flex w-full max-w-[320px] flex-col items-center overflow-hidden rounded-xl px-6 py-6">
-            <div class="mb-4 text-sm font-semibold text-[rgba(255,200,160,0.8)]">确定要删除这条笔记吗？</div>
-            <div class="flex w-full gap-3">
-              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="showDeleteConfirm = false">取消</button>
-              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="confirmDelete">删除</button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </div>
-  </div>
+  <NotebookListView
+    :view="view"
+    :notes="notes"
+    :page="page"
+    :total-pages="totalPages"
+    :loading="loading"
+    :card-style="cardStyle"
+    :format-time="formatTime"
+    :rotations="ROTATIONS"
+    :pin-colors="PIN_COLORS"
+    @open-editor="openEditor"
+    @delete-note="deleteNote"
+    @prev-page="goPrevPage"
+    @next-page="goNextPage"
+  />
+  <NotebookEditorView
+    :view="view"
+    v-model:editorDraft="editorDraft"
+    :editing-note-id="editingNoteId"
+    :editor-style="editorStyle"
+    :saving="saving"
+    :ai-drawer-open="aiDrawerOpen"
+    :ai-loading="aiLoading"
+    :ai-result="aiResult"
+    :show-delete-confirm="showDeleteConfirm"
+    :current-date="currentDate"
+    :card-style="cardStyle"
+    @back="backToList"
+    @optimize="startOptimize"
+    @request-delete="showDeleteConfirm = true"
+    @cancel-delete="showDeleteConfirm = false"
+    @confirm-delete="confirmDelete"
+    @save="saveEditor"
+    @apply-ai="applyAI"
+    @close-ai="closeAI"
+  />
 </template>
 
 <script setup>
-import { onMounted, ref, nextTick } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from '../../../i18n/index.js';
+import NotebookEditorView from '../../../components/apps/notebook/NotebookEditorView.vue';
+import NotebookListView from '../../../components/apps/notebook/NotebookListView.vue';
 
+const { locale, t } = useI18n();
 const API_BASE = '/apps/notebook';
 const PAGE_SIZE = 12;
 
@@ -151,7 +59,6 @@ const editorDraft = ref('');
 const editingNoteId = ref(null);
 const editorStyle = ref(0);
 const saving = ref(false);
-const editorRef = ref(null);
 const aiDrawerOpen = ref(false);
 const aiLoading = ref(false);
 const aiResult = ref('');
@@ -188,7 +95,13 @@ const randomStyle = () => {
   return s;
 };
 
-const currentDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+const currentDate = computed(() =>
+  new Date().toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '/')
+);
 
 const fetchNotes = async () => {
   try {
@@ -200,7 +113,7 @@ const fetchNotes = async () => {
     total.value = Number(data.total || 0);
     totalPages.value = Number(data.totalPages || 1);
     if (page.value > totalPages.value) { page.value = totalPages.value; return fetchNotes(); }
-  } catch (e) { error.value = e.message || '加载失败'; }
+  } catch (e) { error.value = e.message || t('notebook_load_failed'); }
   finally { loading.value = false; }
 };
 
@@ -212,7 +125,6 @@ const openEditor = (note) => {
   aiLoading.value = false;
   aiResult.value = '';
   view.value = 'editor';
-  nextTick(() => editorRef.value?.focus());
 };
 
 const backToList = () => { view.value = 'list'; editingNoteId.value = null; editorDraft.value = ''; aiDrawerOpen.value = false; aiResult.value = ''; };
@@ -232,7 +144,7 @@ const saveEditor = async () => {
     page.value = 1;
     await fetchNotes();
     backToList();
-  } catch (e) { error.value = e.message || '保存失败'; }
+  } catch (e) { error.value = e.message || t('notebook_create_failed'); }
   finally { saving.value = false; }
 };
 
@@ -248,7 +160,7 @@ const deleteNote = async (id) => {
     const res = await fetch(`${API_BASE}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     await fetchNotes();
-  } catch (e) { error.value = e.message || '删除失败'; }
+  } catch (e) { error.value = e.message || t('notebook_delete_failed'); }
 };
 
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
@@ -270,7 +182,7 @@ const startOptimize = async () => {
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
     aiResult.value = data.result || '';
   } catch (e) {
-    error.value = e.message || '优化失败';
+    error.value = e.message || t('notebook_optimize_failed');
     aiDrawerOpen.value = false;
   } finally {
     aiLoading.value = false;
@@ -292,17 +204,17 @@ const formatTime = (v) => {
   const d = new Date(v.replace(' ', 'T'));
   if (isNaN(d)) return v;
   const diff = Date.now() - d;
-  if (diff < 60000) return '刚刚';
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
-  return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+  if (diff < 60000) return t('notebook_just_now');
+  if (diff < 3600000) return t('notebook_minutes_ago', { n: Math.floor(diff / 60000) });
+  if (diff < 86400000) return t('notebook_hours_ago', { n: Math.floor(diff / 3600000) });
+  if (diff < 604800000) return t('notebook_days_ago', { n: Math.floor(diff / 86400000) });
+  return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', { month: 'short', day: 'numeric' });
 };
 
 onMounted(fetchNotes);
 </script>
 
-<style scoped>
+<style>
 /* ── 软木板纹理（SVG噪声+暗角，Tailwind无法实现） ── */
 .cork-surface {
   background-color: #b5835a;

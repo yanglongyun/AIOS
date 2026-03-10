@@ -1,6 +1,11 @@
 export default {
-  nokia_input_placeholder: 'Type your choice...',
-  nokia_send: 'Send',
+  nokia_input_placeholder: 'Enter your command...',
+  nokia_send: 'Run',
+  nokia_welcome: 'Welcome',
+  nokia_choose_prompt: 'Please choose:',
+  nokia_menu_sms: '1) Messages',
+  nokia_menu_news: '2) News',
+  nokia_menu_bottle: '3) Bottle',
   nokia_prev: '◀ Previous',
   nokia_home: '● Home',
   nokia_next: 'Next ▶',

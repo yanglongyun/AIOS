@@ -7,6 +7,7 @@ export default {
   subscriber_saved: '已保存 ',
   subscriber_refresh_button: '立即收报',
   subscriber_refreshing: '接收中...',
+  subscriber_tomorrow_prefix: '明天 ',
   subscriber_schedule_label: '播出时间 SCHEDULE',
   subscriber_fill_focus_hint: '点击右上角齿轮设置订阅主题，然后点击「立即收报」生成内容',
   subscriber_history_title: '往期',

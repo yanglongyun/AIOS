@@ -1,63 +1,37 @@
 <template>
   <div class="flex h-full w-full items-center justify-center overflow-hidden bg-[#c8bcac] bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_8px)] font-['PingFang_SC','Microsoft_YaHei',sans-serif] text-[#3e3223]">
     <div class="relative flex max-h-[calc(100vh-32px)] w-[280px] flex-col overflow-hidden rounded-[20px] border border-[#ddd6ce] bg-[#eeebe6] p-[14px] shadow-[inset_0_4px_6px_rgba(255,255,255,0.9),inset_0_-4px_6px_rgba(0,0,0,0.06),0_20px_40px_rgba(80,60,40,0.25),0_6px_12px_rgba(80,60,40,0.12)]">
-
-      <!-- 听筒 + 品牌 -->
       <div class="mb-3 flex flex-col items-center">
         <div class="earpiece"></div>
         <div class="font-['Pacifico',cursive] text-[22px] tracking-[2px] text-[#8a7a62] [text-shadow:0_2px_0_rgba(255,255,255,0.6),0_-1px_0_rgba(0,0,0,0.1)]">banana</div>
       </div>
-
-      <!-- LCD 屏幕 -->
-      <div class="lcd-screen">
-        <div v-if="isLoading" class="lcd-content lcd-loading">
-          <div>{{ toast }}<span class="blink-cursor">▮</span></div>
-          <div class="lcd-progress">
-            <span class="lcd-progress-bar"></span>
-          </div>
-        </div>
-        <div v-else-if="homePage" class="lcd-content home-img">
-          <img src="/nokia/hand.png" />
-        </div>
-        <div v-else-if="timeLine.length > 0" class="lcd-content" v-html="timeLine[currentIndex].content"></div>
-      </div>
-
-      <!-- 选项按钮 -->
-      <div class="flex flex-1 flex-col gap-2.5 overflow-y-auto py-[10px] pb-2" v-if="timeLine.length > 0">
-        <button
-          v-for="(option, i) in timeLine[currentIndex].options"
-          :key="i"
-          class="w-full rounded-md border border-[#9c9288] bg-[linear-gradient(180deg,#e6e0d8_0%,#c2b8ac_100%)] px-2.5 py-2 text-left text-[11px] font-extrabold text-[#4a4136] [text-shadow:0_1px_0_rgba(255,255,255,0.5)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_3px_0_#8a8076,0_4px_6px_rgba(0,0,0,0.18)] transition-all active:translate-y-[3px] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_0,0_1px_2px_rgba(0,0,0,0.15)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0"
-          @click="chooseOption(option)"
-          :disabled="isChoosing"
-        >{{ option.text }}</button>
-      </div>
-
-      <!-- 输入框 -->
-      <input
-        v-model="customOption"
-        class="mt-2 box-border w-full rounded-md border border-[#d4c8b4] bg-[#faf7f2] px-2.5 py-2 text-[11px] font-bold text-[#3e3223] shadow-[inset_0_3px_6px_rgba(0,0,0,0.12),0_2px_0_rgba(255,255,255,0.8)] outline-none placeholder:text-[#b8ad9e] focus:border-[#8a7f62]"
-        placeholder="输入你的指令..."
-        @keydown.enter.prevent="customOption.trim() && chooseOption({ text: customOption })"
+      <NokiaScreen
+        :is-loading="isLoading"
+        :toast="toast"
+        :home-page="homePage"
+        :time-line="timeLine"
+        :current-index="currentIndex"
       />
-
-      <!-- 红色执行按钮 -->
-      <button
-        class="mt-2 w-full rounded-lg border-2 border-[#7a2810] bg-[linear-gradient(180deg,#d05a38_0%,#a83c20_100%)] py-2.5 text-[13px] font-black tracking-[2px] text-[#fdf0e8] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] shadow-[inset_0_2px_0_rgba(255,255,255,0.2),0_4px_0_#6a1e08,0_5px_8px_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_0_0_#6a1e08,0_1px_2px_rgba(0,0,0,0.3)] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0"
-        @click="chooseOption({ text: customOption })"
-        :disabled="!customOption.trim() || isChoosing"
-      >执 行</button>
-
-      <!-- 分割线 + 麦克风 -->
+      <NokiaControls
+        :time-line="timeLine"
+        :current-index="currentIndex"
+        v-model:customOption="customOption"
+        :is-choosing="isChoosing"
+        @choose="chooseOption"
+      />
       <div class="mt-5 border-t-2 border-[#d4ccc0]"></div>
       <div class="mic"></div>
-
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from '../../../i18n/index.js';
+import NokiaControls from '../../../components/apps/nokia/NokiaControls.vue';
+import NokiaScreen from '../../../components/apps/nokia/NokiaScreen.vue';
+
+const { t } = useI18n();
 const API_BASE = '/apps/nokia';
 
 const homePage = ref(true);
@@ -75,15 +49,15 @@ onMounted(() => {
 async function goHomePage() {
   timeLine.value = [{
     content: `<div style="font-weight:900; margin-bottom:6px; font-size:14px; letter-spacing:2px;">banana</div>
-<div style="margin-top:8px;">欢迎使用</div>
-<div style="margin-top:6px;">请选择：</div>
-<div>1) 短信</div>
-<div>2) 新闻</div>
-<div>3) 漂流瓶</div>`,
+<div style="margin-top:8px;">${t('nokia_welcome')}</div>
+<div style="margin-top:6px;">${t('nokia_choose_prompt')}</div>
+<div>${t('nokia_menu_sms')}</div>
+<div>${t('nokia_menu_news')}</div>
+<div>${t('nokia_menu_bottle')}</div>`,
     options: [
-      { text: '查看通话记录' },
-      { text: '写一条备忘录' },
-      { text: '看看今日运势' }
+      { text: t('nokia_option_sms') },
+      { text: t('nokia_option_news') },
+      { text: t('nokia_option_bottle') }
     ],
     choices: null
   }];
@@ -93,7 +67,7 @@ async function goHomePage() {
 
 async function init() {
   isLoading.value = true;
-  toast.value = '正在开机...';
+  toast.value = t('nokia_booting');
 
   try {
     const res = await fetch(`${API_BASE}/progress`);
@@ -115,8 +89,8 @@ async function init() {
 
   try {
     const result = await api('/generation', {
-      now: '开机画面',
-      next: '进入主屏幕'
+      now: t('nokia_boot_screen'),
+      next: t('nokia_enter_home')
     });
 
     if (result.content) {
@@ -147,7 +121,7 @@ async function chooseOption(option) {
   timeLine.value[currentIndex.value].choices = option.text;
 
   const history = timeLine.value.slice(1, 3).reverse().map(item => {
-    return `${'界面：'}${item.content}` + (item.choices ? `${'，选择：'}${item.choices}` : '');
+    return `${t('nokia_ctx_screen')}${item.content}` + (item.choices ? `${t('nokia_ctx_choice')}${item.choices}` : '');
   });
 
   try {
@@ -185,7 +159,7 @@ async function api(path, body) {
 }
 </script>
 
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
 .earpiece {

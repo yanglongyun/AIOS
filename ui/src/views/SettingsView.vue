@@ -11,7 +11,7 @@
             ? 'bg-[rgba(90,58,40,0.1)] text-[#5a3e28] dark:bg-[rgba(200,160,96,0.12)] dark:text-[#c8a060]'
             : 'text-[#b8a888] hover:text-[#7a6a50] hover:bg-[rgba(90,58,40,0.06)] dark:text-[#6a5840] dark:hover:text-[#a08c70] dark:hover:bg-[rgba(200,160,96,0.06)]'"
         >
-          {{ tab.label }}
+          {{ t(tab.labelKey) }}
         </button>
       </div>
     </div>
@@ -63,8 +63,10 @@
         <GeneralTab
           v-else
           :theme="theme"
+          :language="language"
           @save="save"
           @set-theme="setTheme"
+          @set-language="setLanguage"
         />
       </div>
     </div>
@@ -81,19 +83,21 @@ import ToolTab from '../components/settings/ToolTab.vue';
 import GeneralTab from '../components/settings/GeneralTab.vue';
 import { getProvider } from '../data/providers.js';
 import { toast } from '../stores/toast.js';
+import { useI18n } from '../i18n/index.js';
 const router = useRouter();
+const { locale, setLocale, t } = useI18n();
 
 const tabs = [
-  { key: 'account', label: '账户' },
-  { key: 'model', label: '模型' },
-  { key: 'messages', label: '消息' },
-  { key: 'tools', label: '工具' },
-  { key: 'general', label: '通用' }
+  { key: 'account', labelKey: 'settings_tab_account' },
+  { key: 'model', labelKey: 'settings_tab_model' },
+  { key: 'messages', labelKey: 'settings_tab_messages' },
+  { key: 'tools', labelKey: 'settings_tab_tools' },
+  { key: 'general', labelKey: 'settings_tab_general' }
 ];
 
 const activeTab = ref('account');
 const theme = ref(localStorage.getItem('theme') || 'dark');
-const language = ref('zh');
+const language = ref(locale.value);
 const provider = ref('openai');
 const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);
@@ -160,7 +164,8 @@ const onProviderChange = (nextProvider) => {
 const fetchSettings = async () => {
   const data = await request('/api/settings');
   provider.value = data.provider || 'openai';
-  language.value = 'zh';
+  language.value = data.language === 'en' ? 'en' : locale.value;
+  setLocale(language.value);
   editRounds.value = data.contextRounds || 100;
   enableToolResultTruncate.value = data.enableToolResultTruncate !== false;
   toolResultMaxChars.value = Number(data.toolResultMaxChars) || 12000;
@@ -188,8 +193,10 @@ const setTheme = (nextTheme) => {
   document.documentElement.classList.toggle('dark', nextTheme === 'dark');
 };
 
-const setLanguage = () => {
-  language.value = 'zh';
+const setLanguage = (nextLanguage) => {
+  const normalized = nextLanguage === 'en' ? 'en' : 'zh';
+  language.value = normalized;
+  setLocale(normalized);
 };
 
 const save = async () => {
@@ -222,19 +229,19 @@ const save = async () => {
       model: editModel.value
     };
     saveProviderConfigs();
-    toast.show('配置已保存');
+    toast.show(t('settings_saved'));
   } catch (e) {
-    toast.show(`保存失败：${e.message}`, { type: 'error' });
+    toast.show(t('settings_save_failed', { message: e.message }), { type: 'error' });
   }
 };
 
 const changePassword = async () => {
   try {
     if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
-      throw new Error('请填写完整密码信息');
+      throw new Error(t('settings_password_required'));
     }
     if (newPassword.value !== confirmPassword.value) {
-      throw new Error('两次新密码不一致');
+      throw new Error(t('settings_password_mismatch'));
     }
 
     await request('/api/auth/password', {
@@ -249,10 +256,10 @@ const changePassword = async () => {
     oldPassword.value = '';
     newPassword.value = '';
     confirmPassword.value = '';
-    toast.show('密码已修改，请重新登录');
+    toast.show(t('settings_password_changed_relogin'));
     await logout();
   } catch (e) {
-    toast.show(`保存失败：${e.message}`, { type: 'error' });
+    toast.show(t('settings_save_failed', { message: e.message }), { type: 'error' });
   }
 };
 

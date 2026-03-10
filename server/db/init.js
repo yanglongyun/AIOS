@@ -43,17 +43,6 @@ export const initDatabase = () => {
       finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS notifications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      app TEXT NOT NULL,
-      title TEXT NOT NULL,
-      content TEXT,
-      read INTEGER NOT NULL DEFAULT 0,
-      reply TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      read_at TEXT
-    );
-
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,

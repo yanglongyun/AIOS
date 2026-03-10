@@ -11,7 +11,7 @@ import FinanceView from '../views/apps/FinanceView.vue';
 import InboxView from '../views/apps/InboxView.vue';
 import NokiaView from '../views/apps/NokiaView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
-import BriefingView from '../views/apps/BriefingView.vue';
+import SubscriberView from '../views/apps/SubscriberView.vue';
 import CryptobotView from '../views/apps/CryptobotView.vue';
 import StoryView from '../views/apps/StoryView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
@@ -32,7 +32,7 @@ const routes = [
   { path: '/finance', component: FinanceView },
   { path: '/inbox', component: InboxView },
   { path: '/nokia', component: NokiaView },
-  { path: '/briefing', component: BriefingView },
+  { path: '/subscriber', component: SubscriberView },
   { path: '/cryptobot', component: CryptobotView },
   { path: '/story', component: StoryView },
   { path: '/fortune', component: FortuneView },

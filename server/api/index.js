@@ -3,7 +3,6 @@ import { handleChatApi } from './chat/index.js';
 import { handleSettingsApi } from './settings/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
-import { handleNotificationsApi } from './notifications/index.js';
 import { handleAuthApi } from './auth/index.js';
 import { handleSetupApi } from './setup/index.js';
 import { access } from '../../shared/auth/index.js';
@@ -50,11 +49,6 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/task')) {
       await handleTaskApi(req, res, path, url);
-      return true;
-    }
-
-    if (path.startsWith('/api/notifications')) {
-      await handleNotificationsApi(req, res, path, url);
       return true;
     }
 

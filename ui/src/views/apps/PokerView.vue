@@ -26,7 +26,7 @@
       <!-- AI 区域 -->
       <div class="flex w-full flex-col items-center relative gap-2">
         <div class="flex flex-col items-center gap-0.5 rounded-xl bg-black/30 px-4 py-1">
-          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">AI 筹码</span>
+          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">{{ t('poker_ai_stack') }}</span>
           <span class="font-mono text-base sm:text-lg font-bold text-[#d4b878]">{{ game ? game.aiChips :
             economy.aiBalance }}</span>
         </div>
@@ -58,7 +58,7 @@
           class="absolute w-[120px] sm:w-[160px] h-[120px] sm:h-[160px] rounded-full border border-white/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         </div>
 
-        <span class="text-[10px] uppercase tracking-widest text-[#a0d0a0] mb-1 z-10">总底池</span>
+        <span class="text-[10px] uppercase tracking-widest text-[#a0d0a0] mb-1 z-10">{{ t('poker_total_pot') }}</span>
         <div
           class="z-10 flex items-center gap-2 rounded-full border border-[#c8a060]/40 bg-[#c8a060]/10 px-5 sm:px-6 py-1.5 sm:py-2 shadow-[0_0_20px_rgba(200,160,96,0.15)] backdrop-blur">
           <span
@@ -89,7 +89,7 @@
         </div>
 
         <div class="flex flex-col items-center gap-0.5 rounded-xl bg-black/30 px-4 py-1 mt-1">
-          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">你的筹码</span>
+          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">{{ t('poker_your_stack') }}</span>
           <span class="font-mono text-base sm:text-lg font-bold text-[#d4b878]">{{ game ? game.playerChips :
             economy.playerBalance }}</span>
         </div>
@@ -103,28 +103,28 @@
         class="text-center mb-3 text-[11px] sm:text-[12px] tracking-wide text-[#9bc49b]">{{ lastActionText }}</div>
       <div v-if="!game || game.status === 'done'" class="flex flex-col items-center mt-1">
         <div class="mb-3 text-[11px] sm:text-xs text-[#8a7a58]/80 leading-relaxed text-center px-2">
-          <p>游戏规则：开局由玩家优先行动，您可选择 <span class="text-[#c8a060] font-bold">跟注</span>、<span
-              class="text-[#a07a4a] font-bold">加注 (3倍)</span> 或 <span
-              class="text-[#8a5a4a] font-bold">弃牌</span>。</p>
-          <p class="mt-0.5">每次对立选择记1回合，最多对峙 <span class="text-[#c8a060] font-bold">5 回合</span>，触顶自动开牌决胜负。</p>
+          <p>{{ t('poker_game_rules') }} <span class="text-[#c8a060] font-bold">{{ t('poker_call') }}</span>、<span
+              class="text-[#a07a4a] font-bold">{{ t('poker_raise') }}</span> {{ t('poker_or') }} <span
+              class="text-[#8a5a4a] font-bold">{{ t('poker_fold') }}</span>。</p>
+          <p class="mt-0.5">{{ t('poker_rules_round_limit') }} <span class="text-[#c8a060] font-bold">{{ t('poker_rules_max_round') }}</span>{{ t('poker_rules_auto_compare') }}</p>
         </div>
         <button @click="startGame" :disabled="busy"
           class="w-full sm:w-auto rounded-xl bg-[#c8a060] px-8 py-2.5 text-[14px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,160,96,0.3)] transition-all hover:-translate-y-1 hover:bg-[#d4b070] disabled:opacity-40">
-          {{ game ? '再来一局' : '开始发牌' }}
+          {{ game ? t('poker_play_again') : t('poker_start') }}
         </button>
       </div>
       <div v-else class="flex justify-center gap-2 sm:gap-3">
         <button @click="handleAction('call')" :disabled="busy"
           class="flex-1 rounded-xl bg-[#c8a060] py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,160,96,0.3)] transition-all hover:-translate-y-1 hover:bg-[#d4b070] disabled:opacity-40 disabled:hover:translate-y-0">
-          跟注
+          {{ t('poker_call') }}
         </button>
         <button @click="handleAction('raise')" :disabled="busy"
           class="flex-1 rounded-xl bg-[#c89050] py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,144,80,0.35)] transition-all hover:-translate-y-1 hover:bg-[#d7a060] disabled:opacity-40 disabled:hover:translate-y-0">
-          加注 (3倍)
+          {{ t('poker_raise') }}
         </button>
         <button @click="handleAction('fold')" :disabled="busy"
           class="flex-1 rounded-xl border border-[#8a5a4a] bg-transparent py-2 sm:py-2.5 text-[12px] sm:text-[13px] font-bold tracking-wider text-[#8a5a4a] transition-all hover:-translate-y-1 hover:bg-[#8a5a4a] hover:text-white disabled:opacity-40 disabled:hover:translate-y-0">
-          弃牌
+          {{ t('poker_fold') }}
         </button>
       </div>
     </div>
@@ -136,6 +136,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { toast } from '../../stores/toast.js';
+import { useI18n } from '../../i18n/index.js';
+const { t } = useI18n();
 
 const game = ref(null);
 const busy = ref(false);
@@ -153,13 +155,13 @@ const displayAiCards = computed(() => {
 });
 
 const roundStatusText = computed(() => {
-  if (!game.value) return '回合 ' + '0';
+  if (!game.value) return t('poker_round') + '0';
   if (game.value.status === 'done') {
-    if (game.value.winner === 'player') return '你赢了';
-    if (game.value.winner === 'draw') return '平局';
-    return 'AI 赢了';
+    if (game.value.winner === 'player') return t('poker_you_win');
+    if (game.value.winner === 'draw') return t('poker_draw');
+    return t('poker_ai_wins');
   }
-  return '回合 ' + game.value.round;
+  return t('poker_round') + game.value.round;
 });
 
 const request = async (url, opts) => {
@@ -172,7 +174,7 @@ const loadStatus = async () => {
   if (data.success) {
     economy.value = data.economy;
     const granted = Number(data.grant?.player || 0);
-    if (granted > 0) toast.show('今日补贴已到账：+{0} 筹码'.replace('{0}', granted));
+    if (granted > 0) toast.show(t('poker_daily_grant', { 0: granted }));
   }
 };
 
@@ -185,14 +187,14 @@ const startGame = async () => {
     if (data.success) {
       game.value = data.game;
       economy.value = data.economy || economy.value;
-      lastActionText.value = '新局开始，轮到你行动。';
+      lastActionText.value = t('poker_turn_start');
       aiSpeech.value = '';
       aiExpression.value = '';
       return;
     }
-    lastActionText.value = data.message || '开始失败';
+    lastActionText.value = data.message || t('poker_start_failed');
   } catch (error) {
-    lastActionText.value = error?.message || '网络异常';
+    lastActionText.value = error?.message || t('poker_network_error');
   } finally {
     busy.value = false;
   }
@@ -215,17 +217,17 @@ const handleAction = async (action) => {
       aiExpression.value = data.meta?.aiExpression || '';
 
       if (game.value.status === 'done') {
-        lastActionText.value = '牌局结束！';
+        lastActionText.value = t('poker_game_over');
       } else {
-        if (aiResponseAction === 'fold') lastActionText.value = 'AI 弃牌';
-        else if (aiResponseAction === 'raise') lastActionText.value = 'AI 加注了 {0}，轮到你行动。'.replace('{0}', data.meta?.aiBet ?? '');
-        else lastActionText.value = 'AI 跟注了 {0}，轮到你行动。'.replace('{0}', data.meta?.aiBet ?? '');
+        if (aiResponseAction === 'fold') lastActionText.value = t('poker_ai_folded');
+        else if (aiResponseAction === 'raise') lastActionText.value = t('poker_ai_raised', { 0: data.meta?.aiBet ?? '' });
+        else lastActionText.value = t('poker_ai_called', { 0: data.meta?.aiBet ?? '' });
       }
       return;
     }
-    lastActionText.value = data.message || '操作失败';
+    lastActionText.value = data.message || t('poker_action_failed');
   } catch (error) {
-    lastActionText.value = error?.message || '网络异常';
+    lastActionText.value = error?.message || t('poker_network_error');
   } finally {
     busy.value = false;
   }

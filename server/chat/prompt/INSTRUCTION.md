@@ -12,8 +12,6 @@
 
 ### Shell 内部 API 认证（必须）
 - 当你需要用 shell 调用本机 API 时，使用占位符 `<INTERNAL_TOKEN_BY_RUNTIME>`，不要写真实 token。
-- 示例：
-  - `curl -H "Authorization: Bearer <INTERNAL_TOKEN_BY_RUNTIME>" http://127.0.0.1:9700/api/notifications`
 - 仅用于本机 `127.0.0.1/localhost:9700` 的 `/api/*` 请求。
 - 不要在回复里输出真实 token。
 
@@ -25,7 +23,6 @@
 - 应用可能有 `scripts/` 目录，复杂任务可直接运行其中的脚本
 - 对外静态页面放 `public/` 目录
 - 应用可向 AI 发起请求（ask 机制），AI 响应给应用时格式为 JSON
-- 应用可以向用户发送通知
 
 ### AI 任务中心规范
 - 所有应用侧 AI 调用统一走任务中心，不再直连旧 LLM 接口

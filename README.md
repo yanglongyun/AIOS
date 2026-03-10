@@ -30,9 +30,9 @@ npm run start:apps # 应用服务: 9701
 |------|------|------|
 | 📝 记事本 | `/notebook` | 软木板 + 夹板拟物风格，12 种随机纸张纹理 |
 | 💰 记账本 | `/finance` | 银行存折拟物风格，按月翻页，行内印字录入 |
-| 📰 看新闻 | `/briefing` | AI 聚合新闻头条 |
+| 📻 订阅机 | `/subscriber` | AI 聚合新闻订阅 |
 | 📈 炒币机 | `/cryptobot` | 加密货币自动交易 |
-| 📬 收件箱 | `/inbox` | 通知与消息收件箱 |
+| 📬 收件箱 | `/inbox` | 消息收件箱 |
 | 📚 读小说 | `/story` | 在线小说阅读器 |
 | 🃏 炸金花 | `/poker` | 经典扑克牌游戏 |
 | 🔮 算一卦 | `/fortune` | AI 占卜 |
@@ -60,7 +60,7 @@ apps/            应用服务
   registry.js    应用注册表
   notebook/      记事本
   finance/       记账本
-  briefing/      看新闻
+  subscriber/    订阅机
   cryptobot/     炒币机
   inbox/         收件箱
   story/         读小说

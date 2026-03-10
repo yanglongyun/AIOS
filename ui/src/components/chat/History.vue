@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center font-['Georgia','PingFang_SC',serif] text-sm text-[#a0907a] dark:text-[#6a5840]">📭 暂无历史对话</div>
+    <div v-if="!chats.length" class="py-12 text-center font-['Georgia','PingFang_SC',serif] text-sm text-[#a0907a] dark:text-[#6a5840]">📭 {{ t('history_empty') }}</div>
 
     <div
       v-for="c in chats"
@@ -31,14 +31,14 @@
           <button
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
-            title="重命名"
+            :title="t('history_rename')"
             class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#b8a888] transition-all hover:bg-[#ece0c8] hover:text-[#5a4a38] dark:text-[#5a4a38] dark:hover:bg-[rgba(200,160,96,0.1)] dark:hover:text-[#c8a060]">
             <Pencil class="h-3.5 w-3.5" />
           </button>
-          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] font-['Georgia','PingFang_SC',serif] text-[#c04040]">确认删除?</span>
+          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] font-['Georgia','PingFang_SC',serif] text-[#c04040]">{{ t('history_confirm_delete') }}</span>
           <button
             @click.stop="confirmDelete(c.conversation_id)"
-            :title="deletingId === c.conversation_id ? '点击确认' : '删除'"
+            :title="deletingId === c.conversation_id ? t('history_click_confirm') : t('common_delete')"
             class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#b8a888] transition-all hover:bg-[#ece0c8] hover:text-[#5a4a38] dark:text-[#5a4a38] dark:hover:bg-[rgba(200,160,96,0.1)] dark:hover:text-[#c8a060]"
             :class="deletingId === c.conversation_id ? 'bg-[#c04040] text-white hover:bg-[#c04040] hover:text-white dark:bg-[#c04040] dark:text-white dark:hover:bg-[#c04040] dark:hover:text-white' : ''">
             <Trash2 class="h-3.5 w-3.5" />
@@ -53,6 +53,8 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
+import { useI18n } from '../../i18n/index.js';
+const { t } = useI18n();
 
 defineEmits(['open-chat']);
 

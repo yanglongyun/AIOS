@@ -8,7 +8,6 @@ import { environment as environmentSection } from './environment.js';
 import { language as languageSection } from './language.js';
 import { memory as memorySection } from './memory.js';
 import { model as modelSection } from './model.js';
-import { notifications as notificationsSection } from './notifications.js';
 import { scripts as scriptsSection } from './scripts.js';
 import { tools as toolsSection } from './tools.js';
 
@@ -61,7 +60,6 @@ export const buildSystemPrompt = (currentConversationId = '') => {
   prompt += appsSection();
   prompt += scriptsSection();
   prompt += chatsSection(currentConversationId);
-  prompt += notificationsSection();
 
   return prompt;
 };

@@ -3,8 +3,8 @@
     <div class="mx-auto max-w-[960px]">
       <div class="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h1 class="m-0 text-xl font-bold text-[#4a3a28]">任务详情</h1>
-          <p class="mt-0.5 text-xs text-[#a0907a]">查看任务信息、完整消息记录，并在进行中时终止任务</p>
+          <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('taskdetail_title') }}</h1>
+          <p class="mt-0.5 text-xs text-[#a0907a]">{{ t('taskdetail_subtitle') }}</p>
         </div>
         <div class="flex items-center gap-2">
           <button
@@ -14,14 +14,14 @@
             :disabled="stopping"
             @click="stopTask"
           >
-            {{ stopping ? '终止中...' : '终止任务' }}
+            {{ stopping ? t('taskdetail_stopping') : t('taskdetail_stop_button') }}
           </button>
           <button
             type="button"
             class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]"
             @click="loadAll"
           >
-            刷新
+            {{ t('taskdetail_refresh_button') }}
           </button>
         </div>
       </div>
@@ -37,23 +37,23 @@
           <span v-if="task.mode" class="rounded bg-[#e8f5e4] px-2 py-0.5 text-[11px] font-semibold text-[#4a8a38]">{{ task.mode }}</span>
           <span class="rounded px-2 py-0.5 text-[11px] font-semibold" :class="statusClass">{{ task.status || '-' }}</span>
         </div>
-        <div class="mb-2 text-sm font-semibold text-[#4a3a28]">{{ task.title || '未命名任务' }}</div>
+        <div class="mb-2 text-sm font-semibold text-[#4a3a28]">{{ task.title || t('taskdetail_unnamed_task') }}</div>
         <div class="grid gap-2 text-xs text-[#7a6a58] md:grid-cols-2">
-          <div>创建时间：{{ task.created_at || '-' }}</div>
-          <div>完成时间：{{ task.finished_at || '-' }}</div>
-          <div class="md:col-span-2 break-all">会话ID：{{ task.conversation_id || '-' }}</div>
+          <div>{{ t('taskdetail_created_at') }}{{ task.created_at || '-' }}</div>
+          <div>{{ t('taskdetail_finished_at') }}{{ task.finished_at || '-' }}</div>
+          <div class="md:col-span-2 break-all">{{ t('taskdetail_conversation_id') }}{{ task.conversation_id || '-' }}</div>
         </div>
         <div class="mt-3 space-y-2">
           <div>
-            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">任务输入</div>
+            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">{{ t('taskdetail_input_label') }}</div>
             <div class="whitespace-pre-wrap rounded-lg bg-[#f8f2e8] px-3 py-2 text-[13px] leading-relaxed text-[#4a3a28]">{{ task.prompt || '-' }}</div>
           </div>
           <div v-if="task.response">
-            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">任务输出</div>
+            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">{{ t('taskdetail_output_label') }}</div>
             <div class="whitespace-pre-wrap rounded-lg bg-[#eef7ea] px-3 py-2 text-[13px] leading-relaxed text-[#2d4a30]">{{ task.response }}</div>
           </div>
           <div v-if="task.error">
-            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">错误信息</div>
+            <div class="mb-1 text-[11px] font-semibold text-[#a0907a]">{{ t('taskdetail_error_label') }}</div>
             <div class="whitespace-pre-wrap rounded-lg bg-[#fdf0ef] px-3 py-2 text-[13px] leading-relaxed text-[#9a3a2a]">{{ task.error }}</div>
           </div>
         </div>
@@ -61,11 +61,11 @@
 
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="mb-3 flex items-center justify-between">
-          <h2 class="m-0 text-sm font-bold text-[#5a4a38]">消息记录</h2>
-          <span class="text-[11px] text-[#a0907a]">{{ messages.length }} 条</span>
+          <h2 class="m-0 text-sm font-bold text-[#5a4a38]">{{ t('taskdetail_messages_title') }}</h2>
+          <span class="text-[11px] text-[#a0907a]">{{ t('taskdetail_messages_count', { count: messages.length }) }}</span>
         </div>
         <div v-if="messages.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-6 text-center text-xs text-[#a0907a]">
-          暂无消息
+          {{ t('taskdetail_no_messages') }}
         </div>
         <div v-else class="space-y-2">
           <div v-for="item in displayMessages" :key="item.id" class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] p-3">
@@ -87,7 +87,9 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { on } from '../ws.js';
+import { useI18n } from '../i18n/index.js';
 const route = useRoute();
+const { t } = useI18n();
 const taskId = Number(route.params.id || 0);
 const task = ref({});
 const messages = ref([]);
@@ -138,7 +140,7 @@ const loadAll = async () => {
   try {
     await Promise.all([loadTask(), loadMessages()]);
   } catch (e) {
-    error.value = e.message || '加载失败';
+    error.value = e.message || t('taskdetail_load_failed');
   }
 };
 
@@ -154,7 +156,7 @@ const stopTask = async () => {
     });
     await loadAll();
   } catch (e) {
-    error.value = e.message || '终止失败';
+    error.value = e.message || t('taskdetail_stop_failed');
   } finally {
     stopping.value = false;
   }

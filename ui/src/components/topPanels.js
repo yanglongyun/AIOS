@@ -4,25 +4,17 @@ import { connect, on } from '../ws.js';
 export const useTopPanels = () => {
   const activePanel = ref(null);
   const tasks = ref([]);
-  const notifications = ref([]);
   const lastSeenTaskId = ref(Number(localStorage.getItem('tasks.lastSeenId') || 0));
 
   const taskRows = computed(() => (Array.isArray(tasks.value) ? tasks.value : []));
-  const notificationRows = computed(() => (Array.isArray(notifications.value) ? notifications.value : []));
   const taskCount = computed(() => taskRows.value.filter(r => Number(r.id || 0) > lastSeenTaskId.value).length);
   const hasPending = computed(() => taskRows.value.some(r => r.status === 'pending'));
-  const unreadCount = computed(() => notificationRows.value.filter(n => !n.read).length);
 
   const fetchData = async () => {
     try {
-      const [reqRes, notifRes] = await Promise.all([
-        fetch('/api/task?limit=20'),
-        fetch('/api/notifications?limit=20')
-      ]);
+      const reqRes = await fetch('/api/task?limit=20');
       const taskData = await reqRes.json();
-      const notifData = await notifRes.json();
       tasks.value = Array.isArray(taskData) ? taskData : [];
-      notifications.value = Array.isArray(notifData) ? notifData : [];
     } catch {}
   };
 
@@ -49,7 +41,6 @@ export const useTopPanels = () => {
     fetchData();
     unsubs.push(on('open', fetchData));
     unsubs.push(on('tasks_changed', fetchData));
-    unsubs.push(on('notifications_changed', fetchData));
   };
 
   const stop = () => {
@@ -62,10 +53,8 @@ export const useTopPanels = () => {
   return {
     activePanel,
     tasks,
-    notifications,
     taskCount,
     hasPending,
-    unreadCount,
     togglePanel,
     start,
     stop

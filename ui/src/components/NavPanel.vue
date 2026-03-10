@@ -4,8 +4,8 @@
     <!-- 对话区域 -->
     <div class="px-3 pb-2 pt-4">
       <div class="mb-1 flex items-center justify-between px-2">
-        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">对话</span>
-        <button @click="goNewSession" title="新对话"
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">{{ t('app_sidebar_chat') }}</span>
+        <button @click="goNewSession" :title="t('app_sidebar_new_chat')"
           class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">
           <Plus class="h-3 w-3" />
         </button>
@@ -15,22 +15,22 @@
         :class="btnClass(isChatNew)">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
-        对话
+        {{ t('app_sidebar_chat') }}
       </button>
       <button @click="goHistory"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
         :class="btnClass(isChatHistory)">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">◷</span>
-        历史
+        {{ t('app_sidebar_history') }}
       </button>
     </div>
 
     <!-- 应用区域 -->
     <div class="flex min-h-0 flex-1 flex-col px-3 pb-2">
       <div class="mb-1 flex items-center justify-between px-2">
-        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">应用</span>
-        <button @click="go('/apps/create')" title="创建应用"
+        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">{{ t('app_sidebar_apps') }}</span>
+        <button @click="go('/apps/create')" :title="t('app_sidebar_create_app')"
           class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">
           <Plus class="h-3 w-3" />
         </button>
@@ -41,39 +41,39 @@
           <button @click="go('/notebook')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/notebook'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📝</span>记事本</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📝</span>{{ t('app_sidebar_notebook') }}</button>
           <button @click="go('/finance')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/finance'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>记账本</button>
-          <button @click="go('/briefing')"
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">💰</span>{{ t('app_sidebar_finance') }}</button>
+          <button @click="go('/subscriber')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/briefing'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📰</span>看新闻</button>
+            :class="btnClass(route.path.startsWith('/subscriber'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📻</span>{{ t('app_sidebar_subscriber') }}</button>
           <button @click="go('/cryptobot')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/cryptobot'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>炒币机</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📈</span>{{ t('app_sidebar_cryptobot') }}</button>
           <button @click="go('/inbox')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/inbox'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>收件箱</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>{{ t('app_sidebar_inbox') }}</button>
           <button @click="go('/story')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/story'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>读小说</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>{{ t('app_sidebar_story') }}</button>
           <button @click="go('/poker')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/poker'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>炸金花</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🃏</span>{{ t('app_sidebar_poker') }}</button>
           <button @click="go('/fortune')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/fortune'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>算一卦</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🔮</span>{{ t('app_sidebar_fortune') }}</button>
           <button @click="go('/nokia')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/nokia'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>老手机</button>
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📱</span>{{ t('app_sidebar_nokia') }}</button>
         </div>
         <div v-if="thumbVisible"
           class="pointer-events-none absolute bottom-1 right-0 top-0 w-[3px] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -90,14 +90,14 @@
         :class="btnClass(false)">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">👥</span>
-        社区
+        {{ t('app_sidebar_community') }}
       </button>
       <button @click="go('/settings')"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
         :class="btnClass(is('/settings'))">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">⚙️</span>
-        设置
+        {{ t('app_sidebar_settings') }}
       </button>
     </div>
   </nav>
@@ -107,9 +107,11 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Plus } from 'lucide-vue-next';
+import { useI18n } from '../i18n/index.js';
 const emit = defineEmits(['navigate']);
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const appListRef = ref(null);
 const thumbVisible = ref(false);
 const thumbHeight = ref(0);

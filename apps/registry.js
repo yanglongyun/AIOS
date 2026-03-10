@@ -21,11 +21,11 @@ export const appRegistry = [
     dbInit: ['initInboxDatabase']
   },
   {
-    name: 'briefing',
-    match: (path) => path.startsWith('/apps/briefing/'),
-    load: () => import('./briefing/api/index.js'),
-    apiHandler: 'handleBriefingApi',
-    dbInit: ['initBriefingDatabase']
+    name: 'subscriber',
+    match: (path) => path.startsWith('/apps/subscriber/'),
+    load: () => import('./subscriber/api/index.js'),
+    apiHandler: 'handleSubscriberApi',
+    dbInit: ['initSubscriberDatabase']
   },
   {
     name: 'cryptobot',

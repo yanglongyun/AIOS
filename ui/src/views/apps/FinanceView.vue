@@ -28,15 +28,15 @@
           <!-- 汇总框 -->
           <div class="summary-box flex justify-between gap-3 rounded border-2 border-dashed border-[rgba(82,113,255,0.4)] bg-white/60 px-3 py-2 shadow-[inset_0_0_10px_rgba(0,0,0,0.02)] sm:gap-[30px] sm:px-6 sm:py-3">
             <div class="flex flex-col items-end">
-              <span class="mb-0.5 text-[10px] text-gray-500 sm:mb-1 sm:text-xs">进项</span>
+              <span class="mb-0.5 text-[10px] text-gray-500 sm:mb-1 sm:text-xs">{{ t('finance_income') }}</span>
               <span class="text-sm font-bold text-green-700 sm:text-lg">+ {{ fmtAmt(totalIncome) }}</span>
             </div>
             <div class="flex flex-col items-end border-l border-dashed border-[rgba(82,113,255,0.3)] pl-3 sm:pl-[30px]">
-              <span class="mb-0.5 text-[10px] text-gray-500 sm:mb-1 sm:text-xs">划出</span>
+              <span class="mb-0.5 text-[10px] text-gray-500 sm:mb-1 sm:text-xs">{{ t('finance_expense') }}</span>
               <span class="text-sm font-bold text-red-700 sm:text-lg">- {{ fmtAmt(totalExpense) }}</span>
             </div>
             <div class="flex flex-col items-end border-l border-dashed border-[rgba(82,113,255,0.3)] pl-3 sm:pl-[30px]">
-              <span class="mb-0.5 text-[10px] font-bold text-blue-900 sm:mb-1 sm:text-xs">结余</span>
+              <span class="mb-0.5 text-[10px] font-bold text-blue-900 sm:mb-1 sm:text-xs">{{ t('finance_balance') }}</span>
               <span class="text-base font-black text-black underline decoration-double sm:text-2xl">{{ fmtAmt(endingBalance) }}</span>
             </div>
           </div>
@@ -47,27 +47,44 @@
           <table class="dot-matrix w-full border-collapse">
             <thead>
               <tr>
-                <th class="passbook-th w-[12%]">日期<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DATE</span></th>
-                <th class="passbook-th">摘要<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">NARRATIVE</span></th>
-                <th class="passbook-th w-[15%]">支出<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">WITHDRAWAL</span></th>
-                <th class="passbook-th w-[15%]">存入<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DEPOSIT</span></th>
-                <th class="passbook-th w-[10%]">操作<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">OPR</span></th>
+                <th class="passbook-th w-[12%]">{{ t('finance_date') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DATE</span></th>
+                <th class="passbook-th">{{ t('finance_narrative') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">NARRATIVE</span></th>
+                <th class="passbook-th w-[15%]">{{ t('finance_withdrawal') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">WITHDRAWAL</span></th>
+                <th class="passbook-th w-[15%]">{{ t('finance_deposit') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DEPOSIT</span></th>
+                <th class="passbook-th w-[10%]">{{ t('finance_operation') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">OPR</span></th>
               </tr>
             </thead>
             <tbody>
               <!-- 历史记录 -->
               <tr v-for="(row, i) in rows" :key="row.id" class="group transition-colors hover:bg-[rgba(82,113,255,0.05)]">
-                <td class="passbook-td text-center">{{ fmtDate(row.date) }}</td>
-                <td class="passbook-td text-center">{{ row.note || (row.type === 'income' ? '存入' : '支出') }}</td>
-                <td class="passbook-td text-right font-bold" :class="row.type === 'expense' ? 'text-red-700' : ''">
-                  {{ row.type === 'expense' ? '-' + fmtAmt(row.amount) : '' }}
+                <!-- 日期 -->
+                <td class="passbook-td text-center" @dblclick="startEdit(row, 'date')">
+                  <input v-if="editing?.id === row.id && editing?.field === 'date'" v-model="editing.value"
+                    class="inline-input text-center" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                  <span v-else>{{ fmtDate(row.date) }}</span>
                 </td>
-                <td class="passbook-td text-right font-bold" :class="row.type === 'income' ? 'text-green-700' : ''">
-                  {{ row.type === 'income' ? '+' + fmtAmt(row.amount) : '' }}
+                <!-- 摘要 -->
+                <td class="passbook-td text-center" @dblclick="startEdit(row, 'note')">
+                  <input v-if="editing?.id === row.id && editing?.field === 'note'" v-model="editing.value"
+                    class="inline-input text-center" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                  <span v-else>{{ row.note || (row.type === 'income' ? t('finance_default_income_note') : t('finance_default_expense_note')) }}</span>
                 </td>
+                <!-- 支出 -->
+                <td class="passbook-td text-right font-bold" :class="row.type === 'expense' ? 'text-red-700' : ''" @dblclick="row.type === 'expense' && startEdit(row, 'amount')">
+                  <input v-if="editing?.id === row.id && editing?.field === 'amount' && row.type === 'expense'" v-model="editing.value"
+                    class="inline-input text-right font-bold text-red-700" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                  <span v-else>{{ row.type === 'expense' ? '-' + fmtAmt(row.amount) : '' }}</span>
+                </td>
+                <!-- 存入 -->
+                <td class="passbook-td text-right font-bold" :class="row.type === 'income' ? 'text-green-700' : ''" @dblclick="row.type === 'income' && startEdit(row, 'amount')">
+                  <input v-if="editing?.id === row.id && editing?.field === 'amount' && row.type === 'income'" v-model="editing.value"
+                    class="inline-input text-right font-bold text-green-700" @blur="saveEdit" @keyup.enter="saveEdit" @keyup.escape="cancelEdit" />
+                  <span v-else>{{ row.type === 'income' ? '+' + fmtAmt(row.amount) : '' }}</span>
+                </td>
+                <!-- 操作 -->
                 <td class="passbook-td text-center">
                   <button class="print-btn border-red-700 text-red-700 opacity-100 transition-opacity hover:bg-red-700 hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
-                          @click="remove(row.id)">删除</button>
+                          @click="remove(row.id)">{{ t('common_delete') }}</button>
                 </td>
               </tr>
 
@@ -77,7 +94,7 @@
                   <input v-model="newDate" type="text" class="inline-input text-center" :placeholder="todayStr" />
                 </td>
                 <td class="passbook-td text-center">
-                  <input ref="noteInput" v-model="newNote" type="text" class="inline-input text-center" placeholder="摘要事由..." @keyup.enter="save" />
+                  <input ref="noteInput" v-model="newNote" type="text" class="inline-input text-center" :placeholder="t('finance_note_placeholder')" @keyup.enter="save" />
                 </td>
                 <td class="passbook-td text-right">
                   <input v-model="newWithdraw" type="text" class="inline-input text-right font-bold text-red-700" placeholder="0.00" @keyup.enter="save" />
@@ -86,7 +103,7 @@
                   <input v-model="newDeposit" type="text" class="inline-input text-right font-bold text-green-700" placeholder="0.00" @keyup.enter="save" />
                 </td>
                 <td class="passbook-td text-center">
-                  <button class="print-btn" :disabled="saving || (!newWithdraw && !newDeposit)" @click="save">印字</button>
+                  <button class="print-btn" :disabled="saving || (!newWithdraw && !newDeposit)" @click="save">{{ t('common_save') }}</button>
                 </td>
               </tr>
 
@@ -102,6 +119,8 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
+import { useI18n } from '../../i18n/index.js';
+const { locale, t } = useI18n();
 
 const API_BASE = '/apps/finance';
 
@@ -119,6 +138,7 @@ const newNote = ref('');
 const newWithdraw = ref('');
 const newDeposit = ref('');
 const noteInput = ref(null);
+const editing = ref(null); // { id, field, value, original }
 
 const displayMonth = computed(() => month.value.replace('-', ' / '));
 const isCurrentMonth = computed(() => {
@@ -143,7 +163,7 @@ const endingBalance = computed(() => totalIncome.value - totalExpense.value);
 
 const fmtAmt = (n) => {
   const v = Number(n) || 0;
-  return v.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return v.toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 const fmtDate = (dateStr) => {
   if (!dateStr) return '';
@@ -208,6 +228,48 @@ const save = async () => {
     nextTick(() => noteInput.value?.focus());
   } catch (e) { console.error(e); }
   finally { saving.value = false; }
+};
+
+const startEdit = (row, field) => {
+  let value;
+  if (field === 'date') value = fmtDate(row.date);
+  else if (field === 'amount') value = String(row.amount);
+  else value = row.note || '';
+  editing.value = { id: row.id, field, value, original: value };
+  nextTick(() => {
+    const input = document.querySelector('tr .inline-input:focus') || document.querySelector(`input.inline-input`);
+    input?.focus();
+  });
+};
+
+const cancelEdit = () => { editing.value = null; };
+
+const saveEdit = async () => {
+  if (!editing.value) return;
+  const { id, field, value, original } = editing.value;
+  if (value === original) { editing.value = null; return; }
+
+  const body = { id };
+  if (field === 'date') {
+    const dayPart = value.includes('-') ? value.split('-').pop() : value;
+    body.date = `${month.value}-${dayPart.padStart(2, '0')}T12:00:00`;
+  } else if (field === 'amount') {
+    const amt = parseFloat(value);
+    if (!amt || amt <= 0) { editing.value = null; return; }
+    body.amount = amt;
+  } else {
+    body.note = value;
+  }
+
+  editing.value = null;
+  try {
+    await fetch(`${API_BASE}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    await fetchData();
+  } catch (e) { console.error(e); }
 };
 
 const remove = async (id) => {

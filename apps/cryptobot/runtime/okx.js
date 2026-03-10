@@ -67,7 +67,24 @@ export const fetchSpotBalances = async (cfg, instId) => {
     quoteAvail: q.avail,
     quoteCash: q.cash,
     baseAvail: b.avail,
-    baseCash: b.cash
+    baseCash: b.cash,
+    totalEq: Number(data?.data?.[0]?.totalEq || 0) || 0
+  };
+};
+
+export const fetchFundingBalances = async (cfg, instId) => {
+  const { base, quote } = parseInstPair(instId);
+  const data = await okxRequest(cfg, 'GET', `/api/v5/asset/balances?ccy=${encodeURIComponent(`${quote},${base}`)}`);
+  const rows = Array.isArray(data?.data) ? data.data : [];
+  const findBal = (ccy) => {
+    const row = rows.find((x) => String(x.ccy || '').toUpperCase() === ccy);
+    return Number(row?.bal || row?.availBal || 0) || 0;
+  };
+  return {
+    base,
+    quote,
+    quoteBal: findBal(quote),
+    baseBal: findBal(base)
   };
 };
 

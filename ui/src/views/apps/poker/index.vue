@@ -1,5 +1,8 @@
 <template>
-  <div class="flex h-full min-h-full w-full flex-col items-center overflow-hidden bg-[#0a150a]">
+  <div
+    class="flex h-full min-h-full w-full flex-col items-center overflow-hidden bg-[#1a3a1a]"
+    style="background-image: radial-gradient(ellipse at 50% 30%, #224422 0%, #0a150a 100%);"
+  >
     <PokerTableView
       class="w-full flex-1"
       :ai-speech="aiSpeech"

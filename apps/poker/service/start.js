@@ -1,4 +1,4 @@
-import { grantDailyAllowanceIfNeeded, getPokerEconomy, setPokerBalances } from '../repository/economy.js';
+import { getPokerEconomy, setPokerBalances } from '../repository/economy.js';
 import { insertGame } from '../repository/game.js';
 
 const SUITS = ['spade', 'heart', 'diamond', 'club'];
@@ -15,7 +15,6 @@ const shuffle = () => {
 };
 
 export const startGame = () => {
-  const granted = grantDailyAllowanceIfNeeded();
   const economyBefore = getPokerEconomy();
 
   const deck = shuffle();
@@ -52,7 +51,6 @@ export const startGame = () => {
       round: 1,
       status: 'playing'
     },
-    economy,
-    grant: granted
+    economy
   };
 };

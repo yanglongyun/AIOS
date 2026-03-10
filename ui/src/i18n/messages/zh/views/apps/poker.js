@@ -23,6 +23,5 @@ export default {
     poker_ai_called: 'AI 跟注了 {0}，轮到你行动。',
     poker_start_failed: '开始失败',
     poker_action_failed: '操作失败',
-    poker_network_error: '网络异常',
-    poker_daily_grant: '今日补贴已到账：+{0} 筹码'
+    poker_network_error: '网络异常'
 };

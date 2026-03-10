@@ -1,19 +1,18 @@
 import { readBody } from '../../app_shared/utils/readBody.js';
 import { json } from '../../app_shared/utils/json.js';
 import { initPokerDatabase } from '../repository/init.js';
-import { grantDailyAllowanceIfNeeded, getPokerEconomy } from '../repository/economy.js';
+import { getPokerEconomy } from '../repository/economy.js';
 import { startHandler } from './start.js';
 import { actionHandler } from './action.js';
 import { stateHandler } from './state.js';
 import { listHandler } from './list.js';
 
-export { initPokerDatabase, grantDailyAllowanceIfNeeded, getPokerEconomy };
+export { initPokerDatabase, getPokerEconomy };
 
 export const handlePokerApi = async (req, res, path) => {
   if (path === '/apps/poker/status' && req.method === 'GET') {
-    const grant = grantDailyAllowanceIfNeeded();
     const economy = getPokerEconomy();
-    return json(res, { success: true, economy, grant });
+    return json(res, { success: true, economy });
   }
 
   if (path === '/apps/poker/start' && req.method === 'POST') {

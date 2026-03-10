@@ -23,6 +23,5 @@ export default {
     poker_ai_called: 'AI Called with {0}, your turn.',
     poker_start_failed: 'Failed to start',
     poker_action_failed: 'Action failed',
-    poker_network_error: 'Network error',
-    poker_daily_grant: 'Daily allowance granted: +{0} chips'
+    poker_network_error: 'Network error'
 };

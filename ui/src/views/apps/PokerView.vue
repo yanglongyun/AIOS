@@ -135,7 +135,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { toast } from '../../stores/toast.js';
 import { useI18n } from '../../i18n/index.js';
 const { t } = useI18n();
 
@@ -173,8 +172,6 @@ const loadStatus = async () => {
   const data = await request('/apps/poker/status');
   if (data.success) {
     economy.value = data.economy;
-    const granted = Number(data.grant?.player || 0);
-    if (granted > 0) toast.show(t('poker_daily_grant', { 0: granted }));
   }
 };
 

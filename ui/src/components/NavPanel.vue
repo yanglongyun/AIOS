@@ -58,10 +58,10 @@
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(is('/inbox'))"><span
               class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📬</span>{{ t('app_sidebar_inbox') }}</button>
-          <button @click="go('/story')"
+          <button @click="go('/reader')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-            :class="btnClass(route.path.startsWith('/story'))"><span
-              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>{{ t('app_sidebar_story') }}</button>
+            :class="btnClass(route.path.startsWith('/reader'))"><span
+              class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📚</span>{{ t('app_sidebar_reader') }}</button>
           <button @click="go('/poker')"
             class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
             :class="btnClass(route.path.startsWith('/poker'))"><span

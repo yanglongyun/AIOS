@@ -1,8 +1,8 @@
 import { db } from './client.js';
 
-export const initStoryDatabase = () => {
+export const initReaderDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_story_sessions (
+    CREATE TABLE IF NOT EXISTS apps_reader_sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL DEFAULT '未命名故事',
       premise TEXT NOT NULL DEFAULT '',
@@ -15,7 +15,7 @@ export const initStoryDatabase = () => {
   `);
 
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_story_chapters (
+    CREATE TABLE IF NOT EXISTS apps_reader_chapters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id INTEGER NOT NULL,
       idx INTEGER NOT NULL,
@@ -25,19 +25,19 @@ export const initStoryDatabase = () => {
       summary TEXT NOT NULL DEFAULT '',
       progress TEXT NOT NULL DEFAULT '',
       created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY(session_id) REFERENCES apps_story_sessions(id) ON DELETE CASCADE
+      FOREIGN KEY(session_id) REFERENCES apps_reader_sessions(id) ON DELETE CASCADE
     )
   `);
 
   // 预置书籍
-  const count = db.prepare('SELECT COUNT(*) as c FROM apps_story_sessions').get().c;
+  const count = db.prepare('SELECT COUNT(*) as c FROM apps_reader_sessions').get().c;
   if (count === 0) {
     const insertSession = db.prepare(`
-      INSERT INTO apps_story_sessions (title, premise, summary, progress, chapter_count, created_at, updated_at)
+      INSERT INTO apps_reader_sessions (title, premise, summary, progress, chapter_count, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
     const insertChapter = db.prepare(`
-      INSERT INTO apps_story_chapters (session_id, idx, action, content, choices_json, summary, progress, created_at)
+      INSERT INTO apps_reader_chapters (session_id, idx, action, content, choices_json, summary, progress, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 

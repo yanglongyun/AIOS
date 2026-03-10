@@ -13,7 +13,7 @@ import NokiaView from '../views/apps/NokiaView.vue';
 import CreateAppView from '../views/apps/CreateAppView.vue';
 import SubscriberView from '../views/apps/SubscriberView.vue';
 import CryptobotView from '../views/apps/CryptobotView.vue';
-import StoryView from '../views/apps/StoryView.vue';
+import ReaderView from '../views/apps/ReaderView.vue';
 import FortuneView from '../views/apps/FortuneView.vue';
 import PokerView from '../views/apps/PokerView.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
@@ -34,7 +34,7 @@ const routes = [
   { path: '/nokia', component: NokiaView },
   { path: '/subscriber', component: SubscriberView },
   { path: '/cryptobot', component: CryptobotView },
-  { path: '/story', component: StoryView },
+  { path: '/reader', component: ReaderView },
   { path: '/fortune', component: FortuneView },
   { path: '/poker', component: PokerView },
   { path: '/settings', component: SettingsView }

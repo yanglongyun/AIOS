@@ -33,7 +33,7 @@ npm run start:apps # 应用服务: 9701
 | 📻 订阅机 | `/subscriber` | AI 聚合新闻订阅 |
 | 📈 炒币机 | `/cryptobot` | 加密货币自动交易 |
 | 📬 收件箱 | `/inbox` | 消息收件箱 |
-| 📚 读小说 | `/story` | 在线小说阅读器 |
+| 📚 阅读器 | `/reader` | 在线小说阅读器 |
 | 🃏 炸金花 | `/poker` | 经典扑克牌游戏 |
 | 🔮 算一卦 | `/fortune` | AI 占卜 |
 | 📱 老手机 | `/nokia` | 复古诺基亚手机模拟器 |
@@ -63,7 +63,7 @@ apps/            应用服务
   subscriber/    订阅机
   cryptobot/     炒币机
   inbox/         收件箱
-  story/         读小说
+  reader/        阅读器
   poker/         炸金花
   fortune/       算一卦
   nokia/         老手机

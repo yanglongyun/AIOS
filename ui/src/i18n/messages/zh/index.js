@@ -13,7 +13,7 @@ import inbox from './views/apps/inbox.js';
 import nokia from './views/apps/nokia.js';
 import notebook from './views/apps/notebook.js';
 import poker from './views/apps/poker.js';
-import story from './views/apps/story.js';
+import reader from './views/apps/reader.js';
 import settings from './views/settings.js';
 import welcome from './views/welcome.js';
 
@@ -33,7 +33,7 @@ export default {
   ...nokia,
   ...notebook,
   ...poker,
-  ...story,
+  ...reader,
   ...settings,
   ...welcome
 };

@@ -9,7 +9,7 @@ export default {
   app_sidebar_inbox: '收件箱',
   app_sidebar_subscriber: '订阅机',
   app_sidebar_cryptobot: '炒币机',
-  app_sidebar_story: '读小说',
+  app_sidebar_reader: '阅读器',
   app_sidebar_poker: '炸金花',
   app_sidebar_fortune: '算一卦',
   app_sidebar_nokia: '老手机',

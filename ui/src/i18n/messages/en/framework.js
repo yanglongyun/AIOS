@@ -9,7 +9,7 @@ export default {
   app_sidebar_inbox: 'Inbox',
   app_sidebar_subscriber: 'Subscriber',
   app_sidebar_cryptobot: 'Crypto Bot',
-  app_sidebar_story: 'Novel Reader',
+  app_sidebar_reader: 'Reader',
   app_sidebar_poker: 'Poker',
   app_sidebar_fortune: 'Divination',
   app_sidebar_nokia: 'Old Phone',

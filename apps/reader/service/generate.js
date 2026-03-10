@@ -14,13 +14,13 @@ const normalizeChoices = (choices = []) => {
 
 const taskAgent = async ({ sessionId, action, req }) => {
   return await agentTaskJson({
-    app: 'story',
+    app: 'reader',
     title: `故事推进 #${sessionId}`,
     prompt: [
-      '你在处理 story 的章节推进请求。',
-      '数据库路径：database/apps/story.db',
-      '用 shell 查询 apps_story_sessions 获取故事标题、世界观设定、当前梗概、当前进度；',
-      '查询 apps_story_chapters 获取该 session 最近 6 章的 action 和 content 作为叙事上下文。',
+      '你在处理 reader 的章节推进请求。',
+      '数据库路径：database/apps/reader.db',
+      '用 shell 查询 apps_reader_sessions 获取故事标题、世界观设定、当前梗概、当前进度；',
+      '查询 apps_reader_chapters 获取该 session 最近 6 章的 action 和 content 作为叙事上下文。',
       `session_id: ${sessionId}`,
       `用户行动：${action}`,
       '最终只输出 JSON：{"content":"本章正文(120-260字)","choices":["选项1","选项2","选项3"],"summary":"更新后的累积梗概(80-140字)","progress":"第N章：副标题"}',

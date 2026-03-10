@@ -36,11 +36,11 @@ export const appRegistry = [
     serviceStart: ['initCryptobotRuntime']
   },
   {
-    name: 'story',
-    match: (path) => path.startsWith('/apps/story/'),
-    load: () => import('./story/api/index.js'),
-    apiHandler: 'handleStoryApi',
-    dbInit: ['initStoryDatabase']
+    name: 'reader',
+    match: (path) => path.startsWith('/apps/reader/'),
+    load: () => import('./reader/api/index.js'),
+    apiHandler: 'handleReaderApi',
+    dbInit: ['initReaderDatabase']
   },
   {
     name: 'fortune',

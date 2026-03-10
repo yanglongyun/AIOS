@@ -5,6 +5,7 @@ import { listHandler } from './list.js';
 import { createHandler } from './create.js';
 import { updateHandler } from './update.js';
 import { deleteHandler } from './delete.js';
+import { optimizeHandler } from './optimize.js';
 
 export { initNotebookDatabase };
 
@@ -32,6 +33,13 @@ export const handleNotebookApi = async (req, res, path) => {
   if (path === '/apps/notebook/delete' && req.method === 'POST') {
     const body = await readBody(req);
     const data = deleteHandler(body);
+    if (data?.error) return json(res, { error: data.error }, data.status || 400);
+    return json(res, data);
+  }
+
+  if (path === '/apps/notebook/optimize' && req.method === 'POST') {
+    const body = await readBody(req);
+    const data = await optimizeHandler(body, req);
     if (data?.error) return json(res, { error: data.error }, data.status || 400);
     return json(res, data);
   }

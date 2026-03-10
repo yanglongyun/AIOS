@@ -6,10 +6,8 @@
     <div class="radio-cabinet">
 
       <!-- 应用标题 -->
-      <div class="mb-3 flex shrink-0 items-center justify-center gap-3">
+      <div class="mb-3 flex shrink-0 items-center justify-center">
         <div class="text-[10px] font-black uppercase tracking-[0.3em] text-[#a08040]" style="text-shadow:0 1px 0 rgba(0,0,0,0.3);">{{ t('subscriber_title') }}</div>
-        <div class="h-1 w-1 rounded-full bg-[#806040] opacity-50"></div>
-        <div class="text-[10px] tracking-widest text-[#806040]">{{ t('subscriber_subtitle') }}</div>
       </div>
 
       <!-- 调频显示条 -->

@@ -55,10 +55,6 @@
   <div v-else class="flex h-full w-full items-center justify-center bg-[#2b1d14]">
     <div class="clipboard-board relative flex w-full max-w-[500px] flex-col items-center rounded-t-2xl rounded-b-3xl" style="height:90%">
 
-      <!-- 金属边角 -->
-      <div class="board-corner absolute -bottom-0.5 -left-0.5 z-[5] h-[30px] w-[30px] rounded-[0_10px_0_16px] bg-gradient-to-br from-[#a0a0a0] via-[#666] to-[#333] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.5),1px_1px_3px_rgba(0,0,0,0.6)]"></div>
-      <div class="board-corner absolute -bottom-0.5 -right-0.5 z-[5] h-[30px] w-[30px] rounded-[10px_0_16px_0] bg-gradient-to-br from-[#a0a0a0] via-[#666] to-[#333] shadow-[inset_1px_1px_2px_rgba(255,255,255,0.5),1px_1px_3px_rgba(0,0,0,0.6)]"></div>
-
       <!-- 金属弹簧夹 -->
       <div class="absolute top-[10px] z-30 flex w-[140px] flex-col items-center">
         <div class="clip-base relative h-[25px] w-full rounded border border-[#555]">
@@ -69,9 +65,8 @@
       </div>
 
       <!-- 信笺纸（根据 style 变纹理） -->
-      <div class="legal-pad relative z-10 mt-10 w-[90%] overflow-hidden rounded-b"
-           :class="cardStyle(editorStyle).padCls"
-           style="height:calc(100% - 100px)">
+      <div class="legal-pad relative z-10 mt-10 min-h-0 flex-1 w-[90%] overflow-hidden rounded-b"
+           :class="cardStyle(editorStyle).padCls">
         <div class="pad-binding absolute inset-x-0 top-0 h-4 border-b border-dashed border-white/20 shadow-[0_2px_3px_rgba(0,0,0,0.4)]"></div>
 
         <!-- 日期戳 -->
@@ -83,25 +78,57 @@
         <!-- 编辑区 -->
         <textarea ref="editorRef"
           v-model="editorDraft"
-          class="absolute inset-0 resize-none border-none bg-transparent pl-[55px] pr-4 pt-[50px] font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-lg leading-[30px] tracking-wide outline-none placeholder:italic placeholder:opacity-30"
+          class="absolute inset-0 resize-none border-none bg-transparent pl-[55px] pr-4 pt-[50px] pb-4 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-lg leading-[30px] tracking-wide outline-none placeholder:italic placeholder:opacity-30"
           :class="cardStyle(editorStyle).inkCls"
           placeholder="在这里记下你的灵感碎片..."
           spellcheck="false"
         ></textarea>
       </div>
 
-      <!-- 底部操作栏 -->
-      <div class="absolute inset-x-0 bottom-0 z-40 flex items-center justify-between rounded-b-3xl bg-[#3a2515] px-5 py-3 shadow-[inset_0_2px_4px_rgba(255,255,255,0.08)]">
-        <button class="board-btn bg-gradient-to-b from-[#6b5540] to-[#4a3828] text-white/70 hover:from-[#7a6450] hover:to-[#5a4838] active:from-[#4a3828] active:to-[#3a2818]"
-                @click="backToList">返回</button>
-        <button v-if="editingNoteId" class="board-btn bg-gradient-to-b from-[#8b3a3a] to-[#6a2222] text-red-200 hover:from-[#9b4a4a] hover:to-[#7a3232] active:from-[#6a2222] active:to-[#5a1818]"
-                @click="deleteAndBack">删除</button>
-        <button class="board-btn bg-gradient-to-b from-[#c0903a] to-[#9a7028] text-white hover:from-[#d0a04a] hover:to-[#aa8038] active:from-[#9a7028] active:to-[#8a6018] disabled:opacity-40 disabled:cursor-not-allowed"
-                :disabled="saving || !editorDraft.trim()"
-                @click="saveEditor">
-          {{ saving ? '...' : '保存' }}
-        </button>
+      <!-- 底部区域：AI抽屉 + 按钮托盘，统一绒面 -->
+      <div class="bottom-zone w-full shrink-0 z-40 flex flex-col overflow-hidden rounded-b-3xl">
+        <!-- AI 抽屉 -->
+        <div class="ai-drawer overflow-hidden" :class="{ show: aiDrawerOpen }">
+          <div class="ai-well mx-3 mt-2.5 flex flex-col overflow-hidden rounded">
+            <div class="flex items-center border-b border-white/5 px-2.5 py-1.5">
+              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">AI 润色</div>
+              <div v-if="aiResult && !aiLoading" class="ml-auto flex items-center gap-1.5">
+                <button class="ai-btn-apply cursor-pointer rounded px-3.5 py-1 text-[11px] font-bold tracking-wider border-none" @click="applyAI">应用</button>
+                <button class="ai-btn-close cursor-pointer rounded px-3.5 py-1 text-[11px] font-bold tracking-wider border-none" @click="closeAI">关闭</button>
+              </div>
+            </div>
+            <div v-if="aiLoading" class="ai-loading flex items-center justify-center gap-2.5 py-4 px-3">
+              <div class="quill-anim relative h-[18px] w-[18px]"></div>
+              <div class="ai-loading-text text-[11px] font-semibold tracking-widest">正在润色...</div>
+            </div>
+            <div v-else-if="aiResult" class="ai-body overflow-y-auto whitespace-pre-wrap px-3 py-2 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-sm leading-6 tracking-wide">{{ aiResult }}</div>
+          </div>
+        </div>
+
+        <!-- 按钮托盘 -->
+        <div class="tray-buttons flex shrink-0 items-stretch gap-2.5 px-4 py-2.5 pb-3.5">
+          <button class="tray-btn tray-btn-back flex-1" @click="backToList">返回</button>
+          <button class="tray-btn tray-btn-ai flex-1" :disabled="!editorDraft.trim() || aiLoading" @click="startOptimize">优化</button>
+          <button v-if="editingNoteId" class="tray-btn tray-btn-del flex-1" @click="showDeleteConfirm = true">删除</button>
+          <button class="tray-btn tray-btn-save flex-1" :disabled="saving || !editorDraft.trim()" @click="saveEditor">
+            {{ saving ? '...' : '保存' }}
+          </button>
+        </div>
       </div>
+
+      <!-- 删除确认弹窗 -->
+      <Transition name="ai-modal">
+        <div v-if="showDeleteConfirm" class="absolute inset-0 z-50 flex items-center justify-center rounded-t-2xl rounded-b-3xl" @click.self="showDeleteConfirm = false">
+          <div class="ai-modal-backdrop absolute inset-0 rounded-t-2xl rounded-b-3xl"></div>
+          <div class="ai-modal-card relative z-10 mx-8 flex w-full max-w-[320px] flex-col items-center overflow-hidden rounded-xl px-6 py-6">
+            <div class="mb-4 text-sm font-semibold text-[rgba(255,200,160,0.8)]">确定要删除这条笔记吗？</div>
+            <div class="flex w-full gap-3">
+              <button class="tray-btn tray-btn-back flex-1 text-center" @click="showDeleteConfirm = false">取消</button>
+              <button class="tray-btn tray-btn-del flex-1 text-center" @click="confirmDelete">删除</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -125,6 +152,10 @@ const editingNoteId = ref(null);
 const editorStyle = ref(0);
 const saving = ref(false);
 const editorRef = ref(null);
+const aiDrawerOpen = ref(false);
+const aiLoading = ref(false);
+const aiResult = ref('');
+const showDeleteConfirm = ref(false);
 
 // 8种卡片样式：Tailwind类 + 需要原生CSS的用class名
 // 8种卡片：每种都有独特纹理（CSS class），不再有纯色
@@ -177,11 +208,14 @@ const openEditor = (note) => {
   editingNoteId.value = note?.id || null;
   editorDraft.value = note?.content || '';
   editorStyle.value = note ? (Number(note.style) || 0) : randomStyle();
+  aiDrawerOpen.value = false;
+  aiLoading.value = false;
+  aiResult.value = '';
   view.value = 'editor';
   nextTick(() => editorRef.value?.focus());
 };
 
-const backToList = () => { view.value = 'list'; editingNoteId.value = null; editorDraft.value = ''; };
+const backToList = () => { view.value = 'list'; editingNoteId.value = null; editorDraft.value = ''; aiDrawerOpen.value = false; aiResult.value = ''; };
 
 const saveEditor = async () => {
   const content = editorDraft.value.trim();
@@ -202,7 +236,8 @@ const saveEditor = async () => {
   finally { saving.value = false; }
 };
 
-const deleteAndBack = async () => {
+const confirmDelete = async () => {
+  showDeleteConfirm.value = false;
   if (!editingNoteId.value) return;
   await deleteNote(editingNoteId.value);
   backToList();
@@ -218,6 +253,39 @@ const deleteNote = async (id) => {
 
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
 const goNextPage = async () => { if (page.value < totalPages.value && !loading.value) { page.value++; await fetchNotes(); } };
+
+const startOptimize = async () => {
+  const content = editorDraft.value.trim();
+  if (!content || aiLoading.value) return;
+  aiLoading.value = true;
+  aiResult.value = '';
+  aiDrawerOpen.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/optimize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+    aiResult.value = data.result || '';
+  } catch (e) {
+    error.value = e.message || '优化失败';
+    aiDrawerOpen.value = false;
+  } finally {
+    aiLoading.value = false;
+  }
+};
+
+const applyAI = () => {
+  if (aiResult.value) editorDraft.value = aiResult.value;
+  closeAI();
+};
+
+const closeAI = () => {
+  aiDrawerOpen.value = false;
+  aiResult.value = '';
+};
 
 const formatTime = (v) => {
   if (!v) return '';
@@ -530,24 +598,157 @@ onMounted(fetchNotes);
   background: linear-gradient(180deg, #111, #333, #111);
 }
 
-/* ── 实体按钮（3D凸起+按下效果） ── */
-.board-btn {
-  padding: 8px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  border: 1px solid rgba(0,0,0,0.3);
-  box-shadow:
-    0 3px 0 rgba(0,0,0,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.15);
+/* ── 底部绒面区域 ── */
+.bottom-zone {
+  background: linear-gradient(180deg, #3a1818, #2a0e0e);
+  border-top: 3px solid #5a3020;
+  box-shadow: inset 0 4px 12px rgba(0,0,0,0.6);
+  background-image:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 3px);
+}
+
+/* AI 抽屉 */
+.ai-drawer {
+  max-height: 0;
+  transition: max-height 0.4s ease;
+}
+.ai-drawer.show { max-height: 50vh; }
+
+.ai-well {
+  background: rgba(0,0,0,0.25);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.03);
+}
+
+/* 删除确认弹窗 */
+.ai-modal-backdrop {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+}
+.ai-modal-card {
+  background: linear-gradient(180deg, #3a1818, #2a0e0e);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+  background-image:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 3px);
+}
+.ai-modal-enter-active { transition: all 0.25s ease-out; }
+.ai-modal-leave-active { transition: all 0.2s ease-in; }
+.ai-modal-enter-from { opacity: 0; }
+.ai-modal-enter-from .ai-modal-card { transform: scale(0.9); }
+.ai-modal-leave-to { opacity: 0; }
+.ai-modal-leave-to .ai-modal-card { transform: scale(0.9); }
+
+.ai-tag::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e8c060, #a08030);
+  box-shadow: 0 0 4px rgba(200,160,60,0.4);
+}
+
+.ai-btn-apply {
+  background: linear-gradient(180deg, #4a7a40, #306828);
+  color: #d0e8c0;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 0 rgba(20,50,10,0.5), inset 0 1px 0 rgba(200,255,200,0.12);
+  transition: all 0.1s;
+}
+.ai-btn-apply:hover { background: linear-gradient(180deg, #5a8a50, #407838); }
+.ai-btn-apply:active { box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
+
+.ai-btn-close {
+  background: rgba(255,255,255,0.06);
+  color: rgba(200,160,100,0.5);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: all 0.1s;
+}
+.ai-btn-close:hover { background: rgba(255,255,255,0.1); color: rgba(200,160,100,0.8); }
+.ai-btn-close:active { box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
+
+.ai-body {
+  color: rgba(220,200,160,0.75);
+  max-height: 28vh;
+}
+.ai-body::-webkit-scrollbar { width: 3px; }
+.ai-body::-webkit-scrollbar-thumb { background: rgba(200,160,80,0.15); border-radius: 2px; }
+
+/* loading */
+.ai-loading-text {
+  color: rgba(200,160,80,0.6);
+  animation: loadPulse 1.5s ease-in-out infinite;
+}
+.quill-anim::before {
+  content: '\270D'; font-size: 14px; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  animation: quillWrite 1.2s ease-in-out infinite;
+  filter: grayscale(0.3) brightness(0.8);
+}
+@keyframes quillWrite {
+  0%,100% { transform: rotate(-5deg) translateY(0); }
+  25% { transform: rotate(3deg) translateY(-2px); }
+  50% { transform: rotate(-3deg) translateY(1px); }
+  75% { transform: rotate(2deg) translateY(-1px); }
+}
+@keyframes loadPulse {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ── 托盘按钮 ── */
+.tray-btn {
+  padding: 10px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
   transition: all 0.1s;
   position: relative;
   top: 0;
+  border: 1px solid rgba(0,0,0,0.3);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.12);
 }
-.board-btn:active {
+.tray-btn:active {
   top: 3px;
-  box-shadow:
-    0 0 0 rgba(0,0,0,0.4),
-    inset 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.4);
 }
+.tray-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tray-btn-back {
+  background: linear-gradient(180deg, #6a5838, #4a3820, #3a2810);
+  color: rgba(255,220,180,0.5);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  border-color: #2a1808;
+}
+.tray-btn-back:hover { background: linear-gradient(180deg, #7a6848, #5a4830, #4a3820); }
+
+.tray-btn-ai {
+  background: linear-gradient(180deg, #4a3848, #3a2838, #2a1828);
+  color: rgba(220,200,255,0.6);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  border-color: #1a0828;
+}
+.tray-btn-ai:hover { background: linear-gradient(180deg, #5a4858, #4a3848, #3a2838); }
+
+.tray-btn-del {
+  background: linear-gradient(180deg, #8a3028, #6a1818, #501010);
+  color: rgba(255,200,180,0.7);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  border-color: #3a0808;
+}
+.tray-btn-del:hover { background: linear-gradient(180deg, #9a4038, #7a2828, #601818); }
+
+.tray-btn-save {
+  background: linear-gradient(180deg, #d0a848, #a88028, #886818);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  border-color: #604010;
+  box-shadow: 0 3px 0 rgba(80,50,10,0.6), inset 0 1px 1px rgba(255,255,200,0.25);
+}
+.tray-btn-save:hover { background: linear-gradient(180deg, #e0b858, #b89038, #988028); }
+.tray-btn-save:active { top: 3px; box-shadow: 0 0 0 rgba(80,50,10,0.6), inset 0 2px 4px rgba(0,0,0,0.4); }
 </style>

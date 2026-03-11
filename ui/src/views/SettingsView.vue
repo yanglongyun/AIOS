@@ -60,6 +60,9 @@
           @update:enable-tool-loop-limit="enableToolLoopLimit = $event"
           @update:tool-max-rounds="toolMaxRounds = $event"
         />
+        <ResourceTab
+          v-else-if="activeTab === 'resources'"
+        />
         <GeneralTab
           v-else
           :theme="theme"
@@ -81,6 +84,7 @@ import ModelTab from '../components/settings/ModelTab.vue';
 import ContextTab from '../components/settings/ContextTab.vue';
 import ToolTab from '../components/settings/ToolTab.vue';
 import GeneralTab from '../components/settings/GeneralTab.vue';
+import ResourceTab from '../components/settings/ResourceTab.vue';
 import { getProvider } from '../data/providers.js';
 import { toast } from '../stores/toast.js';
 import { useI18n } from '../i18n/index.js';
@@ -92,6 +96,7 @@ const tabs = [
   { key: 'model', labelKey: 'settings_tab_model' },
   { key: 'messages', labelKey: 'settings_tab_messages' },
   { key: 'tools', labelKey: 'settings_tab_tools' },
+  { key: 'resources', labelKey: 'settings_tab_resources' },
   { key: 'general', labelKey: 'settings_tab_general' }
 ];
 

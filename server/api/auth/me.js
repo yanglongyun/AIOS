@@ -1,5 +1,5 @@
 import { json } from '../../../shared/http/json.js';
-import { getAuthUser } from './require.js';
+import { getAuthUser } from '../../../shared/auth/guard.js';
 
 export const me = async (req, res) => {
   const user = getAuthUser(req);

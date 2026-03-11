@@ -8,6 +8,7 @@ import { environment as environmentSection } from './environment.js';
 import { language as languageSection } from './language.js';
 import { memory as memorySection } from './memory.js';
 import { model as modelSection } from './model.js';
+import { resources as resourcesSection } from './resources.js';
 import { scripts as scriptsSection } from './scripts.js';
 import { tools as toolsSection } from './tools.js';
 
@@ -82,6 +83,9 @@ export const buildSystemPrompt = (currentConversationId = '') => {
 
   // 应用段：告诉模型当前系统有哪些应用，以及应用层的协作规则。
   prompt += appsSection();
+
+  // 资源段：用户配置的外部 API Key 与能力。
+  prompt += resourcesSection();
 
   // 脚本段：告诉模型哪些本地脚本能力可直接使用。
   prompt += scriptsSection();

@@ -24,8 +24,8 @@ export default {
   welcome_model: 'Model',
   welcome_api_url: 'API URL (Optional)',
   welcome_api_key: 'API Key',
-  welcome_testing: 'Testing…',
-  welcome_save_test: 'Save & Test',
+  welcome_testing: 'Checking…',
+  welcome_save_test: 'Check Availability',
   welcome_intro_title: 'Initialization Complete',
   welcome_intro_hint: 'System is ready. Here is the first response from the AI core:',
   welcome_enter: 'Enter System',
@@ -33,5 +33,12 @@ export default {
   welcome_err_admin: 'Failed to create admin',
   welcome_err_save: 'Failed to save model config',
   welcome_err_test: 'Model connection test failed',
-  welcome_default_intro: 'Hi, I am AIOS. Nice to meet you.'
+  welcome_default_intro: 'Hi, I am AIOS. Nice to meet you.',
+  welcome_resources_title: 'Resources',
+  welcome_resources_hint: 'Configure external capabilities and API keys for AI, such as search engine or image model API keys.',
+  welcome_resource_title_ph: 'Name, e.g. Google Search API Key',
+  welcome_resource_content_ph: 'API Key / Value…',
+  welcome_resource_add: 'Add item',
+  welcome_skip: 'Skip',
+  welcome_saving: 'Saving…'
 };

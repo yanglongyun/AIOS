@@ -34,5 +34,11 @@ export default {
   settings_password_mismatch: 'New passwords do not match',
   settings_password_changed_relogin: 'Password changed. Please log in again',
   settings_saved: 'Saved',
-  settings_save_failed: 'Save failed: {message}'
+  settings_save_failed: 'Save failed: {message}',
+  settings_tab_resources: 'Resources',
+  settings_resources_hint: 'Manage external capabilities and API keys for AI, such as search, image generation, etc.',
+  settings_resource_title_ph: 'Name',
+  settings_resource_content_ph: 'API Key / Value…',
+  settings_resource_add: 'Add item',
+  settings_saving: 'Saving…'
 };

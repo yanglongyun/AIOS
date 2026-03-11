@@ -8,6 +8,13 @@ export default {
   common_loading: '加载中...',
   common_connected: '已连接',
   common_connecting: '连接中...',
-  common_disconnected: '未连接'
+  common_disconnected: '未连接',
+  reload_title: '系统更新',
+  reload_confirm: '确认更新',
+  reload_building: '正在编译前端…',
+  reload_restarting: '正在重启服务…',
+  reload_retry: '重试',
+  reload_will_build: '重新编译前端',
+  reload_will_restart: '重启服务'
 };
 

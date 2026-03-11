@@ -4,7 +4,8 @@ import { handleSettingsApi } from './settings/index.js';
 import { handleFilesApi } from './files/index.js';
 import { handleTaskApi } from './task/index.js';
 import { handleAuthApi } from './auth/index.js';
-import { handleSetupApi } from './setup/index.js';
+import { handleResourcesApi } from './resources/index.js';
+import { handleSystemApi } from './system/index.js';
 import { access } from '../../shared/auth/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
@@ -27,8 +28,8 @@ export const handleApiRequest = async (req, res, url) => {
       return true;
     }
 
-    if (path.startsWith('/api/setup/')) {
-      await handleSetupApi(req, res, path);
+    if (path.startsWith('/api/system/')) {
+      await handleSystemApi(req, res, path);
       return true;
     }
 
@@ -44,6 +45,11 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/files/')) {
       await handleFilesApi(req, res, path);
+      return true;
+    }
+
+    if (path.startsWith('/api/resources')) {
+      await handleResourcesApi(req, res, path);
       return true;
     }
 

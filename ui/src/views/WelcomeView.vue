@@ -18,23 +18,29 @@
         <!-- 进度条 -->
         <div class="h-[3px] bg-[#2a1e14]">
           <div class="h-full bg-[linear-gradient(90deg,#c8a060,#d4b878)] transition-all duration-500"
-            :style="{ width: step / 4 * 100 + '%' }"></div>
+            :style="{ width: step / 5 * 100 + '%' }"></div>
         </div>
 
-        <!-- Step 1: 欢迎 -->
+        <!-- Step 1: 欢迎 + 语言选择 -->
         <div v-if="step === 1" class="px-10 py-12">
           <h2
             class="bg-gradient-to-r from-[#e8d4b8] to-[#c8a060] bg-clip-text text-[60px] font-extrabold leading-none tracking-tight text-transparent">
             AIOS</h2>
           <div class="mt-8 h-px w-full bg-gradient-to-r from-[#c8a060] to-transparent opacity-30"></div>
-          <p class="mt-8 space-y-3 text-[14px] leading-relaxed tracking-wide text-[#a09078] max-w-[450px]">
+          <p class="mt-8 max-w-[450px] space-y-3 text-[14px] leading-relaxed tracking-wide text-[#a09078]">
             <span>{{ t('welcome_desc_1') }}</span><br>
             <span>{{ t('welcome_desc_2') }}</span><br>
             <span>{{ t('welcome_desc_3') }}</span>
           </p>
-          <div class="mt-12 flex items-end justify-end">
+          <div class="mt-12 flex items-end justify-between">
+            <div class="flex gap-4">
+              <button v-for="lang in [{ id: 'zh', label: '中文' }, { id: 'en', label: 'English' }]" :key="lang.id"
+                class="relative text-[13px] tracking-wider transition-colors cursor-pointer"
+                :class="model.language === lang.id ? 'text-[#c8a060] font-bold after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-[#c8a060]' : 'text-[#6a5840] hover:text-[#a08c70]'"
+                @click="model.language = lang.id">{{ lang.label }}</button>
+            </div>
             <button
-              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all"
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all cursor-pointer"
               @click="step = 2">{{ t('welcome_next') }}</button>
           </div>
         </div>
@@ -47,29 +53,26 @@
           <div class="mt-8 space-y-5">
             <div>
               <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_username') }}</label>
-              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="wiz-input" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_password') }}</label>
-                <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')"
-                  class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+                <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')" class="wiz-input" />
               </div>
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_confirm') }}</label>
-                <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')"
-                  class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+                <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')" class="wiz-input" />
               </div>
             </div>
           </div>
-          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error
-          }}</div>
+          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
 
           <div class="mt-10 flex items-center justify-between">
-            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
+            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
               @click="step = 1">{{ t('welcome_prev') }}</button>
             <button
-              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40"
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
               :disabled="pending" @click="createAdmin">
               {{ pending ? t('welcome_creating') : t('welcome_next') }}
             </button>
@@ -85,7 +88,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_provider') }}</label>
-                <select v-model="model.provider" class="wiz-select w-full appearance-none rounded-md border border-transparent bg-black/30 px-4 py-3 pr-10 text-[13px] text-[#e8d4b8] outline-none transition-all focus:border-[#c8a060] focus:bg-black/50" @change="applyProviderDefault">
+                <select v-model="model.provider" class="wiz-input wiz-select" @change="applyProviderDefault">
                   <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
                     <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </optgroup>
@@ -93,34 +96,72 @@
               </div>
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_model') }}</label>
-                <input v-model.trim="model.model" placeholder="gpt-5.2" class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+                <input v-model.trim="model.model" placeholder="gpt-5.2" class="wiz-input" />
               </div>
             </div>
             <div>
               <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_url') }}</label>
-              <input v-model.trim="model.apiUrl" placeholder="https://..." class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
             </div>
             <div>
-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">API Key</label>
-              <input v-model.trim="model.apiKey" placeholder="sk-..." class="w-full rounded-md border border-transparent bg-black/30 px-4 py-3 text-[13px] text-[#e8d4b8] outline-none transition-all placeholder:text-[#5a4a35] focus:border-[#c8a060] focus:bg-black/50" />
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_key') }}</label>
+              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
             </div>
           </div>
-          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error
-          }}</div>
+          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
 
           <div class="mt-10 flex items-center justify-between">
-            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
+            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
               @click="step = 2">{{ t('welcome_prev') }}</button>
             <button
-              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40"
+              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
               :disabled="pending" @click="saveModelAndTest">
               {{ pending ? t('welcome_testing') : t('welcome_save_test') }}
             </button>
           </div>
         </div>
 
-        <!-- Step 4: 完成 -->
-        <div v-if="step === 4" class="px-10 py-12">
+        <!-- Step 4: 配置资源 -->
+        <div v-if="step === 4" class="px-10 py-10">
+          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_resources_title') }}</h2>
+          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_resources_hint') }}</p>
+
+          <div class="mt-6 max-h-[280px] space-y-3 overflow-y-auto pr-1">
+            <div v-for="(item, idx) in resources" :key="idx"
+              class="group rounded-lg border border-[#3a2a18] bg-black/20 px-4 py-3">
+              <div class="flex items-center gap-2">
+                <input v-model.trim="item.title" :placeholder="t('welcome_resource_title_ph')"
+                  class="flex-1 border-b border-transparent bg-transparent text-[13px] font-semibold text-[#e8d4b8] outline-none placeholder:text-[#5a4a35] focus:border-[#c8a060]" />
+                <button class="cursor-pointer text-sm text-[#6a5840] opacity-0 transition-colors hover:text-[#c8a060] group-hover:opacity-100"
+                  @click="resources.splice(idx, 1)">✕</button>
+              </div>
+              <textarea v-model.trim="item.content" :placeholder="t('welcome_resource_content_ph')" rows="2"
+                class="mt-2 w-full resize-none bg-transparent text-[13px] leading-relaxed text-[#a09078] outline-none placeholder:text-[#5a4a35] focus:text-[#c8b898]"></textarea>
+            </div>
+          </div>
+
+          <button class="mt-3 cursor-pointer text-[13px] text-[#6a5840] transition-colors hover:text-[#c8a060]"
+            @click="resources.push({ title: '', content: '' })">+ {{ t('welcome_resource_add') }}</button>
+
+          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
+
+          <div class="mt-8 flex items-center justify-between">
+            <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
+              @click="step = 3">{{ t('welcome_prev') }}</button>
+            <div class="flex gap-3">
+              <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
+                @click="skipResources">{{ t('welcome_skip') }}</button>
+              <button
+                class="cursor-pointer rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070] disabled:opacity-40"
+                :disabled="pending" @click="saveResources">
+                {{ pending ? t('welcome_saving') : t('welcome_next') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: 完成 -->
+        <div v-if="step === 5" class="px-10 py-12">
           <div class="flex items-start gap-6">
             <div>
               <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_intro_title') }}</h2>
@@ -136,10 +177,10 @@
 
           <div class="mt-12 flex items-center justify-between transition-opacity duration-500"
             :class="typing ? 'opacity-0' : 'opacity-100'">
-            <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors"
-              @click="step = 3">{{ t('welcome_prev') }}</button>
+            <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
+              @click="step = 4">{{ t('welcome_prev') }}</button>
             <button
-              class="rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all"
+              class="cursor-pointer rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070]"
               @click="enterSystem">{{ t('welcome_enter') }}</button>
           </div>
         </div>
@@ -149,13 +190,14 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, watch, reactive, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
-import { useI18n } from '../i18n/index.js';
+import { setLocale, useI18n } from '../i18n/index.js';
+
+const { t } = useI18n();
 const router = useRouter();
-const { locale, t } = useI18n();
 const step = ref(1);
 const pending = ref(false);
 const error = ref('');
@@ -164,6 +206,8 @@ const displayedText = ref('');
 const typing = ref(false);
 let typeTimer = null;
 
+const detectedLanguage = String(navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+
 const admin = ref({ username: '', password: '', confirm: '' });
 
 const model = ref({
@@ -171,9 +215,12 @@ const model = ref({
   apiUrl: getProvider('openai')?.apiUrl || '',
   model: getProvider('openai')?.defaultModel || '',
   apiKey: '',
-  language: locale.value
+  language: detectedLanguage
 });
 
+const resources = reactive([{ title: '', content: '' }]);
+
+watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);
@@ -242,6 +289,8 @@ const saveModelAndTest = async () => {
       throw new Error(saveData?.message || saveData?.error || t('welcome_err_save'));
     }
 
+    setLocale(model.value.language);
+    const isZh = model.value.language === 'zh';
     const testRes = await fetch('/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -249,18 +298,17 @@ const saveModelAndTest = async () => {
       body: JSON.stringify({
         app: 'setup',
         title: '初始化欢迎语',
-        prompt: '生成初始化欢迎介绍。',
+        prompt: isZh ? '生成初始化欢迎介绍。' : 'Generate onboarding intro.',
         schema: { required: ['intro'] },
         messages: [
+          { role: 'system', content: '只输出 JSON：{"intro":"..."}' },
           {
             role: 'system',
-            content: '只输出 JSON：{"intro":"..."}'
+            content: isZh
+              ? '你是 AIOS，一个 AI 驱动的个人操作系统。现在是初始化完成后的第一次启动，请做一段简短的自我介绍（3-5句），像第一次见面打招呼一样自然。告诉用户你能做什么、你的特点。'
+              : 'You are AIOS, an AI-driven personal operating system. This is the first boot after initialization. Give a brief self-introduction (3-5 sentences), naturally like greeting someone for the first time. Tell the user what you can do.'
           },
-          {
-            role: 'system',
-            content: '你是 AIOS，一个 AI 驱动的个人操作系统。现在是初始化完成后的第一次启动，请做一段简短的自我介绍（3-5句），像第一次见面打招呼一样自然。告诉用户你能做什么、你的特点。'
-          },
-          { role: 'user', content: '你好，介绍一下你自己。' }
+          { role: 'user', content: isZh ? '你好，介绍一下你自己。' : 'Hello, introduce yourself.' }
         ]
       })
     });
@@ -271,12 +319,39 @@ const saveModelAndTest = async () => {
     const parsed = JSON.parse(String(testData.response || '{}'));
 
     step.value = 4;
-    startTypewriter(parsed?.intro || t('welcome_default_intro'));
+    welcomeText.value = parsed?.intro || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.');
   } catch (e) {
     error.value = e?.message || t('welcome_err_test');
   } finally {
     pending.value = false;
   }
+};
+
+const saveResources = async () => {
+  error.value = '';
+  pending.value = true;
+  try {
+    const valid = resources.filter(r => r.title.trim());
+    for (const r of valid) {
+      await fetch('/api/resources/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ title: r.title.trim(), content: r.content.trim() })
+      });
+    }
+    step.value = 5;
+    startTypewriter(welcomeText.value);
+  } catch (e) {
+    error.value = e?.message || 'Failed to save resources';
+  } finally {
+    pending.value = false;
+  }
+};
+
+const skipResources = () => {
+  step.value = 5;
+  startTypewriter(welcomeText.value);
 };
 
 const enterSystem = async () => {
@@ -290,11 +365,34 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.wiz-input {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #e8d4b8;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.wiz-input::placeholder {
+  color: #5a4a35;
+}
+
+.wiz-input:focus {
+  border-color: #c8a060;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .wiz-select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238a7860'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-position: right 12px center;
   background-repeat: no-repeat;
   background-size: 16px;
+  padding-right: 40px;
 }
 </style>

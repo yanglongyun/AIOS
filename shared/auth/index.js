@@ -52,7 +52,7 @@ const getInternalActor = (req, path, scope) => {
 };
 
 const allowServerPublic = (path, method) => {
-  return path === '/api/health' || path.startsWith('/api/auth/') || path.startsWith('/api/setup/');
+  return path === '/api/health' || path.startsWith('/api/auth/') || path === '/api/system/setup';
 };
 
 const allowServerDuringSetup = (path, method) => {

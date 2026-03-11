@@ -38,6 +38,7 @@
     </div>
 
     <GlobalToast />
+    <ReloadModal />
   </div>
 </template>
 
@@ -47,6 +48,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router';
 import { LoaderCircle, Menu } from 'lucide-vue-next';
 import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
+import ReloadModal from './components/ReloadModal.vue';
 import TasksPanel from './components/TasksPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 import { useI18n } from './i18n/index.js';

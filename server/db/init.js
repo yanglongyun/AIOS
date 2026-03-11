@@ -60,5 +60,12 @@ export const initDatabase = () => {
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
 
+    CREATE TABLE IF NOT EXISTS resources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
   `);
 };

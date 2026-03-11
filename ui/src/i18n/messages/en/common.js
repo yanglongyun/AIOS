@@ -8,6 +8,13 @@ export default {
   common_loading: 'Loading...',
   common_connected: 'Connected',
   common_connecting: 'Connecting...',
-  common_disconnected: 'Disconnected'
+  common_disconnected: 'Disconnected',
+  reload_title: 'System Update',
+  reload_confirm: 'Confirm',
+  reload_building: 'Building frontend…',
+  reload_restarting: 'Restarting service…',
+  reload_retry: 'Retry',
+  reload_will_build: 'Rebuild frontend',
+  reload_will_restart: 'Restart service'
 };
 

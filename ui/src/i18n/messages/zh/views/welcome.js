@@ -24,8 +24,8 @@ export default {
   welcome_model: '模型',
   welcome_api_url: 'API 链接 (可选)',
   welcome_api_key: 'API Key',
-  welcome_testing: '测试中…',
-  welcome_save_test: '保存并测试',
+  welcome_testing: '检查中…',
+  welcome_save_test: '检查可用性',
   welcome_intro_title: '初始化完成',
   welcome_intro_hint: '系统已就绪，以下是来自 AI 核心的初次回应：',
   welcome_enter: '进入系统',
@@ -33,5 +33,12 @@ export default {
   welcome_err_admin: '创建管理员失败',
   welcome_err_save: '模型配置保存失败',
   welcome_err_test: '模型连通测试失败',
-  welcome_default_intro: '你好，我是 AIOS。很高兴认识你。'
+  welcome_default_intro: '你好，我是 AIOS。很高兴认识你。',
+  welcome_resources_title: '配置资源',
+  welcome_resources_hint: '配置 AI 可使用的外部能力与密钥，如搜索引擎 API Key、图片模型 API Key 等。',
+  welcome_resource_title_ph: '名称，如 Google Search API Key',
+  welcome_resource_content_ph: 'API Key / 配置值…',
+  welcome_resource_add: '添加一项',
+  welcome_skip: '跳过',
+  welcome_saving: '保存中…'
 };

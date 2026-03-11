@@ -2,7 +2,7 @@ import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
 import { findUserAuthById, updateUserPasswordById, deleteAuthSessionsByUserId } from '../../../shared/auth/repository.js';
 import { hashPassword, verifyPassword } from '../../../shared/auth/password.js';
-import { getAuthUser } from './require.js';
+import { getAuthUser } from '../../../shared/auth/guard.js';
 
 export const changePassword = async (req, res) => {
   const user = getAuthUser(req);

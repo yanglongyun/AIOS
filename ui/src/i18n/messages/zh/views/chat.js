@@ -8,6 +8,7 @@ export default {
   chat_done: '完成',
   chat_thinking: '思考中',
   chat_input_placeholder: '输入消息...',
+  chat_input_placeholder_busy: '进行中...',
   chat_uploading: '上传中...',
   chat_upload_file: '上传文件',
   chat_drop_files: '拖拽文件到这里即可添加附件',

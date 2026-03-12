@@ -1,28 +1,47 @@
 <template>
   <nav
     class="group flex h-full flex-col overflow-hidden bg-transparent font-['Georgia','PingFang_SC',serif]">
-    <!-- 对话区域 -->
-    <div class="px-3 pb-2 pt-4">
-      <div class="mb-1 flex items-center justify-between px-2">
-        <span class="text-[11px] tracking-[0.08em] text-[#8a7050]">{{ t('app_sidebar_chat') }}</span>
+    <!-- 顶部导航 -->
+    <div class="space-y-0.5 px-3 pb-2 pt-4">
+      <div class="relative flex w-full items-center rounded-lg text-[13px] transition-all duration-150"
+        :class="btnClass(isChatNew)">
+        <button @click="goLastChat" class="flex flex-1 items-center gap-2 px-3 py-2">
+          <span
+            class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
+          {{ t('app_sidebar_chat') }}
+        </button>
         <button @click="goNewSession" :title="t('app_sidebar_new_chat')"
-          class="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">
-          <Plus class="h-3 w-3" />
+          class="mr-2 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">
+          <PenLine class="h-3 w-3" />
         </button>
       </div>
-      <button @click="goLastChat"
-        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-        :class="btnClass(isChatNew)">
-        <span
-          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">✦</span>
-        {{ t('app_sidebar_chat') }}
-      </button>
       <button @click="goHistory"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
         :class="btnClass(isChatHistory)">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">◷</span>
         {{ t('app_sidebar_history') }}
+      </button>
+      <button @click="go('/files')"
+        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+        :class="btnClass(is('/files'))">
+        <span
+          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📁</span>
+        {{ t('app_sidebar_files') }}
+      </button>
+      <button @click="go('/tasks')"
+        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+        :class="btnClass(is('/tasks'))">
+        <span
+          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📋</span>
+        {{ t('app_sidebar_tasks') }}
+      </button>
+      <button @click="go('/skills')"
+        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+        :class="btnClass(is('/skills'))">
+        <span
+          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">🎯</span>
+        {{ t('app_sidebar_skills') }}
       </button>
     </div>
 
@@ -86,7 +105,7 @@
         :class="btnClass(false)">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">👥</span>
-        {{ t('app_sidebar_community') }}
+        {{ t('app_sidebar_base') }}
       </button>
       <button @click="go('/settings')"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
@@ -102,7 +121,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Plus } from 'lucide-vue-next';
+import { PenLine, Plus } from 'lucide-vue-next';
 import { useI18n } from '../i18n/index.js';
 const emit = defineEmits(['navigate']);
 const route = useRoute();

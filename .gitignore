@@ -5,10 +5,10 @@ memory/
 dev/
 uploads/
 files/
-
 ui/dist/
-AGENT.md
 AGENTS.md
 CLAUDE.md
 .claude/
 think/
+/skills/
+.playwright-cli/

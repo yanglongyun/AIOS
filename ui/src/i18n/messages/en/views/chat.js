@@ -8,6 +8,7 @@ export default {
   chat_done: 'Done',
   chat_thinking: 'Thinking',
   chat_input_placeholder: 'Type a message...',
+  chat_input_placeholder_busy: 'In progress...',
   chat_uploading: 'Uploading...',
   chat_upload_file: 'Upload File',
   chat_drop_files: 'Drop files here to attach them',

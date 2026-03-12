@@ -113,7 +113,7 @@
               @keydown.enter.exact="onEnter"
               @compositionstart="composing = true"
               @compositionend="composing = false"
-              :placeholder="t('chat_input_placeholder')"
+              :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
               rows="1"
               :disabled="busy"
               class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#4a3a28] outline-none placeholder:text-[#c0b098] disabled:opacity-50 dark:text-[#d4c0a0] dark:placeholder:text-[#4a3a28]"

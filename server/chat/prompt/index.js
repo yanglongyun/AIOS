@@ -8,6 +8,7 @@ import { environment as environmentSection } from './environment.js';
 import { language as languageSection } from './language.js';
 import { memory as memorySection } from './memory.js';
 import { model as modelSection } from './model.js';
+import { skills as skillsSection } from './skills.js';
 import { tools as toolsSection } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -80,6 +81,9 @@ export const buildSystemPrompt = (currentConversationId = '') => {
 
   // 应用段：告诉模型当前系统有哪些应用，以及应用层的协作规则。
   prompt += appsSection();
+
+  // 技能段：扫描 skills/ 目录，把可用技能的名称和描述注入上下文。
+  prompt += skillsSection();
 
   // 会话段：把当前 conversation 的上下文约束拼到最后。
   prompt += chatsSection(currentConversationId);

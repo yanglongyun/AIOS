@@ -12,7 +12,7 @@
         </button>
         <button @click="goNewSession" :title="t('app_sidebar_new_chat')"
           class="mr-2 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/10 text-[#8a7050] transition-all hover:bg-white/20 hover:text-[#e0c8a0]">
-          <PenLine class="h-3 w-3" />
+          <Plus class="h-3 w-3" />
         </button>
       </div>
       <button @click="goHistory"

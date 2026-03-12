@@ -43,9 +43,9 @@ export const getStatus = async () => {
     success: true,
     config: {
       base_url: cfg.base_url,
-      has_api_key: Boolean(cfg.api_key),
-      has_api_secret: Boolean(cfg.api_secret),
-      has_passphrase: Boolean(cfg.passphrase),
+      api_key: cfg.api_key || '',
+      api_secret: cfg.api_secret || '',
+      passphrase: cfg.passphrase || '',
       has_keys: Boolean(cfg.api_key && cfg.api_secret && cfg.passphrase),
       directive: cfg.directive,
       interval_sec: cfg.interval_sec,
@@ -58,7 +58,9 @@ export const getStatus = async () => {
       trade_count: state.trade_count || 0,
       started_at: state.started_at,
       last_run_at: state.last_run_at,
-      last_price: lastPrice
+      last_price: lastPrice,
+      last_error: state.last_error || null,
+      last_error_at: state.last_error_at || null
     },
     equity: {
       current: equity,

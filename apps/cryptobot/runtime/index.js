@@ -11,14 +11,13 @@ import { parseJson } from '../../../shared/json/parse.js';
 let timer = null;
 
 const askAI = async (prompt) => {
-  const resp = await fetch('http://localhost:9700/api/task/create/instant', {
+  const resp = await fetch('http://localhost:9700/api/task/create/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       app: 'cryptobot',
       title: '炒币策略决策',
-      prompt,
-      schema: { required: ['action', 'reason', 'amount_usdt'] }
+      prompt
     })
   });
   const data = await resp.json();
@@ -35,6 +34,10 @@ const askAI = async (prompt) => {
 };
 
 const runBotOnce = async () => {
+  // 先更新 last_run_at，确保倒计时能正常重置
+  const stBefore = getState();
+  saveState({ ...stBefore, last_run_at: nowIso() });
+
   const cfg = getConfig();
   if (!cfg.directive) throw new Error('请先设置交易指令');
   if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) throw new Error('请先配置 OKX API Key/Secret/Passphrase');
@@ -88,7 +91,8 @@ const runBotOnce = async () => {
     trade_count: parseInt(state.trade_count || 0) + (trade.executed ? 1 : 0),
     last_price: lastPrice,
     started_at: state.started_at,
-    last_run_at: nowIso()
+    last_error: null,
+    last_error_at: null
   });
 };
 
@@ -102,22 +106,33 @@ export const startBot = (intervalSec) => {
   }
   const sec = Math.max(60, parseInt(intervalSec || cfg.interval_sec || 300));
 
-  if (timer) clearInterval(timer);
+  if (timer) { clearTimeout(timer); timer = null; }
 
   saveConfig({ interval_sec: sec });
   const oldState = getState();
   saveState({ ...oldState, running: 1, started_at: nowIso(), tick_count: oldState.tick_count || 0, trade_count: oldState.trade_count || 0 });
 
-  timer = setInterval(async () => {
-    try { await runBotOnce(); } catch (e) { console.error('[cryptobot]', e.message); }
-  }, sec * 1000);
+  const onError = (e) => {
+    console.error('[cryptobot]', e.message);
+    saveState({ ...getState(), last_error: e.message, last_error_at: nowIso() });
+  };
 
-  runBotOnce().catch(e => console.error('[cryptobot] first run:', e.message));
+  const scheduleNext = () => {
+    timer = setTimeout(async () => {
+      try { await runBotOnce(); } catch (e) { onError(e); }
+      if (getState().running) scheduleNext();
+    }, sec * 1000);
+  };
+
+  runBotOnce()
+    .catch(e => onError(e))
+    .finally(() => { if (getState().running) scheduleNext(); });
+
   return getState();
 };
 
 export const stopBot = () => {
-  if (timer) { clearInterval(timer); timer = null; }
+  if (timer) { clearTimeout(timer); timer = null; }
   return saveState({ ...getState(), running: 0 });
 };
 

@@ -17,6 +17,9 @@ description: 创建应用前必读的基础约束与交付要求
 # create-app
 
 - 创建应用前先阅读目标应用的 \`APP.md\` 与当前系统架构（\`ui/\`、\`apps/\`、\`server/\`）。
+- \`APP.md\` frontmatter 固定字段：\`name\`、\`description\`、\`backend\`、\`database\`。
+- \`backend\` 必须填写应用后端目录（示例：\`apps/reader\`）。
+- \`database\` 必须填写根目录数据库路径（示例：\`database/apps/reader.db\`）。
 - 交付必须包含：API 路由、service、repository、前端入口（如需要）、数据初始化（如需要）。
 - 禁止半成品：不得只做页面或只做接口。
 - 默认遵循项目硬规则：单一路径、无兜底、开发期不做数据兼容。

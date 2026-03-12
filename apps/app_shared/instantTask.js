@@ -1,12 +1,10 @@
 import { parseJsonObject } from '../../shared/ai/json.js';
 
-const requestTask = async (body = {}, req) => {
-  const cookie = typeof req?.headers?.cookie === 'string' ? req.headers.cookie : '';
+const requestTask = async (body = {}) => {
   const resp = await fetch('http://localhost:9700/api/task/create/instant', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      ...(cookie ? { cookie } : {})
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(body)
   });
@@ -22,7 +20,6 @@ export const instantTask = async ({
   title,
   prompt = '',
   schema = null,
-  req,
   messages = null,
   tools = null,
   tool_choice = undefined,
@@ -41,7 +38,7 @@ export const instantTask = async ({
     parallel_tool_calls,
     response_format,
     meta
-  }, req);
+  });
 };
 
 export const instantTaskJson = async (args = {}) => {

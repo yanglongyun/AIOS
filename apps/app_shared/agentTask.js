@@ -1,12 +1,10 @@
 import { parseJsonObject } from '../../shared/ai/json.js';
 
-const requestTask = async (body = {}, req) => {
-  const cookie = typeof req?.headers?.cookie === 'string' ? req.headers.cookie : '';
+const requestTask = async (body = {}) => {
   const resp = await fetch('http://localhost:9700/api/task/create/agent', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      ...(cookie ? { cookie } : {})
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(body)
   });
@@ -17,13 +15,13 @@ const requestTask = async (body = {}, req) => {
   return data;
 };
 
-export const agentTask = async ({ app, title, prompt, req, meta = null }) => {
+export const agentTask = async ({ app, title, prompt, meta = null }) => {
   return await requestTask({
     app,
     title,
     prompt,
     meta
-  }, req);
+  });
 };
 
 export const agentTaskJson = async (args = {}) => {

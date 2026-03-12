@@ -1,4 +1,4 @@
-import { countUsers, deleteAllAuthSessions, getInternalApiToken } from './repository.js';
+import { countUsers, deleteAllAuthSessions } from './repository.js';
 import { getAuthUser } from './guard.js';
 
 export const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
@@ -22,30 +22,10 @@ const isTrustedLocalRequest = (req) => {
   return isLoopbackIp(req?.socket?.remoteAddress || '');
 };
 
-const readInternalToken = () => {
-  return String(getInternalApiToken() || '').trim();
-};
-
-const readBearerToken = (req) => {
-  const auth = String(req?.headers?.authorization || '').trim();
-  if (!auth) return '';
-  const match = auth.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || '').trim() : '';
-};
-
-const getInternalActor = (req, path, scope) => {
-  if (scope !== 'server-api') return null;
-  if (!String(path || '').startsWith('/api/')) return null;
-  if (!isTrustedLocalRequest(req)) return null;
-
-  const internalToken = readInternalToken();
-  if (!internalToken) return null;
-  const token = readBearerToken(req);
-  if (!token || token !== internalToken) return null;
-
+const localActor = () => {
   return {
     id: 0,
-    username: 'internal-agent',
+    username: 'local-runtime',
     role: 'system',
     internal: true
   };
@@ -69,11 +49,10 @@ const allowAppsPublic = (path) => {
 export const access = (req, path, method, scope) => {
   const initialized = countUsers() > 0;
   if (!initialized) deleteAllAuthSessions();
-  const internalActor = getInternalActor(req, path, scope);
 
   if (scope === 'server-api') {
-    if (internalActor) {
-      return { ok: true, initialized, user: internalActor };
+    if (isTrustedLocalRequest(req)) {
+      return { ok: true, initialized, user: localActor() };
     }
     if (allowServerPublic(path, method)) {
       return { ok: true, initialized, user: null };
@@ -90,6 +69,9 @@ export const access = (req, path, method, scope) => {
   }
 
   if (scope === 'apps') {
+    if (isTrustedLocalRequest(req)) {
+      return { ok: true, initialized, user: localActor() };
+    }
     if (allowAppsPublic(path)) return { ok: true, initialized, user: null };
     if (!initialized) {
       return { ok: false, status: 423, message: '系统未初始化，请先完成欢迎安装流程' };

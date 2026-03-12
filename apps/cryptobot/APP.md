@@ -1,6 +1,8 @@
 ---
 name: cryptobot
 description: 炒币机 - 基于 OKX 的自动交易应用，支持配置交易参数、启动停止、收益曲线和决策记录。数据在 cryptobot_config、cryptobot_state、cryptobot_decisions、cryptobot_equity。
+backend: apps/cryptobot
+database: database/apps/cryptobot.db
 ---
 
 # 炒币机

@@ -10,6 +10,8 @@ const parseReadme = (filePath) => {
 
   let fmName = '';
   let fmDescription = '';
+  let fmBackend = '';
+  let fmDatabase = '';
   if (lines[0]?.trim() === '---') {
     let i = 1;
     for (; i < lines.length; i++) {
@@ -17,10 +19,17 @@ const parseReadme = (filePath) => {
       if (line === '---') break;
       if (line.startsWith('name:')) fmName = line.replace(/^name:\s*/, '').trim();
       if (line.startsWith('description:')) fmDescription = line.replace(/^description:\s*/, '').trim();
+      if (line.startsWith('backend:')) fmBackend = line.replace(/^backend:\s*/, '').trim();
+      if (line.startsWith('database:')) fmDatabase = line.replace(/^database:\s*/, '').trim();
     }
   }
-  if (!fmName && !fmDescription) return null;
-  return { title: fmName, summary: fmDescription };
+  if (!fmName && !fmDescription && !fmBackend && !fmDatabase) return null;
+  return {
+    title: fmName,
+    summary: fmDescription,
+    backend: fmBackend,
+    database: fmDatabase
+  };
 };
 
 export const apps = () => {
@@ -45,7 +54,9 @@ export const apps = () => {
     list.push({
       id: name,
       title: meta.title || name,
-      summary: meta.summary || ''
+      summary: meta.summary || '',
+      backend: meta.backend || '',
+      database: meta.database || ''
     });
   }
   list.sort((a, b) => a.id.localeCompare(b.id));
@@ -55,7 +66,9 @@ export const apps = () => {
   }
   const lines = list.map((app, i) => {
     const summary = app.summary ? ` - ${app.summary}` : '';
-    return `${i + 1}. ${app.id} | ${app.title}${summary}`;
+    const backend = app.backend ? ` | backend: ${app.backend}` : '';
+    const database = app.database ? ` | database: ${app.database}` : '';
+    return `${i + 1}. ${app.id} | ${app.title}${summary}${backend}${database}`;
   });
   return `\n\n## 应用目录\n你可以帮助用户构建应用、使用应用、管理应用。\n${lines.join('\n')}`;
 };

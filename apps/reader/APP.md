@@ -1,6 +1,8 @@
 ---
 name: reader
 description: 阅读器 - 互动式章节故事应用，每轮固定 3 个选项并持续推进剧情。数据在 reader_sessions 和 reader_chapters。
+backend: apps/reader
+database: database/apps/reader.db
 ---
 
 # 阅读器

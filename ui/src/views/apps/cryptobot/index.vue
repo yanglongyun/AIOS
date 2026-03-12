@@ -52,7 +52,7 @@ let ticker = null;
 const nowTs = ref(Date.now());
 
 const status = reactive({
-  config: { has_api_key: false, has_api_secret: false, has_passphrase: false, has_keys: false, directive: '', interval_sec: 300, inst_id: '', updated_at: '', base_url: '' },
+  config: { api_key: '', api_secret: '', passphrase: '', has_keys: false, directive: '', interval_sec: 300, inst_id: '', updated_at: '', base_url: '' },
   state: { running: false, tick_count: 0, trade_count: 0, started_at: '', last_run_at: '', last_price: 0 },
   equity: { current: 0, initial: 0, pnl: 0, pnl_ratio: 0, today_change: 0 }
 });
@@ -88,14 +88,10 @@ const loadStatus = async () => {
   Object.assign(status.equity, d.equity || {});
 };
 
-const clearExchangeSecretInputs = () => {
-  exForm.api_key = '';
-  exForm.api_secret = '';
-  exForm.passphrase = '';
-};
-
 const syncExFormFromStatus = () => {
-  clearExchangeSecretInputs();
+  exForm.api_key = status.config.api_key || '';
+  exForm.api_secret = status.config.api_secret || '';
+  exForm.passphrase = status.config.passphrase || '';
   exDirty.value = false;
 };
 
@@ -122,7 +118,6 @@ const doTestExchange = async () => {
   } catch (e) {
     testResult.value = { ok: false, msg: e.message };
   } finally {
-    clearExchangeSecretInputs();
     testingEx.value = false;
   }
 };

@@ -1,6 +1,8 @@
 ---
 name: subscriber
 description: 订阅机 - 按用户订阅主题生成每日简报。支持订阅主题、立即收报、历史查看。数据在 subscriber_profile 和 subscriber_daily。
+backend: apps/subscriber
+database: database/apps/subscriber.db
 ---
 
 # 订阅机

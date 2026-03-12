@@ -1,6 +1,8 @@
 ---
 name: notebook
 description: 随心记 - 轻量笔记应用，支持创建、编辑、置顶、搜索、AI 同步。
+backend: apps/notebook
+database: database/apps/notebook.db
 ---
 
 # 随心记（notebook）

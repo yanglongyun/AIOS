@@ -12,7 +12,7 @@
         >{{ status.state.running ? t('cryptobot_running') : t('cryptobot_stopped') }}</span>
       </div>
       <div class="brand-plate relative rounded-sm border border-[#868e96] px-3.5 py-[3px] text-[9px] font-black tracking-[3px] text-[#1c2128]">
-        CRYPTO-TICKER 3000
+        CRYPTO-TICKER
       </div>
       <button
         class="power-btn rounded px-3 py-[5px] text-[9px] font-black tracking-[1px]"
@@ -49,12 +49,16 @@
       <span class="whitespace-nowrap text-[11px] font-black" :class="status.state.running ? 'text-[#1aab40]' : 'text-[#4a5060]'">{{ countdownLabel }}</span>
     </div>
 
+    <div v-if="status.state.last_error" class="mt-1.5 rounded border border-[#6a2020] bg-[#401010]/60 px-2.5 py-1.5 text-[10px] leading-snug text-[#ff6464]">
+      <span class="font-black">ERR</span> {{ status.state.last_error }}
+    </div>
+
     <button
       class="panel-btn mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-2"
       :class="panelOpen ? 'open' : ''"
       @click="$emit('update:panelOpen', !panelOpen)"
     >
-      <span class="panel-btn-icon text-[11px] transition-transform duration-300" :class="panelOpen ? 'rotate-180 text-[#00ff64]' : 'text-[#8090a0]'">▼</span>
+      <span class="panel-btn-icon text-[11px] transition-transform duration-300" :class="panelOpen ? 'rotate-90 text-[#00ff64]' : 'text-[#8090a0]'">▶</span>
       <span class="text-[9px] font-black tracking-[2px] transition-colors" :class="panelOpen ? 'text-[#00ff64]' : 'text-[#8090a0]'">{{ t('cryptobot_control_panel') }}</span>
       <div class="ml-auto flex gap-[3px]">
         <div class="h-1 w-1 rounded-full transition-colors" :class="panelOpen ? 'bg-[#00ff64]' : 'bg-[#4a5060]'"></div>
@@ -63,8 +67,8 @@
       </div>
     </button>
 
-    <div class="expand-zone overflow-hidden transition-all" :class="panelOpen ? 'open' : ''">
-      <div class="pt-3">
+    <div class="expand-zone transition-all" :class="panelOpen ? 'open' : ''">
+      <div class="expand-scroll pt-3">
         <div v-if="error" class="mb-3 rounded border border-[#6a2020] bg-[#401010] px-3 py-2 text-[11px] text-[#ff6464]">{{ error }}</div>
 
         <div class="field-block mb-2 rounded-[5px] border border-[#21262d] bg-[#080c10] px-3 py-2">
@@ -113,40 +117,38 @@
 
         <hr class="my-2.5 border-t border-dashed border-[#21262d]" />
 
-        <div class="mb-2 flex items-center justify-between">
+        <div class="mb-2">
           <div class="text-[8px] font-black tracking-[2px] text-[#4a5060]">{{ t('cryptobot_exchange_config') }}</div>
-          <div class="flex items-center gap-2">
-            <span
-              v-if="testResult"
-              class="text-[10px] font-black tracking-[1px]"
-              :class="testResult.ok ? 'text-[#00d455]' : 'text-[#ff4d4d]'"
-            >{{ testResult.ok ? t('cryptobot_test_success') : '✗ ' + testResult.msg }}</span>
-            <span v-if="testingEx" class="text-[10px] font-black tracking-[1px] text-[#a08040]">● {{ t('cryptobot_testing') }}</span>
-            <button
-              class="test-btn whitespace-nowrap rounded border border-[#30363d] px-3.5 py-1.5 text-[9px] font-black tracking-[1px] text-[#8090a0]"
-              :disabled="testingEx"
-              @click="$emit('testExchange')"
-            >{{ t('cryptobot_test') }}</button>
-          </div>
         </div>
         <div class="mb-2 grid grid-cols-2 gap-1.5">
           <div class="exchange-field rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">{{ t('cryptobot_api_key') }}</div>
-            <input v-model="exForm.api_key" type="password" autocomplete="off" :placeholder="t('cryptobot_api_key_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.api_key" type="text" autocomplete="off" :placeholder="t('cryptobot_api_key_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
           <div class="exchange-field rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">{{ t('cryptobot_passphrase') }}</div>
-            <input v-model="exForm.passphrase" type="password" autocomplete="off" :placeholder="t('cryptobot_passphrase_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.passphrase" type="text" autocomplete="off" :placeholder="t('cryptobot_passphrase_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
           <div class="col-span-2 rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">{{ t('cryptobot_api_secret') }}</div>
-            <input v-model="exForm.api_secret" type="password" autocomplete="off" :placeholder="t('cryptobot_api_secret_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.api_secret" type="text" autocomplete="off" :placeholder="t('cryptobot_api_secret_placeholder')" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
         </div>
 
         <hr class="my-2.5 border-t border-dashed border-[#21262d]" />
-        <div class="flex justify-start">
-          <button class="save-btn rounded border border-[#2a3040] px-6 py-2 text-[10px] font-black tracking-[2px] text-[#8090a0]" @click="$emit('saveAll')">{{ t('cryptobot_save') }}</button>
+        <div class="flex items-center gap-3">
+          <button
+            class="test-btn whitespace-nowrap rounded border border-[#30363d] px-5 py-2 text-[10px] font-black tracking-[1px] text-[#8090a0]"
+            :disabled="testingEx"
+            @click="$emit('testExchange')"
+          >{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
+          <span
+            v-if="testResult"
+            class="text-[10px] font-black tracking-[1px]"
+            :class="testResult.ok ? 'text-[#00d455]' : 'text-[#ff4d4d]'"
+          >{{ testResult.ok ? t('cryptobot_test_success') : '✗ ' + testResult.msg }}</span>
+          <div class="flex-1"></div>
+          <button class="save-btn rounded border border-[#1aab40] px-6 py-2 text-[10px] font-black tracking-[2px] text-[#00ff64]" @click="$emit('saveAll')">{{ t('cryptobot_save') }}</button>
         </div>
       </div>
     </div>
@@ -249,8 +251,12 @@ const { t } = useI18n();
   box-shadow: 0 3px 0 #000, 0 0 10px rgba(26,171,64,0.15);
 }
 
-.expand-zone { max-height: 0; opacity: 0; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease; }
-.expand-zone.open { max-height: 600px; opacity: 1; }
+.expand-zone { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease; }
+.expand-zone.open { max-height: 45vh; opacity: 1; }
+.expand-scroll { max-height: 45vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+.expand-scroll::-webkit-scrollbar { width: 4px; }
+.expand-scroll::-webkit-scrollbar-track { background: transparent; }
+.expand-scroll::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
 
 .directive-input::placeholder { color: #2a3040; }
 .directive-input:focus { color: #e0d0a0; }
@@ -296,10 +302,10 @@ const { t } = useI18n();
 .test-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .save-btn {
-  background: linear-gradient(180deg, #1a1e28, #0e1218);
-  box-shadow: 0 4px 0 #000;
-  transition: transform 0.08s, box-shadow 0.08s;
+  background: linear-gradient(180deg, #1a3020, #0e1a10);
+  box-shadow: 0 4px 0 #000, 0 0 10px rgba(0,255,100,0.15);
+  transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
 }
 .save-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #000; }
-.save-btn:hover { color: #c9d1d9; border-color: #3a4050; }
+.save-btn:hover { background: linear-gradient(180deg, #205030, #1a3020); box-shadow: 0 4px 0 #000, 0 0 16px rgba(0,255,100,0.25); }
 </style>

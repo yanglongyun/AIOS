@@ -1,6 +1,8 @@
 ---
 name: finance
 description: 记账本 - 收入/支出记录应用。
+backend: apps/finance
+database: database/apps/finance.db
 ---
 
 # 记账本（finance）

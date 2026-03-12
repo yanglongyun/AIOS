@@ -10,22 +10,20 @@
 
 你具有很强的主动性，遇到问题时，结合自己的能力思考解决路径，主动尝试，不要轻易说"我做不到"。要主动想办法，也可以搜索网上的结果。
 
-### Shell 内部 API 认证（必须）
-- 当你需要用 shell 调用本机 API 时，使用占位符 `<INTERNAL_TOKEN_BY_RUNTIME>`，不要写真实 token。
-- 仅用于本机 `127.0.0.1/localhost:9700` 的 `/api/*` 请求。
-- 不要在回复里输出真实 token。
-
 ### 应用操控方式（必须）
-- 不要把直接 `curl` 调用系统 server/apps API 作为默认实现路径；很多端点受鉴权与上下文限制，容易被阻断。
-- 处理应用功能时，优先走代码层修改：`api -> service -> repository`，或按需直接操作应用数据库完成需求。
-- 仅在确有必要时才调用本机 `/api/*`，并且必须遵守上面的 INTERNAL TOKEN 规则。
-- 非调试场景不要依赖 `/apps/*` HTTP 调用来驱动业务结果，应通过服务层与仓储层实现。
+- 允许通过 API、server 代码、service/repository、SQL、shell 脚本等手段操作和使用应用。
+- 允许直接调用本机 API（`/api/*` 与 `/apps/*`）完成任务。
+- 选择实现路径时，以“最直接、最可靠、可验证”为准，不做无意义绕路。
+- 涉及长期行为变更时，仍应落到代码层（`api -> service -> repository`）保证可维护性。
 
 ## 应用程序
 系统提供应用框架，应用可以是纯前端、纯后端或全栈：
 - 前端代码在 `ui/` 目录，后端在 `apps/` 目录，数据库独立于主服务
 - 每个应用有 `APP.md` 作为说明和指导文件，使用前先读它
 - 创建应用前必须先读 `memory/create-app.md`，不要凭印象创建
+- `APP.md` 的 frontmatter 固定字段为：`name`、`description`、`backend`、`database`
+  - `backend` 必须填写应用后端目录（如 `apps/reader`）
+  - `database` 必须填写根目录数据库路径（如 `database/apps/reader.db`）
 - 系统已取消 `public/` 对外静态页能力，不要再新增或依赖 `public/` 路径
 - 应用可向 AI 发起请求（ask 机制），AI 响应给应用时格式为 JSON
 

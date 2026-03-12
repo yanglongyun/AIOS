@@ -2,7 +2,7 @@ import { db } from './client.js';
 
 export const getProfile = () => {
   return db.prepare(`
-    SELECT focus, updated_at AS updatedAt
+    SELECT focus, schedule_time AS scheduleTime, updated_at AS updatedAt
     FROM subscriber_profile
     WHERE id = 1
     LIMIT 1

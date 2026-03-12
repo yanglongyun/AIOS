@@ -95,6 +95,7 @@ const request = async (url, options = {}) => {
 const loadToday = async () => {
   const data = await request(`${API_BASE}/today`);
   focus.value = data.profile?.focus || t('subscriber_default_focus');
+  scheduleTime.value = data.profile?.scheduleTime || '08:00';
   today.value = data.today || null;
 };
 
@@ -110,7 +111,7 @@ const saveFocus = async () => {
     const data = await request(`${API_BASE}/focus`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ focus: focus.value })
+      body: JSON.stringify({ focus: focus.value, scheduleTime: scheduleTime.value })
     });
     focus.value = data.profile?.focus || '';
   } catch (e) {

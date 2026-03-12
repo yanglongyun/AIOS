@@ -8,6 +8,7 @@ export const getToday = () => {
     success: true,
     profile: {
       focus: profile?.focus || '',
+      scheduleTime: profile?.scheduleTime || '08:00',
       updatedAt: profile?.updatedAt || null
     },
     today: today || null

@@ -1,12 +1,9 @@
 import { createServer } from 'http';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { json } from '../shared/http/json.js';
 import { appRegistry } from './registry.js';
 import { access } from '../shared/auth/index.js';
 
 const APPS_PORT = 9701;
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const moduleCache = new Map();
 const dbInitCache = new Set();
@@ -28,7 +25,7 @@ const initDbModule = async (entry, mod) => {
   dbInitCache.add(entry.name);
 };
 
-const bootServices = async () => {
+const bootAppRuntimes = async () => {
   for (const entry of appRegistry) {
     if (!Array.isArray(entry.serviceStart) || entry.serviceStart.length === 0) continue;
     const mod = await loadModule(entry);
@@ -97,7 +94,7 @@ const appsServer = createServer(async (req, res) => {
   }
 });
 
-await bootServices();
+await bootAppRuntimes();
 
 appsServer.listen(APPS_PORT, () => {
   console.log(`  > apps: http://localhost:${APPS_PORT}`);

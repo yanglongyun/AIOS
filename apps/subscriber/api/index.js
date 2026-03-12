@@ -6,6 +6,7 @@ import { refresh } from '../service/refresh.js';
 import { updateFocus } from '../service/focus.js';
 
 export { initSubscriberDatabase } from '../repository/init.js';
+export { initRuntime as initSubscriberRuntime } from '../runtime/index.js';
 
 export const handleSubscriberApi = async (req, res, path) => {
   if (path === '/apps/subscriber/today' && req.method === 'GET') {

@@ -18,7 +18,8 @@ export const appRegistry = [
     match: (path) => path.startsWith('/apps/subscriber/'),
     load: () => import('./subscriber/api/index.js'),
     apiHandler: 'handleSubscriberApi',
-    dbInit: ['initSubscriberDatabase']
+    dbInit: ['initSubscriberDatabase'],
+    serviceStart: ['initSubscriberRuntime']
   },
   {
     name: 'cryptobot',

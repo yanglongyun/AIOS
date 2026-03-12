@@ -18,7 +18,7 @@
           <span v-if="taskCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ taskCount > 99 ? '99+' : taskCount }}</span>
         </button>
         <!-- 对话 -->
-        <button :title="t('app_top_chat')" @click="togglePanel('chat')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]" :class="activePanel === 'chat' ? 'bg-white/20 text-[#f0e0c0]' : ''">
+        <button v-if="!isChatRoute" :title="t('app_top_chat')" @click="togglePanel('chat')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]" :class="activePanel === 'chat' ? 'bg-white/20 text-[#f0e0c0]' : ''">
           <MessageSquare class="h-[14px] w-[14px]" />
         </button>
       </div>
@@ -69,6 +69,7 @@ const sidebarOpen = ref(window.innerWidth >= 768);
 const route = useRoute();
 const router = useRouter();
 const isAuthRoute = computed(() => route.path === '/login' || route.path === '/welcome');
+const isChatRoute = computed(() => route.path.startsWith('/chat'));
 const {
   activePanel,
   tasks,

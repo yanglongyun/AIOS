@@ -1,6 +1,6 @@
 import { agentTaskJson } from '../../app_shared/agentTask.js';
 import { toDateKey } from '../../../shared/time/dateKey.js';
-import { getProfileFocus, upsertProfile, upsertDaily, getDailyFullByDate } from '../repository/refresh.js';
+import { getProfileFocus, upsertProfile, insertDaily, getDailyFullByDate } from '../repository/refresh.js';
 
 const taskAgent = async ({ prompt, taskTitle, req }) => {
   const parsed = await agentTaskJson({
@@ -37,7 +37,7 @@ export const refresh = async (body = {}, req) => {
     return { status: 500, message: '生成结果不完整' };
   }
 
-  upsertDaily(date, focus, result.title, result.brief, result.content, result.note);
+  insertDaily(date, focus, result.title, result.brief, result.content, result.note);
 
   const today = getDailyFullByDate(date);
   return { success: true, today };

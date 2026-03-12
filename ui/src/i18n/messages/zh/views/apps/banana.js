@@ -1,0 +1,20 @@
+export default {
+  banana_input_placeholder: '输入你的指令...',
+  banana_send: '执行',
+  banana_welcome: '欢迎使用',
+  banana_choose_prompt: '请选择：',
+  banana_menu_sms: '1) 短信',
+  banana_menu_news: '2) 新闻',
+  banana_menu_bottle: '3) 漂流瓶',
+  banana_prev: '◀ 上一步',
+  banana_home: '● 主页',
+  banana_next: '下一步 ▶',
+  banana_option_sms: '查看通话记录',
+  banana_option_news: '写一条备忘录',
+  banana_option_bottle: '看看今日运势',
+  banana_booting: '正在开机...',
+  banana_boot_screen: '开机画面',
+  banana_enter_home: '进入主屏幕',
+  banana_ctx_screen: '界面：',
+  banana_ctx_choice: '，选择：'
+};

@@ -3,6 +3,7 @@ export default {
   subscriber_subtitle: 'SUBSCRIBER',
   subscriber_focus_label: '订阅主题 TOPICS',
   subscriber_focus_placeholder: '例如：AI 编程工具、全球科技公司动态、加密市场趋势',
+  subscriber_default_focus: 'AI 领域重大新闻：大模型发布与技术突破、AI 产品与应用动态、行业融资与收购、开源项目进展、AI 政策与监管动向',
   subscriber_save_button: '保存设置',
   subscriber_saved: '已保存 ',
   subscriber_refresh_button: '立即收报',

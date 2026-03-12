@@ -11,7 +11,7 @@ export default {
   app_sidebar_reader: '阅读器',
   app_sidebar_poker: '炸金花',
   app_sidebar_fortune: '算一卦',
-  app_sidebar_nokia: '老手机',
+  app_sidebar_banana: '老手机',
   app_sidebar_settings: '设置',
   app_sidebar_community: '社区',
   app_top_tasks: '任务',

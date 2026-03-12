@@ -1,13 +1,13 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initNokiaDatabase } from '../repository/init.js';
+import { initBananaDatabase } from '../repository/init.js';
 import { generate } from '../service/generation.js';
 import { getProgress } from '../service/progress.js';
 
-export { initNokiaDatabase };
+export { initBananaDatabase };
 
-export const handleNokiaApi = async (req, res, path) => {
-  if (path === '/apps/nokia/generation' && req.method === 'POST') {
+export const handleBananaApi = async (req, res, path) => {
+  if (path === '/apps/banana/generation' && req.method === 'POST') {
     const body = await readBody(req);
     const { history, now, choices, next, prompt, messages, taskTitle } = body;
     if (!now && !next) return json(res, { success: false, message: '缺少参数' }, 400);
@@ -21,7 +21,7 @@ export const handleNokiaApi = async (req, res, path) => {
     return json(res, data);
   }
 
-  if (path === '/apps/nokia/progress' && req.method === 'GET') {
+  if (path === '/apps/banana/progress' && req.method === 'GET') {
     return json(res, getProgress());
   }
 

@@ -9,7 +9,7 @@ import createapp from './views/apps/createapp.js';
 import cryptobot from './views/apps/cryptobot.js';
 import finance from './views/apps/finance.js';
 import fortune from './views/apps/fortune.js';
-import nokia from './views/apps/nokia.js';
+import banana from './views/apps/banana.js';
 import notebook from './views/apps/notebook.js';
 import poker from './views/apps/poker.js';
 import reader from './views/apps/reader.js';
@@ -28,7 +28,7 @@ export default {
   ...cryptobot,
   ...finance,
   ...fortune,
-  ...nokia,
+  ...banana,
   ...notebook,
   ...poker,
   ...reader,

@@ -1,0 +1,20 @@
+export default {
+  banana_input_placeholder: 'Enter your command...',
+  banana_send: 'Run',
+  banana_welcome: 'Welcome',
+  banana_choose_prompt: 'Please choose:',
+  banana_menu_sms: '1) Messages',
+  banana_menu_news: '2) News',
+  banana_menu_bottle: '3) Bottle',
+  banana_prev: '◀ Previous',
+  banana_home: '● Home',
+  banana_next: 'Next ▶',
+  banana_option_sms: 'Open unread messages',
+  banana_option_news: 'Open subscribed news',
+  banana_option_bottle: 'Check bottle notifications',
+  banana_booting: 'Booting...',
+  banana_boot_screen: 'Boot screen',
+  banana_enter_home: 'Enter home screen',
+  banana_ctx_screen: 'Screen: ',
+  banana_ctx_choice: ', choice: '
+};

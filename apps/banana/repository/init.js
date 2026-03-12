@@ -1,8 +1,8 @@
 import { db } from './client.js';
 
-export const initNokiaDatabase = () => {
+export const initBananaDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS nokia_sessions (
+    CREATE TABLE IF NOT EXISTS banana_sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       current_screen TEXT NOT NULL DEFAULT '{}',
       screen_history TEXT DEFAULT '{}',

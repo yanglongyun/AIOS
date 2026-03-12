@@ -47,6 +47,7 @@ export default {
   cryptobot_countdown_paused: '未运行',
   cryptobot_countdown_due: '即将执行',
   cryptobot_directive_placeholder: '告诉 AI 你想怎么交易...\n\n例如：帮我盯 BTC，保守操作，单次不超过 50U，跌 5% 止损。',
+  cryptobot_default_directive: '盯住 BTC-USDT，做一个耐心的猎手。单次交易不超过 100U，急跌别接飞刀等它站稳再说。连续下跌超过 8% 可以小仓试探抄底。暴涨别追高，等回调再进。止损线 5%，到了果断跑不犹豫不恋战。',
   cryptobot_last_saved: '上次保存 {t}',
   cryptobot_not_saved: '未保存',
   cryptobot_equity_total_usdt: '账户总权益 (USDT)',

@@ -94,7 +94,7 @@ const request = async (url, options = {}) => {
 
 const loadToday = async () => {
   const data = await request(`${API_BASE}/today`);
-  focus.value = data.profile?.focus || '';
+  focus.value = data.profile?.focus || t('subscriber_default_focus');
   today.value = data.today || null;
 };
 

@@ -47,6 +47,7 @@ export default {
   cryptobot_countdown_paused: 'Paused',
   cryptobot_countdown_due: 'Due now',
   cryptobot_directive_placeholder: 'Tell AI how to trade...\n\nExample: Watch BTC, trade conservatively, max 50U per trade, stop-loss at 5%.',
+  cryptobot_default_directive: 'Watch BTC-USDT like a patient hunter. Max 100U per trade. Never catch falling knives — wait for stabilization. Down 8%+ in a row? Nibble a small bottom-fishing position. Never chase pumps — wait for pullbacks. Stop-loss at 5%, cut and don\'t look back.',
   cryptobot_last_saved: 'Last saved {t}',
   cryptobot_not_saved: 'Not saved',
   cryptobot_equity_total_usdt: 'Total Equity (USDT)',

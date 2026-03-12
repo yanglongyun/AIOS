@@ -101,7 +101,7 @@ npm run start:apps # 应用服务: 9701
 | 📚 阅读器 | `/reader` | 在线小说阅读器 |
 | 🃏 炸金花 | `/poker` | 经典扑克牌游戏 |
 | 🔮 算一卦 | `/fortune` | AI 占卜 |
-| 📱 老手机 | `/nokia` | 复古诺基亚手机模拟器 |
+| 📱 老手机 | `/banana` | 复古 Banana 手机模拟器 |
 
 ---
 

@@ -3,11 +3,11 @@
     <table class="dot-matrix w-full border-collapse">
       <thead>
         <tr>
-          <th class="sticky top-0 z-10 w-[12%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_date') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DATE</span></th>
-          <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_narrative') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">NARRATIVE</span></th>
-          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_withdrawal') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">WITHDRAWAL</span></th>
-          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_deposit') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">DEPOSIT</span></th>
-          <th class="sticky top-0 z-10 w-[10%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_operation') }}<br><span class="hidden text-[10px] font-normal opacity-60 sm:inline">OPR</span></th>
+          <th class="sticky top-0 z-10 w-[12%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_date') }}</th>
+          <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_narrative') }}</th>
+          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_withdrawal') }}</th>
+          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_deposit') }}</th>
+          <th class="sticky top-0 z-10 w-[10%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_operation') }}</th>
         </tr>
       </thead>
       <tbody>

@@ -50,10 +50,10 @@ export const appRegistry = [
     dbInit: ['initPokerDatabase']
   },
   {
-    name: 'nokia',
-    match: (path) => path.startsWith('/apps/nokia/'),
-    load: () => import('./nokia/api/index.js'),
-    apiHandler: 'handleNokiaApi',
-    dbInit: ['initNokiaDatabase']
+    name: 'banana',
+    match: (path) => path.startsWith('/apps/banana/'),
+    load: () => import('./banana/api/index.js'),
+    apiHandler: 'handleBananaApi',
+    dbInit: ['initBananaDatabase']
   },
 ];

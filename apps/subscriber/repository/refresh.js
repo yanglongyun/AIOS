@@ -24,21 +24,15 @@ export const getDailyByDate = (date) => {
     SELECT note
     FROM subscriber_daily
     WHERE date = ?
+    ORDER BY id DESC
     LIMIT 1
   `).get(date);
 };
 
-export const upsertDaily = (date, focus, title, brief, content, note) => {
+export const insertDaily = (date, focus, title, brief, content, note) => {
   db.prepare(`
     INSERT INTO subscriber_daily (date, focus, title, brief, content, note, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-    ON CONFLICT(date) DO UPDATE SET
-      focus = excluded.focus,
-      title = excluded.title,
-      brief = excluded.brief,
-      content = excluded.content,
-      note = CASE WHEN excluded.note <> '' THEN excluded.note ELSE subscriber_daily.note END,
-      updated_at = datetime('now')
   `).run(date, focus, title, brief, content, note);
 };
 
@@ -55,6 +49,7 @@ export const getDailyFullByDate = (date) => {
       updated_at AS updatedAt
     FROM subscriber_daily
     WHERE date = ?
+    ORDER BY id DESC
     LIMIT 1
   `).get(date);
 };

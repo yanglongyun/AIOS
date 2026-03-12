@@ -237,7 +237,7 @@ let pendingRefresh = false;
 onMounted(async () => {
   try {
     await loadAll();
-    directive.value = status.config.directive || '';
+    directive.value = status.config.directive || t('cryptobot_default_directive');
     sliderIdx.value = minToSliderIdx(Math.round((status.config.interval_sec || 300) / 60));
     syncExFormFromStatus();
     if (!status.config.has_keys) panelOpen.value = true;

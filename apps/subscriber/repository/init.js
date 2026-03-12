@@ -10,7 +10,7 @@ export const initSubscriberDatabase = () => {
 
     CREATE TABLE IF NOT EXISTS subscriber_daily (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL UNIQUE,
+      date TEXT NOT NULL,
       focus TEXT NOT NULL DEFAULT '',
       title TEXT NOT NULL DEFAULT '',
       brief TEXT NOT NULL DEFAULT '',

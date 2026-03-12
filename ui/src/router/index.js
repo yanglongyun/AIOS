@@ -8,7 +8,7 @@ import WelcomeView from '../views/WelcomeView.vue';
 import NotebookView from '../views/apps/notebook/index.vue';
 import SettingsView from '../views/SettingsView.vue';
 import FinanceView from '../views/apps/finance/index.vue';
-import NokiaView from '../views/apps/nokia/index.vue';
+import BananaView from '../views/apps/banana/index.vue';
 import CreateAppView from '../views/apps/createapp/index.vue';
 import SubscriberView from '../views/apps/subscriber/index.vue';
 import CryptobotView from '../views/apps/cryptobot/index.vue';
@@ -29,7 +29,7 @@ const routes = [
   { path: '/apps/create', component: CreateAppView },
   { path: '/notebook', component: NotebookView },
   { path: '/finance', component: FinanceView },
-  { path: '/nokia', component: NokiaView },
+  { path: '/banana', component: BananaView },
   { path: '/subscriber', component: SubscriberView },
   { path: '/cryptobot', component: CryptobotView },
   { path: '/reader', component: ReaderView },

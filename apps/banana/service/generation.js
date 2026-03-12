@@ -8,7 +8,7 @@ export const generate = async ({ history, now, choices, next, prompt, messages, 
   if (taskMessages.length === 0) return { status: 400, message: 'messages 不能为空' };
 
   const parsed = await instantTaskJson({
-    app: 'nokia',
+    app: 'banana',
     title: String(taskTitle || '').trim() || '老手机界面生成',
     schema: { required: ['content', 'options'] },
     prompt: promptText,
@@ -28,7 +28,7 @@ export const generate = async ({ history, now, choices, next, prompt, messages, 
       screenHistory: { history, now, choices, next }
     });
   } catch (e) {
-    console.error('保存 Nokia 进度失败:', e.message);
+    console.error('保存 Banana 进度失败:', e.message);
   }
 
   return result;

@@ -3,6 +3,7 @@ export default {
   subscriber_subtitle: 'SUBSCRIBER',
   subscriber_focus_label: 'TOPICS',
   subscriber_focus_placeholder: 'e.g., AI programming tools, global tech companies, crypto market trends',
+  subscriber_default_focus: 'AI Industry Major News: LLM releases & breakthroughs, AI product launches & demos, funding & acquisitions, open-source developments, AI policy & regulation',
   subscriber_save_button: 'Save',
   subscriber_saved: 'Saved ',
   subscriber_refresh_button: 'Receive Now',

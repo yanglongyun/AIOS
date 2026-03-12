@@ -5,13 +5,13 @@
         <div class="earpiece"></div>
         <div class="font-['Pacifico',cursive] text-[22px] tracking-[2px] text-[#8a7a62] [text-shadow:0_2px_0_rgba(255,255,255,0.6),0_-1px_0_rgba(0,0,0,0.1)]">banana</div>
       </div>
-      <NokiaScreen
+      <BananaScreen
         :is-loading="isLoading"
         :toast="toast"
         :time-line="timeLine"
         :current-index="currentIndex"
       />
-      <NokiaControls
+      <BananaControls
         :time-line="timeLine"
         :current-index="currentIndex"
         v-model:customOption="customOption"
@@ -27,11 +27,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
-import NokiaControls from '../../../components/apps/nokia/NokiaControls.vue';
-import NokiaScreen from '../../../components/apps/nokia/NokiaScreen.vue';
+import BananaControls from '../../../components/apps/banana/BananaControls.vue';
+import BananaScreen from '../../../components/apps/banana/BananaScreen.vue';
 
 const { t, locale } = useI18n();
-const API_BASE = '/apps/nokia';
+const API_BASE = '/apps/banana';
 
 const currentIndex = ref(0);
 const customOption = ref('');
@@ -67,7 +67,7 @@ function goHomePage() {
 
 async function init() {
   isLoading.value = true;
-  toast.value = t('nokia_booting');
+  toast.value = t('banana_booting');
 
   try {
     const res = await fetch(`${API_BASE}/progress`);
@@ -88,13 +88,13 @@ async function init() {
   }
 
   try {
-    const params = buildNokiaTaskParams({
-      now: t('nokia_boot_screen'),
-      next: t('nokia_enter_home')
+    const params = buildBananaTaskParams({
+      now: t('banana_boot_screen'),
+      next: t('banana_enter_home')
     });
     const result = await api('/generation', {
-      now: t('nokia_boot_screen'),
-      next: t('nokia_enter_home'),
+      now: t('banana_boot_screen'),
+      next: t('banana_enter_home'),
       ...params
     });
 
@@ -126,11 +126,11 @@ async function chooseOption(option) {
   timeLine.value[currentIndex.value].choices = option.text;
 
   const history = timeLine.value.slice(1, 3).reverse().map(item => {
-    return `${t('nokia_ctx_screen')}${item.content}` + (item.choices ? `${t('nokia_ctx_choice')}${item.choices}` : '');
+    return `${t('banana_ctx_screen')}${item.content}` + (item.choices ? `${t('banana_ctx_choice')}${item.choices}` : '');
   });
 
   try {
-    const params = buildNokiaTaskParams({
+    const params = buildBananaTaskParams({
       history,
       now: timeLine.value[currentIndex.value].content,
       choices: option.text
@@ -169,7 +169,7 @@ async function api(path, body) {
   return await res.json();
 }
 
-function buildNokiaTaskParams({ history = [], now = '', choices = '', next = '' }) {
+function buildBananaTaskParams({ history = [], now = '', choices = '', next = '' }) {
   const lang = locale.value === 'en' ? 'en' : 'zh';
   const prompt = lang === 'en'
     ? 'Generate the next old-phone screen by context and return strict JSON.'
@@ -207,7 +207,7 @@ Return JSON:
       : `用户最近的操作历史是'''${JSON.stringify(history || [])}'''，当前界面显示的是'''${now}'''，用户最新做出的选择是'''${choices}'''`);
   return {
     prompt,
-    taskTitle: lang === 'en' ? 'Nokia UI Generation' : '老手机界面生成',
+    taskTitle: lang === 'en' ? 'Banana UI Generation' : '老手机界面生成',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }

@@ -7,6 +7,8 @@ import { ROOT, API_URL, APPS_URL } from './config.js';
 
 const PID_DIR = path.join(ROOT, 'files', 'tmp');
 const PID_FILE = path.join(PID_DIR, 'aios-service-pids.json');
+const SERVER_PORT = 9700;
+const APPS_PORT = 9701;
 
 export const buildUI = () => {
   try {
@@ -56,9 +58,35 @@ const isPidRunning = (pid) => {
   }
 };
 
+const sleepMs = (ms) => {
+  const end = Date.now() + Math.max(0, Number(ms) || 0);
+  while (Date.now() < end) {}
+};
+
+const listListeningPids = (port) => {
+  const n = Number(port);
+  if (!Number.isInteger(n) || n <= 0) return [];
+  if (process.platform === 'win32') return [];
+  try {
+    const output = execSync(`lsof -nP -t -iTCP:${n} -sTCP:LISTEN`, { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString('utf8')
+      .trim();
+    if (!output) return [];
+    return [...new Set(
+      output
+        .split('\n')
+        .map((line) => Number(line.trim()))
+        .filter((pid) => Number.isInteger(pid) && pid > 0)
+    )];
+  } catch {
+    return [];
+  }
+};
+
 const killPid = (pid) => {
   const n = Number(pid);
   if (!Number.isInteger(n) || n <= 0) return false;
+  if (n === process.pid) return false;
   if (!isPidRunning(n)) return false;
 
   try {
@@ -67,7 +95,14 @@ const killPid = (pid) => {
       return true;
     }
 
-    process.kill(n, 'SIGTERM');
+    // Detached child process usually has pgid = pid; kill process group first.
+    try { process.kill(-n, 'SIGTERM'); } catch {}
+    try { process.kill(n, 'SIGTERM'); } catch {}
+    sleepMs(120);
+    if (isPidRunning(n)) {
+      try { process.kill(-n, 'SIGKILL'); } catch {}
+      try { process.kill(n, 'SIGKILL'); } catch {}
+    }
     return true;
   } catch {
     return false;
@@ -93,26 +128,35 @@ export const stopServices = () => {
   console.log(chalk.dim('  停止 AIOS 服务...'));
   let stoppedAny = false;
   const state = readPidState();
-
-  if (state?.serverPid) {
-    if (killPid(state.serverPid)) {
-      stoppedAny = true;
-      console.log(chalk.dim(`  已停止: server(${state.serverPid})`));
-    } else {
-      console.log(chalk.dim(`  未运行: server(${state.serverPid})`));
-    }
+  const targets = new Map();
+  if (state?.serverPid) targets.set(Number(state.serverPid), `server(${state.serverPid})`);
+  if (state?.appsPid) targets.set(Number(state.appsPid), `apps(${state.appsPid})`);
+  for (const pid of listListeningPids(SERVER_PORT)) {
+    if (!targets.has(pid)) targets.set(pid, `port:${SERVER_PORT}(${pid})`);
+  }
+  for (const pid of listListeningPids(APPS_PORT)) {
+    if (!targets.has(pid)) targets.set(pid, `port:${APPS_PORT}(${pid})`);
   }
 
-  if (state?.appsPid) {
-    if (killPid(state.appsPid)) {
+  for (const [pid, label] of targets.entries()) {
+    if (killPid(pid)) {
       stoppedAny = true;
-      console.log(chalk.dim(`  已停止: apps(${state.appsPid})`));
+      console.log(chalk.dim(`  已停止: ${label}`));
     } else {
-      console.log(chalk.dim(`  未运行: apps(${state.appsPid})`));
+      console.log(chalk.dim(`  未运行: ${label}`));
     }
   }
 
   if (state?.serverPid || state?.appsPid) clearPidState();
+
+  const remains9700 = listListeningPids(SERVER_PORT);
+  const remains9701 = listListeningPids(APPS_PORT);
+  if (remains9700.length > 0) {
+    console.log(chalk.yellow(`  警告: 端口 ${SERVER_PORT} 仍被占用 -> ${remains9700.join(', ')}`));
+  }
+  if (remains9701.length > 0) {
+    console.log(chalk.yellow(`  警告: 端口 ${APPS_PORT} 仍被占用 -> ${remains9701.join(', ')}`));
+  }
 
   return stoppedAny;
 };
@@ -141,20 +185,24 @@ export const getServiceStatus = async () => {
   const appsPid = Number(state.appsPid) || 0;
   const serverRunning = isPidRunning(serverPid);
   const appsRunning = isPidRunning(appsPid);
+  const serverPortPids = listListeningPids(SERVER_PORT);
+  const appsPortPids = listListeningPids(APPS_PORT);
+  const serverPids = serverPortPids.length > 0 ? serverPortPids : (serverRunning ? [serverPid] : []);
+  const appsPids = appsPortPids.length > 0 ? appsPortPids : (appsRunning ? [appsPid] : []);
 
-  if (!serverRunning && !appsRunning && (state.serverPid || state.appsPid)) {
+  if (serverPids.length === 0 && appsPids.length === 0 && (state.serverPid || state.appsPid)) {
     clearPidState();
   }
 
   return {
     server: {
-      running: serverRunning,
-      pids: serverRunning ? [serverPid] : [],
+      running: serverPids.length > 0,
+      pids: serverPids,
       ready: await isReady(`${API_URL}/health`)
     },
     apps: {
-      running: appsRunning,
-      pids: appsRunning ? [appsPid] : [],
+      running: appsPids.length > 0,
+      pids: appsPids,
       ready: await isReady(`${APPS_URL}/apps/health`)
     }
   };

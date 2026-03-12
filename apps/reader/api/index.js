@@ -30,8 +30,11 @@ export const handleReaderApi = async (req, res, path) => {
   if (path === '/apps/reader/generate' && req.method === 'POST') {
     const body = await readBody(req);
     const sessionId = Number(body.sessionId);
-    const action = String(body.action || '').trim() || '开始故事';
-    const data = await generate({ sessionId, action, req });
+    const action = String(body.action || '').trim();
+    const prompt = String(body.prompt || '').trim();
+    const locale = String(body.locale || '').trim();
+    const taskTitle = String(body.taskTitle || '').trim();
+    const data = await generate({ sessionId, action, prompt, locale, taskTitle, req });
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

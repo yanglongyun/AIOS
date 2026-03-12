@@ -21,6 +21,7 @@ export default {
     poker_ai_folded: 'AI 弃牌',
     poker_ai_raised: 'AI 加注了 {0}，轮到你行动。',
     poker_ai_called: 'AI 跟注了 {0}，轮到你行动。',
+    poker_insufficient_chips: '一方筹码不足，无法开始新局',
     poker_start_failed: '开始失败',
     poker_action_failed: '操作失败',
     poker_network_error: '网络异常'

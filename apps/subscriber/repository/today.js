@@ -3,7 +3,7 @@ import { db } from './client.js';
 export const getProfile = () => {
   return db.prepare(`
     SELECT focus, updated_at AS updatedAt
-    FROM apps_subscriber_profile
+    FROM subscriber_profile
     WHERE id = 1
     LIMIT 1
   `).get();
@@ -20,7 +20,7 @@ export const getLatestDaily = () => {
       content,
       created_at AS createdAt,
       updated_at AS updatedAt
-    FROM apps_subscriber_daily
+    FROM subscriber_daily
     ORDER BY date DESC
     LIMIT 1
   `).get();

@@ -9,11 +9,11 @@ export { initNokiaDatabase };
 export const handleNokiaApi = async (req, res, path) => {
   if (path === '/apps/nokia/generation' && req.method === 'POST') {
     const body = await readBody(req);
-    const { history, now, choices, next } = body;
+    const { history, now, choices, next, prompt, messages, taskTitle } = body;
     if (!now && !next) return json(res, { success: false, message: '缺少参数' }, 400);
     let data = null;
     try {
-      data = await generate({ history, now, choices, next, req });
+      data = await generate({ history, now, choices, next, prompt, messages, taskTitle, req });
     } catch (error) {
       data = { status: 500, message: error.message || 'generation failed' };
     }

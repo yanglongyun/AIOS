@@ -2,7 +2,7 @@ import { db } from './client.js';
 
 export const initFortuneDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_fortune_records (
+    CREATE TABLE IF NOT EXISTS fortune_records (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       question TEXT NOT NULL DEFAULT '',
       sign_name TEXT NOT NULL DEFAULT '',

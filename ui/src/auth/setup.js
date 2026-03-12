@@ -4,6 +4,6 @@ export const getSetupStatus = async () => {
     const data = await res.json();
     return { initialized: Boolean(res.ok && data?.initialized) };
   } catch {
-    return { initialized: true };
+    return { initialized: false };
   }
 };

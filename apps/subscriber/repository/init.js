@@ -2,13 +2,13 @@ import { db } from './client.js';
 
 export const initSubscriberDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_subscriber_profile (
+    CREATE TABLE IF NOT EXISTS subscriber_profile (
       id INTEGER PRIMARY KEY CHECK(id = 1),
       focus TEXT NOT NULL DEFAULT '',
       updated_at TEXT DEFAULT (datetime('now'))
     );
 
-    CREATE TABLE IF NOT EXISTS apps_subscriber_daily (
+    CREATE TABLE IF NOT EXISTS subscriber_daily (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date TEXT NOT NULL UNIQUE,
       focus TEXT NOT NULL DEFAULT '',

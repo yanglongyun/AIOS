@@ -63,6 +63,11 @@ const request = async (url, opts) => {
   return res.json();
 };
 
+const resolveMessage = (data, fallbackKey) => {
+  if (data?.messageKey) return t(data.messageKey);
+  return data?.message || t(fallbackKey);
+};
+
 const loadStatus = async () => {
   const data = await request('/apps/poker/status');
   if (data.success) {
@@ -84,7 +89,7 @@ const startGame = async () => {
       aiExpression.value = '';
       return;
     }
-    lastActionText.value = data.message || t('poker_start_failed');
+    lastActionText.value = resolveMessage(data, 'poker_start_failed');
   } catch (error) {
     lastActionText.value = error?.message || t('poker_network_error');
   } finally {
@@ -117,7 +122,7 @@ const handleAction = async (action) => {
       }
       return;
     }
-    lastActionText.value = data.message || t('poker_action_failed');
+    lastActionText.value = resolveMessage(data, 'poker_action_failed');
   } catch (error) {
     lastActionText.value = error?.message || t('poker_network_error');
   } finally {

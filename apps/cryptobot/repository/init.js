@@ -3,7 +3,7 @@ import { getConfig } from './config.js';
 import { getState } from './state.js';
 
 export const initDatabase = () => {
-  db.exec(`CREATE TABLE IF NOT EXISTS apps_cryptobot_config (
+  db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_config (
     id INTEGER PRIMARY KEY CHECK(id = 1),
     base_url TEXT NOT NULL DEFAULT 'https://www.okx.com',
     api_key TEXT NOT NULL DEFAULT '',
@@ -12,13 +12,13 @@ export const initDatabase = () => {
     directive TEXT NOT NULL DEFAULT '',
     interval_sec INTEGER NOT NULL DEFAULT 300,
     inst_id TEXT NOT NULL DEFAULT 'BTC-USDT',
-    virtual_usdt REAL NOT NULL DEFAULT 10000,
+    virtual_usdt REAL NOT NULL DEFAULT 0,
     virtual_coin REAL NOT NULL DEFAULT 0,
-    initial_equity REAL NOT NULL DEFAULT 10000,
+    initial_equity REAL NOT NULL DEFAULT 0,
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
 
-  db.exec(`CREATE TABLE IF NOT EXISTS apps_cryptobot_state (
+  db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_state (
     id INTEGER PRIMARY KEY CHECK(id = 1),
     running INTEGER NOT NULL DEFAULT 0,
     tick_count INTEGER NOT NULL DEFAULT 0,
@@ -29,7 +29,7 @@ export const initDatabase = () => {
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
 
-  db.exec(`CREATE TABLE IF NOT EXISTS apps_cryptobot_decisions (
+  db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_decisions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     action TEXT NOT NULL,
     reason TEXT NOT NULL DEFAULT '',
@@ -40,7 +40,7 @@ export const initDatabase = () => {
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-  db.exec(`CREATE TABLE IF NOT EXISTS apps_cryptobot_equity (
+  db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_equity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     equity REAL NOT NULL,
     created_at TEXT DEFAULT (datetime('now'))

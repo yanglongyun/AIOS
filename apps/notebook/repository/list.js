@@ -8,9 +8,9 @@ export const listNotes = ({ keyword = '', page = 1, pageSize = 10 } = {}) => {
   const like = `%${q}%`;
   const where = q ? 'WHERE content LIKE ?' : '';
 
-  const totalQuery = `SELECT COUNT(*) AS c FROM apps_notes ${where}`;
+  const totalQuery = `SELECT COUNT(*) AS c FROM notes ${where}`;
   const listQuery = `
-    SELECT * FROM apps_notes
+    SELECT * FROM notes
     ${where}
     ORDER BY updated_at DESC, id DESC
     LIMIT ? OFFSET ?

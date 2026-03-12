@@ -1,6 +1,6 @@
 ---
 name: fortune
-description: 算一卦 - 玄学转盘，用户输入问题后转盘抽签，AI 给出宜忌建议。数据在 apps_fortune_records。
+description: 算一卦 - 玄学转盘，用户输入问题后转盘抽签，AI 给出宜忌建议。数据在 fortune_records。
 ---
 
 # 算一卦

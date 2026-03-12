@@ -22,7 +22,7 @@ export const startGame = () => {
   const aiCards = deck.slice(3, 6);
   const ante = 10;
   if (economyBefore.playerBalance < ante || economyBefore.aiBalance < ante) {
-    return { status: 400, message: '一方筹码不足，无法开始新局' };
+    return { status: 400, messageKey: 'poker_insufficient_chips' };
   }
 
   const playerChips = economyBefore.playerBalance - ante;

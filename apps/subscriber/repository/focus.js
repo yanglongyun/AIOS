@@ -2,7 +2,7 @@ import { db } from './client.js';
 
 export const upsertProfile = (focus) => {
   db.prepare(`
-    INSERT INTO apps_subscriber_profile (id, focus, updated_at)
+    INSERT INTO subscriber_profile (id, focus, updated_at)
     VALUES (1, ?, datetime('now'))
     ON CONFLICT(id) DO UPDATE SET
       focus = excluded.focus,
@@ -13,7 +13,7 @@ export const upsertProfile = (focus) => {
 export const getProfile = () => {
   return db.prepare(`
     SELECT focus, updated_at AS updatedAt
-    FROM apps_subscriber_profile
+    FROM subscriber_profile
     WHERE id = 1
     LIMIT 1
   `).get();

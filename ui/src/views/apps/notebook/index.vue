@@ -166,6 +166,27 @@ const deleteNote = async (id) => {
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
 const goNextPage = async () => { if (page.value < totalPages.value && !loading.value) { page.value++; await fetchNotes(); } };
 
+const buildOptimizePrompt = (lang, content) => {
+  if (lang === 'en') {
+    return [
+      'You are a writing editor.',
+      'Polish the following text to be clearer and more professional while preserving original meaning.',
+      'Output only the polished text. No explanation, no prefix, no markdown.',
+      '',
+      'Original text:',
+      content
+    ].join('\n');
+  }
+  return [
+    '你是一位文字润色专家。',
+    '请润色以下文字，使其更通顺、更专业，同时保持原意不变。',
+    '只输出润色后的正文，不要解释、不要前缀、不要 markdown。',
+    '',
+    '原文：',
+    content
+  ].join('\n');
+};
+
 const startOptimize = async () => {
   const content = editorDraft.value.trim();
   if (!content || aiLoading.value) return;
@@ -173,10 +194,15 @@ const startOptimize = async () => {
   aiResult.value = '';
   aiDrawerOpen.value = true;
   try {
+    const lang = locale.value === 'en' ? 'en' : 'zh';
     const res = await fetch(`${API_BASE}/optimize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({
+        content,
+        taskTitle: lang === 'en' ? 'Note polish' : '笔记润色',
+        prompt: buildOptimizePrompt(lang, content)
+      })
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);

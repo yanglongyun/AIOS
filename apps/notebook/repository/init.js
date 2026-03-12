@@ -32,7 +32,7 @@ const SEED_NOTES = [
 
 const initNotebookTables = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS apps_notes (
+    CREATE TABLE IF NOT EXISTS notes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       content TEXT NOT NULL DEFAULT '',
       style INTEGER NOT NULL DEFAULT 0,
@@ -43,11 +43,11 @@ const initNotebookTables = () => {
 };
 
 const seedNotebookIfEmpty = () => {
-  const count = db.prepare('SELECT COUNT(*) as c FROM apps_notes').get().c;
+  const count = db.prepare('SELECT COUNT(*) as c FROM notes').get().c;
   if (count !== 0) return;
 
   const insert = db.prepare(`
-    INSERT INTO apps_notes (content, style, created_at, updated_at)
+    INSERT INTO notes (content, style, created_at, updated_at)
     VALUES (?, ?, datetime('now'), datetime('now'))
   `);
   for (const content of SEED_NOTES) {

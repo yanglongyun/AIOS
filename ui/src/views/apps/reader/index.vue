@@ -40,7 +40,7 @@ import ReaderCreateView from '../../../components/apps/reader/ReaderCreateView.v
 import ReaderDetailView from '../../../components/apps/reader/ReaderDetailView.vue';
 import ReaderListView from '../../../components/apps/reader/ReaderListView.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const props = defineProps({
   initialView: {
     type: String,
@@ -62,6 +62,7 @@ const newTitle = ref('');
 const newPremise = ref('');
 const customAction = ref('');
 const startAction = computed(() => t('reader_start_reader'));
+const readerLocale = computed(() => (locale.value === 'en' ? 'en' : 'zh'));
 
 const shelfTiers = computed(() => {
   const tiers = [];
@@ -85,6 +86,43 @@ const request = async (url, options = {}) => {
   const data = await resp.json();
   if (!resp.ok || data.success === false) throw new Error(data.message || `HTTP ${resp.status}`);
   return data;
+};
+
+const buildReaderPrompt = ({ lang, session, action, recentChapters }) => {
+  if (lang === 'en') {
+    return [
+      'You are writing the next chapter of an interactive novel.',
+      'Return JSON only and strictly follow the schema.',
+      `Book title: ${session.title}`,
+      `World setting: ${session.premise || '(none)'}`,
+      `Current summary: ${session.summary || '(none)'}`,
+      `Current progress: ${session.progress || '(none)'}`,
+      `User action: ${action}`,
+      'Recent chapters context (latest up to 6):',
+      JSON.stringify(recentChapters),
+      'Requirements:',
+      '- content: 120-260 words',
+      '- choices: exactly 3 distinct options that branch the plot',
+      '- summary: updated running summary, 80-140 words',
+      '- progress: chapter progress text, e.g. "Chapter N: Subtitle"'
+    ].join('\n');
+  }
+  return [
+    '你在续写互动小说下一章。',
+    '只输出 JSON，严格按 schema。',
+    `书名：${session.title}`,
+    `世界观设定：${session.premise || '无'}`,
+    `当前梗概：${session.summary || '无'}`,
+    `当前进度：${session.progress || '无'}`,
+    `用户行动：${action}`,
+    '最近章节上下文（最多 6 章）：',
+    JSON.stringify(recentChapters),
+    '要求：',
+    '- content：120-260字',
+    '- choices：恰好 3 个分叉选项，方向不同',
+    '- summary：更新后的累计梗概，80-140字',
+    '- progress：章节进度文本，如“第N章：副标题”'
+  ].join('\n');
 };
 
 const loadSessions = async () => {
@@ -131,10 +169,30 @@ const runGenerate = async (action) => {
   error.value = '';
   loading.value = true;
   try {
+    const lang = readerLocale.value;
+    const actionText = String(action || '').trim() || (lang === 'en' ? 'Start Reader' : '开始阅读');
+    const recentChapters = chapters.value.slice(-6).map((c) => ({
+      idx: c.idx,
+      action: c.action,
+      content: c.content
+    }));
+    const prompt = buildReaderPrompt({
+      lang,
+      session: activeSession.value,
+      action: actionText,
+      recentChapters
+    });
+
     await request(`${API_BASE}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: activeSession.value.id, action })
+      body: JSON.stringify({
+        sessionId: activeSession.value.id,
+        locale: lang,
+        taskTitle: lang === 'en' ? `Story Progress #${activeSession.value.id}` : `故事推进 #${activeSession.value.id}`,
+        action: actionText,
+        prompt
+      })
     });
     await selectSession(activeSession.value.id);
   } catch (e) {

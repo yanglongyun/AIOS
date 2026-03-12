@@ -67,6 +67,10 @@ export const deleteAuthSessionsByUserId = (userId) => {
   db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
 };
 
+export const deleteAllAuthSessions = () => {
+  db.prepare('DELETE FROM sessions').run();
+};
+
 export const deleteExpiredAuthSessions = () => {
   db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(toIso(new Date()));
 };

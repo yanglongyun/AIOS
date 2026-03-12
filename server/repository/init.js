@@ -35,6 +35,7 @@ export const initDatabase = () => {
       response TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
       error TEXT,
+      schedule_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       finished_at TEXT
     );

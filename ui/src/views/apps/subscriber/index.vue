@@ -118,6 +118,30 @@ const saveFocus = async () => {
   }
 };
 
+const buildSubscriberPrompt = ({ lang, date, focusText, currentNote }) => {
+  if (lang === 'en') {
+    return [
+      'Generate today\'s subscriber briefing.',
+      'You may browse and read web sources before summarizing.',
+      'Return JSON only: {"title":"...","brief":"...","content":"...","note":"..."}',
+      'content should be multi-paragraph and include key bullet points.',
+      `Date: ${date}`,
+      `Focus: ${focusText}`,
+      `Current note: ${currentNote || ''}`
+    ].join('\n');
+  }
+  return [
+    '你在处理 subscriber（订阅机）的今日新闻简报生成请求。',
+    '你可以自行使用 shell 搜索和阅读网页，再整理结果。',
+    '最终只输出 JSON，不要输出任何其它文字。',
+    'JSON 格式必须是：{"title":"...","brief":"...","content":"...","note":"..."}。',
+    '其中 content 建议使用多段文本，包含要点列表。',
+    `日期：${date}`,
+    `用户关注方向：${focusText}`,
+    `当前 note：${currentNote || ''}`
+  ].join('\n');
+};
+
 const refreshToday = async () => {
   error.value = '';
   refreshing.value = true;
@@ -125,10 +149,22 @@ const refreshToday = async () => {
   try {
     if (!focus.value.trim()) throw new Error(t('subscriber_fill_focus_error'));
     await saveFocus();
+    const lang = locale.value === 'en' ? 'en' : 'zh';
+    const date = new Date().toISOString().slice(0, 10);
+    const prompt = buildSubscriberPrompt({
+      lang,
+      date,
+      focusText: focus.value.trim(),
+      currentNote: today.value?.note || ''
+    });
     const data = await request(`${API_BASE}/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ focus: focus.value })
+      body: JSON.stringify({
+        focus: focus.value,
+        taskTitle: lang === 'en' ? `Subscriber Briefing ${date}` : `订阅收报 ${date}`,
+        prompt
+      })
     });
     today.value = data.today || null;
     selectedId.value = null;

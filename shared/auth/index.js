@@ -1,4 +1,4 @@
-import { countUsers, getInternalApiToken } from './repository.js';
+import { countUsers, deleteAllAuthSessions, getInternalApiToken } from './repository.js';
 import { getAuthUser } from './guard.js';
 
 export const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
@@ -68,6 +68,7 @@ const allowAppsPublic = (path) => {
 // 唯一对外入口：调用方只需要 access(...) 即可完成鉴权/初始化门禁。
 export const access = (req, path, method, scope) => {
   const initialized = countUsers() > 0;
+  if (!initialized) deleteAllAuthSessions();
   const internalActor = getInternalActor(req, path, scope);
 
   if (scope === 'server-api') {

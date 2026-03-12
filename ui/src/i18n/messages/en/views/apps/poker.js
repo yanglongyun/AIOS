@@ -21,6 +21,7 @@ export default {
     poker_ai_folded: 'AI Folded',
     poker_ai_raised: 'AI Raised by {0}, your turn.',
     poker_ai_called: 'AI Called with {0}, your turn.',
+    poker_insufficient_chips: 'One side does not have enough chips to start a new game.',
     poker_start_failed: 'Failed to start',
     poker_action_failed: 'Action failed',
     poker_network_error: 'Network error'

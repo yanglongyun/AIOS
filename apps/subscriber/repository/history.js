@@ -1,7 +1,7 @@
 import { db } from './client.js';
 
 export const countDailies = () => {
-  return db.prepare('SELECT COUNT(*) AS c FROM apps_subscriber_daily').get().c || 0;
+  return db.prepare('SELECT COUNT(*) AS c FROM subscriber_daily').get().c || 0;
 };
 
 export const listDailies = (limit, offset) => {
@@ -15,7 +15,7 @@ export const listDailies = (limit, offset) => {
       content,
       created_at AS createdAt,
       updated_at AS updatedAt
-    FROM apps_subscriber_daily
+    FROM subscriber_daily
     ORDER BY date DESC
     LIMIT ? OFFSET ?
   `).all(limit, offset);

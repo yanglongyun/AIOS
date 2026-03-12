@@ -39,7 +39,12 @@ export const handleNotebookApi = async (req, res, path) => {
 
   if (path === '/apps/notebook/optimize' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await optimizeNotebook({ content: body.content, req });
+    const data = await optimizeNotebook({
+      content: body.content,
+      prompt: body.prompt,
+      taskTitle: body.taskTitle,
+      req
+    });
     if (data?.error) return json(res, { error: data.error }, data.status || 400);
     return json(res, data);
   }

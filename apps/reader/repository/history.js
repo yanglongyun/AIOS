@@ -3,7 +3,7 @@ import { db } from './client.js';
 export const findSessionWithChapters = (sessionId) => {
   const session = db.prepare(`
     SELECT id, title, premise, summary, progress, chapter_count, created_at, updated_at
-    FROM apps_reader_sessions
+    FROM reader_sessions
     WHERE id = ?
   `).get(sessionId);
 
@@ -11,7 +11,7 @@ export const findSessionWithChapters = (sessionId) => {
 
   const chapters = db.prepare(`
     SELECT id, idx, action, content, choices_json, summary, progress, created_at
-    FROM apps_reader_chapters
+    FROM reader_chapters
     WHERE session_id = ?
     ORDER BY idx ASC
   `).all(sessionId);

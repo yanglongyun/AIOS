@@ -13,10 +13,12 @@ export const handleFortuneApi = async (req, res, path) => {
     if (!question) return json(res, { success: false, message: '请输入你的问题' }, 400);
 
     const hexagram = String(body.hexagram || '').trim();
-    const yaos = String(body.yaos || '').trim();
+    const prompt = String(body.prompt || '').trim();
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const taskTitle = String(body.taskTitle || '').trim();
     let data = null;
     try {
-      data = await divine({ question, hexagram, yaos, req });
+      data = await divine({ question, hexagram, prompt, messages, taskTitle, req });
     } catch (e) {
       data = { status: 500, message: e.message || '占卜失败' };
     }

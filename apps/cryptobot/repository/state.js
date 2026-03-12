@@ -1,10 +1,10 @@
 import { db } from './client.js';
 
 export const getState = () => {
-  const row = db.prepare('SELECT * FROM apps_cryptobot_state WHERE id = 1').get();
+  const row = db.prepare('SELECT * FROM cryptobot_state WHERE id = 1').get();
   if (!row) {
     db.prepare(`
-      INSERT INTO apps_cryptobot_state (id, running, tick_count, trade_count, last_price, started_at, last_run_at, updated_at)
+      INSERT INTO cryptobot_state (id, running, tick_count, trade_count, last_price, started_at, last_run_at, updated_at)
       VALUES (1, 0, 0, 0, 0, '', '', datetime('now'))
     `).run();
     return { id: 1, running: 0, tick_count: 0, trade_count: 0, last_price: 0, started_at: '', last_run_at: '' };
@@ -15,7 +15,7 @@ export const getState = () => {
 export const saveState = (patch = {}) => {
   const state = { ...getState(), ...patch };
   db.prepare(`
-    UPDATE apps_cryptobot_state
+    UPDATE cryptobot_state
     SET running = ?, tick_count = ?, trade_count = ?, last_price = ?,
         started_at = ?, last_run_at = ?, updated_at = datetime('now')
     WHERE id = 1

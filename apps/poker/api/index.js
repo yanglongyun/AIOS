@@ -1,13 +1,10 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initPokerDatabase } from '../repository/init.js';
 import { getPokerEconomy } from '../repository/economy.js';
 import { startGame } from '../service/start.js';
 import { performAction } from '../service/action.js';
 import { getGameState } from '../service/state.js';
 import { getGameList } from '../service/list.js';
-
-export { initPokerDatabase, getPokerEconomy };
 
 export const handlePokerApi = async (req, res, path) => {
   if (path === '/apps/poker/status' && req.method === 'GET') {

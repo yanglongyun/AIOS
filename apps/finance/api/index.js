@@ -1,12 +1,9 @@
 import { json } from '../../../shared/http/json.js';
 import { readBody } from '../../../shared/http/readBody.js';
-import { initFinanceDatabase } from '../repository/init.js';
 import { listFinance } from '../service/list.js';
 import { createFinance } from '../service/create.js';
 import { deleteFinance } from '../service/delete.js';
 import { updateFinance } from '../service/update.js';
-
-export { initFinanceDatabase };
 
 export async function handleFinanceApi(req, res, path) {
   if (path === '/apps/finance/list' && req.method === 'GET') {

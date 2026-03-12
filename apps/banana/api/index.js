@@ -1,10 +1,7 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initBananaDatabase } from '../repository/init.js';
 import { generate } from '../service/generation.js';
 import { getProgress } from '../service/progress.js';
-
-export { initBananaDatabase };
 
 export const handleBananaApi = async (req, res, path) => {
   if (path === '/apps/banana/generation' && req.method === 'POST') {

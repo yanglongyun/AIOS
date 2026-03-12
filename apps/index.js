@@ -1,39 +1,56 @@
 import { createServer } from 'http';
 import { json } from '../shared/http/json.js';
-import { appRegistry } from './registry.js';
+import { appLoaders } from './registry.js';
 import { access } from '../shared/auth/index.js';
 
 const APPS_PORT = 9701;
 
 const moduleCache = new Map();
+const appModules = [];
 const dbInitCache = new Set();
 
-const loadModule = async (entry) => {
-  if (moduleCache.has(entry.name)) return moduleCache.get(entry.name);
-  const mod = await entry.load();
-  moduleCache.set(entry.name, mod);
-  return mod;
+const loadAppModule = async (load) => {
+  if (moduleCache.has(load)) return moduleCache.get(load);
+
+  const mod = await load();
+  const app = mod?.default;
+  if (!app || typeof app !== 'object') {
+    throw new Error('Invalid app module: missing default export object');
+  }
+  if (typeof app.name !== 'string' || !app.name.trim()) {
+    throw new Error('Invalid app module: missing name');
+  }
+  if (typeof app.match !== 'function') {
+    throw new Error(`Invalid app module "${app.name}": missing match(path)`);
+  }
+  if (typeof app.handleApi !== 'function') {
+    throw new Error(`Invalid app module "${app.name}": missing handleApi(req,res,path)`);
+  }
+
+  moduleCache.set(load, app);
+  return app;
 };
 
-const initDbModule = async (entry, mod) => {
-  if (dbInitCache.has(entry.name)) return;
-  for (const fnName of entry.dbInit || []) {
-    if (typeof mod[fnName] === 'function') {
-      await mod[fnName]();
-    }
+const loadRegisteredApps = async () => {
+  for (const load of appLoaders) {
+    const app = await loadAppModule(load);
+    appModules.push(app);
   }
-  dbInitCache.add(entry.name);
+};
+
+const initDbForApp = async (app) => {
+  if (dbInitCache.has(app.name)) return;
+  if (typeof app.initDb === 'function') {
+    await app.initDb();
+  }
+  dbInitCache.add(app.name);
 };
 
 const bootAppRuntimes = async () => {
-  for (const entry of appRegistry) {
-    if (!Array.isArray(entry.serviceStart) || entry.serviceStart.length === 0) continue;
-    const mod = await loadModule(entry);
-    await initDbModule(entry, mod);
-    for (const fnName of entry.serviceStart) {
-      if (typeof mod[fnName] === 'function') {
-        await mod[fnName]();
-      }
+  for (const app of appModules) {
+    await initDbForApp(app);
+    if (typeof app.initRuntime === 'function') {
+      await app.initRuntime();
     }
   }
 };
@@ -64,22 +81,14 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
 
-    const entry = appRegistry.find((item) => item.match(path));
-    if (!entry) {
+    const app = appModules.find((item) => item.match(path));
+    if (!app) {
       json(res, { success: false, message: 'Apps endpoint not found' }, 404);
       return;
     }
 
-    const mod = await loadModule(entry);
-    await initDbModule(entry, mod);
-
-    const handle = mod[entry.apiHandler];
-    if (typeof handle !== 'function') {
-      json(res, { success: false, message: `Invalid app handler: ${entry.name}` }, 500);
-      return;
-    }
-
-    const handled = await handle(req, res, path);
+    await initDbForApp(app);
+    const handled = await app.handleApi(req, res, path);
     if (handled === false) {
       json(res, { success: false, message: 'Apps endpoint not found' }, 404);
     }
@@ -94,6 +103,7 @@ const appsServer = createServer(async (req, res) => {
   }
 });
 
+await loadRegisteredApps();
 await bootAppRuntimes();
 
 appsServer.listen(APPS_PORT, () => {

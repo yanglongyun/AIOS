@@ -1,10 +1,7 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initFortuneDatabase } from '../repository/init.js';
 import { divine } from '../service/divine.js';
 import { list } from '../service/list.js';
-
-export { initFortuneDatabase };
 
 export const handleFortuneApi = async (req, res, path) => {
   if (path === '/apps/fortune/divine' && req.method === 'POST') {

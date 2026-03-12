@@ -1,13 +1,10 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initReaderDatabase } from '../repository/init.js';
 import { create } from '../service/create.js';
 import { list } from '../service/list.js';
 import { history } from '../service/history.js';
 import { generate } from '../service/generate.js';
 import { reset } from '../service/reset.js';
-
-export { initReaderDatabase };
 
 export const handleReaderApi = async (req, res, path) => {
   if (path === '/apps/reader/list' && req.method === 'GET') {

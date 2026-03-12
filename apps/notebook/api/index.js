@@ -1,13 +1,10 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initNotebookDatabase } from '../repository/init.js';
 import { listNotebook } from '../service/list.js';
 import { createNotebook } from '../service/create.js';
 import { updateNotebook } from '../service/update.js';
 import { deleteNotebook } from '../service/delete.js';
 import { optimizeNotebook } from '../service/optimize.js';
-
-export { initNotebookDatabase };
 
 export const handleNotebookApi = async (req, res, path) => {
   if (path === '/apps/notebook/list' && req.method === 'GET') {

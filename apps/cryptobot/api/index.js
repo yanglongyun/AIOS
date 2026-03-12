@@ -1,7 +1,5 @@
 import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
-import { initDatabase } from '../repository/init.js';
-import { initRuntime } from '../runtime/index.js';
 import { getStatus } from '../service/status.js';
 import { start } from '../service/start.js';
 import { stop } from '../service/stop.js';
@@ -10,9 +8,6 @@ import { listEquity } from '../service/equity.js';
 import { saveGoal } from '../service/goal.js';
 import { saveExchange } from '../service/exchange.js';
 import { testExchange } from '../service/exchangeTest.js';
-
-export const initCryptobotDatabase = initDatabase;
-export const initCryptobotRuntime = initRuntime;
 
 export const handleCryptobotApi = async (req, res, path) => {
   if (path === '/apps/cryptobot/status' && req.method === 'GET') {

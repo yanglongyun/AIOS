@@ -100,11 +100,23 @@ const dragOver = ref(false);
 const uploading = ref(false);
 const uploadCount = ref(0);
 
-// 完整面包屑：全部可点击，支持绝对路径导航
+// 完整面包屑：全部可点击
 const fullBreadcrumbs = computed(() => {
-  const crumbs = [];
+  const dir = currentDir.value || '';
+  const isAbs = dir.startsWith('/');
 
-  // 系统路径部分（全部可点击，用绝对路径导航）
+  // 绝对路径：直接拆分显示
+  if (isAbs) {
+    const parts = dir.split('/').filter(Boolean);
+    return parts.map((name, i) => ({
+      name,
+      clickable: true,
+      dir: '/' + parts.slice(0, i + 1).join('/')
+    }));
+  }
+
+  // 相对路径：rootPath + currentDir
+  const crumbs = [];
   if (rootPath.value) {
     const parts = rootPath.value.split('/').filter(Boolean);
     for (let i = 0; i < parts.length; i++) {
@@ -115,10 +127,8 @@ const fullBreadcrumbs = computed(() => {
       });
     }
   }
-
-  // 当前相对路径部分（可点击）
-  if (currentDir.value) {
-    const segs = currentDir.value.split('/');
+  if (dir) {
+    const segs = dir.split('/');
     for (let i = 0; i < segs.length; i++) {
       crumbs.push({
         name: segs[i],
@@ -127,7 +137,6 @@ const fullBreadcrumbs = computed(() => {
       });
     }
   }
-
   return crumbs;
 });
 

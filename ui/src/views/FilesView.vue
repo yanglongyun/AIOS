@@ -13,13 +13,12 @@
       </div>
 
       <!-- 面包屑 -->
-      <div class="mb-3 flex items-center gap-1 text-[12px] text-[#8a7860]">
-        <button @click="goDir('')"
-          class="rounded px-1.5 py-0.5 hover:bg-[#e8dcc8]">AIOS</button>
-        <template v-for="(seg, i) in breadcrumbs" :key="i">
-          <span class="text-[#c8b898]">/</span>
-          <button @click="goDir(breadcrumbs.slice(0, i + 1).join('/'))"
-            class="rounded px-1.5 py-0.5 hover:bg-[#e8dcc8]">{{ seg }}</button>
+      <div class="mb-3 flex flex-wrap items-center gap-1 text-[12px] text-[#8a7860]">
+        <template v-for="(seg, i) in fullBreadcrumbs" :key="i">
+          <span v-if="i > 0" class="text-[#c8b898]">/</span>
+          <button v-if="seg.clickable" @click="goDir(seg.dir)"
+            class="rounded px-1.5 py-0.5 hover:bg-[#e8dcc8]">{{ seg.name }}</button>
+          <span v-else class="px-1.5 py-0.5 text-[#b8a888]">{{ seg.name }}</span>
         </template>
       </div>
 
@@ -50,7 +49,7 @@
             <span class="shrink-0 text-[14px]">{{ item.type === 'dir' ? '📁' : fileIcon(item.name) }}</span>
 
             <!-- 名称（目录可点击） -->
-            <button v-if="item.type === 'dir'" @click="goDir(currentDir ? currentDir + '/' + item.name : item.name)"
+            <button v-if="item.type === 'dir'" @click="goDir(absPath(currentDir, item.name))"
               class="flex-1 truncate text-left text-[13px] font-medium text-[#4a3a28] hover:underline">
               {{ item.name }}
             </button>
@@ -94,13 +93,43 @@ import { useI18n } from '../i18n/index.js';
 
 const { t } = useI18n();
 const items = ref([]);
-const currentDir = ref('');
+const currentDir = ref('files');
+const rootPath = ref('');
 const loading = ref(true);
 const dragOver = ref(false);
 const uploading = ref(false);
 const uploadCount = ref(0);
 
-const breadcrumbs = computed(() => currentDir.value ? currentDir.value.split('/') : []);
+// 完整面包屑：全部可点击，支持绝对路径导航
+const fullBreadcrumbs = computed(() => {
+  const crumbs = [];
+
+  // 系统路径部分（全部可点击，用绝对路径导航）
+  if (rootPath.value) {
+    const parts = rootPath.value.split('/').filter(Boolean);
+    for (let i = 0; i < parts.length; i++) {
+      crumbs.push({
+        name: parts[i],
+        clickable: true,
+        dir: '/' + parts.slice(0, i + 1).join('/')
+      });
+    }
+  }
+
+  // 当前相对路径部分（可点击）
+  if (currentDir.value) {
+    const segs = currentDir.value.split('/');
+    for (let i = 0; i < segs.length; i++) {
+      crumbs.push({
+        name: segs[i],
+        clickable: true,
+        dir: segs.slice(0, i + 1).join('/')
+      });
+    }
+  }
+
+  return crumbs;
+});
 
 const loadDir = async (dir = '') => {
   loading.value = true;
@@ -109,6 +138,7 @@ const loadDir = async (dir = '') => {
     const data = await res.json();
     items.value = (data.data || []).map(f => ({ ...f, _deleting: false }));
     currentDir.value = dir;
+    if (data.root && !rootPath.value) rootPath.value = data.root;
   } catch { items.value = []; }
   loading.value = false;
 };
@@ -139,7 +169,12 @@ const formatTime = (iso) => {
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 };
 
-const filePath = (item) => currentDir.value ? currentDir.value + '/' + item.name : item.name;
+const absPath = (base, name) => {
+  if (!base) return name;
+  return base.endsWith('/') ? base + name : base + '/' + name;
+};
+
+const filePath = (item) => currentDir.value ? absPath(currentDir.value, item.name) : item.name;
 
 const download = (item) => {
   const a = document.createElement('a');
@@ -177,7 +212,7 @@ const uploadFiles = async (fileList) => {
           body: JSON.stringify({
             name: file.name,
             data: reader.result,
-            dir: currentDir.value || 'uploads/chat'
+            dir: currentDir.value || 'files/uploads/chat'
           })
         });
         resolve();
@@ -193,5 +228,5 @@ const uploadFiles = async (fileList) => {
 const onUpload = (e) => uploadFiles(e.target.files);
 const onDrop = (e) => { dragOver.value = false; uploadFiles(e.dataTransfer.files); };
 
-onMounted(() => loadDir(''));
+onMounted(() => loadDir('files'));
 </script>

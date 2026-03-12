@@ -27,10 +27,11 @@ const MIME_MAP = {
 const safeName = (name = 'file') =>
   String(name).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'file';
 
-// 确保路径在项目根目录内（防止路径穿越）
+// 解析路径（支持绝对路径和相对于项目根的路径）
 const safePath = (sub) => {
-  const full = resolve(ROOT, sub || '');
-  if (!full.startsWith(ROOT)) return null;
+  if (!sub) return ROOT;
+  // 绝对路径直接用，相对路径基于项目根
+  const full = sub.startsWith('/') ? resolve(sub) : resolve(ROOT, sub);
   return full;
 };
 
@@ -90,7 +91,7 @@ const listHandler = async (dir = '') => {
     if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
     return a.name.localeCompare(b.name);
   });
-  return { success: true, data: items, path: dir };
+  return { success: true, data: items, path: dir, root: ROOT };
 };
 
 const deleteHandler = async (filePath = '') => {

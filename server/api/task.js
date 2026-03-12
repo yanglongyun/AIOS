@@ -6,6 +6,10 @@ import { listTaskMessages } from '../service/task/messages.js';
 import { stopTask } from '../service/task/stop.js';
 import { createInstantTask } from '../service/task/create/instant.js';
 import { createAgentTask } from '../service/task/create/agent.js';
+import { listSchedules } from '../service/task/schedule/list.js';
+import { createSchedule } from '../service/task/schedule/create.js';
+import { updateSchedule } from '../service/task/schedule/update.js';
+import { deleteSchedule } from '../service/task/schedule/delete.js';
 
 const handleTaskCreateInstantApi = async (req, res, path) => {
   if (path !== '/api/task/create/instant' || req.method !== 'POST') return false;
@@ -91,6 +95,38 @@ export const handleTaskApi = async (req, res, path, url) => {
     if (handled2 !== false) return true;
   }
 
+  if (path === '/api/task/schedule' && req.method === 'GET') {
+    const limit = Number(url.searchParams.get('limit') || 200);
+    return json(res, listSchedules({ limit }));
+  }
+
+  if (path === '/api/task/schedule/create' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      return json(res, createSchedule(body));
+    } catch (e) {
+      return json(res, { success: false, message: e?.message || '创建计划失败' }, 400);
+    }
+  }
+
+  if (path === '/api/task/schedule/update' && req.method === 'POST') {
+    const body = await readBody(req);
+    const id = Number(body.id || 0);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: 'id 无效' }, 400);
+    const result = updateSchedule({ id, ...body });
+    if (result?.status) return json(res, { success: false, message: result.message }, result.status);
+    return json(res, result);
+  }
+
+  if (path === '/api/task/schedule/delete' && req.method === 'POST') {
+    const body = await readBody(req);
+    const id = Number(body.id || 0);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: 'id 无效' }, 400);
+    const result = deleteSchedule({ id });
+    if (result?.status) return json(res, { success: false, message: result.message }, result.status);
+    return json(res, result);
+  }
+
   if (path === '/api/task/stop' && req.method === 'POST') {
     const body = await readBody(req);
     const id = Number(body.id || 0);
@@ -102,4 +138,3 @@ export const handleTaskApi = async (req, res, path, url) => {
 
   json(res, { error: 'not found' }, 404);
 };
-

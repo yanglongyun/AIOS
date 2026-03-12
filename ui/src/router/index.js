@@ -16,6 +16,7 @@ import ReaderView from '../views/apps/reader/index.vue';
 import FortuneView from '../views/apps/fortune/index.vue';
 import PokerView from '../views/apps/poker/index.vue';
 import TaskDetailView from '../views/TaskDetailView.vue';
+import TaskCreateView from '../views/TaskCreateView.vue';
 import FilesView from '../views/FilesView.vue';
 import SkillsView from '../views/SkillsView.vue';
 import TasksView from '../views/TasksView.vue';
@@ -28,6 +29,7 @@ const routes = [
   { path: '/files', component: FilesView },
   { path: '/skills', component: SkillsView },
   { path: '/tasks', component: TasksView },
+  { path: '/tasks/create', component: TaskCreateView },
   { path: '/task/:id', component: TaskDetailView },
   { path: '/history', component: HistoryView },
   { path: '/apps/create', component: CreateAppView },

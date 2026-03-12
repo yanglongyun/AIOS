@@ -22,19 +22,19 @@
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">◷</span>
         {{ t('app_sidebar_history') }}
       </button>
-      <button @click="go('/files')"
-        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
-        :class="btnClass(is('/files'))">
-        <span
-          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📁</span>
-        {{ t('app_sidebar_files') }}
-      </button>
       <button @click="go('/tasks')"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
         :class="btnClass(is('/tasks'))">
         <span
           class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📋</span>
         {{ t('app_sidebar_tasks') }}
+      </button>
+      <button @click="go('/files')"
+        class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"
+        :class="btnClass(is('/files'))">
+        <span
+          class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/5 text-[11px]">📁</span>
+        {{ t('app_sidebar_files') }}
       </button>
       <button @click="go('/skills')"
         class="relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-150"

@@ -40,7 +40,7 @@ export const initDatabase = () => {
       finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS task_schedules (
+    CREATE TABLE IF NOT EXISTS schedules (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       prompt TEXT NOT NULL,

@@ -4,7 +4,7 @@ export const listTaskSchedules = (limit = 200) => {
   const size = Math.max(1, Math.min(1000, Number(limit) || 200));
   return db.prepare(`
     SELECT id, name, prompt, run_at, cron, enabled, last_run_at, last_task_id, created_at, updated_at
-    FROM task_schedules
+    FROM schedules
     ORDER BY id DESC
     LIMIT ?
   `).all(size);
@@ -13,7 +13,7 @@ export const listTaskSchedules = (limit = 200) => {
 export const getEnabledTaskSchedules = () => {
   return db.prepare(`
     SELECT id, name, prompt, run_at, cron, enabled, last_run_at, last_task_id, created_at, updated_at
-    FROM task_schedules
+    FROM schedules
     WHERE enabled = 1
     ORDER BY id ASC
   `).all();
@@ -22,14 +22,14 @@ export const getEnabledTaskSchedules = () => {
 export const getTaskScheduleById = (id) => {
   return db.prepare(`
     SELECT id, name, prompt, run_at, cron, enabled, last_run_at, last_task_id, created_at, updated_at
-    FROM task_schedules
+    FROM schedules
     WHERE id = ?
   `).get(Number(id || 0));
 };
 
 export const insertTaskSchedule = ({ name, prompt, run_at = null, cron = null }) => {
   const row = db.prepare(`
-    INSERT INTO task_schedules (name, prompt, run_at, cron, enabled, created_at, updated_at)
+    INSERT INTO schedules (name, prompt, run_at, cron, enabled, created_at, updated_at)
     VALUES (?, ?, ?, ?, 1, datetime('now'), datetime('now'))
     RETURNING id
   `).get(String(name || ''), String(prompt || ''), run_at || null, cron || null);
@@ -41,7 +41,7 @@ export const updateTaskScheduleById = ({ id, patch = {} }) => {
   if (!current) return null;
   const next = { ...current, ...patch };
   db.prepare(`
-    UPDATE task_schedules
+    UPDATE schedules
     SET name = ?, prompt = ?, run_at = ?, cron = ?, enabled = ?,
         last_run_at = ?, last_task_id = ?, updated_at = datetime('now')
     WHERE id = ?
@@ -59,5 +59,5 @@ export const updateTaskScheduleById = ({ id, patch = {} }) => {
 };
 
 export const deleteTaskScheduleById = (id) => {
-  db.prepare('DELETE FROM task_schedules WHERE id = ?').run(Number(id || 0));
+  db.prepare('DELETE FROM schedules WHERE id = ?').run(Number(id || 0));
 };

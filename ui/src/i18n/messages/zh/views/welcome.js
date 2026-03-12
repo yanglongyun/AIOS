@@ -34,11 +34,4 @@ export default {
   welcome_err_save: '模型配置保存失败',
   welcome_err_test: '模型连通测试失败',
   welcome_default_intro: '你好，我是 AIOS。很高兴认识你。',
-  welcome_resources_title: '配置资源',
-  welcome_resources_hint: '配置 AI 可使用的外部能力与密钥，如搜索引擎 API Key、图片模型 API Key 等。',
-  welcome_resource_title_ph: '名称，如 Google Search API Key',
-  welcome_resource_content_ph: 'API Key / 配置值…',
-  welcome_resource_add: '添加一项',
-  welcome_skip: '跳过',
-  welcome_saving: '保存中…'
 };

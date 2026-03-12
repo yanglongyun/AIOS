@@ -3,6 +3,7 @@ import { getSettings } from '../service/settings/get.js';
 import { buildSystemPrompt } from './prompt/index.js';
 import { injectAttachmentsMessage } from './attachments.js';
 import { getMessages, saveMessage } from './messages.js';
+import { hasConversation } from './conversations.js';
 
 export const createSession = (wsSend) => {
   let conversationId = null;
@@ -39,6 +40,10 @@ export const createSession = (wsSend) => {
       const incomingConversationId = data.conversationId || null;
       if (!incomingConversationId) {
         wsSend({ type: 'error', content: '缺少 conversationId' });
+        return;
+      }
+      if (!hasConversation(incomingConversationId)) {
+        wsSend({ type: 'error', content: '会话不存在，请新建对话后重试' });
         return;
       }
 

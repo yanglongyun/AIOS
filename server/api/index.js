@@ -1,11 +1,10 @@
 import { json } from '../../shared/http/json.js';
-import { handleChatApi } from './chat/index.js';
-import { handleSettingsApi } from './settings/index.js';
-import { handleFilesApi } from './files/index.js';
-import { handleTaskApi } from './task/index.js';
+import { handleChatApi } from './chat.js';
+import { handleSettingsApi } from './settings.js';
+import { handleFilesApi } from './files.js';
+import { handleTaskApi } from './task.js';
 import { handleAuthApi } from './auth/index.js';
-import { handleResourcesApi } from './resources/index.js';
-import { handleSystemApi } from './system/index.js';
+import { handleSystemApi } from './system.js';
 import { access } from '../../shared/auth/index.js';
 
 export const handleApiRequest = async (req, res, url) => {
@@ -45,11 +44,6 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/files/')) {
       await handleFilesApi(req, res, path);
-      return true;
-    }
-
-    if (path.startsWith('/api/resources')) {
-      await handleResourcesApi(req, res, path);
       return true;
     }
 

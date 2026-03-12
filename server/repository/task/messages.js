@@ -1,4 +1,4 @@
-import { db } from '../../db/client.js';
+import { db } from '../client.js';
 
 export const listMessagesByConversationId = (conversationId) => {
   return db.prepare(

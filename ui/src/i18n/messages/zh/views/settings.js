@@ -35,10 +35,5 @@ export default {
   settings_password_changed_relogin: '密码已修改，请重新登录',
   settings_saved: '配置已保存',
   settings_save_failed: '保存失败：{message}',
-  settings_tab_resources: '资源',
-  settings_resources_hint: '管理 AI 可使用的外部能力与密钥，如搜索引擎、图片生成等服务的 API Key。',
-  settings_resource_title_ph: '名称',
-  settings_resource_content_ph: 'API Key / 配置值…',
-  settings_resource_add: '添加一项',
   settings_saving: '保存中…'
 };

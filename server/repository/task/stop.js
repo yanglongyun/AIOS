@@ -1,4 +1,4 @@
-import { db } from '../../db/client.js';
+import { db } from '../client.js';
 
 export const getTaskStatusById = (id) => {
   return db.prepare('SELECT id, status FROM tasks WHERE id = ? LIMIT 1').get(id) || null;

@@ -1,22 +1,32 @@
-import { readBody } from '../../app_shared/utils/readBody.js';
-import { json } from '../../app_shared/utils/json.js';
+import { readBody } from '../../../shared/http/readBody.js';
+import { json } from '../../../shared/http/json.js';
 import { initFortuneDatabase } from '../repository/init.js';
-import { divineHandler } from './divine.js';
-import { listHandler } from './list.js';
+import { divine } from '../service/divine.js';
+import { list } from '../service/list.js';
 
 export { initFortuneDatabase };
 
 export const handleFortuneApi = async (req, res, path) => {
   if (path === '/apps/fortune/divine' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await divineHandler(body, req);
+    const question = String(body.question || '').trim();
+    if (!question) return json(res, { success: false, message: '请输入你的问题' }, 400);
+
+    const hexagram = String(body.hexagram || '').trim();
+    const yaos = String(body.yaos || '').trim();
+    let data = null;
+    try {
+      data = await divine({ question, hexagram, yaos, req });
+    } catch (e) {
+      data = { status: 500, message: e.message || '占卜失败' };
+    }
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/fortune/list' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
-    return json(res, listHandler({
+    return json(res, list({
       page: url.searchParams.get('page'),
       pageSize: url.searchParams.get('pageSize')
     }));

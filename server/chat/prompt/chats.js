@@ -1,4 +1,4 @@
-import { db } from '../../db/client.js';
+import { db } from '../../repository/client.js';
 
 const recentChats = () => {
   return db.prepare(`

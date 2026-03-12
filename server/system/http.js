@@ -1,5 +1,5 @@
 import { createServer } from 'http';
-import { readFileSync, existsSync, statSync, mkdirSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { handleApiRequest } from '../api/index.js';
@@ -7,10 +7,6 @@ import { handleApiRequest } from '../api/index.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..', '..');
 const PUBLIC_DIR = join(ROOT_DIR, 'ui', 'dist');
-const FILES_DIR = join(ROOT_DIR, 'files');
-const FILES_UPLOADS_DIR = join(FILES_DIR, 'uploads');
-const FILES_EXPORTS_DIR = join(FILES_DIR, 'exports');
-const FILES_TMP_DIR = join(FILES_DIR, 'tmp');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -27,10 +23,6 @@ const MIME = {
 };
 
 const APPS_PORT = 9701;
-
-mkdirSync(FILES_UPLOADS_DIR, { recursive: true });
-mkdirSync(FILES_EXPORTS_DIR, { recursive: true });
-mkdirSync(FILES_TMP_DIR, { recursive: true });
 
 const readRawBody = async (req) => {
   const chunks = [];

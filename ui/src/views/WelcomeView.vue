@@ -18,7 +18,7 @@
         <!-- 进度条 -->
         <div class="h-[3px] bg-[#2a1e14]">
           <div class="h-full bg-[linear-gradient(90deg,#c8a060,#d4b878)] transition-all duration-500"
-            :style="{ width: step / 5 * 100 + '%' }"></div>
+            :style="{ width: step / 4 * 100 + '%' }"></div>
         </div>
 
         <!-- Step 1: 欢迎 + 语言选择 -->
@@ -121,47 +121,8 @@
           </div>
         </div>
 
-        <!-- Step 4: 配置资源 -->
-        <div v-if="step === 4" class="px-10 py-10">
-          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_resources_title') }}</h2>
-          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_resources_hint') }}</p>
-
-          <div class="mt-6 max-h-[280px] space-y-3 overflow-y-auto pr-1">
-            <div v-for="(item, idx) in resources" :key="idx"
-              class="group rounded-lg border border-[#3a2a18] bg-black/20 px-4 py-3">
-              <div class="flex items-center gap-2">
-                <input v-model.trim="item.title" :placeholder="t('welcome_resource_title_ph')"
-                  class="flex-1 border-b border-transparent bg-transparent text-[13px] font-semibold text-[#e8d4b8] outline-none placeholder:text-[#5a4a35] focus:border-[#c8a060]" />
-                <button class="cursor-pointer text-sm text-[#6a5840] opacity-0 transition-colors hover:text-[#c8a060] group-hover:opacity-100"
-                  @click="resources.splice(idx, 1)">✕</button>
-              </div>
-              <textarea v-model.trim="item.content" :placeholder="t('welcome_resource_content_ph')" rows="2"
-                class="mt-2 w-full resize-none bg-transparent text-[13px] leading-relaxed text-[#a09078] outline-none placeholder:text-[#5a4a35] focus:text-[#c8b898]"></textarea>
-            </div>
-          </div>
-
-          <button class="mt-3 cursor-pointer text-[13px] text-[#6a5840] transition-colors hover:text-[#c8a060]"
-            @click="resources.push({ title: '', content: '' })">+ {{ t('welcome_resource_add') }}</button>
-
-          <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
-
-          <div class="mt-8 flex items-center justify-between">
-            <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
-              @click="step = 3">{{ t('welcome_prev') }}</button>
-            <div class="flex gap-3">
-              <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
-                @click="skipResources">{{ t('welcome_skip') }}</button>
-              <button
-                class="cursor-pointer rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070] disabled:opacity-40"
-                :disabled="pending" @click="saveResources">
-                {{ pending ? t('welcome_saving') : t('welcome_next') }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 5: 完成 -->
-        <div v-if="step === 5" class="px-10 py-12">
+        <!-- Step 4: 完成 -->
+        <div v-if="step === 4" class="px-10 py-12">
           <div class="flex items-start gap-6">
             <div>
               <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_intro_title') }}</h2>
@@ -178,7 +139,7 @@
           <div class="mt-12 flex items-center justify-between transition-opacity duration-500"
             :class="typing ? 'opacity-0' : 'opacity-100'">
             <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
-              @click="step = 4">{{ t('welcome_prev') }}</button>
+              @click="step = 3">{{ t('welcome_prev') }}</button>
             <button
               class="cursor-pointer rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070]"
               @click="enterSystem">{{ t('welcome_enter') }}</button>
@@ -190,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
@@ -217,8 +178,6 @@ const model = ref({
   apiKey: '',
   language: detectedLanguage
 });
-
-const resources = reactive([{ title: '', content: '' }]);
 
 watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
 
@@ -320,38 +279,12 @@ const saveModelAndTest = async () => {
 
     step.value = 4;
     welcomeText.value = parsed?.intro || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.');
+    startTypewriter(welcomeText.value);
   } catch (e) {
     error.value = e?.message || t('welcome_err_test');
   } finally {
     pending.value = false;
   }
-};
-
-const saveResources = async () => {
-  error.value = '';
-  pending.value = true;
-  try {
-    const valid = resources.filter(r => r.title.trim());
-    for (const r of valid) {
-      await fetch('/api/resources/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ title: r.title.trim(), content: r.content.trim() })
-      });
-    }
-    step.value = 5;
-    startTypewriter(welcomeText.value);
-  } catch (e) {
-    error.value = e?.message || 'Failed to save resources';
-  } finally {
-    pending.value = false;
-  }
-};
-
-const skipResources = () => {
-  step.value = 5;
-  startTypewriter(welcomeText.value);
 };
 
 const enterSystem = async () => {

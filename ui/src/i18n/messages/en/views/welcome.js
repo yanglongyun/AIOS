@@ -34,11 +34,4 @@ export default {
   welcome_err_save: 'Failed to save model config',
   welcome_err_test: 'Model connection test failed',
   welcome_default_intro: 'Hi, I am AIOS. Nice to meet you.',
-  welcome_resources_title: 'Resources',
-  welcome_resources_hint: 'Configure external capabilities and API keys for AI, such as search engine or image model API keys.',
-  welcome_resource_title_ph: 'Name, e.g. Google Search API Key',
-  welcome_resource_content_ph: 'API Key / Value…',
-  welcome_resource_add: 'Add item',
-  welcome_skip: 'Skip',
-  welcome_saving: 'Saving…'
 };

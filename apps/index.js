@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { json } from './app_shared/utils/json.js';
+import { json } from '../shared/http/json.js';
 import { appRegistry } from './registry.js';
 import { access } from '../shared/auth/index.js';
 

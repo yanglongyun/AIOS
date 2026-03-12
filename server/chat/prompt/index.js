@@ -8,8 +8,6 @@ import { environment as environmentSection } from './environment.js';
 import { language as languageSection } from './language.js';
 import { memory as memorySection } from './memory.js';
 import { model as modelSection } from './model.js';
-import { resources as resourcesSection } from './resources.js';
-import { scripts as scriptsSection } from './scripts.js';
 import { tools as toolsSection } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -57,8 +55,7 @@ export const buildSystemPrompt = (currentConversationId = '') => {
   // 5. model：当前模型/供应商/API 配置摘要
   // 6. tools：工具截断、循环轮数等工具规则
   // 7. apps：当前系统内置应用与使用约束
-  // 8. scripts：可直接运行的脚本能力说明
-  // 9. chats：当前会话相关上下文约束
+  // 8. chats：当前会话相关上下文约束
   let prompt = instruction();
 
   // 语言段：告诉模型当前应优先使用哪种语言回复。
@@ -83,12 +80,6 @@ export const buildSystemPrompt = (currentConversationId = '') => {
 
   // 应用段：告诉模型当前系统有哪些应用，以及应用层的协作规则。
   prompt += appsSection();
-
-  // 资源段：用户配置的外部 API Key 与能力。
-  prompt += resourcesSection();
-
-  // 脚本段：告诉模型哪些本地脚本能力可直接使用。
-  prompt += scriptsSection();
 
   // 会话段：把当前 conversation 的上下文约束拼到最后。
   prompt += chatsSection(currentConversationId);

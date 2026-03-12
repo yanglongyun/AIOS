@@ -1,42 +1,44 @@
-import { readBody } from '../../app_shared/utils/readBody.js';
-import { json } from '../../app_shared/utils/json.js';
+import { readBody } from '../../../shared/http/readBody.js';
+import { json } from '../../../shared/http/json.js';
 import { initReaderDatabase } from '../repository/init.js';
-import { createHandler } from './create.js';
-import { listHandler } from './list.js';
-import { historyHandler } from './history.js';
-import { generateHandler } from './generate.js';
-import { resetHandler } from './reset.js';
+import { create } from '../service/create.js';
+import { list } from '../service/list.js';
+import { history } from '../service/history.js';
+import { generate } from '../service/generate.js';
+import { reset } from '../service/reset.js';
 
 export { initReaderDatabase };
 
 export const handleReaderApi = async (req, res, path) => {
   if (path === '/apps/reader/list' && req.method === 'GET') {
-    return json(res, listHandler());
+    return json(res, list());
   }
 
   if (path === '/apps/reader/create' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, await createHandler(body, req));
+    return json(res, await create(body));
   }
 
   if (path === '/apps/reader/history' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const sessionId = Number(url.searchParams.get('sessionId') || 0);
-    const data = historyHandler({ sessionId });
+    const data = history({ sessionId });
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/reader/generate' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = await generateHandler(body, req);
+    const sessionId = Number(body.sessionId);
+    const action = String(body.action || '').trim() || '开始故事';
+    const data = await generate({ sessionId, action, req });
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }
 
   if (path === '/apps/reader/reset' && req.method === 'POST') {
     const body = await readBody(req);
-    const data = resetHandler(body);
+    const data = reset(body);
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

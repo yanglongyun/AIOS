@@ -8,5 +8,6 @@ files/
 
 ui/dist/
 AGENT.md
+CLAUDE.md
 .claude/
 think/

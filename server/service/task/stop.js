@@ -1,6 +1,6 @@
 import { broadcast } from '../../system/ws.js';
 import { getTaskStatusById, markTaskAbortedById } from '../../repository/task/stop.js';
-import { stopTaskExecution } from '../../runtime/task/control.js';
+import { stopTaskExecution } from './execution.js';
 
 export const stopTask = ({ id }) => {
   const task = getTaskStatusById(id);

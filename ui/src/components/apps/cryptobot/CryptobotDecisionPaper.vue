@@ -4,7 +4,7 @@
       <div class="mb-5 border-b-2 border-dashed border-[#1a1040] pb-3 text-center text-base font-black tracking-[4px] text-[#1a1040]">
         {{ t('cryptobot_decision_log') }}<br>
         <span class="text-[10px] font-normal tracking-normal text-[#5a4e7a]">
-          {{ t('cryptobot_ticks', { n: status.state.tick_count }) }} · {{ t('cryptobot_trades', { n: status.state.trade_count }) }}
+          {{ t('cryptobot_ticks', { n: status.state.tick_count }) }}
         </span>
       </div>
 
@@ -16,26 +16,24 @@
         v-for="d in decisions"
         :key="d.id"
         class="decision-block border-b-2 border-dashed border-[rgba(26,16,64,0.2)] py-4 pl-2.5 last:border-b-0"
-        :class="d.action"
+        :class="d.ok ? 'ok' : 'fail'"
       >
         <div class="mb-1.5 flex items-start justify-between">
           <div>
-            <span class="action-badge mr-1.5 inline-block rounded-sm px-2 py-0.5 text-[10px] font-black tracking-[2px]" :class="'badge-' + d.action">{{ actLabel(d.action) }}</span>
-            <span class="text-sm font-black text-[#0d0820]">{{ status.config.inst_id || t('cryptobot_inst_unset') }}</span>
+            <span class="action-badge mr-1.5 inline-block rounded-sm px-2 py-0.5 text-[10px] font-black tracking-[2px]" :class="d.ok ? 'badge-ok' : 'badge-fail'">
+              {{ d.ok ? t('cryptobot_task_ok') : t('cryptobot_task_fail') }}
+            </span>
+            <span class="text-sm font-black text-[#0d0820]">#{{ d.id }}</span>
           </div>
           <div class="text-right text-[10px] text-[#5a4e7a]">{{ fmtTime(d.created_at) }}</div>
         </div>
-        <div class="mb-1 text-[11px] text-[#3a2e60]">
-          <template v-if="d.action !== 'hold' && d.amount_usdt > 0">
-            <span class="text-[#7060a0]">{{ t('cryptobot_amount') }}: </span>{{ fmtNum(d.amount_usdt) }} U
-          </template>
-          <template v-else>
-            <span class="text-[#7060a0]">{{ t('cryptobot_no_fill') }}</span>
-          </template>
+        <div class="mb-1 text-[10px] text-[#7060a0]">
+          task_id: {{ d.task_id || '-' }}
         </div>
         <div class="mt-1.5 border-l-2 border-[rgba(26,16,64,0.15)] pl-2 text-[11px] leading-relaxed text-[#3a2e60]">
-          <span class="mb-0.5 block text-[8px] font-black tracking-[1px] text-[#7060a0]">{{ t('cryptobot_ai_reason') }}</span>
-          {{ d.reason || '-' }}
+          <span class="mb-0.5 block text-[8px] font-black tracking-[1px] text-[#7060a0]">{{ t('cryptobot_task_summary') }}</span>
+          {{ d.summary || '-' }}
+          <div v-if="d.error" class="mt-1 text-[10px] text-[#c92a2a]">{{ d.error }}</div>
         </div>
       </div>
 
@@ -58,9 +56,7 @@ defineProps({
   status: { type: Object, required: true },
   decisions: { type: Array, required: true },
   hasMore: { type: Boolean, required: true },
-  fmtNum: { type: Function, required: true },
-  fmtTime: { type: Function, required: true },
-  actLabel: { type: Function, required: true }
+  fmtTime: { type: Function, required: true }
 });
 
 defineEmits(['loadMore']);
@@ -107,11 +103,9 @@ const { t } = useI18n();
   text-shadow: 0.5px 0 0.5px rgba(0,0,0,0.12);
 }
 
-.decision-block.buy { box-shadow: -4px 0 0 #1aab40; }
-.decision-block.sell { box-shadow: -4px 0 0 #c92a2a; }
-.decision-block.hold { box-shadow: -4px 0 0 #4a5060; }
+.decision-block.ok { box-shadow: -4px 0 0 #1aab40; }
+.decision-block.fail { box-shadow: -4px 0 0 #c92a2a; }
 
-.badge-buy { background: #1aab40; color: #fff; }
-.badge-sell { background: #c92a2a; color: #fff; }
-.badge-hold { background: #2a3040; color: #8090a0; }
+.badge-ok { background: #1aab40; color: #fff; }
+.badge-fail { background: #c92a2a; color: #fff; }
 </style>

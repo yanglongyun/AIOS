@@ -4,7 +4,7 @@
       :status="status"
       :error="error"
       v-model:panelOpen="panelOpen"
-      v-model:directive="directive"
+      v-model:goal="goal"
       :slider-idx="sliderIdx"
       :intervals="INTERVALS"
       :slider-bg="sliderBg"
@@ -16,7 +16,7 @@
       :fmt-num="fmtNum"
       @start="doStart"
       @stop="doStop"
-      @save-directive="doSaveDirective"
+      @save-goal="doSaveGoal"
       @slider-input="onSliderInput"
       @test-exchange="doTestExchange"
       @mark-exchange-dirty="exDirty = true"
@@ -27,9 +27,7 @@
       :status="status"
       :decisions="decisions"
       :has-more="hasMore"
-      :fmt-num="fmtNum"
       :fmt-time="fmtTime"
-      :act-label="actLabel"
       @load-more="loadMoreDecisions"
     />
   </div>
@@ -52,8 +50,8 @@ let ticker = null;
 const nowTs = ref(Date.now());
 
 const status = reactive({
-  config: { api_key: '', api_secret: '', passphrase: '', has_keys: false, directive: '', interval_sec: 300, inst_id: '', updated_at: '', base_url: '' },
-  state: { running: false, tick_count: 0, trade_count: 0, started_at: '', last_run_at: '', last_price: 0 },
+  config: { api_key: '', api_secret: '', passphrase: '', has_keys: false, goal: '', interval_sec: 300, updated_at: '', base_url: '' },
+  state: { running: false, executing: false, tick_count: 0, started_at: '', last_run_at: '', last_error: null, last_error_at: null },
   equity: { current: 0, initial: 0, pnl: 0, pnl_ratio: 0, today_change: 0 }
 });
 
@@ -62,7 +60,7 @@ const exDirty = ref(false);
 const exForm = reactive({ api_key: '', api_secret: '', passphrase: '' });
 const testingEx = ref(false);
 const testResult = ref(null);
-const directive = ref('');
+const goal = ref('');
 const sliderIdx = ref(2);
 const decisions = ref([]);
 const decisionLimit = ref(50);
@@ -122,10 +120,10 @@ const doTestExchange = async () => {
   }
 };
 
-const doSaveDirective = async () => {
+const doSaveGoal = async () => {
   error.value = '';
   try {
-    await post('/directive', { directive: directive.value });
+    await post('/goal', { goal: goal.value });
     await loadStatus();
   } catch (e) {
     error.value = e.message;
@@ -136,7 +134,7 @@ const doSaveAll = async () => {
   error.value = '';
   try {
     await Promise.all([
-      post('/directive', { directive: directive.value }),
+      post('/goal', { goal: goal.value }),
       post('/exchange', exForm)
     ]);
     await loadStatus();
@@ -178,6 +176,7 @@ const sliderBg = computed(() => {
 
 const countdownSec = computed(() => {
   if (!status.state.running) return null;
+  if (status.state.executing) return 0;
   const intervalSec = Math.max(1, Number(status.config.interval_sec) || 300);
   const ref = status.state.last_run_at || status.state.started_at;
   if (!ref) return intervalSec;
@@ -189,6 +188,7 @@ const countdownSec = computed(() => {
 
 const countdownLabel = computed(() => {
   if (countdownSec.value === null) return t('cryptobot_countdown_paused');
+  if (status.state.executing) return t('cryptobot_countdown_executing');
   if (countdownSec.value <= 0) return t('cryptobot_countdown_due');
   const total = countdownSec.value;
   const mm = Math.floor(total / 60);
@@ -216,12 +216,6 @@ const fmtTime = (v) => {
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 };
 
-const actLabel = (a) => {
-  if (a === 'buy') return t('cryptobot_buy');
-  if (a === 'sell') return t('cryptobot_sell');
-  return t('cryptobot_hold');
-};
-
 const minToSliderIdx = (min) => {
   const idx = INTERVALS.indexOf(min);
   return idx >= 0 ? idx : 2;
@@ -232,14 +226,14 @@ let pendingRefresh = false;
 onMounted(async () => {
   try {
     await loadAll();
-    directive.value = status.config.directive || t('cryptobot_default_directive');
+    goal.value = status.config.goal || t('cryptobot_default_directive');
     sliderIdx.value = minToSliderIdx(Math.round((status.config.interval_sec || 300) / 60));
     syncExFormFromStatus();
     if (!status.config.has_keys) panelOpen.value = true;
 
     ticker = setInterval(() => {
       nowTs.value = Date.now();
-      if (status.state.running && countdownSec.value <= 0 && !pendingRefresh) {
+      if (status.state.running && (status.state.executing || countdownSec.value <= 0) && !pendingRefresh) {
         pendingRefresh = true;
         setTimeout(() => {
           loadAll().catch(() => {}).finally(() => { pendingRefresh = false; });

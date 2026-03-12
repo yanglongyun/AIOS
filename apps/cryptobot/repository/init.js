@@ -9,12 +9,10 @@ export const initDatabase = () => {
     api_key TEXT NOT NULL DEFAULT '',
     api_secret TEXT NOT NULL DEFAULT '',
     passphrase TEXT NOT NULL DEFAULT '',
-    directive TEXT NOT NULL DEFAULT '',
+    goal TEXT NOT NULL DEFAULT '',
     interval_sec INTEGER NOT NULL DEFAULT 300,
-    inst_id TEXT NOT NULL DEFAULT 'BTC-USDT',
-    virtual_usdt REAL NOT NULL DEFAULT 0,
-    virtual_coin REAL NOT NULL DEFAULT 0,
     initial_equity REAL NOT NULL DEFAULT 0,
+    current_equity REAL NOT NULL DEFAULT 0,
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
 
@@ -22,21 +20,19 @@ export const initDatabase = () => {
     id INTEGER PRIMARY KEY CHECK(id = 1),
     running INTEGER NOT NULL DEFAULT 0,
     tick_count INTEGER NOT NULL DEFAULT 0,
-    trade_count INTEGER NOT NULL DEFAULT 0,
-    last_price REAL NOT NULL DEFAULT 0,
     started_at TEXT DEFAULT '',
     last_run_at TEXT DEFAULT '',
+    last_error TEXT DEFAULT '',
+    last_error_at TEXT DEFAULT '',
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
 
   db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_decisions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    action TEXT NOT NULL,
-    reason TEXT NOT NULL DEFAULT '',
-    price REAL NOT NULL DEFAULT 0,
-    size_coin REAL NOT NULL DEFAULT 0,
-    amount_usdt REAL NOT NULL DEFAULT 0,
-    equity_after REAL NOT NULL DEFAULT 0,
+    summary TEXT NOT NULL DEFAULT '',
+    task_id INTEGER NOT NULL DEFAULT 0,
+    ok INTEGER NOT NULL DEFAULT 1,
+    error TEXT NOT NULL DEFAULT '',
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 

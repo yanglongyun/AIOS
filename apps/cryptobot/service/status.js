@@ -1,41 +1,27 @@
-import { getConfig } from '../repository/config.js';
+import { getConfig, saveConfig } from '../repository/config.js';
 import { getState } from '../repository/state.js';
 import { getTodayChange } from '../repository/equity.js';
 import { parseNum } from '../repository/client.js';
-import { fetchCandles, fetchSpotBalances, fetchFundingBalances } from '../runtime/okx.js';
+import { fetchAccountTotalEq } from '../runtime/okx.js';
+import { isBotExecuting } from '../runtime/index.js';
 
 export const getStatus = async () => {
   const cfg = getConfig();
   const state = getState();
-  let lastPrice = parseNum(state.last_price);
-  let usdt = parseNum(cfg.virtual_usdt);
-  let coin = parseNum(cfg.virtual_coin);
-  let fundingUsdt = 0;
-  let fundingCoin = 0;
-  let accountTotalEq = 0;
 
+  let equity = parseNum(cfg.current_equity);
   if (cfg.api_key && cfg.api_secret && cfg.passphrase) {
     try {
-      const [candles, balances, funding] = await Promise.all([
-        fetchCandles(cfg),
-        fetchSpotBalances(cfg, cfg.inst_id),
-        fetchFundingBalances(cfg, cfg.inst_id).catch(() => ({ quoteBal: 0, baseBal: 0 }))
-      ]);
-      const last = candles[candles.length - 1];
-      if (last?.close) lastPrice = parseNum(last.close);
-      usdt = parseNum(balances.quoteCash);
-      coin = parseNum(balances.baseCash);
-      fundingUsdt = parseNum(funding.quoteBal);
-      fundingCoin = parseNum(funding.baseBal);
-      accountTotalEq = parseNum(balances.totalEq);
+      const liveEq = await fetchAccountTotalEq(cfg);
+      if (liveEq > 0) {
+        equity = liveEq;
+        saveConfig({ current_equity: liveEq });
+      }
     } catch {
-      // keep cached values when OKX temporarily unavailable
+      // keep cached equity when exchange temporarily unavailable
     }
   }
 
-  const tradingEq = lastPrice > 0 ? (usdt + coin * lastPrice) : parseNum(usdt);
-  const fundingEq = lastPrice > 0 ? (fundingUsdt + fundingCoin * lastPrice) : parseNum(fundingUsdt);
-  const equity = accountTotalEq > 0 ? (accountTotalEq + fundingEq) : (tradingEq + fundingEq);
   const initialEq = parseNum(cfg.initial_equity, equity) || 1;
   const pnl = equity - initialEq;
 
@@ -47,18 +33,16 @@ export const getStatus = async () => {
       api_secret: cfg.api_secret || '',
       passphrase: cfg.passphrase || '',
       has_keys: Boolean(cfg.api_key && cfg.api_secret && cfg.passphrase),
-      directive: cfg.directive,
+      goal: cfg.goal || '',
       interval_sec: cfg.interval_sec,
-      inst_id: cfg.inst_id,
       updated_at: cfg.updated_at
     },
     state: {
       running: Boolean(state.running),
+      executing: isBotExecuting(),
       tick_count: state.tick_count || 0,
-      trade_count: state.trade_count || 0,
       started_at: state.started_at,
       last_run_at: state.last_run_at,
-      last_price: lastPrice,
       last_error: state.last_error || null,
       last_error_at: state.last_error_at || null
     },

@@ -7,7 +7,7 @@ import { start } from '../service/start.js';
 import { stop } from '../service/stop.js';
 import { listDecisions } from '../service/decisions.js';
 import { listEquity } from '../service/equity.js';
-import { saveDirective } from '../service/directive.js';
+import { saveGoal } from '../service/goal.js';
 import { saveExchange } from '../service/exchange.js';
 import { testExchange } from '../service/exchangeTest.js';
 
@@ -29,9 +29,9 @@ export const handleCryptobotApi = async (req, res, path) => {
     return json(res, await testExchange(body));
   }
 
-  if (path === '/apps/cryptobot/directive' && req.method === 'POST') {
+  if (path === '/apps/cryptobot/goal' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, saveDirective(body));
+    return json(res, saveGoal(body));
   }
 
   if (path === '/apps/cryptobot/start' && req.method === 'POST') {

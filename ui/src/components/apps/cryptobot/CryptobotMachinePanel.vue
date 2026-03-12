@@ -74,13 +74,13 @@
         <div class="field-block mb-2 rounded-[5px] border border-[#21262d] bg-[#080c10] px-3 py-2">
           <div class="mb-1.5 text-[8px] tracking-[2px] text-[#4a9060]">{{ t('cryptobot_directive') }}</div>
           <textarea
-            :value="directive"
+            :value="goal"
             rows="2"
             spellcheck="false"
-            class="directive-input w-full resize-none border-none bg-transparent text-xs leading-relaxed text-[#c9d1d9] outline-none"
+            class="goal-input w-full resize-none border-none bg-transparent text-xs leading-relaxed text-[#c9d1d9] outline-none"
             :placeholder="t('cryptobot_directive_placeholder')"
-            @input="$emit('update:directive', $event.target.value)"
-            @blur="$emit('saveDirective')"
+            @input="$emit('update:goal', $event.target.value)"
+            @blur="$emit('saveGoal')"
           ></textarea>
         </div>
 
@@ -162,7 +162,7 @@ defineProps({
   status: { type: Object, required: true },
   error: { type: String, required: true },
   panelOpen: { type: Boolean, required: true },
-  directive: { type: String, required: true },
+  goal: { type: String, required: true },
   sliderIdx: { type: Number, required: true },
   intervals: { type: Array, required: true },
   sliderBg: { type: Object, required: true },
@@ -176,10 +176,10 @@ defineProps({
 
 defineEmits([
   'update:panelOpen',
-  'update:directive',
+  'update:goal',
   'start',
   'stop',
-  'saveDirective',
+  'saveGoal',
   'sliderInput',
   'testExchange',
   'markExchangeDirty',
@@ -258,8 +258,8 @@ const { t } = useI18n();
 .expand-scroll::-webkit-scrollbar-track { background: transparent; }
 .expand-scroll::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
 
-.directive-input::placeholder { color: #2a3040; }
-.directive-input:focus { color: #e0d0a0; }
+.goal-input::placeholder { color: #2a3040; }
+.goal-input:focus { color: #e0d0a0; }
 
 .interval-value { text-shadow: 0 0 8px rgba(0,255,100,0.4); }
 .mech-slider { -webkit-appearance: none; appearance: none; height: 6px; background: #000; border-radius: 3px; border: 1px solid #21262d; box-shadow: inset 0 2px 4px rgba(0,0,0,0.9); }

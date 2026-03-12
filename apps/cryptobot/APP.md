@@ -1,19 +1,19 @@
 ---
 name: cryptobot
-description: 炒币机 - 基于 OKX 的自动交易应用，支持配置交易参数、启动停止、收益曲线和决策记录。数据在 cryptobot_config、cryptobot_state、cryptobot_decisions、cryptobot_equity。
+description: 炒币机 - 基于 OKX 的自主交易应用。用户仅配置凭证与目标，系统周期性触发 AI 自主执行并记录任务总结。数据在 cryptobot_config、cryptobot_state、cryptobot_decisions、cryptobot_equity。
 backend: apps/cryptobot
 database: database/apps/cryptobot.db
 ---
 
 # 炒币机
 
-周期性自动执行策略交易，不是每次交易都请求 LLM。  
-LLM 只在策略刷新周期触发，用于更新策略代码。
+周期性触发 AI 任务，AI 基于目标完全自主决策与执行。  
+Decision Log 只记录每轮任务总结，不记录固定 action/amount 字段。
 
 API:
 - GET `/apps/cryptobot/status`
 - POST `/apps/cryptobot/exchange`
-- POST `/apps/cryptobot/directive`
+- POST `/apps/cryptobot/goal`
 - POST `/apps/cryptobot/start`
 - POST `/apps/cryptobot/stop`
 - GET `/apps/cryptobot/equity?limit=300`

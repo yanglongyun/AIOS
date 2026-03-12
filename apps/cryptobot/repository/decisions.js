@@ -1,16 +1,16 @@
 import { db } from './client.js';
 
-export const recordDecision = ({ action, reason, price, sizeCoin, amountUsdt, equityAfter }) => {
+export const recordDecision = ({ summary, taskId = 0, ok = true, error = '' }) => {
   db.prepare(`
-    INSERT INTO cryptobot_decisions (action, reason, price, size_coin, amount_usdt, equity_after, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-  `).run(action, reason, price, sizeCoin, amountUsdt, equityAfter);
+    INSERT INTO cryptobot_decisions (summary, task_id, ok, error, created_at)
+    VALUES (?, ?, ?, ?, datetime('now'))
+  `).run(String(summary || ''), Number(taskId || 0), ok ? 1 : 0, String(error || ''));
 };
 
 export const listDecisions = (limit = 50) => {
   const size = Math.min(200, Math.max(1, parseInt(limit) || 50));
   return db.prepare(`
-    SELECT id, action, reason, price, size_coin, amount_usdt, equity_after, created_at
+    SELECT id, summary, task_id, ok, error, created_at
     FROM cryptobot_decisions
     ORDER BY id DESC
     LIMIT ?

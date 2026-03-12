@@ -263,35 +263,35 @@ onUnmounted(() => {
 }
 @keyframes dialDrift {
   from { background-position: 0 0; }
-  to   { background-position: -80px 0; }
+  to   { background-position: 80px 0; }
 }
 
-/* 订阅时间针（红色） */
-.needle-schedule {
-  position: absolute; top: 0; bottom: 0; width: 2px;
-  background: #e84030;
-  box-shadow: 0 0 6px rgba(232,64,48,0.6);
-  z-index: 3; transition: left 0.5s ease;
-}
-.needle-schedule::after {
-  content: ''; position: absolute; top: -1px; left: -3px;
-  width: 0; height: 0;
-  border-left: 4px solid transparent; border-right: 4px solid transparent;
-  border-top: 5px solid #e84030;
-}
-
-/* 当前时间针（琥珀色） */
+/* 当前时间针（琥珀色，上层） */
 .needle-now {
   position: absolute; top: 0; bottom: 0; width: 2px;
   background: #e8c060;
   box-shadow: 0 0 8px rgba(232,192,96,0.6);
-  z-index: 2; transition: left 1s linear;
+  z-index: 3; transition: left 1s linear;
 }
 .needle-now::after {
+  content: ''; position: absolute; top: -1px; left: -3px;
+  width: 0; height: 0;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-top: 5px solid #e8c060;
+}
+
+/* 订阅时间针（红色，下层） */
+.needle-schedule {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: #e84030;
+  box-shadow: 0 0 6px rgba(232,64,48,0.6);
+  z-index: 2; transition: left 0.5s ease;
+}
+.needle-schedule::after {
   content: ''; position: absolute; bottom: -1px; left: -3px;
   width: 0; height: 0;
   border-left: 4px solid transparent; border-right: 4px solid transparent;
-  border-bottom: 5px solid #e8c060;
+  border-bottom: 5px solid #e84030;
 }
 
 /* 接收中闪烁 */

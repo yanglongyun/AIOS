@@ -100,6 +100,9 @@ watch(() => route.path, (p) => {
   if (p.startsWith('/chat') && activePanel.value === 'chat') activePanel.value = null;
 });
 
+// 面板打开时禁止底层滚动（解决小屏幕滚动穿透）
+watch(activePanel, (v) => { document.body.style.overflow = v ? 'hidden' : ''; });
+
 const onNavigate = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;
 };

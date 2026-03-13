@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-[90]" @click.self="$emit('close')">
+  <div class="fixed inset-0 z-[90] max-md:bg-[rgba(22,14,8,0.45)] max-md:backdrop-blur-[1px]" @click.self="$emit('close')">
     <div class="absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
       <div class="flex items-center border-b border-[#4a3828] px-4 py-2.5">
         <span class="text-sm font-bold text-[#e8d0a8]">{{ t('tasks_title') }}</span>

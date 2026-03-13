@@ -9,6 +9,7 @@ export const createSession = (wsSend) => {
   let conversationId = null;
   let messages = [];
   let abortController = null;
+  let running = false;
 
   const handleMessage = async (data) => {
     if (data.type === 'ping') {
@@ -25,6 +26,16 @@ export const createSession = (wsSend) => {
     }
 
     if (data.type === 'message') {
+      // 防止并发：上一轮还在执行时，先中止再开始新一轮
+      if (running && abortController) {
+        abortController.abort();
+        abortController = null;
+        // 等上一轮结束释放锁
+        await new Promise((r) => {
+          const check = () => running ? setTimeout(check, 50) : r();
+          check();
+        });
+      }
       const settings = getSettings();
       const {
         contextRounds,
@@ -76,6 +87,7 @@ export const createSession = (wsSend) => {
       modelMessages[modelMessages.length - 1] = modelUserMsg;
       saveMessage(conversationId, userMsg, userMeta);
 
+      running = true;
       abortController = new AbortController();
       const { signal } = abortController;
 
@@ -136,6 +148,7 @@ export const createSession = (wsSend) => {
         }
       } finally {
         abortController = null;
+        running = false;
       }
     }
   };

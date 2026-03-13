@@ -1,6 +1,6 @@
 import { readBody } from '../../shared/http/readBody.js';
 import { json } from '../../shared/http/json.js';
-import { hasConversation, createConversation } from '../chat/conversations.js';
+import { hasChat, createChat } from '../chat/chats.js';
 import { listChats } from '../service/chat/list.js';
 import { getChatMessagesPaged } from '../service/chat/messages.js';
 import { renameChat } from '../service/chat/rename.js';
@@ -14,13 +14,13 @@ export const handleChatApi = async (req, res, path, url) => {
 
   if (path === '/api/chat/create' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, createConversation(body.title || '新对话', body.scene || 'chat', body.meta || null));
+    return json(res, createChat(body.title || '新对话', body.scene || 'chat', body.meta || null));
   }
 
   if (path === '/api/chat/messages' && req.method === 'GET') {
     const conversationId = url.searchParams.get('conversationId');
     if (!conversationId) return json(res, { error: '缺少 conversationId' }, 400);
-    if (!hasConversation(conversationId)) return json(res, { error: '会话不存在' }, 404);
+    if (!hasChat(conversationId)) return json(res, { error: '会话不存在' }, 404);
     const limit = Number(url.searchParams.get('limit') || 20);
     const offset = Number(url.searchParams.get('offset') || 0);
     return json(res, getChatMessagesPaged(conversationId, limit, offset));

@@ -3,7 +3,7 @@ import { getSettings } from '../service/settings/get.js';
 import { buildSystemPrompt } from './prompt/index.js';
 import { injectAttachmentsMessage } from './attachments.js';
 import { getMessages, saveMessage } from './messages.js';
-import { hasConversation } from './conversations.js';
+import { hasChat } from './chats.js';
 
 export const createSession = (wsSend) => {
   const conversations = new Map(); // conversationId -> { abortController }
@@ -28,7 +28,7 @@ export const createSession = (wsSend) => {
         wsSend({ type: 'error', content: '缺少 conversationId' });
         return;
       }
-      if (!hasConversation(cid)) {
+      if (!hasChat(cid)) {
         wsSend({ type: 'error', content: '会话不存在，请新建对话后重试' });
         return;
       }

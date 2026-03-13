@@ -75,8 +75,7 @@ export const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal,
         const raw = dataLines.join('\n');
         if (!raw || raw === '[DONE]') continue;
 
-        const json = parseJson(raw, null);
-        if (!json) continue;
+        const json = parseJson(raw, 'llm.stream.chunk');
         parseOpenAiDelta(json, state, onDelta);
       }
     }

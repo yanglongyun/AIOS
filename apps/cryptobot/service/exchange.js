@@ -2,17 +2,18 @@ import { getConfig, saveConfig } from '../repository/config.js';
 
 export const saveExchange = (body = {}) => {
   const cfg = getConfig();
-  const pick = (input, fallback) => {
-    if (input === undefined || input === null) return fallback;
-    const text = String(input).trim();
-    return text ? text : fallback;
-  };
+  const apiKey = String(body.api_key ?? '').trim();
+  const apiSecret = String(body.api_secret ?? '').trim();
+  const passphrase = String(body.passphrase ?? '').trim();
+  if (!apiKey || !apiSecret || !passphrase) {
+    throw new Error('API Key、Secret、Passphrase 均不能为空');
+  }
 
   saveConfig({
-    base_url: pick(body.base_url, cfg.base_url),
-    api_key: pick(body.api_key, cfg.api_key),
-    api_secret: pick(body.api_secret, cfg.api_secret),
-    passphrase: pick(body.passphrase, cfg.passphrase)
+    base_url: String(cfg.base_url || '').trim(),
+    api_key: apiKey,
+    api_secret: apiSecret,
+    passphrase
   });
   return { success: true };
 };

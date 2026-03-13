@@ -1,5 +1,3 @@
-import { getInternalApiToken } from '../../shared/auth/repository.js';
-
 export const truncateToolResult = (content, { enabled = true, maxChars = 12000 } = {}) => {
   const limit = Math.max(1000, Math.min(50000, Number(maxChars) || 12000));
   const text = String(content ?? '');
@@ -13,17 +11,22 @@ export const truncateToolResult = (content, { enabled = true, maxChars = 12000 }
   return { content: clipped, truncated: true, originalLength: text.length };
 };
 
-const clampInt = (value, min, max, fallback) => {
+const parseBoundedInt = (name, value, min, max) => {
   const num = Number(value);
-  if (!Number.isFinite(num)) return fallback;
-  return Math.max(min, Math.min(max, Math.floor(num)));
+  if (!Number.isFinite(num) || !Number.isInteger(num)) {
+    throw new Error(`Invalid ${name}: integer required`);
+  }
+  if (num < min || num > max) {
+    throw new Error(`Invalid ${name}: must be between ${min} and ${max}`);
+  }
+  return num;
 };
 
 export const normalizeChatOptions = (options = {}) => {
   return {
-    maxRounds: clampInt(options.maxRounds, 1, 500, 50),
+    maxRounds: parseBoundedInt('maxRounds', options.maxRounds, 1, 100000),
     enableToolResultTruncate: options.enableToolResultTruncate !== false,
-    toolResultMaxChars: clampInt(options.toolResultMaxChars, 1000, 50000, 12000)
+    toolResultMaxChars: parseBoundedInt('toolResultMaxChars', options.toolResultMaxChars, 1000, 50000)
   };
 };
 
@@ -94,50 +97,4 @@ export const normalizeAgentMessages = (messages = []) => {
   }
 
   return out;
-};
-
-const RUNTIME_TOKEN_PLACEHOLDER = '<INTERNAL_TOKEN_BY_RUNTIME>';
-const LOCAL_API_CURL_RE = /^\s*curl\b[\s\S]*https?:\/\/(?:127\.0\.0\.1|localhost):9700\/api\/\S+/i;
-const DANGEROUS_CHAIN_RE = /(?:&&|\|\||;|`|\$\()/;
-
-const escapeRegExp = (text) => String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const readInternalToken = () => {
-  return String(getInternalApiToken() || '').trim();
-};
-
-export const prepareShellCommand = (command) => {
-  const raw = String(command || '');
-  if (!raw.includes(RUNTIME_TOKEN_PLACEHOLDER)) {
-    return { command: raw, secrets: [] };
-  }
-
-  if (DANGEROUS_CHAIN_RE.test(raw)) {
-    throw new Error('检测到危险命令拼接，拒绝替换内部令牌');
-  }
-  if (!LOCAL_API_CURL_RE.test(raw)) {
-    throw new Error('内部令牌仅允许用于本地 API curl 命令');
-  }
-
-  const token = readInternalToken();
-  if (!token) {
-    throw new Error('系统内部令牌不存在，请先完成一次登录');
-  }
-  return {
-    command: raw.split(RUNTIME_TOKEN_PLACEHOLDER).join(token),
-    secrets: [token]
-  };
-};
-
-export const maskSensitiveInText = (text, secrets = []) => {
-  const source = String(text || '');
-  if (!Array.isArray(secrets) || secrets.length === 0) return source;
-
-  let masked = source;
-  for (const secret of secrets) {
-    const value = String(secret || '').trim();
-    if (!value) continue;
-    masked = masked.replace(new RegExp(escapeRegExp(value), 'g'), '***');
-  }
-  return masked;
 };

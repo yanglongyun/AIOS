@@ -7,7 +7,7 @@ export const listTaskMessages = ({ conversationId }) => {
   return rows.map((row) => ({
     id: row.id,
     createdAt: row.created_at,
-    message: parseJson(row.message, {}),
-    meta: parseJson(row.meta, null)
+    message: parseJson(row.message, 'tasks.message'),
+    meta: row.meta == null ? null : parseJson(row.meta, 'tasks.meta')
   }));
 };

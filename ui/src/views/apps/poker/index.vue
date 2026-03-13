@@ -63,9 +63,13 @@ const request = async (url, opts) => {
   return res.json();
 };
 
-const resolveMessage = (data, fallbackKey) => {
+const resolveMessage = (data) => {
   if (data?.messageKey) return t(data.messageKey);
-  return data?.message || t(fallbackKey);
+  const text = String(data?.message || '').trim();
+  if (!text) {
+    throw new Error('poker api 返回了空 message');
+  }
+  return text;
 };
 
 const loadStatus = async () => {
@@ -89,9 +93,11 @@ const startGame = async () => {
       aiExpression.value = '';
       return;
     }
-    lastActionText.value = resolveMessage(data, 'poker_start_failed');
+    lastActionText.value = resolveMessage(data);
   } catch (error) {
-    lastActionText.value = error?.message || t('poker_network_error');
+    const text = String(error?.message || '').trim();
+    if (!text) throw new Error('poker start failed without error message');
+    lastActionText.value = text;
   } finally {
     busy.value = false;
   }
@@ -122,9 +128,11 @@ const handleAction = async (action) => {
       }
       return;
     }
-    lastActionText.value = resolveMessage(data, 'poker_action_failed');
+    lastActionText.value = resolveMessage(data);
   } catch (error) {
-    lastActionText.value = error?.message || t('poker_network_error');
+    const text = String(error?.message || '').trim();
+    if (!text) throw new Error('poker action failed without error message');
+    lastActionText.value = text;
   } finally {
     busy.value = false;
   }

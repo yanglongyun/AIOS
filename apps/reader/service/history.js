@@ -27,7 +27,7 @@ export const history = ({ sessionId }) => {
       idx: c.idx,
       action: c.action || '',
       content: c.content || '',
-      choices: parseJson(c.choices_json || '[]', []),
+      choices: parseJson(c.choices_json, `reader_chapters.choices_json#${c.id}`),
       summary: c.summary || '',
       progress: c.progress || '',
       createdAt: c.created_at

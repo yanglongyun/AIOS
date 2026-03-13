@@ -3,20 +3,19 @@ import { okxRequest } from '../runtime/okx.js';
 
 export const testExchange = async (body = {}) => {
   const saved = getConfig();
-  const pick = (input, fallback) => {
-    if (input === undefined || input === null) return fallback;
-    const text = String(input).trim();
-    return text ? text : fallback;
-  };
+  const baseUrl = String(saved.base_url || '').trim();
+  const apiKey = String(body.api_key ?? '').trim();
+  const apiSecret = String(body.api_secret ?? '').trim();
+  const passphrase = String(body.passphrase ?? '').trim();
   const cfg = {
-    base_url: pick(body.base_url, saved.base_url || 'https://www.okx.com'),
-    api_key: pick(body.api_key, saved.api_key),
-    api_secret: pick(body.api_secret, saved.api_secret),
-    passphrase: pick(body.passphrase, saved.passphrase),
+    base_url: baseUrl,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    passphrase
   };
 
-  if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
-    throw new Error('API Key、Secret、Passphrase 均不能为空');
+  if (!cfg.base_url || !cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
+    throw new Error('base_url、API Key、Secret、Passphrase 均不能为空');
   }
 
   await okxRequest(cfg, 'GET', '/api/v5/account/balance');

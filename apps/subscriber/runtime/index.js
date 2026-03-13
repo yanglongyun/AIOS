@@ -1,6 +1,7 @@
 import { getProfile } from '../repository/today.js';
 import { refresh } from '../service/refresh.js';
 import { toDateKey } from '../../../shared/time/dateKey.js';
+import { getSystemLanguage } from '../../app_shared/settings/language.js';
 
 let timer = null;
 
@@ -45,18 +46,19 @@ const runScheduledRefresh = async () => {
   }
 
   const date = toDateKey();
-  const prompt = buildAutoPrompt(focus, 'zh');
-  console.log(`[subscriber] 定时收报开始 ${date}`);
+  const language = getSystemLanguage();
+  const prompt = buildAutoPrompt(focus, language);
+  console.log(language === 'en' ? `[subscriber] auto briefing started ${date}` : `[subscriber] 定时收报开始 ${date}`);
 
   try {
     await refresh({
       focus,
-      taskTitle: `订阅收报 ${date}`,
+      taskTitle: language === 'en' ? `Subscriber Briefing ${date}` : `订阅收报 ${date}`,
       prompt
     });
-    console.log(`[subscriber] 定时收报完成 ${date}`);
+    console.log(language === 'en' ? `[subscriber] auto briefing finished ${date}` : `[subscriber] 定时收报完成 ${date}`);
   } catch (e) {
-    console.error(`[subscriber] 定时收报失败:`, e.message);
+    console.error(language === 'en' ? '[subscriber] auto briefing failed:' : '[subscriber] 定时收报失败:', e.message);
   }
 };
 

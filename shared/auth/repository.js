@@ -1,5 +1,4 @@
 import Database from 'better-sqlite3';
-import { randomBytes } from 'crypto';
 import { mkdirSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -73,23 +72,4 @@ export const deleteAllAuthSessions = () => {
 
 export const deleteExpiredAuthSessions = () => {
   db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(toIso(new Date()));
-};
-
-const getSettingValue = (key) => {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(String(key));
-  return String(row?.value || '');
-};
-
-const setSettingValue = (key, value) => {
-  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(String(key), String(value || ''));
-};
-
-export const getInternalApiToken = () => getSettingValue('internalApiToken');
-
-export const ensureInternalApiToken = () => {
-  const existing = getInternalApiToken();
-  if (existing) return existing;
-  const created = randomBytes(32).toString('hex');
-  setSettingValue('internalApiToken', created);
-  return created;
 };

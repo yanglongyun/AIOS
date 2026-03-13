@@ -13,7 +13,13 @@ export const locale = ref(localStorage.getItem(LOCALE_KEY) || defaultLocale);
 
 const messages = { zh: zhMessages, en: enMessages };
 
-const normalizeLocale = (nextLocale) => (nextLocale === 'en' ? 'en' : 'zh');
+const normalizeLocale = (nextLocale) => {
+  const value = String(nextLocale || '').trim();
+  if (value !== 'zh' && value !== 'en') {
+    throw new Error(`Invalid locale: ${value}`);
+  }
+  return value;
+};
 
 export const setLocale = (nextLocale) => {
   locale.value = normalizeLocale(nextLocale);
@@ -26,9 +32,14 @@ export const initI18n = () => {
 };
 
 export const t = (key, params = {}) => {
-  const dict = messages[locale.value] || messages[defaultLocale];
-  const fallback = messages[defaultLocale];
-  let text = dict[key] ?? fallback[key] ?? key;
+  const dict = messages[locale.value];
+  if (!dict) {
+    throw new Error(`Unsupported locale: ${locale.value}`);
+  }
+  if (!(key in dict)) {
+    throw new Error(`Missing i18n key: ${key} for locale ${locale.value}`);
+  }
+  let text = dict[key];
   for (const [k, v] of Object.entries(params || {})) {
     text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
   }

@@ -291,7 +291,7 @@ export const createSession = async () => {
     return false;
   };
 
-  const createConversation = async () => {
+  const createChat = async () => {
     const res = await fetch(`${API_URL}/chat/create`, {
       method: 'POST',
       headers: {
@@ -317,5 +317,5 @@ export const createSession = async () => {
   }
 
   await ensureAuth();
-  return await createConversation();
+  return await createChat();
 };

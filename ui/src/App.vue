@@ -6,7 +6,7 @@
   <div v-else class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#2a2218] font-['Georgia','PingFang_SC',serif]">
 
     <!-- 顶部栏 -->
-    <div class="relative z-[80] flex h-12 shrink-0 items-center gap-3.5 border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28_0%,#4a3020_100%)] px-4 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+    <div class="relative z-[100] flex h-12 shrink-0 items-center gap-3.5 border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28_0%,#4a3020_100%)] px-4 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
       <button @click="sidebarOpen = !sidebarOpen" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
         <Menu class="h-[14px] w-[14px]" />
       </button>

@@ -6,7 +6,7 @@ import { getMessages, saveMessage } from './messages.js';
 import { hasConversation } from './conversations.js';
 
 export const createSession = (wsSend) => {
-  const tasks = new Map(); // conversationId -> { abortController }
+  const conversations = new Map(); // conversationId -> { abortController }
 
   const handleMessage = async (data) => {
     if (data.type === 'ping') {
@@ -16,8 +16,8 @@ export const createSession = (wsSend) => {
 
     if (data.type === 'abort') {
       const cid = data.conversationId;
-      if (cid && tasks.has(cid)) {
-        tasks.get(cid).abortController.abort();
+      if (cid && conversations.has(cid)) {
+        conversations.get(cid).abortController.abort();
       }
       return;
     }
@@ -34,10 +34,10 @@ export const createSession = (wsSend) => {
       }
 
       // 同一会话正在执行 → 先中止再开始新一轮
-      if (tasks.has(cid)) {
-        tasks.get(cid).abortController.abort();
+      if (conversations.has(cid)) {
+        conversations.get(cid).abortController.abort();
         await new Promise((r) => {
-          const check = () => tasks.has(cid) ? setTimeout(check, 50) : r();
+          const check = () => conversations.has(cid) ? setTimeout(check, 50) : r();
           check();
         });
       }
@@ -77,7 +77,7 @@ export const createSession = (wsSend) => {
       saveMessage(cid, userMsg, userMeta);
 
       const abortController = new AbortController();
-      tasks.set(cid, { abortController });
+      conversations.set(cid, { abortController });
 
       const send = (msg) => {
         if (msg.type === 'delta') {
@@ -132,7 +132,7 @@ export const createSession = (wsSend) => {
           wsSend({ type: 'error', conversationId: cid, content: e.message });
         }
       } finally {
-        tasks.delete(cid);
+        conversations.delete(cid);
       }
     }
   };

@@ -240,9 +240,10 @@ const formatTime = (v) => {
 
 onMounted(() => {
   fetchNotes();
+  chatPanel.setContext({ scene: 'notebook', label: t('app_sidebar_notebook') });
   chatPanel.setQuickMessages([t('notebook_chat_quick_1'), t('notebook_chat_quick_2'), t('notebook_chat_quick_3')]);
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style>

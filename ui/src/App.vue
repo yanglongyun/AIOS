@@ -32,8 +32,6 @@
 
     <ChatPanel
       v-if="activePanel === 'chat'"
-      :context="currentAppContext"
-      :quick-messages="chatPanel.state.quickMessages"
       :pending-message="chatPanel.state.pendingMessage"
       @close="activePanel = null"
     />
@@ -84,19 +82,6 @@ const {
 } = useTopPanels();
 let panelStarted = false;
 
-const APP_CONTEXT_KEYS = {
-  '/notebook': 'app_sidebar_notebook', '/finance': 'app_sidebar_finance', '/reader': 'app_sidebar_reader',
-  '/cryptobot': 'app_sidebar_cryptobot', '/subscriber': 'app_sidebar_subscriber', '/fortune': 'app_sidebar_fortune',
-  '/poker': 'app_sidebar_poker', '/banana': 'app_sidebar_banana', '/files': 'app_sidebar_files',
-  '/skills': 'app_sidebar_skills', '/tasks': 'app_sidebar_tasks', '/settings': 'app_sidebar_settings'
-};
-const currentAppContext = computed(() => {
-  const p = route.path;
-  for (const [prefix, key] of Object.entries(APP_CONTEXT_KEYS)) {
-    if (p.startsWith(prefix)) return t(key);
-  }
-  return '';
-});
 
 // 进入 /chat 时关闭侧边聊天面板
 watch(() => route.path, (p) => {

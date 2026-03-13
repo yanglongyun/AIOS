@@ -232,6 +232,7 @@ const resetReader = async () => {
 };
 
 onMounted(async () => {
+  chatPanel.setContext({ scene: 'reader', label: t('app_sidebar_reader') });
   chatPanel.setQuickMessages([t('reader_chat_quick_1'), t('reader_chat_quick_2'), t('reader_chat_quick_3')]);
   try {
     await loadSessions();
@@ -243,7 +244,7 @@ onMounted(async () => {
     error.value = e.message || t('reader_init_failed');
   }
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style>

@@ -24,11 +24,13 @@
                 <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#5a3e28] px-4 py-3 text-sm leading-relaxed text-[#f0e8d8] shadow-[0_2px_8px_rgba(0,0,0,0.1)] dark:bg-[#c8a060] dark:text-[#1a1410] dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
-                    <div class="mb-1 text-[10px] uppercase tracking-[0.08em] text-[#c0a878] dark:text-[#5a4a38]">{{ t('chat_attachment') }}</div>
-                    <div v-for="(f, idx) in m.attachments" :key="`${f.path}-${idx}`" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1 dark:border-black/15 dark:bg-black/10">
-                      <div class="text-[11px] font-semibold">{{ f.name }}</div>
-                      <div class="break-all text-[10px] text-[#c0a878] dark:text-[#5a4a38]">{{ f.path }}</div>
-                    </div>
+                    <template v-for="(f, idx) in m.attachments" :key="idx">
+                      <div v-if="f.type === 'file'" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1 dark:border-black/15 dark:bg-black/10">
+                        <div class="text-[11px] font-semibold">{{ f.name }}</div>
+                        <div class="break-all text-[10px] text-[#c0a878] dark:text-[#5a4a38]">{{ f.path }}</div>
+                      </div>
+                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-[#c0a878] dark:border-black/10 dark:bg-black/5 dark:text-[#6a5840]">{{ f.label }}</div>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -341,7 +343,7 @@ const handleSend = async () => {
   }
 
   const content = text || t('chat_attachment_only_prompt');
-  const outgoingAttachments = pendingFiles.value.map(f => ({ name: f.name, path: f.path, size: f.size }));
+  const outgoingAttachments = pendingFiles.value.map(f => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
 
   ensureChatId(text).then((id) => {
     saveLastChatId(id);
@@ -359,7 +361,7 @@ const handleSend = async () => {
   });
 };
 
-const stopBusy = () => { send({ type: 'abort' }); busy.value = false; };
+const stopBusy = () => { send({ type: 'abort', conversationId: currentConversationId.value }); busy.value = false; };
 
 const openFilePicker = () => { uploadError.value = ''; fileInput.value?.click(); };
 const removePendingFile = (idx) => { pendingFiles.value.splice(idx, 1); };
@@ -442,6 +444,7 @@ onMounted(() => {
   if (wsStatus.value === 'disconnected') connect();
 
   unsubs.push(on('delta', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     let key = streamingAssistantKey.value;
     if (!key) {
       key = `ws:${Date.now()}:assistant_stream`;
@@ -454,7 +457,8 @@ onMounted(() => {
     scrollToBottom(true);
   }));
 
-  unsubs.push(on('done', () => {
+  unsubs.push(on('done', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const key = streamingAssistantKey.value;
     if (key) { const msg = messages.value.find(m => m._key === key); if (msg) msg.streaming = false; }
     streamingAssistantKey.value = '';
@@ -462,6 +466,7 @@ onMounted(() => {
   }));
 
   unsubs.push(on('tool_call', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const sKey = streamingAssistantKey.value;
     if (sKey) { const msg = messages.value.find(m => m._key === sKey); if (msg) msg.streaming = false; streamingAssistantKey.value = ''; }
     const _key = `ws:${Date.now()}:tool_call`;
@@ -470,6 +475,7 @@ onMounted(() => {
   }));
 
   unsubs.push(on('tool_result', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     for (let i = messages.value.length - 1; i >= 0; i--) {
       const m = messages.value[i];
       if (m.type === 'tool_call' && !m.result) { m.result = data.content; return; }
@@ -480,6 +486,7 @@ onMounted(() => {
   }));
 
   unsubs.push(on('error', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
@@ -487,7 +494,11 @@ onMounted(() => {
     busy.value = false;
   }));
 
-  unsubs.push(on('aborted', () => { streamingAssistantKey.value = ''; busy.value = false; }));
+  unsubs.push(on('aborted', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
+    streamingAssistantKey.value = '';
+    busy.value = false;
+  }));
 });
 
 onUnmounted(() => { unsubs.forEach(fn => fn()); });

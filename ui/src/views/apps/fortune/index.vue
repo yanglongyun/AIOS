@@ -203,7 +203,8 @@ const loadHistory = async () => {
 
 onMounted(() => {
   loadHistory();
+  chatPanel.setContext({ scene: 'fortune', label: t('app_sidebar_fortune') });
   chatPanel.setQuickMessages([t('fortune_chat_quick_1'), t('fortune_chat_quick_2'), t('fortune_chat_quick_3')]);
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

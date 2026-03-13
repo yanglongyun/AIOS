@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
         <div class="flex items-baseline gap-1.5">
           <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_top_chat') }}</span>
-          <span v-if="context" class="text-[10px] text-[#6a5840]">{{ context }}</span>
+          <span v-if="contextLabel" class="text-[10px] text-[#6a5840]">{{ contextLabel }}</span>
         </div>
         <div class="flex items-center gap-2">
           <button class="cursor-pointer text-[#8a7860] transition-colors hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
@@ -43,7 +43,7 @@
             <div v-if="!messages.length" class="flex flex-col items-center justify-center py-10 text-center">
               <div class="mb-3 text-[32px] grayscale-[0.2]">💬</div>
               <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">{{ t('chat_empty_title') }}</h3>
-              <p v-if="context" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${context}</b>` })"></p>
+              <p v-if="contextLabel" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${contextLabel}</b>` })"></p>
               <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
               <div v-if="quickMessages.length" class="mt-4 flex w-full flex-col gap-1.5 px-1">
                 <button v-for="(msg, idx) in quickMessages" :key="idx" @click="sendQuick(msg)" class="cursor-pointer rounded-lg border border-[#4a3828] bg-[#3a2a1a] px-3 py-2 text-left text-[11px] text-[#d4c0a0] transition-colors hover:border-[#c8a060]/30 hover:bg-[#3a2a1c]">{{ msg }}</button>
@@ -63,9 +63,12 @@
                   <div class="max-w-[85%] rounded-[14px_14px_4px_14px] bg-[#c8a060] px-3 py-2 text-[12px] leading-relaxed text-[#1a1410]">
                     <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                     <div v-if="m.attachments?.length" class="mt-1.5">
-                      <div v-for="(f, idx) in m.attachments" :key="`${f.path}-${idx}`" class="mb-0.5 rounded border border-black/15 bg-black/10 px-1.5 py-0.5">
-                        <div class="text-[10px] font-semibold">{{ f.name }}</div>
-                      </div>
+                      <template v-for="(f, idx) in m.attachments" :key="idx">
+                        <div v-if="f.type === 'file'" class="mb-0.5 rounded border border-black/15 bg-black/10 px-1.5 py-0.5">
+                          <div class="text-[10px] font-semibold">{{ f.name }}</div>
+                        </div>
+                        <div v-else-if="f.type === 'context'" class="mb-0.5 inline-block rounded-full border border-black/10 bg-black/5 px-2 py-0.5 text-[10px] text-[#5a4a38]">{{ f.label }}</div>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -143,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, History, Plus, Square } from 'lucide-vue-next';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
@@ -151,17 +154,18 @@ import { chatPanel } from '../stores/chatPanel.js';
 import { useI18n } from '../i18n/index.js';
 
 const props = defineProps({
-  context: { type: String, default: '' },
-  quickMessages: { type: Array, default: () => [] },
   pendingMessage: { type: String, default: null }
 });
+
+const contextLabel = computed(() => chatPanel.state.context?.label || '');
+const contextScene = computed(() => chatPanel.state.context?.scene || 'chat');
+const quickMessages = computed(() => chatPanel.state.quickMessages);
 defineEmits(['close']);
 
 const { t } = useI18n();
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
-const LAST_CHAT_KEY = 'lastConversationId';
 const currentConversationId = ref(null);
 const messages = ref([]);
 const busy = ref(false);
@@ -269,13 +273,13 @@ const resetState = () => {
 };
 
 const buildChatTitleFromFirstMessage = (text = '') => {
-  const prefix = props.context ? `[${props.context}] ` : '';
+  const prefix = contextLabel.value ? `[${contextLabel.value}] ` : '';
   const normalized = String(text).replace(/\s+/g, ' ').trim();
   return prefix + (normalized.slice(0, 20) || t('chat_new_title'));
 };
 
 const createNewChat = async (title = t('chat_new_title')) => {
-  const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
+  const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, scene: contextScene.value }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
   hasMore.value = false;
@@ -336,18 +340,16 @@ const handleSend = async () => {
     return;
   }
 
-  // 上下文注入：第一条消息带上当前应用信息
-  let content = text;
-  if (props.context && messages.value.length === 0) {
-    content = `[当前正在使用: ${props.context}]\n\n${content}`;
+  const outgoingAttachments = [];
+  if (chatPanel.state.context) {
+    outgoingAttachments.push({ type: 'context', scene: chatPanel.state.context.scene, label: chatPanel.state.context.label });
   }
 
   ensureChatId(text).then((id) => {
-    localStorage.setItem(LAST_CHAT_KEY, String(id));
     const _key = `client:${Date.now()}:user`;
     seenKeys.value.add(_key);
-    messages.value.push({ role: 'user', content: text, _key });
-    send({ type: 'message', conversationId: id, content });
+    messages.value.push({ role: 'user', content: text, attachments: outgoingAttachments.length ? outgoingAttachments : undefined, _key });
+    send({ type: 'message', conversationId: id, content: text, attachments: outgoingAttachments.length ? outgoingAttachments : undefined });
     input.value = '';
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
   }).catch((e) => {
@@ -356,7 +358,7 @@ const handleSend = async () => {
   });
 };
 
-const stopBusy = () => { send({ type: 'abort' }); busy.value = false; };
+const stopBusy = () => { send({ type: 'abort', conversationId: currentConversationId.value }); busy.value = false; };
 
 const newChat = () => {
   resetState();
@@ -370,7 +372,9 @@ const sendQuick = (msg) => {
 
 const fetchHistory = async () => {
   try {
-    historyList.value = await request('/api/chat/list');
+    const scene = contextScene.value;
+    const params = scene !== 'chat' ? `?scene=${scene}` : '';
+    historyList.value = await request(`/api/chat/list${params}`);
   } catch { historyList.value = []; }
 };
 
@@ -383,7 +387,6 @@ const openChat = async (conversationId) => {
   showHistory.value = false;
   resetState();
   currentConversationId.value = conversationId;
-  localStorage.setItem(LAST_CHAT_KEY, String(conversationId));
   try {
     await loadChatPage(conversationId, 0, 20);
     scrollToBottom(false);
@@ -400,7 +403,7 @@ watch(() => messages.value.length, (newLen, oldLen) => {
   scrollToBottom(true);
 });
 
-// 挂载时加载上次对话
+// 挂载时加载当前 scene 最近对话
 onMounted(async () => {
   if (wsStatus.value === 'disconnected') connect();
 
@@ -409,9 +412,23 @@ onMounted(async () => {
     input.value = props.pendingMessage;
     chatPanel.clearPending();
     nextTick(() => handleSend());
+  } else {
+    // 按 scene 加载最近一个对话
+    const scene = contextScene.value;
+    const params = scene !== 'chat' ? `?scene=${scene}` : '';
+    try {
+      const list = await request(`/api/chat/list${params}`);
+      if (list.length > 0) {
+        const last = list[0];
+        currentConversationId.value = last.conversation_id;
+        await loadChatPage(last.conversation_id, 0, 20);
+        scrollToBottom(false);
+      }
+    } catch {}
   }
 
   unsubs.push(on('delta', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     let key = streamingAssistantKey.value;
     if (!key) {
       key = `ws:${Date.now()}:assistant_stream`;
@@ -424,7 +441,8 @@ onMounted(async () => {
     scrollToBottom(true);
   }));
 
-  unsubs.push(on('done', () => {
+  unsubs.push(on('done', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const key = streamingAssistantKey.value;
     if (key) { const msg = messages.value.find(m => m._key === key); if (msg) msg.streaming = false; }
     streamingAssistantKey.value = '';
@@ -432,6 +450,7 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('tool_call', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const sKey = streamingAssistantKey.value;
     if (sKey) { const msg = messages.value.find(m => m._key === sKey); if (msg) msg.streaming = false; streamingAssistantKey.value = ''; }
     const _key = `ws:${Date.now()}:tool_call`;
@@ -440,6 +459,7 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('tool_result', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     for (let i = messages.value.length - 1; i >= 0; i--) {
       const m = messages.value[i];
       if (m.type === 'tool_call' && !m.result) { m.result = data.content; return; }
@@ -450,6 +470,7 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('error', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
     messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
@@ -457,7 +478,11 @@ onMounted(async () => {
     busy.value = false;
   }));
 
-  unsubs.push(on('aborted', () => { streamingAssistantKey.value = ''; busy.value = false; }));
+  unsubs.push(on('aborted', (data) => {
+    if (data.conversationId !== currentConversationId.value) return;
+    streamingAssistantKey.value = '';
+    busy.value = false;
+  }));
 });
 
 onUnmounted(() => { unsubs.forEach(fn => fn()); });

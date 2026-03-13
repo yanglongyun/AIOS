@@ -205,6 +205,7 @@ const formatTime = (value) => {
 onMounted(async () => {
   updateNow();
   dialTimer = setInterval(updateNow, 10000);
+  chatPanel.setContext({ scene: 'subscriber', label: t('app_sidebar_subscriber') });
   chatPanel.setQuickMessages([t('subscriber_chat_quick_1'), t('subscriber_chat_quick_2'), t('subscriber_chat_quick_3')]);
   try {
     await loadToday();
@@ -216,6 +217,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (dialTimer) clearInterval(dialTimer);
+  chatPanel.clearContext();
   chatPanel.setQuickMessages([]);
 });
 </script>

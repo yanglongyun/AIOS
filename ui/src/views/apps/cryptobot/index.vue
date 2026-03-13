@@ -225,6 +225,7 @@ const minToSliderIdx = (min) => {
 let pendingRefresh = false;
 
 onMounted(async () => {
+  chatPanel.setContext({ scene: 'cryptobot', label: t('app_sidebar_cryptobot') });
   chatPanel.setQuickMessages([t('cryptobot_chat_quick_1'), t('cryptobot_chat_quick_2'), t('cryptobot_chat_quick_3')]);
   try {
     await loadAll();
@@ -258,6 +259,7 @@ onUnmounted(() => {
     clearInterval(ticker);
     ticker = null;
   }
+  chatPanel.clearContext();
   chatPanel.setQuickMessages([]);
 });
 </script>

@@ -6,10 +6,7 @@ import { getMessages, saveMessage } from './messages.js';
 import { hasConversation } from './conversations.js';
 
 export const createSession = (wsSend) => {
-  let conversationId = null;
-  let messages = [];
-  let abortController = null;
-  let running = false;
+  const tasks = new Map(); // conversationId -> { abortController }
 
   const handleMessage = async (data) => {
     if (data.type === 'ping') {
@@ -18,24 +15,33 @@ export const createSession = (wsSend) => {
     }
 
     if (data.type === 'abort') {
-      if (abortController) {
-        abortController.abort();
-        abortController = null;
+      const cid = data.conversationId;
+      if (cid && tasks.has(cid)) {
+        tasks.get(cid).abortController.abort();
       }
       return;
     }
 
     if (data.type === 'message') {
-      // 防止并发：上一轮还在执行时，先中止再开始新一轮
-      if (running && abortController) {
-        abortController.abort();
-        abortController = null;
-        // 等上一轮结束释放锁
+      const cid = data.conversationId || null;
+      if (!cid) {
+        wsSend({ type: 'error', content: '缺少 conversationId' });
+        return;
+      }
+      if (!hasConversation(cid)) {
+        wsSend({ type: 'error', content: '会话不存在，请新建对话后重试' });
+        return;
+      }
+
+      // 同一会话正在执行 → 先中止再开始新一轮
+      if (tasks.has(cid)) {
+        tasks.get(cid).abortController.abort();
         await new Promise((r) => {
-          const check = () => running ? setTimeout(check, 50) : r();
+          const check = () => tasks.has(cid) ? setTimeout(check, 50) : r();
           check();
         });
       }
+
       const settings = getSettings();
       const {
         contextRounds,
@@ -48,28 +54,11 @@ export const createSession = (wsSend) => {
         enableToolLoopLimit,
         toolMaxRounds
       } = settings;
-      const incomingConversationId = data.conversationId || null;
-      if (!incomingConversationId) {
-        wsSend({ type: 'error', content: '缺少 conversationId' });
-        return;
-      }
-      if (!hasConversation(incomingConversationId)) {
-        wsSend({ type: 'error', content: '会话不存在，请新建对话后重试' });
-        return;
-      }
 
-      if (incomingConversationId !== conversationId) {
-        conversationId = incomingConversationId;
-        messages = [{
-          role: 'system',
-          content: buildSystemPrompt(conversationId)
-        }, ...getMessages(conversationId, contextRounds)];
-      }
-
-      messages[0] = {
+      const messages = [{
         role: 'system',
-        content: buildSystemPrompt(conversationId)
-      };
+        content: buildSystemPrompt(cid)
+      }, ...getMessages(cid, contextRounds)];
 
       const userMsg = { role: 'user', content: data.content };
       let userMeta = null;
@@ -85,32 +74,32 @@ export const createSession = (wsSend) => {
       messages.push(userMsg);
       const modelMessages = [...messages];
       modelMessages[modelMessages.length - 1] = modelUserMsg;
-      saveMessage(conversationId, userMsg, userMeta);
+      saveMessage(cid, userMsg, userMeta);
 
-      running = true;
-      abortController = new AbortController();
-      const { signal } = abortController;
+      const abortController = new AbortController();
+      tasks.set(cid, { abortController });
 
       const send = (msg) => {
         if (msg.type === 'delta') {
-          wsSend({ type: 'delta', delta: msg.delta || '' });
+          wsSend({ type: 'delta', conversationId: cid, delta: msg.delta || '' });
           return;
         }
 
         if (msg.type === 'assistant_tool_calls') {
-          if (msg.message) saveMessage(conversationId, msg.message, null);
+          if (msg.message) saveMessage(cid, msg.message, null);
           return;
         }
 
         if (msg.type === 'tool_call') {
-          wsSend({ type: 'tool_call', toolCall: msg.toolCall });
+          wsSend({ type: 'tool_call', conversationId: cid, toolCall: msg.toolCall });
           return;
         }
 
         if (msg.type === 'tool_result') {
-          if (msg.message) saveMessage(conversationId, msg.message, null);
+          if (msg.message) saveMessage(cid, msg.message, null);
           wsSend({
             type: 'tool_result',
+            conversationId: cid,
             toolCallId: msg.message?.tool_call_id,
             content: msg.message?.content ?? ''
           });
@@ -118,8 +107,8 @@ export const createSession = (wsSend) => {
         }
 
         if (msg.type === 'done') {
-          if (msg.message) saveMessage(conversationId, msg.message, null);
-          wsSend({ type: 'done' });
+          if (msg.message) saveMessage(cid, msg.message, null);
+          wsSend({ type: 'done', conversationId: cid });
           return;
         }
       };
@@ -131,24 +120,19 @@ export const createSession = (wsSend) => {
           apiKey,
           model,
           send,
-          signal,
+          signal: abortController.signal,
           maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
           enableToolResultTruncate,
           toolResultMaxChars
         });
-        messages = [{
-          role: 'system',
-          content: buildSystemPrompt(conversationId)
-        }, ...getMessages(conversationId, contextRounds)];
       } catch (e) {
         if (e.name === 'AbortError') {
-          wsSend({ type: 'aborted' });
+          wsSend({ type: 'aborted', conversationId: cid });
         } else {
-          wsSend({ type: 'error', content: e.message });
+          wsSend({ type: 'error', conversationId: cid, content: e.message });
         }
       } finally {
-        abortController = null;
-        running = false;
+        tasks.delete(cid);
       }
     }
   };

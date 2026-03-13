@@ -43,9 +43,10 @@ const toast = ref('');
 
 onMounted(() => {
   init();
+  chatPanel.setContext({ scene: 'banana', label: t('app_sidebar_banana') });
   chatPanel.setQuickMessages([t('banana_chat_quick_1'), t('banana_chat_quick_2'), t('banana_chat_quick_3')]);
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
 function goHomePage() {
   timeLine.value = [{

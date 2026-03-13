@@ -224,9 +224,10 @@ const remove = async (id) => {
 
 onMounted(() => {
   fetchData();
+  chatPanel.setContext({ scene: 'finance', label: t('app_sidebar_finance') });
   chatPanel.setQuickMessages([t('finance_chat_quick_1'), t('finance_chat_quick_2'), t('finance_chat_quick_3')]);
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style scoped>

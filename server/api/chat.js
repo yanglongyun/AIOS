@@ -6,16 +6,15 @@ import { getChatMessagesPaged } from '../service/chat/messages.js';
 import { renameChat } from '../service/chat/rename.js';
 import { deleteChat } from '../service/chat/delete.js';
 
-const createChat = (title = '新对话') => {
-  return createConversation(title);
-};
-
 export const handleChatApi = async (req, res, path, url) => {
-  if (path === '/api/chat/list' && req.method === 'GET') return json(res, listChats());
+  if (path === '/api/chat/list' && req.method === 'GET') {
+    const scene = url.searchParams.get('scene') || null;
+    return json(res, listChats(scene));
+  }
 
   if (path === '/api/chat/create' && req.method === 'POST') {
     const body = await readBody(req);
-    return json(res, createChat(body.title || '新对话'));
+    return json(res, createConversation(body.title || '新对话', body.scene || 'chat', body.meta || null));
   }
 
   if (path === '/api/chat/messages' && req.method === 'GET') {

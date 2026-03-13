@@ -82,9 +82,10 @@ const loadStatus = async () => {
 
 onMounted(() => {
   loadStatus();
+  chatPanel.setContext({ scene: 'poker', label: t('app_sidebar_poker') });
   chatPanel.setQuickMessages([t('poker_chat_quick_1'), t('poker_chat_quick_2'), t('poker_chat_quick_3')]);
 });
-onUnmounted(() => chatPanel.setQuickMessages([]));
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
 const startGame = async () => {
   busy.value = true;

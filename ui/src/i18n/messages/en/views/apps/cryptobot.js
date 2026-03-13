@@ -73,5 +73,6 @@ export default {
   cryptobot_task_fail: 'Failed',
   cryptobot_save: 'Save',
   cryptobot_test: 'Test',
-  cryptobot_exchange_config: 'Exchange Config · OKX'
+  cryptobot_exchange_config: 'Exchange Config · OKX',
+  cryptobot_trading: 'Trading...'
 };

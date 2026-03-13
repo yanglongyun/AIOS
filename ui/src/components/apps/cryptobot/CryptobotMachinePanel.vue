@@ -28,6 +28,7 @@
           {{ fmtNum(status.equity.current, 2) }}<span class="ml-0.5 text-[11px] text-[#1aab40]">U</span>
         </div>
       </div>
+      <div v-if="status.state.executing" class="trading-indicator text-[10px] font-black tracking-[1px] text-[#00ff64]">{{ t('cryptobot_trading') }}</div>
       <div class="flex flex-col items-end gap-0.5">
         <span class="text-[8px] tracking-[1px] text-[#3a4050]">{{ t('cryptobot_today') }}</span>
         <span
@@ -230,6 +231,8 @@ const { t } = useI18n();
 .balance-value { text-shadow: 0 0 12px rgba(0,255,100,0.5), 0 0 24px rgba(0,255,100,0.2); }
 .pnl-up { color: #00d455; text-shadow: 0 0 8px rgba(0,212,85,0.3); }
 .pnl-down { color: #ff4d4d; text-shadow: 0 0 8px rgba(255,77,77,0.3); }
+.trading-indicator { text-shadow: 0 0 8px rgba(0,255,100,0.5); animation: pulse-trading 1.5s infinite; }
+@keyframes pulse-trading { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
 .cycle-fill {
   background: linear-gradient(90deg, #1aab40, #00ff64);

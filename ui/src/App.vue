@@ -30,7 +30,7 @@
       @close="activePanel = null"
     />
 
-    <ChatSidePanel
+    <ChatPanel
       v-if="activePanel === 'chat'"
       :context="currentAppContext"
       @close="activePanel = null"
@@ -60,7 +60,7 @@ import NavPanel from './components/NavPanel.vue';
 import GlobalToast from './components/GlobalToast.vue';
 import ReloadModal from './components/ReloadModal.vue';
 import TasksPanel from './components/TasksPanel.vue';
-import ChatSidePanel from './components/ChatSidePanel.vue';
+import ChatPanel from './components/ChatPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
 import { useI18n } from './i18n/index.js';
 const { t } = useI18n();

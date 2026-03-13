@@ -73,5 +73,6 @@ export default {
   cryptobot_task_fail: '失败',
   cryptobot_save: '保存',
   cryptobot_test: '测试',
-  cryptobot_exchange_config: '交易所配置 · OKX'
+  cryptobot_exchange_config: '交易所配置 · OKX',
+  cryptobot_trading: '自动交易中...'
 };

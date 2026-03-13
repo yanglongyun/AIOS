@@ -1,14 +1,16 @@
 import { execSync, spawn } from 'child_process';
-import readline from 'readline';
 import chalk from 'chalk';
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
-import { ROOT, API_URL, APPS_URL } from './config.js';
+import { ROOT, SERVER_PORT, APPS_PORT, API_URL, APPS_URL } from './config.js';
+import { ensureAuth, getAuthCookie } from './auth.js';
+import t from './locale.js';
+import { createSpinner } from './ui.js';
 
 const PID_DIR = path.join(ROOT, 'files', 'tmp');
 const PID_FILE = path.join(PID_DIR, 'aios-service-pids.json');
-const SERVER_PORT = 9700;
-const APPS_PORT = 9701;
+
+export { getAuthCookie };
 
 export const buildUI = () => {
   try {
@@ -59,14 +61,14 @@ const isPidRunning = (pid) => {
 };
 
 const sleepMs = (ms) => {
-  const end = Date.now() + Math.max(0, Number(ms) || 0);
-  while (Date.now() < end) {}
+  const buf = new SharedArrayBuffer(4);
+  const view = new Int32Array(buf);
+  Atomics.wait(view, 0, 0, Math.max(0, Number(ms) || 0));
 };
 
 const listListeningPids = (port) => {
   const n = Number(port);
   if (!Number.isInteger(n) || n <= 0) return [];
-  if (process.platform === 'win32') return [];
   try {
     const output = execSync(`lsof -nP -t -iTCP:${n} -sTCP:LISTEN`, { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString('utf8')
@@ -90,12 +92,6 @@ const killPid = (pid) => {
   if (!isPidRunning(n)) return false;
 
   try {
-    if (process.platform === 'win32') {
-      execSync(`taskkill /PID ${n} /T /F`, { stdio: 'ignore' });
-      return true;
-    }
-
-    // Detached child process usually has pgid = pid; kill process group first.
     try { process.kill(-n, 'SIGTERM'); } catch {}
     try { process.kill(n, 'SIGTERM'); } catch {}
     sleepMs(120);
@@ -110,7 +106,7 @@ const killPid = (pid) => {
 };
 
 export const startServices = () => {
-  console.log(chalk.dim('  启动 AIOS 服务...'));
+  console.log(chalk.dim('  ' + t.starting));
   const opts = { cwd: ROOT, detached: true, stdio: 'ignore' };
   const serverProc = spawn('node', ['server/index.js'], opts);
   const appsProc = spawn('node', ['apps/index.js'], opts);
@@ -125,7 +121,7 @@ export const startServices = () => {
 };
 
 export const stopServices = () => {
-  console.log(chalk.dim('  停止 AIOS 服务...'));
+  console.log(chalk.dim('  ' + t.stopping));
   let stoppedAny = false;
   const state = readPidState();
   const targets = new Map();
@@ -141,9 +137,9 @@ export const stopServices = () => {
   for (const [pid, label] of targets.entries()) {
     if (killPid(pid)) {
       stoppedAny = true;
-      console.log(chalk.dim(`  已停止: ${label}`));
+      console.log(chalk.dim('  ' + t.stopped(label)));
     } else {
-      console.log(chalk.dim(`  未运行: ${label}`));
+      console.log(chalk.dim('  ' + t.notRunning(label)));
     }
   }
 
@@ -152,29 +148,28 @@ export const stopServices = () => {
   const remains9700 = listListeningPids(SERVER_PORT);
   const remains9701 = listListeningPids(APPS_PORT);
   if (remains9700.length > 0) {
-    console.log(chalk.yellow(`  警告: 端口 ${SERVER_PORT} 仍被占用 -> ${remains9700.join(', ')}`));
+    console.log(chalk.yellow('  ' + t.portOccupied(SERVER_PORT, remains9700.join(', '))));
   }
   if (remains9701.length > 0) {
-    console.log(chalk.yellow(`  警告: 端口 ${APPS_PORT} 仍被占用 -> ${remains9701.join(', ')}`));
+    console.log(chalk.yellow('  ' + t.portOccupied(APPS_PORT, remains9701.join(', '))));
   }
 
   return stoppedAny;
 };
 
-export const isReady = async (url, method = 'GET') => {
+export const isReady = async (url) => {
   try {
-    const res = await fetch(url, { method });
+    const res = await fetch(url, { method: 'GET' });
     return res.ok;
   } catch {
     return false;
   }
 };
 
-export const waitReadyUrl = async (url, method = 'GET', retries = 15, delay = 800) => {
+export const waitReadyUrl = async (url, retries = 15, delay = 800) => {
   for (let i = 0; i < retries; i++) {
-    if (await isReady(url, method)) return true;
+    if (await isReady(url)) return true;
     await new Promise(r => setTimeout(r, delay));
-    process.stdout.write('.');
   }
   return false;
 };
@@ -208,114 +203,37 @@ export const getServiceStatus = async () => {
   };
 };
 
-let authCookie = '';
-
 const readJsonSafe = async (res) => {
-  try {
-    return await res.json();
-  } catch {
-    return {};
-  }
+  try { return await res.json(); } catch { return {}; }
 };
-
-const getSetCookieHeader = (res) => {
-  if (typeof res?.headers?.getSetCookie === 'function') {
-    const values = res.headers.getSetCookie();
-    if (Array.isArray(values) && values.length > 0) return values[0];
-  }
-  return res?.headers?.get?.('set-cookie') || '';
-};
-
-const pickCookiePair = (setCookie = '') => {
-  const first = String(setCookie).split(';')[0].trim();
-  return first || '';
-};
-
-const ask = (question) => new Promise((resolve) => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  rl.question(question, (answer) => {
-    rl.close();
-    resolve(String(answer || '').trim());
-  });
-});
-
-const login = async () => {
-  let username = String(process.env.AIOS_USERNAME || '').trim();
-  let password = String(process.env.AIOS_PASSWORD || '').trim();
-
-  if (!username) username = await ask('AIOS 用户名: ');
-  if (!password) password = await ask('AIOS 密码: ');
-
-  const res = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
-  const data = await readJsonSafe(res);
-  if (!res.ok || data?.success === false) {
-    throw new Error(data?.message || '登录失败');
-  }
-
-  const cookiePair = pickCookiePair(getSetCookieHeader(res));
-  if (!cookiePair) throw new Error('登录成功但未获取会话 cookie');
-  authCookie = cookiePair;
-};
-
-const ensureAuth = async () => {
-  if (!authCookie) {
-    await login();
-    return;
-  }
-
-  const res = await fetch(`${API_URL}/auth/me`, {
-    method: 'GET',
-    headers: { cookie: authCookie }
-  });
-  if (res.ok) return;
-  await login();
-};
-
-export const getAuthCookie = () => authCookie;
 
 export const createSession = async () => {
-  const waitServiceReady = async (retries = 15, delay = 800) => {
-    for (let i = 0; i < retries; i++) {
-      const ready = await isReady(`${API_URL}/health`);
-      if (ready) return true;
-      await new Promise(r => setTimeout(r, delay));
-      process.stdout.write('.');
-    }
-    return false;
-  };
-
-  const createChat = async () => {
-    const res = await fetch(`${API_URL}/chat/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        cookie: authCookie
-      },
-      body: JSON.stringify({ title: 'CLI 会话' })
-    });
-    const data = await readJsonSafe(res);
-    if (!res.ok || !data?.conversationId) {
-      throw new Error(data?.error || data?.message || '创建会话失败');
-    }
-    return data.conversationId;
-  };
-
   const readyNow = await isReady(`${API_URL}/health`);
   if (!readyNow) {
     startServices();
-    process.stdout.write(chalk.dim('  等待服务就绪'));
-    const ready = await waitServiceReady();
-    if (!ready) throw new Error('服务启动超时');
-    console.log(chalk.dim(' 就绪\n'));
+    const spinner = createSpinner(t.waitingReady);
+    spinner.start();
+    const ready = await waitReadyUrl(`${API_URL}/health`);
+    if (!ready) {
+      spinner.fail(t.startTimeout);
+      throw new Error(t.startTimeout);
+    }
+    spinner.stop(t.ready);
   }
 
   await ensureAuth();
-  return await createChat();
+
+  const res = await fetch(`${API_URL}/chat/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      cookie: getAuthCookie()
+    },
+    body: JSON.stringify({ title: 'CLI' })
+  });
+  const data = await readJsonSafe(res);
+  if (!res.ok || !data?.conversationId) {
+    throw new Error(data?.error || data?.message || t.chatCreateFailed);
+  }
+  return data.conversationId;
 };

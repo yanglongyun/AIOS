@@ -4,6 +4,8 @@ import chalk from 'chalk';
 import { WS_URL } from './config.js';
 import { createSession, getAuthCookie } from './service.js';
 import { print } from './print.js';
+import t from './locale.js';
+import { banner } from './ui.js';
 
 const connect = (onReady) => {
   const cookie = getAuthCookie();
@@ -14,7 +16,7 @@ const connect = (onReady) => {
   });
 
   ws.on('error', (e) => {
-    console.error(chalk.red('连接失败，请确认 AIOS 守护进程正在运行'));
+    console.error(chalk.red(t.chatConnectFailed));
     console.error(chalk.dim('  ' + e.message));
     process.exit(1);
   });
@@ -24,14 +26,14 @@ const connect = (onReady) => {
 };
 
 export const startChat = async () => {
-  console.log(chalk.bold('\n  AIOS') + chalk.dim(' — AI Agent CLI'));
-  console.log(chalk.dim('  输入消息开始对话，Ctrl+C 退出\n'));
+  banner();
+  console.log(chalk.dim('  ' + t.chatWelcome + '\n'));
 
   let conversationId;
   try {
     conversationId = await createSession();
   } catch (e) {
-    console.error(chalk.red('启动失败: ' + e.message));
+    console.error(chalk.red(t.chatStartFailed(e.message)));
     process.exit(1);
   }
 
@@ -58,10 +60,11 @@ export const startChat = async () => {
     };
   };
 
+  const shortId = conversationId.slice(0, 6);
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: chalk.green('> '),
+    prompt: chalk.dim(`[${shortId}]`) + chalk.green(' > '),
   });
 
   connect((socket) => {
@@ -73,7 +76,7 @@ export const startChat = async () => {
 
     socket.on('close', () => {
       clearInterval(ping);
-      console.log(chalk.red('\n连接断开'));
+      console.log(chalk.red('\n' + t.chatDisconnected));
       process.exit(0);
     });
 
@@ -136,7 +139,7 @@ export const startChat = async () => {
       if (!input) { rl.prompt(); return; }
 
       if (busy) {
-        console.log(chalk.dim('（等待上一条回复完成）'));
+        console.log(chalk.dim(t.chatBusy));
         rl.prompt();
         return;
       }
@@ -149,7 +152,6 @@ export const startChat = async () => {
         type: 'message',
         conversationId,
         content: input,
-        mode: 'auto',
       }));
     });
 

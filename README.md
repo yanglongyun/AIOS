@@ -75,18 +75,38 @@ AIOS，顾名思义，即由 AI 驱动的操作系统。在 AIOS 中，你可以
 Web 服务拆分为"主服务"和"应用服务"两部分。主服务负责对话与调度，应用服务运行具体软件。即使某个应用崩溃，也不会牵连核心——你依然可以继续对话并让 AI 去修复它。系统预装了一系列基础应用，打通了双向机制：AI 可以使用应用数据，应用也可以调用 AI。这些应用或许不能完全对齐你的需求，但你随时可以让 AI 修改它、卸载它，或者当场写一个全新的。
 
 
-## 快速开始
+## 快速安装
 
 ```bash
 git clone https://github.com/valueriver/aios.git
 cd aios
-npm install
+```
+
+Linux (Ubuntu/Debian):
+```bash
+bash install-linux.sh
+```
+
+macOS:
+```bash
+bash install-macos.sh
+```
+
+Windows (PowerShell):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
+```
+
+打开：`http://localhost:9700`
+
+## 手动启动
+
+```bash
+npm ci
 npm run build
 npm start          # 主服务: 9700
 npm run start:apps # 应用服务: 9701
 ```
-
-打开：`http://localhost:9700`
 
 ---
 

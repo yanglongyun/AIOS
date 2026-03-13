@@ -9,7 +9,7 @@
         <h3 class="text-base font-bold text-[#e8d4b8]">{{ t('reload_title') }}</h3>
 
         <!-- 说明 -->
-        <p v-if="message" class="mt-2 text-[13px] leading-relaxed text-[#a09078]">{{ message }}</p>
+        <p v-if="message" class="mt-3 rounded-lg border border-[#3a2a18] bg-[#1a1410]/60 px-3 py-2 text-[13px] leading-relaxed text-[#a09078]">{{ message }}</p>
 
         <!-- 操作摘要 -->
         <div class="mt-3 space-y-1 text-[12px] text-[#8a7860]">

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="view === 'list'" class="cork-surface relative flex h-full w-full flex-wrap content-start gap-[30px] overflow-y-auto overflow-x-hidden p-10">
+  <div v-if="view === 'list'" class="cork-surface relative flex h-full w-full flex-wrap content-start justify-center md:justify-start gap-[30px] overflow-y-auto overflow-x-hidden p-10">
     <div class="group z-20 flex h-[240px] w-[200px] shrink-0 cursor-pointer flex-col items-center justify-center rounded-t-lg rounded-b-xl border border-[#3a2515] bg-[#5c412a] shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),4px_8px_15px_rgba(0,0,0,0.6)] transition-all hover:scale-[1.02] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),6px_12px_20px_rgba(0,0,0,0.7)]" style="transform:rotate(-2deg)" @click="$emit('open-editor', null)">
       <div class="absolute top-[5px] h-4 w-[60px] rounded-sm bg-[#888] shadow-[0_4px_6px_rgba(0,0,0,0.6)]"></div>
       <div class="mt-5 flex h-[85%] w-[85%] items-center justify-center rounded-sm bg-[rgba(253,245,211,0.9)] shadow-[0_2px_4px_rgba(0,0,0,0.4)]">

@@ -100,27 +100,22 @@ database/ 目录不能删除
 ```
 
 ## 更新与重载
-当你修改了代码后，需要编译前端或重启服务时，使用系统提供的重载服务。
+当你修改了代码后，需要编译前端或重启服务时，调用系统重载 API。
 
-**用法**：编写一个 Node 脚本，导入并调用 `requestReload()`：
+**用法**：发送 POST 请求到 `/api/system/reload/request`：
 ```bash
-node -e "
-import { requestReload } from './server/service/reload.js';
-requestReload({
-  build: true,        // 是否重新编译前端（修改了 ui/ 下的文件时设为 true）
-  restart: 'server',  // 重启哪个服务：'server' | 'apps' | 'both' | null
-  message: '更新了登录页面样式'  // 展示给用户的更新说明
-});
-"
+curl -X POST http://localhost:9700/api/system/reload/request \
+  -H "Content-Type: application/json" \
+  -d '{"build": true, "restart": "server", "message": "更新了登录页面样式"}'
 ```
 
 调用后，前端会弹窗让用户确认，确认后系统自动完成编译和重启，用户无需手动操作。
 
 **参数说明**：
 - `build: true` — 修改了 `ui/` 下的前端文件时需要
-- `restart: 'server'` — 修改了 `server/` 下的主服务代码时需要
-- `restart: 'apps'` — 修改了 `apps/` 下的应用服务代码时需要
-- `restart: 'both'` — 同时修改了主服务和应用服务时需要
+- `restart: "server"` — 修改了 `server/` 下的主服务代码时需要
+- `restart: "apps"` — 修改了 `apps/` 下的应用服务代码时需要
+- `restart: "both"` — 同时修改了主服务和应用服务时需要
 - `restart: null` — 仅编译前端，不重启任何服务（纯 UI 改动）
 - `message` — 简述本次更新内容，显示在确认弹窗中
 

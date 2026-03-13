@@ -1,6 +1,7 @@
 import { readBody } from '../../shared/http/readBody.js';
 import { json } from '../../shared/http/json.js';
 import { countUsers } from '../../shared/auth/repository.js';
+import { requestReload } from '../service/reload.js';
 import { execSync, spawn } from 'child_process';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -11,6 +12,16 @@ const ROOT_DIR = join(__dirname, '..', '..');
 export const handleSystemApi = async (req, res, path) => {
   if (path === '/api/system/setup' && req.method === 'GET') {
     return json(res, { success: true, initialized: countUsers() > 0 });
+  }
+
+  if (path === '/api/system/reload/request' && req.method === 'POST') {
+    const body = await readBody(req);
+    requestReload({
+      build: body.build ?? false,
+      restart: body.restart || null,
+      message: body.message || ''
+    });
+    return json(res, { success: true });
   }
 
   if (path === '/api/system/reload' && req.method === 'POST') {

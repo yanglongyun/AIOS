@@ -74,5 +74,8 @@ export default {
   cryptobot_save: '保存',
   cryptobot_test: '测试',
   cryptobot_exchange_config: '交易所配置 · OKX',
-  cryptobot_trading: '自动交易中...'
+  cryptobot_trading: '自动交易中...',
+  cryptobot_chat_quick_1: '当前市场行情怎么看？',
+  cryptobot_chat_quick_2: '分析一下最近的交易操作',
+  cryptobot_chat_quick_3: '有什么风险需要注意？'
 };

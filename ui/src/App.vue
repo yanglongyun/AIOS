@@ -33,6 +33,8 @@
     <ChatPanel
       v-if="activePanel === 'chat'"
       :context="currentAppContext"
+      :quick-messages="chatPanel.state.quickMessages"
+      :pending-message="chatPanel.state.pendingMessage"
       @close="activePanel = null"
     />
 
@@ -62,6 +64,7 @@ import ReloadModal from './components/ReloadModal.vue';
 import TasksPanel from './components/TasksPanel.vue';
 import ChatPanel from './components/ChatPanel.vue';
 import { useTopPanels } from './components/topPanels.js';
+import { chatPanel } from './stores/chatPanel.js';
 import { useI18n } from './i18n/index.js';
 const { t } = useI18n();
 const ready = ref(false);
@@ -102,6 +105,11 @@ watch(() => route.path, (p) => {
 
 // 面板打开时禁止底层滚动（解决小屏幕滚动穿透）
 watch(activePanel, (v) => { document.body.style.overflow = v ? 'hidden' : ''; });
+
+// 应用触发打开聊天面板
+watch(() => chatPanel.state.requestOpen, () => {
+  if (chatPanel.state.requestOpen > 0) activePanel.value = 'chat';
+});
 
 const onNavigate = () => {
   if (window.innerWidth < 768) sidebarOpen.value = false;

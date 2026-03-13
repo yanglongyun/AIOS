@@ -29,5 +29,8 @@ export default {
   reader_generate_failed: 'Generation failed',
   reader_reset_confirm: 'Reset "{title}"? All chapters will be cleared.',
   reader_reset_failed: 'Reset failed',
-  reader_init_failed: 'Initialization failed'
+  reader_init_failed: 'Initialization failed',
+  reader_chat_quick_1: 'Suggest an interesting story setting',
+  reader_chat_quick_2: 'Help me with character names',
+  reader_chat_quick_3: 'Inspire the current story plot'
 };

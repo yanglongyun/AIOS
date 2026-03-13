@@ -19,4 +19,7 @@ export default {
   subscriber_generate_failed: 'Failed to receive',
   subscriber_fill_focus_error: 'Please set topics first',
   subscriber_init_failed: 'Failed to initialize',
+  subscriber_chat_quick_1: 'Any important news today?',
+  subscriber_chat_quick_2: 'Help adjust my subscription topics',
+  subscriber_chat_quick_3: 'Summarize recent trends'
 };

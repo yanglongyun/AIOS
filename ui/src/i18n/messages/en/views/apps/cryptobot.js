@@ -74,5 +74,8 @@ export default {
   cryptobot_save: 'Save',
   cryptobot_test: 'Test',
   cryptobot_exchange_config: 'Exchange Config · OKX',
-  cryptobot_trading: 'Trading...'
+  cryptobot_trading: 'Trading...',
+  cryptobot_chat_quick_1: "What's the current market outlook?",
+  cryptobot_chat_quick_2: 'Analyze my recent trades',
+  cryptobot_chat_quick_3: 'Any risks I should watch out for?'
 };

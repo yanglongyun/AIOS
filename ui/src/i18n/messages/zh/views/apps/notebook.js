@@ -33,5 +33,8 @@ export default {
   notebook_delete_failed: '删除失败',
   notebook_pin_failed: '置顶更新失败',
   notebook_optimize_failed: '优化失败',
-  notebook_optimize_empty: '优化结果为空'
+  notebook_optimize_empty: '优化结果为空',
+  notebook_chat_quick_1: '帮我整理最近的笔记',
+  notebook_chat_quick_2: '给我一些写作灵感',
+  notebook_chat_quick_3: '帮我总结笔记要点'
 };

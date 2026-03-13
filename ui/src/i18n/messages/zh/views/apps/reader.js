@@ -29,5 +29,8 @@ export default {
   reader_generate_failed: '生成失败',
   reader_reset_confirm: '重置「{title}」？所有章节将被清除。',
   reader_reset_failed: '重置失败',
-  reader_init_failed: '初始化失败'
+  reader_init_failed: '初始化失败',
+  reader_chat_quick_1: '推荐一个有趣的故事设定',
+  reader_chat_quick_2: '帮我想几个角色名字',
+  reader_chat_quick_3: '给当前故事一些发展灵感'
 };

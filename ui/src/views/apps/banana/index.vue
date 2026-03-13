@@ -25,8 +25,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import BananaControls from '../../../components/apps/banana/BananaControls.vue';
 import BananaScreen from '../../../components/apps/banana/BananaScreen.vue';
 
@@ -42,7 +43,9 @@ const toast = ref('');
 
 onMounted(() => {
   init();
+  chatPanel.setQuickMessages([t('banana_chat_quick_1'), t('banana_chat_quick_2'), t('banana_chat_quick_3')]);
 });
+onUnmounted(() => chatPanel.setQuickMessages([]));
 
 function goHomePage() {
   timeLine.value = [{

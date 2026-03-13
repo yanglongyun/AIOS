@@ -37,8 +37,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import FortuneHexagramPanel from '../../../components/apps/fortune/FortuneHexagramPanel.vue';
 import FortuneQuestionForm from '../../../components/apps/fortune/FortuneQuestionForm.vue';
 import FortuneResultCard from '../../../components/apps/fortune/FortuneResultCard.vue';
@@ -200,5 +201,9 @@ const loadHistory = async () => {
   if (data.success) history.value = data.items;
 };
 
-onMounted(loadHistory);
+onMounted(() => {
+  loadHistory();
+  chatPanel.setQuickMessages([t('fortune_chat_quick_1'), t('fortune_chat_quick_2'), t('fortune_chat_quick_3')]);
+});
+onUnmounted(() => chatPanel.setQuickMessages([]));
 </script>

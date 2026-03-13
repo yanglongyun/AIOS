@@ -16,5 +16,8 @@ export default {
   banana_boot_screen: '开机画面',
   banana_enter_home: '进入主屏幕',
   banana_ctx_screen: '界面：',
-  banana_ctx_choice: '，选择：'
+  banana_ctx_choice: '，选择：',
+  banana_chat_quick_1: '这个手机还有什么隐藏功能？',
+  banana_chat_quick_2: '教我怎么玩这个游戏',
+  banana_chat_quick_3: '给我推荐一些有趣的操作'
 };

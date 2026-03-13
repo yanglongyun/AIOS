@@ -24,5 +24,8 @@ export default {
     poker_insufficient_chips: '一方筹码不足，无法开始新局',
     poker_start_failed: '开始失败',
     poker_action_failed: '操作失败',
-    poker_network_error: '网络异常'
+    poker_network_error: '网络异常',
+    poker_chat_quick_1: '教我一些扑克策略',
+    poker_chat_quick_2: '怎么提高胜率？',
+    poker_chat_quick_3: '分析一下 AI 的出牌风格'
 };

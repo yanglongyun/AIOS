@@ -27,8 +27,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import PokerControlPanel from '../../../components/apps/poker/PokerControlPanel.vue';
 import PokerTableView from '../../../components/apps/poker/PokerTableView.vue';
 const { t } = useI18n();
@@ -79,7 +80,11 @@ const loadStatus = async () => {
   }
 };
 
-onMounted(loadStatus);
+onMounted(() => {
+  loadStatus();
+  chatPanel.setQuickMessages([t('poker_chat_quick_1'), t('poker_chat_quick_2'), t('poker_chat_quick_3')]);
+});
+onUnmounted(() => chatPanel.setQuickMessages([]));
 
 const startGame = async () => {
   busy.value = true;

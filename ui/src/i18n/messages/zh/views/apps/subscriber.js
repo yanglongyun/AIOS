@@ -19,4 +19,7 @@ export default {
   subscriber_generate_failed: '收报失败',
   subscriber_fill_focus_error: '请先设置订阅主题',
   subscriber_init_failed: '初始化失败',
+  subscriber_chat_quick_1: '今天有什么重要新闻？',
+  subscriber_chat_quick_2: '帮我调整订阅方向',
+  subscriber_chat_quick_3: '总结最近的趋势'
 };

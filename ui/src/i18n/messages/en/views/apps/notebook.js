@@ -33,5 +33,8 @@ export default {
   notebook_delete_failed: 'Delete failed',
   notebook_pin_failed: 'Pin update failed',
   notebook_optimize_failed: 'Optimize failed',
-  notebook_optimize_empty: 'Optimization is empty'
+  notebook_optimize_empty: 'Optimization is empty',
+  notebook_chat_quick_1: 'Help organize my recent notes',
+  notebook_chat_quick_2: 'Give me some writing inspiration',
+  notebook_chat_quick_3: 'Summarize key points from my notes'
 };

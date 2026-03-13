@@ -19,5 +19,8 @@ export default {
   fortune_yao_four: '四',
   fortune_yao_three: '三',
   fortune_yao_two: '二',
-  fortune_yao_one: '初'
+  fortune_yao_one: '初',
+  fortune_chat_quick_1: '帮我解读最近的卦象',
+  fortune_chat_quick_2: '今天运势如何？',
+  fortune_chat_quick_3: '给我一些开运小建议'
 };

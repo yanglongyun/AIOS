@@ -24,5 +24,8 @@ export default {
     poker_insufficient_chips: 'One side does not have enough chips to start a new game.',
     poker_start_failed: 'Failed to start',
     poker_action_failed: 'Action failed',
-    poker_network_error: 'Network error'
+    poker_network_error: 'Network error',
+    poker_chat_quick_1: 'Teach me poker strategy',
+    poker_chat_quick_2: 'How to improve my win rate?',
+    poker_chat_quick_3: "Analyze AI's playing style"
 };

@@ -34,8 +34,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import ReaderCreateView from '../../../components/apps/reader/ReaderCreateView.vue';
 import ReaderDetailView from '../../../components/apps/reader/ReaderDetailView.vue';
 import ReaderListView from '../../../components/apps/reader/ReaderListView.vue';
@@ -231,6 +232,7 @@ const resetReader = async () => {
 };
 
 onMounted(async () => {
+  chatPanel.setQuickMessages([t('reader_chat_quick_1'), t('reader_chat_quick_2'), t('reader_chat_quick_3')]);
   try {
     await loadSessions();
     if (view.value === 'detail') {
@@ -241,6 +243,7 @@ onMounted(async () => {
     error.value = e.message || t('reader_init_failed');
   }
 });
+onUnmounted(() => chatPanel.setQuickMessages([]));
 </script>
 
 <style>

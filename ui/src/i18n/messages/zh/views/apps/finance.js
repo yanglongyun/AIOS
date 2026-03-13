@@ -25,5 +25,8 @@ export default {
   finance_ai_json_hint: '只返回 JSON：{"type":"income|expense","amount":数字,"note":"备注"}',
   finance_ai_system_prompt: '你是记账助手。把用户的一句话记账描述提取成 JSON：{"type":"income|expense","amount":数字,"note":"备注"}。只返回 JSON，不要解释，不要代码块。',
   finance_ai_incomplete: '识别结果不完整，请补充金额',
-  finance_ai_failed: '智能填充失败'
+  finance_ai_failed: '智能填充失败',
+  finance_chat_quick_1: '帮我分析这个月的支出',
+  finance_chat_quick_2: '有哪些可以省的开支？',
+  finance_chat_quick_3: '生成本月财务小结'
 };

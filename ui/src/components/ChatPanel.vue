@@ -45,6 +45,9 @@
               <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">{{ t('chat_empty_title') }}</h3>
               <p v-if="context" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${context}</b>` })"></p>
               <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+              <div v-if="quickMessages.length" class="mt-4 flex w-full flex-col gap-1.5 px-1">
+                <button v-for="(msg, idx) in quickMessages" :key="idx" @click="sendQuick(msg)" class="cursor-pointer rounded-lg border border-[#4a3828] bg-[#3a2a1a] px-3 py-2 text-left text-[11px] text-[#d4c0a0] transition-colors hover:border-[#c8a060]/30 hover:bg-[#3a2a1c]">{{ msg }}</button>
+              </div>
             </div>
 
             <!-- 消息列表 -->
@@ -144,10 +147,13 @@ import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, History, Plus, Square } from 'lucide-vue-next';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
+import { chatPanel } from '../stores/chatPanel.js';
 import { useI18n } from '../i18n/index.js';
 
 const props = defineProps({
-  context: { type: String, default: '' }
+  context: { type: String, default: '' },
+  quickMessages: { type: Array, default: () => [] },
+  pendingMessage: { type: String, default: null }
 });
 defineEmits(['close']);
 
@@ -357,6 +363,11 @@ const newChat = () => {
   showHistory.value = false;
 };
 
+const sendQuick = (msg) => {
+  input.value = msg;
+  handleSend();
+};
+
 const fetchHistory = async () => {
   try {
     historyList.value = await request('/api/chat/list');
@@ -393,16 +404,11 @@ watch(() => messages.value.length, (newLen, oldLen) => {
 onMounted(async () => {
   if (wsStatus.value === 'disconnected') connect();
 
-  // 加载上次对话
-  const lastId = localStorage.getItem(LAST_CHAT_KEY);
-  if (lastId) {
-    currentConversationId.value = lastId;
-    try {
-      await loadChatPage(lastId, 0, 20);
-      scrollToBottom(false);
-    } catch {
-      resetState();
-    }
+  // 自动发送 pendingMessage
+  if (props.pendingMessage) {
+    input.value = props.pendingMessage;
+    chatPanel.clearPending();
+    nextTick(() => handleSend());
   }
 
   unsubs.push(on('delta', (data) => {

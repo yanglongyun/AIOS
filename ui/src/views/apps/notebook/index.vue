@@ -38,8 +38,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import NotebookEditorView from '../../../components/apps/notebook/NotebookEditorView.vue';
 import NotebookListView from '../../../components/apps/notebook/NotebookListView.vue';
 
@@ -237,7 +238,11 @@ const formatTime = (v) => {
   return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', { month: 'short', day: 'numeric' });
 };
 
-onMounted(fetchNotes);
+onMounted(() => {
+  fetchNotes();
+  chatPanel.setQuickMessages([t('notebook_chat_quick_1'), t('notebook_chat_quick_2'), t('notebook_chat_quick_3')]);
+});
+onUnmounted(() => chatPanel.setQuickMessages([]));
 </script>
 
 <style>

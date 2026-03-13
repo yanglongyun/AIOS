@@ -19,5 +19,8 @@ export default {
   fortune_yao_four: 'Four',
   fortune_yao_three: 'Three',
   fortune_yao_two: 'Two',
-  fortune_yao_one: 'One'
+  fortune_yao_one: 'One',
+  fortune_chat_quick_1: 'Interpret my recent reading',
+  fortune_chat_quick_2: "How's my luck today?",
+  fortune_chat_quick_3: 'Give me some fortune tips'
 };

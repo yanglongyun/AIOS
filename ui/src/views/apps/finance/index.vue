@@ -39,12 +39,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import FinanceHeader from '../../../components/apps/finance/FinanceHeader.vue';
 import FinanceLedgerTable from '../../../components/apps/finance/FinanceLedgerTable.vue';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const API_BASE = '/apps/finance';
 
 const now = new Date();
@@ -221,7 +222,11 @@ const remove = async (id) => {
   }
 };
 
-onMounted(fetchData);
+onMounted(() => {
+  fetchData();
+  chatPanel.setQuickMessages([t('finance_chat_quick_1'), t('finance_chat_quick_2'), t('finance_chat_quick_3')]);
+});
+onUnmounted(() => chatPanel.setQuickMessages([]));
 </script>
 
 <style scoped>

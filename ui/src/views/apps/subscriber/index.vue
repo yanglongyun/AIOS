@@ -33,6 +33,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import SubscriberArticlePanel from '../../../components/apps/subscriber/SubscriberArticlePanel.vue';
 import SubscriberControlPanel from '../../../components/apps/subscriber/SubscriberControlPanel.vue';
 
@@ -204,6 +205,7 @@ const formatTime = (value) => {
 onMounted(async () => {
   updateNow();
   dialTimer = setInterval(updateNow, 10000);
+  chatPanel.setQuickMessages([t('subscriber_chat_quick_1'), t('subscriber_chat_quick_2'), t('subscriber_chat_quick_3')]);
   try {
     await loadToday();
     await loadHistory();
@@ -214,6 +216,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (dialTimer) clearInterval(dialTimer);
+  chatPanel.setQuickMessages([]);
 });
 </script>
 

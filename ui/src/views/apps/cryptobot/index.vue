@@ -36,6 +36,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useI18n } from '../../../i18n/index.js';
+import { chatPanel } from '../../../stores/chatPanel.js';
 import CryptobotMachinePanel from '../../../components/apps/cryptobot/CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from '../../../components/apps/cryptobot/CryptobotDecisionPaper.vue';
 
@@ -224,6 +225,7 @@ const minToSliderIdx = (min) => {
 let pendingRefresh = false;
 
 onMounted(async () => {
+  chatPanel.setQuickMessages([t('cryptobot_chat_quick_1'), t('cryptobot_chat_quick_2'), t('cryptobot_chat_quick_3')]);
   try {
     await loadAll();
     goal.value = status.config.goal || t('cryptobot_default_directive');
@@ -256,6 +258,7 @@ onUnmounted(() => {
     clearInterval(ticker);
     ticker = null;
   }
+  chatPanel.setQuickMessages([]);
 });
 </script>
 

@@ -25,5 +25,8 @@ export default {
   finance_ai_json_hint: 'Return JSON only: {"type":"income|expense","amount":number,"note":"note"}',
   finance_ai_system_prompt: 'You are a bookkeeping assistant. Extract the user sentence into JSON: {"type":"income|expense","amount":number,"note":"note"}. Return JSON only. No explanation. No markdown.',
   finance_ai_incomplete: 'Incomplete parse result, please provide amount',
-  finance_ai_failed: 'Smart parse failed'
+  finance_ai_failed: 'Smart parse failed',
+  finance_chat_quick_1: 'Analyze this month\'s spending',
+  finance_chat_quick_2: 'Where can I cut expenses?',
+  finance_chat_quick_3: 'Generate a monthly financial summary'
 };

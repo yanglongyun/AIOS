@@ -16,5 +16,8 @@ export default {
   banana_boot_screen: 'Boot screen',
   banana_enter_home: 'Enter home screen',
   banana_ctx_screen: 'Screen: ',
-  banana_ctx_choice: ', choice: '
+  banana_ctx_choice: ', choice: ',
+  banana_chat_quick_1: 'Any hidden features on this phone?',
+  banana_chat_quick_2: 'Teach me how to play this game',
+  banana_chat_quick_3: 'Suggest some fun things to try'
 };

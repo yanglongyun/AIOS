@@ -5,17 +5,16 @@ set -euo pipefail
 # Usage:
 #   bash install.sh
 
-REPO_URL="${REPO_URL:-https://github.com/valueriver/aios.git}"
-APP_NAME="${APP_NAME:-aios}"
-LOCAL_PORT="${LOCAL_PORT:-9700}"
-APPS_PORT="${APPS_PORT:-9701}"
+REPO_URL="https://github.com/valueriver/aios.git"
+APP_NAME="aios"
+LOCAL_PORT="9700"
 
 PLATFORM="$(uname -s)"
 
 if [ "$PLATFORM" = "Darwin" ]; then
-  APP_DIR="${APP_DIR:-$HOME/aios}"
+  APP_DIR="$HOME/aios"
 else
-  APP_DIR="${APP_DIR:-/opt/aios}"
+  APP_DIR="/opt/aios"
 fi
 
 # ── 1. 安装系统依赖 ──────────────────────────────────────
@@ -68,7 +67,7 @@ if [ "$PLATFORM" = "Darwin" ]; then
     git -C "$APP_DIR" pull --ff-only
   fi
 else
-  SERVICE_USER="${SERVICE_USER:-$USER}"
+  SERVICE_USER="$(id -un)"
   sudo mkdir -p "$(dirname "$APP_DIR")"
   if [ ! -d "$APP_DIR/.git" ]; then
     sudo git clone "$REPO_URL" "$APP_DIR"
@@ -158,7 +157,7 @@ EOF
   launchctl kickstart -k "gui/$(id -u)/${LABEL_APPS}"
 
 else
-  SERVICE_USER="${SERVICE_USER:-$USER}"
+  SERVICE_USER="$(id -un)"
 
   # 主服务
   sudo tee /etc/systemd/system/${APP_NAME}.service >/dev/null <<EOF
@@ -205,9 +204,18 @@ EOF
   sudo systemctl restart "${APP_NAME}" "${APP_NAME}-apps"
 
   # Nginx 反向代理
-  DOMAIN="${DOMAIN:-_}"
+  DOMAIN="_"
+  NGINX_MANAGED_MARKER="# managed-by-aios-installer"
   NGINX_CONF="/etc/nginx/sites-available/${APP_NAME}"
+  NGINX_ENABLED="/etc/nginx/sites-enabled/${APP_NAME}"
+
+  if sudo test -f "$NGINX_CONF" && ! sudo grep -Fxq "$NGINX_MANAGED_MARKER" "$NGINX_CONF"; then
+    echo "Refuse to overwrite unmanaged nginx config: $NGINX_CONF"
+    exit 1
+  fi
+
   sudo tee "$NGINX_CONF" >/dev/null <<EOF
+$NGINX_MANAGED_MARKER
 server {
     listen 80;
     server_name ${DOMAIN};
@@ -227,10 +235,22 @@ server {
 }
 EOF
 
-  sudo ln -sf "$NGINX_CONF" "/etc/nginx/sites-enabled/${APP_NAME}"
-  [ -f /etc/nginx/sites-enabled/default ] && sudo rm -f /etc/nginx/sites-enabled/default
+  if sudo test -e "$NGINX_ENABLED"; then
+    if ! sudo test -L "$NGINX_ENABLED"; then
+      echo "Refuse to modify non-symlink nginx entry: $NGINX_ENABLED"
+      exit 1
+    fi
+    CURRENT_TARGET="$(sudo readlink -f "$NGINX_ENABLED")"
+    EXPECTED_TARGET="$(sudo readlink -f "$NGINX_CONF")"
+    if [ "$CURRENT_TARGET" != "$EXPECTED_TARGET" ]; then
+      echo "Refuse to replace nginx symlink pointing to another config: $NGINX_ENABLED"
+      exit 1
+    fi
+  fi
+
+  sudo ln -sfn "$NGINX_CONF" "$NGINX_ENABLED"
   sudo nginx -t
-  sudo systemctl restart nginx
+  sudo systemctl reload nginx
 fi
 
 # ── 5. 完成 ─────────────────────────────────────────────

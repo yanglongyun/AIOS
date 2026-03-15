@@ -5,10 +5,25 @@ $RepoUrl = "https://github.com/valueriver/aios.git"
 $AppName = "aios"
 $LocalPort = 9700
 $AppDir = Join-Path $HOME "aios"
-$CurrentUser = "$env:USERDOMAIN\$env:USERNAME"
+$RunningOnWindows = [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
 
-if (-not $IsWindows) {
+if (-not $RunningOnWindows) {
   throw "install-windows.ps1 only supports Windows."
+}
+
+try {
+  $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+}
+catch {
+  if ([string]::IsNullOrWhiteSpace($env:USERNAME)) {
+    throw "Unable to detect current Windows user."
+  }
+  if ([string]::IsNullOrWhiteSpace($env:USERDOMAIN)) {
+    $CurrentUser = $env:USERNAME
+  }
+  else {
+    $CurrentUser = "$env:USERDOMAIN\$env:USERNAME"
+  }
 }
 
 Write-Host "[1/5] Check dependencies..."
@@ -27,8 +42,17 @@ if ($NodeVersion -lt 22) {
   throw "Node.js version must be >= 22."
 }
 
+$NodeCommand = Get-Command node -ErrorAction Stop
+$NodeExe = $NodeCommand.Source
+if (-not (Test-Path $NodeExe)) {
+  throw "Unable to resolve node executable path."
+}
+
 Write-Host "[2/5] Pull code..."
 if (-not (Test-Path (Join-Path $AppDir ".git"))) {
+  if ((Test-Path $AppDir) -and (Get-ChildItem -Force -Path $AppDir -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+    throw "Target directory already exists and is not a git repository: $AppDir"
+  }
   $Parent = Split-Path -Parent $AppDir
   if (-not (Test-Path $Parent)) {
     New-Item -ItemType Directory -Force -Path $Parent | Out-Null
@@ -57,12 +81,12 @@ if (-not (Test-Path $ScriptDir)) {
 
 @"
 Set-Location "$AppDir"
-node server/index.js
+& "$NodeExe" server/index.js
 "@ | Set-Content -Path $ServerRunner -Encoding UTF8
 
 @"
 Set-Location "$AppDir"
-node apps/index.js
+& "$NodeExe" apps/index.js
 "@ | Set-Content -Path $AppsRunner -Encoding UTF8
 
 Write-Host "[4/5] Setup startup tasks..."
@@ -73,8 +97,8 @@ $Trigger = New-ScheduledTaskTrigger -AtLogOn -User $CurrentUser
 Unregister-ScheduledTask -TaskName $ServerTaskName -Confirm:$false -ErrorAction SilentlyContinue
 Unregister-ScheduledTask -TaskName $AppsTaskName -Confirm:$false -ErrorAction SilentlyContinue
 
-Register-ScheduledTask -TaskName $ServerTaskName -Action $ServerAction -Trigger $Trigger -User $CurrentUser -RunLevel Highest -Force | Out-Null
-Register-ScheduledTask -TaskName $AppsTaskName -Action $AppsAction -Trigger $Trigger -User $CurrentUser -RunLevel Highest -Force | Out-Null
+Register-ScheduledTask -TaskName $ServerTaskName -Action $ServerAction -Trigger $Trigger -User $CurrentUser -Force | Out-Null
+Register-ScheduledTask -TaskName $AppsTaskName -Action $AppsAction -Trigger $Trigger -User $CurrentUser -Force | Out-Null
 
 Start-ScheduledTask -TaskName $ServerTaskName
 Start-ScheduledTask -TaskName $AppsTaskName

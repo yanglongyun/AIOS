@@ -113,6 +113,13 @@ export const PROVIDERS = [
     apiUrl: 'https://api.fireworks.ai/inference/v1/chat/completions',
     defaultModel: 'glm-5',
   },
+  {
+    id: 'chatnext',
+    name: 'ChatNext',
+    group: 'aggregator',
+    apiUrl: 'https://api.chatnext.ai/v1/chat/completions',
+    defaultModel: 'gpt-5-mini',
+  },
   // Coding Plan
   {
     id: 'glm-coding',

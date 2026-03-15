@@ -24,7 +24,6 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       tools = null,
       tool_choice = undefined,
       parallel_tool_calls = undefined,
-      response_format = undefined
     } = await readBody(req);
     if (!String(app || '').trim()) return json(res, { success: false, message: 'app 不能为空' }, 400);
     if (!String(prompt || '').trim() && (!Array.isArray(messages) || messages.length === 0)) {
@@ -40,7 +39,6 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       tools,
       tool_choice,
       parallel_tool_calls,
-      response_format
     });
     return json(res, result);
   } catch (e) {

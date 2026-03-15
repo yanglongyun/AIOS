@@ -24,7 +24,6 @@ export const instantTask = async ({
   tools = null,
   tool_choice = undefined,
   parallel_tool_calls = undefined,
-  response_format = undefined,
   meta = null
 }) => {
   return await requestTask({
@@ -36,7 +35,6 @@ export const instantTask = async ({
     tools,
     tool_choice,
     parallel_tool_calls,
-    response_format,
     meta
   });
 };

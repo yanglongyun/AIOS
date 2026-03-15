@@ -23,7 +23,6 @@ export const runInstantTask = async ({
   tools,
   tool_choice,
   parallel_tool_calls,
-  response_format,
   signal
 }) => {
   const hasMessages = Array.isArray(messages) && messages.length > 0;
@@ -45,9 +44,6 @@ export const runInstantTask = async ({
   if (Array.isArray(tools) && tools.length) payload.tools = tools;
   if (tool_choice !== undefined) payload.tool_choice = tool_choice;
   if (parallel_tool_calls !== undefined) payload.parallel_tool_calls = parallel_tool_calls;
-  if (response_format) payload.response_format = response_format;
-  else if (schema) payload.response_format = { type: 'json_object' };
-
   const assistant = await callLlmRegular(provider, apiUrl, apiKey, payload, signal);
   const content = String(assistant?.content || '').trim();
 
@@ -58,7 +54,7 @@ export const runInstantTask = async ({
     });
   }
 
-  if (schema || payload.response_format?.type === 'json_object') {
+  if (schema) {
     const parsed = parseJsonObject(content);
     validateBySchema(parsed, schema);
     return JSON.stringify(parsed);
@@ -77,7 +73,6 @@ export const createInstantTask = async ({
   tools = null,
   tool_choice = undefined,
   parallel_tool_calls = undefined,
-  response_format = undefined
 }) => {
   const { apiUrl, apiKey, model, provider } = getSettings();
   const conversationId = `task:${randomUUID().slice(0, 8)}`;
@@ -106,7 +101,6 @@ export const createInstantTask = async ({
       tools,
       tool_choice,
       parallel_tool_calls,
-      response_format,
       signal: abortController.signal
     });
     saveTaskMessage(conversationId, { role: 'assistant', content: response }, null);

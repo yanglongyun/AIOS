@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { WEB_URL, API_URL, APPS_URL, SERVER_PORT, APPS_PORT } from './config.js';
 import { getServiceStatus, startServices, stopServices, buildUI, isReady, waitReadyUrl } from './service.js';
 import { startChat } from './chat.js';
+import { runUninstall } from './uninstall.js';
 import t from './locale.js';
 import { banner, createSpinner } from './ui.js';
 
@@ -20,6 +21,7 @@ if (arg === 'help' || arg === '--help' || arg === '-h') {
     ['restart', t.helpRestart],
     ['status', t.helpStatus],
     ['web', t.helpWeb],
+    ['uninstall', t.helpUninstall],
     ['help', t.helpHelp],
   ];
   for (const [cmd, desc] of cmds) {
@@ -110,6 +112,10 @@ if (arg === 'status') {
   console.log(chalk.dim('  ─────────────────────────────────────'));
   console.log();
   process.exit(status.server.ready && status.apps.ready ? 0 : 1);
+}
+
+if (arg === 'uninstall') {
+  await runUninstall();
 }
 
 if (arg) {

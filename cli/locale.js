@@ -9,6 +9,7 @@ const zh = {
   helpRestart: '重启服务（含前端构建）',
   helpStatus: '查看服务状态',
   helpWeb: '浏览器打开 AIOS',
+  helpUninstall: '卸载 AIOS',
   helpHelp: '显示帮助信息',
 
   // service lifecycle
@@ -53,6 +54,16 @@ const zh = {
   chatBusy: '（等待上一条回复完成）',
   chatCreateFailed: '创建会话失败',
 
+  // uninstall
+  uninstallTitle: '卸载 AIOS',
+  uninstallDir: '将删除目录:',
+  uninstallConfirm: '确认卸载？此操作不可恢复。',
+  uninstallCancelled: '已取消',
+  uninstallStopping: '停止服务...',
+  uninstallUnlinking: '移除全局命令...',
+  uninstallRemoving: '删除安装目录...',
+  uninstallDone: 'AIOS 已卸载',
+
   // print
   thinking: '思考中...',
 };
@@ -68,6 +79,7 @@ const en = {
   helpRestart: 'Restart services (with UI build)',
   helpStatus: 'Show service status',
   helpWeb: 'Open AIOS in browser',
+  helpUninstall: 'Uninstall AIOS',
   helpHelp: 'Show help',
 
   // service lifecycle
@@ -111,6 +123,16 @@ const en = {
   chatDisconnected: 'Disconnected',
   chatBusy: '(Waiting for previous reply)',
   chatCreateFailed: 'Failed to create chat session',
+
+  // uninstall
+  uninstallTitle: 'Uninstall AIOS',
+  uninstallDir: 'Will remove:',
+  uninstallConfirm: 'Confirm uninstall? This cannot be undone.',
+  uninstallCancelled: 'Cancelled',
+  uninstallStopping: 'Stopping services...',
+  uninstallUnlinking: 'Removing global command...',
+  uninstallRemoving: 'Removing installation directory...',
+  uninstallDone: 'AIOS uninstalled',
 
   // print
   thinking: 'Thinking...',

@@ -4,7 +4,7 @@ database/
 memory/
 dev/
 uploads/
-files/
+/files/
 ui/dist/
 AGENTS.md
 CLAUDE.md

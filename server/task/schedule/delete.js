@@ -1,5 +1,5 @@
-import { getTaskScheduleById, deleteTaskScheduleById } from '../../../repository/task/schedule.js';
-import { broadcast } from '../../../system/ws.js';
+import { getTaskScheduleById, deleteTaskScheduleById } from '../../repository/task/schedule.js';
+import { broadcast } from '../../system/ws.js';
 
 export const deleteSchedule = ({ id }) => {
   const row = getTaskScheduleById(id);

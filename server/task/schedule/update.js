@@ -1,5 +1,5 @@
-import { getTaskScheduleById, updateTaskScheduleById } from '../../../repository/task/schedule.js';
-import { broadcast } from '../../../system/ws.js';
+import { getTaskScheduleById, updateTaskScheduleById } from '../../repository/task/schedule.js';
+import { broadcast } from '../../system/ws.js';
 
 const normalizeRunAt = (value) => {
   if (value === undefined) return undefined;

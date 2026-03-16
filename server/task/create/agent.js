@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
-import { chat } from '../../../agent/handler.js';
-import { getSettings } from '../../settings/get.js';
+import { chat } from '../../agent/handler.js';
+import { buildSystemPrompt } from '../../prompt/index.js';
+import { getSettings } from '../../service/settings/get.js';
 import { registerTaskExecution, unregisterTaskExecution } from '../execution.js';
 import {
   insertAgentTaskRecord,
@@ -8,8 +9,8 @@ import {
   updateTaskAborted,
   updateTaskDone,
   updateTaskError
-} from '../../../repository/task/create.js';
-import { broadcast } from '../../../system/ws.js';
+} from '../../repository/task/create.js';
+import { broadcast } from '../../system/ws.js';
 
 export const runAgentTask = async ({
   app,
@@ -25,15 +26,9 @@ export const runAgentTask = async ({
   enableToolLoopLimit,
   toolMaxRounds
 }) => {
+  const systemPrompt = buildSystemPrompt();
   const messages = [
-    {
-      role: 'system',
-      content: [
-        `你是 AIOS 的 agent，正在处理来自「${app}」应用的请求。直接返回结果，不要废话。`,
-        `工具结果截断：${enableToolResultTruncate ? '开启' : '关闭'}；最大长度：${toolResultMaxChars}`,
-        `工具循环限制：${enableToolLoopLimit ? '开启' : '关闭'}；最大轮次：${toolMaxRounds}`
-      ].join('\n')
-    },
+    { role: 'system', content: systemPrompt },
     { role: 'user', content: prompt }
   ];
 
@@ -133,4 +128,3 @@ export const createAgentTask = async ({
     unregisterTaskExecution(taskId);
   }
 };
-

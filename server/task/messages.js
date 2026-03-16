@@ -1,5 +1,5 @@
-import { parseJson } from '../../../shared/json/parse.js';
-import { listMessagesByConversationId } from '../../repository/task/messages.js';
+import { parseJson } from '../../shared/json/parse.js';
+import { listMessagesByConversationId } from '../repository/task/messages.js';
 
 export const listTaskMessages = ({ conversationId }) => {
   const rows = listMessagesByConversationId(conversationId);

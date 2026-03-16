@@ -1,6 +1,6 @@
 import { tools } from './tools.js';
 import { runTools } from './runner.js';
-import { callLlmStream } from '../system/llm/stream.js';
+import { callLlmStream } from '../llm/stream.js';
 import { normalizeAgentMessages, normalizeChatOptions } from './utils.js';
 
 export const chat = async (messages, {

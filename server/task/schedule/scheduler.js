@@ -1,7 +1,7 @@
-import { getEnabledTaskSchedules, updateTaskScheduleById } from '../../../repository/task/schedule.js';
+import { getEnabledTaskSchedules, updateTaskScheduleById } from '../../repository/task/schedule.js';
 import { createAgentTask } from '../create/agent.js';
 import { shouldRunCron } from './cron.js';
-import { broadcast } from '../../../system/ws.js';
+import { broadcast } from '../../system/ws.js';
 
 let timer = null;
 

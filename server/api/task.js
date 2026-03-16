@@ -1,15 +1,15 @@
 import { readBody } from '../../shared/http/readBody.js';
 import { json } from '../../shared/http/json.js';
-import { listTaskRecords } from '../service/task/list.js';
-import { getTaskDetail } from '../service/task/detail.js';
-import { listTaskMessages } from '../service/task/messages.js';
-import { stopTask } from '../service/task/stop.js';
-import { createInstantTask } from '../service/task/create/instant.js';
-import { createAgentTask } from '../service/task/create/agent.js';
-import { listSchedules } from '../service/task/schedule/list.js';
-import { createSchedule } from '../service/task/schedule/create.js';
-import { updateSchedule } from '../service/task/schedule/update.js';
-import { deleteSchedule } from '../service/task/schedule/delete.js';
+import { listTaskRecords } from '../task/list.js';
+import { getTaskDetail } from '../task/detail.js';
+import { listTaskMessages } from '../task/messages.js';
+import { stopTask } from '../task/stop.js';
+import { createInstantTask } from '../task/create/instant.js';
+import { createAgentTask } from '../task/create/agent.js';
+import { listSchedules } from '../task/schedule/list.js';
+import { createSchedule } from '../task/schedule/create.js';
+import { updateSchedule } from '../task/schedule/update.js';
+import { deleteSchedule } from '../task/schedule/delete.js';
 
 const handleTaskCreateInstantApi = async (req, res, path) => {
   if (path !== '/api/task/create/instant' || req.method !== 'POST') return false;

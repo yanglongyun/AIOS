@@ -1,4 +1,4 @@
-import { listTasksByLimit } from '../../repository/task/list.js';
+import { listTasksByLimit } from '../repository/task/list.js';
 
 export const listTaskRecords = ({ limit = 20 } = {}) => {
   const parsed = Number(limit);

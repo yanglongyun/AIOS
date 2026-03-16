@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
-import { callLlmRegular } from '../../../system/llm/regular.js';
-import { getSettings } from '../../settings/get.js';
+import { callLlmRegular } from '../../llm/regular.js';
+import { buildSystemPrompt } from '../../prompt/index.js';
+import { getSettings } from '../../service/settings/get.js';
 import { registerTaskExecution, unregisterTaskExecution } from '../execution.js';
 import {
   insertInstantTaskRecord,
@@ -8,9 +9,9 @@ import {
   updateTaskAborted,
   updateTaskDone,
   updateTaskError
-} from '../../../repository/task/create.js';
-import { broadcast } from '../../../system/ws.js';
-import { parseJsonObject, validateBySchema } from '../../../../shared/ai/json.js';
+} from '../../repository/task/create.js';
+import { broadcast } from '../../system/ws.js';
+import { parseJsonObject, validateBySchema } from '../../../shared/ai/json.js';
 
 export const runInstantTask = async ({
   prompt,
@@ -26,12 +27,13 @@ export const runInstantTask = async ({
   signal
 }) => {
   const hasMessages = Array.isArray(messages) && messages.length > 0;
+  const systemPrompt = buildSystemPrompt();
   const payload = {
     model,
     messages: hasMessages ? messages : [
       {
         role: 'system',
-        content: '你是一个结构化任务执行器。严格按要求输出，不要输出额外解释。'
+        content: systemPrompt
       },
       {
         role: 'user',
@@ -44,6 +46,7 @@ export const runInstantTask = async ({
   if (Array.isArray(tools) && tools.length) payload.tools = tools;
   if (tool_choice !== undefined) payload.tool_choice = tool_choice;
   if (parallel_tool_calls !== undefined) payload.parallel_tool_calls = parallel_tool_calls;
+
   const assistant = await callLlmRegular(provider, apiUrl, apiKey, payload, signal);
   const content = String(assistant?.content || '').trim();
 

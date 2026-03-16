@@ -1,7 +1,7 @@
-import { readFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { getSettings } from '../../service/settings/get.js';
+import { getSettings } from '../service/settings/get.js';
 import { apps as appsSection } from './apps.js';
 import { chats as chatsSection } from './chats.js';
 import { environment as environmentSection } from './environment.js';
@@ -87,6 +87,14 @@ export const buildSystemPrompt = (currentConversationId = '') => {
 
   // 会话段：把当前 conversation 的上下文约束拼到最后。
   prompt += chatsSection(currentConversationId);
+
+  // debug: 把完整 system prompt 写到 debug 目录供检查
+  try {
+    const debugDir = join(cwd, 'debug');
+    mkdirSync(debugDir, { recursive: true });
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    writeFileSync(join(debugDir, `system-prompt-${ts}.md`), prompt, 'utf8');
+  } catch {}
 
   return prompt;
 };

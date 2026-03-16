@@ -378,7 +378,7 @@ const uploadSingleFile = async (file) => {
   const res = await request('/api/files/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: file.name, data: dataUrl })
+    body: JSON.stringify({ name: file.name, data: dataUrl, dir: 'files/uploads/chat' })
   });
   return res.file;
 };

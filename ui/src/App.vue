@@ -3,21 +3,22 @@
 
   <RouterView v-else-if="isAuthRoute" />
 
-  <div v-else class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#2a2218] font-['Georgia','PingFang_SC',serif]">
+  <div v-else class="flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#1a1410] font-['Georgia','PingFang_SC',serif]">
 
-    <!-- 顶部栏 -->
-    <div class="relative z-[100] flex h-12 shrink-0 items-center gap-3.5 border-b-2 border-[#3a2010] bg-[linear-gradient(180deg,#5a3e28_0%,#4a3020_100%)] px-4 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-      <button @click="sidebarOpen = !sidebarOpen" class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
-        <Menu class="h-[14px] w-[14px]" />
-      </button>
-      <span class="text-base font-bold tracking-[0.12em] text-[#e8d4b8] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">AIOS</span>
-      <div class="ml-auto flex items-center gap-2">
-        <!-- 任务 -->
+    <!-- 顶栏 -->
+    <div class="relative z-[300] flex h-12 shrink-0 items-center border-b border-black/30 bg-[linear-gradient(180deg,#201810_0%,#181010_100%)] px-4 shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+      <!-- 左：hamburger (mobile) -->
+      <div class="flex w-[68px] shrink-0 items-center justify-center max-md:w-auto">
+        <button @click="serverBarOpen = !serverBarOpen" class="hidden h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg text-[#8a7050] transition-all hover:bg-[rgba(200,160,96,0.08)] hover:text-[#b8a080] max-md:flex">☰</button>
+      </div>
+      <!-- 中：页面名称 -->
+      <div class="flex-1 text-center text-[13px] font-bold tracking-wide text-[#c8a060]">{{ currentPageName }}</div>
+      <!-- 右：任务 + 对话 -->
+      <div class="flex items-center gap-2">
         <button :title="t('app_top_tasks')" @click="togglePanel('tasks')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]">
           <LoaderCircle class="h-[14px] w-[14px]" :class="{ 'animate-spin': hasPending }" />
           <span v-if="taskCount > 0" class="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#c8a060] px-0.5 text-[9px] font-bold text-[#2a1a0a]">{{ taskCount > 99 ? '99+' : taskCount }}</span>
         </button>
-        <!-- 对话 -->
         <button v-if="!isChatRoute" :title="t('app_top_chat')" @click="togglePanel('chat')" class="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-white/10 text-[#d4c0a0] transition-all hover:bg-white/15 hover:text-[#f0e0c0]" :class="activePanel === 'chat' ? 'bg-white/20 text-[#f0e0c0]' : ''">
           <MessageSquare class="h-[14px] w-[14px]" />
         </button>
@@ -36,13 +37,18 @@
       @close="activePanel = null"
     />
 
-    <!-- 下方：导航面板 + 内容区 -->
+    <!-- 下方：服务栏 + 内容区 -->
     <div class="relative flex min-h-0 flex-1">
-      <div v-if="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-[60] hidden bg-[rgba(22,14,8,0.45)] backdrop-blur-[1px] max-md:block" />
-      <div v-show="sidebarOpen" class="relative z-[70] h-full w-[220px] shrink-0 border-r border-[#1a1008] bg-gradient-to-b from-[#3a2a1a] to-[#2e2014] opacity-100 max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-[4px_0_20px_rgba(0,0,0,0.5)]">
-        <NavPanel @navigate="onNavigate" />
+      <!-- 移动端：服务栏遮罩 -->
+      <div v-if="serverBarOpen" @click="serverBarOpen = false" class="fixed inset-0 z-[150] hidden bg-[rgba(10,8,5,0.6)] max-md:block" />
+
+      <!-- 服务栏：桌面静态 / 移动端 fixed 滑出 -->
+      <div class="max-md:fixed max-md:left-0 max-md:top-12 max-md:bottom-0 max-md:z-[200] max-md:transition-transform max-md:duration-250" :class="serverBarOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'">
+        <ServerBar @navigate="onServerNavigate" />
       </div>
-      <div class="relative z-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+
+      <!-- 内容区（圆角卡片） -->
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-tl-[10px] bg-[#2a2218] max-md:rounded-tl-none">
         <RouterView />
       </div>
     </div>
@@ -55,8 +61,8 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterView, useRoute, useRouter } from 'vue-router';
-import { LoaderCircle, Menu, MessageSquare } from 'lucide-vue-next';
-import NavPanel from './components/NavPanel.vue';
+import { LoaderCircle, MessageSquare } from 'lucide-vue-next';
+import ServerBar from './components/ServerBar.vue';
 import GlobalToast from './components/GlobalToast.vue';
 import ReloadModal from './components/ReloadModal.vue';
 import TasksPanel from './components/TasksPanel.vue';
@@ -66,11 +72,32 @@ import { chatPanel } from './stores/chatPanel.js';
 import { useI18n } from './i18n/index.js';
 const { t } = useI18n();
 const ready = ref(false);
-const sidebarOpen = ref(window.innerWidth >= 768);
+const serverBarOpen = ref(false);
 const route = useRoute();
 const router = useRouter();
 const isAuthRoute = computed(() => route.path === '/login' || route.path === '/welcome');
 const isChatRoute = computed(() => route.path.startsWith('/chat'));
+
+const currentPageName = computed(() => {
+  const p = route.path;
+  if (p.startsWith('/chat')) return t('app_sidebar_chat');
+  if (p === '/history') return t('app_sidebar_history');
+  if (p.startsWith('/tasks') || p.startsWith('/task/')) return t('app_sidebar_tasks');
+  if (p === '/files') return t('app_sidebar_files');
+  if (p === '/skills') return t('app_sidebar_skills');
+  if (p.startsWith('/notebook')) return t('app_sidebar_notebook');
+  if (p.startsWith('/finance')) return t('app_sidebar_finance');
+  if (p.startsWith('/subscriber')) return t('app_sidebar_subscriber');
+  if (p.startsWith('/cryptobot')) return t('app_sidebar_cryptobot');
+  if (p.startsWith('/reader')) return t('app_sidebar_reader');
+  if (p.startsWith('/poker')) return t('app_sidebar_poker');
+  if (p.startsWith('/fortune')) return t('app_sidebar_fortune');
+  if (p.startsWith('/banana')) return t('app_sidebar_banana');
+  if (p === '/settings') return t('app_sidebar_settings');
+  if (p === '/apps/create') return t('app_sidebar_create_app');
+  return 'AIOS';
+});
+
 const {
   activePanel,
   tasks,
@@ -82,26 +109,22 @@ const {
 } = useTopPanels();
 let panelStarted = false;
 
-
-// 进入 /chat 时关闭侧边聊天面板
 watch(() => route.path, (p) => {
   if (p.startsWith('/chat') && activePanel.value === 'chat') activePanel.value = null;
 });
 
-// 面板打开时禁止底层滚动（解决小屏幕滚动穿透）
 watch(activePanel, (v) => { document.body.style.overflow = v ? 'hidden' : ''; });
 
-// 应用触发打开聊天面板
 watch(() => chatPanel.state.requestOpen, () => {
   if (chatPanel.state.requestOpen > 0) activePanel.value = 'chat';
 });
 
-const onNavigate = () => {
-  if (window.innerWidth < 768) sidebarOpen.value = false;
+const onServerNavigate = () => {
+  serverBarOpen.value = false;
 };
 
 const onResize = () => {
-  if (window.innerWidth < 768) sidebarOpen.value = false;
+  if (window.innerWidth < 768) serverBarOpen.value = false;
 };
 
 onMounted(async () => {

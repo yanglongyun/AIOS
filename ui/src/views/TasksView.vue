@@ -5,7 +5,7 @@
         <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_center') }}</h1>
         <div class="flex gap-2">
           <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('tasks_refresh') }}</button>
-          <button type="button" class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]" @click="router.push('/tasks/create')">{{ t('tasks_arrange') }}</button>
+          <button type="button" class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]" @click="windowManager.open('task-create')">{{ t('tasks_arrange') }}</button>
         </div>
       </div>
 
@@ -91,11 +91,9 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { on } from '../ws.js';
 import { useI18n } from '../i18n/index.js';
-
-const router = useRouter();
+import { windowManager } from '../stores/windowManager.js';
 const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);
@@ -134,7 +132,7 @@ const loadAll = async () => {
   }
 };
 
-const openTask = (id) => { if (id) router.push(`/task/${id}`); };
+const openTask = (id) => { if (id) windowManager.open('task-detail', { id }); };
 
 const toggleSchedule = async (s) => {
   try {

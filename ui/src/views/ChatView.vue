@@ -2,10 +2,10 @@
   <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#1a1410] font-['Georgia','PingFang_SC',serif]">
     <!-- 左侧对话列表 -->
     <div class="flex w-56 shrink-0 flex-col border-r border-[#2a1e14] bg-[#1e1610]">
-      <div class="flex items-center justify-between border-b border-[#2a1e14] px-3 py-2.5">
-        <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_sidebar_chat') }}</span>
-        <button class="cursor-pointer rounded-lg border-none bg-transparent p-1.5 text-[#8a7860] transition-colors hover:bg-[rgba(200,160,96,0.1)] hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
-          <Plus class="h-4 w-4" />
+      <div class="border-b border-[#2a1e14] px-3 py-2.5">
+        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-[#3a2818] bg-[rgba(200,160,96,0.08)] px-3 py-2 text-[13px] text-[#c8a060] transition-colors hover:bg-[rgba(200,160,96,0.15)]" @click="newChat">
+          <Plus class="h-3.5 w-3.5" />
+          {{ t('chat_new_title') }}
         </button>
       </div>
       <div class="flex-1 overflow-y-auto px-1.5 py-1.5 [scrollbar-width:thin]">
@@ -14,7 +14,7 @@
     </div>
 
     <!-- 右侧聊天区 -->
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#1a1410] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(255,255,255,0.02)_28px,rgba(255,255,255,0.02)_29px)]">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] dark:bg-[#1a1410] dark:bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(255,255,255,0.02)_28px,rgba(255,255,255,0.02)_29px)]">
     <div class="flex min-h-0 flex-1 flex-col">
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar]:w-1.5 dark:[&::-webkit-scrollbar-thumb]:bg-white/10" @scroll="onScroll">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">

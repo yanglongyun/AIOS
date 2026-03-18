@@ -1,11 +1,6 @@
 <template>
-  <!-- 外层：embedded 无遮罩，弹出模式有遮罩 -->
-  <div
-    :class="embedded ? 'flex h-full w-full flex-col overflow-hidden bg-[#2e2014]' : 'fixed inset-0 z-[90] max-md:bg-[rgba(22,14,8,0.45)] max-md:backdrop-blur-[1px]'"
-    @click.self="$emit('close')"
-  >
-    <!-- 面板容器：embedded 填满父级，弹出模式绝对定位 -->
-    <div :class="embedded ? 'flex h-full w-full flex-col overflow-hidden' : 'absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]'">
+  <div class="fixed inset-0 z-[90] max-md:bg-[rgba(22,14,8,0.45)] max-md:backdrop-blur-[1px]" @click.self="$emit('close')">
+    <div class="absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
       <!-- 顶栏 -->
       <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
         <div class="flex items-baseline gap-1.5">
@@ -159,8 +154,7 @@ import { chatPanel } from '../stores/chatPanel.js';
 import { useI18n } from '../i18n/index.js';
 
 const props = defineProps({
-  pendingMessage: { type: String, default: null },
-  embedded: { type: Boolean, default: false }
+  pendingMessage: { type: String, default: null }
 });
 
 const contextLabel = computed(() => chatPanel.state.context?.label || '');

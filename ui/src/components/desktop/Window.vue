@@ -15,9 +15,6 @@
       >
         <span class="flex-1 truncate text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
         <div class="flex items-center gap-0.5">
-          <button @click.stop="toggleSideChat" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent transition-all duration-100 hover:bg-black/[0.06]" :class="showSideChat ? 'text-[#c8a060]' : 'text-[#8a7a68] hover:text-[#5a4a38]'" title="AI 对话">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 .5l2.18 4.41L15.5 5.73l-3.75 3.66.89 5.16L8 12.18l-4.64 2.37.89-5.16L.5 5.73l5.32-.82z"/></svg>
-          </button>
           <button @click.stop="toggleMaximize" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent text-[#8a7a68] transition-all duration-100 hover:bg-black/[0.06] hover:text-[#5a4a38]" :title="win.state === 'maximized' ? '还原' : '最大化'">
             <svg v-if="win.state === 'maximized'" viewBox="0 0 12 12" width="12" height="12"><rect x="1.5" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M3.5 3V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H9.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
             <svg v-else viewBox="0 0 12 12" width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
@@ -46,55 +43,14 @@
       <div class="absolute top-[-4px] left-[-4px] h-3.5 w-3.5 cursor-nw-resize" @mousedown.stop.prevent="startResize($event, 'tl')" />
     </template>
 
-    <!-- 侧边聊天面板 -->
-    <div
-      v-if="showSideChat"
-      class="side-chat fixed flex flex-col overflow-hidden rounded-lg"
-      :style="sideChatStyle"
-      @mousedown.stop
-    >
-      <ChatPanel embedded @close="showSideChat = false" />
-    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { windowManager } from '../../stores/windowManager.js';
-import ChatPanel from '../ChatPanel.vue';
 
 const props = defineProps({ win: { type: Object, required: true } });
-
-const showSideChat = ref(false);
-
-function toggleSideChat() {
-  showSideChat.value = !showSideChat.value;
-}
-
-const sideChatStyle = computed(() => {
-  const w = props.win;
-  const panelW = 320;
-  const gap = 8;
-  let x, y, h;
-
-  if (w.state === 'maximized') {
-    x = window.innerWidth - panelW - gap;
-    y = 36 + gap;
-    h = window.innerHeight - 36 - gap * 2;
-  } else {
-    const rightSpace = window.innerWidth - (w.x + w.w);
-    x = rightSpace > panelW + gap * 2 ? w.x + w.w + gap : w.x - panelW - gap;
-    x = Math.max(gap, x);
-    y = w.y;
-    h = w.h;
-  }
-
-  return {
-    left: x + 'px', top: y + 'px',
-    width: panelW + 'px', height: h + 'px',
-    zIndex: w.zIndex + 1
-  };
-});
 
 const windowStyle = computed(() => {
   const w = props.win;
@@ -209,9 +165,4 @@ function stopResize() {
   background: #e04040;
 }
 
-.side-chat {
-  border: 1px solid #3a2010;
-  background: #2e2014;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-}
 </style>

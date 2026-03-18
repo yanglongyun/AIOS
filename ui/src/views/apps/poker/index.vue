@@ -14,7 +14,7 @@
       :suit-icon="suitIcon"
       :rank-label="rankLabel"
     />
-    <div class="relative z-10 -mt-4 flex w-full justify-center px-4 pb-6">
+    <div class="relative z-10 -mt-4 pb-6">
       <PokerControlPanel
         :last-action-text="lastActionText"
         :game="game"

@@ -1,6 +1,6 @@
 <template>
   <button
-    class="task-fab fixed right-5 top-5 z-[200] flex h-10 w-10 cursor-pointer items-center justify-center rounded-[10px] border-none text-[#5a4a38] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90"
+    class="task-fab fixed right-5 top-5 z-[5] flex h-10 w-10 cursor-pointer items-center justify-center rounded-[10px] border-none text-[#5a4a38] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90"
     @click="togglePanel"
   >
     <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 2"/></svg>

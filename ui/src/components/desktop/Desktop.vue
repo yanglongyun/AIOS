@@ -109,7 +109,7 @@ defineExpose({ setWallpaper, wallpaper: wallpaperId });
 /* grid 纵向排列 — Tailwind 不支持 grid-auto-flow: column */
 .desktop-icons {
   display: grid;
-  grid-template-columns: repeat(2, 80px);
+  grid-template-columns: repeat(auto-fill, 80px);
   grid-template-rows: repeat(auto-fill, 90px);
   grid-auto-flow: column;
   gap: 6px 16px;

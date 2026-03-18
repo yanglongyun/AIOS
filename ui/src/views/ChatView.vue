@@ -303,7 +303,7 @@ const buildChatTitleFromFirstMessage = (text = '') => {
 };
 
 const createNewChat = async (title = t('chat_new_title')) => {
-  const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
+  const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
   hasMore.value = false;
@@ -414,7 +414,7 @@ const toDataUrl = (file) => new Promise((resolve, reject) => {
 
 const uploadSingleFile = async (file) => {
   const dataUrl = await toDataUrl(file);
-  const res = await request('/api/files/upload', {
+  const res = await request('/aios/api/files/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: file.name, data: dataUrl, dir: 'files/uploads/chat' })

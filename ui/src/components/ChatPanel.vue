@@ -279,7 +279,7 @@ const buildChatTitleFromFirstMessage = (text = '') => {
 };
 
 const createNewChat = async (title = t('chat_new_title')) => {
-  const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, scene: contextScene.value }) });
+  const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, scene: contextScene.value }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
   hasMore.value = false;

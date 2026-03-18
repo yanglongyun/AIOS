@@ -150,7 +150,7 @@ const stopTask = async () => {
   stopping.value = true;
   error.value = '';
   try {
-    await request('/api/task/stop', {
+    await request('/aios/api/task/stop', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: taskId })

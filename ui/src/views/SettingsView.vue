@@ -162,7 +162,7 @@ const onProviderChange = (nextProvider) => {
 };
 
 const fetchSettings = async () => {
-  const data = await request('/api/settings');
+  const data = await request('/aios/api/settings');
   provider.value = data.provider || 'openai';
   language.value = data.language === 'en' ? 'en' : locale.value;
   setLocale(language.value);
@@ -183,7 +183,7 @@ const fetchSettings = async () => {
 };
 
 const fetchMe = async () => {
-  const data = await request('/api/auth/me');
+  const data = await request('/aios/api/auth/me');
   accountUsername.value = data?.user?.username || '';
 };
 
@@ -206,7 +206,7 @@ const save = async () => {
     toolResultMaxChars.value = maxChars;
     toolMaxRounds.value = maxRounds;
 
-    await request('/api/settings', {
+    await request('/aios/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -244,7 +244,7 @@ const changePassword = async () => {
       throw new Error(t('settings_password_mismatch'));
     }
 
-    await request('/api/auth/password', {
+    await request('/aios/api/auth/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -265,7 +265,7 @@ const changePassword = async () => {
 
 const logout = async () => {
   try {
-    await request('/api/auth/logout', {
+    await request('/aios/api/auth/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });

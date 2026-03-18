@@ -22,19 +22,13 @@ AIOS 是一个由 AI 驱动的个人操作系统原型：
 ### Linux (Ubuntu/Debian)
 
 ```bash
-curl -fsSL https://aios.valueriver.com/install-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | bash
 ```
 
 ### macOS
 
 ```bash
-curl -fsSL https://aios.valueriver.com/install-macos.sh | bash
-```
-
-### Windows (PowerShell)
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb https://aios.valueriver.com/install-windows.ps1 | iex"
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | bash
 ```
 
 安装完成后，打开：
@@ -74,16 +68,18 @@ aios help       # 查看帮助
 
 ## 6. Web 端模块说明
 
-主界面左侧导航除“聊天、历史”外，还包含以下模块：
-- 任务（`/tasks`）：查看运行中任务、历史任务；进入任务详情；创建定时/循环任务。
-- 文件（`/files`）：浏览与管理系统文件。
-- 技能（`/skills`）：查看可用技能并用于任务执行。
-- 应用区（如 `/notebook`、`/finance`、`/subscriber`、`/cryptobot`、`/reader`、`/poker`、`/fortune`、`/banana`）：进入各业务应用。
-- 创建应用（`/apps/create`）：通过对话描述需求，创建新应用。
-- 社区：打开社区链接（新窗口）。
-- 设置（`/settings`）：账号、模型与系统相关配置。
+主界面为桌面风格，所有应用以窗口形式打开，支持拖拽、缩放、最大化。
 
-另外，顶部还有任务面板和侧边聊天面板的快捷入口，用于快速查看任务与发起对话。
+双击桌面图标打开对应应用：
+- **对话**：与 AI 对话，左侧有历史记录列表与新对话按钮。
+- **任务**：查看运行中任务、历史任务；进入任务详情；通过「安排」按钮创建定时/循环任务。
+- **文件**：浏览与管理系统文件。
+- **技能**：查看已安装技能列表。
+- **创建应用**：在输入框中描述需求，点击「立即创建」，自动打开对话窗口并发送。
+- **设置**：账号、模型与系统相关配置。
+- 其余图标为内置业务应用（记事本、记账本、订阅机、炒币机、阅读器、炸金花、算一卦、老手机）。
+
+右上角为任务图标，点击查看当前任务状态。
 
 默认地址：
 - 主服务：`http://localhost:9700`

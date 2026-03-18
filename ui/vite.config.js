@@ -12,8 +12,8 @@ export default defineConfig({
     }
   },
   build: {
+    base: '/aios/',
     outDir: 'dist',
-    emptyOutDir: true,
-    assetsDir: 'aios/assets'
+    emptyOutDir: true
   }
 });

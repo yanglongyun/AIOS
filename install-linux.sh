@@ -80,7 +80,8 @@ EOF
 sudo tee /etc/systemd/system/${APP_NAME}-apps.service >/dev/null <<EOF
 [Unit]
 Description=AIOS - Apps Server
-After=network.target
+After=network.target ${APP_NAME}.service
+Requires=${APP_NAME}.service
 
 [Service]
 Type=simple

@@ -1,5 +1,10 @@
 import { db } from './client.js';
 
+const detectDefaultLanguage = () => {
+  const locale = String(Intl.DateTimeFormat().resolvedOptions().locale || '').toLowerCase();
+  return locale.startsWith('zh') ? 'zh' : 'en';
+};
+
 export const initDatabase = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
@@ -73,4 +78,9 @@ export const initDatabase = () => {
     );
 
   `);
+
+  db.prepare(`
+    INSERT OR IGNORE INTO settings (key, value)
+    VALUES ('language', ?)
+  `).run(detectDefaultLanguage());
 };

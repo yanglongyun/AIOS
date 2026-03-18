@@ -1,6 +1,6 @@
 <template>
-  <div class="passbook-bg flex h-full w-full items-center justify-center overflow-hidden font-['PingFang_SC','Microsoft_YaHei',sans-serif]">
-    <div class="passbook-container m-5 flex h-full w-full max-h-[900px] max-w-[1400px] rounded-xl shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+  <div class="passbook-bg flex h-full w-full items-center justify-center overflow-hidden px-5 py-8 font-['PingFang_SC','Microsoft_YaHei',sans-serif]">
+    <div class="passbook-container flex h-full w-full max-h-[900px] max-w-[1400px] rounded-xl shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
       <div class="passbook-cover relative flex w-[25px] shrink-0 items-center justify-center rounded-l-xl">
         <div class="cover-stripe absolute bottom-0 left-[5px] top-0 w-[10px] opacity-80"></div>
       </div>

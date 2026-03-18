@@ -1,53 +1,43 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { ensureAuth } from '../auth/session.js';
 import { getSetupStatus } from '../auth/setup.js';
-import ChatView from '../views/ChatView.vue';
-import HistoryView from '../views/HistoryView.vue';
+import { windowManager } from '../stores/windowManager.js';
 import LoginView from '../views/LoginView.vue';
 import WelcomeView from '../views/WelcomeView.vue';
-import NotebookView from '../views/apps/notebook/index.vue';
-import SettingsView from '../views/SettingsView.vue';
-import FinanceView from '../views/apps/finance/index.vue';
-import BananaView from '../views/apps/banana/index.vue';
-import CreateAppView from '../views/apps/createapp/index.vue';
-import SubscriberView from '../views/apps/subscriber/index.vue';
-import CryptobotView from '../views/apps/cryptobot/index.vue';
-import ReaderView from '../views/apps/reader/index.vue';
-import FortuneView from '../views/apps/fortune/index.vue';
-import PokerView from '../views/apps/poker/index.vue';
-import TaskDetailView from '../views/TaskDetailView.vue';
-import TaskCreateView from '../views/TaskCreateView.vue';
-import FilesView from '../views/FilesView.vue';
-import SkillsView from '../views/SkillsView.vue';
-import TasksView from '../views/TasksView.vue';
+
+const DesktopPlaceholder = { render: () => null };
 
 const routes = [
-  { path: '/', redirect: '/chat' },
+  { path: '/', component: DesktopPlaceholder },
   { path: '/welcome', component: WelcomeView },
   { path: '/login', component: LoginView },
-  { path: '/chat/:id?', component: ChatView },
-  { path: '/files', component: FilesView },
-  { path: '/skills', component: SkillsView },
-  { path: '/tasks', component: TasksView },
-  { path: '/tasks/create', component: TaskCreateView },
-  { path: '/task/:id', component: TaskDetailView },
-  { path: '/history', component: HistoryView },
-  { path: '/apps/create', component: CreateAppView },
-  { path: '/notebook', component: NotebookView },
-  { path: '/finance', component: FinanceView },
-  { path: '/banana', component: BananaView },
-  { path: '/subscriber', component: SubscriberView },
-  { path: '/cryptobot', component: CryptobotView },
-  { path: '/reader', component: ReaderView },
-  { path: '/fortune', component: FortuneView },
-  { path: '/poker', component: PokerView },
-  { path: '/settings', component: SettingsView }
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ];
 
 export const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+// 路由 → 窗口映射
+const routeMap = [
+  { pattern: /^\/chat(?:\/(.+))?$/, appId: 'chat', props: m => m[1] ? { id: m[1] } : {} },
+  { pattern: /^\/task\/(.+)$/, appId: 'task-detail', props: m => ({ id: m[1] }) },
+  { pattern: /^\/tasks\/create$/, appId: 'task-create' },
+  { pattern: /^\/tasks$/, appId: 'tasks' },
+  { pattern: /^\/files$/, appId: 'files' },
+  { pattern: /^\/skills$/, appId: 'skills' },
+  { pattern: /^\/notebook/, appId: 'notebook' },
+  { pattern: /^\/finance/, appId: 'finance' },
+  { pattern: /^\/subscriber/, appId: 'subscriber' },
+  { pattern: /^\/cryptobot/, appId: 'cryptobot' },
+  { pattern: /^\/reader/, appId: 'reader' },
+  { pattern: /^\/poker/, appId: 'poker' },
+  { pattern: /^\/fortune/, appId: 'fortune' },
+  { pattern: /^\/banana/, appId: 'banana' },
+  { pattern: /^\/settings$/, appId: 'settings' },
+  { pattern: /^\/apps\/create$/, appId: 'create-app' },
+];
 
 router.beforeEach(async (to) => {
   const setup = await getSetupStatus();
@@ -59,10 +49,24 @@ router.beforeEach(async (to) => {
 
   if (to.path === '/login') {
     const ok = await ensureAuth();
-    if (ok) return '/chat';
+    if (ok) return '/';
     return true;
   }
+
   const ok = await ensureAuth();
   if (!ok) return '/login';
+
+  // 桌面根路径直接通过
+  if (to.path === '/') return true;
+
+  // 拦截应用路由 → 打开窗口
+  for (const rule of routeMap) {
+    const match = to.path.match(rule.pattern);
+    if (match) {
+      windowManager.open(rule.appId, rule.props?.(match) || {});
+      return '/';
+    }
+  }
+
   return true;
 });

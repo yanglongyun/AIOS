@@ -1,5 +1,5 @@
 <template>
-  <div class="relative z-10 w-[600px] max-w-[96vw] rounded-2xl border border-[#4a3a28] bg-gradient-to-t from-[#1a1410] to-[#251d18] p-3 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+  <div class="relative z-10 w-[600px] max-w-[96vw] p-3">
     <div v-if="lastActionText && game?.status !== 'done'" class="mb-3 text-center text-[11px] tracking-wide text-[#9bc49b] sm:text-[12px]">{{ lastActionText }}</div>
     <div v-if="!game || game.status === 'done'" class="mt-1 flex flex-col items-center">
       <div class="mb-3 px-2 text-center text-[11px] leading-relaxed text-[#8a7a58]/80 sm:text-xs">

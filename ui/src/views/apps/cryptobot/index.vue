@@ -1,5 +1,5 @@
 <template>
-  <div class="cryptobot-page flex h-full flex-col items-center overflow-hidden font-['Courier_New',Courier,monospace]">
+  <div class="cryptobot-page flex h-full flex-col items-center overflow-y-auto font-['Courier_New',Courier,monospace]">
     <CryptobotMachinePanel
       :status="status"
       :error="error"

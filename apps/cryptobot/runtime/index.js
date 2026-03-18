@@ -7,6 +7,7 @@ let timer = null;
 let executing = false;
 
 const runBotOnce = async () => {
+  if (!getState().running) return;
   executing = true;
   try {
     await runTradingCycle();
@@ -40,8 +41,16 @@ export const startBot = (intervalSec) => {
 
   const scheduleNext = () => {
     timer = setTimeout(async () => {
+      if (!getState().running) {
+        timer = null;
+        return;
+      }
       try { await runBotOnce(); } catch (e) { onError(e); }
-      if (getState().running) scheduleNext();
+      if (getState().running) {
+        scheduleNext();
+      } else {
+        timer = null;
+      }
     }, sec * 1000);
   };
 
@@ -54,7 +63,6 @@ export const startBot = (intervalSec) => {
 
 export const stopBot = () => {
   if (timer) { clearTimeout(timer); timer = null; }
-  executing = false;
   return saveState({ ...getState(), running: 0 });
 };
 

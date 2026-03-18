@@ -17,5 +17,9 @@ export default {
   chat_send_error: 'Error: {message}',
   chat_attachment_only_prompt: 'Please read the attachments and summarize key points first',
   chat_file_read_failed: 'Failed to read file',
-  chat_upload_failed: 'Upload failed'
+  chat_upload_failed: 'Upload failed',
+  history_empty: 'No conversation history',
+  history_rename: 'Rename',
+  history_confirm_delete: 'Confirm delete?',
+  history_click_confirm: 'Click to confirm',
 };

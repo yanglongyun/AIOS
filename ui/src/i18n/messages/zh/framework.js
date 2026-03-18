@@ -1,7 +1,6 @@
 export default {
   app_sidebar_chat: '对话',
   app_sidebar_new_chat: '新对话',
-  app_sidebar_history: '历史',
   app_sidebar_apps: '应用',
   app_sidebar_create_app: '创建应用',
   app_sidebar_notebook: '记事本',

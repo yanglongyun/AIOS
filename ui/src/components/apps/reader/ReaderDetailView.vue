@@ -1,11 +1,10 @@
 <template>
   <template v-if="view === 'detail' && activeSession">
-    <div class="beam shrink-0 relative z-20 flex h-[50px] items-center justify-between px-5">
+    <div class="beam shrink-0 relative z-20 flex h-[42px] items-center justify-between px-5">
       <button class="relative top-0 flex cursor-pointer items-center gap-1 rounded-md border border-black/20 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.08))] px-3 py-1 pl-2 text-xs font-semibold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.4)] shadow-[0_2px_0_rgba(0,0,0,.25),inset_0_1px_0_rgba(255,240,200,.12)] transition-all hover:bg-[linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.04))] active:top-[2px] active:shadow-[0_0_0_rgba(0,0,0,.25),inset_0_1px_3px_rgba(0,0,0,.2)]" @click="$emit('back')">
         <svg class="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
         {{ t('reader_back') }}
       </button>
-      <span class="beam-title absolute left-1/2 max-w-[50%] -translate-x-1/2 truncate font-serif text-sm font-extrabold text-[#fff8ee] [text-shadow:0_1px_3px_rgba(0,0,0,.3)]">{{ activeSession.title }}</span>
       <button @click="$emit('reset')" :disabled="loading" class="relative top-0 cursor-pointer rounded-md border border-black/20 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.08))] px-2.5 py-1 text-[11px] font-semibold text-[#fff8ee] [text-shadow:0_1px_2px_rgba(0,0,0,.4)] shadow-[0_2px_0_rgba(0,0,0,.25),inset_0_1px_0_rgba(255,240,200,.12)] transition-all hover:bg-[linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.04))] active:top-[2px] active:shadow-[0_0_0_rgba(0,0,0,.25),inset_0_1px_3px_rgba(0,0,0,.2)] disabled:cursor-default disabled:opacity-40">{{ t('reader_reset') }}</button>
     </div>
     <div class="wood-dark flex-1 overflow-y-auto px-5 py-6 pb-10">

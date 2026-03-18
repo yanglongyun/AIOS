@@ -56,6 +56,7 @@ export const useTopPanels = () => {
     taskCount,
     hasPending,
     togglePanel,
+    markTasksRead,
     start,
     stop
   };

@@ -1,7 +1,6 @@
 export default {
   app_sidebar_chat: 'Chat',
   app_sidebar_new_chat: 'New Chat',
-  app_sidebar_history: 'History',
   app_sidebar_apps: 'Apps',
   app_sidebar_create_app: 'Create App',
   app_sidebar_notebook: 'Notebook',

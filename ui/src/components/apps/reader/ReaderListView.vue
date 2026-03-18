@@ -1,10 +1,5 @@
 <template>
   <template v-if="view === 'list'">
-    <div class="beam shrink-0 relative z-20 flex h-[50px] items-center justify-between px-5">
-      <span></span>
-      <span class="font-serif text-[15px] font-extrabold tracking-wider text-[#fff8ee] [text-shadow:0_1px_3px_rgba(0,0,0,.3)]">{{ t('reader_shelf_spaced') }}</span>
-      <span></span>
-    </div>
     <div class="wood-dark flex-1 overflow-y-auto">
       <div v-if="!sessions.length" class="flex h-full items-center justify-center text-[13px] text-[#9a8060]">{{ t('reader_empty') }}</div>
       <template v-else>

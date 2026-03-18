@@ -1,7 +1,6 @@
 import common from './common.js';
 import framework from './framework.js';
 import chat from './views/chat.js';
-import history from './views/history.js';
 import login from './views/login.js';
 import taskdetail from './views/taskdetail.js';
 import subscriber from './views/apps/subscriber.js';
@@ -20,7 +19,6 @@ export default {
   ...common,
   ...framework,
   ...chat,
-  ...history,
   ...login,
   ...taskdetail,
   ...subscriber,

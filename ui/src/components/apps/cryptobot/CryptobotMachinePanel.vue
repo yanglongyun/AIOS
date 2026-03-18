@@ -33,7 +33,7 @@
         <span class="text-[8px] tracking-[1px] text-[#3a4050]">{{ t('cryptobot_today') }}</span>
         <span
           class="text-[13px] font-black"
-          :class="status.equity.today_change >= 0 ? 'pnl-up' : 'pnl-down'"
+          :class="status.equity.today_change >= 0 ? 'text-[#00d455] [text-shadow:0_0_8px_rgba(0,212,85,0.3)]' : 'text-[#ff4d4d] [text-shadow:0_0_8px_rgba(255,77,77,0.3)]'"
         >{{ status.equity.today_change >= 0 ? '+' : '' }}{{ fmtNum(status.equity.today_change, 2) }} U</span>
       </div>
     </div>
@@ -43,7 +43,9 @@
       <div class="cycle-track flex-1 overflow-hidden rounded border border-[#21262d] bg-[#0a0e12]" style="height:8px;">
         <div
           class="h-full rounded transition-[width] duration-1000"
-          :class="status.state.running ? 'cycle-fill' : 'cycle-fill-off'"
+          :class="status.state.running
+            ? 'bg-[linear-gradient(90deg,#1aab40,#00ff64)] [box-shadow:0_0_8px_rgba(0,255,100,0.5),0_0_16px_rgba(0,255,100,0.2)]'
+            : 'bg-[#21262d]'"
           :style="{ width: `${countdownProgress}%` }"
         ></div>
       </div>
@@ -55,8 +57,10 @@
     </div>
 
     <button
-      class="panel-btn mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-2"
-      :class="panelOpen ? 'open' : ''"
+      class="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-2 transition-[background,border-color,transform,box-shadow] duration-200 [box-shadow:0_3px_0_#000,0_4px_6px_rgba(0,0,0,0.4)] active:translate-y-[3px] active:[box-shadow:0_0_0_#000]"
+      :class="panelOpen
+        ? 'border-[#1aab40] bg-[linear-gradient(180deg,#1a3020,#0e1a10)] [box-shadow:0_3px_0_#000,0_0_10px_rgba(26,171,64,0.15)]'
+        : 'border-[#3a4050] bg-[linear-gradient(180deg,#2a3038,#1e2430)] hover:bg-[linear-gradient(180deg,#323a44,#252d38)]'"
       @click="$emit('update:panelOpen', !panelOpen)"
     >
       <span class="panel-btn-icon text-[11px] transition-transform duration-300" :class="panelOpen ? 'rotate-90 text-[#00ff64]' : 'text-[#8090a0]'">▶</span>
@@ -139,7 +143,7 @@
         <hr class="my-2.5 border-t border-dashed border-[#21262d]" />
         <div class="flex items-center gap-3">
           <button
-            class="test-btn whitespace-nowrap rounded border border-[#30363d] px-5 py-2 text-[10px] font-black tracking-[1px] text-[#8090a0]"
+            class="whitespace-nowrap rounded border border-[#30363d] bg-[linear-gradient(180deg,#21262d,#161b22)] px-5 py-2 text-[10px] font-black tracking-[1px] text-[#8090a0] [box-shadow:0_3px_0_#000] transition-[transform,box-shadow,background] duration-150 active:translate-y-[3px] active:[box-shadow:0_0_0_#000] hover:bg-[linear-gradient(180deg,#2a3040,#1e2430)] hover:text-[#c9d1d9] disabled:cursor-not-allowed disabled:opacity-45"
             :disabled="testingEx"
             @click="$emit('testExchange')"
           >{{ testingEx ? t('cryptobot_testing') : t('cryptobot_test_connection') }}</button>
@@ -149,7 +153,10 @@
             :class="testResult.ok ? 'text-[#00d455]' : 'text-[#ff4d4d]'"
           >{{ testResult.ok ? t('cryptobot_test_success') : '✗ ' + testResult.msg }}</span>
           <div class="flex-1"></div>
-          <button class="save-btn rounded border border-[#1aab40] px-6 py-2 text-[10px] font-black tracking-[2px] text-[#00ff64]" @click="$emit('saveAll')">{{ t('cryptobot_save') }}</button>
+          <button
+            class="rounded border border-[#1aab40] bg-[linear-gradient(180deg,#1a3020,#0e1a10)] px-6 py-2 text-[10px] font-black tracking-[2px] text-[#00ff64] [box-shadow:0_4px_0_#000,0_0_10px_rgba(0,255,100,0.15)] transition-[transform,box-shadow,background] duration-150 active:translate-y-[4px] active:[box-shadow:0_0_0_#000] hover:bg-[linear-gradient(180deg,#205030,#1a3020)] hover:[box-shadow:0_4px_0_#000,0_0_16px_rgba(0,255,100,0.25)]"
+            @click="$emit('saveAll')"
+          >{{ t('cryptobot_save') }}</button>
         </div>
       </div>
     </div>
@@ -229,30 +236,8 @@ const { t } = useI18n();
 
 .balance-display { box-shadow: inset 0 3px 10px rgba(0,0,0,0.8), 0 0 8px rgba(0,255,100,0.05); }
 .balance-value { text-shadow: 0 0 12px rgba(0,255,100,0.5), 0 0 24px rgba(0,255,100,0.2); }
-.pnl-up { color: #00d455; text-shadow: 0 0 8px rgba(0,212,85,0.3); }
-.pnl-down { color: #ff4d4d; text-shadow: 0 0 8px rgba(255,77,77,0.3); }
 .trading-indicator { text-shadow: 0 0 8px rgba(0,255,100,0.5); animation: pulse-trading 1.5s infinite; }
 @keyframes pulse-trading { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-
-.cycle-fill {
-  background: linear-gradient(90deg, #1aab40, #00ff64);
-  box-shadow: 0 0 8px rgba(0,255,100,0.5), 0 0 16px rgba(0,255,100,0.2);
-}
-.cycle-fill-off { background: #21262d; }
-
-.panel-btn {
-  background: linear-gradient(180deg, #2a3038, #1e2430);
-  border-color: #3a4050;
-  box-shadow: 0 3px 0 #000, 0 4px 6px rgba(0,0,0,0.4);
-  transition: background 0.2s, border-color 0.2s, transform 0.08s, box-shadow 0.08s;
-}
-.panel-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #000; }
-.panel-btn:hover { background: linear-gradient(180deg, #323a44, #252d38); }
-.panel-btn.open {
-  background: linear-gradient(180deg, #1a3020, #0e1a10);
-  border-color: #1aab40;
-  box-shadow: 0 3px 0 #000, 0 0 10px rgba(26,171,64,0.15);
-}
 
 .expand-zone { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease; }
 .expand-zone.open { max-height: 45vh; opacity: 1; }
@@ -294,21 +279,4 @@ const { t } = useI18n();
 .exchange-input::placeholder { color: #2a3040; font-size: 10px; }
 .exchange-input:focus { border-bottom-color: #1aab40; color: #e0d0a0; }
 .field-block { box-shadow: inset 0 2px 6px rgba(0,0,0,0.6); }
-
-.test-btn {
-  background: linear-gradient(180deg, #21262d, #161b22);
-  box-shadow: 0 3px 0 #000;
-  transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
-}
-.test-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #000; }
-.test-btn:hover { background: linear-gradient(180deg, #2a3040, #1e2430); color: #c9d1d9; }
-.test-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-.save-btn {
-  background: linear-gradient(180deg, #1a3020, #0e1a10);
-  box-shadow: 0 4px 0 #000, 0 0 10px rgba(0,255,100,0.15);
-  transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
-}
-.save-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #000; }
-.save-btn:hover { background: linear-gradient(180deg, #205030, #1a3020); box-shadow: 0 4px 0 #000, 0 0 16px rgba(0,255,100,0.25); }
 </style>

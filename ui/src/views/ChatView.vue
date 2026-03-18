@@ -1,5 +1,20 @@
 <template>
-  <div class="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] font-['Georgia','PingFang_SC',serif] dark:bg-[#1a1410] dark:bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(255,255,255,0.02)_28px,rgba(255,255,255,0.02)_29px)]">
+  <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#1a1410] font-['Georgia','PingFang_SC',serif]">
+    <!-- 左侧对话列表 -->
+    <div class="flex w-56 shrink-0 flex-col border-r border-[#2a1e14] bg-[#1e1610]">
+      <div class="flex items-center justify-between border-b border-[#2a1e14] px-3 py-2.5">
+        <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_sidebar_chat') }}</span>
+        <button class="cursor-pointer rounded-lg border-none bg-transparent p-1.5 text-[#8a7860] transition-colors hover:bg-[rgba(200,160,96,0.1)] hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
+          <Plus class="h-4 w-4" />
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-1.5 py-1.5 [scrollbar-width:thin]">
+        <HistoryPanel ref="historyRef" :active-id="currentConversationId" @open-chat="openChatFromHistory" />
+      </div>
+    </div>
+
+    <!-- 右侧聊天区 -->
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#1a1410] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(255,255,255,0.02)_28px,rgba(255,255,255,0.02)_29px)]">
     <div class="flex min-h-0 flex-1 flex-col">
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar]:w-1.5 dark:[&::-webkit-scrollbar-thumb]:bg-white/10" @scroll="onScroll">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
@@ -144,6 +159,7 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -151,10 +167,12 @@
 import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
-import { ArrowUp, ChevronRight, Paperclip, Square } from 'lucide-vue-next';
+import { ArrowUp, ChevronRight, Paperclip, Plus, Square } from 'lucide-vue-next';
+import HistoryPanel from '../components/chat/History.vue';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
 import { useI18n } from '../i18n/index.js';
 
+const viewProps = defineProps({ id: { type: String, default: null } });
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -180,6 +198,7 @@ const streamingAssistantKey = ref('');
 const dragActive = ref(false);
 const dragCounter = ref(0);
 const seenKeys = ref(new Set());
+const historyRef = ref(null);
 const unsubs = [];
 
 const saveLastChatId = (id) => { if (id) localStorage.setItem(LAST_CHAT_KEY, String(id)); };
@@ -354,7 +373,7 @@ const handleSend = async () => {
     send({ type: 'message', conversationId: id, content, attachments: outgoingAttachments });
     input.value = '';
     pendingFiles.value = [];
-    nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
+    nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); historyRef.value?.fetchChats(); });
   }).catch((e) => {
     messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) });
     busy.value = false;
@@ -362,6 +381,23 @@ const handleSend = async () => {
 };
 
 const stopBusy = () => { send({ type: 'abort', conversationId: currentConversationId.value }); busy.value = false; };
+
+const newChat = () => {
+  resetState();
+  router.replace('/chat').catch(() => {});
+};
+
+const openChatFromHistory = (chat) => {
+  const id = chat.conversation_id;
+  if (id === currentConversationId.value) return;
+  currentConversationId.value = id;
+  saveLastChatId(id);
+  messages.value = [];
+  hasMore.value = false;
+  loadedOffset.value = 0;
+  seenKeys.value = new Set();
+  loadChatPage(id, 0, 20).then(() => scrollToBottom(false)).catch(() => resetState());
+};
 
 const openFilePicker = () => { uploadError.value = ''; fileInput.value?.click(); };
 const removePendingFile = (idx) => { pendingFiles.value.splice(idx, 1); };
@@ -413,9 +449,9 @@ const onDragLeave = (event) => { if (!hasDraggedFiles(event)) return; dragCounte
 const onDropFiles = async (event) => { dragCounter.value = 0; dragActive.value = false; if (busy.value) return; await appendFiles(Array.from(event.dataTransfer?.files || [])); };
 
 // 路由驱动的会话切换
-watch(() => route.fullPath, () => {
-  if (!route.path.startsWith('/chat')) return;
-  const id = route.params.id ? String(route.params.id) : null;
+watch([() => viewProps.id, () => route.fullPath], () => {
+  if (!viewProps.id && !route.path.startsWith('/chat')) return;
+  const id = viewProps.id || (route.params.id ? String(route.params.id) : null);
   if (id === currentConversationId.value) return;
   if (!id) { resetState(); return; }
   currentConversationId.value = id;

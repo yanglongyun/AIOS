@@ -8,7 +8,7 @@
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div v-if="loading" class="py-8 text-center text-xs text-[#a0907a]">...</div>
         <div v-else-if="skills.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          暂无技能，将 SKILL.md 放入 skills/ 目录即可
+          暂无技能，在 skills/ 下新建子目录，目录内放 SKILL.md 即可
         </div>
         <div v-else class="space-y-2">
           <div

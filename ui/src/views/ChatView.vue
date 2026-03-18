@@ -172,7 +172,10 @@ import HistoryPanel from '../components/chat/History.vue';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
 import { useI18n } from '../i18n/index.js';
 
-const viewProps = defineProps({ id: { type: String, default: null } });
+const viewProps = defineProps({
+  id: { type: String, default: null },
+  pendingMessage: { type: String, default: null }
+});
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -478,6 +481,10 @@ watch(() => messages.value.length, (newLen, oldLen) => {
 
 onMounted(() => {
   if (wsStatus.value === 'disconnected') connect();
+  if (viewProps.pendingMessage) {
+    input.value = viewProps.pendingMessage;
+    nextTick(() => handleSend());
+  }
 
   unsubs.push(on('delta', (data) => {
     if (data.conversationId !== currentConversationId.value) return;

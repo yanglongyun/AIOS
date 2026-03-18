@@ -46,11 +46,27 @@ const proxyAppsRequest = async (req, res, url) => {
   const hasBody = method !== 'GET' && method !== 'HEAD';
   const body = hasBody ? await readRawBody(req) : undefined;
 
-  const upstream = await fetch(target, {
-    method,
-    headers,
-    body
-  });
+  let upstream;
+  try {
+    upstream = await fetch(target, {
+      method,
+      headers,
+      body
+    });
+  } catch (error) {
+    const code = String(error?.code || error?.cause?.code || '').trim();
+    const detail = String(error?.cause?.message || error?.message || 'unknown fetch error').trim();
+    const summary = `[apps-proxy] ${method} ${url.pathname}${url.search} -> ${target} failed`
+      + (code ? ` (${code})` : '')
+      + `: ${detail}`;
+    const wrapped = new Error(summary);
+    wrapped.code = code || 'APPS_PROXY_FETCH_FAILED';
+    wrapped.target = target;
+    wrapped.method = method;
+    wrapped.path = `${url.pathname}${url.search}`;
+    wrapped.detail = detail;
+    throw wrapped;
+  }
 
   const buf = Buffer.from(await upstream.arrayBuffer());
   const outHeaders = {};
@@ -84,8 +100,22 @@ export const httpServer = createServer(async (req, res) => {
     try {
       await proxyAppsRequest(req, res, url);
     } catch (error) {
+      const code = String(error?.code || 'APPS_PROXY_ERROR').trim();
+      const detail = String(error?.detail || error?.message || 'unknown error').trim();
+      const target = String(error?.target || `http://127.0.0.1:${APPS_PORT}`).trim();
+      const method = String(error?.method || req.method || 'GET').trim();
+      const path = String(error?.path || `${url.pathname}${url.search}`).trim();
+      console.error('[apps-proxy]', { code, method, path, target, detail });
       res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ success: false, message: `Apps service unavailable: ${error.message}` }));
+      res.end(JSON.stringify({
+        success: false,
+        message: `Apps service unavailable: ${method} ${path} -> ${target} (${code}) ${detail}`,
+        code,
+        method,
+        path,
+        target,
+        detail
+      }));
     }
     return;
   }

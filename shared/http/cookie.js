@@ -8,7 +8,15 @@ export const parseCookieHeader = (cookieHeader = '') => {
     const key = part.slice(0, index).trim();
     const value = part.slice(index + 1).trim();
     if (!key) continue;
-    result[key] = decodeURIComponent(value);
+    // Keep the first value for duplicated cookie keys.
+    // Browsers typically send longer-path cookies earlier; overriding can pick stale tokens.
+    if (result[key] !== undefined) continue;
+    try {
+      result[key] = decodeURIComponent(value);
+    } catch {
+      // Ignore malformed cookie fragments instead of breaking whole auth parsing.
+      continue;
+    }
   }
   return result;
 };

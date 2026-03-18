@@ -12,7 +12,7 @@ export const useTopPanels = () => {
 
   const fetchData = async () => {
     try {
-      const reqRes = await fetch('/api/task?limit=20');
+      const reqRes = await fetch('/aios/api/task?limit=20');
       const taskData = await reqRes.json();
       tasks.value = Array.isArray(taskData) ? taskData : [];
     } catch {}

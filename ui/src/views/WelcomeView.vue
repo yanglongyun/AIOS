@@ -195,7 +195,7 @@ const createAdmin = async () => {
   }
   pending.value = true;
   try {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch('/aios/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -231,7 +231,7 @@ const saveModelAndTest = async () => {
   error.value = '';
   pending.value = true;
   try {
-    const saveRes = await fetch('/api/settings', {
+    const saveRes = await fetch('/aios/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -250,7 +250,7 @@ const saveModelAndTest = async () => {
 
     setLocale(model.value.language);
     const isZh = model.value.language === 'zh';
-    const testRes = await fetch('/api/task/create/instant', {
+    const testRes = await fetch('/aios/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

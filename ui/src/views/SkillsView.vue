@@ -35,7 +35,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const res = await fetch('/api/skills/list');
+    const res = await fetch('/aios/api/skills/list');
     const data = await res.json();
     skills.value = data.success ? data.data : [];
   } catch { /* ignore */ }

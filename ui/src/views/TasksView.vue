@@ -112,13 +112,13 @@ const tabs = computed(() => ([
 const scheduleTypeLabel = (s) => s.cron ? t('tasks_repeat') : t('tasks_once');
 
 const loadTasks = async () => {
-  const res = await fetch('/api/task?limit=200');
+  const res = await fetch('/aios/api/task?limit=200');
   const data = await res.json().catch(() => []);
   tasks.value = Array.isArray(data) ? data : [];
 };
 
 const loadSchedules = async () => {
-  const res = await fetch('/api/task/schedule?limit=200');
+  const res = await fetch('/aios/api/task/schedule?limit=200');
   const data = await res.json().catch(() => []);
   schedules.value = Array.isArray(data) ? data : [];
 };
@@ -136,7 +136,7 @@ const openTask = (id) => { if (id) windowManager.open('task-detail', { id }); };
 
 const toggleSchedule = async (s) => {
   try {
-    await fetch('/api/task/schedule/update', {
+    await fetch('/aios/api/task/schedule/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: s.id, enabled: s.enabled ? 0 : 1 })
@@ -149,7 +149,7 @@ const toggleSchedule = async (s) => {
 
 const removeSchedule = async (id) => {
   try {
-    await fetch('/api/task/schedule/delete', {
+    await fetch('/aios/api/task/schedule/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })

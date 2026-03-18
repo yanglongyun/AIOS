@@ -49,7 +49,7 @@ const props = defineProps({
   }
 });
 const BOOKS_PER_SHELF = 4;
-const API_BASE = '/apps/reader';
+const API_BASE = '/aios/apps/reader';
 
 const validViews = new Set(['list', 'detail', 'create']);
 const view = ref(validViews.has(props.initialView) ? props.initialView : 'list');

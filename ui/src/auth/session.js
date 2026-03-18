@@ -8,7 +8,7 @@ export const clearAuthCache = () => {
 
 export const checkAuth = async () => {
   try {
-    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    const res = await fetch('/aios/api/auth/me', { credentials: 'include' });
     const data = await res.json();
     authed = Boolean(res.ok && data?.success);
   } catch {

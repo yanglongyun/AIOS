@@ -46,7 +46,7 @@ import FinanceHeader from '../../../components/apps/finance/FinanceHeader.vue';
 import FinanceLedgerTable from '../../../components/apps/finance/FinanceLedgerTable.vue';
 
 const { locale, t } = useI18n();
-const API_BASE = '/apps/finance';
+const API_BASE = '/aios/apps/finance';
 
 const now = new Date();
 const month = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);

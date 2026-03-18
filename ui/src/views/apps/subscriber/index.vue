@@ -38,7 +38,7 @@ import SubscriberArticlePanel from '../../../components/apps/subscriber/Subscrib
 import SubscriberControlPanel from '../../../components/apps/subscriber/SubscriberControlPanel.vue';
 
 const { locale, t } = useI18n();
-const API_BASE = '/apps/subscriber';
+const API_BASE = '/aios/apps/subscriber';
 
 // 状态
 const focus = ref('');

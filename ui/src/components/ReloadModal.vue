@@ -96,7 +96,7 @@ const doReload = async () => {
   errorMsg.value = '';
 
   try {
-    const res = await fetch('/api/system/reload', {
+    const res = await fetch('/aios/api/system/reload', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -133,7 +133,7 @@ const pollHealth = () => {
         return;
       }
       try {
-        const res = await fetch('/api/health', { credentials: 'include' });
+        const res = await fetch('/aios/api/health', { credentials: 'include' });
         if (res.ok) { resolve(); return; }
       } catch {}
       setTimeout(check, 1000);

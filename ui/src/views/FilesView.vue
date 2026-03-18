@@ -143,7 +143,7 @@ const fullBreadcrumbs = computed(() => {
 const loadDir = async (dir = '') => {
   loading.value = true;
   try {
-    const res = await fetch(`/api/files/list?dir=${encodeURIComponent(dir)}`);
+    const res = await fetch(`/aios/api/files/list?dir=${encodeURIComponent(dir)}`);
     const data = await res.json();
     items.value = (data.data || []).map(f => ({ ...f, _deleting: false }));
     currentDir.value = dir;
@@ -198,7 +198,7 @@ const confirmDelete = async (item) => {
     setTimeout(() => { item._deleting = false; }, 2000);
     return;
   }
-  await fetch('/api/files/delete', {
+  await fetch('/aios/api/files/delete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: filePath(item) })
@@ -215,7 +215,7 @@ const uploadFiles = async (fileList) => {
     const reader = new FileReader();
     await new Promise((resolve) => {
       reader.onload = async () => {
-        await fetch('/api/files/upload', {
+        await fetch('/aios/api/files/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -173,7 +173,7 @@ Return JSON only:
   const userText = lang === 'en'
     ? `My question: ${question.value.trim()}\nHexagram: ${name}\nLines (bottom to top): ${yaoDesc}`
     : `我的问题：${question.value.trim()}\n所得卦象：${name}\n爻象（初爻到上爻）：${yaoDesc}`;
-  const data = await request('/apps/fortune/divine', {
+  const data = await request('/aios/apps/fortune/divine', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -197,7 +197,7 @@ Return JSON only:
 };
 
 const loadHistory = async () => {
-  const data = await request('/apps/fortune/list?page=1&pageSize=30');
+  const data = await request('/aios/apps/fortune/list?page=1&pageSize=30');
   if (data.success) history.value = data.items;
 };
 

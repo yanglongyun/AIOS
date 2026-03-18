@@ -14,7 +14,7 @@ export const wsStatus = ref('disconnected'); // connected | disconnected | conne
 const getDefaultWsUrl = () => {
   const params = new URLSearchParams(location.search);
   const token = params.get('token');
-  const base = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`;
+  const base = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/aios/ws`;
   return token ? `${base}?token=${token}` : base;
 };
 

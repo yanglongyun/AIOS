@@ -32,7 +32,7 @@ import BananaControls from '../../../components/apps/banana/BananaControls.vue';
 import BananaScreen from '../../../components/apps/banana/BananaScreen.vue';
 
 const { t, locale } = useI18n();
-const API_BASE = '/apps/banana';
+const API_BASE = '/aios/apps/banana';
 
 const currentIndex = ref(0);
 const customOption = ref('');

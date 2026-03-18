@@ -88,7 +88,7 @@ const submitSchedule = async () => {
   const body = { name: form.name.trim(), prompt: form.prompt.trim() };
   if (form.execType === 'once') body.run_at = form.runAt;
   if (form.execType === 'repeat') body.cron = form.cron.trim();
-  const res = await fetch('/api/task/schedule/create', {
+  const res = await fetch('/aios/api/task/schedule/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)

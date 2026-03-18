@@ -45,7 +45,7 @@ import NotebookEditorView from '../../../components/apps/notebook/NotebookEditor
 import NotebookListView from '../../../components/apps/notebook/NotebookListView.vue';
 
 const { locale, t } = useI18n();
-const API_BASE = '/apps/notebook';
+const API_BASE = '/aios/apps/notebook';
 const PAGE_SIZE = 12;
 
 const view = ref('list');

@@ -14,7 +14,7 @@ export const broadcast = (msg) => {
 };
 
 export const setupWebSocket = (httpServer) => {
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  const wss = new WebSocketServer({ server: httpServer, path: '/aios/ws' });
 
   wss.on('connection', (ws, req) => {
     const user = getAuthUser(req);

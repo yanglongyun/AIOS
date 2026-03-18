@@ -40,7 +40,7 @@ import { chatPanel } from '../../../stores/chatPanel.js';
 import CryptobotMachinePanel from '../../../components/apps/cryptobot/CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from '../../../components/apps/cryptobot/CryptobotDecisionPaper.vue';
 
-const API = '/apps/cryptobot';
+const API = '/aios/apps/cryptobot';
 const { t } = useI18n();
 
 const INTERVALS = [1, 2, 5, 10, 15, 30, 60];

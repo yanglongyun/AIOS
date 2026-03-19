@@ -3,42 +3,51 @@
 
     <!-- 顶栏 -->
     <div class="flex h-[52px] shrink-0 items-center border-b border-[#e0d0b8] bg-[rgba(250,245,238,0.97)] px-4 backdrop-blur-xl">
-      <button v-if="openedApp" class="mr-3 text-[#5a3e28]" @click="closeApp">
-        <span class="text-[20px]">←</span>
-      </button>
-      <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ topTitle }}</div>
-
-      <!-- 头像按钮 -->
-      <div class="relative" @click.stop>
+      <!-- 应用打开状态：左侧图标+名称，右侧关闭按钮 -->
+      <template v-if="openedApp">
+        <span class="mr-2 text-[22px] leading-none">{{ openedAppIcon }}</span>
+        <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ topTitle }}</div>
         <button
-          class="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-[rgba(200,160,96,0.22)] text-[13px] font-semibold text-[#5a3e28]"
-          @click="userMenuOpen = !userMenuOpen"
-        >{{ usernameInitial }}</button>
-
-        <!-- 下拉菜单 -->
-        <div
-          v-if="userMenuOpen"
-          class="absolute right-0 top-[38px] z-[300] w-[140px] overflow-hidden rounded-[12px] border border-[#e0d0b8] bg-[rgba(255,252,248,0.98)] shadow-[0_8px_24px_rgba(90,62,40,0.14)] backdrop-blur-xl"
+          class="flex h-[32px] w-[32px] items-center justify-center rounded-full text-[#7a6a58] transition-colors active:bg-[rgba(200,160,96,0.12)]"
+          @click="closeApp"
         >
-          <div class="border-b border-[#f0e4d0] px-3.5 py-2.5">
-            <p class="truncate text-[11px] text-[#9a8870]">{{ username || '...' }}</p>
+          <X class="h-[18px] w-[18px]" />
+        </button>
+      </template>
+
+      <!-- 默认状态：标题 + 头像菜单 -->
+      <template v-else>
+        <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">AIOS</div>
+        <div class="relative" @click.stop>
+          <button
+            class="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-[rgba(200,160,96,0.22)] text-[13px] font-semibold text-[#5a3e28]"
+            @click="userMenuOpen = !userMenuOpen"
+          >{{ usernameInitial }}</button>
+
+          <div
+            v-if="userMenuOpen"
+            class="absolute right-0 top-[38px] z-[300] w-[140px] overflow-hidden rounded-[12px] border border-[#e0d0b8] bg-[rgba(255,252,248,0.98)] shadow-[0_8px_24px_rgba(90,62,40,0.14)] backdrop-blur-xl"
+          >
+            <div class="border-b border-[#f0e4d0] px-3.5 py-2.5">
+              <p class="truncate text-[11px] text-[#9a8870]">{{ username || '...' }}</p>
+            </div>
+            <button
+              class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#3a2a18] transition-colors active:bg-[rgba(200,160,96,0.1)]"
+              @click="doRestart"
+            >
+              <RotateCcw class="h-[14px] w-[14px] text-[#7a6a58]" />
+              重启系统
+            </button>
+            <button
+              class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#c04040] transition-colors active:bg-[rgba(200,80,50,0.06)]"
+              @click="doLogout"
+            >
+              <LogOut class="h-[14px] w-[14px]" />
+              退出登录
+            </button>
           </div>
-          <button
-            class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#3a2a18] transition-colors active:bg-[rgba(200,160,96,0.1)]"
-            @click="doRestart"
-          >
-            <RotateCcw class="h-[14px] w-[14px] text-[#7a6a58]" />
-            重启系统
-          </button>
-          <button
-            class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#c04040] transition-colors active:bg-[rgba(200,80,50,0.06)]"
-            @click="doLogout"
-          >
-            <LogOut class="h-[14px] w-[14px]" />
-            退出登录
-          </button>
         </div>
-      </div>
+      </template>
     </div>
 
     <!-- 内容区（全屏，无底部导航） -->
@@ -77,7 +86,7 @@
 <script setup>
 import { ref, computed, shallowRef, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { LogOut, RotateCcw } from 'lucide-vue-next';
+import { LogOut, RotateCcw, X } from 'lucide-vue-next';
 import { appRegistry } from '../desktop/apps.js';
 import { useI18n } from '../i18n/index.js';
 import { clearAuthCache } from '../auth/session.js';
@@ -118,13 +127,18 @@ async function doRestart() {
   } catch {}
 }
 
-// 顶栏标题
+// 顶栏标题 & 图标
 const topTitle = computed(() => {
   if (openedApp.value) {
     const app = appRegistry.find(a => a.id === openedApp.value.appId);
     return app ? t(app.name) : 'AIOS';
   }
   return 'AIOS';
+});
+
+const openedAppIcon = computed(() => {
+  if (!openedApp.value) return '';
+  return appRegistry.find(a => a.id === openedApp.value.appId)?.icon || '';
 });
 
 // 应用网格

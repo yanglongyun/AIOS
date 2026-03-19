@@ -6,13 +6,22 @@ APP_NAME="aios"
 APP_DIR="/opt/aios"
 LOCAL_PORT="9700"
 SERVICE_USER="$(id -un)"
+ENV_FILE="/etc/default/aios"
 
 if [ "$(uname -s)" != "Linux" ]; then
-  echo "install-linux.sh only supports Linux."
+  echo "install-linux-litellm.sh only supports Linux."
   exit 1
 fi
 if ! command -v apt-get >/dev/null 2>&1; then
   echo "Only Ubuntu/Debian is supported on Linux."
+  exit 1
+fi
+
+echo "[0/5] LiteLLM configuration..."
+read -rp "LITELLM_URL (e.g. http://localhost:4000): " LITELLM_URL
+read -rp "LITELLM_KEY: " LITELLM_KEY
+if [ -z "$LITELLM_URL" ] || [ -z "$LITELLM_KEY" ]; then
+  echo "LITELLM_URL and LITELLM_KEY are required."
   exit 1
 fi
 
@@ -58,6 +67,12 @@ export PATH="$NPM_GLOBAL_BIN:$PATH"
 echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
 
+sudo tee "$ENV_FILE" >/dev/null <<EOF
+LITELLM_URL=${LITELLM_URL}
+LITELLM_KEY=${LITELLM_KEY}
+EOF
+sudo chmod 600 "$ENV_FILE"
+
 sudo tee /etc/systemd/system/${APP_NAME}.service >/dev/null <<EOF
 [Unit]
 Description=AIOS - Main Server
@@ -65,6 +80,7 @@ After=network.target
 
 [Service]
 Type=simple
+EnvironmentFile=-${ENV_FILE}
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
 ExecStart=${NODE_BIN} server/index.js
@@ -85,6 +101,7 @@ Requires=${APP_NAME}.service
 
 [Service]
 Type=simple
+EnvironmentFile=-${ENV_FILE}
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
 ExecStart=${NODE_BIN} apps/index.js
@@ -151,6 +168,9 @@ sudo systemctl reload nginx
 
 echo
 echo "Done."
+echo
+echo "  LiteLLM URL: ${LITELLM_URL}"
+echo "  Env file:    ${ENV_FILE}"
 echo
 echo "  Main:  systemctl status ${APP_NAME}"
 echo "  Apps:  systemctl status ${APP_NAME}-apps"

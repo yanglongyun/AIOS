@@ -30,7 +30,7 @@
     <div class="relative min-h-0 flex-1 overflow-hidden">
 
       <!-- 打开的应用 -->
-      <div v-if="openedApp" class="absolute inset-0 overflow-hidden bg-white">
+      <div v-if="openedApp" class="absolute inset-0 flex flex-col overflow-hidden bg-white">
         <component :is="openedApp.component" v-bind="openedApp.props" />
       </div>
 

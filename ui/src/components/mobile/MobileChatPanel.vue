@@ -69,11 +69,15 @@ import { marked } from 'marked';
 import { connect, send, on, wsStatus, ensureConnected } from '../../ws.js';
 import { useI18n } from '../../i18n/index.js';
 
+const props = defineProps({
+  conversationId: { type: String, default: null }
+});
+
 const { t } = useI18n();
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
-const currentConversationId = ref(null);
+const currentConversationId = ref(props.conversationId);
 const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
@@ -183,14 +187,12 @@ watch(() => messages.value.length, (n, o) => {
 
 onMounted(async () => {
   if (wsStatus.value === 'disconnected') connect();
-  try {
-    const list = await request('/aios/api/chat/list');
-    if (list.length > 0) {
-      currentConversationId.value = list[0].conversation_id;
-      await loadPage(list[0].conversation_id);
+  if (currentConversationId.value) {
+    try {
+      await loadPage(currentConversationId.value);
       scrollToBottom(false);
-    }
-  } catch {}
+    } catch {}
+  }
 
   unsubs.push(on('delta', (data) => {
     if (data.conversationId !== currentConversationId.value) return;

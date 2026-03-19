@@ -5,8 +5,21 @@
     <div class="flex h-[52px] shrink-0 items-center border-b border-[#e0d0b8] bg-[rgba(250,245,238,0.97)] px-4 backdrop-blur-xl">
       <!-- 应用打开状态 -->
       <template v-if="openedApp">
-        <span class="mr-2 text-[22px] leading-none">{{ openedAppIcon }}</span>
-        <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ topTitle }}</div>
+        <!-- 二级页面：返回箭头 + 动态标题 -->
+        <template v-if="navOverride.back">
+          <button
+            class="mr-2 flex h-[32px] w-[32px] items-center justify-center rounded-full text-[#7a6a58] transition-colors active:bg-[rgba(200,160,96,0.12)]"
+            @click="navOverride.back"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="flex-1 truncate text-[15px] font-bold text-[#3a2a18]">{{ navOverride.title }}</div>
+        </template>
+        <!-- 默认：应用图标 + 应用名 -->
+        <template v-else>
+          <span class="mr-2 text-[22px] leading-none">{{ openedAppIcon }}</span>
+          <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ topTitle }}</div>
+        </template>
         <button
           class="flex h-[32px] w-[32px] items-center justify-center rounded-full text-[#7a6a58] transition-colors active:bg-[rgba(200,160,96,0.12)]"
           @click="closeApp"
@@ -89,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, computed, shallowRef, onMounted } from 'vue';
+import { ref, computed, shallowRef, onMounted, provide, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { LogOut, RotateCcw, X } from 'lucide-vue-next';
 import { appRegistry } from '../desktop/apps.js';
@@ -98,6 +111,14 @@ import { clearAuthCache } from '../auth/session.js';
 
 const { t } = useI18n();
 const router = useRouter();
+
+// 二级导航：子应用调用 setMobileNav(title, backFn) 更新顶栏
+const navOverride = reactive({ title: null, back: null });
+function setMobileNav(title, back) {
+  navOverride.title = title;
+  navOverride.back = back;
+}
+provide('mobileNav', setMobileNav);
 
 // 用户
 const username = ref('');
@@ -172,11 +193,16 @@ const openedApp = shallowRef(null);
 async function openApp(appId) {
   const app = appRegistry.find(a => a.id === appId);
   if (!app) return;
-  const mod = await app.load();
+  navOverride.title = null;
+  navOverride.back = null;
+  const loader = app.mobileLoad || app.load;
+  const mod = await loader();
   openedApp.value = { appId, component: mod.default, props: {} };
 }
 function closeApp() {
   openedApp.value = null;
+  navOverride.title = null;
+  navOverride.back = null;
 }
 
 onMounted(fetchMe);

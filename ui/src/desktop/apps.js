@@ -1,7 +1,9 @@
 export const appRegistry = [
   // 核心
   { id: 'chat', name: 'app_sidebar_chat', icon: '💬', iconClass: 'icon-chat',
-    load: () => import('../views/ChatView.vue'), defaultSize: { w: 900, h: 640 } },
+    load: () => import('../views/ChatView.vue'),
+    mobileLoad: () => import('../components/mobile/MobileChatView.vue'),
+    defaultSize: { w: 900, h: 640 } },
   { id: 'tasks', name: 'app_sidebar_tasks', icon: '✅', iconClass: 'icon-tasks',
     load: () => import('../views/TasksView.vue'), defaultSize: { w: 700, h: 500 } },
   { id: 'files', name: 'app_sidebar_files', icon: '📁', iconClass: 'icon-files',

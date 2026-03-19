@@ -103,13 +103,13 @@ async function doRestart() {
   if (restarting.value) return;
   restarting.value = true;
   try {
-    await fetch('/aios/api/system/reload', {
+    await fetch('/aios/api/system/reload/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ restart: 'server' })
     });
   } catch {}
-  setTimeout(() => { restarting.value = false; }, 3000);
+  restarting.value = false;
 }
 
 onMounted(() => {

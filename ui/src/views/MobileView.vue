@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-dvh flex-col overflow-hidden bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]">
+  <div class="flex h-dvh flex-col overflow-hidden bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]" @click="userMenuOpen = false">
 
     <!-- 顶栏 -->
     <div class="flex h-[52px] shrink-0 items-center border-b border-[#e0d0b8] bg-[rgba(250,245,238,0.97)] px-4 backdrop-blur-xl">
@@ -7,19 +7,50 @@
         <span class="text-[20px]">←</span>
       </button>
       <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ topTitle }}</div>
-      <span class="text-[13px] text-[#9a8870]">{{ clockTime }}</span>
+
+      <!-- 头像按钮 -->
+      <div class="relative" @click.stop>
+        <button
+          class="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-[rgba(200,160,96,0.22)] text-[13px] font-semibold text-[#5a3e28]"
+          @click="userMenuOpen = !userMenuOpen"
+        >{{ usernameInitial }}</button>
+
+        <!-- 下拉菜单 -->
+        <div
+          v-if="userMenuOpen"
+          class="absolute right-0 top-[38px] z-[300] w-[140px] overflow-hidden rounded-[12px] border border-[#e0d0b8] bg-[rgba(255,252,248,0.98)] shadow-[0_8px_24px_rgba(90,62,40,0.14)] backdrop-blur-xl"
+        >
+          <div class="border-b border-[#f0e4d0] px-3.5 py-2.5">
+            <p class="truncate text-[11px] text-[#9a8870]">{{ username || '...' }}</p>
+          </div>
+          <button
+            class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#3a2a18] transition-colors active:bg-[rgba(200,160,96,0.1)]"
+            @click="doRestart"
+          >
+            <RotateCcw class="h-[14px] w-[14px] text-[#7a6a58]" />
+            重启系统
+          </button>
+          <button
+            class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#c04040] transition-colors active:bg-[rgba(200,80,50,0.06)]"
+            @click="doLogout"
+          >
+            <LogOut class="h-[14px] w-[14px]" />
+            退出登录
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- 内容区 -->
+    <!-- 内容区（全屏，无底部导航） -->
     <div class="relative min-h-0 flex-1 overflow-hidden">
 
-      <!-- 打开的应用（覆盖所有 tab） -->
+      <!-- 打开的应用 -->
       <div v-if="openedApp" class="absolute inset-0 overflow-hidden bg-white">
         <component :is="openedApp.component" v-bind="openedApp.props" />
       </div>
 
       <!-- 应用网格 -->
-      <div v-else-if="activeTab === 'apps'" class="h-full overflow-y-auto px-4 py-4">
+      <div v-else class="h-full overflow-y-auto px-4 py-4">
         <input
           v-model="appSearch"
           class="mb-4 w-full rounded-[12px] border border-[rgba(200,160,96,0.3)] bg-white px-4 py-2.5 text-[14px] text-[#3a2a18] shadow-sm outline-none placeholder-[#b0a090] focus:border-[#c8a060]"
@@ -38,88 +69,53 @@
         </div>
       </div>
 
-      <!-- 对话 -->
-      <div v-else-if="activeTab === 'chat'" class="flex h-full flex-col overflow-hidden bg-[#1a1410]">
-        <MobileChatPanel />
-      </div>
-
-      <!-- 任务 -->
-      <div v-else-if="activeTab === 'tasks'" class="h-full overflow-y-auto">
-        <MobileTaskPanel :task-count="taskCount" />
-      </div>
-
-    </div>
-
-    <!-- 底部导航 -->
-    <div
-      class="shrink-0 border-t border-[#e0d0b8] bg-[rgba(250,245,238,0.97)] backdrop-blur-xl"
-      style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-    >
-      <div class="flex h-[54px] items-stretch">
-        <button
-          v-for="tab in TABS"
-          :key="tab.id"
-          class="flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors"
-          :class="!openedApp && activeTab === tab.id ? 'text-[#5a3e28]' : 'text-[#b0a090]'"
-          @click="switchTab(tab.id)"
-        >
-          <div class="relative">
-            <span class="text-[20px] leading-none">{{ tab.icon }}</span>
-            <span
-              v-if="tab.id === 'tasks' && taskCount > 0"
-              class="absolute -right-[5px] -top-[3px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#e05030] px-[2px] text-[9px] font-bold text-white"
-            >{{ taskCount > 9 ? '9+' : taskCount }}</span>
-          </div>
-          <span class="text-[10px] font-medium">{{ tab.label }}</span>
-          <div
-            class="h-[2px] w-[18px] rounded-full transition-colors"
-            :class="!openedApp && activeTab === tab.id ? 'bg-[#5a3e28]' : 'bg-transparent'"
-          ></div>
-        </button>
-      </div>
     </div>
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed, shallowRef, onMounted, onUnmounted, defineAsyncComponent } from 'vue';
+import { ref, computed, shallowRef, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { LogOut, RotateCcw } from 'lucide-vue-next';
 import { appRegistry } from '../desktop/apps.js';
 import { useI18n } from '../i18n/index.js';
+import { clearAuthCache } from '../auth/session.js';
 
 const { t } = useI18n();
+const router = useRouter();
 
-const taskCount = ref(0);
-async function fetchTaskCount() {
+// 用户
+const username = ref('');
+const usernameInitial = computed(() => (username.value || '?')[0].toUpperCase());
+const userMenuOpen = ref(false);
+
+async function fetchMe() {
   try {
-    const res = await fetch('/aios/api/tasks/list');
+    const res = await fetch('/aios/api/auth/me', { credentials: 'include' });
     const data = await res.json();
-    const list = Array.isArray(data) ? data : (data.tasks || []);
-    taskCount.value = list.filter(t => t.status === 'running' || t.status === 'scheduled').length;
+    username.value = data?.user?.username || '';
   } catch {}
 }
 
-// 时钟
-const clockTime = ref('');
-function updateClock() {
-  const now = new Date();
-  clockTime.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+async function doLogout() {
+  userMenuOpen.value = false;
+  try {
+    await fetch('/aios/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  } catch {}
+  clearAuthCache();
+  router.push('/login');
 }
-let clockTimer;
-onMounted(() => { updateClock(); clockTimer = setInterval(updateClock, 30000); fetchTaskCount(); });
-onUnmounted(() => clearInterval(clockTimer));
 
-// tabs
-const TABS = [
-  { id: 'apps', icon: '⊞', label: '应用' },
-  { id: 'chat', icon: '💬', label: '对话' },
-  { id: 'tasks', icon: '✅', label: '任务' },
-];
-
-const activeTab = ref('apps');
-function switchTab(tabId) {
-  openedApp.value = null;
-  activeTab.value = tabId;
+async function doRestart() {
+  userMenuOpen.value = false;
+  try {
+    await fetch('/aios/api/system/reload/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ restart: 'server' })
+    });
+  } catch {}
 }
 
 // 顶栏标题
@@ -128,8 +124,6 @@ const topTitle = computed(() => {
     const app = appRegistry.find(a => a.id === openedApp.value.appId);
     return app ? t(app.name) : 'AIOS';
   }
-  if (activeTab.value === 'chat') return t('mobile_tab_chat');
-  if (activeTab.value === 'tasks') return t('mobile_tab_tasks');
   return 'AIOS';
 });
 
@@ -154,7 +148,5 @@ function closeApp() {
   openedApp.value = null;
 }
 
-// 懒加载移动端子面板
-const MobileChatPanel = defineAsyncComponent(() => import('../components/mobile/MobileChatPanel.vue'));
-const MobileTaskPanel = defineAsyncComponent(() => import('../components/mobile/MobileTaskPanel.vue'));
+onMounted(fetchMe);
 </script>

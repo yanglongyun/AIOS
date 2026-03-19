@@ -1,10 +1,7 @@
 <template>
-  <div
-    class="flex h-full min-h-full w-full flex-col items-center overflow-hidden bg-[#1a3a1a]"
-    style="background-image: radial-gradient(ellipse at 50% 30%, #224422 0%, #0a150a 100%);"
-  >
+  <div class="relative h-full w-full overflow-hidden">
     <PokerTableView
-      class="w-full flex-1"
+      class="h-full w-full overflow-y-auto"
       :ai-speech="aiSpeech"
       :ai-expression="aiExpression"
       :game="game"
@@ -14,8 +11,9 @@
       :suit-icon="suitIcon"
       :rank-label="rankLabel"
     />
-    <div class="relative z-10 -mt-4 pb-6">
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center pb-4">
       <PokerControlPanel
+        class="pointer-events-auto"
         :last-action-text="lastActionText"
         :game="game"
         :busy="busy"

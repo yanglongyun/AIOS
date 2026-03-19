@@ -38,11 +38,26 @@
 
     <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
 
-    <!-- 右侧：时钟 -->
+    <!-- 右侧：时钟 + 任务入口 -->
     <div class="flex-shrink-0 cursor-default px-1.5 text-right">
       <div class="text-[13px] font-semibold leading-[1.25] text-[#3a2a18]">{{ clockTime }}</div>
       <div class="text-[10px] leading-[1.25] text-[#9a8870]">{{ clockDate }}</div>
     </div>
+
+    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
+
+    <button
+      class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-[8px] border transition-all"
+      :class="taskCenterOpen
+        ? 'border-[rgba(200,160,96,0.4)] bg-[rgba(200,160,96,0.15)]'
+        : 'border-transparent hover:border-[rgba(200,160,96,0.25)] hover:bg-[rgba(200,160,96,0.12)]'"
+      @click.stop="toggleTaskCenter"
+    >
+      <ListTodo class="h-[15px] w-[15px] text-[#5a3e28]" />
+    </button>
+
+    <!-- 任务中心面板 -->
+    <TaskCenter v-if="taskCenterOpen" @close="taskCenterOpen = false" />
 
     <!-- 启动器面板 -->
     <LauncherPanel
@@ -56,7 +71,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ListTodo } from 'lucide-vue-next';
 import LauncherPanel from './LauncherPanel.vue';
+import TaskCenter from './TaskCenter.vue';
 import { windowManager } from '../../stores/windowManager.js';
 import { appRegistry } from '../../apps.js';
 import { useI18n } from '../../i18n/index.js';
@@ -65,6 +82,7 @@ const { t } = useI18n();
 
 const windows = computed(() => windowManager.state.windows);
 const launcherOpen = ref(false);
+const taskCenterOpen = ref(false);
 
 // 时钟
 const clockTime = ref('');
@@ -106,13 +124,21 @@ function clickTab(win) {
   }
 }
 
+// 任务中心
+function toggleTaskCenter() {
+  taskCenterOpen.value = !taskCenterOpen.value;
+  if (taskCenterOpen.value) launcherOpen.value = false;
+}
+
 // 应用启动器
 function toggleLauncher() {
   launcherOpen.value = !launcherOpen.value;
+  if (launcherOpen.value) taskCenterOpen.value = false;
 }
 
 function closeLauncher() {
   launcherOpen.value = false;
+  taskCenterOpen.value = false;
 }
 
 function onLauncherOpen(appId) {

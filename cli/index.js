@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from 'child_process';
 import chalk from 'chalk';
-import { WEB_URL, API_URL, APPS_URL, SERVER_PORT, APPS_PORT } from './config.js';
+import { ROOT, WEB_URL, API_URL, APPS_URL, SERVER_PORT, APPS_PORT } from './config.js';
 import { getServiceStatus, startServices, stopServices, buildUI, isReady, waitReadyUrl } from './service.js';
 import { startChat } from './chat.js';
 import { runUninstall } from './uninstall.js';
@@ -9,6 +9,31 @@ import t from './locale.js';
 import { banner, createSpinner } from './ui.js';
 
 const arg = process.argv[2];
+
+const restartWithBuild = async (doneMessage) => {
+  stopServices();
+
+  console.log(chalk.dim('  ' + t.buildingUI));
+  if (!buildUI()) {
+    console.error(chalk.red('  ' + t.buildFailed));
+    process.exit(1);
+  }
+  console.log(chalk.dim('  ' + t.buildDone));
+
+  startServices();
+  const spinner = createSpinner(t.waitingReady);
+  spinner.start();
+  const serverOk = await waitReadyUrl(`${API_URL}/health`);
+  const appsOk = await waitReadyUrl(`${APPS_URL}/apps/health`);
+  if (!serverOk || !appsOk) {
+    spinner.fail(t.restartFailed);
+    process.exit(1);
+  }
+  spinner.stop(doneMessage);
+  console.log(chalk.dim(`  Server: ${WEB_URL}`));
+  console.log(chalk.dim(`  Apps:   ${APPS_URL}`));
+  process.exit(0);
+};
 
 if (arg === 'help' || arg === '--help' || arg === '-h') {
   banner();
@@ -19,6 +44,7 @@ if (arg === 'help' || arg === '--help' || arg === '-h') {
     ['start', t.helpStart],
     ['stop', t.helpStop],
     ['restart', t.helpRestart],
+    ['update', t.helpUpdate],
     ['status', t.helpStatus],
     ['web', t.helpWeb],
     ['uninstall', t.helpUninstall],
@@ -62,28 +88,29 @@ if (arg === 'start') {
 }
 
 if (arg === 'restart') {
-  stopServices();
+  await restartWithBuild(t.restarted);
+}
 
-  console.log(chalk.dim('  ' + t.buildingUI));
-  if (!buildUI()) {
-    console.error(chalk.red('  ' + t.buildFailed));
+if (arg === 'update') {
+  console.log(chalk.dim('  ' + t.pullingCode));
+  try {
+    execSync('git pull --ff-only', { cwd: ROOT, stdio: 'inherit' });
+  } catch {
+    console.error(chalk.red('  ' + t.pullFailed));
     process.exit(1);
   }
-  console.log(chalk.dim('  ' + t.buildDone));
+  console.log(chalk.dim('  ' + t.pullDone));
 
-  startServices();
-  const spinner = createSpinner(t.waitingReady);
-  spinner.start();
-  const serverOk = await waitReadyUrl(`${API_URL}/health`);
-  const appsOk = await waitReadyUrl(`${APPS_URL}/apps/health`);
-  if (!serverOk || !appsOk) {
-    spinner.fail(t.restartFailed);
+  console.log(chalk.dim('  ' + t.installingDeps));
+  try {
+    execSync('npm ci', { cwd: ROOT, stdio: 'inherit' });
+  } catch {
+    console.error(chalk.red('  ' + t.depsFailed));
     process.exit(1);
   }
-  spinner.stop(t.restarted);
-  console.log(chalk.dim(`  Server: ${WEB_URL}`));
-  console.log(chalk.dim(`  Apps:   ${APPS_URL}`));
-  process.exit(0);
+  console.log(chalk.dim('  ' + t.depsDone));
+
+  await restartWithBuild(t.updateDone);
 }
 
 if (arg === 'stop') {

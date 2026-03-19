@@ -6,7 +6,7 @@ const normalizeLocale = (value) => (String(value || '').toLowerCase() === 'en' ?
 const normalizeChoices = (choices = [], locale = 'zh') => {
   const out = [];
   for (const c of choices) {
-    const text = String(c || '').trim();
+    const text = (typeof c === 'object' && c !== null ? (c.text || c.action || c.label || JSON.stringify(c)) : String(c || '')).trim();
     if (!text) continue;
     out.push(text);
     if (out.length >= 3) break;

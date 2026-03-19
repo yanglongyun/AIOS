@@ -103,7 +103,7 @@ const buildReaderPrompt = ({ lang, session, action, recentChapters }) => {
       JSON.stringify(recentChapters),
       'Requirements:',
       '- content: 120-260 words',
-      '- choices: exactly 3 distinct options that branch the plot',
+      '- choices: array of exactly 3 short strings, each a distinct action that branches the plot',
       '- summary: updated running summary, 80-140 words',
       '- progress: chapter progress text, e.g. "Chapter N: Subtitle"'
     ].join('\n');
@@ -120,7 +120,7 @@ const buildReaderPrompt = ({ lang, session, action, recentChapters }) => {
     JSON.stringify(recentChapters),
     '要求：',
     '- content：120-260字',
-    '- choices：恰好 3 个分叉选项，方向不同',
+    '- choices：字符串数组，恰好 3 个简短的行动选项，方向不同',
     '- summary：更新后的累计梗概，80-140字',
     '- progress：章节进度文本，如“第N章：副标题”'
   ].join('\n');

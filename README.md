@@ -77,24 +77,19 @@ Web 服务拆分为"主服务"和"应用服务"两部分。主服务负责对话
 
 ## 快速安装
 
-```bash
-git clone https://github.com/valueriver/aios.git
-cd aios
-```
-
 Linux (Ubuntu/Debian):
 ```bash
-bash install-linux.sh
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/install-linux.sh | bash
 ```
 
 macOS:
 ```bash
-bash install-macos.sh
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/install-macos.sh | bash
 ```
 
 Windows (PowerShell):
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
+irm https://raw.githubusercontent.com/valueriver/aios/main/install-windows.ps1 | iex
 ```
 
 打开：`http://localhost:9700`

@@ -1,11 +1,11 @@
 <template>
   <!-- 对话列表 -->
-  <div v-if="!currentChat" class="flex h-full flex-col bg-[#1a1410]">
+  <div v-if="!currentChat" class="flex h-full flex-col bg-[#f5f0e8]">
     <!-- 新建按钮 -->
-    <div class="shrink-0 border-b border-[#2a1e14] px-4 py-3">
+    <div class="shrink-0 border-b border-[#e0d0b8] px-4 py-3">
       <button
         @click="newChat"
-        class="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#2a1e14] py-2.5 text-[13px] text-[#c8a060] transition-colors active:bg-[#3a2a1c]"
+        class="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#d4c0a0] bg-white py-2.5 text-[13px] text-[#8a6a40] transition-colors active:bg-[#f5ead8]"
       >
         <span class="text-[16px] leading-none">+</span>
         {{ t('chat_new_title') }}
@@ -14,19 +14,19 @@
 
     <!-- 对话列表 -->
     <div class="min-h-0 flex-1 overflow-y-auto">
-      <div v-if="!chats.length" class="py-16 text-center text-[13px] text-[#5a4a38]">{{ t('history_empty') }}</div>
+      <div v-if="!chats.length" class="py-16 text-center text-[13px] text-[#a09080]">{{ t('history_empty') }}</div>
       <button
         v-for="c in chats"
         :key="c.conversation_id"
-        class="flex w-full items-center gap-3 border-b border-[#2a1e14] px-4 py-3.5 text-left transition-colors active:bg-[#2a1e14]"
+        class="flex w-full items-center gap-3 border-b border-[#e0d0b8] px-4 py-3.5 text-left transition-colors active:bg-[rgba(200,160,96,0.1)]"
         @click="openChat(c)"
       >
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2a1e14] text-[18px]">💬</div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ece4d8] text-[18px]">💬</div>
         <div class="min-w-0 flex-1">
-          <div class="truncate text-[14px] text-[#d4c0a0]">{{ c.title || c.conversation_id.slice(0, 12) }}</div>
-          <div class="mt-0.5 text-[11px] text-[#5a4a38]">{{ c.created_at }}</div>
+          <div class="truncate text-[14px] text-[#4a3a28]">{{ c.title || c.conversation_id.slice(0, 12) }}</div>
+          <div class="mt-0.5 text-[11px] text-[#a09080]">{{ c.created_at }}</div>
         </div>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4a3a28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a09080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
   </div>

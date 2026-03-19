@@ -13,22 +13,23 @@
         @mousedown.left="startDrag"
         @dblclick="toggleMaximize"
       >
-        <span class="flex-1 truncate text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
-        <div class="flex items-center gap-0.5">
-          <button @click.stop="showSideChat = !showSideChat" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent transition-all duration-100 hover:bg-black/[0.06]" :class="showSideChat ? 'text-[#c8a060]' : 'text-[#8a7a68] hover:text-[#5a4a38]'" title="侧边对话">
-            <svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2h8a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+        <!-- 左侧红绿灯 -->
+        <div class="traffic-lights mr-3 flex items-center gap-[7px]">
+          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="关闭">
+            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="#4a0000" stroke-width="1.2" fill="none"/></svg>
           </button>
-          <button @click.stop="doMinimize" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent text-[#8a7a68] transition-all duration-100 hover:bg-black/[0.06] hover:text-[#5a4a38]" title="最小化">
-            <svg viewBox="0 0 12 12" width="12" height="12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5"/></svg>
+          <button @click.stop="doMinimize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#febc2e] transition-opacity" title="最小化">
+            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><line x1="1" y1="4" x2="7" y2="4" stroke="#995700" stroke-width="1.2"/></svg>
           </button>
-          <button @click.stop="toggleMaximize" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent text-[#8a7a68] transition-all duration-100 hover:bg-black/[0.06] hover:text-[#5a4a38]" :title="win.state === 'maximized' ? '还原' : '最大化'">
-            <svg v-if="win.state === 'maximized'" viewBox="0 0 12 12" width="12" height="12"><rect x="1.5" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M3.5 3V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H9.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-            <svg v-else viewBox="0 0 12 12" width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-          </button>
-          <button @click.stop="doClose" class="win-btn-close flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent text-[#8a7a68] transition-all duration-100 hover:text-white" title="关闭">
-            <svg viewBox="0 0 12 12" width="12" height="12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '还原' : '最大化'">
+            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 5.5L4 2l2.5 3.5" stroke="#006500" stroke-width="1.2" fill="none"/></svg>
           </button>
         </div>
+        <span class="flex-1 truncate text-center text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
+        <!-- 右侧聊天按钮 -->
+        <button @click.stop="showSideChat = !showSideChat" class="ml-3 flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent transition-all duration-100 hover:bg-black/[0.06]" :class="showSideChat ? 'text-[#c8a060]' : 'text-[#8a7a68] hover:text-[#5a4a38]'" title="侧边对话">
+          <svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2h8a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+        </button>
       </div>
 
       <!-- 内容区 -->
@@ -178,8 +179,12 @@ function stopResize() {
   background: linear-gradient(180deg, #f5ece0 0%, #e8dcc8 100%);
 }
 
-.win-btn-close:hover {
-  background: #e04040;
+.traffic-icon {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.traffic-lights:hover .traffic-icon {
+  opacity: 1;
 }
 
 </style>

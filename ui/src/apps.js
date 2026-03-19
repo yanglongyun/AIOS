@@ -22,7 +22,7 @@ export const appRegistry = [
   { id: 'reader', name: 'app_sidebar_reader', icon: '📖', iconClass: 'icon-reader',
     load: () => import('./apps/reader/index.vue'), defaultSize: { w: 800, h: 600 } },
   { id: 'poker', name: 'app_sidebar_poker', icon: '🃏', iconClass: 'icon-poker',
-    load: () => import('./apps/poker/index.vue'), defaultSize: { w: 700, h: 520 } },
+    load: () => import('./apps/poker/index.vue'), defaultSize: { w: 900, h: 700 } },
   { id: 'fortune', name: 'app_sidebar_fortune', icon: '🔮', iconClass: 'icon-fortune',
     load: () => import('./apps/fortune/index.vue'), defaultSize: { w: 700, h: 560 } },
   { id: 'banana', name: 'app_sidebar_banana', icon: '📱', iconClass: 'icon-banana',

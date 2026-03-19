@@ -38,15 +38,20 @@
       </div>
       <span class="flex-1 truncate text-[12px] text-[#5a4a38]">{{ username || '...' }}</span>
       <button
-        class="flex h-[26px] items-center rounded-[6px] px-2 text-[11px] text-[#7a6a58] transition-colors hover:bg-[rgba(200,160,96,0.12)] hover:text-[#5a3e28]"
+        class="flex h-[26px] items-center rounded-[6px] px-2 text-[#7a6a58] transition-colors hover:bg-[rgba(200,160,96,0.12)] hover:text-[#5a3e28] disabled:opacity-40"
         :disabled="restarting"
         @click="doRestart"
         title="重启服务"
-      >{{ restarting ? '...' : '↺' }}</button>
+      >
+        <RotateCcw class="h-[13px] w-[13px]" :class="restarting ? 'animate-spin' : ''" />
+      </button>
       <button
-        class="flex h-[26px] items-center rounded-[6px] px-2 text-[11px] text-[#c04040] transition-colors hover:bg-[rgba(200,80,50,0.08)]"
+        class="flex h-[26px] items-center rounded-[6px] px-2 text-[#c04040] transition-colors hover:bg-[rgba(200,80,50,0.08)]"
         @click="doLogout"
-      >{{ t('settings_logout') }}</button>
+        title="退出登录"
+      >
+        <LogOut class="h-[13px] w-[13px]" />
+      </button>
     </div>
   </div>
 </template>
@@ -54,6 +59,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { LogOut, RotateCcw } from 'lucide-vue-next';
 import { appRegistry } from '../../desktop/apps.js';
 import { useI18n } from '../../i18n/index.js';
 import { clearAuthCache } from '../../auth/session.js';

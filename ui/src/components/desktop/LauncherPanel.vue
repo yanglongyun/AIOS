@@ -18,6 +18,7 @@
         {{ t('app_sidebar_create_app') }}
       </button>
     </div>
+
     <div class="grid grid-cols-4 gap-1.5">
       <button
         v-for="app in filteredApps"
@@ -29,19 +30,44 @@
         <span class="text-center text-[10.5px] leading-tight text-[#5a4a38]">{{ t(app.name) }}</span>
       </button>
     </div>
+
+    <!-- 底部用户栏 -->
+    <div class="mt-2.5 flex items-center gap-1.5 border-t border-[rgba(200,160,96,0.2)] pt-2.5">
+      <div class="flex h-[28px] w-[28px] flex-shrink-0 items-center justify-center rounded-full bg-[rgba(200,160,96,0.2)] text-[13px] font-semibold text-[#5a3e28]">
+        {{ usernameInitial }}
+      </div>
+      <span class="flex-1 truncate text-[12px] text-[#5a4a38]">{{ username || '...' }}</span>
+      <button
+        class="flex h-[26px] items-center rounded-[6px] px-2 text-[11px] text-[#7a6a58] transition-colors hover:bg-[rgba(200,160,96,0.12)] hover:text-[#5a3e28]"
+        :disabled="restarting"
+        @click="doRestart"
+        title="重启服务"
+      >{{ restarting ? '...' : '↺' }}</button>
+      <button
+        class="flex h-[26px] items-center rounded-[6px] px-2 text-[11px] text-[#c04040] transition-colors hover:bg-[rgba(200,80,50,0.08)]"
+        @click="doLogout"
+      >{{ t('settings_logout') }}</button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { appRegistry } from '../../desktop/apps.js';
 import { useI18n } from '../../i18n/index.js';
+import { clearAuthCache } from '../../auth/session.js';
 
 const { t } = useI18n();
+const router = useRouter();
 defineEmits(['open', 'close', 'create-app']);
 
 const search = ref('');
 const searchEl = ref(null);
+const username = ref('');
+const restarting = ref(false);
+
+const usernameInitial = computed(() => (username.value || '?')[0].toUpperCase());
 
 const visibleApps = appRegistry.filter(a => !a.hidden);
 
@@ -51,5 +77,37 @@ const filteredApps = computed(() => {
   return visibleApps.filter(a => t(a.name).toLowerCase().includes(q));
 });
 
-onMounted(() => searchEl.value?.focus());
+async function fetchMe() {
+  try {
+    const res = await fetch('/aios/api/auth/me', { credentials: 'include' });
+    const data = await res.json();
+    username.value = data?.user?.username || '';
+  } catch {}
+}
+
+async function doLogout() {
+  try {
+    await fetch('/aios/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  } catch {}
+  clearAuthCache();
+  router.push('/login');
+}
+
+async function doRestart() {
+  if (restarting.value) return;
+  restarting.value = true;
+  try {
+    await fetch('/aios/api/system/reload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ restart: 'server' })
+    });
+  } catch {}
+  setTimeout(() => { restarting.value = false; }, 3000);
+}
+
+onMounted(() => {
+  searchEl.value?.focus();
+  fetchMe();
+});
 </script>

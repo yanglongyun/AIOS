@@ -4,11 +4,15 @@ import { getSetupStatus } from '../auth/setup.js';
 import { windowManager } from '../stores/windowManager.js';
 import LoginView from '../views/LoginView.vue';
 import WelcomeView from '../views/WelcomeView.vue';
+import MobileView from '../views/MobileView.vue';
 
 const DesktopPlaceholder = { render: () => null };
 
+const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
 const routes = [
   { path: '/', component: DesktopPlaceholder },
+  { path: '/mobile', component: MobileView },
   { path: '/welcome', component: WelcomeView },
   { path: '/login', component: LoginView },
   { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -49,12 +53,15 @@ router.beforeEach(async (to) => {
 
   if (to.path === '/login') {
     const ok = await ensureAuth();
-    if (ok) return '/';
+    if (ok) return isMobile() ? '/mobile' : '/';
     return true;
   }
 
   const ok = await ensureAuth();
   if (!ok) return '/login';
+
+  // 移动端自动跳转
+  if (to.path === '/' && isMobile()) return '/mobile';
 
   // 桌面根路径直接通过
   if (to.path === '/') return true;

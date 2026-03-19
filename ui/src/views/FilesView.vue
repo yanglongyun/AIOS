@@ -187,7 +187,7 @@ const filePath = (item) => currentDir.value ? absPath(currentDir.value, item.nam
 
 const download = (item) => {
   const a = document.createElement('a');
-  a.href = `/api/files/download?path=${encodeURIComponent(filePath(item))}`;
+  a.href = `/aios/api/files/download?path=${encodeURIComponent(filePath(item))}`;
   a.download = item.name;
   a.click();
 };

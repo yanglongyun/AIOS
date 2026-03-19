@@ -127,12 +127,12 @@ const messageText = (item) => {
 };
 
 const loadTask = async () => {
-  const data = await request(`/api/task/detail?id=${taskId}`);
+  const data = await request(`/aios/api/task/detail?id=${taskId}`);
   task.value = data.task || {};
 };
 
 const loadMessages = async () => {
-  const data = await request(`/api/task/messages?id=${taskId}`);
+  const data = await request(`/aios/api/task/messages?id=${taskId}`);
   messages.value = Array.isArray(data.messages) ? data.messages : [];
 };
 

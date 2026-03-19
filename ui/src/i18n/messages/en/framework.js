@@ -76,4 +76,8 @@ export default {
   notebook_record: 'Save',
   instruction_title: 'System Prompt',
   instruction_hint: 'Environment context will be appended automatically',
+  launcher_search: 'Search apps...',
+  mobile_tab_apps: 'Apps',
+  mobile_tab_chat: 'Chat',
+  mobile_tab_tasks: 'Tasks',
 };

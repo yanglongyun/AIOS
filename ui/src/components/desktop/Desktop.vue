@@ -1,6 +1,6 @@
 <template>
   <div
-    class="desktop relative h-[100dvh] w-screen transition-[background] duration-500"
+    class="desktop relative h-[calc(100dvh-44px)] w-screen transition-[background] duration-500"
     :class="wallpaperClass"
     :style="wallpaperStyle"
     @click="onDesktopClick"

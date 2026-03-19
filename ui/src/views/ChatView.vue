@@ -275,7 +275,7 @@ const parseMessages = (raw) => {
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
   const params = new URLSearchParams({ conversationId: id, offset: String(offset), limit: String(limit) });
-  const data = await request(`/api/chat/messages?${params.toString()}`);
+  const data = await request(`/aios/api/chat/messages?${params.toString()}`);
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
   const parsed = parseMessages(data.messages);

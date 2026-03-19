@@ -76,4 +76,8 @@ export default {
   notebook_record: '记录',
   instruction_title: '系统提示词',
   instruction_hint: '环境信息会自动追加',
+  launcher_search: '搜索应用...',
+  mobile_tab_apps: '应用',
+  mobile_tab_chat: '对话',
+  mobile_tab_tasks: '任务',
 };

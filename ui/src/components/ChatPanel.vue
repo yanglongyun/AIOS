@@ -250,7 +250,7 @@ const parseMessages = (raw) => {
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
   const params = new URLSearchParams({ conversationId: id, offset: String(offset), limit: String(limit) });
-  const data = await request(`/api/chat/messages?${params.toString()}`);
+  const data = await request(`/aios/api/chat/messages?${params.toString()}`);
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
   const parsed = parseMessages(data.messages);
@@ -374,7 +374,7 @@ const fetchHistory = async () => {
   try {
     const scene = contextScene.value;
     const params = scene !== 'chat' ? `?scene=${scene}` : '';
-    historyList.value = await request(`/api/chat/list${params}`);
+    historyList.value = await request(`/aios/api/chat/list${params}`);
   } catch { historyList.value = []; }
 };
 
@@ -417,7 +417,7 @@ onMounted(async () => {
     const scene = contextScene.value;
     const params = scene !== 'chat' ? `?scene=${scene}` : '';
     try {
-      const list = await request(`/api/chat/list${params}`);
+      const list = await request(`/aios/api/chat/list${params}`);
       if (list.length > 0) {
         const last = list[0];
         currentConversationId.value = last.conversation_id;

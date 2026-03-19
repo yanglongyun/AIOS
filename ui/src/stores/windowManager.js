@@ -1,6 +1,7 @@
 import { reactive, shallowRef } from 'vue';
 import { appRegistry } from '../desktop/apps.js';
 import { useI18n } from '../i18n/index.js';
+import { TASKBAR_H } from '../desktop/constants.js';
 
 const state = reactive({
   windows: [],
@@ -82,7 +83,7 @@ function maximize(windowId) {
     win.x = 0;
     win.y = 0;
     win.w = window.innerWidth;
-    win.h = window.innerHeight;
+    win.h = window.innerHeight - TASKBAR_H;
     win.state = 'maximized';
   }
 }

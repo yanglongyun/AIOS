@@ -20,9 +20,8 @@
     <!-- 壁纸选择 -->
     <WallpaperPicker ref="wpPickerRef" @select="onWallpaperSelect" />
 
-    <!-- 任务入口（右上角常驻） -->
-    <TaskFab
-      :tasks="tasks"
+    <!-- 底部任务栏 -->
+    <Taskbar
       :task-count="taskCount"
       :mark-read="markTasksRead"
     />
@@ -39,7 +38,7 @@ import Desktop from './components/desktop/Desktop.vue';
 import AppWindow from './components/desktop/Window.vue';
 import ContextMenu from './components/desktop/ContextMenu.vue';
 import WallpaperPicker from './components/desktop/WallpaperPicker.vue';
-import TaskFab from './components/desktop/TaskFab.vue';
+import Taskbar from './components/desktop/Taskbar.vue';
 import GlobalToast from './components/GlobalToast.vue';
 import ReloadModal from './components/ReloadModal.vue';
 import { windowManager } from './stores/windowManager.js';
@@ -48,14 +47,13 @@ import { useTopPanels } from './components/topPanels.js';
 const ready = ref(false);
 const route = useRoute();
 const router = useRouter();
-const isAuthRoute = computed(() => route.path === '/login' || route.path === '/welcome');
+const isAuthRoute = computed(() => route.path === '/login' || route.path === '/welcome' || route.path === '/mobile');
 
 const desktopRef = ref(null);
 const ctxMenuRef = ref(null);
 const wpPickerRef = ref(null);
 
 const {
-  tasks,
   taskCount,
   markTasksRead,
   start,

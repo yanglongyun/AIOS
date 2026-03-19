@@ -96,7 +96,7 @@
               </div>
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_model') }}</label>
-                <input v-model.trim="model.model" placeholder="gpt-5.2" class="wiz-input" />
+                <input v-model.trim="model.model" placeholder="gpt-5.4" class="wiz-input" />
               </div>
             </div>
             <div>

@@ -34,7 +34,7 @@ export const getSettings = () => {
     contextRounds: normalizeContextRounds(obj.contextRounds),
     apiUrl: litellmUrl || obj.apiUrl || 'https://api.openai.com/v1/chat/completions',
     apiKey: litellmKey || obj.apiKey || '',
-    model: obj.model || 'gpt-5.2',
+    model: obj.model || 'gpt-5.4',
     enableToolResultTruncate: obj.enableToolResultTruncate === undefined ? true : obj.enableToolResultTruncate === '1',
     toolResultMaxChars,
     enableToolLoopLimit: obj.enableToolLoopLimit === undefined ? true : obj.enableToolLoopLimit === '1',

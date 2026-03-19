@@ -12,7 +12,7 @@ export const PROVIDERS = [
     name: 'OpenAI',
     group: 'default',
     apiUrl: 'https://api.openai.com/v1/chat/completions',
-    defaultModel: 'gpt-5.2',
+    defaultModel: 'gpt-5.4',
   },
   {
     id: 'claude',

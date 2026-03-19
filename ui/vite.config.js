@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  base: '/aios/',
   plugins: [vue(), tailwindcss()],
   server: {
     proxy: {
@@ -12,7 +13,6 @@ export default defineConfig({
     }
   },
   build: {
-    base: '/aios/',
     outDir: 'dist',
     emptyOutDir: true
   }

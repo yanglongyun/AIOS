@@ -8,6 +8,14 @@ export const normalizeContextRounds = (value) => {
   return 500;
 };
 
+const normalizeLiteLlmUrl = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const noTrailingSlash = raw.replace(/\/+$/, '');
+  if (noTrailingSlash.endsWith('/v1/chat/completions')) return noTrailingSlash;
+  return `${noTrailingSlash}/v1/chat/completions`;
+};
+
 export const getSettings = () => {
   const rows = listSettingRows();
   const obj = {};
@@ -16,7 +24,7 @@ export const getSettings = () => {
   const toolResultMaxChars = Math.max(1000, Math.min(50000, Number(obj.toolResultMaxChars) || 12000));
   const toolMaxRounds = Math.max(1, Math.min(500, Number(obj.toolMaxRounds) || 50));
 
-  const litellmUrl = process.env.LITELLM_URL;
+  const litellmUrl = normalizeLiteLlmUrl(process.env.LITELLM_URL);
   const litellmKey = process.env.LITELLM_KEY;
 
   return {

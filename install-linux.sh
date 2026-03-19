@@ -65,6 +65,7 @@ After=network.target
 
 [Service]
 Type=simple
+EnvironmentFile=/etc/environment
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
 ExecStart=${NODE_BIN} server/index.js
@@ -85,6 +86,7 @@ Requires=${APP_NAME}.service
 
 [Service]
 Type=simple
+EnvironmentFile=/etc/environment
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
 ExecStart=${NODE_BIN} apps/index.js

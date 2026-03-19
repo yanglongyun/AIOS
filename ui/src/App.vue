@@ -21,10 +21,7 @@
     <WallpaperPicker ref="wpPickerRef" @select="onWallpaperSelect" />
 
     <!-- 底部任务栏 -->
-    <Taskbar
-      :task-count="taskCount"
-      :mark-read="markTasksRead"
-    />
+    <Taskbar />
 
     <GlobalToast />
     <ReloadModal />
@@ -53,12 +50,7 @@ const desktopRef = ref(null);
 const ctxMenuRef = ref(null);
 const wpPickerRef = ref(null);
 
-const {
-  taskCount,
-  markTasksRead,
-  start,
-  stop
-} = useTopPanels();
+const { start, stop } = useTopPanels();
 
 let panelStarted = false;
 

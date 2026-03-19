@@ -18,6 +18,7 @@ export default {
   chat_attachment_only_prompt: '请先阅读附件并总结关键信息',
   chat_file_read_failed: '文件读取失败',
   chat_upload_failed: '上传失败',
+  history_title: '历史对话',
   history_empty: '暂无历史对话',
   history_rename: '重命名',
   history_confirm_delete: '确认删除?',

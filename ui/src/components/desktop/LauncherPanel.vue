@@ -60,7 +60,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { LogOut, RotateCcw } from 'lucide-vue-next';
-import { appRegistry } from '../../desktop/apps.js';
+import { appRegistry } from '../../apps.js';
 import { useI18n } from '../../i18n/index.js';
 import { clearAuthCache } from '../../auth/session.js';
 

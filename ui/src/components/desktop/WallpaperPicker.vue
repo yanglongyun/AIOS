@@ -21,7 +21,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { wallpaperList } from '../../desktop/wallpapers.js';
+import { wallpaperList } from './wallpapers.js';
 
 const emit = defineEmits(['select']);
 const visible = ref(false);

@@ -58,7 +58,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import LauncherPanel from './LauncherPanel.vue';
 import { windowManager } from '../../stores/windowManager.js';
-import { appRegistry } from '../../desktop/apps.js';
+import { appRegistry } from '../../apps.js';
 import { useI18n } from '../../i18n/index.js';
 
 const { t } = useI18n();

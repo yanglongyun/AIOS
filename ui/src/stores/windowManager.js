@@ -1,7 +1,8 @@
 import { reactive, shallowRef } from 'vue';
-import { appRegistry } from '../desktop/apps.js';
+import { appRegistry } from '../apps.js';
 import { useI18n } from '../i18n/index.js';
-import { TASKBAR_H } from '../desktop/constants.js';
+
+const TASKBAR_H = 44;
 
 const state = reactive({
   windows: [],

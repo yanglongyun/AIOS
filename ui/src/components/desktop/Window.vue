@@ -15,6 +15,9 @@
       >
         <span class="flex-1 truncate text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
         <div class="flex items-center gap-0.5">
+          <button @click.stop="showSideChat = !showSideChat" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent transition-all duration-100 hover:bg-black/[0.06]" :class="showSideChat ? 'text-[#c8a060]' : 'text-[#8a7a68] hover:text-[#5a4a38]'" title="侧边对话">
+            <svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2h8a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+          </button>
           <button @click.stop="doMinimize" class="flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent text-[#8a7a68] transition-all duration-100 hover:bg-black/[0.06] hover:text-[#5a4a38]" title="最小化">
             <svg viewBox="0 0 12 12" width="12" height="12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5"/></svg>
           </button>
@@ -29,8 +32,12 @@
       </div>
 
       <!-- 内容区 -->
-      <div class="flex min-h-0 flex-1 flex-col overflow-auto bg-[#2a2218]">
+      <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#2a2218]">
         <component :is="win.component" v-bind="win.props" />
+        <!-- 聊天小面板 -->
+        <div v-if="showSideChat" class="absolute right-2 top-2 bottom-[30%] z-10 flex w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <ChatPanel @close="showSideChat = false" />
+        </div>
       </div>
     </div>
 
@@ -50,15 +57,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { windowManager } from '../../stores/windowManager.js';
+import ChatPanel from '../ChatPanel.vue';
 
 const props = defineProps({ win: { type: Object, required: true } });
+
+const showSideChat = ref(false);
 
 const windowStyle = computed(() => {
   const w = props.win;
   if (w.state === 'maximized') {
-    return { left: 0, top: 0, width: '100vw', height: '100vh', zIndex: w.zIndex, borderRadius: 0, border: 'none' };
+    return { left: 0, top: 0, width: '100vw', height: 'calc(100vh - 46px)', zIndex: w.zIndex, borderRadius: 0, border: 'none' };
   }
   return {
     left: w.x + 'px', top: w.y + 'px',

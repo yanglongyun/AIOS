@@ -1,147 +1,145 @@
 <template>
-  <div class="fixed inset-0 z-[90] max-md:bg-[rgba(22,14,8,0.45)] max-md:backdrop-blur-[1px]" @click.self="$emit('close')">
-    <div class="absolute right-4 top-12 z-[91] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] bg-[#2e2014] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-      <!-- 顶栏 -->
-      <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
-        <div class="flex items-baseline gap-1.5">
-          <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_top_chat') }}</span>
-          <span v-if="contextLabel" class="text-[10px] text-[#6a5840]">{{ contextLabel }}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="cursor-pointer text-[#8a7860] transition-colors hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
-            <Plus class="h-4 w-4" />
-          </button>
-          <button class="cursor-pointer transition-colors" :class="showHistory ? 'text-[#c8a060]' : 'text-[#8a7860] hover:text-[#c8a060]'" @click="toggleHistory" :title="t('history_title')">
-            <History class="h-4 w-4" />
-          </button>
-        </div>
+  <div class="flex h-full w-full flex-col overflow-hidden bg-[#2e2014]">
+    <!-- 顶栏 -->
+    <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_top_chat') }}</span>
+        <span v-if="contextLabel" class="text-[10px] text-[#6a5840]">{{ contextLabel }}</span>
       </div>
-
-      <!-- 历史列表 -->
-      <div v-if="showHistory" class="flex-1 overflow-y-auto [scrollbar-width:thin]">
-        <div v-if="!historyList.length" class="px-4 py-8 text-center text-xs text-[#6a5840]">{{ t('history_empty') }}</div>
-        <button
-          v-for="c in historyList"
-          :key="c.conversation_id"
-          type="button"
-          class="flex w-full cursor-pointer items-start gap-2.5 border-b border-[#3a2818] px-4 py-2.5 text-left transition-colors hover:bg-[#3a2a1c] last:border-b-0"
-          @click="openChat(c.conversation_id)"
-        >
-          <div class="min-w-0 flex-1">
-            <div class="line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
-            <div class="mt-0.5 text-[10px] text-[#6a5840]">{{ c.created_at }}</div>
-          </div>
+      <div class="flex items-center gap-2">
+        <button class="cursor-pointer text-[#8a7860] transition-colors hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
+          <Plus class="h-4 w-4" />
+        </button>
+        <button class="cursor-pointer transition-colors" :class="showHistory ? 'text-[#c8a060]' : 'text-[#8a7860] hover:text-[#c8a060]'" @click="toggleHistory" :title="t('history_title')">
+          <History class="h-4 w-4" />
         </button>
       </div>
-
-      <!-- 聊天内容 -->
-      <template v-else>
-        <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" @scroll="onScroll">
-          <div class="flex flex-col gap-0 px-3 py-3">
-
-            <!-- 空状态 -->
-            <div v-if="!messages.length" class="flex flex-col items-center justify-center py-10 text-center">
-              <div class="mb-3 text-[32px] grayscale-[0.2]">💬</div>
-              <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">{{ t('chat_empty_title') }}</h3>
-              <p v-if="contextLabel" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${contextLabel}</b>` })"></p>
-              <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
-              <div v-if="quickMessages.length" class="mt-4 flex w-full flex-col gap-1.5 px-1">
-                <button v-for="(msg, idx) in quickMessages" :key="idx" @click="sendQuick(msg)" class="cursor-pointer rounded-lg border border-[#4a3828] bg-[#3a2a1a] px-3 py-2 text-left text-[11px] text-[#d4c0a0] transition-colors hover:border-[#c8a060]/30 hover:bg-[#3a2a1c]">{{ msg }}</button>
-              </div>
-            </div>
-
-            <!-- 消息列表 -->
-            <template v-else>
-              <div v-if="hasMore" class="py-1 text-center text-[10px] text-[#6a5840]">
-                <span>{{ t('chat_load_more') }}</span>
-              </div>
-
-              <div v-for="(m, i) in messages" :key="m._key || i" class="mb-3">
-
-                <!-- 用户消息 -->
-                <div v-if="m.role === 'user'" class="flex justify-end">
-                  <div class="max-w-[85%] rounded-[14px_14px_4px_14px] bg-[#c8a060] px-3 py-2 text-[12px] leading-relaxed text-[#1a1410]">
-                    <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
-                    <div v-if="m.attachments?.length" class="mt-1.5">
-                      <template v-for="(f, idx) in m.attachments" :key="idx">
-                        <div v-if="f.type === 'file'" class="mb-0.5 rounded border border-black/15 bg-black/10 px-1.5 py-0.5">
-                          <div class="text-[10px] font-semibold">{{ f.name }}</div>
-                        </div>
-                        <div v-else-if="f.type === 'context'" class="mb-0.5 inline-block rounded-full border border-black/10 bg-black/5 px-2 py-0.5 text-[10px] text-[#5a4a38]">{{ f.label }}</div>
-                      </template>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 助手消息 -->
-                <div v-else-if="m.role === 'assistant'" class="flex items-start gap-2">
-                  <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3a2a1a] text-xs">🤖</div>
-                  <div class="chat-md min-w-0 flex-1 overflow-x-auto rounded-[14px_14px_14px_4px] bg-[#3a2a1a] px-3 py-2 text-[12px] leading-relaxed text-[#d4c0a0]" v-html="renderMd(m.content)" />
-                </div>
-
-                <!-- 工具调用 -->
-                <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-2">
-                  <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1a2a14] text-xs">⚙️</div>
-                  <div class="min-w-0 flex-1 overflow-hidden rounded-lg border border-[#3a2818] bg-[#3a2a1a]">
-                    <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-1.5 border-none bg-[#332618] px-2.5 py-1.5 text-left transition-colors hover:bg-[#3a2a1c]">
-                      <ChevronRight class="h-2.5 w-2.5 shrink-0 text-[#6a5840] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
-                      <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[#d4c0a0]">{{ m.title || t('chat_tool_call') }}</span>
-                      <span v-if="m.result" class="shrink-0 text-[10px] text-[#6a5840]">{{ t('chat_done') }}</span>
-                    </button>
-                    <div v-if="m.expanded" class="border-t border-[#3a2818]">
-                      <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#4ade80]"><span class="select-none text-[#6a5840]">$ </span>{{ m.command }}</div>
-                      <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#4ade80]">{{ m.detail }}</div>
-                      <div v-if="m.result" class="max-h-32 overflow-auto whitespace-pre border-t border-[#3a2818] bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#8a7a60]">{{ m.result }}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- tool 结果兜底 -->
-                <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="flex items-start gap-2">
-                  <div class="flex h-6 w-6 shrink-0 items-center justify-center">
-                    <span class="h-1 w-1 rounded-full bg-[#6a5840]"></span>
-                  </div>
-                  <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-[10px] leading-relaxed text-[#6a5840]">{{ m.result || m.content }}</div>
-                </div>
-
-              </div>
-
-              <!-- 思考中 -->
-              <div v-if="busy" class="flex items-start gap-2">
-                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3a2a1a] text-xs">🤖</div>
-                <div class="py-1 text-[12px] text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <!-- 输入区 -->
-        <div class="shrink-0 border-t border-[#4a3828] px-3 pb-3 pt-2">
-          <form @submit.prevent="handleSend" class="flex items-end gap-1.5 rounded-lg border border-[#4a3828] bg-[#1a1410] pr-1">
-            <textarea
-              ref="textarea"
-              v-model="input"
-              @input="autoResize"
-              @keydown.enter.exact="onEnter"
-              @compositionstart="composing = true"
-              @compositionend="composing = false"
-              :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
-              rows="1"
-              :disabled="busy"
-              class="min-h-[36px] max-h-[100px] min-w-0 flex-1 resize-none overflow-y-auto border-none bg-transparent px-3 pb-2 pt-2 text-[12px] leading-relaxed text-[#d4c0a0] outline-none placeholder:text-[#4a3a28] disabled:opacity-50"
-            />
-            <div class="mb-1 shrink-0">
-              <button v-if="busy" type="button" @click="stopBusy" class="flex h-7 w-7 items-center justify-center rounded-md border-none bg-[#c8a060] text-[#1a1410] transition-opacity hover:opacity-80">
-                <Square class="h-3 w-3 fill-current" />
-              </button>
-              <button v-else type="submit" :disabled="!input.trim()" class="flex h-7 w-7 items-center justify-center rounded-md border transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#c8a060] text-[#1a1410] hover:opacity-85' : 'cursor-default border-[#3a2818] bg-[#2a1e14] text-[#6a5840]'">
-                <ArrowUp class="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </form>
-        </div>
-      </template>
     </div>
+
+    <!-- 历史列表 -->
+    <div v-if="showHistory" class="flex-1 overflow-y-auto [scrollbar-width:thin]">
+      <div v-if="!historyList.length" class="px-4 py-8 text-center text-xs text-[#6a5840]">{{ t('history_empty') }}</div>
+      <button
+        v-for="c in historyList"
+        :key="c.conversation_id"
+        type="button"
+        class="flex w-full cursor-pointer items-start gap-2.5 border-b border-[#3a2818] px-4 py-2.5 text-left transition-colors hover:bg-[#3a2a1c] last:border-b-0"
+        @click="openChat(c.conversation_id)"
+      >
+        <div class="min-w-0 flex-1">
+          <div class="line-clamp-1 text-[11px] font-semibold leading-relaxed text-[#d8c8a8]">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+          <div class="mt-0.5 text-[10px] text-[#6a5840]">{{ c.created_at }}</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- 聊天内容 -->
+    <template v-else>
+      <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" @scroll="onScroll">
+        <div class="flex flex-col gap-0 px-3 py-3">
+
+          <!-- 空状态 -->
+          <div v-if="!messages.length" class="flex flex-col items-center justify-center py-10 text-center">
+            <div class="mb-3 text-[32px] grayscale-[0.2]">💬</div>
+            <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">{{ t('chat_empty_title') }}</h3>
+            <p v-if="contextLabel" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${contextLabel}</b>` })"></p>
+            <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+            <div v-if="quickMessages.length" class="mt-4 flex w-full flex-col gap-1.5 px-1">
+              <button v-for="(msg, idx) in quickMessages" :key="idx" @click="sendQuick(msg)" class="cursor-pointer rounded-lg border border-[#4a3828] bg-[#3a2a1a] px-3 py-2 text-left text-[11px] text-[#d4c0a0] transition-colors hover:border-[#c8a060]/30 hover:bg-[#3a2a1c]">{{ msg }}</button>
+            </div>
+          </div>
+
+          <!-- 消息列表 -->
+          <template v-else>
+            <div v-if="hasMore" class="py-1 text-center text-[10px] text-[#6a5840]">
+              <span>{{ t('chat_load_more') }}</span>
+            </div>
+
+            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-3">
+
+              <!-- 用户消息 -->
+              <div v-if="m.role === 'user'" class="flex justify-end">
+                <div class="max-w-[85%] rounded-[14px_14px_4px_14px] bg-[#c8a060] px-3 py-2 text-[12px] leading-relaxed text-[#1a1410]">
+                  <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
+                  <div v-if="m.attachments?.length" class="mt-1.5">
+                    <template v-for="(f, idx) in m.attachments" :key="idx">
+                      <div v-if="f.type === 'file'" class="mb-0.5 rounded border border-black/15 bg-black/10 px-1.5 py-0.5">
+                        <div class="text-[10px] font-semibold">{{ f.name }}</div>
+                      </div>
+                      <div v-else-if="f.type === 'context'" class="mb-0.5 inline-block rounded-full border border-black/10 bg-black/5 px-2 py-0.5 text-[10px] text-[#5a4a38]">{{ f.label }}</div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 助手消息 -->
+              <div v-else-if="m.role === 'assistant'" class="flex items-start gap-2">
+                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3a2a1a] text-xs">🤖</div>
+                <div class="chat-md min-w-0 flex-1 overflow-x-auto rounded-[14px_14px_14px_4px] bg-[#3a2a1a] px-3 py-2 text-[12px] leading-relaxed text-[#d4c0a0]" v-html="renderMd(m.content)" />
+              </div>
+
+              <!-- 工具调用 -->
+              <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-2">
+                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1a2a14] text-xs">⚙️</div>
+                <div class="min-w-0 flex-1 overflow-hidden rounded-lg border border-[#3a2818] bg-[#3a2a1a]">
+                  <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-1.5 border-none bg-[#332618] px-2.5 py-1.5 text-left transition-colors hover:bg-[#3a2a1c]">
+                    <ChevronRight class="h-2.5 w-2.5 shrink-0 text-[#6a5840] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[#d4c0a0]">{{ m.title || t('chat_tool_call') }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[10px] text-[#6a5840]">{{ t('chat_done') }}</span>
+                  </button>
+                  <div v-if="m.expanded" class="border-t border-[#3a2818]">
+                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#4ade80]"><span class="select-none text-[#6a5840]">$ </span>{{ m.command }}</div>
+                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#4ade80]">{{ m.detail }}</div>
+                    <div v-if="m.result" class="max-h-32 overflow-auto whitespace-pre border-t border-[#3a2818] bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#8a7a60]">{{ m.result }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- tool 结果兜底 -->
+              <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="flex items-start gap-2">
+                <div class="flex h-6 w-6 shrink-0 items-center justify-center">
+                  <span class="h-1 w-1 rounded-full bg-[#6a5840]"></span>
+                </div>
+                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-[10px] leading-relaxed text-[#6a5840]">{{ m.result || m.content }}</div>
+              </div>
+
+            </div>
+
+            <!-- 思考中 -->
+            <div v-if="busy" class="flex items-start gap-2">
+              <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3a2a1a] text-xs">🤖</div>
+              <div class="py-1 text-[12px] text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- 输入区 -->
+      <div class="shrink-0 border-t border-[#4a3828] px-3 pb-3 pt-2">
+        <form @submit.prevent="handleSend" class="flex items-end gap-1.5 rounded-lg border border-[#4a3828] bg-[#1a1410] pr-1">
+          <textarea
+            ref="textarea"
+            v-model="input"
+            @input="autoResize"
+            @keydown.enter.exact="onEnter"
+            @compositionstart="composing = true"
+            @compositionend="composing = false"
+            :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
+            rows="1"
+            :disabled="busy"
+            class="min-h-[36px] max-h-[100px] min-w-0 flex-1 resize-none overflow-y-auto border-none bg-transparent px-3 pb-2 pt-2 text-[12px] leading-relaxed text-[#d4c0a0] outline-none placeholder:text-[#4a3a28] disabled:opacity-50"
+          />
+          <div class="mb-1 shrink-0">
+            <button v-if="busy" type="button" @click="stopBusy" class="flex h-7 w-7 items-center justify-center rounded-md border-none bg-[#c8a060] text-[#1a1410] transition-opacity hover:opacity-80">
+              <Square class="h-3 w-3 fill-current" />
+            </button>
+            <button v-else type="submit" :disabled="!input.trim()" class="flex h-7 w-7 items-center justify-center rounded-md border transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#c8a060] text-[#1a1410] hover:opacity-85' : 'cursor-default border-[#3a2818] bg-[#2a1e14] text-[#6a5840]'">
+              <ArrowUp class="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </template>
   </div>
 </template>
 

@@ -26,10 +26,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../desktop/apps.js';
+import { appRegistry } from '../../apps.js';
 import { windowManager } from '../../stores/windowManager.js';
 import { useI18n } from '../../i18n/index.js';
-import { wallpaperList } from '../../desktop/wallpapers.js';
+import { wallpaperList } from './wallpapers.js';
 
 const { t } = useI18n();
 

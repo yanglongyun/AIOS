@@ -204,7 +204,13 @@ const createAdmin = async () => {
     const data = await res.json();
     if (!res.ok || data?.success === false) throw new Error(data?.message || t('welcome_err_admin'));
     clearAuthCache();
-    step.value = 3;
+    const envRes = await fetch('/aios/api/llm/env', { credentials: 'include' });
+    const envData = await envRes.json().catch(() => ({}));
+    if (envData.ready) {
+      await runIntroTask();
+    } else {
+      step.value = 3;
+    }
   } catch (e) {
     error.value = e?.message || t('welcome_err_admin');
   } finally {
@@ -227,30 +233,9 @@ const startTypewriter = (text) => {
   }, 50);
 };
 
-const saveModelAndTest = async () => {
-  error.value = '';
-  pending.value = true;
-  try {
-    const saveRes = await fetch('/aios/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        provider: model.value.provider,
-        apiUrl: model.value.apiUrl,
-        apiKey: model.value.apiKey,
-        model: model.value.model,
-        language: model.value.language
-      })
-    });
-    const saveData = await saveRes.json();
-    if (!saveRes.ok || saveData?.success === false || saveData?.error) {
-      throw new Error(saveData?.message || saveData?.error || t('welcome_err_save'));
-    }
-
-    setLocale(model.value.language);
-    const isZh = model.value.language === 'zh';
-    const testRes = await fetch('/aios/api/task/create/instant', {
+const runIntroTask = async () => {
+  const isZh = model.value.language === 'zh';
+  const testRes = await fetch('/aios/api/task/create/instant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -280,6 +265,30 @@ const saveModelAndTest = async () => {
     step.value = 4;
     welcomeText.value = parsed?.intro || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.');
     startTypewriter(welcomeText.value);
+};
+
+const saveModelAndTest = async () => {
+  error.value = '';
+  pending.value = true;
+  try {
+    const saveRes = await fetch('/aios/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        provider: model.value.provider,
+        apiUrl: model.value.apiUrl,
+        apiKey: model.value.apiKey,
+        model: model.value.model,
+        language: model.value.language
+      })
+    });
+    const saveData = await saveRes.json();
+    if (!saveRes.ok || saveData?.success === false || saveData?.error) {
+      throw new Error(saveData?.message || saveData?.error || t('welcome_err_save'));
+    }
+    setLocale(model.value.language);
+    await runIntroTask();
   } catch (e) {
     error.value = e?.message || t('welcome_err_test');
   } finally {

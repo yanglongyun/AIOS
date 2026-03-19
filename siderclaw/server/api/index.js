@@ -4,6 +4,7 @@ import { handleSettingsApi } from './settings.js';
 import { handleFilesApi } from './files.js';
 import { handleSkillsApi } from './skills.js';
 import { handleTaskApi } from './task.js';
+import { handleLlmApi } from './llm.js';
 import { handleAuthApi } from './auth/index.js';
 import { handleSystemApi } from './system.js';
 import { access } from '../../shared/auth/index.js';
@@ -50,6 +51,11 @@ export const handleApiRequest = async (req, res, url) => {
 
     if (path.startsWith('/api/skills')) {
       await handleSkillsApi(req, res, path);
+      return true;
+    }
+
+    if (path.startsWith('/api/llm/')) {
+      handleLlmApi(req, res, path);
       return true;
     }
 

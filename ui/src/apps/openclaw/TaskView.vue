@@ -3,11 +3,6 @@
 
     <!-- 时刻表页 -->
     <div class="page absolute inset-0 flex flex-col overflow-hidden" :class="view === 'timetable' ? 'active' : 'hide-left'">
-      <div class="flex shrink-0 items-center justify-between px-4 py-1.5">
-        <div class="text-[10px] font-bold text-[rgba(255,230,180,0.4)] tracking-widest">TASKS</div>
-        <button class="brass-btn px-3 py-1 rounded cursor-pointer text-[9px] font-bold tracking-wider text-white border border-[#7a5818]" @click="showNew = true">{{ t('openclaw_new_task') }}</button>
-      </div>
-
       <div class="flex-1 min-h-0 overflow-y-auto pb-8 scrollbar-hide" ref="timetableRef">
         <template v-if="cronLoading">
           <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_loading') }}</div>
@@ -128,6 +123,9 @@
         </div>
       </div>
     </div>
+
+    <!-- 悬浮新建按钮 -->
+    <button class="fab absolute bottom-4 right-4 z-[5] w-11 h-11 rounded-full flex items-center justify-center text-white text-xl cursor-pointer border border-[#7a5818]" @click="showNew = true">+</button>
 
     <!-- 新建浮层 -->
     <div class="absolute inset-0 z-20 bg-[rgba(30,20,12,0.7)] backdrop-blur-sm flex-col items-center justify-center p-5" :class="showNew ? 'flex' : 'hidden'" @click.self="showNew = false">
@@ -358,4 +356,6 @@ onMounted(async () => {
 .nc-btn:active { transform:translateY(2px); box-shadow:none; }
 .nc-cancel { background:linear-gradient(180deg,#e8e0d0,#d8d0c0); border:1px solid #c0b8a0; color:#8a7a58; }
 .nc-create { background:linear-gradient(180deg,#c8a050,#a07828); border:1px solid #7a5818; text-shadow:0 1px 1px rgba(0,0,0,0.2); box-shadow:0 2px 0 #5a3a08; }
+.fab { background:linear-gradient(180deg,#c8a050,#a07828); text-shadow:0 1px 1px rgba(0,0,0,0.3); box-shadow:0 3px 8px rgba(90,50,10,0.4), 0 1px 0 #5a3a08, inset 0 1px 1px rgba(255,230,160,0.25); }
+.fab:active { transform:translateY(2px); box-shadow:0 1px 4px rgba(90,50,10,0.3); }
 </style>

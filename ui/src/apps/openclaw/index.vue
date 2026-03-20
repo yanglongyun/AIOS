@@ -42,6 +42,7 @@
 
       <!-- 任务列表 -->
       <div v-if="cronError" class="mb-3 rounded-lg border border-[#c04040]/20 bg-[#c04040]/5 px-3 py-2 text-[12px] text-[#c04040]">{{ cronError }}</div>
+      <div v-if="cronNotice" class="mb-3 rounded-lg border border-[#6a9a4a]/20 bg-[#6a9a4a]/5 px-3 py-2 text-[12px] text-[#5a7a3a]">{{ cronNotice }}</div>
       <div v-if="!cronJobs.length && !cronError" class="py-12 text-center text-[13px] text-[#a09080]">{{ t('openclaw_cron_empty') }}</div>
       <div v-for="job in cronJobs" :key="job.id" class="mb-2 rounded-xl border border-[#e0d0b8] bg-white px-4 py-3">
         <div class="flex items-start justify-between">
@@ -53,10 +54,38 @@
               <span v-else-if="job.schedule?.every">every: {{ job.schedule.every }}ms</span>
               <span v-if="job.lastRunAt" class="ml-2">{{ t('openclaw_last_run') }} {{ job.lastRunAt }}</span>
             </div>
+            <div v-if="job.state?.lastStatus" class="mt-0.5 text-[11px] text-[#9a8870]">{{ t('openclaw_last_status') }} {{ job.state.lastStatus }}</div>
+            <div v-if="job.state?.lastError" class="mt-0.5 text-[11px] text-[#c04040]">{{ t('openclaw_last_error') }} {{ job.state.lastError }}</div>
           </div>
           <div class="flex shrink-0 gap-1">
+            <button @click="toggleRuns(job.id)" class="rounded-lg border border-[#d4c0a0] px-2.5 py-1 text-[10px] text-[#8a6a40] hover:bg-[rgba(200,160,96,0.1)]">{{ t('openclaw_history') }}</button>
+            <button @click="startEditCron(job)" class="rounded-lg border border-[#d4c0a0] px-2.5 py-1 text-[10px] text-[#8a6a40] hover:bg-[rgba(200,160,96,0.1)]">{{ t('openclaw_edit') }}</button>
             <button @click="doRunCron(job.id)" class="rounded-lg border border-[#d4c0a0] px-2.5 py-1 text-[10px] text-[#8a6a40] hover:bg-[rgba(200,160,96,0.1)]">{{ t('openclaw_run') }}</button>
             <button @click="doDeleteCron(job.id)" class="rounded-lg border border-[#c04040]/30 px-2.5 py-1 text-[10px] text-[#c04040] hover:bg-[#c04040]/5">{{ t('openclaw_delete') }}</button>
+          </div>
+        </div>
+        <div v-if="editingCronId === job.id" class="mt-3 rounded-lg border border-[#e0d0b8] bg-[#faf7f2] p-3">
+          <input v-model="editForm.name" :placeholder="t('openclaw_cron_name_ph')" class="mb-2 w-full rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+          <input v-model="editForm.cron" :placeholder="t('openclaw_cron_cron_ph')" class="mb-2 w-full rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+          <textarea v-model="editForm.prompt" :placeholder="t('openclaw_cron_prompt_ph')" rows="2" class="w-full resize-none rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+          <div class="mt-2 flex justify-end gap-2">
+            <button @click="cancelEditCron" class="px-3 py-1.5 text-[12px] text-[#9a8870]">{{ t('openclaw_cancel') }}</button>
+            <button @click="doUpdateCron" :disabled="editBusy" class="rounded-lg bg-[#c8a060] px-4 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50">{{ t('openclaw_save') }}</button>
+          </div>
+        </div>
+        <div v-if="openRunsJobId === job.id" class="mt-3 rounded-lg border border-[#e0d0b8] bg-[#faf7f2] p-3">
+          <div v-if="runsLoading" class="text-[12px] text-[#9a8870]">{{ t('openclaw_loading_history') }}</div>
+          <div v-else-if="!runsByJob[job.id]?.length" class="text-[12px] text-[#9a8870]">{{ t('openclaw_history_empty') }}</div>
+          <div v-else class="space-y-2">
+            <div v-for="(r, idx) in runsByJob[job.id]" :key="idx" class="rounded-md border border-[#eadfcf] bg-white px-3 py-2">
+              <div class="text-[11px] text-[#8a7a60]">
+                <span>{{ formatTs(r.ts) }}</span>
+                <span class="ml-2">{{ t('openclaw_last_status') }} {{ r.status || '-' }}</span>
+                <span v-if="r.durationMs" class="ml-2">{{ r.durationMs }}ms</span>
+              </div>
+              <div v-if="r.summary" class="mt-1 whitespace-pre-wrap text-[12px] text-[#4a3a28]">{{ r.summary }}</div>
+              <div v-if="r.error" class="mt-1 whitespace-pre-wrap text-[11px] text-[#c04040]">{{ t('openclaw_last_error') }} {{ r.error }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -105,9 +134,16 @@ const tabs = ['cron', 'chat'];
 // Cron
 const cronJobs = ref([]);
 const cronError = ref('');
+const cronNotice = ref('');
 const showAdd = ref(false);
 const addBusy = ref(false);
 const addForm = ref({ name: '', cron: '', prompt: '' });
+const editingCronId = ref('');
+const editBusy = ref(false);
+const editForm = ref({ name: '', cron: '', prompt: '' });
+const openRunsJobId = ref('');
+const runsLoading = ref(false);
+const runsByJob = ref({});
 
 const loadStatus = async () => {
   try {
@@ -118,6 +154,7 @@ const loadStatus = async () => {
 
 const loadCron = async () => {
   cronError.value = '';
+  cronNotice.value = '';
   try {
     const res = await fetch(`${API}/cron/list`);
     const data = await res.json();
@@ -127,6 +164,8 @@ const loadCron = async () => {
 };
 
 const doAddCron = async () => {
+  cronError.value = '';
+  cronNotice.value = '';
   addBusy.value = true;
   try {
     const res = await fetch(`${API}/cron/add`, {
@@ -143,16 +182,101 @@ const doAddCron = async () => {
 };
 
 const doRunCron = async (jobId) => {
+  cronError.value = '';
+  cronNotice.value = '';
   try {
-    await fetch(`${API}/cron/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
+    const res = await fetch(`${API}/cron/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
+    const data = await res.json();
+    if (!data.success) { cronError.value = data.message || 'run failed'; return; }
+    cronNotice.value = t('openclaw_run_triggered');
+    await loadCron();
+    setTimeout(() => { loadCron(); }, 1500);
   } catch (e) { cronError.value = e.message; }
 };
 
 const doDeleteCron = async (jobId) => {
+  cronError.value = '';
+  cronNotice.value = '';
   try {
     await fetch(`${API}/cron/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
     await loadCron();
   } catch (e) { cronError.value = e.message; }
+};
+
+const formatTs = (ts) => {
+  const n = Number(ts || 0);
+  if (!n) return '';
+  const d = new Date(n);
+  return d.toISOString().replace('T', ' ').slice(0, 19);
+};
+
+const toggleRuns = async (jobId) => {
+  const id = String(jobId || '');
+  if (!id) return;
+  if (openRunsJobId.value === id) {
+    openRunsJobId.value = '';
+    return;
+  }
+  openRunsJobId.value = id;
+  runsLoading.value = true;
+  try {
+    const res = await fetch(`${API}/cron/runs?jobId=${encodeURIComponent(id)}&limit=10`);
+    const data = await res.json();
+    if (!data.success) {
+      cronError.value = data.message || 'load runs failed';
+      return;
+    }
+    runsByJob.value[id] = Array.isArray(data.entries) ? data.entries : [];
+  } catch (e) {
+    cronError.value = e.message;
+  } finally {
+    runsLoading.value = false;
+  }
+};
+
+const startEditCron = (job) => {
+  showAdd.value = false;
+  editingCronId.value = String(job?.id || '');
+  editForm.value = {
+    name: String(job?.name || ''),
+    cron: String(job?.schedule?.cron || ''),
+    prompt: String(job?.prompt || '')
+  };
+};
+
+const cancelEditCron = () => {
+  editingCronId.value = '';
+  editForm.value = { name: '', cron: '', prompt: '' };
+};
+
+const doUpdateCron = async () => {
+  if (!editingCronId.value) {
+    cronError.value = 'jobId 必填';
+    return;
+  }
+  cronError.value = '';
+  cronNotice.value = '';
+  editBusy.value = true;
+  try {
+    const res = await fetch(`${API}/cron/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jobId: editingCronId.value,
+        name: editForm.value.name,
+        schedule: { cron: editForm.value.cron },
+        prompt: editForm.value.prompt
+      })
+    });
+    const data = await res.json();
+    if (!data.success) { cronError.value = data.message; return; }
+    cancelEditCron();
+    await loadCron();
+  } catch (e) {
+    cronError.value = e.message;
+  } finally {
+    editBusy.value = false;
+  }
 };
 
 // Chat

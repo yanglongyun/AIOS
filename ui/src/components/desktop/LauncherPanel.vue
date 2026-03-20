@@ -10,13 +10,6 @@
         class="min-w-0 flex-1 rounded-[8px] border border-[rgba(200,160,96,0.3)] bg-[rgba(245,240,232,0.9)] px-3 py-1.5 text-[13px] text-[#3a2a18] outline-none placeholder-[#b0a090] focus:border-[#c8a060]"
         :placeholder="t('launcher_search')"
       />
-      <button
-        class="flex h-[32px] flex-shrink-0 items-center gap-1 rounded-[8px] bg-[rgba(200,160,96,0.18)] px-2.5 text-[12px] font-medium text-[#5a3e28] transition-colors hover:bg-[rgba(200,160,96,0.3)]"
-        @click="$emit('create-app')"
-      >
-        <span class="text-[14px] leading-none">✦</span>
-        {{ t('app_sidebar_create_app') }}
-      </button>
     </div>
 
     <div class="grid grid-cols-4 gap-1.5">
@@ -66,7 +59,7 @@ import { clearAuthCache } from '../../auth/session.js';
 
 const { t } = useI18n();
 const router = useRouter();
-defineEmits(['open', 'close', 'create-app']);
+defineEmits(['open', 'close']);
 
 const search = ref('');
 const searchEl = ref(null);

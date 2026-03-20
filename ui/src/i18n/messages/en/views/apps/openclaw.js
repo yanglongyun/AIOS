@@ -38,4 +38,10 @@ export default {
   openclaw_loading: 'Loading...',
   openclaw_running: 'Running...',
   openclaw_run_triggered: 'Run triggered',
+  openclaw_tab_tasks: 'Tasks',
+  openclaw_tab_chat: 'Chat',
+  openclaw_chat_empty: 'Send a message to start chatting',
+  openclaw_chat_ph: 'Type a message...',
+  openclaw_send: 'Send',
+  openclaw_thinking: 'Thinking',
 };

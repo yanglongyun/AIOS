@@ -38,4 +38,10 @@ export default {
   openclaw_loading: '加载中...',
   openclaw_running: '执行中...',
   openclaw_run_triggered: '已触发执行',
+  openclaw_tab_tasks: '任务',
+  openclaw_tab_chat: '对话',
+  openclaw_chat_empty: '向 OpenClaw 发送消息开始对话',
+  openclaw_chat_ph: '输入消息...',
+  openclaw_send: '发送',
+  openclaw_thinking: '思考中',
 };

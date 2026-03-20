@@ -91,6 +91,8 @@
               </div>
             </div>
             <div v-if="selectedJob.message" class="text-xs leading-relaxed text-[#5a4830] italic py-2 border-t border-dashed border-[rgba(160,140,100,0.2)] mt-1.5">{{ selectedJob.message }}</div>
+            <div v-if="selectedJob.lastRunAt" class="text-[10px] text-[#9a8a68] mt-1.5">{{ t('openclaw_last_run') }} {{ new Date(selectedJob.lastRunAt).toLocaleString() }}</div>
+            <div v-if="selectedJob.state?.lastStatus" class="text-[10px] mt-0.5" :class="selectedJob.state.lastStatus === 'error' ? 'text-[#c05040]' : 'text-[#4a8a40]'">{{ selectedJob.state.lastStatus }}</div>
             <div class="flex gap-1.5 mt-2.5 pt-2 border-t border-dashed border-[rgba(160,140,100,0.2)]">
               <button class="ib ib-run px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doRun(selectedJob.id)">▶ {{ t('openclaw_run') }}</button>
               <button class="ib ib-del px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doDelete(selectedJob.id)">{{ t('openclaw_delete') }}</button>
@@ -266,8 +268,19 @@ const openDetail = async (job) => {
   try {
     const res = await fetch(`${API}/cron/runs?jobId=${encodeURIComponent(job.id)}`);
     const data = await res.json();
-    if (data.success) runs.value = Array.isArray(data.runs) ? data.runs : [];
-  } catch { /* no runs */ }
+    if (data.success && Array.isArray(data.runs) && data.runs.length) {
+      runs.value = data.runs;
+    }
+  } catch { /* runs API 不可用 */ }
+  // 如果 runs API 没返回数据，用 job 自身的执行信息构造记录
+  if (!runs.value.length && job.lastRunAt) {
+    runs.value = [{
+      time: new Date(job.lastRunAt).toLocaleString(),
+      duration: job.state?.durationMs ? job.state.durationMs + 'ms' : '—',
+      ok: job.state?.lastStatus !== 'error',
+      output: job.state?.lastError || job.state?.lastSummary || job.state?.lastStatus || '执行完成',
+    }];
+  }
   runsLoading.value = false;
 };
 

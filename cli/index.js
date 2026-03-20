@@ -94,7 +94,10 @@ if (arg === 'restart') {
 if (arg === 'update') {
   console.log(chalk.dim('  ' + t.pullingCode));
   try {
+    const hasChanges = execSync('git status --porcelain', { cwd: ROOT }).toString().trim();
+    if (hasChanges) execSync('git stash', { cwd: ROOT, stdio: 'inherit' });
     execSync('git pull --ff-only', { cwd: ROOT, stdio: 'inherit' });
+    if (hasChanges) execSync('git stash pop', { cwd: ROOT, stdio: 'pipe' }).toString();
   } catch {
     console.error(chalk.red('  ' + t.pullFailed));
     process.exit(1);

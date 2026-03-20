@@ -38,14 +38,6 @@
 
     <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
 
-    <!-- 右侧：时钟 + 任务入口 -->
-    <div class="flex-shrink-0 cursor-default px-1.5 text-right">
-      <div class="text-[13px] font-semibold leading-[1.25] text-[#3a2a18]">{{ clockTime }}</div>
-      <div class="text-[10px] leading-[1.25] text-[#9a8870]">{{ clockDate }}</div>
-    </div>
-
-    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
-
     <button
       class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-[8px] border transition-all"
       :class="taskCenterOpen
@@ -55,6 +47,14 @@
     >
       <ListTodo class="h-[15px] w-[15px] text-[#5a3e28]" />
     </button>
+
+    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
+
+    <!-- 时钟（最右侧） -->
+    <div class="flex-shrink-0 cursor-default px-1.5 text-right">
+      <div class="text-[13px] font-semibold leading-[1.25] text-[#3a2a18]">{{ clockTime }}</div>
+      <div class="text-[10px] leading-[1.25] text-[#9a8870]">{{ clockDate }}</div>
+    </div>
 
     <!-- 任务中心面板 -->
     <TaskCenter v-if="taskCenterOpen" @close="taskCenterOpen = false" />

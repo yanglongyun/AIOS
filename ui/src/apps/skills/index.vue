@@ -26,14 +26,17 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '../../i18n/index.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 
 const { t } = useI18n();
 const skills = ref([]);
 const loading = ref(true);
 
 onMounted(async () => {
+  chatPanel.setContext({ scene: 'skills', label: t('app_sidebar_skills') });
+  chatPanel.setQuickMessages([t('skills_chat_quick_1'), t('skills_chat_quick_2'), t('skills_chat_quick_3')]);
   try {
     const res = await fetch('/aios/api/skills/list');
     const data = await res.json();
@@ -41,4 +44,5 @@ onMounted(async () => {
   } catch { /* ignore */ }
   loading.value = false;
 });
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

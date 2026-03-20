@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
@@ -83,6 +83,7 @@ import ToolTab from './ToolTab.vue';
 import GeneralTab from './GeneralTab.vue';
 import { getProvider } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 import { useI18n } from '../../i18n/index.js';
 const router = useRouter();
 const { locale, setLocale, t } = useI18n();
@@ -274,8 +275,11 @@ const logout = async () => {
 };
 
 onMounted(async () => {
+  chatPanel.setContext({ scene: 'settings', label: t('app_sidebar_settings') });
+  chatPanel.setQuickMessages([t('settings_chat_quick_1'), t('settings_chat_quick_2'), t('settings_chat_quick_3')]);
   loadProviderConfigs();
   await fetchMe();
   await fetchSettings();
 });
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

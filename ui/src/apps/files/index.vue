@@ -88,8 +88,9 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../../i18n/index.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 
 const { t } = useI18n();
 const items = ref([]);
@@ -237,5 +238,10 @@ const uploadFiles = async (fileList) => {
 const onUpload = (e) => uploadFiles(e.target.files);
 const onDrop = (e) => { dragOver.value = false; uploadFiles(e.dataTransfer.files); };
 
-onMounted(() => loadDir('files'));
+onMounted(() => {
+  loadDir('files');
+  chatPanel.setContext({ scene: 'files', label: t('app_sidebar_files') });
+  chatPanel.setQuickMessages([t('files_chat_quick_1'), t('files_chat_quick_2'), t('files_chat_quick_3')]);
+});
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

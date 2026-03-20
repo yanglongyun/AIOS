@@ -94,6 +94,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { on } from '../../ws.js';
 import { useI18n } from '../../i18n/index.js';
 import { windowManager } from '../../stores/windowManager.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);
@@ -163,10 +164,13 @@ const removeSchedule = async (id) => {
 const unsubs = [];
 onMounted(async () => {
   await loadAll();
+  chatPanel.setContext({ scene: 'tasks', label: t('app_sidebar_tasks') });
+  chatPanel.setQuickMessages([t('tasks_chat_quick_1'), t('tasks_chat_quick_2'), t('tasks_chat_quick_3')]);
   unsubs.push(on('tasks_changed', loadTasks));
   unsubs.push(on('schedules_changed', loadSchedules));
 });
 onUnmounted(() => {
+  chatPanel.clearContext(); chatPanel.setQuickMessages([]);
   while (unsubs.length) {
     const off = unsubs.pop();
     if (typeof off === 'function') off();

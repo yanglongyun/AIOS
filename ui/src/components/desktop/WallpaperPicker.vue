@@ -25,7 +25,7 @@ import { wallpaperList } from './wallpapers.js';
 
 const emit = defineEmits(['select']);
 const visible = ref(false);
-const current = ref(localStorage.getItem('aios-wallpaper') || 'wp-warm-morning');
+const current = ref(localStorage.getItem('aios-wallpaper') || 'wp-ocean-breeze');
 const wallpapers = wallpaperList;
 
 function show() { visible.value = true; }

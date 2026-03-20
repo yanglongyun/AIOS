@@ -1,241 +1,113 @@
 <template>
-  <div class="flex h-full flex-col overflow-hidden font-['Georgia','PingFang_SC',serif] bg-[#2a1e14] relative">
-    <div class="cork-bg"></div>
-    <div class="frame-t"></div>
-
-    <div class="flex-1 min-h-0 relative z-[2] overflow-hidden">
-
-      <!-- 时刻表页 -->
-      <div class="page" :class="currentView === 'timetable' ? 'active' : 'hide-left'">
-        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
-          <div class="t-badge">🦞</div>
-          <div class="flex-1">
-            <div class="text-sm font-bold text-[#3a2810]">OpenClaw</div>
-            <div class="flex items-center gap-1 mt-px">
-              <span class="w-1 h-1 rounded-full" :class="status.online ? (status.gateway ? 'dot-on' : 'dot-warn') : 'bg-[#6a4a3a]'"></span>
-              <span class="text-[8px] text-[rgba(60,40,20,0.4)]">{{ status.online ? (status.gateway ? t('openclaw_online') : t('openclaw_no_gateway')) : t('openclaw_offline') }}{{ status.version ? ' · ' + status.version : '' }}</span>
-            </div>
-          </div>
-          <button class="brass-btn" @click="showNew = true">{{ t('openclaw_new_task') }}</button>
-        </div>
-
-        <div class="flex-1 min-h-0 overflow-y-auto pb-8 scrollbar-hide" ref="timetableRef">
-          <template v-if="!cronJobs.length && !cronError">
-            <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_cron_empty') }}</div>
-          </template>
-          <template v-else>
-            <template v-for="slot in pastSlots" :key="'past-'+slot.key">
-              <div class="hour-row" :class="{ major: slot.major }">
-                <div class="hour-label" style="color:rgba(255,230,180,0.35)">{{ slot.label }}</div>
-                <div v-if="slot.job" class="task-card past" :class="'tilt-'+((slot.idx%4)+1)" @click="openDetail(slot.job)">
-                  <div class="pin" :class="pinColor(slot.idx)"></div>
-                  <div class="stripe" :class="stripeColor(slot.idx)"></div>
-                  <div class="px-3 py-2.5 pl-3.5">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xl shrink-0">{{ jobEmoji(slot.idx) }}</span>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-bold text-[#3a2810] truncate">{{ slot.job.name || slot.job.id }}</div>
-                        <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · {{ t('openclaw_executed') }}</div>
-                      </div>
-                    </div>
-                    <div v-if="slot.job.message" class="mt-1.5 text-[11px] leading-relaxed text-[#6a5838] italic line-clamp-2">{{ slot.job.message }}</div>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <div class="hour-row major" ref="nowRef">
-              <div class="hour-label now-label">{{ nowLabel }}</div>
-            </div>
-            <div class="now-line"><span class="now-tag">{{ t('openclaw_now') }}</span></div>
-
-            <template v-for="slot in futureSlots" :key="'future-'+slot.key">
-              <div class="hour-row" :class="{ major: slot.major }">
-                <div class="hour-label" style="color:rgba(180,230,150,0.7)">{{ slot.label }}</div>
-                <div v-if="slot.job" class="task-card" :class="'tilt-'+((slot.idx%4)+1)" @click="openDetail(slot.job)">
-                  <div class="pin" :class="pinColor(slot.idx)"></div>
-                  <div class="stripe" :class="stripeColor(slot.idx)"></div>
-                  <div v-if="slot.idx % 3 === 0" class="tape" style="top:4px;left:-6px;transform:rotate(-10deg)"></div>
-                  <div class="px-3 py-2.5 pl-3.5">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xl shrink-0">{{ jobEmoji(slot.idx) }}</span>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-bold text-[#3a2810] truncate">{{ slot.job.name || slot.job.id }}</div>
-                        <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · {{ slot.countdown }}</div>
-                      </div>
-                    </div>
-                    <div v-if="slot.job.message" class="mt-1.5 text-[11px] leading-relaxed text-[#6a5838] italic line-clamp-2">{{ slot.job.message }}</div>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </template>
-        </div>
+  <div class="flex h-full flex-col overflow-hidden bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]">
+    <!-- 顶栏：状态 + Tab -->
+    <div class="shrink-0 border-b border-[#e0d0b8] px-5 pt-4 pb-0">
+      <div class="mb-3 flex items-center gap-2">
+        <span class="text-[22px]">🦞</span>
+        <span class="text-base font-bold text-[#3a2a18]">OpenClaw</span>
+        <span class="ml-auto flex items-center gap-1.5 text-[11px]">
+          <span class="h-2 w-2 rounded-full" :class="status.online ? (status.gateway ? 'bg-[#6a9a4a]' : 'bg-[#d4a840]') : 'bg-[#c04040]'"></span>
+          <span class="text-[#9a8870]">{{ status.online ? (status.gateway ? t('openclaw_online') : t('openclaw_no_gateway')) : t('openclaw_offline') }}</span>
+          <span v-if="status.version" class="text-[#b0a090]">{{ status.version }}</span>
+        </span>
       </div>
-
-      <!-- 详情页 -->
-      <div class="page page-bg" :class="currentView === 'detail' ? 'active' : (currentView === 'viz' ? 'hide-left' : 'hide-right')" style="z-index:3">
-        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
-          <button class="back-btn" @click="currentView = 'timetable'">{{ t('openclaw_back') }}</button>
-          <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ selectedJob?.name || '' }}</div>
-        </div>
-        <div class="flex-1 min-h-0 overflow-y-auto px-4 pb-6 scrollbar-hide">
-          <div v-if="selectedJob" class="info-card">
-            <div class="flex items-center gap-2.5 mb-1.5">
-              <span class="text-[26px]">{{ jobEmoji(selectedJobIdx) }}</span>
-              <div>
-                <div class="text-base font-bold text-[#3a2810]">{{ selectedJob.name || selectedJob.id }}</div>
-                <div class="text-[11px] text-[#9a8a68] font-['Courier_New',monospace] mt-0.5">{{ scheduleText(selectedJob) }}</div>
-              </div>
-            </div>
-            <div v-if="selectedJob.message" class="text-xs leading-relaxed text-[#5a4830] italic py-2 border-t border-dashed border-[rgba(160,140,100,0.2)] mt-1.5">{{ selectedJob.message }}</div>
-            <div class="flex gap-1.5 mt-2.5 pt-2 border-t border-dashed border-[rgba(160,140,100,0.2)]">
-              <button class="ib ib-run" @click="doRun(selectedJob.id)">▶ {{ t('openclaw_run') }}</button>
-              <button class="ib ib-del" @click="doDelete(selectedJob.id)">{{ t('openclaw_delete') }}</button>
-            </div>
-          </div>
-
-          <div class="text-[10px] font-bold text-[rgba(255,230,180,0.5)] tracking-widest mb-2">{{ t('openclaw_runs_label') }}</div>
-          <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">...</div>
-          <div v-else-if="!runs.length" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_no_runs') }}</div>
-          <div v-for="(r, ri) in runs" :key="ri" class="run-card" :class="{ open: expandedRun === ri }" @click="expandedRun = expandedRun === ri ? -1 : ri">
-            <div class="flex items-center gap-2 px-3 py-2.5">
-              <div class="w-2 h-2 rounded-full shrink-0" :class="r.ok !== false ? 'rd-ok' : 'rd-fail'"></div>
-              <div class="flex-1 min-w-0">
-                <div class="text-xs font-semibold text-[#3a2810]">{{ r.time || r.startedAt || '—' }}</div>
-                <div class="text-[9px] text-[#9a8a68] mt-px">{{ t('openclaw_run_duration') }} {{ r.duration || '—' }}</div>
-              </div>
-              <div class="shrink-0 text-[9px] font-bold" :class="r.ok !== false ? 'text-[#4a8a40]' : 'text-[#c05040]'">{{ r.ok !== false ? t('openclaw_run_ok') : t('openclaw_run_fail') }}</div>
-              <div class="run-arrow shrink-0 text-[10px] text-[#c0b090]">▸</div>
-            </div>
-            <div class="run-detail" @click.stop>
-              <div class="run-output">{{ r.output || r.result || '—' }}</div>
-              <div v-if="r.ok !== false" class="flex gap-1.5 mt-2">
-                <button class="viz-btn" @click="openViz(r)">{{ t('openclaw_visualize') }}</button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="flex gap-0">
+        <button v-for="tab in tabs" :key="tab" @click="activeTab = tab"
+          class="border-b-2 px-4 py-2 text-[13px] font-semibold transition-colors"
+          :class="activeTab === tab ? 'border-[#c8a060] text-[#3a2a18]' : 'border-transparent text-[#a09080] hover:text-[#5a4a38]'"
+        >{{ t(`openclaw_tab_${tab}`) }}</button>
       </div>
-
-      <!-- 可视化页 -->
-      <div class="page page-bg" :class="currentView === 'viz' ? 'active' : 'hide-right'" style="z-index:4">
-        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
-          <button class="back-btn" @click="currentView = 'detail'">{{ t('openclaw_back') }}</button>
-          <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ t('openclaw_visualize') }}</div>
-        </div>
-        <div class="flex-1 min-h-0 mx-4 mb-4 rounded overflow-hidden bg-white relative shadow-md">
-          <iframe class="w-full h-full border-none" ref="vizFrameRef"></iframe>
-          <div class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3 transition-opacity" :class="vizLoading ? '' : 'opacity-0 pointer-events-none'">
-            <div class="viz-spinner"></div>
-            <div class="text-xs text-[#8a8aaa] font-sans">{{ t('openclaw_viz_loading') }}</div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
-    <div class="frame-b"></div>
-
-    <!-- 新建浮层 -->
-    <div class="fixed inset-0 z-20 bg-[rgba(30,20,12,0.7)] backdrop-blur-sm flex-col items-center justify-center p-5" :class="showNew ? 'flex' : 'hidden'" @click.self="showNew = false">
-      <div class="w-full max-w-[320px] rounded-sm p-[18px] relative shadow-xl info-card">
-        <div class="pin pin-r" style="right:16px;top:-3px"></div>
-        <div class="text-center text-[15px] font-bold text-[#3a2810] mb-3.5">📌 {{ t('openclaw_new_task') }}</div>
-        <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_name_ph') }}</div>
-          <input class="nc-input" v-model="addForm.name" :placeholder="t('openclaw_cron_name_ph')" />
+    <!-- Cron Tab -->
+    <div v-if="activeTab === 'cron'" class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="text-[13px] font-semibold text-[#5a4a38]">{{ t('openclaw_cron_title') }}</span>
+        <div class="flex gap-2">
+          <button @click="loadCron" class="rounded-lg border border-[#d4c0a0] px-3 py-1 text-[11px] text-[#8a6a40] transition-colors hover:bg-[rgba(200,160,96,0.1)]">{{ t('openclaw_refresh') }}</button>
+          <button @click="showAdd = !showAdd" class="rounded-lg bg-[#c8a060] px-3 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-[#b89050]">+ {{ t('openclaw_cron_add') }}</button>
         </div>
-        <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">调度方式</div>
-          <div class="flex gap-1 mb-2.5">
-            <div v-for="st in ['cron','every','at']" :key="st" class="sched-opt" :class="{ sel: addForm.schedType === st }" @click="addForm.schedType = st">{{ t('openclaw_sched_' + st) }}</div>
+      </div>
+
+      <!-- 新建表单 -->
+      <div v-if="showAdd" class="mb-4 rounded-xl border border-[#d4c0a0] bg-white p-4">
+        <input v-model="addForm.name" :placeholder="t('openclaw_cron_name_ph')" class="mb-2 w-full rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+        <input v-model="addForm.cron" :placeholder="t('openclaw_cron_cron_ph')" class="mb-2 w-full rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+        <textarea v-model="addForm.prompt" :placeholder="t('openclaw_cron_prompt_ph')" rows="2" class="mb-2 w-full resize-none rounded-lg border border-[#e0d0b8] px-3 py-2 text-[13px] outline-none focus:border-[#c8a060]" />
+        <div class="flex justify-end gap-2">
+          <button @click="showAdd = false" class="px-3 py-1.5 text-[12px] text-[#9a8870]">{{ t('openclaw_cancel') }}</button>
+          <button @click="doAddCron" :disabled="addBusy" class="rounded-lg bg-[#c8a060] px-4 py-1.5 text-[12px] font-semibold text-white disabled:opacity-50">{{ t('openclaw_cron_create') }}</button>
+        </div>
+      </div>
+
+      <!-- 任务列表 -->
+      <div v-if="cronError" class="mb-3 rounded-lg border border-[#c04040]/20 bg-[#c04040]/5 px-3 py-2 text-[12px] text-[#c04040]">{{ cronError }}</div>
+      <div v-if="!cronJobs.length && !cronError" class="py-12 text-center text-[13px] text-[#a09080]">{{ t('openclaw_cron_empty') }}</div>
+      <div v-for="job in cronJobs" :key="job.id" class="mb-2 rounded-xl border border-[#e0d0b8] bg-white px-4 py-3">
+        <div class="flex items-start justify-between">
+          <div class="min-w-0 flex-1">
+            <div class="text-[13px] font-semibold text-[#3a2a18]">{{ job.name || job.id }}</div>
+            <div class="mt-0.5 text-[11px] text-[#a09080]">
+              <span v-if="job.schedule?.cron">cron: {{ job.schedule.cron }}</span>
+              <span v-else-if="job.schedule?.at">at: {{ job.schedule.at }}</span>
+              <span v-else-if="job.schedule?.every">every: {{ job.schedule.every }}ms</span>
+              <span v-if="job.lastRunAt" class="ml-2">{{ t('openclaw_last_run') }} {{ job.lastRunAt }}</span>
+            </div>
+          </div>
+          <div class="flex shrink-0 gap-1">
+            <button @click="doRunCron(job.id)" class="rounded-lg border border-[#d4c0a0] px-2.5 py-1 text-[10px] text-[#8a6a40] hover:bg-[rgba(200,160,96,0.1)]">{{ t('openclaw_run') }}</button>
+            <button @click="doDeleteCron(job.id)" class="rounded-lg border border-[#c04040]/30 px-2.5 py-1 text-[10px] text-[#c04040] hover:bg-[#c04040]/5">{{ t('openclaw_delete') }}</button>
           </div>
         </div>
-        <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_sched_label_' + addForm.schedType) }}</div>
-          <input class="nc-input" v-model="addForm.schedValue" :placeholder="t('openclaw_sched_' + addForm.schedType + '_ph')" />
+      </div>
+    </div>
+
+    <!-- Chat Tab -->
+    <div v-if="activeTab === 'chat'" class="flex min-h-0 flex-1 flex-col">
+      <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+        <div v-if="!chatMessages.length" class="py-12 text-center text-[13px] text-[#a09080]">{{ t('openclaw_chat_empty') }}</div>
+        <div v-for="(m, i) in chatMessages" :key="i" class="mb-3">
+          <div v-if="m.role === 'user'" class="flex justify-end">
+            <div class="max-w-[80%] rounded-[14px_14px_4px_14px] bg-[#5a3e28] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#f0e8d8]">{{ m.content }}</div>
+          </div>
+          <div v-else class="flex items-start gap-2">
+            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#ece4d8] text-[14px]">🦞</div>
+            <div class="max-w-[80%] whitespace-pre-wrap rounded-[14px_14px_14px_4px] border border-[#e0d0b8] bg-white px-3.5 py-2.5 text-[13px] leading-relaxed text-[#4a3a28]">{{ m.content }}</div>
+          </div>
         </div>
-        <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_prompt_ph') }}</div>
-          <textarea class="nc-ta" v-model="addForm.prompt" rows="3" :placeholder="t('openclaw_cron_prompt_ph')"></textarea>
+        <div v-if="chatBusy" class="flex items-start gap-2">
+          <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#ece4d8] text-[14px]">🦞</div>
+          <div class="py-2 text-[13px] text-[#a09080]">{{ t('openclaw_thinking') }}<span class="animate-pulse">...</span></div>
         </div>
-        <div class="flex gap-2 mt-3.5 justify-center">
-          <button class="nc-btn nc-cancel" @click="showNew = false">{{ t('openclaw_cancel') }}</button>
-          <button class="nc-btn nc-create" @click="doAdd" :disabled="addBusy">{{ t('openclaw_pin_it') }}</button>
-        </div>
+      </div>
+      <div class="shrink-0 border-t border-[#e0d0b8] px-5 py-3">
+        <form @submit.prevent="doChat" class="flex gap-2">
+          <input v-model="chatInput" :placeholder="t('openclaw_chat_ph')" :disabled="chatBusy" class="min-w-0 flex-1 rounded-xl border border-[#d4c0a0] bg-white px-4 py-2.5 text-[13px] outline-none placeholder:text-[#b0a090] focus:border-[#c8a060] disabled:opacity-50" />
+          <button type="submit" :disabled="!chatInput.trim() || chatBusy" class="rounded-xl bg-[#c8a060] px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#b89050] disabled:opacity-40">{{ t('openclaw_send') }}</button>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../../i18n/index.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 
 const { t } = useI18n();
 const API = '/aios/apps/openclaw';
 
 const status = ref({ online: false, version: null, gateway: false });
+const activeTab = ref('cron');
+const tabs = ['cron', 'chat'];
+
+// Cron
 const cronJobs = ref([]);
 const cronError = ref('');
-const currentView = ref('timetable');
-const selectedJob = ref(null);
-const selectedJobIdx = ref(0);
-const runs = ref([]);
-const runsLoading = ref(false);
-const expandedRun = ref(-1);
-const vizLoading = ref(false);
-const showNew = ref(false);
+const showAdd = ref(false);
 const addBusy = ref(false);
-const addForm = ref({ name: '', schedType: 'cron', schedValue: '', prompt: '' });
-const timetableRef = ref(null);
-const nowRef = ref(null);
-const vizFrameRef = ref(null);
-
-const EMOJIS = ['🐡', '🐠', '🐙', '🪼', '🦑', '🐚', '🦀', '🐳'];
-const PINS = ['pin-r', 'pin-g', 'pin-b', 'pin-y'];
-const STRIPES = ['s-coral', 's-teal', 's-plum', 's-amber'];
-
-const jobEmoji = (idx) => EMOJIS[idx % EMOJIS.length];
-const pinColor = (idx) => PINS[idx % PINS.length];
-const stripeColor = (idx) => STRIPES[idx % STRIPES.length];
-
-const scheduleText = (job) => {
-  if (job.schedule?.cron) return `cron: ${job.schedule.cron}`;
-  if (job.schedule?.every) return `every ${job.schedule.every}`;
-  if (job.schedule?.at) return `at ${job.schedule.at}`;
-  return job.id;
-};
-
-const nowLabel = computed(() => {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-});
-
-const pastSlots = computed(() => {
-  return cronJobs.value
-    .filter(j => j.lastRunAt)
-    .map((j, i) => {
-      const d = new Date(j.lastRunAt);
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      return { key: j.id + '-past', label: `${hh}:${mm}`, major: mm === '00', job: j, idx: i };
-    })
-    .sort((a, b) => a.label.localeCompare(b.label));
-});
-
-const futureSlots = computed(() => {
-  return cronJobs.value.map((j, i) => {
-    let countdown = '';
-    if (j.schedule?.every) countdown = `${j.schedule.every}后`;
-    else if (j.schedule?.at) countdown = j.schedule.at;
-    else countdown = '下次执行';
-    const nextHour = ((new Date().getHours() + 1 + i) % 24);
-    const label = `${String(nextHour).padStart(2, '0')}:00`;
-    return { key: j.id + '-future', label, major: true, job: j, idx: i, countdown };
-  });
-});
+const addForm = ref({ name: '', cron: '', prompt: '' });
 
 const loadStatus = async () => {
   try {
@@ -254,216 +126,67 @@ const loadCron = async () => {
   } catch (e) { cronError.value = e.message; }
 };
 
-const openDetail = async (job) => {
-  selectedJob.value = job;
-  selectedJobIdx.value = cronJobs.value.indexOf(job);
-  expandedRun.value = -1;
-  currentView.value = 'detail';
-  runsLoading.value = true;
-  runs.value = [];
+const doAddCron = async () => {
+  addBusy.value = true;
   try {
-    const res = await fetch(`${API}/cron/runs?jobId=${encodeURIComponent(job.id)}`);
+    const res = await fetch(`${API}/cron/add`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: addForm.value.name, schedule: { cron: addForm.value.cron }, prompt: addForm.value.prompt })
+    });
     const data = await res.json();
-    if (data.success) runs.value = Array.isArray(data.runs) ? data.runs : [];
-  } catch { /* no runs */ }
-  runsLoading.value = false;
+    if (!data.success) { cronError.value = data.message; return; }
+    showAdd.value = false;
+    addForm.value = { name: '', cron: '', prompt: '' };
+    await loadCron();
+  } catch (e) { cronError.value = e.message; }
+  finally { addBusy.value = false; }
 };
 
-const doRun = async (jobId) => {
+const doRunCron = async (jobId) => {
   try {
     await fetch(`${API}/cron/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
-    if (selectedJob.value) await openDetail(selectedJob.value);
   } catch (e) { cronError.value = e.message; }
 };
 
-const doDelete = async (jobId) => {
+const doDeleteCron = async (jobId) => {
   try {
     await fetch(`${API}/cron/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
-    currentView.value = 'timetable';
     await loadCron();
   } catch (e) { cronError.value = e.message; }
 };
 
-const doAdd = async () => {
-  if (!addForm.value.name || !addForm.value.prompt) return;
-  addBusy.value = true;
-  const schedule = {};
-  schedule[addForm.value.schedType] = addForm.value.schedValue;
+// Chat
+const chatMessages = ref([]);
+const chatInput = ref('');
+const chatBusy = ref(false);
+const msgBox = ref(null);
+
+const scrollBottom = () => nextTick(() => { if (msgBox.value) msgBox.value.scrollTop = msgBox.value.scrollHeight; });
+
+const doChat = async () => {
+  const msg = chatInput.value.trim();
+  if (!msg || chatBusy.value) return;
+  chatMessages.value.push({ role: 'user', content: msg });
+  chatInput.value = '';
+  chatBusy.value = true;
+  scrollBottom();
   try {
-    const res = await fetch(`${API}/cron/add`, {
+    const res = await fetch(`${API}/chat`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: addForm.value.name, schedule, prompt: addForm.value.prompt })
+      body: JSON.stringify({ message: msg, history: chatMessages.value.slice(0, -1) })
     });
     const data = await res.json();
-    if (data.success) {
-      showNew.value = false;
-      addForm.value = { name: '', schedType: 'cron', schedValue: '', prompt: '' };
-      await loadCron();
-    }
-  } catch (e) { cronError.value = e.message; }
-  addBusy.value = false;
+    if (data.success) chatMessages.value.push({ role: 'assistant', content: data.reply });
+    else chatMessages.value.push({ role: 'assistant', content: `Error: ${data.message}` });
+  } catch (e) { chatMessages.value.push({ role: 'assistant', content: `Error: ${e.message}` }); }
+  finally { chatBusy.value = false; scrollBottom(); }
 };
 
-const openViz = (run) => {
-  vizLoading.value = true;
-  currentView.value = 'viz';
-  nextTick(() => {
-    const content = run.output || run.result || '';
-    const html = `<!DOCTYPE html><html><head><style>*{margin:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;padding:16px;background:#f8f9fa;color:#1a1a2e;font-size:13px;line-height:1.7}pre{white-space:pre-wrap;word-break:break-all}</style></head><body><pre>${content}</pre></body></html>`;
-    if (vizFrameRef.value) vizFrameRef.value.srcdoc = html;
-    setTimeout(() => { vizLoading.value = false; }, 500);
-  });
-};
-
-onMounted(async () => {
-  await loadStatus();
-  await loadCron();
-  nextTick(() => {
-    if (nowRef.value) nowRef.value.scrollIntoView({ block: 'center' });
-  });
+onMounted(() => {
+  chatPanel.setContext({ scene: 'openclaw', label: t('app_sidebar_openclaw') });
+  chatPanel.setQuickMessages([t('openclaw_chat_quick_1'), t('openclaw_chat_quick_2'), t('openclaw_chat_quick_3')]);
+  loadStatus();
+  loadCron();
 });
+onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
-
-<style scoped>
-/* 只保留 Tailwind 无法表达的拟物效果 */
-
-.cork-bg {
-  position:absolute; inset:0; z-index:0;
-  background:
-    repeating-conic-gradient(rgba(160,120,70,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px,
-    repeating-linear-gradient(175deg, rgba(180,140,80,0.02) 0px, transparent 1px, transparent 4px),
-    repeating-linear-gradient(85deg, rgba(120,80,40,0.02) 0px, transparent 1px, transparent 6px),
-    linear-gradient(160deg, #8a6a42, #7a5c38, #6a4e30, #5a4228);
-  box-shadow:inset 0 0 80px rgba(0,0,0,0.3);
-}
-.frame-t { flex-shrink:0; height:6px; background:linear-gradient(180deg,#4a3420,#3a2414); box-shadow:0 3px 6px rgba(0,0,0,0.4); position:relative; z-index:5; }
-.frame-b { flex-shrink:0; height:6px; background:linear-gradient(0deg,#4a3420,#3a2414); box-shadow:0 -3px 6px rgba(0,0,0,0.4); position:relative; z-index:5; }
-
-/* 页面切换动画 */
-.page { position:absolute; inset:0; display:flex; flex-direction:column; transition:transform 0.35s cubic-bezier(0.32,0.72,0,1), opacity 0.25s; overflow:hidden; }
-.page.hide-left { transform:translateX(-30%); opacity:0; pointer-events:none; }
-.page.hide-right { transform:translateX(100%); opacity:0; pointer-events:none; }
-.page.active { transform:translateX(0); opacity:1; }
-.page-bg {
-  background:
-    repeating-conic-gradient(rgba(160,120,70,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px,
-    repeating-linear-gradient(175deg, rgba(180,140,80,0.02) 0px, transparent 1px, transparent 4px),
-    linear-gradient(160deg, #8a6a42, #7a5c38, #6a4e30, #5a4228);
-}
-
-/* 黄铜徽章 */
-.t-badge {
-  width:34px; height:34px; border-radius:50%;
-  background:radial-gradient(circle at 42% 38%, #c8a060, #8a6a30);
-  border:2px solid #6a4a18;
-  box-shadow:inset 0 2px 3px rgba(255,220,150,0.3), 0 2px 4px rgba(0,0,0,0.4);
-  display:flex; align-items:center; justify-content:center; font-size:16px;
-}
-.dot-on { background:radial-gradient(circle,#60b848,#388020); box-shadow:0 0 3px rgba(60,160,40,0.3); }
-.dot-warn { background:radial-gradient(circle,#d4a840,#a08020); box-shadow:0 0 3px rgba(200,160,40,0.3); }
-
-/* 黄铜按钮 */
-.brass-btn {
-  padding:5px 12px; border-radius:5px; cursor:pointer;
-  font-family:'Georgia',serif; font-size:9px; font-weight:700; letter-spacing:1px;
-  background:linear-gradient(180deg,#c8a050,#a07828);
-  border:1px solid #7a5818; color:#fff;
-  text-shadow:0 1px 1px rgba(0,0,0,0.3);
-  box-shadow:0 2px 0 #5a3a08, inset 0 1px 1px rgba(255,230,160,0.2);
-}
-.brass-btn:active { transform:translateY(2px); box-shadow:0 0 0 #5a3a08; }
-
-.back-btn {
-  padding:5px 12px; border-radius:5px; cursor:pointer;
-  font-family:'Georgia',serif; font-size:10px; font-weight:700;
-  background:linear-gradient(180deg,#6a5838,#4a3820);
-  border:1px solid #3a2810; color:rgba(255,220,150,0.6);
-  box-shadow:0 2px 0 rgba(0,0,0,0.3);
-}
-.back-btn:active { transform:translateY(2px); box-shadow:none; }
-
-/* 时刻表刻度 */
-.scrollbar-hide::-webkit-scrollbar { display:none; }
-.hour-row { position:relative; min-height:48px; padding-left:58px; padding-right:16px; }
-.hour-row::before { content:''; position:absolute; top:0; left:52px; right:0; height:1px; background:linear-gradient(90deg, rgba(200,180,140,0.12), rgba(200,180,140,0.03)); }
-.hour-row.major::before { background:linear-gradient(90deg, rgba(200,180,140,0.22), rgba(200,180,140,0.05)); }
-.hour-label { position:absolute; top:-2px; left:6px; width:42px; text-align:right; font-size:13px; font-weight:800; letter-spacing:0.5px; font-family:'Courier New',monospace; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
-.hour-label.now-label { color:rgba(255,200,120,0.9) !important; font-weight:900; font-size:14px; text-shadow:0 0 8px rgba(255,180,80,0.3), 0 1px 2px rgba(0,0,0,0.4); }
-
-/* NOW 线 */
-.now-line { position:relative; margin-left:52px; margin-right:16px; height:0; }
-.now-line::before { content:''; position:absolute; top:-1px; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(180,80,40,0.5), rgba(180,80,40,0.1)); border-radius:1px; }
-.now-line::after { content:''; position:absolute; top:-4px; left:-4px; width:8px; height:8px; border-radius:50%; background:radial-gradient(circle at 38% 32%, #e08040, #b05020); border:1px solid #8a3818; box-shadow:0 0 6px rgba(200,80,40,0.3); }
-.now-tag { position:absolute; top:-10px; left:14px; font-size:11px; font-weight:900; color:rgba(255,160,80,0.85); letter-spacing:2px; font-family:'Courier New',monospace; }
-
-/* 索引卡片 */
-.task-card {
-  position:relative; margin:6px 0 10px;
-  background:linear-gradient(180deg, #faf4e4, #f4ecda, #f0e6d0);
-  border-radius:2px; cursor:pointer; transition:transform 0.1s; overflow:hidden;
-  box-shadow:1px 2px 4px rgba(0,0,0,0.18), 2px 3px 6px rgba(0,0,0,0.08), inset 0 0 20px rgba(200,180,140,0.12);
-}
-.task-card:active { transform:scale(0.98) rotate(0deg) !important; }
-.task-card.past { opacity:0.5; }
-.tilt-1{transform:rotate(-0.5deg)} .tilt-2{transform:rotate(0.4deg)} .tilt-3{transform:rotate(-0.3deg)} .tilt-4{transform:rotate(0.6deg)}
-
-/* 图钉 */
-.pin { position:absolute; top:-3px; right:12px; z-index:3; width:16px; height:16px; border-radius:50%; box-shadow:0 2px 3px rgba(0,0,0,0.3); }
-.pin::after { content:''; position:absolute; top:3px; left:4px; width:4px; height:3px; border-radius:50%; background:rgba(255,255,255,0.35); }
-.pin-r{background:radial-gradient(circle at 38% 32%,#ff8888,#c83030);border:1px solid #a02020}
-.pin-g{background:radial-gradient(circle at 38% 32%,#88dd88,#30a030);border:1px solid #208020}
-.pin-b{background:radial-gradient(circle at 38% 32%,#88aaff,#3050c8);border:1px solid #2040a0}
-.pin-y{background:radial-gradient(circle at 38% 32%,#ffdd66,#c8a020);border:1px solid #a08010}
-
-/* 彩条 */
-.stripe{position:absolute;top:0;left:0;bottom:0;width:4px}
-.s-coral{background:linear-gradient(180deg,#e06848,#c04830)} .s-teal{background:linear-gradient(180deg,#48a8a0,#308880)}
-.s-plum{background:linear-gradient(180deg,#9068a8,#704888)} .s-amber{background:linear-gradient(180deg,#d0a040,#b08020)}
-
-/* 胶带 */
-.tape { position:absolute; z-index:4; width:50px; height:14px; background:linear-gradient(180deg,rgba(255,240,180,0.65),rgba(230,210,140,0.45)); border:1px solid rgba(200,180,120,0.25); }
-
-/* 信息卡 */
-.info-card { background:linear-gradient(180deg,#faf4e4,#f0e6d0); border-radius:2px; padding:14px; box-shadow:1px 2px 4px rgba(0,0,0,0.15); margin-bottom:14px; }
-
-/* 操作按钮 */
-.ib { padding:6px 14px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:9px; font-weight:700; box-shadow:0 2px 0 rgba(0,0,0,0.12); }
-.ib:active { transform:translateY(2px); box-shadow:none; }
-.ib-run { background:linear-gradient(180deg,#5a9a50,#408838); border:1px solid #2a6a20; color:#d8f0d0; }
-.ib-del { background:linear-gradient(180deg,#c0a090,#a88878); border:1px solid #8a6858; color:#fff; }
-
-/* 执行记录 */
-.run-card { background:linear-gradient(180deg,#faf4e4,#f0e6d0); border-radius:2px; margin-bottom:8px; overflow:hidden; cursor:pointer; box-shadow:1px 1px 3px rgba(0,0,0,0.12); }
-.run-card:active { transform:scale(0.98); }
-.rd-ok { background:radial-gradient(circle at 35% 30%,#70d060,#388020); box-shadow:0 0 4px rgba(60,180,40,0.3); }
-.rd-fail { background:radial-gradient(circle at 35% 30%,#e06050,#a02820); box-shadow:0 0 4px rgba(200,60,40,0.3); }
-.run-arrow { transition:transform 0.2s; }
-.run-card.open .run-arrow { transform:rotate(90deg); }
-.run-detail { display:none; border-top:1px dashed rgba(160,140,100,0.2); padding:10px 12px; }
-.run-card.open .run-detail { display:block; }
-.run-output { font-family:'Courier New',monospace; font-size:10px; line-height:1.6; color:#4a3a20; background:rgba(0,0,0,0.03); border:1px solid rgba(160,140,100,0.12); border-radius:4px; padding:8px 10px; max-height:140px; overflow-y:auto; white-space:pre-wrap; word-break:break-all; }
-.run-output::-webkit-scrollbar { display:none; }
-
-/* 可视化按钮 */
-.viz-btn { padding:5px 14px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:9px; font-weight:700; background:linear-gradient(180deg,#5868a8,#384888); border:1px solid #283868; color:#d0d8f0; box-shadow:0 2px 0 rgba(0,0,0,0.2); }
-.viz-btn:active { transform:translateY(2px); box-shadow:none; }
-.viz-spinner { width:28px; height:28px; border-radius:50%; border:3px solid rgba(90,100,160,0.15); border-top-color:#5868a8; animation:spin 0.8s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg)} }
-
-/* 表单输入 */
-.nc-input { width:100%; border:none; outline:none; background:transparent; border-bottom:1px solid rgba(160,140,100,0.3); padding:7px 2px; font-family:'Georgia',serif; font-size:13px; color:#3a2810; }
-.nc-input::placeholder { color:rgba(160,140,100,0.35); font-style:italic; }
-.nc-input:focus { border-bottom-color:#a08030; }
-.nc-ta { width:100%; border:none; outline:none; resize:none; background:transparent; border-bottom:1px solid rgba(160,140,100,0.3); padding:7px 2px; font-family:'Georgia',serif; font-size:13px; color:#3a2810; line-height:1.6; }
-.nc-ta::placeholder { color:rgba(160,140,100,0.35); font-style:italic; }
-
-/* 调度类型选择 */
-.sched-opt { flex:1; padding:5px 0; border-radius:4px; cursor:pointer; text-align:center; font-family:'Georgia',serif; font-size:9px; font-weight:700; background:rgba(0,0,0,0.03); border:1px solid rgba(160,140,100,0.15); color:#9a8a68; }
-.sched-opt.sel { background:linear-gradient(180deg,#c8a050,#a07828); border-color:#7a5818; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
-
-/* 表单按钮 */
-.nc-btn { padding:7px 20px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:11px; font-weight:700; box-shadow:0 2px 0 rgba(0,0,0,0.12); }
-.nc-btn:active { transform:translateY(2px); box-shadow:none; }
-.nc-cancel { background:linear-gradient(180deg,#e8e0d0,#d8d0c0); border:1px solid #c0b8a0; color:#8a7a58; }
-.nc-create { background:linear-gradient(180deg,#c8a050,#a07828); border:1px solid #7a5818; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); box-shadow:0 2px 0 #5a3a08; }
-</style>

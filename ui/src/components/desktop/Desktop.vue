@@ -37,7 +37,7 @@ defineEmits(['contextmenu']);
 
 const visibleApps = computed(() => appRegistry.filter(a => !a.hidden));
 const selectedId = ref(null);
-const wallpaperId = ref(localStorage.getItem('aios-wallpaper') || 'wp-warm-morning');
+const wallpaperId = ref(localStorage.getItem('aios-wallpaper') || 'wp-ocean-breeze');
 
 const currentWp = computed(() => wallpaperList.find(w => w.id === wallpaperId.value) || wallpaperList[0]);
 const wallpaperClass = computed(() => currentWp.value.type === 'css' ? currentWp.value.id : '');

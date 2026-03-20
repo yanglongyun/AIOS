@@ -44,7 +44,7 @@ if (arg === 'help' || arg === '--help' || arg === '-h') {
     ['start', t.helpStart],
     ['stop', t.helpStop],
     ['restart', t.helpRestart],
-    ['update', t.helpUpdate],
+    ['update [-f]', t.helpUpdate],
     ['status', t.helpStatus],
     ['web', t.helpWeb],
     ['uninstall', t.helpUninstall],
@@ -92,12 +92,19 @@ if (arg === 'restart') {
 }
 
 if (arg === 'update') {
+  const force = process.argv.includes('--force') || process.argv.includes('-f');
   console.log(chalk.dim('  ' + t.pullingCode));
   try {
-    const hasChanges = execSync('git status --porcelain', { cwd: ROOT }).toString().trim();
-    if (hasChanges) execSync('git stash', { cwd: ROOT, stdio: 'inherit' });
-    execSync('git pull --ff-only', { cwd: ROOT, stdio: 'inherit' });
-    if (hasChanges) execSync('git stash pop', { cwd: ROOT, stdio: 'pipe' }).toString();
+    if (force) {
+      execSync('git checkout -- .', { cwd: ROOT, stdio: 'pipe' });
+      execSync('git clean -fd', { cwd: ROOT, stdio: 'pipe' });
+    } else {
+      const hasChanges = execSync('git status --porcelain', { cwd: ROOT }).toString().trim();
+      if (hasChanges) execSync('git stash', { cwd: ROOT, stdio: 'inherit' });
+      execSync('git pull --ff-only', { cwd: ROOT, stdio: 'inherit' });
+      if (hasChanges) execSync('git stash pop', { cwd: ROOT, stdio: 'pipe' }).toString();
+    }
+    if (force) execSync('git pull --ff-only', { cwd: ROOT, stdio: 'inherit' });
   } catch {
     console.error(chalk.red('  ' + t.pullFailed));
     process.exit(1);

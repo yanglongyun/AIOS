@@ -29,7 +29,7 @@ export const appRegistry = [
   { id: 'banana', name: 'app_sidebar_banana', icon: '📱', iconClass: 'icon-banana',
     load: () => import('./apps/banana/index.vue'), defaultSize: { w: 420, h: 700 } },
   { id: 'openclaw', name: 'app_sidebar_openclaw', icon: '🦞', iconClass: 'icon-openclaw',
-    load: () => import('./apps/openclaw/index.vue'), defaultSize: { w: 800, h: 560 } },
+    load: () => import('./apps/openclaw/index.vue'), defaultSize: { w: 520, h: 700 } },
   // 工具
   { id: 'settings', name: 'app_sidebar_settings', icon: '⚙️', iconClass: 'icon-settings',
     load: () => import('./apps/settings/index.vue'), defaultSize: { w: 750, h: 520 } },

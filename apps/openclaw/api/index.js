@@ -2,7 +2,7 @@ import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
 import { getStatus } from '../service/status.js';
 import { listCron, addCron, runCron, deleteCron } from '../service/cron.js';
-import { chat } from '../service/chat.js';
+import { listRuns } from '../service/runs.js';
 
 export const handleOpenclawApi = async (req, res, path) => {
   if (path === '/apps/openclaw/status' && req.method === 'GET') {
@@ -37,9 +37,10 @@ export const handleOpenclawApi = async (req, res, path) => {
     return json(res, data);
   }
 
-  if (path === '/apps/openclaw/chat' && req.method === 'POST') {
-    const body = await readBody(req);
-    const data = await chat(body);
+  if (path === '/apps/openclaw/cron/runs' && req.method === 'GET') {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const jobId = url.searchParams.get('jobId');
+    const data = await listRuns(jobId);
     if (data.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

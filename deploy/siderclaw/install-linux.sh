@@ -18,11 +18,12 @@ if ! command -v apt-get >/dev/null 2>&1; then
 fi
 
 echo "[0/5] LiteLLM configuration..."
-read -rp "LITELLM_URL (e.g. http://localhost:4000): " LITELLM_URL
-read -rp "LITELLM_KEY: " LITELLM_KEY
+LITELLM_URL="${LITELLM_URL:-}"
+LITELLM_KEY="${LITELLM_KEY:-}"
+START_SERVICES=1
 if [ -z "$LITELLM_URL" ] || [ -z "$LITELLM_KEY" ]; then
-  echo "LITELLM_URL and LITELLM_KEY are required."
-  exit 1
+  START_SERVICES=0
+  echo "LITELLM env not set yet. Installation will continue; service start will be skipped."
 fi
 
 echo "[1/5] Check dependencies..."
@@ -74,10 +75,21 @@ export PATH="$NPM_GLOBAL_BIN:$PATH"
 echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
 
-sudo tee "$ENV_FILE" >/dev/null <<EOF
+if [ "$START_SERVICES" -eq 1 ]; then
+  sudo tee "$ENV_FILE" >/dev/null <<EOF
 LITELLM_URL=${LITELLM_URL}
 LITELLM_KEY=${LITELLM_KEY}
 EOF
+else
+  if ! sudo test -f "$ENV_FILE"; then
+    sudo tee "$ENV_FILE" >/dev/null <<EOF
+# Set these after install, then run:
+# sudo systemctl restart ${APP_NAME} ${APP_NAME}-apps
+LITELLM_URL=
+LITELLM_KEY=
+EOF
+  fi
+fi
 sudo chmod 600 "$ENV_FILE"
 
 sudo tee /etc/systemd/system/${APP_NAME}.service >/dev/null <<EOF
@@ -123,7 +135,11 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable "${APP_NAME}" "${APP_NAME}-apps"
-sudo systemctl restart "${APP_NAME}" "${APP_NAME}-apps"
+if [ "$START_SERVICES" -eq 1 ]; then
+  sudo systemctl restart "${APP_NAME}" "${APP_NAME}-apps"
+else
+  echo "Skip starting ${APP_NAME} services until LiteLLM env is configured."
+fi
 
 DOMAIN="_"
 NGINX_MANAGED_MARKER="# managed-by-aios-installer"
@@ -178,6 +194,10 @@ echo "Done."
 echo
 echo "  LiteLLM URL: ${LITELLM_URL}"
 echo "  Env file:    ${ENV_FILE}"
+if [ "$START_SERVICES" -eq 0 ]; then
+  echo "  Note: services were not started (missing LITELLM_URL/LITELLM_KEY)."
+  echo "        Fill ${ENV_FILE} then run: sudo systemctl restart ${APP_NAME} ${APP_NAME}-apps"
+fi
 echo
 echo "  Main:  systemctl status ${APP_NAME}"
 echo "  Apps:  systemctl status ${APP_NAME}-apps"

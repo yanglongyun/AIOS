@@ -53,10 +53,10 @@ echo "[3/5] Install deps + build UI..."
 cd "$APP_DIR"
 
 echo "  Applying LiteLLM overlay..."
-cp siderclaw/server/api/llm.js server/api/llm.js
-cp siderclaw/server/api/index.js server/api/index.js
-cp siderclaw/server/service/settings/get.js server/service/settings/get.js
-cp siderclaw/ui/src/views/WelcomeView.vue ui/src/views/WelcomeView.vue
+cp deploy/siderclaw/server/api/llm.js server/api/llm.js
+cp deploy/siderclaw/server/api/index.js server/api/index.js
+cp deploy/siderclaw/server/service/settings/get.js server/service/settings/get.js
+cp deploy/siderclaw/ui/src/views/WelcomeView.vue ui/src/views/WelcomeView.vue
 
 npm ci
 npm run build

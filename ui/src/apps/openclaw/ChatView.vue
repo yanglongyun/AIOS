@@ -16,12 +16,12 @@
         <div class="py-2 text-[13px] text-[rgba(255,230,180,0.4)]">{{ t('openclaw_thinking') }}<span class="animate-pulse">...</span></div>
       </div>
     </div>
-    <div class="shrink-0 px-4 pb-3 pt-2 border-t border-[rgba(200,180,140,0.1)]">
-      <form @submit.prevent="send" class="flex gap-2">
+    <div class="input-tray shrink-0 px-4 pb-3 pt-2.5">
+      <form @submit.prevent="send" class="input-well flex items-center gap-2 rounded-lg p-1.5">
         <input v-model="input" :placeholder="t('openclaw_chat_ph')" :disabled="busy"
-          class="min-w-0 flex-1 rounded-xl px-4 py-2.5 text-[13px] outline-none disabled:opacity-50 chat-input" />
+          class="chat-input min-w-0 flex-1 rounded-md px-3.5 py-2 text-[13px] outline-none disabled:opacity-50 font-['Georgia','PingFang_SC',serif]" />
         <button type="submit" :disabled="!input.trim() || busy"
-          class="brass-btn rounded-xl px-5 py-2.5 text-[13px] font-bold text-white border border-[#7a5818] disabled:opacity-40">{{ t('openclaw_send') }}</button>
+          class="send-btn flex items-center justify-center w-9 h-9 rounded-md text-[14px] font-bold text-[#3a2008] disabled:opacity-30 cursor-pointer shrink-0">↑</button>
       </form>
     </div>
   </div>
@@ -66,9 +66,36 @@ const send = async () => {
 .msg-user { background:linear-gradient(135deg, #5a3828, #3a2018); border:1px solid rgba(100,70,40,0.3); }
 .msg-avatar { background:radial-gradient(circle at 42% 38%, #6a4a28, #3a2810); border:1px solid rgba(100,70,40,0.3); }
 .msg-bot { background:rgba(0,0,0,0.12); border:1px solid rgba(160,140,100,0.1); }
-.chat-input { background:rgba(0,0,0,0.15); border:1px solid rgba(160,140,100,0.15); color:rgba(220,200,160,0.8); font-family:'Georgia','PingFang SC',serif; }
-.chat-input::placeholder { color:rgba(160,140,100,0.3); }
-.chat-input:focus { border-color:rgba(200,160,80,0.3); }
-.brass-btn { background:linear-gradient(180deg,#c8a050,#a07828); text-shadow:0 1px 1px rgba(0,0,0,0.3); box-shadow:0 2px 0 #5a3a08, inset 0 1px 1px rgba(255,230,160,0.2); }
-.brass-btn:active { transform:translateY(2px); box-shadow:0 0 0 #5a3a08; }
+/* 输入栏托盘 — 皮革质感 */
+.input-tray {
+  background: linear-gradient(180deg, rgba(50,35,20,0.4), rgba(40,28,16,0.6));
+  border-top: 1px solid rgba(0,0,0,0.2);
+  box-shadow: 0 -1px 0 rgba(255,220,150,0.03);
+}
+/* 输入凹槽 */
+.input-well {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(80,60,30,0.3);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(255,220,150,0.02);
+}
+/* 输入框 */
+.chat-input {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(100,80,40,0.15);
+  color: rgba(220,200,160,0.85);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+.chat-input::placeholder { color:rgba(160,140,100,0.25); }
+.chat-input:focus { border-color:rgba(200,160,80,0.35); box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(200,160,80,0.1); }
+/* 发送按钮 — 黄铜圆形 */
+.send-btn {
+  background: linear-gradient(180deg, #d8b868, #b89838, #a08028);
+  border: 1px solid #8a6a20;
+  box-shadow: 0 2px 0 rgba(60,30,0,0.4), inset 0 1px 1px rgba(255,255,200,0.3);
+  text-shadow: 0 1px 0 rgba(255,230,160,0.3);
+  transition: all 0.08s;
+  position: relative; top: 0;
+}
+.send-btn:active { top: 2px; box-shadow: 0 0 0 rgba(60,30,0,0.3), inset 0 1px 2px rgba(0,0,0,0.2); }
+.send-btn:hover { background: linear-gradient(180deg, #e0c878, #c8a848, #b09038); }
 </style>

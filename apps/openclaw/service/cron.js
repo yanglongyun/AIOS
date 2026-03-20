@@ -24,7 +24,7 @@ export const addCron = async ({ name, schedule, prompt, sessionTarget }) => {
   if (schedule?.cron) args.push(`--cron "${schedule.cron}"`);
   else if (schedule?.at) args.push(`--at "${schedule.at}"`);
   else if (schedule?.every) args.push(`--every ${schedule.every}`);
-  args.push(`--agent-turn "${prompt.replace(/"/g, '\\"')}"`);
+  args.push(`--message "${prompt.replace(/"/g, '\\"')}"`);
   if (sessionTarget) args.push(`--session ${sessionTarget}`);
   const out = await run(`openclaw cron add ${args.join(' ')}`);
   return { success: true, output: out };

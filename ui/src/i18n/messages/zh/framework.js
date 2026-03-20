@@ -11,6 +11,7 @@ export default {
   app_sidebar_poker: '炸金花',
   app_sidebar_fortune: '算一卦',
   app_sidebar_banana: '老手机',
+  app_sidebar_openclaw: 'OpenClaw',
   app_sidebar_files: '文件',
   app_sidebar_tasks: '任务',
   app_sidebar_skills: '技能',

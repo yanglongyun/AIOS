@@ -12,6 +12,7 @@ import banana from './views/apps/banana.js';
 import notebook from './views/apps/notebook.js';
 import poker from './views/apps/poker.js';
 import reader from './views/apps/reader.js';
+import openclaw from './views/apps/openclaw.js';
 import settings from './views/settings.js';
 import welcome from './views/welcome.js';
 
@@ -30,6 +31,7 @@ export default {
   ...notebook,
   ...poker,
   ...reader,
+  ...openclaw,
   ...settings,
   ...welcome
 };

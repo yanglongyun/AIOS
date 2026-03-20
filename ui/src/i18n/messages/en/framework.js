@@ -11,6 +11,7 @@ export default {
   app_sidebar_poker: 'Poker',
   app_sidebar_fortune: 'Divination',
   app_sidebar_banana: 'Banana',
+  app_sidebar_openclaw: 'OpenClaw',
   app_sidebar_files: 'Files',
   app_sidebar_tasks: 'Tasks',
   app_sidebar_skills: 'Skills',

@@ -6,5 +6,6 @@ export const appLoaders = [
   () => import('./reader/index.js'),
   () => import('./fortune/index.js'),
   () => import('./poker/index.js'),
-  () => import('./banana/index.js')
+  () => import('./banana/index.js'),
+  () => import('./openclaw/index.js')
 ];

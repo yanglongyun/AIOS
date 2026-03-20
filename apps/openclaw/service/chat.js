@@ -1,0 +1,25 @@
+const GATEWAY = 'http://localhost:18789';
+
+export const chat = async ({ message, history = [] }) => {
+  if (!message?.trim()) return { status: 400, message: 'message 不能为空' };
+
+  const messages = [
+    ...history.map(m => ({ role: m.role, content: m.content })),
+    { role: 'user', content: message }
+  ];
+
+  const res = await fetch(`${GATEWAY}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'openclaw:main', messages, stream: false })
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    return { status: res.status, message: `OpenClaw Gateway 错误: ${res.status} ${text}` };
+  }
+
+  const data = await res.json();
+  const reply = data.choices?.[0]?.message?.content || '';
+  return { success: true, reply };
+};

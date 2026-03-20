@@ -92,46 +92,36 @@ Windows (PowerShell):
 irm https://raw.githubusercontent.com/valueriver/aios/main/install-windows.ps1 | iex
 ```
 
-打开：`http://localhost:9700`
+打开：`http://localhost:9700/aios`
 
 ## 手动启动
 
+1. 进入项目目录
 ```bash
-npm ci
-npm run build
-npm start          # 主服务: 9700
-npm run start:apps # 应用服务: 9701
+cd AIOS
 ```
 
----
-
-## 内置应用
-
-| 应用 | 路径 | 说明 |
-|------|------|------|
-| 📝 记事本 | `/notebook` | 软木板 + 夹板拟物风格，12 种随机纸张纹理 |
-| 💰 记账本 | `/finance` | 银行存折拟物风格，按月翻页，行内印字录入 |
-| 📻 订阅机 | `/subscriber` | AI 聚合新闻订阅 |
-| 📈 炒币机 | `/cryptobot` | 加密货币自动交易 |
-| 📚 阅读器 | `/reader` | 在线小说阅读器 |
-| 🃏 炸金花 | `/poker` | 经典扑克牌游戏 |
-| 🔮 算一卦 | `/fortune` | AI 占卜 |
-| 📱 老手机 | `/banana` | 复古 Banana 手机模拟器 |
-
----
-
-## 技术栈
-
-- **前端**：Vue 3 + Vite + Tailwind CSS
-- **后端**：Node.js + better-sqlite3
-- **AI**：Claude API（OpenAI 兼容格式）
-- **架构**：三层分离（api → service → repository）
-
-## 开发命令
-
+2. 安装依赖
 ```bash
-npm run dev          # server + apps + ui 同时启动
-npm run build        # 构建前端
-npm start            # 启动主服务
-npm run start:apps   # 启动应用服务
+npm ci
+```
+
+3. 构建前端
+```bash
+npm run build
+```
+
+4. 启动主服务（9700）
+```bash
+npm start
+```
+
+5. 新开一个终端，启动应用服务（9701）
+```bash
+npm run start:apps
+```
+
+6. 打开
+```text
+http://localhost:9700/aios
 ```

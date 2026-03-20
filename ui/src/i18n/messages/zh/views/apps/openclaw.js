@@ -35,4 +35,7 @@ export default {
   openclaw_enable: '启用',
   openclaw_now: 'NOW',
   openclaw_executed: '✓ 已执行',
+  openclaw_loading: '加载中...',
+  openclaw_running: '执行中...',
+  openclaw_run_triggered: '已触发执行',
 };

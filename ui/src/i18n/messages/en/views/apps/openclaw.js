@@ -35,4 +35,7 @@ export default {
   openclaw_enable: 'Enable',
   openclaw_now: 'NOW',
   openclaw_executed: '✓ Executed',
+  openclaw_loading: 'Loading...',
+  openclaw_running: 'Running...',
+  openclaw_run_triggered: 'Run triggered',
 };

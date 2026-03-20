@@ -74,7 +74,7 @@ export const updateCron = async ({ jobId, name, schedule, prompt, sessionTarget 
 
 export const runCron = async (jobId) => {
   if (!jobId) return { status: 400, message: 'jobId 必填' };
-  const out = await run(`openclaw cron run ${jobId}`);
+  const out = await run(`openclaw cron run ${jobId} --session main`);
   return { success: true, output: out };
 };
 

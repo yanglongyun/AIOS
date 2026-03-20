@@ -20,7 +20,10 @@
         </div>
 
         <div class="flex-1 min-h-0 overflow-y-auto pb-8 scrollbar-hide" ref="timetableRef">
-          <template v-if="!cronJobs.length && !cronError">
+          <template v-if="cronLoading">
+            <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_loading') }}</div>
+          </template>
+          <template v-else-if="!cronJobs.length && !cronError">
             <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_cron_empty') }}</div>
           </template>
           <template v-else>
@@ -94,13 +97,13 @@
             <div v-if="selectedJob.lastRunAt" class="text-[10px] text-[#9a8a68] mt-1.5">{{ t('openclaw_last_run') }} {{ new Date(selectedJob.lastRunAt).toLocaleString() }}</div>
             <div v-if="selectedJob.state?.lastStatus" class="text-[10px] mt-0.5" :class="selectedJob.state.lastStatus === 'error' ? 'text-[#c05040]' : 'text-[#4a8a40]'">{{ selectedJob.state.lastStatus }}</div>
             <div class="flex gap-1.5 mt-2.5 pt-2 border-t border-dashed border-[rgba(160,140,100,0.2)]">
-              <button class="ib ib-run px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doRun(selectedJob.id)">▶ {{ t('openclaw_run') }}</button>
+              <button class="ib ib-run px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold disabled:opacity-50" :disabled="runBusy" @click="doRun(selectedJob.id)">{{ runBusy ? t('openclaw_running') : '▶ ' + t('openclaw_run') }}</button>
               <button class="ib ib-del px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doDelete(selectedJob.id)">{{ t('openclaw_delete') }}</button>
             </div>
           </div>
 
           <div class="text-[10px] font-bold text-[rgba(255,230,180,0.5)] tracking-widest mb-2">{{ t('openclaw_runs_label') }}</div>
-          <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">...</div>
+          <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_loading') }}</div>
           <div v-else-if="!runs.length" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_no_runs') }}</div>
           <div v-for="(r, ri) in runs" :key="ri" class="run-card rounded-sm mb-2 overflow-hidden cursor-pointer" :class="{ open: expandedRun === ri }" @click="expandedRun = expandedRun === ri ? -1 : ri">
             <div class="flex items-center gap-2 px-3 py-2.5">
@@ -183,6 +186,7 @@ const API = '/aios/apps/openclaw';
 const status = ref({ online: false, version: null, gateway: false });
 const cronJobs = ref([]);
 const cronError = ref('');
+const cronLoading = ref(false);
 const currentView = ref('timetable');
 const selectedJob = ref(null);
 const selectedJobIdx = ref(0);
@@ -190,6 +194,7 @@ const runs = ref([]);
 const runsLoading = ref(false);
 const expandedRun = ref(-1);
 const vizLoading = ref(false);
+const runBusy = ref(false);
 const showNew = ref(false);
 const addBusy = ref(false);
 const addForm = ref({ name: '', schedType: 'cron', schedValue: '', prompt: '' });
@@ -250,12 +255,20 @@ const loadStatus = async () => {
 
 const loadCron = async () => {
   cronError.value = '';
+  cronLoading.value = true;
   try {
     const res = await fetch(`${API}/cron/list`);
     const data = await res.json();
     if (!data.success) { cronError.value = data.message; return; }
     cronJobs.value = Array.isArray(data.jobs) ? data.jobs : [];
   } catch (e) { cronError.value = e.message; }
+  cronLoading.value = false;
+};
+
+const formatTs = (ts) => {
+  const n = Number(ts || 0);
+  if (!n) return '';
+  return new Date(n).toLocaleString();
 };
 
 const openDetail = async (job) => {
@@ -268,14 +281,18 @@ const openDetail = async (job) => {
   try {
     const res = await fetch(`${API}/cron/runs?jobId=${encodeURIComponent(job.id)}`);
     const data = await res.json();
-    if (data.success && Array.isArray(data.runs) && data.runs.length) {
-      runs.value = data.runs;
+    if (data.success && Array.isArray(data.entries) && data.entries.length) {
+      runs.value = data.entries.map(e => ({
+        time: formatTs(e.ts),
+        duration: e.durationMs ? e.durationMs + 'ms' : '—',
+        ok: e.status !== 'error',
+        output: e.summary || e.error || e.status || '',
+      }));
     }
   } catch { /* runs API 不可用 */ }
-  // 如果 runs API 没返回数据，用 job 自身的执行信息构造记录
   if (!runs.value.length && job.lastRunAt) {
     runs.value = [{
-      time: new Date(job.lastRunAt).toLocaleString(),
+      time: job.lastRunAt,
       duration: job.state?.durationMs ? job.state.durationMs + 'ms' : '—',
       ok: job.state?.lastStatus !== 'error',
       output: job.state?.lastError || job.state?.lastSummary || job.state?.lastStatus || '执行完成',
@@ -285,10 +302,15 @@ const openDetail = async (job) => {
 };
 
 const doRun = async (jobId) => {
+  runBusy.value = true;
   try {
-    await fetch(`${API}/cron/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
+    const res = await fetch(`${API}/cron/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
+    const data = await res.json();
+    if (!data.success) { cronError.value = data.message; return; }
+    await loadCron();
     if (selectedJob.value) await openDetail(selectedJob.value);
   } catch (e) { cronError.value = e.message; }
+  runBusy.value = false;
 };
 
 const doDelete = async (jobId) => {

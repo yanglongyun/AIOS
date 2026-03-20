@@ -2,7 +2,6 @@ import { readBody } from '../../../shared/http/readBody.js';
 import { json } from '../../../shared/http/json.js';
 import { getStatus } from '../service/status.js';
 import { listCron, addCron, updateCron, runCron, listCronRuns, deleteCron } from '../service/cron.js';
-import { chat } from '../service/chat.js';
 
 export const handleOpenclawApi = async (req, res, path) => {
   if (path === '/apps/openclaw/status' && req.method === 'GET') {
@@ -49,13 +48,6 @@ export const handleOpenclawApi = async (req, res, path) => {
   if (path === '/apps/openclaw/cron/delete' && req.method === 'POST') {
     const body = await readBody(req);
     const data = await deleteCron(body?.jobId);
-    if (data.status) return json(res, { success: false, message: data.message }, data.status);
-    return json(res, data);
-  }
-
-  if (path === '/apps/openclaw/chat' && req.method === 'POST') {
-    const body = await readBody(req);
-    const data = await chat(body);
     if (data.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

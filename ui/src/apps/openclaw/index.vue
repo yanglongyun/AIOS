@@ -285,7 +285,7 @@ const openDetail = async (job) => {
       runs.value = data.entries.map(e => ({
         time: formatTs(e.ts),
         duration: e.durationMs ? e.durationMs + 'ms' : '—',
-        ok: e.status !== 'error',
+        ok: !e.error && e.status !== 'error' && e.status !== 'failed',
         output: e.summary || e.error || e.status || '',
       }));
     }
@@ -294,8 +294,8 @@ const openDetail = async (job) => {
     runs.value = [{
       time: job.lastRunAt,
       duration: job.state?.durationMs ? job.state.durationMs + 'ms' : '—',
-      ok: job.state?.lastStatus !== 'error',
-      output: job.state?.lastError || job.state?.lastSummary || job.state?.lastStatus || '执行完成',
+      ok: !job.state?.lastError && job.state?.lastStatus !== 'error' && job.state?.lastStatus !== 'failed',
+      output: job.state?.lastSummary || job.state?.lastError || job.state?.lastStatus || '执行完成',
     }];
   }
   runsLoading.value = false;

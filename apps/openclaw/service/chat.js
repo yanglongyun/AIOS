@@ -1,4 +1,15 @@
+import { readFileSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
+
 const GATEWAY = 'http://localhost:18789';
+
+const getToken = () => {
+  try {
+    const cfg = JSON.parse(readFileSync(join(homedir(), '.openclaw/openclaw.json'), 'utf-8'));
+    return cfg?.gateway?.auth?.token || '';
+  } catch { return ''; }
+};
 
 export const chat = async ({ message, history = [] }) => {
   if (!message?.trim()) return { status: 400, message: 'message 不能为空' };
@@ -8,9 +19,13 @@ export const chat = async ({ message, history = [] }) => {
     { role: 'user', content: message }
   ];
 
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${GATEWAY}/v1/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ model: 'openclaw:main', messages, stream: false })
   });
 

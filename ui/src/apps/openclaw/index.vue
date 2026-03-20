@@ -1,120 +1,116 @@
 <template>
-  <div class="oc-root">
+  <div class="flex h-full flex-col overflow-hidden font-['Georgia','PingFang_SC',serif] bg-[#2a1e14] relative">
     <div class="cork-bg"></div>
     <div class="frame-t"></div>
 
-    <div class="pages">
+    <div class="flex-1 min-h-0 relative z-[2] overflow-hidden">
 
       <!-- 时刻表页 -->
       <div class="page" :class="currentView === 'timetable' ? 'active' : 'hide-left'">
-        <div class="topbar">
+        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
           <div class="t-badge">🦞</div>
-          <div class="t-info">
-            <div class="t-name">OpenClaw</div>
-            <div class="t-sub">
-              <span class="t-dot" :class="status.online ? (status.gateway ? 'dot-on' : 'dot-warn') : 'dot-off'"></span>
-              <span class="t-ver">{{ status.online ? (status.gateway ? t('openclaw_online') : t('openclaw_no_gateway')) : t('openclaw_offline') }}{{ status.version ? ' · ' + status.version : '' }}</span>
+          <div class="flex-1">
+            <div class="text-sm font-bold text-[#3a2810]">OpenClaw</div>
+            <div class="flex items-center gap-1 mt-px">
+              <span class="w-1 h-1 rounded-full" :class="status.online ? (status.gateway ? 'dot-on' : 'dot-warn') : 'bg-[#6a4a3a]'"></span>
+              <span class="text-[8px] text-[rgba(60,40,20,0.4)]">{{ status.online ? (status.gateway ? t('openclaw_online') : t('openclaw_no_gateway')) : t('openclaw_offline') }}{{ status.version ? ' · ' + status.version : '' }}</span>
             </div>
           </div>
           <button class="brass-btn" @click="showNew = true">{{ t('openclaw_new_task') }}</button>
         </div>
 
-        <div class="timetable" ref="timetableRef">
+        <div class="flex-1 min-h-0 overflow-y-auto pb-8 scrollbar-hide" ref="timetableRef">
           <template v-if="!cronJobs.length && !cronError">
-            <div class="empty-state">{{ t('openclaw_cron_empty') }}</div>
+            <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_cron_empty') }}</div>
           </template>
           <template v-else>
-            <!-- 已执行区 -->
             <template v-for="slot in pastSlots" :key="'past-'+slot.key">
               <div class="hour-row" :class="{ major: slot.major }">
-                <div class="hour-label" style="color:rgba(255,230,180,0.35);">{{ slot.label }}</div>
+                <div class="hour-label" style="color:rgba(255,230,180,0.35)">{{ slot.label }}</div>
                 <div v-if="slot.job" class="task-card past" :class="'tilt-'+((slot.idx%4)+1)" @click="openDetail(slot.job)">
                   <div class="pin" :class="pinColor(slot.idx)"></div>
                   <div class="stripe" :class="stripeColor(slot.idx)"></div>
-                  <div class="tc-body">
-                    <div class="tc-top">
-                      <span class="tc-emoji">{{ jobEmoji(slot.idx) }}</span>
-                      <div class="tc-info">
-                        <div class="tc-name">{{ slot.job.name || slot.job.id }}</div>
-                        <div class="tc-cron">{{ scheduleText(slot.job) }} · {{ t('openclaw_executed') }}</div>
+                  <div class="px-3 py-2.5 pl-3.5">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xl shrink-0">{{ jobEmoji(slot.idx) }}</span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-bold text-[#3a2810] truncate">{{ slot.job.name || slot.job.id }}</div>
+                        <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · {{ t('openclaw_executed') }}</div>
                       </div>
                     </div>
-                    <div v-if="slot.job.message" class="tc-prompt">{{ slot.job.message }}</div>
+                    <div v-if="slot.job.message" class="mt-1.5 text-[11px] leading-relaxed text-[#6a5838] italic line-clamp-2">{{ slot.job.message }}</div>
                   </div>
                 </div>
               </div>
             </template>
 
-            <!-- NOW 标记 -->
             <div class="hour-row major" ref="nowRef">
               <div class="hour-label now-label">{{ nowLabel }}</div>
             </div>
             <div class="now-line"><span class="now-tag">{{ t('openclaw_now') }}</span></div>
 
-            <!-- 即将执行区 -->
             <template v-for="slot in futureSlots" :key="'future-'+slot.key">
               <div class="hour-row" :class="{ major: slot.major }">
-                <div class="hour-label" style="color:rgba(180,230,150,0.7);">{{ slot.label }}</div>
+                <div class="hour-label" style="color:rgba(180,230,150,0.7)">{{ slot.label }}</div>
                 <div v-if="slot.job" class="task-card" :class="'tilt-'+((slot.idx%4)+1)" @click="openDetail(slot.job)">
                   <div class="pin" :class="pinColor(slot.idx)"></div>
                   <div class="stripe" :class="stripeColor(slot.idx)"></div>
-                  <div v-if="slot.idx % 3 === 0" class="tape" style="top:4px;left:-6px;transform:rotate(-10deg);"></div>
-                  <div class="tc-body">
-                    <div class="tc-top">
-                      <span class="tc-emoji">{{ jobEmoji(slot.idx) }}</span>
-                      <div class="tc-info">
-                        <div class="tc-name">{{ slot.job.name || slot.job.id }}</div>
-                        <div class="tc-cron">{{ scheduleText(slot.job) }} · {{ slot.countdown }}</div>
+                  <div v-if="slot.idx % 3 === 0" class="tape" style="top:4px;left:-6px;transform:rotate(-10deg)"></div>
+                  <div class="px-3 py-2.5 pl-3.5">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xl shrink-0">{{ jobEmoji(slot.idx) }}</span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-bold text-[#3a2810] truncate">{{ slot.job.name || slot.job.id }}</div>
+                        <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · {{ slot.countdown }}</div>
                       </div>
                     </div>
-                    <div v-if="slot.job.message" class="tc-prompt">{{ slot.job.message }}</div>
+                    <div v-if="slot.job.message" class="mt-1.5 text-[11px] leading-relaxed text-[#6a5838] italic line-clamp-2">{{ slot.job.message }}</div>
                   </div>
                 </div>
               </div>
             </template>
           </template>
-          <div style="height:40px;"></div>
         </div>
       </div>
 
       <!-- 详情页 -->
-      <div class="page page-bg" :class="currentView === 'detail' ? 'active' : (currentView === 'viz' ? 'hide-left' : 'hide-right')" style="z-index:3;">
-        <div class="topbar">
+      <div class="page page-bg" :class="currentView === 'detail' ? 'active' : (currentView === 'viz' ? 'hide-left' : 'hide-right')" style="z-index:3">
+        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
           <button class="back-btn" @click="currentView = 'timetable'">{{ t('openclaw_back') }}</button>
-          <div class="page-title">{{ selectedJob?.name || '' }}</div>
+          <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ selectedJob?.name || '' }}</div>
         </div>
-        <div class="detail-scroll">
+        <div class="flex-1 min-h-0 overflow-y-auto px-4 pb-6 scrollbar-hide">
           <div v-if="selectedJob" class="info-card">
-            <div class="info-row">
-              <span class="info-emoji">{{ jobEmoji(selectedJobIdx) }}</span>
+            <div class="flex items-center gap-2.5 mb-1.5">
+              <span class="text-[26px]">{{ jobEmoji(selectedJobIdx) }}</span>
               <div>
-                <div class="info-name">{{ selectedJob.name || selectedJob.id }}</div>
-                <div class="info-cron">{{ scheduleText(selectedJob) }}</div>
+                <div class="text-base font-bold text-[#3a2810]">{{ selectedJob.name || selectedJob.id }}</div>
+                <div class="text-[11px] text-[#9a8a68] font-['Courier_New',monospace] mt-0.5">{{ scheduleText(selectedJob) }}</div>
               </div>
             </div>
-            <div v-if="selectedJob.message" class="info-prompt">{{ selectedJob.message }}</div>
-            <div class="info-actions">
+            <div v-if="selectedJob.message" class="text-xs leading-relaxed text-[#5a4830] italic py-2 border-t border-dashed border-[rgba(160,140,100,0.2)] mt-1.5">{{ selectedJob.message }}</div>
+            <div class="flex gap-1.5 mt-2.5 pt-2 border-t border-dashed border-[rgba(160,140,100,0.2)]">
               <button class="ib ib-run" @click="doRun(selectedJob.id)">▶ {{ t('openclaw_run') }}</button>
               <button class="ib ib-del" @click="doDelete(selectedJob.id)">{{ t('openclaw_delete') }}</button>
             </div>
           </div>
 
-          <div class="runs-label">{{ t('openclaw_runs_label') }}</div>
-          <div v-if="runsLoading" class="empty-state">...</div>
-          <div v-else-if="!runs.length" class="empty-state">{{ t('openclaw_no_runs') }}</div>
+          <div class="text-[10px] font-bold text-[rgba(255,230,180,0.5)] tracking-widest mb-2">{{ t('openclaw_runs_label') }}</div>
+          <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">...</div>
+          <div v-else-if="!runs.length" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_no_runs') }}</div>
           <div v-for="(r, ri) in runs" :key="ri" class="run-card" :class="{ open: expandedRun === ri }" @click="expandedRun = expandedRun === ri ? -1 : ri">
-            <div class="run-top">
-              <div class="run-dot" :class="r.ok !== false ? 'rd-ok' : 'rd-fail'"></div>
-              <div class="run-info">
-                <div class="run-time">{{ r.time || r.startedAt || '—' }}</div>
-                <div class="run-dur">{{ t('openclaw_run_duration') }} {{ r.duration || '—' }}</div>
+            <div class="flex items-center gap-2 px-3 py-2.5">
+              <div class="w-2 h-2 rounded-full shrink-0" :class="r.ok !== false ? 'rd-ok' : 'rd-fail'"></div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-semibold text-[#3a2810]">{{ r.time || r.startedAt || '—' }}</div>
+                <div class="text-[9px] text-[#9a8a68] mt-px">{{ t('openclaw_run_duration') }} {{ r.duration || '—' }}</div>
               </div>
-              <div class="run-status" :class="r.ok !== false ? 'rs-ok' : 'rs-fail'">{{ r.ok !== false ? t('openclaw_run_ok') : t('openclaw_run_fail') }}</div>
-              <div class="run-arrow">▸</div>
+              <div class="shrink-0 text-[9px] font-bold" :class="r.ok !== false ? 'text-[#4a8a40]' : 'text-[#c05040]'">{{ r.ok !== false ? t('openclaw_run_ok') : t('openclaw_run_fail') }}</div>
+              <div class="run-arrow shrink-0 text-[10px] text-[#c0b090]">▸</div>
             </div>
             <div class="run-detail" @click.stop>
               <div class="run-output">{{ r.output || r.result || '—' }}</div>
-              <div v-if="r.ok !== false" class="run-btns">
+              <div v-if="r.ok !== false" class="flex gap-1.5 mt-2">
                 <button class="viz-btn" @click="openViz(r)">{{ t('openclaw_visualize') }}</button>
               </div>
             </div>
@@ -123,16 +119,16 @@
       </div>
 
       <!-- 可视化页 -->
-      <div class="page page-bg" :class="currentView === 'viz' ? 'active' : 'hide-right'" style="z-index:4;">
-        <div class="topbar">
+      <div class="page page-bg" :class="currentView === 'viz' ? 'active' : 'hide-right'" style="z-index:4">
+        <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
           <button class="back-btn" @click="currentView = 'detail'">{{ t('openclaw_back') }}</button>
-          <div class="page-title">{{ t('openclaw_visualize') }}</div>
+          <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ t('openclaw_visualize') }}</div>
         </div>
-        <div class="viz-wrap">
-          <iframe class="viz-iframe" ref="vizFrameRef"></iframe>
-          <div class="viz-loading" :class="{ hide: !vizLoading }">
+        <div class="flex-1 min-h-0 mx-4 mb-4 rounded overflow-hidden bg-white relative shadow-md">
+          <iframe class="w-full h-full border-none" ref="vizFrameRef"></iframe>
+          <div class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3 transition-opacity" :class="vizLoading ? '' : 'opacity-0 pointer-events-none'">
             <div class="viz-spinner"></div>
-            <div class="viz-text">{{ t('openclaw_viz_loading') }}</div>
+            <div class="text-xs text-[#8a8aaa] font-sans">{{ t('openclaw_viz_loading') }}</div>
           </div>
         </div>
       </div>
@@ -142,31 +138,29 @@
     <div class="frame-b"></div>
 
     <!-- 新建浮层 -->
-    <div class="new-ov" :class="{ show: showNew }" @click.self="showNew = false">
-      <div class="new-card">
-        <div class="pin pin-r" style="right:16px;top:-3px;"></div>
-        <div class="nc-title">📌 {{ t('openclaw_new_task') }}</div>
-        <div class="nc-field">
-          <div class="nc-label">{{ t('openclaw_cron_name_ph') }}</div>
+    <div class="fixed inset-0 z-20 bg-[rgba(30,20,12,0.7)] backdrop-blur-sm flex-col items-center justify-center p-5" :class="showNew ? 'flex' : 'hidden'" @click.self="showNew = false">
+      <div class="w-full max-w-[320px] rounded-sm p-[18px] relative shadow-xl info-card">
+        <div class="pin pin-r" style="right:16px;top:-3px"></div>
+        <div class="text-center text-[15px] font-bold text-[#3a2810] mb-3.5">📌 {{ t('openclaw_new_task') }}</div>
+        <div class="mb-2.5">
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_name_ph') }}</div>
           <input class="nc-input" v-model="addForm.name" :placeholder="t('openclaw_cron_name_ph')" />
         </div>
-        <div class="nc-field">
-          <div class="nc-label">调度方式</div>
-          <div class="sched-row">
-            <div class="sched-opt" :class="{ sel: addForm.schedType === 'cron' }" @click="addForm.schedType = 'cron'">{{ t('openclaw_sched_cron') }}</div>
-            <div class="sched-opt" :class="{ sel: addForm.schedType === 'every' }" @click="addForm.schedType = 'every'">{{ t('openclaw_sched_every') }}</div>
-            <div class="sched-opt" :class="{ sel: addForm.schedType === 'at' }" @click="addForm.schedType = 'at'">{{ t('openclaw_sched_at') }}</div>
+        <div class="mb-2.5">
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">调度方式</div>
+          <div class="flex gap-1 mb-2.5">
+            <div v-for="st in ['cron','every','at']" :key="st" class="sched-opt" :class="{ sel: addForm.schedType === st }" @click="addForm.schedType = st">{{ t('openclaw_sched_' + st) }}</div>
           </div>
         </div>
-        <div class="nc-field">
-          <div class="nc-label">{{ t('openclaw_sched_label_' + addForm.schedType) }}</div>
+        <div class="mb-2.5">
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_sched_label_' + addForm.schedType) }}</div>
           <input class="nc-input" v-model="addForm.schedValue" :placeholder="t('openclaw_sched_' + addForm.schedType + '_ph')" />
         </div>
-        <div class="nc-field">
-          <div class="nc-label">{{ t('openclaw_cron_prompt_ph') }}</div>
+        <div class="mb-2.5">
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_prompt_ph') }}</div>
           <textarea class="nc-ta" v-model="addForm.prompt" rows="3" :placeholder="t('openclaw_cron_prompt_ph')"></textarea>
         </div>
-        <div class="nc-actions">
+        <div class="flex gap-2 mt-3.5 justify-center">
           <button class="nc-btn nc-cancel" @click="showNew = false">{{ t('openclaw_cancel') }}</button>
           <button class="nc-btn nc-create" @click="doAdd" :disabled="addBusy">{{ t('openclaw_pin_it') }}</button>
         </div>
@@ -234,13 +228,9 @@ const pastSlots = computed(() => {
 const futureSlots = computed(() => {
   return cronJobs.value.map((j, i) => {
     let countdown = '';
-    if (j.schedule?.every) {
-      countdown = `${j.schedule.every}后`;
-    } else if (j.schedule?.at) {
-      countdown = j.schedule.at;
-    } else {
-      countdown = '下次执行';
-    }
+    if (j.schedule?.every) countdown = `${j.schedule.every}后`;
+    else if (j.schedule?.at) countdown = j.schedule.at;
+    else countdown = '下次执行';
     const nextHour = ((new Date().getHours() + 1 + i) % 24);
     const label = `${String(nextHour).padStart(2, '0')}:00`;
     return { key: j.id + '-future', label, major: true, job: j, idx: i, countdown };
@@ -275,7 +265,7 @@ const openDetail = async (job) => {
     const res = await fetch(`${API}/cron/runs?jobId=${encodeURIComponent(job.id)}`);
     const data = await res.json();
     if (data.success) runs.value = Array.isArray(data.runs) ? data.runs : [];
-  } catch { /* no runs available */ }
+  } catch { /* no runs */ }
   runsLoading.value = false;
 };
 
@@ -335,12 +325,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.oc-root {
-  display:flex; flex-direction:column; height:100%; overflow:hidden;
-  font-family:'Georgia','PingFang SC',serif;
-  background:#2a1e14;
-  position:relative;
-}
+/* 只保留 Tailwind 无法表达的拟物效果 */
 
 .cork-bg {
   position:absolute; inset:0; z-index:0;
@@ -351,19 +336,14 @@ onMounted(async () => {
     linear-gradient(160deg, #8a6a42, #7a5c38, #6a4e30, #5a4228);
   box-shadow:inset 0 0 80px rgba(0,0,0,0.3);
 }
-
 .frame-t { flex-shrink:0; height:6px; background:linear-gradient(180deg,#4a3420,#3a2414); box-shadow:0 3px 6px rgba(0,0,0,0.4); position:relative; z-index:5; }
 .frame-b { flex-shrink:0; height:6px; background:linear-gradient(0deg,#4a3420,#3a2414); box-shadow:0 -3px 6px rgba(0,0,0,0.4); position:relative; z-index:5; }
 
-.pages { flex:1; min-height:0; position:relative; z-index:2; overflow:hidden; }
-.page {
-  position:absolute; inset:0; display:flex; flex-direction:column;
-  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1), opacity 0.25s;
-  overflow:hidden; background:transparent;
-}
+/* 页面切换动画 */
+.page { position:absolute; inset:0; display:flex; flex-direction:column; transition:transform 0.35s cubic-bezier(0.32,0.72,0,1), opacity 0.25s; overflow:hidden; }
 .page.hide-left { transform:translateX(-30%); opacity:0; pointer-events:none; }
 .page.hide-right { transform:translateX(100%); opacity:0; pointer-events:none; }
-.page.active { transform:translateX(0); opacity:1; pointer-events:auto; }
+.page.active { transform:translateX(0); opacity:1; }
 .page-bg {
   background:
     repeating-conic-gradient(rgba(160,120,70,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px,
@@ -371,8 +351,7 @@ onMounted(async () => {
     linear-gradient(160deg, #8a6a42, #7a5c38, #6a4e30, #5a4228);
 }
 
-/* 顶栏 */
-.topbar { flex-shrink:0; padding:8px 16px 6px; display:flex; align-items:center; gap:10px; }
+/* 黄铜徽章 */
 .t-badge {
   width:34px; height:34px; border-radius:50%;
   background:radial-gradient(circle at 42% 38%, #c8a060, #8a6a30);
@@ -380,14 +359,10 @@ onMounted(async () => {
   box-shadow:inset 0 2px 3px rgba(255,220,150,0.3), 0 2px 4px rgba(0,0,0,0.4);
   display:flex; align-items:center; justify-content:center; font-size:16px;
 }
-.t-info { flex:1; }
-.t-name { font-size:14px; font-weight:700; color:#3a2810; text-shadow:0 1px 0 rgba(255,220,150,0.12); }
-.t-sub { display:flex; align-items:center; gap:4px; margin-top:1px; }
-.t-dot { width:4px; height:4px; border-radius:50%; }
 .dot-on { background:radial-gradient(circle,#60b848,#388020); box-shadow:0 0 3px rgba(60,160,40,0.3); }
 .dot-warn { background:radial-gradient(circle,#d4a840,#a08020); box-shadow:0 0 3px rgba(200,160,40,0.3); }
-.dot-off { background:#6a4a3a; }
-.t-ver { font-size:8px; color:rgba(60,40,20,0.4); }
+
+/* 黄铜按钮 */
 .brass-btn {
   padding:5px 12px; border-radius:5px; cursor:pointer;
   font-family:'Georgia',serif; font-size:9px; font-weight:700; letter-spacing:1px;
@@ -397,6 +372,7 @@ onMounted(async () => {
   box-shadow:0 2px 0 #5a3a08, inset 0 1px 1px rgba(255,230,160,0.2);
 }
 .brass-btn:active { transform:translateY(2px); box-shadow:0 0 0 #5a3a08; }
+
 .back-btn {
   padding:5px 12px; border-radius:5px; cursor:pointer;
   font-family:'Georgia',serif; font-size:10px; font-weight:700;
@@ -405,23 +381,22 @@ onMounted(async () => {
   box-shadow:0 2px 0 rgba(0,0,0,0.3);
 }
 .back-btn:active { transform:translateY(2px); box-shadow:none; }
-.page-title { flex:1; font-size:13px; font-weight:700; color:#3a2810; text-shadow:0 1px 0 rgba(255,220,150,0.12); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-/* 时刻表 */
-.timetable { flex:1; min-height:0; overflow-y:auto; padding:0 0 30px; -webkit-overflow-scrolling:touch; }
-.timetable::-webkit-scrollbar { display:none; }
+/* 时刻表刻度 */
+.scrollbar-hide::-webkit-scrollbar { display:none; }
 .hour-row { position:relative; min-height:48px; padding-left:58px; padding-right:16px; }
 .hour-row::before { content:''; position:absolute; top:0; left:52px; right:0; height:1px; background:linear-gradient(90deg, rgba(200,180,140,0.12), rgba(200,180,140,0.03)); }
 .hour-row.major::before { background:linear-gradient(90deg, rgba(200,180,140,0.22), rgba(200,180,140,0.05)); }
-.hour-label { position:absolute; top:-2px; left:6px; width:42px; text-align:right; font-size:13px; font-weight:800; color:rgba(255,230,180,0.35); letter-spacing:0.5px; font-family:'Courier New',monospace; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
-.hour-label.now-label { color:rgba(255,200,120,0.9); font-weight:900; font-size:14px; text-shadow:0 0 8px rgba(255,180,80,0.3), 0 1px 2px rgba(0,0,0,0.4); }
+.hour-label { position:absolute; top:-2px; left:6px; width:42px; text-align:right; font-size:13px; font-weight:800; letter-spacing:0.5px; font-family:'Courier New',monospace; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
+.hour-label.now-label { color:rgba(255,200,120,0.9) !important; font-weight:900; font-size:14px; text-shadow:0 0 8px rgba(255,180,80,0.3), 0 1px 2px rgba(0,0,0,0.4); }
 
+/* NOW 线 */
 .now-line { position:relative; margin-left:52px; margin-right:16px; height:0; }
 .now-line::before { content:''; position:absolute; top:-1px; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(180,80,40,0.5), rgba(180,80,40,0.1)); border-radius:1px; }
 .now-line::after { content:''; position:absolute; top:-4px; left:-4px; width:8px; height:8px; border-radius:50%; background:radial-gradient(circle at 38% 32%, #e08040, #b05020); border:1px solid #8a3818; box-shadow:0 0 6px rgba(200,80,40,0.3); }
 .now-tag { position:absolute; top:-10px; left:14px; font-size:11px; font-weight:900; color:rgba(255,160,80,0.85); letter-spacing:2px; font-family:'Courier New',monospace; }
 
-/* 卡片 */
+/* 索引卡片 */
 .task-card {
   position:relative; margin:6px 0 10px;
   background:linear-gradient(180deg, #faf4e4, #f4ecda, #f0e6d0);
@@ -430,95 +405,63 @@ onMounted(async () => {
 }
 .task-card:active { transform:scale(0.98) rotate(0deg) !important; }
 .task-card.past { opacity:0.5; }
-.tilt-1{transform:rotate(-0.5deg);} .tilt-2{transform:rotate(0.4deg);} .tilt-3{transform:rotate(-0.3deg);} .tilt-4{transform:rotate(0.6deg);}
+.tilt-1{transform:rotate(-0.5deg)} .tilt-2{transform:rotate(0.4deg)} .tilt-3{transform:rotate(-0.3deg)} .tilt-4{transform:rotate(0.6deg)}
 
+/* 图钉 */
 .pin { position:absolute; top:-3px; right:12px; z-index:3; width:16px; height:16px; border-radius:50%; box-shadow:0 2px 3px rgba(0,0,0,0.3); }
 .pin::after { content:''; position:absolute; top:3px; left:4px; width:4px; height:3px; border-radius:50%; background:rgba(255,255,255,0.35); }
-.pin-r{background:radial-gradient(circle at 38% 32%,#ff8888,#c83030);border:1px solid #a02020;}
-.pin-g{background:radial-gradient(circle at 38% 32%,#88dd88,#30a030);border:1px solid #208020;}
-.pin-b{background:radial-gradient(circle at 38% 32%,#88aaff,#3050c8);border:1px solid #2040a0;}
-.pin-y{background:radial-gradient(circle at 38% 32%,#ffdd66,#c8a020);border:1px solid #a08010;}
+.pin-r{background:radial-gradient(circle at 38% 32%,#ff8888,#c83030);border:1px solid #a02020}
+.pin-g{background:radial-gradient(circle at 38% 32%,#88dd88,#30a030);border:1px solid #208020}
+.pin-b{background:radial-gradient(circle at 38% 32%,#88aaff,#3050c8);border:1px solid #2040a0}
+.pin-y{background:radial-gradient(circle at 38% 32%,#ffdd66,#c8a020);border:1px solid #a08010}
 
-.stripe{position:absolute;top:0;left:0;bottom:0;width:4px;}
-.s-coral{background:linear-gradient(180deg,#e06848,#c04830);} .s-teal{background:linear-gradient(180deg,#48a8a0,#308880);}
-.s-plum{background:linear-gradient(180deg,#9068a8,#704888);} .s-amber{background:linear-gradient(180deg,#d0a040,#b08020);}
+/* 彩条 */
+.stripe{position:absolute;top:0;left:0;bottom:0;width:4px}
+.s-coral{background:linear-gradient(180deg,#e06848,#c04830)} .s-teal{background:linear-gradient(180deg,#48a8a0,#308880)}
+.s-plum{background:linear-gradient(180deg,#9068a8,#704888)} .s-amber{background:linear-gradient(180deg,#d0a040,#b08020)}
 
+/* 胶带 */
 .tape { position:absolute; z-index:4; width:50px; height:14px; background:linear-gradient(180deg,rgba(255,240,180,0.65),rgba(230,210,140,0.45)); border:1px solid rgba(200,180,120,0.25); }
 
-.tc-body{padding:10px 12px 10px 14px;}
-.tc-top{display:flex;align-items:center;gap:8px;}
-.tc-emoji{font-size:20px;flex-shrink:0;}
-.tc-info{flex:1;min-width:0;}
-.tc-name{font-size:14px;font-weight:700;color:#3a2810;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tc-cron{font-size:9px;color:#9a8a68;font-family:'Courier New',monospace;margin-top:1px;}
-.tc-prompt{margin-top:6px;font-size:11px;line-height:1.55;color:#6a5838;font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-
-.empty-state { text-align:center; padding:40px 0; font-size:12px; color:rgba(255,230,180,0.3); }
-
-/* 详情页 */
-.detail-scroll { flex:1; min-height:0; overflow-y:auto; padding:0 16px 24px; -webkit-overflow-scrolling:touch; }
-.detail-scroll::-webkit-scrollbar { display:none; }
-
+/* 信息卡 */
 .info-card { background:linear-gradient(180deg,#faf4e4,#f0e6d0); border-radius:2px; padding:14px; box-shadow:1px 2px 4px rgba(0,0,0,0.15); margin-bottom:14px; }
-.info-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-.info-emoji { font-size:26px; }
-.info-name { font-size:16px; font-weight:700; color:#3a2810; }
-.info-cron { font-size:11px; color:#9a8a68; font-family:'Courier New',monospace; margin-top:2px; }
-.info-prompt { font-size:12px; line-height:1.65; color:#5a4830; font-style:italic; padding:8px 0; border-top:1px dashed rgba(160,140,100,0.2); margin-top:6px; }
-.info-actions { display:flex; gap:6px; margin-top:10px; padding-top:8px; border-top:1px dashed rgba(160,140,100,0.2); }
+
+/* 操作按钮 */
 .ib { padding:6px 14px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:9px; font-weight:700; box-shadow:0 2px 0 rgba(0,0,0,0.12); }
 .ib:active { transform:translateY(2px); box-shadow:none; }
 .ib-run { background:linear-gradient(180deg,#5a9a50,#408838); border:1px solid #2a6a20; color:#d8f0d0; }
 .ib-del { background:linear-gradient(180deg,#c0a090,#a88878); border:1px solid #8a6858; color:#fff; }
 
-.runs-label { font-size:10px; font-weight:700; color:rgba(255,230,180,0.5); letter-spacing:2px; margin-bottom:8px; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
-
+/* 执行记录 */
 .run-card { background:linear-gradient(180deg,#faf4e4,#f0e6d0); border-radius:2px; margin-bottom:8px; overflow:hidden; cursor:pointer; box-shadow:1px 1px 3px rgba(0,0,0,0.12); }
 .run-card:active { transform:scale(0.98); }
-.run-top { padding:10px 12px; display:flex; align-items:center; gap:8px; }
-.run-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .rd-ok { background:radial-gradient(circle at 35% 30%,#70d060,#388020); box-shadow:0 0 4px rgba(60,180,40,0.3); }
 .rd-fail { background:radial-gradient(circle at 35% 30%,#e06050,#a02820); box-shadow:0 0 4px rgba(200,60,40,0.3); }
-.run-info { flex:1; min-width:0; }
-.run-time { font-size:12px; font-weight:600; color:#3a2810; }
-.run-dur { font-size:9px; color:#9a8a68; margin-top:1px; }
-.run-status { flex-shrink:0; font-size:9px; font-weight:700; }
-.rs-ok { color:#4a8a40; } .rs-fail { color:#c05040; }
-.run-arrow { flex-shrink:0; font-size:10px; color:#c0b090; transition:transform 0.2s; }
+.run-arrow { transition:transform 0.2s; }
 .run-card.open .run-arrow { transform:rotate(90deg); }
 .run-detail { display:none; border-top:1px dashed rgba(160,140,100,0.2); padding:10px 12px; }
 .run-card.open .run-detail { display:block; }
 .run-output { font-family:'Courier New',monospace; font-size:10px; line-height:1.6; color:#4a3a20; background:rgba(0,0,0,0.03); border:1px solid rgba(160,140,100,0.12); border-radius:4px; padding:8px 10px; max-height:140px; overflow-y:auto; white-space:pre-wrap; word-break:break-all; }
 .run-output::-webkit-scrollbar { display:none; }
-.run-btns { display:flex; gap:6px; margin-top:8px; }
+
+/* 可视化按钮 */
 .viz-btn { padding:5px 14px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:9px; font-weight:700; background:linear-gradient(180deg,#5868a8,#384888); border:1px solid #283868; color:#d0d8f0; box-shadow:0 2px 0 rgba(0,0,0,0.2); }
 .viz-btn:active { transform:translateY(2px); box-shadow:none; }
-
-/* 可视化 */
-.viz-wrap { flex:1; min-height:0; margin:0 16px 16px; border-radius:4px; overflow:hidden; background:#fff; position:relative; box-shadow:1px 2px 6px rgba(0,0,0,0.2); }
-.viz-iframe { width:100%; height:100%; border:none; }
-.viz-loading { position:absolute; inset:0; background:rgba(255,255,255,0.92); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; transition:opacity 0.3s; }
-.viz-loading.hide { opacity:0; pointer-events:none; }
 .viz-spinner { width:28px; height:28px; border-radius:50%; border:3px solid rgba(90,100,160,0.15); border-top-color:#5868a8; animation:spin 0.8s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg);} }
-.viz-text { font-size:12px; color:#8a8aaa; font-family:-apple-system,sans-serif; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
-/* 新建 */
-.new-ov { display:none; position:absolute; inset:0; z-index:20; background:rgba(30,20,12,0.7); backdrop-filter:blur(4px); flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-.new-ov.show { display:flex; }
-.new-card { width:100%; max-width:320px; background:linear-gradient(180deg,#faf4e4,#f0e6d0); border-radius:2px; padding:18px; box-shadow:2px 4px 12px rgba(0,0,0,0.3); position:relative; }
-.nc-title { text-align:center; font-size:15px; font-weight:700; color:#3a2810; margin-bottom:14px; }
-.nc-field { margin-bottom:10px; }
-.nc-label { font-size:9px; color:#9a8a68; letter-spacing:1px; font-weight:700; margin-bottom:3px; }
+/* 表单输入 */
 .nc-input { width:100%; border:none; outline:none; background:transparent; border-bottom:1px solid rgba(160,140,100,0.3); padding:7px 2px; font-family:'Georgia',serif; font-size:13px; color:#3a2810; }
 .nc-input::placeholder { color:rgba(160,140,100,0.35); font-style:italic; }
 .nc-input:focus { border-bottom-color:#a08030; }
 .nc-ta { width:100%; border:none; outline:none; resize:none; background:transparent; border-bottom:1px solid rgba(160,140,100,0.3); padding:7px 2px; font-family:'Georgia',serif; font-size:13px; color:#3a2810; line-height:1.6; }
 .nc-ta::placeholder { color:rgba(160,140,100,0.35); font-style:italic; }
-.sched-row { display:flex; gap:4px; margin-bottom:10px; }
+
+/* 调度类型选择 */
 .sched-opt { flex:1; padding:5px 0; border-radius:4px; cursor:pointer; text-align:center; font-family:'Georgia',serif; font-size:9px; font-weight:700; background:rgba(0,0,0,0.03); border:1px solid rgba(160,140,100,0.15); color:#9a8a68; }
 .sched-opt.sel { background:linear-gradient(180deg,#c8a050,#a07828); border-color:#7a5818; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
-.nc-actions { display:flex; gap:8px; margin-top:14px; justify-content:center; }
+
+/* 表单按钮 */
 .nc-btn { padding:7px 20px; border-radius:5px; cursor:pointer; font-family:'Georgia',serif; font-size:11px; font-weight:700; box-shadow:0 2px 0 rgba(0,0,0,0.12); }
 .nc-btn:active { transform:translateY(2px); box-shadow:none; }
 .nc-cancel { background:linear-gradient(180deg,#e8e0d0,#d8d0c0); border:1px solid #c0b8a0; color:#8a7a58; }

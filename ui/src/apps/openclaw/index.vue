@@ -5,7 +5,7 @@
 
     <div class="flex-1 min-h-0 flex flex-col relative z-[2]">
       <!-- 顶栏 -->
-      <div class="flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-1.5">
+      <div class="topbar-bg flex shrink-0 items-center gap-2.5 px-4 pt-2 pb-2 border-b border-[rgba(0,0,0,0.15)]">
         <div class="t-badge flex items-center justify-center w-[34px] h-[34px] rounded-full border-2 border-[#6a4a18] text-base">🦞</div>
         <div class="flex-1">
           <div class="text-sm font-bold text-[#3a2810]">OpenClaw</div>
@@ -63,6 +63,7 @@ onMounted(async () => {
 }
 .frame-t { background:linear-gradient(180deg,#4a3420,#3a2414); box-shadow:0 3px 6px rgba(0,0,0,0.4); }
 .frame-b { background:linear-gradient(0deg,#4a3420,#3a2414); box-shadow:0 -3px 6px rgba(0,0,0,0.4); }
+.topbar-bg { background:linear-gradient(180deg, rgba(60,42,24,0.6), rgba(50,35,20,0.3)); box-shadow:0 1px 0 rgba(255,220,150,0.04); }
 .t-badge { background:radial-gradient(circle at 42% 38%, #c8a060, #8a6a30); box-shadow:inset 0 2px 3px rgba(255,220,150,0.3), 0 2px 4px rgba(0,0,0,0.4); }
 .dot-on { background:radial-gradient(circle,#60b848,#388020); box-shadow:0 0 3px rgba(60,160,40,0.3); }
 .dot-warn { background:radial-gradient(circle,#d4a840,#a08020); box-shadow:0 0 3px rgba(200,160,40,0.3); }

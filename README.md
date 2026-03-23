@@ -1,5 +1,7 @@
 # AIOS
 
+**[English](./README_en.md)** | 简体中文
+
 > AI-Powered Operating System | 面向个人的 AI 操作系统
 
 ## 快速上手

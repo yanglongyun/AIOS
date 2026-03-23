@@ -1,6 +1,6 @@
 # AIOS
 
-**[English](./README_en.md)** | 简体中文
+**简体中文** | [English](./README_en.md)
 
 > AI-Powered Operating System | 面向个人的 AI 操作系统
 
@@ -10,17 +10,17 @@
 
 Linux (Ubuntu/Debian)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/install-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-linux.sh | bash
 ```
 
 macOS
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/install-macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-macos.sh | bash
 ```
 
 Windows (PowerShell)
 ```powershell
-irm https://raw.githubusercontent.com/valueriver/aios/main/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-windows.ps1 | iex
 ```
 
 打开：`http://localhost:9700/aios`

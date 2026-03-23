@@ -3,86 +3,49 @@
     <div class="mx-auto max-w-[960px]">
       <div class="mb-4 flex items-center justify-between gap-3">
         <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_center') }}</h1>
-        <div class="flex gap-2">
-          <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('tasks_refresh') }}</button>
-          <button type="button" class="cursor-pointer rounded-lg border border-[#c8a060] bg-[#f8f0e0] px-3 py-1.5 text-xs font-semibold text-[#7a5a28] transition hover:bg-[#f0e4c8]" @click="windowManager.open('task-create')">{{ t('tasks_arrange') }}</button>
-        </div>
-      </div>
-
-      <div class="mb-4 flex gap-1 rounded-lg bg-[#efe4d4] p-1">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          type="button"
-          class="flex-1 cursor-pointer rounded-md px-3 py-1.5 text-xs transition"
-          :class="activeTab === tab.key ? 'bg-[#fffdf8] font-semibold text-[#4a3a28] shadow-sm' : 'text-[#8a7a68] hover:text-[#5a4a38]'"
-          @click="activeTab = tab.key"
-        >
-          {{ tab.label }}
-          <span v-if="tab.count > 0" class="ml-1 text-[10px] opacity-60">{{ tab.count }}</span>
-        </button>
+        <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('tasks_refresh') }}</button>
       </div>
 
       <div v-if="error" class="mb-3 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">{{ error }}</div>
 
-      <div v-if="activeTab === 'scheduled'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div v-if="schedules.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">{{ t('tasks_empty_scheduled') }}</div>
+      <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div v-if="allItems.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">{{ t('tasks_empty_running') }}</div>
         <div v-else class="space-y-2">
-          <div v-for="s in schedules" :key="s.id" class="rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1">
-                <div class="text-[12px] font-semibold text-[#4a3a28]">{{ s.name }}</div>
-                <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#8a7a68]">{{ s.prompt }}</div>
-              </div>
-              <div class="flex shrink-0 items-center gap-1.5">
-                <button type="button" class="cursor-pointer rounded border px-2 py-0.5 text-[10px] transition" :class="s.enabled ? 'border-[#c8d8c0] bg-[#f0f8ec] text-[#5a8a48] hover:bg-[#e0f0d8]' : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'" @click="toggleSchedule(s)">
-                  {{ s.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
-                </button>
-                <button type="button" class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]" @click="removeSchedule(s.id)">{{ t('tasks_delete') }}</button>
-              </div>
+          <component
+            :is="item._type === 'task' ? 'button' : 'div'"
+            v-for="item in allItems"
+            :key="item._key"
+            :type="item._type === 'task' ? 'button' : undefined"
+            class="flex w-full items-start gap-2.5 rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5 text-left transition"
+            :class="item._type === 'task' ? 'cursor-pointer hover:bg-[#f8f1e7]' : ''"
+            @click="item._type === 'task' && openTask(item.id)"
+          >
+            <div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+              <span v-if="item._type === 'schedule'" class="text-[12px] text-[#8a6a40]">⏱</span>
+              <span v-else-if="item.status === 'pending'" class="h-2.5 w-2.5 animate-pulse rounded-full bg-[#c8a060]"></span>
+              <span v-else-if="item.status === 'done'" class="text-sm text-[#7a9a6a]">✓</span>
+              <span v-else class="text-sm text-[#c07060]">✗</span>
             </div>
-            <div class="mt-1.5 flex flex-wrap items-center gap-2">
-              <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[10px] text-[#7a6a58]">{{ scheduleTypeLabel(s) }}</span>
-              <span v-if="s.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[10px] text-[#5a6a8a]">{{ s.cron }}</span>
-              <span v-if="s.run_at" class="text-[10px] text-[#7a6a58]">{{ s.run_at }}</span>
-              <span v-if="s.last_run_at" class="ml-auto text-[10px] text-[#a0907a]">{{ t('tasks_last_run') }} {{ s.last_run_at.slice(0, 16) }}</span>
-              <button v-if="s.last_task_id" type="button" class="cursor-pointer text-[10px] text-[#7a6a58] underline hover:text-[#4a3a28]" @click="openTask(s.last_task_id)">#{{ s.last_task_id }}</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="activeTab === 'running'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div v-if="runningTasks.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">{{ t('tasks_empty_running') }}</div>
-        <div v-else class="space-y-2">
-          <button v-for="r in runningTasks" :key="r.id" type="button" class="flex w-full cursor-pointer items-start gap-2.5 rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5 text-left transition hover:bg-[#f8f1e7]" @click="openTask(r.id)">
-            <span class="mt-0.5 shrink-0 animate-spin text-sm text-[#c8a060]">◔</span>
             <div class="min-w-0 flex-1">
-              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || t('tasks_unnamed') }}</div>
-              <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">{{ r.prompt || '-' }}</div>
+              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">
+                {{ item._type === 'schedule' ? (item.name || t('tasks_unnamed')) : (item.title || t('tasks_unnamed')) }}
+              </div>
+              <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">
+                {{ item._type === 'schedule' ? (item.prompt || '-') : (item.response || item.prompt || '-') }}
+              </div>
               <div class="mt-1 flex items-center gap-2 text-[10px] text-[#8a7860]">
-                <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ r.app }}</span>
-                <span>{{ r.created_at || '' }}</span>
+                <span v-if="item._type === 'schedule' && item.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[#5a6a8a]">{{ item.cron }}</span>
+                <span v-if="item._type === 'schedule'" class="flex shrink-0 items-center gap-1.5">
+                  <button type="button" class="cursor-pointer rounded border px-2 py-0.5 text-[10px] transition" :class="item.enabled ? 'border-[#c8d8c0] bg-[#f0f8ec] text-[#5a8a48] hover:bg-[#e0f0d8]' : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'" @click.stop="toggleSchedule(item)">
+                    {{ item.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
+                  </button>
+                  <button type="button" class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]" @click.stop="removeSchedule(item.id)">{{ t('tasks_delete') }}</button>
+                </span>
+                <span v-if="item.app" class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ item.app }}</span>
+                <span v-if="item._type === 'task'">{{ item.created_at || '' }}</span>
               </div>
             </div>
-          </button>
-        </div>
-      </div>
-
-      <div v-if="activeTab === 'history'" class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div v-if="historyTasks.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">{{ t('tasks_empty_history') }}</div>
-        <div v-else class="space-y-2">
-          <button v-for="r in historyTasks" :key="r.id" type="button" class="flex w-full cursor-pointer items-start gap-2.5 rounded-lg border border-[#efe4d4] bg-[#fcfaf6] px-3 py-2.5 text-left transition hover:bg-[#f8f1e7]" @click="openTask(r.id)">
-            <span class="mt-0.5 shrink-0 text-sm" :class="r.status === 'done' ? 'text-[#7a9a6a]' : 'text-[#c07060]'">{{ r.status === 'done' ? '✓' : '✗' }}</span>
-            <div class="min-w-0 flex-1">
-              <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">{{ r.title || t('tasks_unnamed') }}</div>
-              <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">{{ r.response || r.prompt || '-' }}</div>
-              <div class="mt-1 flex items-center gap-2 text-[10px] text-[#8a7860]">
-                <span class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ r.app }}</span>
-                <span>{{ r.created_at || '' }}</span>
-              </div>
-            </div>
-          </button>
+          </component>
         </div>
       </div>
     </div>
@@ -99,18 +62,17 @@ const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);
 const error = ref('');
-const activeTab = ref('scheduled');
 
-const runningTasks = computed(() => tasks.value.filter((x) => x.status === 'pending'));
-const historyTasks = computed(() => tasks.value.filter((x) => x.status !== 'pending'));
-
-const tabs = computed(() => ([
-  { key: 'scheduled', label: t('tasks_tab_scheduled'), count: schedules.value.length },
-  { key: 'running', label: t('tasks_tab_running'), count: runningTasks.value.length },
-  { key: 'history', label: t('tasks_tab_history'), count: historyTasks.value.length }
-]));
-
-const scheduleTypeLabel = (s) => s.cron ? t('tasks_repeat') : t('tasks_once');
+const allItems = computed(() => {
+  const items = [];
+  for (const s of schedules.value) {
+    items.push({ ...s, _type: 'schedule', _key: `s-${s.id}` });
+  }
+  for (const task of tasks.value) {
+    items.push({ ...task, _type: 'task', _key: `t-${task.id}` });
+  }
+  return items;
+});
 
 const loadTasks = async () => {
   const res = await fetch('/aios/api/task?limit=200');

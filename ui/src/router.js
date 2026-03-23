@@ -29,7 +29,6 @@ const routeMap = [
   { pattern: /^\/tasks\/create$/, appId: 'task-create' },
   { pattern: /^\/tasks$/, appId: 'tasks' },
   { pattern: /^\/files$/, appId: 'files' },
-  { pattern: /^\/skills$/, appId: 'skills' },
   { pattern: /^\/notebook/, appId: 'notebook' },
   { pattern: /^\/finance/, appId: 'finance' },
   { pattern: /^\/subscriber/, appId: 'subscriber' },

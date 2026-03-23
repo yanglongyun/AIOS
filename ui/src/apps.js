@@ -9,8 +9,6 @@ export const appRegistry = [
     load: () => import('./apps/tasks/index.vue'), defaultSize: { w: 700, h: 500 } },
   { id: 'files', name: 'app_sidebar_files', icon: '📁', iconClass: 'icon-files',
     load: () => import('./apps/files/index.vue'), defaultSize: { w: 750, h: 520 } },
-  { id: 'skills', name: 'app_sidebar_skills', icon: '✨', iconClass: 'icon-skills',
-    load: () => import('./apps/skills/index.vue'), defaultSize: { w: 700, h: 500 } },
   // 应用
   { id: 'notebook', name: 'app_sidebar_notebook', icon: '📓', iconClass: 'icon-notebook',
     load: () => import('./apps/notebook/index.vue'), defaultSize: { w: 850, h: 600 } },

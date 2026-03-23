@@ -16,4 +16,11 @@ export default {
   taskdetail_no_messages: '暂无消息',
   taskdetail_load_failed: '加载失败',
   taskdetail_stop_failed: '终止失败',
+  taskdetail_status_pending: '进行中',
+  taskdetail_status_done: '已完成',
+  taskdetail_status_error: '错误',
+  taskdetail_status_aborted: '已终止',
+  taskdetail_role_user: '用户',
+  taskdetail_role_tool_call: '工具调用',
+  taskdetail_role_tool_result: '工具结果',
 };

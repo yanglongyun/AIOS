@@ -16,4 +16,11 @@ export default {
   taskdetail_no_messages: 'No messages',
   taskdetail_load_failed: 'Failed to load',
   taskdetail_stop_failed: 'Failed to stop task',
+  taskdetail_status_pending: 'Running',
+  taskdetail_status_done: 'Done',
+  taskdetail_status_error: 'Error',
+  taskdetail_status_aborted: 'Aborted',
+  taskdetail_role_user: 'User',
+  taskdetail_role_tool_call: 'Tool Call',
+  taskdetail_role_tool_result: 'Tool Result',
 };

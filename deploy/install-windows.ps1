@@ -15,15 +15,7 @@ try {
   $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 }
 catch {
-  if ([string]::IsNullOrWhiteSpace($env:USERNAME)) {
-    throw "Unable to detect current Windows user."
-  }
-  if ([string]::IsNullOrWhiteSpace($env:USERDOMAIN)) {
-    $CurrentUser = $env:USERNAME
-  }
-  else {
-    $CurrentUser = "$env:USERDOMAIN\$env:USERNAME"
-  }
+  throw "Unable to detect current Windows user."
 }
 
 Write-Host "[1/5] Check dependencies..."
@@ -65,6 +57,21 @@ else {
 
 Write-Host "[3/5] Install deps + build UI..."
 Set-Location $AppDir
+$NpmCacheDir = (npm config get cache).Trim()
+if ([string]::IsNullOrWhiteSpace($NpmCacheDir)) {
+  throw "npm cache directory is empty."
+}
+if (-not (Test-Path $NpmCacheDir)) {
+  throw "npm cache directory does not exist: $NpmCacheDir"
+}
+try {
+  $ProbeDir = Join-Path $NpmCacheDir ".aios-write-test"
+  New-Item -ItemType Directory -Path $ProbeDir -Force | Out-Null
+  Remove-Item -Path $ProbeDir -Force
+}
+catch {
+  throw "npm cache directory is not writable: $NpmCacheDir"
+}
 npm ci
 npm run build
 npm link
@@ -81,12 +88,12 @@ if (-not (Test-Path $ScriptDir)) {
 
 @"
 Set-Location "$AppDir"
-& "$NodeExe" server/index.js
+& "$NodeExe" --import tsx server/index.ts
 "@ | Set-Content -Path $ServerRunner -Encoding UTF8
 
 @"
 Set-Location "$AppDir"
-& "$NodeExe" apps/index.js
+& "$NodeExe" --import tsx apps/index.ts
 "@ | Set-Content -Path $AppsRunner -Encoding UTF8
 
 Write-Host "[4/5] Setup startup tasks..."

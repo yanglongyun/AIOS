@@ -27,6 +27,10 @@ if [ "${NODE_MAJOR}" -lt 22 ]; then brew upgrade node; fi
 echo "[2/5] Pull code..."
 mkdir -p "$(dirname "$APP_DIR")"
 if [ ! -d "$APP_DIR/.git" ]; then
+  if [ -d "$APP_DIR" ] && [ -n "$(find "$APP_DIR" -mindepth 1 -maxdepth 1 2>/dev/null)" ]; then
+    echo "Target directory already exists and is not a git repository: $APP_DIR"
+    exit 1
+  fi
   git clone "$REPO_URL" "$APP_DIR"
 else
   git -C "$APP_DIR" pull --ff-only
@@ -34,6 +38,28 @@ fi
 
 echo "[3/5] Install deps + build UI..."
 cd "$APP_DIR"
+NPM_CACHE_DIR="$(npm config get cache)"
+if [ -z "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory is empty."
+  exit 1
+fi
+if [ ! -d "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory does not exist: $NPM_CACHE_DIR"
+  exit 1
+fi
+if [ ! -w "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory is not writable: $NPM_CACHE_DIR"
+  exit 1
+fi
+NPM_CACHE_OWNER="$(stat -f '%Su' "$NPM_CACHE_DIR")"
+CURRENT_USER="$(id -un)"
+if [ "$NPM_CACHE_OWNER" != "$CURRENT_USER" ]; then
+  echo "npm cache directory owner mismatch: $NPM_CACHE_DIR"
+  echo "Current user: $CURRENT_USER"
+  echo "Actual owner: $NPM_CACHE_OWNER"
+  echo "Run: sudo chown -R $CURRENT_USER \"$NPM_CACHE_DIR\""
+  exit 1
+fi
 npm ci
 npm run build
 npm link
@@ -50,6 +76,10 @@ export PATH="$NPM_GLOBAL_BIN:$PATH"
 
 echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
+if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
+  echo "Unable to resolve node executable path."
+  exit 1
+fi
 
 LABEL_SERVER="ai.${APP_NAME}.server"
 PLIST_SERVER="$HOME/Library/LaunchAgents/${LABEL_SERVER}.plist"
@@ -63,7 +93,9 @@ cat > "$PLIST_SERVER" <<EOF
   <key>ProgramArguments</key>
   <array>
     <string>${NODE_BIN}</string>
-    <string>${APP_DIR}/server/index.js</string>
+    <string>--import</string>
+    <string>tsx</string>
+    <string>${APP_DIR}/server/index.ts</string>
   </array>
   <key>WorkingDirectory</key><string>${APP_DIR}</string>
   <key>RunAtLoad</key><true/>
@@ -89,7 +121,9 @@ cat > "$PLIST_APPS" <<EOF
   <key>ProgramArguments</key>
   <array>
     <string>${NODE_BIN}</string>
-    <string>${APP_DIR}/apps/index.js</string>
+    <string>--import</string>
+    <string>tsx</string>
+    <string>${APP_DIR}/apps/index.ts</string>
   </array>
   <key>WorkingDirectory</key><string>${APP_DIR}</string>
   <key>RunAtLoad</key><true/>

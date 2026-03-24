@@ -33,6 +33,10 @@ fi
 echo "[2/5] Pull code..."
 sudo mkdir -p "$(dirname "$APP_DIR")"
 if [ ! -d "$APP_DIR/.git" ]; then
+  if [ -d "$APP_DIR" ] && [ -n "$(find "$APP_DIR" -mindepth 1 -maxdepth 1 2>/dev/null)" ]; then
+    echo "Target directory already exists and is not a git repository: $APP_DIR"
+    exit 1
+  fi
   sudo git clone "$REPO_URL" "$APP_DIR"
 else
   sudo git -C "$APP_DIR" pull --ff-only
@@ -41,6 +45,28 @@ sudo chown -R "$SERVICE_USER":"$SERVICE_USER" "$APP_DIR"
 
 echo "[3/5] Install deps + build UI..."
 cd "$APP_DIR"
+NPM_CACHE_DIR="$(npm config get cache)"
+if [ -z "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory is empty."
+  exit 1
+fi
+if [ ! -d "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory does not exist: $NPM_CACHE_DIR"
+  exit 1
+fi
+if [ ! -w "$NPM_CACHE_DIR" ]; then
+  echo "npm cache directory is not writable: $NPM_CACHE_DIR"
+  exit 1
+fi
+NPM_CACHE_OWNER="$(stat -c '%U' "$NPM_CACHE_DIR")"
+CURRENT_USER="$(id -un)"
+if [ "$NPM_CACHE_OWNER" != "$CURRENT_USER" ]; then
+  echo "npm cache directory owner mismatch: $NPM_CACHE_DIR"
+  echo "Current user: $CURRENT_USER"
+  echo "Actual owner: $NPM_CACHE_OWNER"
+  echo "Run: sudo chown -R $CURRENT_USER \"$NPM_CACHE_DIR\""
+  exit 1
+fi
 npm ci
 npm run build
 npm link
@@ -57,6 +83,10 @@ export PATH="$NPM_GLOBAL_BIN:$PATH"
 
 echo "[4/5] Setup daemon..."
 NODE_BIN="$(which node)"
+if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
+  echo "Unable to resolve node executable path."
+  exit 1
+fi
 
 sudo tee /etc/systemd/system/${APP_NAME}.service >/dev/null <<EOF
 [Unit]
@@ -67,7 +97,7 @@ After=network.target
 Type=simple
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
-ExecStart=${NODE_BIN} server/index.js
+ExecStart=${NODE_BIN} --import tsx server/index.ts
 Restart=always
 RestartSec=5
 StandardOutput=journal
@@ -87,7 +117,7 @@ Requires=${APP_NAME}.service
 Type=simple
 User=${SERVICE_USER}
 WorkingDirectory=${APP_DIR}
-ExecStart=${NODE_BIN} apps/index.js
+ExecStart=${NODE_BIN} --import tsx apps/index.ts
 Restart=always
 RestartSec=5
 StandardOutput=journal

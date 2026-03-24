@@ -6,24 +6,21 @@
 
 ## Quick Start
 
-### Automatic Installation
-
-Linux (Ubuntu/Debian)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-linux.sh | bash
+git clone https://github.com/valueriver/aios.git
+cd aios
+npm install
+npm run dev
 ```
 
-macOS
+Open: `http://localhost:5173/aios`
+
+If you want to start services separately:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-macos.sh | bash
+npm run start
+npm run start:apps
 ```
-
-Windows (PowerShell)
-```powershell
-irm https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-windows.ps1 | iex
-```
-
-Open: `http://localhost:9700/aios`
 
 ## Community & Feedback
 

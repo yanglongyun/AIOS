@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
+import { useEffect, useRef, useCallback, type ReactNode } from 'react'
 import {
   MessageCircle,
   ListChecks,
@@ -136,21 +136,15 @@ const apps: { icon: LucideIcon; name: string; desc: string }[] = [
   { icon: Rocket, name: 'Create', desc: 'Generate entirely new apps through conversation' },
 ]
 
-const installCmds: Record<string, string> = {
-  macos:
-    'curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-macos.sh | bash',
-  linux:
-    'curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-linux.sh | bash',
-  windows:
-    'irm https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-windows.ps1 | iex',
-}
+const installCmd = `git clone https://github.com/valueriver/aios.git
+cd aios
+npm install
+npm run dev`
 
 const serif = { fontFamily: "'Instrument Serif', serif" }
 
 /* ── App ── */
 export default function App() {
-  const [platform, setPlatform] = useState<'macos' | 'linux' | 'windows'>('macos')
-
   return (
     <div className="bg-background text-foreground font-body">
       {/* ═══════════════════ Hero ═══════════════════ */}
@@ -298,37 +292,18 @@ export default function App() {
               style={serif}
             >
               Open source.{' '}
-              <span className="text-muted-foreground">One command.</span>
+              <span className="text-muted-foreground">Clone and run.</span>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mt-6 leading-relaxed">
-              Free, transparent, and community-driven. Install in seconds, customize
-              forever.
+              Open source, local-first, and simple to run. Clone the repo, install
+              dependencies, and start it yourself.
             </p>
           </Reveal>
 
-          {/* Platform tabs */}
-          <Reveal delay={0.2}>
-            <div className="flex justify-center gap-2 mt-12">
-              {(['macos', 'linux', 'windows'] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPlatform(p)}
-                  className={`rounded-full px-5 py-2 text-sm transition-all cursor-pointer ${
-                    platform === p
-                      ? 'liquid-glass text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {p === 'macos' ? 'macOS' : p === 'linux' ? 'Linux' : 'Windows'}
-                </button>
-              ))}
-            </div>
-          </Reveal>
-
           {/* Terminal */}
-          <Reveal delay={0.3}>
+          <Reveal delay={0.2}>
             <div className="liquid-glass rounded-2xl mt-6 text-left overflow-hidden">
               <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
                 <span className="w-3 h-3 rounded-full bg-white/10" />
@@ -336,15 +311,15 @@ export default function App() {
                 <span className="w-3 h-3 rounded-full bg-white/10" />
                 <span className="text-xs text-muted-foreground ml-2">terminal</span>
               </div>
-              <div className="p-5 font-mono text-sm text-foreground/90 overflow-x-auto whitespace-nowrap">
+              <div className="p-5 font-mono text-sm text-foreground/90 overflow-x-auto whitespace-pre-wrap">
                 <span className="text-muted-foreground select-none">$ </span>
-                {installCmds[platform]}
+                {installCmd}
               </div>
             </div>
           </Reveal>
 
           {/* GitHub CTA */}
-          <Reveal delay={0.4}>
+          <Reveal delay={0.3}>
             <a
               href="https://github.com/valueriver/aios"
               target="_blank"

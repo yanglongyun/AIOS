@@ -15,8 +15,7 @@
   "include": [
     "server/**/*.ts",
     "apps/**/*.ts",
-    "shared/**/*.ts",
-    "cli/**/*.ts"
+    "shared/**/*.ts"
   ],
   "exclude": [
     "node_modules",

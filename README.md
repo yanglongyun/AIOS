@@ -6,24 +6,21 @@
 
 ## 快速上手
 
-### 自动安装
-
-Linux (Ubuntu/Debian)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-linux.sh | bash
+git clone https://github.com/valueriver/aios.git
+cd aios
+npm install
+npm run dev
 ```
 
-macOS
+打开：`http://localhost:5173/aios`
+
+如需单独启动服务：
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-macos.sh | bash
+npm run start
+npm run start:apps
 ```
-
-Windows (PowerShell)
-```powershell
-irm https://raw.githubusercontent.com/valueriver/aios/main/deploy/install-windows.ps1 | iex
-```
-
-打开：`http://localhost:9700/aios`
 
 ## 交流反馈
 
@@ -84,7 +81,6 @@ AIOS，顾名思义，即由 AI 驱动的操作系统。在 AIOS 中，你可以
 以"互动小说应用"为例：在传统的开发模式下，要想让 AI 生成的新章节与前文保持连贯，不遗忘之前的剧情和设定，开发者必须绞尽脑汁地编写复杂的逻辑去手动编排、截断和压缩上下文。即便如此，受限于代码逻辑的僵化，效果依然常常捉襟见肘。
 
 但在 AIOS 中，"生成下一章"不再是一个需要开发者喂送数据的被动 API 调用，而是应用向底层系统下发的一个**任务（Task）**。底层的 AI 引擎会自主接管：它能够主动查询数据库，自行回顾海量的历史发生记录，动态提取并整合相关设定，最终生成更符合人物逻辑的新章节。
-
 
 
 

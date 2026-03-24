@@ -19,10 +19,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../apps.js';
-import { useI18n } from '../../i18n/index.js';
+import { appRegistry } from '../../apps.ts';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 defineEmits(['open']);

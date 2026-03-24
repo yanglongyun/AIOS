@@ -73,7 +73,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
@@ -81,10 +81,10 @@ import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import GeneralTab from './GeneralTab.vue';
-import { getProvider } from '../../data/providers.js';
-import { toast } from '../../stores/toast.js';
-import { chatPanel } from '../../stores/chatPanel.js';
-import { useI18n } from '../../i18n/index.js';
+import { getProvider } from '../../data/providers.ts';
+import { toast } from '../../stores/toast.ts';
+import { chatPanel } from '../../stores/chatPanel.ts';
+import { useI18n } from '../../i18n/index.ts';
 const router = useRouter();
 const { locale, setLocale, t } = useI18n();
 

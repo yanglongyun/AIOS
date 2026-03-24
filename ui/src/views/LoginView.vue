@@ -47,11 +47,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { clearAuthCache } from '../auth/session.js';
-import { useI18n } from '../i18n/index.js';
+import { clearAuthCache } from '../auth/session.ts';
+import { useI18n } from '../i18n/index.ts';
 const router = useRouter();
 const { t } = useI18n();
 const username = ref('');

@@ -24,12 +24,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../apps.js';
-import { windowManager } from '../../stores/windowManager.js';
-import { useI18n } from '../../i18n/index.js';
-import { wallpaperList } from './wallpapers.js';
+import { appRegistry } from '../../apps.ts';
+import { windowManager } from '../../stores/windowManager.ts';
+import { useI18n } from '../../i18n/index.ts';
+import { wallpaperList } from './wallpapers.ts';
 
 const { t } = useI18n();
 

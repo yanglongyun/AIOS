@@ -69,10 +69,10 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref, reactive } from 'vue';
-import { on } from '../ws.js';
-import { useI18n } from '../i18n/index.js';
+import { on } from '../ws.ts';
+import { useI18n } from '../i18n/index.ts';
 
 const { t } = useI18n();
 

@@ -49,13 +49,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { LogOut, RotateCcw } from 'lucide-vue-next';
-import { appRegistry } from '../../apps.js';
-import { useI18n } from '../../i18n/index.js';
-import { clearAuthCache } from '../../auth/session.js';
+import { appRegistry } from '../../apps.ts';
+import { useI18n } from '../../i18n/index.ts';
+import { clearAuthCache } from '../../auth/session.ts';
 
 const { t } = useI18n();
 const router = useRouter();

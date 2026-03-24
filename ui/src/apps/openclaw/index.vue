@@ -31,9 +31,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.js';
+import { useI18n } from '../../i18n/index.ts';
 import TaskView from './TaskView.vue';
 import ChatView from './ChatView.vue';
 

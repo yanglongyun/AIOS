@@ -18,8 +18,8 @@
   <div v-else-if="!result" class="py-8 text-center text-[13px] text-[#b0a080]">{{ t('fortune_empty_history') }}</div>
 </template>
 
-<script setup>
-import { useI18n } from '../../i18n/index.js';
+<script setup lang="ts">
+import { useI18n } from '../../i18n/index.ts';
 
 defineProps({
   history: { type: Array, required: true },

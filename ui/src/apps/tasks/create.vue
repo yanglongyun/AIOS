@@ -56,10 +56,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from '../../i18n/index.js';
+import { useI18n } from '../../i18n/index.ts';
 
 const router = useRouter();
 const { t } = useI18n();

@@ -24,10 +24,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { useI18n } from '../../i18n/index.ts';
+import { chatPanel } from '../../stores/chatPanel.ts';
 import PokerControlPanel from './PokerControlPanel.vue';
 import PokerTableView from './PokerTableView.vue';
 const { t } = useI18n();

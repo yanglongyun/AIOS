@@ -28,8 +28,8 @@
   </div>
 </template>
 
-<script setup>
-import { useI18n } from '../../i18n/index.js';
+<script setup lang="ts">
+import { useI18n } from '../../i18n/index.ts';
 
 defineProps({
   displayMonth: { type: String, required: true },

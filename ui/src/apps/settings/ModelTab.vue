@@ -51,9 +51,9 @@
   </section>
 </template>
 
-<script setup>
-import { PROVIDER_GROUPS, getProvidersByGroup } from '../../data/providers.js';
-import { useI18n } from '../../i18n/index.js';
+<script setup lang="ts">
+import { PROVIDER_GROUPS, getProvidersByGroup } from '../../data/providers.ts';
+import { useI18n } from '../../i18n/index.ts';
 const { t } = useI18n();
 defineProps({
   provider: { type: String, default: 'openrouter' },

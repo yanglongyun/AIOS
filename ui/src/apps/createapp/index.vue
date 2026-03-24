@@ -23,11 +23,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import CreateAppHero from './CreateAppHero.vue';
-import { windowManager } from '../../stores/windowManager.js';
-import { useI18n } from '../../i18n/index.js';
+import { windowManager } from '../../stores/windowManager.ts';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 const prompt = ref('');

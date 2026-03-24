@@ -52,12 +52,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { on } from '../../ws.js';
-import { useI18n } from '../../i18n/index.js';
-import { windowManager } from '../../stores/windowManager.js';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { on } from '../../ws.ts';
+import { useI18n } from '../../i18n/index.ts';
+import { windowManager } from '../../stores/windowManager.ts';
+import { chatPanel } from '../../stores/chatPanel.ts';
 const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);

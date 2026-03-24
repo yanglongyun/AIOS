@@ -37,10 +37,10 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { useI18n } from '../../i18n/index.ts';
+import { chatPanel } from '../../stores/chatPanel.ts';
 import NotebookEditorView from './NotebookEditorView.vue';
 import NotebookListView from './NotebookListView.vue';
 

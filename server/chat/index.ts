@@ -1,0 +1,142 @@
+import type { AnyRecord } from '../../shared/types.ts';
+import { chat } from '../agent/handler.ts';
+import { getSettings } from '../service/settings/get.ts';
+import { buildSystemPrompt } from '../prompt/index.ts';
+import { injectAttachmentsMessage } from './attachments.ts';
+import { getMessages, saveMessage } from './messages.ts';
+import { hasChat } from './chats.ts';
+
+export const createSession = (wsSend: (message: AnyRecord) => void) => {
+  const conversations = new Map(); // conversationId -> { abortController }
+
+  const handleMessage = async (data) => {
+    if (data.type === 'ping') {
+      wsSend({ type: 'pong' });
+      return;
+    }
+
+    if (data.type === 'abort') {
+      const cid = data.conversationId;
+      if (cid && conversations.has(cid)) {
+        conversations.get(cid).abortController.abort();
+      }
+      return;
+    }
+
+    if (data.type === 'message') {
+      const cid = data.conversationId || null;
+      if (!cid) {
+        wsSend({ type: 'error', content: '缺少 conversationId' });
+        return;
+      }
+      if (!hasChat(cid)) {
+        wsSend({ type: 'error', content: '会话不存在，请新建对话后重试' });
+        return;
+      }
+
+      // 同一会话正在执行 → 先中止再开始新一轮
+      if (conversations.has(cid)) {
+        conversations.get(cid).abortController.abort();
+        await new Promise<void>((r) => {
+          const check = () => conversations.has(cid) ? setTimeout(check, 50) : r();
+          check();
+        });
+      }
+
+      const settings = getSettings();
+      const {
+        contextRounds,
+        apiUrl,
+        apiKey,
+        model,
+        provider,
+        enableToolResultTruncate,
+        toolResultMaxChars,
+        enableToolLoopLimit,
+        toolMaxRounds
+      } = settings;
+
+      const messages = [{
+        role: 'system',
+        content: buildSystemPrompt(cid)
+      }, ...getMessages(cid, contextRounds)];
+
+      const userMsg = { role: 'user', content: data.content };
+      let userMeta = null;
+      let modelUserMsg = userMsg;
+      if (Array.isArray(data.attachments) && data.attachments.length > 0) {
+        const injected = injectAttachmentsMessage([userMsg], data.attachments);
+        modelUserMsg = injected.messages[0] || userMsg;
+        if (injected.attachments.length > 0) {
+          userMeta = { attachments: injected.attachments };
+        }
+      }
+
+      messages.push(userMsg);
+      const modelMessages = [...messages];
+      modelMessages[modelMessages.length - 1] = modelUserMsg;
+      saveMessage(cid, userMsg, userMeta);
+
+      const abortController = new AbortController();
+      conversations.set(cid, { abortController });
+
+      const send = (msg: AnyRecord) => {
+        if (msg.type === 'delta') {
+          wsSend({ type: 'delta', conversationId: cid, delta: msg.delta || '' });
+          return;
+        }
+
+        if (msg.type === 'assistant_tool_calls') {
+          if (msg.message) saveMessage(cid, msg.message, null);
+          return;
+        }
+
+        if (msg.type === 'tool_call') {
+          wsSend({ type: 'tool_call', conversationId: cid, toolCall: msg.toolCall });
+          return;
+        }
+
+        if (msg.type === 'tool_result') {
+          if (msg.message) saveMessage(cid, msg.message, null);
+          wsSend({
+            type: 'tool_result',
+            conversationId: cid,
+            toolCallId: msg.message?.tool_call_id,
+            content: msg.message?.content ?? ''
+          });
+          return;
+        }
+
+        if (msg.type === 'done') {
+          if (msg.message) saveMessage(cid, msg.message, null);
+          wsSend({ type: 'done', conversationId: cid });
+          return;
+        }
+      };
+
+      try {
+        await chat(modelMessages, {
+          provider,
+          apiUrl,
+          apiKey,
+          model,
+          send,
+          signal: abortController.signal,
+          maxRounds: enableToolLoopLimit ? toolMaxRounds : 100000,
+          enableToolResultTruncate,
+          toolResultMaxChars
+        });
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          wsSend({ type: 'aborted', conversationId: cid });
+        } else {
+          wsSend({ type: 'error', conversationId: cid, content: e.message });
+        }
+      } finally {
+        conversations.delete(cid);
+      }
+    }
+  };
+
+  return { handleMessage };
+};

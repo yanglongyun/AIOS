@@ -1,0 +1,26 @@
+import { readBody } from '../../../shared/http/readBody.ts';
+import { json } from '../../../shared/http/json.ts';
+import { generate } from '../service/generation.ts';
+import { getProgress } from '../service/progress.ts';
+
+export const handleBananaApi = async (req, res, path) => {
+  if (path === '/apps/banana/generation' && req.method === 'POST') {
+    const body = await readBody(req);
+    const { history, now, choices, next, prompt, messages, taskTitle } = body;
+    if (!now && !next) return json(res, { success: false, message: '缺少参数' }, 400);
+    let data = null;
+    try {
+      data = await generate({ history, now, choices, next, prompt, messages, taskTitle, req });
+    } catch (error) {
+      data = { status: 500, message: error.message || 'generation failed' };
+    }
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
+  }
+
+  if (path === '/apps/banana/progress' && req.method === 'GET') {
+    return json(res, getProgress());
+  }
+
+  return false;
+};

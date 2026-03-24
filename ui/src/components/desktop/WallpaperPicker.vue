@@ -19,9 +19,9 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { wallpaperList } from './wallpapers.js';
+import { wallpaperList } from './wallpapers.ts';
 
 const emit = defineEmits(['select']);
 const visible = ref(false);

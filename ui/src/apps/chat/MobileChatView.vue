@@ -35,10 +35,10 @@
   <MobileChatPanel v-else :conversation-id="currentChat.conversation_id" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import MobileChatPanel from './MobileChatPanel.vue';
-import { useI18n } from '../../i18n/index.js';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 const setMobileNav = inject('mobileNav');

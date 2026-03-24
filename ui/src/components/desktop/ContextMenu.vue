@@ -31,9 +31,9 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { windowManager } from '../../stores/windowManager.js';
+import { windowManager } from '../../stores/windowManager.ts';
 
 defineEmits(['wallpaper']);
 

@@ -50,12 +50,12 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { X } from 'lucide-vue-next';
-import { windowManager } from '../../stores/windowManager.js';
-import { useI18n } from '../../i18n/index.js';
-import { on } from '../../ws.js';
+import { windowManager } from '../../stores/windowManager.ts';
+import { useI18n } from '../../i18n/index.ts';
+import { on } from '../../ws.ts';
 
 const { t } = useI18n();
 const emit = defineEmits(['close']);

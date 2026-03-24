@@ -37,11 +37,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 import { X } from 'lucide-vue-next';
-import { appRegistry } from '../../apps.js';
-import { useI18n } from '../../i18n/index.js';
+import { appRegistry } from '../../apps.ts';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 const avatarBtn = ref(null);

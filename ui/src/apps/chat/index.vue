@@ -163,14 +163,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, Paperclip, Plus, Square } from 'lucide-vue-next';
 import HistoryPanel from './History.vue';
-import { connect, send, on, wsStatus, ensureConnected } from '../../ws.js';
-import { useI18n } from '../../i18n/index.js';
+import { connect, send, on, wsStatus, ensureConnected } from '../../ws.ts';
+import { useI18n } from '../../i18n/index.ts';
 
 const viewProps = defineProps({
   id: { type: String, default: null },

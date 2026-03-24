@@ -150,12 +150,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
-import { clearAuthCache } from '../auth/session.js';
-import { setLocale, useI18n } from '../i18n/index.js';
+import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.ts';
+import { clearAuthCache } from '../auth/session.ts';
+import { setLocale, useI18n } from '../i18n/index.ts';
 
 const { t } = useI18n();
 const router = useRouter();

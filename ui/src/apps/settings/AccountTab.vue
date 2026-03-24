@@ -49,8 +49,8 @@
   </section>
 </template>
 
-<script setup>
-import { useI18n } from '../../i18n/index.js';
+<script setup lang="ts">
+import { useI18n } from '../../i18n/index.ts';
 const { t } = useI18n();
 defineProps({
   username: { type: String, default: '' },

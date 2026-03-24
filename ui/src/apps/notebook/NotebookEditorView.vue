@@ -67,9 +67,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { nextTick, ref, watch } from 'vue';
-import { useI18n } from '../../i18n/index.js';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 

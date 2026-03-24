@@ -69,14 +69,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ListTodo } from 'lucide-vue-next';
 import LauncherPanel from './LauncherPanel.vue';
 import TaskCenter from './TaskCenter.vue';
-import { windowManager } from '../../stores/windowManager.js';
-import { appRegistry } from '../../apps.js';
-import { useI18n } from '../../i18n/index.js';
+import { windowManager } from '../../stores/windowManager.ts';
+import { appRegistry } from '../../apps.ts';
+import { useI18n } from '../../i18n/index.ts';
 
 const { t } = useI18n();
 

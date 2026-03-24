@@ -33,10 +33,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useI18n } from '../../i18n/index.js';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { useI18n } from '../../i18n/index.ts';
+import { chatPanel } from '../../stores/chatPanel.ts';
 import CryptobotMachinePanel from './CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from './CryptobotDecisionPaper.vue';
 

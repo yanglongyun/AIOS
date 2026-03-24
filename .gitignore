@@ -12,3 +12,8 @@ think/
 /skills/
 .playwright-cli/
 debug/
+.AGENTS
+.agents
+.qoder
+skills-lock.json
+.agent

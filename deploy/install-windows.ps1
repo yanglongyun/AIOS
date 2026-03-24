@@ -57,24 +57,24 @@ else {
 
 Write-Host "[3/5] Install deps + build UI..."
 Set-Location $AppDir
-$NpmCacheDir = (npm config get cache).Trim()
-if ([string]::IsNullOrWhiteSpace($NpmCacheDir)) {
-  throw "npm cache directory is empty."
+$NpmCacheDir = Join-Path $AppDir ".npm-cache"
+if (-not (Test-Path $NpmCacheDir)) {
+  New-Item -ItemType Directory -Force -Path $NpmCacheDir | Out-Null
 }
 if (-not (Test-Path $NpmCacheDir)) {
-  throw "npm cache directory does not exist: $NpmCacheDir"
+  throw "Failed to create npm cache directory: $NpmCacheDir"
 }
 try {
-  $ProbeDir = Join-Path $NpmCacheDir ".aios-write-test"
-  New-Item -ItemType Directory -Path $ProbeDir -Force | Out-Null
-  Remove-Item -Path $ProbeDir -Force
+  $ProbeFile = Join-Path $NpmCacheDir ".aios-write-test"
+  Set-Content -Path $ProbeFile -Value "ok" -Encoding UTF8
+  Remove-Item -Path $ProbeFile -Force
 }
 catch {
   throw "npm cache directory is not writable: $NpmCacheDir"
 }
-npm ci
+npm ci --cache $NpmCacheDir
 npm run build
-npm link
+npm link --cache $NpmCacheDir
 
 $ServerTaskName = "ai.$AppName.server"
 $AppsTaskName = "ai.$AppName.apps"

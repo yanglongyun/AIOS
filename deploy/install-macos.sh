@@ -38,31 +38,19 @@ fi
 
 echo "[3/5] Install deps + build UI..."
 cd "$APP_DIR"
-NPM_CACHE_DIR="$(npm config get cache)"
-if [ -z "$NPM_CACHE_DIR" ]; then
-  echo "npm cache directory is empty."
-  exit 1
-fi
+NPM_CACHE_DIR="$APP_DIR/.npm-cache"
+mkdir -p "$NPM_CACHE_DIR"
 if [ ! -d "$NPM_CACHE_DIR" ]; then
-  echo "npm cache directory does not exist: $NPM_CACHE_DIR"
+  echo "Failed to create npm cache directory: $NPM_CACHE_DIR"
   exit 1
 fi
 if [ ! -w "$NPM_CACHE_DIR" ]; then
   echo "npm cache directory is not writable: $NPM_CACHE_DIR"
   exit 1
 fi
-NPM_CACHE_OWNER="$(stat -f '%Su' "$NPM_CACHE_DIR")"
-CURRENT_USER="$(id -un)"
-if [ "$NPM_CACHE_OWNER" != "$CURRENT_USER" ]; then
-  echo "npm cache directory owner mismatch: $NPM_CACHE_DIR"
-  echo "Current user: $CURRENT_USER"
-  echo "Actual owner: $NPM_CACHE_OWNER"
-  echo "Run: sudo chown -R $CURRENT_USER \"$NPM_CACHE_DIR\""
-  exit 1
-fi
-npm ci
+npm ci --cache "$NPM_CACHE_DIR"
 npm run build
-npm link
+npm link --cache "$NPM_CACHE_DIR"
 
 NPM_GLOBAL_BIN="$(npm prefix -g)/bin"
 SHELL_RC=""

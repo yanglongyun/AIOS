@@ -1,0 +1,15 @@
+services:
+  aios:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9700:9700"
+    volumes:
+      - aios_database:/app/database
+      - aios_files:/app/files
+    restart: unless-stopped
+
+volumes:
+  aios_database:
+  aios_files:

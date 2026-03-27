@@ -4,6 +4,7 @@ import { appLoaders } from './registry.ts';
 import { access } from '../shared/auth/index.ts';
 
 const APPS_PORT = 9701;
+const APPS_HOST = '127.0.0.1';
 
 const moduleCache = new Map();
 const appModules = [];
@@ -106,6 +107,6 @@ const appsServer = createServer(async (req, res) => {
 await loadRegisteredApps();
 await bootAppRuntimes();
 
-appsServer.listen(APPS_PORT, () => {
-  console.log(`  > apps: http://localhost:${APPS_PORT}`);
+appsServer.listen(APPS_PORT, APPS_HOST, () => {
+  console.log(`  > apps: http://${APPS_HOST}:${APPS_PORT}`);
 });

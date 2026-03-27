@@ -64,6 +64,13 @@ export const PROVIDERS = [
     defaultModel: 'glm-5',
   },
   {
+    id: 'zai',
+    name: 'z.ai',
+    group: 'default',
+    apiUrl: 'https://api.z.ai/api/paas/v4/chat/completions',
+    defaultModel: 'glm-5',
+  },
+  {
     id: 'kimi',
     name: 'Kimi (月之暗面)',
     group: 'default',
@@ -148,6 +155,13 @@ export const PROVIDERS = [
     group: 'coding',
     apiUrl: 'https://api.lkeap.cloud.tencent.com/coding/v3/chat/completions',
     defaultModel: 'minimax-m2.5',
+  },
+  {
+    id: 'jdcloud-coding',
+    name: '京东云 Coding Plan',
+    group: 'coding',
+    apiUrl: 'https://modelservice.jdcloud.com/coding/openai/v1/chat/completions',
+    defaultModel: 'Kimi-K2.5',
   },
   {
     id: 'kimi-coding',

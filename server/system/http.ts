@@ -11,6 +11,7 @@ const PUBLIC_DIR = join(ROOT_DIR, 'ui', 'dist');
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
   '.ts': 'application/javascript',
   '.css': 'text/css',
   '.md': 'text/markdown; charset=utf-8',

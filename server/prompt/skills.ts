@@ -1,24 +1,7 @@
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
-
-const SKILLS_ROOT = join(process.cwd(), 'skills');
+import { listSkills } from '../service/skills/list.ts';
 
 export const skills = () => {
-  if (!existsSync(SKILLS_ROOT)) return '';
-
-  const sections = [];
-  for (const dir of readdirSync(SKILLS_ROOT)) {
-    const skillDir = join(SKILLS_ROOT, dir);
-    try { if (!statSync(skillDir).isDirectory()) continue; } catch { continue; }
-
-    const skillFile = join(skillDir, 'SKILL.md');
-    if (!existsSync(skillFile)) continue;
-
-    const content = readFileSync(skillFile, 'utf8').trim();
-    if (!content) continue;
-
-    sections.push(content);
-  }
+  const sections = listSkills().map((skill) => skill.content);
 
   if (sections.length === 0) return '';
 

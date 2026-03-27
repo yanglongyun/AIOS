@@ -60,6 +60,13 @@
           @update:enable-tool-loop-limit="enableToolLoopLimit = $event"
           @update:tool-max-rounds="toolMaxRounds = $event"
         />
+        <SkillTab
+          v-else-if="activeTab === 'skills'"
+          :items="skillItems"
+          :loading="skillsLoading"
+          :error="skillsError"
+          @refresh="fetchSkills"
+        />
         <GeneralTab
           v-else
           :theme="theme"
@@ -81,6 +88,7 @@ import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import GeneralTab from './GeneralTab.vue';
+import SkillTab from './SkillTab.vue';
 import { getProvider } from '../../data/providers.ts';
 import { toast } from '../../stores/toast.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
@@ -93,6 +101,7 @@ const tabs = [
   { key: 'model', labelKey: 'settings_tab_model' },
   { key: 'messages', labelKey: 'settings_tab_messages' },
   { key: 'tools', labelKey: 'settings_tab_tools' },
+  { key: 'skills', labelKey: 'settings_tab_skills' },
   { key: 'general', labelKey: 'settings_tab_general' }
 ];
 
@@ -113,6 +122,9 @@ const oldPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 const providerConfigs = ref({});
+const skillItems = ref([]);
+const skillsLoading = ref(false);
+const skillsError = ref('');
 
 const PROVIDER_CONFIGS_KEY = 'aios.providerConfigs.v1';
 
@@ -186,6 +198,19 @@ const fetchSettings = async () => {
 const fetchMe = async () => {
   const data = await request('/aios/api/auth/me');
   accountUsername.value = data?.user?.username || '';
+};
+
+const fetchSkills = async () => {
+  skillsLoading.value = true;
+  skillsError.value = '';
+  try {
+    const data = await request('/aios/api/settings/skills');
+    skillItems.value = Array.isArray(data.items) ? data.items : [];
+  } catch (e) {
+    skillsError.value = t('settings_skills_load_failed', { message: e.message });
+  } finally {
+    skillsLoading.value = false;
+  }
 };
 
 const setTheme = (nextTheme) => {
@@ -278,8 +303,7 @@ onMounted(async () => {
   chatPanel.setContext({ scene: 'settings', label: t('app_sidebar_settings') });
   chatPanel.setQuickMessages([t('settings_chat_quick_1'), t('settings_chat_quick_2'), t('settings_chat_quick_3')]);
   loadProviderConfigs();
-  await fetchMe();
-  await fetchSettings();
+  await Promise.all([fetchMe(), fetchSettings(), fetchSkills()]);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

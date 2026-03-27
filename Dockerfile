@@ -13,6 +13,7 @@ COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server
 COPY shared ./shared
+COPY skills ./skills
 COPY ui ./ui
 COPY tsconfig.backend.json ./
 
@@ -33,6 +34,7 @@ COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server
 COPY shared ./shared
+COPY skills ./skills
 COPY tsconfig.backend.json ./
 COPY --from=build /app/ui/dist ./ui/dist
 

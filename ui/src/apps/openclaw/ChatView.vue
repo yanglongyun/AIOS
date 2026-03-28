@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-1 min-h-0 flex-col">
     <div class="flex-1 min-h-0 overflow-y-auto px-4 py-3 scrollbar-hide" ref="msgBox">
-      <div v-if="!messages.length" class="py-12 text-center text-xs text-[rgba(255,230,180,0.25)]">{{ t('openclaw_chat_empty') }}</div>
+      <div v-if="!messages.length" class="py-12 text-center text-xs text-[rgba(255,230,180,0.25)]">__T_OPENCLAW_CHAT_EMPTY__</div>
       <div v-for="(m, i) in messages" :key="i" class="mb-3">
         <div v-if="m.role === 'user'" class="flex justify-end">
           <div class="msg-user max-w-[80%] rounded-[14px_14px_4px_14px] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#f0e8d8]">{{ m.content }}</div>
@@ -13,12 +13,12 @@
       </div>
       <div v-if="busy" class="flex items-start gap-2">
         <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[14px] msg-avatar">🦞</div>
-        <div class="py-2 text-[13px] text-[rgba(255,230,180,0.4)]">{{ t('openclaw_thinking') }}<span class="animate-pulse">...</span></div>
+        <div class="py-2 text-[13px] text-[rgba(255,230,180,0.4)]">__T_OPENCLAW_THINKING__<span class="animate-pulse">...</span></div>
       </div>
     </div>
     <div class="input-tray shrink-0 px-4 pb-3 pt-2.5">
       <form @submit.prevent="send" class="input-well flex items-center gap-2 rounded-lg p-1.5">
-        <input v-model="input" :placeholder="t('openclaw_chat_ph')" :disabled="busy"
+        <input v-model="input" placeholder="__T_OPENCLAW_CHAT_PH__" :disabled="busy"
           class="chat-input min-w-0 flex-1 rounded-md px-3.5 py-2 text-[13px] outline-none disabled:opacity-50 font-['Georgia','PingFang_SC',serif]" />
         <button type="submit" :disabled="!input.trim() || busy"
           class="send-btn flex items-center justify-center w-9 h-9 rounded-md text-[14px] font-bold text-[#3a2008] disabled:opacity-30 cursor-pointer shrink-0">↑</button>
@@ -29,9 +29,6 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 const API = '/aios/apps/openclaw';
 
 const messages = ref([]);

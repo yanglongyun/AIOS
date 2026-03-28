@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center text-sm text-[#a09080]">{{ t('history_empty') }}</div>
+    <div v-if="!chats.length" class="py-12 text-center text-sm text-[#a09080]">__T_HISTORY_EMPTY__</div>
 
     <div
       v-for="c in chats"
@@ -32,14 +32,14 @@
           <button
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
-            :title="t('history_rename')"
+            title="__T_HISTORY_RENAME__"
             class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#a09080] transition-all hover:bg-[rgba(200,160,96,0.12)] hover:text-[#8a6a40]">
             <Pencil class="h-3.5 w-3.5" />
           </button>
-          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] text-[#c04040]">{{ t('history_confirm_delete') }}</span>
+          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] text-[#c04040]">__T_HISTORY_CONFIRM_DELETE__</span>
           <button
             @click.stop="confirmDelete(c.conversation_id)"
-            :title="deletingId === c.conversation_id ? t('history_click_confirm') : t('common_delete')"
+            :title="deletingId === c.conversation_id ? '__T_HISTORY_CLICK_CONFIRM__' : '__T_COMMON_DELETE__'"
             class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#a09080] transition-all hover:bg-[rgba(200,160,96,0.12)] hover:text-[#8a6a40]"
             :class="deletingId === c.conversation_id ? 'bg-[#c04040] !text-white hover:!bg-[#c04040]' : ''">
             <Trash2 class="h-3.5 w-3.5" />
@@ -54,9 +54,6 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
-import { useI18n } from '../../i18n/index.ts';
-const { t } = useI18n();
-
 defineProps({
   activeId: { type: String, default: null }
 });

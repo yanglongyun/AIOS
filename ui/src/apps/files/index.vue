@@ -4,10 +4,10 @@
     <div class="mx-auto max-w-[960px]">
       <!-- 顶栏 -->
       <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('app_sidebar_files') }}</h1>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">__T_APP_SIDEBAR_FILES__</h1>
         <label
           class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]">
-          {{ t('files_upload') }}
+          __T_FILES_UPLOAD__
           <input type="file" class="hidden" multiple @change="onUpload" />
         </label>
       </div>
@@ -32,14 +32,14 @@
         <!-- 拖拽提示 -->
         <div v-if="dragOver"
           class="flex items-center justify-center rounded-lg border-2 border-dashed border-[#c8a060] bg-[#fdf8ef] py-12 text-sm text-[#8a7050]">
-          {{ t('files_drop_hint') }}
+          __T_FILES_DROP_HINT__
         </div>
 
         <div v-else-if="loading" class="py-8 text-center text-xs text-[#a0907a]">...</div>
 
         <div v-else-if="items.length === 0"
           class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">
-          {{ t('files_empty') }}
+          __T_FILES_EMPTY__
         </div>
 
         <div v-else class="space-y-1">
@@ -70,10 +70,10 @@
               class="flex shrink-0 gap-1 opacity-0 transition group-hover:opacity-100">
               <button @click="download(item)"
                 class="rounded px-1.5 py-0.5 text-[11px] text-[#7a6a58] hover:bg-[#e8dcc8]"
-                :title="t('files_download')">↓</button>
+                title="__T_FILES_DOWNLOAD__">↓</button>
               <button @click="confirmDelete(item)"
                 class="rounded px-1.5 py-0.5 text-[11px] text-[#c07060] hover:bg-[#fde8e0]"
-                :title="t('files_delete')">{{ item._deleting ? '确认?' : '×' }}</button>
+                title="__T_FILES_DELETE__">{{ item._deleting ? '确认?' : '×' }}</button>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
 
       <!-- 上传进度 -->
       <div v-if="uploading" class="mt-3 text-center text-[11px] text-[#8a7860]">
-        {{ t('files_uploading') }} {{ uploadCount }}...
+        __T_FILES_UPLOADING__ {{ uploadCount }}...
       </div>
     </div>
   </div>
@@ -89,10 +89,8 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
 
-const { t } = useI18n();
 const items = ref([]);
 const currentDir = ref('files');
 const rootPath = ref('');
@@ -240,8 +238,8 @@ const onDrop = (e) => { dragOver.value = false; uploadFiles(e.dataTransfer.files
 
 onMounted(() => {
   loadDir('files');
-  chatPanel.setContext({ scene: 'files', label: t('app_sidebar_files') });
-  chatPanel.setQuickMessages([t('files_chat_quick_1'), t('files_chat_quick_2'), t('files_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'files', label: '__T_APP_SIDEBAR_FILES__' });
+  chatPanel.setQuickMessages(['__T_FILES_CHAT_QUICK_1__', '__T_FILES_CHAT_QUICK_2__', '__T_FILES_CHAT_QUICK_3__']);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

@@ -3,14 +3,14 @@
     <!-- 顶栏 -->
     <div class="flex items-center justify-between border-b border-[#4a3828] px-4 py-2.5">
       <div class="flex items-baseline gap-1.5">
-        <span class="text-sm font-bold text-[#e8d0a8]">{{ t('app_top_chat') }}</span>
+        <span class="text-sm font-bold text-[#e8d0a8]">__T_APP_TOP_CHAT__</span>
         <span v-if="contextLabel" class="text-[10px] text-[#6a5840]">{{ contextLabel }}</span>
       </div>
       <div class="flex items-center gap-2">
-        <button class="cursor-pointer text-[#8a7860] transition-colors hover:text-[#c8a060]" @click="newChat" :title="t('chat_new_title')">
+        <button class="cursor-pointer text-[#8a7860] transition-colors hover:text-[#c8a060]" @click="newChat" title="__T_CHAT_NEW_TITLE__">
           <Plus class="h-4 w-4" />
         </button>
-        <button class="cursor-pointer transition-colors" :class="showHistory ? 'text-[#c8a060]' : 'text-[#8a7860] hover:text-[#c8a060]'" @click="toggleHistory" :title="t('history_title')">
+        <button class="cursor-pointer transition-colors" :class="showHistory ? 'text-[#c8a060]' : 'text-[#8a7860] hover:text-[#c8a060]'" @click="toggleHistory" title="__T_HISTORY_TITLE__">
           <History class="h-4 w-4" />
         </button>
       </div>
@@ -18,7 +18,7 @@
 
     <!-- 历史列表 -->
     <div v-if="showHistory" class="flex-1 overflow-y-auto [scrollbar-width:thin]">
-      <div v-if="!historyList.length" class="px-4 py-8 text-center text-xs text-[#6a5840]">{{ t('history_empty') }}</div>
+      <div v-if="!historyList.length" class="px-4 py-8 text-center text-xs text-[#6a5840]">__T_HISTORY_EMPTY__</div>
       <button
         v-for="c in historyList"
         :key="c.conversation_id"
@@ -41,9 +41,9 @@
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-col items-center justify-center py-10 text-center">
             <div class="mb-3 text-[32px] grayscale-[0.2]">💬</div>
-            <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">{{ t('chat_empty_title') }}</h3>
-            <p v-if="contextLabel" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="t('chat_side_context_hint', { app: `<b class=&quot;text-[#d4c0a0]&quot;>${contextLabel}</b>` })"></p>
-            <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+            <h3 class="mb-1 text-sm font-bold text-[#e8d0a8]">__T_CHAT_EMPTY_TITLE__</h3>
+            <p v-if="contextLabel" class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]" v-html="'__T_CHAT_SIDE_CONTEXT_HINT__'.replace('{app}', `<b class=&quot;text-[#d4c0a0]&quot;>${contextLabel}</b>`)"></p>
+            <p v-else class="max-w-[260px] text-[11px] leading-relaxed text-[#6a5840]">__T_CHAT_EMPTY_DESC__</p>
             <div v-if="quickMessages.length" class="mt-4 flex w-full flex-col gap-1.5 px-1">
               <button v-for="(msg, idx) in quickMessages" :key="idx" @click="sendQuick(msg)" class="cursor-pointer rounded-lg border border-[#4a3828] bg-[#3a2a1a] px-3 py-2 text-left text-[11px] text-[#d4c0a0] transition-colors hover:border-[#c8a060]/30 hover:bg-[#3a2a1c]">{{ msg }}</button>
             </div>
@@ -52,7 +52,7 @@
           <!-- 消息列表 -->
           <template v-else>
             <div v-if="hasMore" class="py-1 text-center text-[10px] text-[#6a5840]">
-              <span>{{ t('chat_load_more') }}</span>
+              <span>__T_CHAT_LOAD_MORE__</span>
             </div>
 
             <div v-for="(m, i) in messages" :key="m._key || i" class="mb-3">
@@ -84,8 +84,8 @@
                 <div class="min-w-0 flex-1 overflow-hidden rounded-lg border border-[#3a2818] bg-[#3a2a1a]">
                   <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-1.5 border-none bg-[#332618] px-2.5 py-1.5 text-left transition-colors hover:bg-[#3a2a1c]">
                     <ChevronRight class="h-2.5 w-2.5 shrink-0 text-[#6a5840] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[#d4c0a0]">{{ m.title || t('chat_tool_call') }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[10px] text-[#6a5840]">{{ t('chat_done') }}</span>
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[#d4c0a0]">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[10px] text-[#6a5840]">__T_CHAT_DONE__</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#3a2818]">
                     <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#1a1410] px-2.5 py-2 font-mono text-[10px] text-[#4ade80]"><span class="select-none text-[#6a5840]">$ </span>{{ m.command }}</div>
@@ -108,7 +108,7 @@
             <!-- 思考中 -->
             <div v-if="busy" class="flex items-start gap-2">
               <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3a2a1a] text-xs">🤖</div>
-              <div class="py-1 text-[12px] text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
+              <div class="py-1 text-[12px] text-[#6a5840]">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
@@ -124,7 +124,7 @@
             @keydown.enter.exact="onEnter"
             @compositionstart="composing = true"
             @compositionend="composing = false"
-            :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
+            :placeholder="busy ? '__T_CHAT_INPUT_PLACEHOLDER_BUSY__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
             rows="1"
             :disabled="busy"
             class="min-h-[36px] max-h-[100px] min-w-0 flex-1 resize-none overflow-y-auto border-none bg-transparent px-3 pb-2 pt-2 text-[12px] leading-relaxed text-[#d4c0a0] outline-none placeholder:text-[#4a3a28] disabled:opacity-50"
@@ -149,8 +149,6 @@ import { marked } from 'marked';
 import { ArrowUp, ChevronRight, History, Plus, Square } from 'lucide-vue-next';
 import { connect, send, on, wsStatus, ensureConnected } from '../ws.ts';
 import { chatPanel } from '../stores/chatPanel.ts';
-import { useI18n } from '../i18n/index.ts';
-
 const props = defineProps({
   pendingMessage: { type: String, default: null }
 });
@@ -160,7 +158,6 @@ const contextScene = computed(() => chatPanel.state.context?.scene || 'chat');
 const quickMessages = computed(() => chatPanel.state.quickMessages);
 defineEmits(['close']);
 
-const { t } = useI18n();
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
@@ -201,7 +198,7 @@ const mapToolCallMessage = (toolCall, _key) => {
   if (name === 'shell' && args) {
     return { type: 'tool_call', shell: true, toolCall, title: args.reason || 'shell', command: args.command || '', _key };
   }
-  return { type: 'tool_call', toolCall, title: name || t('chat_tool_call'), detail: args ? JSON.stringify(args, null, 2) : '', _key };
+  return { type: 'tool_call', toolCall, title: name || '__T_CHAT_TOOL_CALL__', detail: args ? JSON.stringify(args, null, 2) : '', _key };
 };
 
 const addUniqueMessages = (items, { prepend = false } = {}) => {
@@ -273,10 +270,10 @@ const resetState = () => {
 const buildChatTitleFromFirstMessage = (text = '') => {
   const prefix = contextLabel.value ? `[${contextLabel.value}] ` : '';
   const normalized = String(text).replace(/\s+/g, ' ').trim();
-  return prefix + (normalized.slice(0, 20) || t('chat_new_title'));
+  return prefix + (normalized.slice(0, 20) || '__T_CHAT_NEW_TITLE__');
 };
 
-const createNewChat = async (title = t('chat_new_title')) => {
+const createNewChat = async (title = '__T_CHAT_NEW_TITLE__') => {
   const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, scene: contextScene.value }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
@@ -333,7 +330,7 @@ const handleSend = async () => {
   busy.value = true;
 
   try { await ensureConnected(); } catch {
-    messages.value.push({ role: 'assistant', content: t('chat_ws_error') });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_WS_ERROR__' });
     busy.value = false;
     return;
   }
@@ -351,7 +348,7 @@ const handleSend = async () => {
     input.value = '';
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); });
   }).catch((e) => {
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
     busy.value = false;
   });
 };
@@ -471,7 +468,7 @@ onMounted(async () => {
     if (data.conversationId !== currentConversationId.value) return;
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', data.content), _key });
     streamingAssistantKey.value = '';
     busy.value = false;
   }));

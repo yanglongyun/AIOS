@@ -92,10 +92,8 @@ import SkillTab from './SkillTab.vue';
 import { getProvider } from '../../data/providers.ts';
 import { toast } from '../../stores/toast.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
-import { useI18n } from '../../i18n/index.ts';
+import { LOCALE } from '../../locale.ts';
 const router = useRouter();
-const { locale, setLocale, t } = useI18n();
-
 const tabs = [
   { key: 'account', labelKey: 'settings_tab_account' },
   { key: 'model', labelKey: 'settings_tab_model' },
@@ -107,7 +105,7 @@ const tabs = [
 
 const activeTab = ref('account');
 const theme = ref(localStorage.getItem('theme') || 'dark');
-const language = ref(locale.value);
+const language = ref(LOCALE);
 const provider = ref('openai');
 const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);
@@ -177,8 +175,7 @@ const onProviderChange = (nextProvider) => {
 const fetchSettings = async () => {
   const data = await request('/aios/api/settings');
   provider.value = data.provider || 'openai';
-  language.value = data.language === 'en' ? 'en' : locale.value;
-  setLocale(language.value);
+  language.value = data.language === 'en' ? 'en' : LOCALE;
   editRounds.value = data.contextRounds || 100;
   enableToolResultTruncate.value = data.enableToolResultTruncate !== false;
   toolResultMaxChars.value = Number(data.toolResultMaxChars) || 12000;
@@ -207,7 +204,7 @@ const fetchSkills = async () => {
     const data = await request('/aios/api/settings/skills');
     skillItems.value = Array.isArray(data.items) ? data.items : [];
   } catch (e) {
-    skillsError.value = t('settings_skills_load_failed', { message: e.message });
+    skillsError.value = '__T_SETTINGS_SKILLS_LOAD_FAILED__'.replace('{message}', e.message);
   } finally {
     skillsLoading.value = false;
   }
@@ -222,7 +219,7 @@ const setTheme = (nextTheme) => {
 const setLanguage = (nextLanguage) => {
   const normalized = nextLanguage === 'en' ? 'en' : 'zh';
   language.value = normalized;
-  setLocale(normalized);
+  
 };
 
 const save = async () => {
@@ -255,19 +252,19 @@ const save = async () => {
       model: editModel.value
     };
     saveProviderConfigs();
-    toast.show(t('settings_saved'));
+    toast.show('__T_SETTINGS_SAVED__');
   } catch (e) {
-    toast.show(t('settings_save_failed', { message: e.message }), { type: 'error' });
+    toast.show('__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message), { type: 'error' });
   }
 };
 
 const changePassword = async () => {
   try {
     if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
-      throw new Error(t('settings_password_required'));
+      throw new Error('__T_SETTINGS_PASSWORD_REQUIRED__');
     }
     if (newPassword.value !== confirmPassword.value) {
-      throw new Error(t('settings_password_mismatch'));
+      throw new Error('__T_SETTINGS_PASSWORD_MISMATCH__');
     }
 
     await request('/aios/api/auth/password', {
@@ -282,10 +279,10 @@ const changePassword = async () => {
     oldPassword.value = '';
     newPassword.value = '';
     confirmPassword.value = '';
-    toast.show(t('settings_password_changed_relogin'));
+    toast.show('__T_SETTINGS_PASSWORD_CHANGED_RELOGIN__');
     await logout();
   } catch (e) {
-    toast.show(t('settings_save_failed', { message: e.message }), { type: 'error' });
+    toast.show('__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message), { type: 'error' });
   }
 };
 
@@ -300,8 +297,8 @@ const logout = async () => {
 };
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'settings', label: t('app_sidebar_settings') });
-  chatPanel.setQuickMessages([t('settings_chat_quick_1'), t('settings_chat_quick_2'), t('settings_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'settings', label: '__T_APP_SIDEBAR_SETTINGS__' });
+  chatPanel.setQuickMessages(['__T_SETTINGS_CHAT_QUICK_1__', '__T_SETTINGS_CHAT_QUICK_2__', '__T_SETTINGS_CHAT_QUICK_3__']);
   loadProviderConfigs();
   await Promise.all([fetchMe(), fetchSettings(), fetchSkills()]);
 });

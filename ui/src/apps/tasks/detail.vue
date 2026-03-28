@@ -9,7 +9,7 @@
             {{ appIcon }}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-lg font-bold text-[#3a2415] mb-2 leading-snug">{{ task.title || t('taskdetail_unnamed_task') }}</div>
+            <div class="text-lg font-bold text-[#3a2415] mb-2 leading-snug">{{ task.title || '__T_TASKDETAIL_UNNAMED_TASK__' }}</div>
             <div class="flex gap-1.5 flex-wrap">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-[7px] text-[10.5px] font-semibold" :class="statusBadgeClass">
                 <span v-if="task.status === 'pending'" class="w-[5px] h-[5px] rounded-full bg-current animate-pulse"></span>
@@ -26,18 +26,18 @@
               :disabled="stopping"
               @click="stopTask"
             >
-              {{ stopping ? t('taskdetail_stopping') : t('taskdetail_stop_button') }}
+              {{ stopping ? '__T_TASKDETAIL_STOPPING__' : '__T_TASKDETAIL_STOP_BUTTON__' }}
             </button>
-            <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('taskdetail_refresh_button') }}</button>
+            <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">__T_TASKDETAIL_REFRESH_BUTTON__</button>
           </div>
         </div>
         <div class="flex pt-3 text-xs" style="border-top:1px solid rgba(120,90,40,0.1)">
           <div class="flex-1">
-            <div class="text-[10px] text-[#b09870] uppercase tracking-[0.8px]" style="font-family:system-ui,sans-serif">{{ t('taskdetail_created_at') }}</div>
+            <div class="text-[10px] text-[#b09870] uppercase tracking-[0.8px]" style="font-family:system-ui,sans-serif">__T_TASKDETAIL_CREATED_AT__</div>
             <div class="text-[13px] text-[#4a3020] font-semibold mt-0.5" style="font-family:system-ui,sans-serif">{{ task.created_at || '-' }}</div>
           </div>
           <div class="flex-1" style="border-left:1px solid rgba(120,90,40,0.1);padding-left:12px">
-            <div class="text-[10px] text-[#b09870] uppercase tracking-[0.8px]" style="font-family:system-ui,sans-serif">{{ t('taskdetail_finished_at') }}</div>
+            <div class="text-[10px] text-[#b09870] uppercase tracking-[0.8px]" style="font-family:system-ui,sans-serif">__T_TASKDETAIL_FINISHED_AT__</div>
             <div class="text-[13px] text-[#4a3020] font-semibold mt-0.5" style="font-family:system-ui,sans-serif">{{ task.finished_at || '-' }}</div>
           </div>
         </div>
@@ -49,7 +49,7 @@
       <div v-if="task.prompt" class="mb-4 rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="flex items-center gap-1.5 px-4 py-2.5" style="border-bottom:1px solid rgba(120,90,40,0.1);background:rgba(200,160,60,0.04)">
           <span class="text-[13px]">📥</span>
-          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">{{ t('taskdetail_input_label') }}</span>
+          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">__T_TASKDETAIL_INPUT_LABEL__</span>
         </div>
         <div class="px-4 py-3 whitespace-pre-wrap text-[13px] leading-relaxed text-[#4a3a28]">{{ task.prompt }}</div>
       </div>
@@ -58,7 +58,7 @@
       <div v-if="task.error" class="mb-4 rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="flex items-center gap-1.5 px-4 py-2.5" style="border-bottom:1px solid rgba(120,90,40,0.1);background:rgba(200,160,60,0.04)">
           <span class="text-[13px]">⚠️</span>
-          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">{{ t('taskdetail_error_label') }}</span>
+          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">__T_TASKDETAIL_ERROR_LABEL__</span>
         </div>
         <div class="px-4 py-3 whitespace-pre-wrap text-[13px] leading-relaxed text-[#9a3a2a]">{{ task.error }}</div>
       </div>
@@ -67,9 +67,9 @@
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="flex items-center gap-1.5 px-4 py-2.5" style="border-bottom:1px solid rgba(120,90,40,0.1);background:rgba(200,160,60,0.04)">
           <span class="text-[13px]">💬</span>
-          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">{{ t('taskdetail_messages_title') }} ({{ messages.length }})</span>
+          <span class="text-[11.5px] font-bold uppercase tracking-[0.8px] text-[#8a6840]" style="font-family:system-ui,sans-serif">__T_TASKDETAIL_MESSAGES_TITLE__ ({{ messages.length }})</span>
         </div>
-        <div v-if="messages.length === 0" class="py-8 text-center text-xs text-[#a0907a]">{{ t('taskdetail_no_messages') }}</div>
+        <div v-if="messages.length === 0" class="py-8 text-center text-xs text-[#a0907a]">__T_TASKDETAIL_NO_MESSAGES__</div>
         <div v-else class="p-3 space-y-2">
           <div v-for="item in displayMessages" :key="item.id" class="rounded-xl overflow-hidden" :style="msgCardStyle(item)">
             <div class="flex items-center gap-1.5 px-3 py-2" style="border-bottom:1px solid rgba(120,90,40,0.08)">
@@ -104,12 +104,10 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { on } from '../../ws.ts';
-import { useI18n } from '../../i18n/index.ts';
 import { appRegistry } from '../../apps.ts';
 
 const viewProps = defineProps({ id: { type: [String, Number], default: null } });
 const route = useRoute();
-const { t } = useI18n();
 const taskId = Number(viewProps.id || route.params.id || 0);
 const task = ref({});
 const messages = ref([]);
@@ -117,7 +115,7 @@ const error = ref('');
 const stopping = ref(false);
 
 const appIcon = computed(() => appRegistry.find(a => a.id === task.value.app)?.icon || '✅');
-const statusLabel = computed(() => ({ pending: t('taskdetail_status_pending'), done: t('taskdetail_status_done'), error: t('taskdetail_status_error'), aborted: t('taskdetail_status_aborted') }[task.value.status] || task.value.status || '-'));
+const statusLabel = computed(() => ({ pending: '__T_TASKDETAIL_STATUS_PENDING__', done: '__T_TASKDETAIL_STATUS_DONE__', error: '__T_TASKDETAIL_STATUS_ERROR__', aborted: '__T_TASKDETAIL_STATUS_ABORTED__' }[task.value.status] || task.value.status || '-'));
 const statusBadgeClass = computed(() => {
   const s = task.value.status;
   if (s === 'pending') return 'bg-[rgba(80,150,220,0.12)] text-[#3870c0] border border-[rgba(80,150,220,0.2)]';
@@ -128,10 +126,10 @@ const displayMessages = computed(() => [...messages.value].reverse());
 
 const roleLabel = (item) => {
   const r = item?.message?.role;
-  if (r === 'user') return t('taskdetail_role_user');
-  if (r === 'assistant' && isToolCall(item)) return t('taskdetail_role_tool_call');
+  if (r === 'user') return '__T_TASKDETAIL_ROLE_USER__';
+  if (r === 'assistant' && isToolCall(item)) return '__T_TASKDETAIL_ROLE_TOOL_CALL__';
   if (r === 'assistant') return 'AI';
-  if (r === 'tool') return t('taskdetail_role_tool_result');
+  if (r === 'tool') return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
   return r || 'unknown';
 };
 
@@ -208,7 +206,7 @@ const loadAll = async () => {
     ]);
     task.value = td.task || {};
     messages.value = Array.isArray(tm.messages) ? tm.messages : [];
-  } catch (e) { error.value = e.message || t('taskdetail_load_failed'); }
+  } catch (e) { error.value = e.message || '__T_TASKDETAIL_LOAD_FAILED__'; }
 };
 
 const stopTask = async () => {
@@ -218,7 +216,7 @@ const stopTask = async () => {
   try {
     await request('/aios/api/task/stop', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: taskId }) });
     await loadAll();
-  } catch (e) { error.value = e.message || t('taskdetail_stop_failed'); }
+  } catch (e) { error.value = e.message || '__T_TASKDETAIL_STOP_FAILED__'; }
   finally { stopping.value = false; }
 };
 

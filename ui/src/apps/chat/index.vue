@@ -5,7 +5,7 @@
       <div class="border-b border-[#e0d0b8] px-3 py-2.5">
         <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-[#d4c0a0] bg-[rgba(200,160,96,0.08)] px-3 py-2 text-[13px] text-[#8a6a40] transition-colors hover:bg-[rgba(200,160,96,0.15)]" @click="newChat">
           <Plus class="h-3.5 w-3.5" />
-          {{ t('chat_new_title') }}
+          __T_CHAT_NEW_TITLE__
         </button>
       </div>
       <div class="flex-1 overflow-y-auto px-1.5 py-1.5 [scrollbar-width:thin]">
@@ -22,14 +22,14 @@
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
             <div class="mb-4 text-[40px] grayscale-[0.2]">💬</div>
-            <h2 class="mb-2 text-xl font-bold text-[#5a4a38] dark:text-[#e8dcc8]">{{ t('chat_empty_title') }}</h2>
-            <p class="max-w-[320px] text-[13px] leading-relaxed text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+            <h2 class="mb-2 text-xl font-bold text-[#5a4a38] dark:text-[#e8dcc8]">__T_CHAT_EMPTY_TITLE__</h2>
+            <p class="max-w-[320px] text-[13px] leading-relaxed text-[#a0907a] dark:text-[#6a5840]">__T_CHAT_EMPTY_DESC__</p>
           </div>
 
           <!-- 消息列表 -->
           <template v-else>
             <div v-if="hasMore" class="py-2 text-center text-xs text-[#a0907a] dark:text-[#6a5840]">
-              <span>{{ t('chat_load_more') }}</span>
+              <span>__T_CHAT_LOAD_MORE__</span>
             </div>
 
             <div v-for="(m, i) in messages" :key="m._key || i" class="mb-5">
@@ -64,8 +64,8 @@
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-[#dcd0b8] bg-[#fffdf8] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)]">
                   <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-[#f5ead8] px-3 py-2 text-left transition-colors hover:bg-[#ece0c8] dark:bg-[rgba(30,22,14,0.4)] dark:hover:bg-[rgba(30,22,14,0.6)]">
                     <ChevronRight class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform dark:text-[#6a5840]" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38] dark:text-[#d4c0a0]">{{ m.title || t('chat_tool_call') }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_done') }}</span>
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38] dark:text-[#d4c0a0]">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a] dark:text-[#6a5840]">__T_CHAT_DONE__</span>
                   </button>
                   <div v-if="m.expanded" class="border-t border-[#e8dcc8] dark:border-[#2a1e14]">
                     <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#f5ead8] px-3 py-2.5 font-mono text-xs text-[#2d6a30] dark:bg-[rgba(30,22,14,0.4)] dark:text-[#4ade80]"><span class="select-none text-[#a0907a] dark:text-[#6a5840]">$ </span>{{ m.command }}</div>
@@ -88,7 +88,7 @@
             <!-- 思考中 -->
             <div v-if="busy" class="flex items-start gap-2.5">
               <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)] dark:bg-[#2a1e14]">🤖</div>
-              <div class="py-2 text-sm text-[#a0907a] dark:text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
+              <div class="py-2 text-sm text-[#a0907a] dark:text-[#6a5840]">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
@@ -112,7 +112,7 @@
               v-if="dragActive"
               class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#c8a060] bg-[rgba(200,160,96,0.14)] px-6 text-center text-sm font-semibold text-[#5a3e28] dark:bg-[rgba(200,160,96,0.1)] dark:text-[#e8dcc8]"
             >
-              {{ uploading ? t('chat_uploading') : t('chat_drop_files') }}
+              {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_DROP_FILES__' }}
             </div>
 
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
@@ -130,7 +130,7 @@
               @keydown.enter.exact="onEnter"
               @compositionstart="composing = true"
               @compositionend="composing = false"
-              :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
+              :placeholder="busy ? '__T_CHAT_INPUT_PLACEHOLDER_BUSY__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
               rows="1"
               :disabled="busy"
               class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#4a3a28] outline-none placeholder:text-[#c0b098] disabled:opacity-50 dark:text-[#d4c0a0] dark:placeholder:text-[#4a3a28]"
@@ -139,7 +139,7 @@
             <div class="flex items-center px-3.5 pb-2.5">
               <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-[#a0907a] transition-all hover:bg-[#f5ead8] hover:text-[#5a4a38] disabled:cursor-not-allowed disabled:opacity-50 dark:text-[#6a5840] dark:hover:bg-[rgba(200,160,96,0.1)] dark:hover:text-[#c8a060]">
                 <Paperclip class="h-3.5 w-3.5" />
-                {{ uploading ? t('chat_uploading') : t('chat_upload_file') }}
+                {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_UPLOAD_FILE__' }}
               </button>
             </div>
 
@@ -155,7 +155,7 @@
         </div>
         <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#b0a090] dark:text-[#5a4a38]">
           <span class="h-1.5 w-1.5 rounded-full bg-[#ccc]" :class="wsStatus === 'connected' ? 'bg-[#6a9a4a]' : wsStatus === 'connecting' ? 'animate-pulse bg-[#d4a840]' : 'bg-[#c04040]'"></span>
-          <span>{{ wsStatus === 'connected' ? t('common_connected') : wsStatus === 'connecting' ? t('common_connecting') : t('common_disconnected') }}</span>
+          <span>{{ wsStatus === 'connected' ? '__T_COMMON_CONNECTED__' : wsStatus === 'connecting' ? '__T_COMMON_CONNECTING__' : '__T_COMMON_DISCONNECTED__' }}</span>
         </div>
       </div>
     </div>
@@ -170,15 +170,12 @@ import { marked } from 'marked';
 import { ArrowUp, ChevronRight, Paperclip, Plus, Square } from 'lucide-vue-next';
 import HistoryPanel from './History.vue';
 import { connect, send, on, wsStatus, ensureConnected } from '../../ws.ts';
-import { useI18n } from '../../i18n/index.ts';
-
 const viewProps = defineProps({
   id: { type: String, default: null },
   pendingMessage: { type: String, default: null }
 });
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
 const LAST_CHAT_KEY = 'lastConversationId';
 
 marked.setOptions({ breaks: true, gfm: true });
@@ -228,7 +225,7 @@ const mapToolCallMessage = (toolCall, _key) => {
   if (name === 'shell' && args) {
     return { type: 'tool_call', shell: true, toolCall, title: args.reason || 'shell', command: args.command || '', _key };
   }
-  return { type: 'tool_call', toolCall, title: name || t('chat_tool_call'), detail: args ? JSON.stringify(args, null, 2) : '', _key };
+  return { type: 'tool_call', toolCall, title: name || '__T_CHAT_TOOL_CALL__', detail: args ? JSON.stringify(args, null, 2) : '', _key };
 };
 
 const addUniqueMessages = (items, { prepend = false } = {}) => {
@@ -299,10 +296,10 @@ const resetState = () => {
 
 const buildChatTitleFromFirstMessage = (text = '') => {
   const normalized = String(text).replace(/\s+/g, ' ').trim();
-  return normalized.slice(0, 20) || t('chat_new_title');
+  return normalized.slice(0, 20) || '__T_CHAT_NEW_TITLE__';
 };
 
-const createNewChat = async (title = t('chat_new_title')) => {
+const createNewChat = async (title = '__T_CHAT_NEW_TITLE__') => {
   const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
@@ -359,12 +356,12 @@ const handleSend = async () => {
   busy.value = true;
 
   try { await ensureConnected(); } catch {
-    messages.value.push({ role: 'assistant', content: t('chat_ws_error') });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_WS_ERROR__' });
     busy.value = false;
     return;
   }
 
-  const content = text || t('chat_attachment_only_prompt');
+  const content = text || '__T_CHAT_ATTACHMENT_ONLY_PROMPT__';
   const outgoingAttachments = pendingFiles.value.map(f => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
 
   ensureChatId(text).then((id) => {
@@ -378,7 +375,7 @@ const handleSend = async () => {
     pendingFiles.value = [];
     nextTick(() => { if (textarea.value) textarea.value.style.height = 'auto'; scrollToBottom(); historyRef.value?.fetchChats(); });
   }).catch((e) => {
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
     busy.value = false;
   });
 };
@@ -408,7 +405,7 @@ const removePendingFile = (idx) => { pendingFiles.value.splice(idx, 1); };
 const toDataUrl = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(String(reader.result || ''));
-  reader.onerror = () => reject(new Error(t('chat_file_read_failed')));
+  reader.onerror = () => reject(new Error('__T_CHAT_FILE_READ_FAILED__'));
   reader.readAsDataURL(file);
 });
 
@@ -432,7 +429,7 @@ const appendFiles = async (files = []) => {
       if (uploaded?.path) pendingFiles.value.push(uploaded);
     }
   } catch (err) {
-    uploadError.value = err.message || t('chat_upload_failed');
+    uploadError.value = err.message || '__T_CHAT_UPLOAD_FAILED__';
   } finally { uploading.value = false; }
 };
 
@@ -467,7 +464,7 @@ watch([() => viewProps.id, () => route.fullPath], () => {
     scrollToBottom(false);
   }).catch((e) => {
     if (e?.status === 404) { resetState(); router.replace('/chat'); return; }
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: e.message }) });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
   });
 }, { immediate: true });
 
@@ -532,7 +529,7 @@ onMounted(() => {
     if (data.conversationId !== currentConversationId.value) return;
     const _key = `ws:${Date.now()}:error`;
     seenKeys.value.add(_key);
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }), _key });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', data.content), _key });
     streamingAssistantKey.value = '';
     busy.value = false;
   }));

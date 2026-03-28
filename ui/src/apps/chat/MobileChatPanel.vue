@@ -4,10 +4,10 @@
     <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto px-3 py-3 [scrollbar-width:thin]" @scroll="onScroll">
       <div v-if="!messages.length" class="flex flex-col items-center justify-center py-20 text-center">
         <div class="mb-3 text-[40px]">💬</div>
-        <p class="text-[13px] text-[#6a5840]">{{ t('chat_empty_desc') }}</p>
+        <p class="text-[13px] text-[#6a5840]">__T_CHAT_EMPTY_DESC__</p>
       </div>
       <template v-else>
-        <div v-if="hasMore" class="py-2 text-center text-[11px] text-[#6a5840]">{{ t('chat_load_more') }}</div>
+        <div v-if="hasMore" class="py-2 text-center text-[11px] text-[#6a5840]">__T_CHAT_LOAD_MORE__</div>
         <div v-for="(m, i) in messages" :key="m._key || i" class="mb-4">
           <div v-if="m.role === 'user'" class="flex justify-end">
             <div class="max-w-[82%] rounded-[16px_16px_4px_16px] bg-[#c8a060] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#1a1410]">
@@ -24,7 +24,7 @@
         </div>
         <div v-if="busy" class="flex items-start gap-2">
           <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2a1e14] text-[14px]">🤖</div>
-          <div class="py-1 text-[13px] text-[#6a5840]">{{ t('chat_thinking') }}<span class="animate-pulse">...</span></div>
+          <div class="py-1 text-[13px] text-[#6a5840]">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
         </div>
       </template>
     </div>
@@ -39,7 +39,7 @@
           @keydown.enter.exact="onEnter"
           @compositionstart="composing = true"
           @compositionend="composing = false"
-          :placeholder="busy ? t('chat_input_placeholder_busy') : t('chat_input_placeholder')"
+          :placeholder="busy ? '__T_CHAT_INPUT_PLACEHOLDER_BUSY__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
           rows="1"
           :disabled="busy"
           class="min-h-[36px] max-h-[120px] flex-1 resize-none overflow-y-auto border-none bg-transparent py-2 text-[13px] leading-relaxed text-[#d4c0a0] outline-none placeholder:text-[#4a3a28] disabled:opacity-50"
@@ -67,13 +67,10 @@
 import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { marked } from 'marked';
 import { connect, send, on, wsStatus, ensureConnected } from '../../ws.ts';
-import { useI18n } from '../../i18n/index.ts';
-
 const props = defineProps({
   conversationId: { type: String, default: null }
 });
 
-const { t } = useI18n();
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
@@ -162,7 +159,7 @@ const handleSend = async () => {
   const text = input.value.trim();
   if (!text || busy.value) return;
   busy.value = true;
-  try { await ensureConnected(); } catch { messages.value.push({ role: 'assistant', content: t('chat_ws_error') }); busy.value = false; return; }
+  try { await ensureConnected(); } catch { messages.value.push({ role: 'assistant', content: '__T_CHAT_WS_ERROR__' }); busy.value = false; return; }
 
   if (!currentConversationId.value) {
     const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: text.slice(0, 20) }) });
@@ -215,7 +212,7 @@ onMounted(async () => {
   }));
   unsubs.push(on('error', (data) => {
     if (data.conversationId !== currentConversationId.value) return;
-    messages.value.push({ role: 'assistant', content: t('chat_send_error', { message: data.content }) });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', data.content) });
     streamingAssistantKey.value = ''; busy.value = false;
   }));
   unsubs.push(on('aborted', (data) => {

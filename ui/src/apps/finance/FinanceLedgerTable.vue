@@ -3,11 +3,11 @@
     <table class="dot-matrix w-full border-collapse">
       <thead>
         <tr>
-          <th class="sticky top-0 z-10 w-[12%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_date') }}</th>
-          <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_narrative') }}</th>
-          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_withdrawal') }}</th>
-          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_deposit') }}</th>
-          <th class="sticky top-0 z-10 w-[10%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">{{ t('finance_operation') }}</th>
+          <th class="sticky top-0 z-10 w-[12%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">__T_FINANCE_DATE__</th>
+          <th class="sticky top-0 z-10 border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">__T_FINANCE_NARRATIVE__</th>
+          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">__T_FINANCE_WITHDRAWAL__</th>
+          <th class="sticky top-0 z-10 w-[15%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">__T_FINANCE_DEPOSIT__</th>
+          <th class="sticky top-0 z-10 w-[10%] border border-[rgba(82,113,255,0.4)] bg-[rgba(82,113,255,0.15)] px-2 py-3 text-center text-xs font-bold text-[#1a2a40] backdrop-blur-[4px] sm:px-2 sm:py-3 sm:text-sm">__T_FINANCE_OPERATION__</th>
         </tr>
       </thead>
       <tbody>
@@ -33,7 +33,7 @@
               @keyup.enter="saveEdit"
               @keyup.escape="cancelEdit"
             />
-            <span v-else>{{ row.note || (row.type === 'income' ? t('finance_default_income_note') : t('finance_default_expense_note')) }}</span>
+            <span v-else>{{ row.note || (row.type === 'income' ? '__T_FINANCE_DEFAULT_INCOME_NOTE__' : '__T_FINANCE_DEFAULT_EXPENSE_NOTE__') }}</span>
           </td>
 
           <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] font-bold sm:px-4 sm:py-3 sm:text-[15px]" :class="row.type === 'expense' ? 'text-red-700' : ''" @dblclick="row.type === 'expense' && startEdit(row, 'amount')">
@@ -64,7 +64,7 @@
             <button
               class="rounded border border-red-700 bg-transparent px-2 py-1 text-[11px] font-bold text-red-700 opacity-100 transition-all transition-opacity hover:bg-[#0b1c67] hover:text-white hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-px sm:px-3 sm:text-xs sm:opacity-0 sm:group-hover:opacity-100"
               @click="remove(row.id)"
-            >{{ t('common_delete') }}</button>
+            >__T_COMMON_DELETE__</button>
           </td>
         </tr>
 
@@ -73,7 +73,7 @@
             <input v-model="form.newDate" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" :placeholder="todayStr" />
           </td>
           <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
-            <input v-model="form.newNote" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" :placeholder="t('finance_note_placeholder')" @keyup.enter="save" />
+            <input v-model="form.newNote" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-center text-inherit outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" placeholder="__T_FINANCE_NOTE_PLACEHOLDER__" @keyup.enter="save" />
           </td>
           <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-right text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
             <input v-model="form.newWithdraw" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-red-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" placeholder="0.00" @keyup.enter="save" />
@@ -82,7 +82,7 @@
             <input v-model="form.newDeposit" type="text" class="inline-input w-full border-0 border-b border-dashed border-[rgba(11,28,103,0.3)] bg-transparent px-1 py-0.5 text-right font-bold text-green-700 outline-none transition-all placeholder:italic placeholder:text-[rgba(11,28,103,0.3)] focus:border-solid focus:border-[#0b1c67] focus:bg-white/50" placeholder="0.00" @keyup.enter="save" />
           </td>
           <td class="border border-[rgba(82,113,255,0.3)] px-2 py-2 text-center text-[13px] sm:px-4 sm:py-3 sm:text-[15px]">
-            <button class="rounded border border-[#0b1c67] bg-transparent px-2 py-1 text-[11px] font-bold text-[#0b1c67] transition-all hover:bg-[#0b1c67] hover:text-white hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-30 sm:px-3 sm:text-xs" :disabled="saving || (!form.newWithdraw && !form.newDeposit)" @click="save">{{ t('common_save') }}</button>
+            <button class="rounded border border-[#0b1c67] bg-transparent px-2 py-1 text-[11px] font-bold text-[#0b1c67] transition-all hover:bg-[#0b1c67] hover:text-white hover:shadow-[0_2px_4px_rgba(0,0,0,0.2)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-30 sm:px-3 sm:text-xs" :disabled="saving || (!form.newWithdraw && !form.newDeposit)" @click="save">__T_COMMON_SAVE__</button>
           </td>
         </tr>
 
@@ -93,8 +93,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   rows: { type: Array, required: true },
   editing: { type: Object, required: true },
@@ -110,7 +108,6 @@ defineProps({
   save: { type: Function, required: true }
 });
 
-const { t } = useI18n();
 </script>
 
 <style scoped>

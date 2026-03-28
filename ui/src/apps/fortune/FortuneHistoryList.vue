@@ -1,6 +1,6 @@
 <template>
   <div v-if="history.length" class="mt-1">
-    <div class="mb-2.5 text-[11px] font-bold tracking-[0.15em] text-[#a09070]">{{ t('fortune_history') }}</div>
+    <div class="mb-2.5 text-[11px] font-bold tracking-[0.15em] text-[#a09070]">__T_FORTUNE_HISTORY__</div>
     <div
       v-for="item in history"
       :key="item.id"
@@ -15,17 +15,14 @@
       <div class="mt-0.5 text-[11px] italic text-[#a09070]">"{{ item.signPoem }}"</div>
     </div>
   </div>
-  <div v-else-if="!result" class="py-8 text-center text-[13px] text-[#b0a080]">{{ t('fortune_empty_history') }}</div>
+  <div v-else-if="!result" class="py-8 text-center text-[13px] text-[#b0a080]">__T_FORTUNE_EMPTY_HISTORY__</div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   history: { type: Array, required: true },
   result: { type: Object, default: null },
   formatTime: { type: Function, required: true }
 });
 
-const { t } = useI18n();
 </script>

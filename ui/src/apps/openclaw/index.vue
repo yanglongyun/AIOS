@@ -11,14 +11,14 @@
           <div class="text-sm font-bold text-[#3a2810]">OpenClaw</div>
           <div class="flex items-center gap-1 mt-px">
             <span class="w-1 h-1 rounded-full" :class="status.online ? (status.gateway ? 'dot-on' : 'dot-warn') : 'bg-[#6a4a3a]'"></span>
-            <span class="text-[8px] text-[rgba(60,40,20,0.4)]">{{ status.online ? (status.gateway ? t('openclaw_online') : t('openclaw_no_gateway')) : t('openclaw_offline') }}{{ status.version ? ' · ' + status.version : '' }}</span>
+            <span class="text-[8px] text-[rgba(60,40,20,0.4)]">{{ status.online ? (status.gateway ? '__T_OPENCLAW_ONLINE__' : '__T_OPENCLAW_NO_GATEWAY__') : '__T_OPENCLAW_OFFLINE__' }}{{ status.version ? ' · ' + status.version : '' }}</span>
           </div>
         </div>
         <!-- Tab 切换 — 黄铜拨片开关 -->
         <div class="tab-track flex rounded-md overflow-hidden p-[2px]">
           <button v-for="tab in ['tasks', 'chat']" :key="tab" @click="activeTab = tab"
             class="tab-btn px-3.5 py-1 text-[9px] font-bold tracking-wider cursor-pointer font-['Georgia',serif]"
-            :class="activeTab === tab ? 'tab-on' : 'tab-off'">{{ t('openclaw_tab_' + tab) }}</button>
+            :class="activeTab === tab ? 'tab-on' : 'tab-off'">{{ { tasks: '__T_OPENCLAW_TAB_TASKS__', chat: '__T_OPENCLAW_TAB_CHAT__' }[tab] }}</button>
         </div>
       </div>
 
@@ -33,11 +33,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import TaskView from './TaskView.vue';
 import ChatView from './ChatView.vue';
 
-const { t } = useI18n();
 const API = '/aios/apps/openclaw';
 
 const status = ref({ online: false, version: null, gateway: false });

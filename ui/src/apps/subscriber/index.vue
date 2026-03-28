@@ -32,12 +32,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
+import { LOCALE, LOCALE_FULL } from '../../locale.ts';
 import SubscriberArticlePanel from './SubscriberArticlePanel.vue';
 import SubscriberControlPanel from './SubscriberControlPanel.vue';
 
-const { locale, t } = useI18n();
 const API_BASE = '/aios/apps/subscriber';
 
 // 状态
@@ -69,7 +68,7 @@ const scheduleTimeStr = computed(() => {
   if (sched <= now) sched.setDate(sched.getDate() + 1);
   const isToday = sched.getDate() === now.getDate();
   const str = scheduleTime.value;
-  return isToday ? str : t('subscriber_tomorrow_prefix') + str;
+  return isToday ? str : '__T_SUBSCRIBER_TOMORROW_PREFIX__' + str;
 });
 
 // 历史列表（排除 today）
@@ -95,7 +94,7 @@ const request = async (url, options = {}) => {
 
 const loadToday = async () => {
   const data = await request(`${API_BASE}/today`);
-  focus.value = data.profile?.focus || t('subscriber_default_focus');
+  focus.value = data.profile?.focus || '__T_SUBSCRIBER_DEFAULT_FOCUS__';
   scheduleTime.value = data.profile?.scheduleTime || '08:00';
   today.value = data.today || null;
 };
@@ -116,7 +115,7 @@ const saveFocus = async () => {
     });
     focus.value = data.profile?.focus || '';
   } catch (e) {
-    error.value = e.message || t('subscriber_save_failed');
+    error.value = e.message || '__T_SUBSCRIBER_SAVE_FAILED__';
   }
 };
 
@@ -149,9 +148,9 @@ const refreshToday = async () => {
   refreshing.value = true;
   showSettings.value = false;
   try {
-    if (!focus.value.trim()) throw new Error(t('subscriber_fill_focus_error'));
+    if (!focus.value.trim()) throw new Error('__T_SUBSCRIBER_FILL_FOCUS_ERROR__');
     await saveFocus();
-    const lang = locale.value === 'en' ? 'en' : 'zh';
+    const lang = LOCALE;
     const date = new Date().toISOString().slice(0, 10);
     const prompt = buildSubscriberPrompt({
       lang,
@@ -174,7 +173,7 @@ const refreshToday = async () => {
     await loadHistory();
     // 滚动到顶部
   } catch (e) {
-    error.value = e.message || t('subscriber_generate_failed');
+    error.value = e.message || '__T_SUBSCRIBER_GENERATE_FAILED__';
   } finally {
     refreshing.value = false;
   }
@@ -199,19 +198,19 @@ const formatTime = (value) => {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { hour12: false });
+  return d.toLocaleString(LOCALE_FULL, { hour12: false });
 };
 
 onMounted(async () => {
   updateNow();
   dialTimer = setInterval(updateNow, 10000);
-  chatPanel.setContext({ scene: 'subscriber', label: t('app_sidebar_subscriber') });
-  chatPanel.setQuickMessages([t('subscriber_chat_quick_1'), t('subscriber_chat_quick_2'), t('subscriber_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'subscriber', label: '__T_APP_SIDEBAR_SUBSCRIBER__' });
+  chatPanel.setQuickMessages(['__T_SUBSCRIBER_CHAT_QUICK_1__', '__T_SUBSCRIBER_CHAT_QUICK_2__', '__T_SUBSCRIBER_CHAT_QUICK_3__']);
   try {
     await loadToday();
     await loadHistory();
   } catch (e) {
-    error.value = e.message || t('subscriber_init_failed');
+    error.value = e.message || '__T_SUBSCRIBER_INIT_FAILED__';
   }
 });
 

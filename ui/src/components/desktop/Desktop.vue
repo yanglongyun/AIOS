@@ -28,10 +28,7 @@
 import { ref, computed } from 'vue';
 import { appRegistry } from '../../apps.ts';
 import { windowManager } from '../../stores/windowManager.ts';
-import { useI18n } from '../../i18n/index.ts';
 import { wallpaperList } from './wallpapers.ts';
-
-const { t } = useI18n();
 
 defineEmits(['contextmenu']);
 

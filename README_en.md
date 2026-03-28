@@ -2,7 +2,7 @@
 
 [简体中文](./README.md) | **English**
 
-> AI-Powered Operating System
+> The Operating System for the AI Era
 
 ## Quick Start
 

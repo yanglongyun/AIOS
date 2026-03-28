@@ -1,6 +1,6 @@
 <template>
   <section class="space-y-3">
-    <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840]">{{ t('settings_context_rounds') }}</div>
+    <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840]">__T_SETTINGS_CONTEXT_ROUNDS__</div>
     <div class="flex gap-2">
       <button
         v-for="n in [30, 100, 500]"
@@ -15,14 +15,12 @@
       </button>
     </div>
     <div class="pt-2 flex justify-start">
-      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">{{ t('common_save') }}</button>
+      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-const { t } = useI18n();
 defineProps({
   contextRounds: { type: Number, default: 100 }
 });

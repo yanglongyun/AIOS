@@ -2,14 +2,14 @@
   <div class="paper-roll-container -mt-4 w-full max-w-[600px] flex-1 overflow-x-hidden overflow-y-auto pb-12">
     <div class="tractor-paper dot-matrix relative w-full px-[42px] pb-5 pt-7">
       <div class="mb-5 border-b-2 border-dashed border-[#1a1040] pb-3 text-center text-base font-black tracking-[4px] text-[#1a1040]">
-        {{ t('cryptobot_decision_log') }}<br>
+        __T_CRYPTOBOT_DECISION_LOG__<br>
         <span class="text-[10px] font-normal tracking-normal text-[#5a4e7a]">
-          {{ t('cryptobot_ticks', { n: status.state.tick_count }) }}
+          {{ '__T_CRYPTOBOT_TICKS__'.replace('{n}', status.state.tick_count) }}
         </span>
       </div>
 
       <div v-if="!decisions.length" class="py-6 text-center text-[11px] font-bold text-[#5a4e7a]">
-        {{ t('cryptobot_logs_empty') }}
+        __T_CRYPTOBOT_LOGS_EMPTY__
       </div>
 
       <div
@@ -21,7 +21,7 @@
         <div class="mb-1.5 flex items-start justify-between">
           <div>
             <span class="action-badge mr-1.5 inline-block rounded-sm px-2 py-0.5 text-[10px] font-black tracking-[2px]" :class="d.ok ? 'badge-ok' : 'badge-fail'">
-              {{ d.ok ? t('cryptobot_task_ok') : t('cryptobot_task_fail') }}
+              {{ d.ok ? '__T_CRYPTOBOT_TASK_OK__' : '__T_CRYPTOBOT_TASK_FAIL__' }}
             </span>
             <span class="text-sm font-black text-[#0d0820]">#{{ d.id }}</span>
           </div>
@@ -31,7 +31,7 @@
           task_id: {{ d.task_id || '-' }}
         </div>
         <div class="mt-1.5 border-l-2 border-[rgba(26,16,64,0.15)] pl-2 text-[11px] leading-relaxed text-[#3a2e60]">
-          <span class="mb-0.5 block text-[8px] font-black tracking-[1px] text-[#7060a0]">{{ t('cryptobot_task_summary') }}</span>
+          <span class="mb-0.5 block text-[8px] font-black tracking-[1px] text-[#7060a0]">__T_CRYPTOBOT_TASK_SUMMARY__</span>
           {{ d.summary || '-' }}
           <div v-if="d.error" class="mt-1 text-[10px] text-[#c92a2a]">{{ d.error }}</div>
         </div>
@@ -43,15 +43,13 @@
         class="mt-4 w-full cursor-pointer text-center text-[10px] font-bold text-[#5a4e7a] transition hover:text-[#1aab40]"
         @click="$emit('loadMore')"
       >
-        <span class="bg-[#1a1040] px-2.5 py-[3px] text-[10px] text-[#f5f0e0]">--- {{ t('cryptobot_load_more') }} ---</span>
+        <span class="bg-[#1a1040] px-2.5 py-[3px] text-[10px] text-[#f5f0e0]">--- __T_CRYPTOBOT_LOAD_MORE__ ---</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   status: { type: Object, required: true },
   decisions: { type: Array, required: true },
@@ -61,7 +59,6 @@ defineProps({
 
 defineEmits(['loadMore']);
 
-const { t } = useI18n();
 </script>
 
 <style scoped>

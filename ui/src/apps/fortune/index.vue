@@ -3,8 +3,8 @@
     <div class="h-full overflow-y-auto">
       <div class="mx-auto max-w-[460px] px-5 pb-[60px] pt-7">
         <div class="mb-7 text-center">
-          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">{{ t('fortune_title') }}</h1>
-          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">{{ t('fortune_subtitle') }}</p>
+          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">__T_FORTUNE_TITLE__</h1>
+          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">__T_FORTUNE_SUBTITLE__</p>
         </div>
 
         <FortuneHexagramPanel
@@ -28,7 +28,7 @@
 
         <div class="mt-10 border-t border-dashed border-[rgba(160,140,110,0.3)] pt-5 text-center">
           <p class="font-['PingFang_SC',sans-serif] text-[11px] leading-[1.8] tracking-[0.05em] text-[#a09070] opacity-80">
-            {{ t('fortune_disclaimer_1') }}<br>{{ t('fortune_disclaimer_2') }}
+            __T_FORTUNE_DISCLAIMER_1__<br>__T_FORTUNE_DISCLAIMER_2__
           </p>
         </div>
       </div>
@@ -38,14 +38,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
+import { LOCALE } from '../../locale.ts';
 import FortuneHexagramPanel from './FortuneHexagramPanel.vue';
 import FortuneQuestionForm from './FortuneQuestionForm.vue';
 import FortuneResultCard from './FortuneResultCard.vue';
 import FortuneHistoryList from './FortuneHistoryList.vue';
-
-const { t, locale } = useI18n();
 
 const HEXAGRAM_TABLE = [
   ['坤为地', '地山谦', '地水师', '地风升', '地雷复', '地火明夷', '地泽临', '地天泰'],
@@ -59,12 +57,12 @@ const HEXAGRAM_TABLE = [
 ];
 
 const yaoLabels = computed(() => [
-  t('fortune_yao_top'),
-  t('fortune_yao_five'),
-  t('fortune_yao_four'),
-  t('fortune_yao_three'),
-  t('fortune_yao_two'),
-  t('fortune_yao_one')
+  '__T_FORTUNE_YAO_TOP__',
+  '__T_FORTUNE_YAO_FIVE__',
+  '__T_FORTUNE_YAO_FOUR__',
+  '__T_FORTUNE_YAO_THREE__',
+  '__T_FORTUNE_YAO_TWO__',
+  '__T_FORTUNE_YAO_ONE__'
 ]);
 
 const trigramIndex = (y0, y1, y2) => y0 * 4 + y1 * 2 + y2;
@@ -134,7 +132,7 @@ const divine = async () => {
   shaking.value = false;
 
   loading.value = true;
-  const lang = locale.value === 'en' ? 'en' : 'zh';
+  const lang = LOCALE;
   const yaoDesc = lang === 'en'
     ? allYaos.map((y, i) => `${['1st', '2nd', '3rd', '4th', '5th', 'top'][i]}:${y ? 'yang' : 'yin'}`).join(', ')
     : allYaos.map((y, i) => `${['初', '二', '三', '四', '五', '上'][i]}爻:${y ? '阳' : '阴'}`).join('，');
@@ -203,8 +201,8 @@ const loadHistory = async () => {
 
 onMounted(() => {
   loadHistory();
-  chatPanel.setContext({ scene: 'fortune', label: t('app_sidebar_fortune') });
-  chatPanel.setQuickMessages([t('fortune_chat_quick_1'), t('fortune_chat_quick_2'), t('fortune_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'fortune', label: '__T_APP_SIDEBAR_FORTUNE__' });
+  chatPanel.setQuickMessages(['__T_FORTUNE_CHAT_QUICK_1__', '__T_FORTUNE_CHAT_QUICK_2__', '__T_FORTUNE_CHAT_QUICK_3__']);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

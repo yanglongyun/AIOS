@@ -40,12 +40,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
+import { LOCALE_FULL } from '../../locale.ts';
 import FinanceHeader from './FinanceHeader.vue';
 import FinanceLedgerTable from './FinanceLedgerTable.vue';
 
-const { locale, t } = useI18n();
 const API_BASE = '/aios/apps/finance';
 
 const now = new Date();
@@ -84,7 +83,7 @@ const endingBalance = computed(() => totalIncome.value - totalExpense.value);
 
 const fmtAmt = (n) => {
   const v = Number(n) || 0;
-  return v.toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return v.toLocaleString(LOCALE_FULL, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const fmtDate = (dateStr) => {
@@ -224,8 +223,8 @@ const remove = async (id) => {
 
 onMounted(() => {
   fetchData();
-  chatPanel.setContext({ scene: 'finance', label: t('app_sidebar_finance') });
-  chatPanel.setQuickMessages([t('finance_chat_quick_1'), t('finance_chat_quick_2'), t('finance_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'finance', label: '__T_APP_SIDEBAR_FINANCE__' });
+  chatPanel.setQuickMessages(['__T_FINANCE_CHAT_QUICK_1__', '__T_FINANCE_CHAT_QUICK_2__', '__T_FINANCE_CHAT_QUICK_3__']);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

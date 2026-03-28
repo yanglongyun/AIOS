@@ -8,7 +8,7 @@
         ref="searchEl"
         v-model="search"
         class="min-w-0 flex-1 rounded-[8px] border border-[rgba(200,160,96,0.3)] bg-[rgba(245,240,232,0.9)] px-3 py-1.5 text-[13px] text-[#3a2a18] outline-none placeholder-[#b0a090] focus:border-[#c8a060]"
-        :placeholder="t('launcher_search')"
+        placeholder="__T_LAUNCHER_SEARCH__"
       />
     </div>
 
@@ -54,10 +54,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { LogOut, RotateCcw } from 'lucide-vue-next';
 import { appRegistry } from '../../apps.ts';
-import { useI18n } from '../../i18n/index.ts';
 import { clearAuthCache } from '../../auth/session.ts';
 
-const { t } = useI18n();
 const router = useRouter();
 defineEmits(['open', 'close']);
 

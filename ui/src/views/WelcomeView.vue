@@ -28,9 +28,9 @@
             AIOS</h2>
           <div class="mt-8 h-px w-full bg-gradient-to-r from-[#c8a060] to-transparent opacity-30"></div>
           <p class="mt-8 max-w-[450px] space-y-3 text-[14px] leading-relaxed tracking-wide text-[#a09078]">
-            <span>{{ t('welcome_desc_1') }}</span><br>
-            <span>{{ t('welcome_desc_2') }}</span><br>
-            <span>{{ t('welcome_desc_3') }}</span>
+            <span>__T_WELCOME_DESC_1__</span><br>
+            <span>__T_WELCOME_DESC_2__</span><br>
+            <span>__T_WELCOME_DESC_3__</span>
           </p>
           <div class="mt-12 flex items-end justify-between">
             <div class="flex gap-4">
@@ -41,28 +41,28 @@
             </div>
             <button
               class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all cursor-pointer"
-              @click="step = 2">{{ t('welcome_next') }}</button>
+              @click="step = 2">__T_WELCOME_NEXT__</button>
           </div>
         </div>
 
         <!-- Step 2: 创建管理员 -->
         <div v-if="step === 2" class="px-10 py-10">
-          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_admin_title') }}</h2>
-          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_admin_hint') }}</p>
+          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">__T_WELCOME_ADMIN_TITLE__</h2>
+          <p class="mt-2 text-[13px] text-[#8a7860]">__T_WELCOME_ADMIN_HINT__</p>
 
           <div class="mt-8 space-y-5">
             <div>
-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_username') }}</label>
-              <input v-model.trim="admin.username" :placeholder="t('welcome_username_ph')" class="wiz-input" />
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_USERNAME__</label>
+              <input v-model.trim="admin.username" placeholder="__T_WELCOME_USERNAME_PH__" class="wiz-input" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_password') }}</label>
-                <input v-model="admin.password" type="password" :placeholder="t('welcome_password_ph')" class="wiz-input" />
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_PASSWORD__</label>
+                <input v-model="admin.password" type="password" placeholder="__T_WELCOME_PASSWORD_PH__" class="wiz-input" />
               </div>
               <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_confirm') }}</label>
-                <input v-model="admin.confirm" type="password" :placeholder="t('welcome_confirm_ph')" class="wiz-input" />
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_CONFIRM__</label>
+                <input v-model="admin.confirm" type="password" placeholder="__T_WELCOME_CONFIRM_PH__" class="wiz-input" />
               </div>
             </div>
           </div>
@@ -70,24 +70,24 @@
 
           <div class="mt-10 flex items-center justify-between">
             <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
-              @click="step = 1">{{ t('welcome_prev') }}</button>
+              @click="step = 1">__T_WELCOME_PREV__</button>
             <button
               class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
               :disabled="pending" @click="createAdmin">
-              {{ pending ? t('welcome_creating') : t('welcome_next') }}
+              {{ pending ? '__T_WELCOME_CREATING__' : '__T_WELCOME_NEXT__' }}
             </button>
           </div>
         </div>
 
         <!-- Step 3: 配置模型 -->
         <div v-if="step === 3" class="px-10 py-10">
-          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_model_title') }}</h2>
-          <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_model_hint') }}</p>
+          <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">__T_WELCOME_MODEL_TITLE__</h2>
+          <p class="mt-2 text-[13px] text-[#8a7860]">__T_WELCOME_MODEL_HINT__</p>
 
           <div class="mt-8 space-y-5">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_provider') }}</label>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_PROVIDER__</label>
                 <select v-model="model.provider" class="wiz-input wiz-select" @change="applyProviderDefault">
                   <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
                     <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -95,16 +95,16 @@
                 </select>
               </div>
               <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_model') }}</label>
+                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_MODEL__</label>
                 <input v-model.trim="model.model" placeholder="gpt-5.4" class="wiz-input" />
               </div>
             </div>
             <div>
-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_url') }}</label>
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_API_URL__</label>
               <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
             </div>
             <div>
-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t('welcome_api_key') }}</label>
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">__T_WELCOME_API_KEY__</label>
               <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
             </div>
           </div>
@@ -112,11 +112,11 @@
 
           <div class="mt-10 flex items-center justify-between">
             <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
-              @click="step = 2">{{ t('welcome_prev') }}</button>
+              @click="step = 2">__T_WELCOME_PREV__</button>
             <button
               class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
               :disabled="pending" @click="saveModelAndTest">
-              {{ pending ? t('welcome_testing') : t('welcome_save_test') }}
+              {{ pending ? '__T_WELCOME_TESTING__' : '__T_WELCOME_SAVE_TEST__' }}
             </button>
           </div>
         </div>
@@ -125,8 +125,8 @@
         <div v-if="step === 4" class="px-10 py-12">
           <div class="flex items-start gap-6">
             <div>
-              <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">{{ t('welcome_intro_title') }}</h2>
-              <p class="mt-2 text-[13px] text-[#8a7860]">{{ t('welcome_intro_hint') }}</p>
+              <h2 class="text-2xl font-bold tracking-wide text-[#e8d4b8]">__T_WELCOME_INTRO_TITLE__</h2>
+              <p class="mt-2 text-[13px] text-[#8a7860]">__T_WELCOME_INTRO_HINT__</p>
             </div>
           </div>
 
@@ -139,10 +139,10 @@
           <div class="mt-12 flex items-center justify-between transition-opacity duration-500"
             :class="typing ? 'opacity-0' : 'opacity-100'">
             <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
-              @click="step = 3">{{ t('welcome_prev') }}</button>
+              @click="step = 3">__T_WELCOME_PREV__</button>
             <button
               class="cursor-pointer rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070]"
-              @click="enterSystem">{{ t('welcome_enter') }}</button>
+              @click="enterSystem">__T_WELCOME_ENTER__</button>
           </div>
         </div>
       </div>
@@ -155,9 +155,6 @@ import { ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.ts';
 import { clearAuthCache } from '../auth/session.ts';
-import { setLocale, useI18n } from '../i18n/index.ts';
-
-const { t } = useI18n();
 const router = useRouter();
 const step = ref(1);
 const pending = ref(false);
@@ -179,7 +176,7 @@ const model = ref({
   language: detectedLanguage
 });
 
-watch(() => model.value.language, (lang) => setLocale(lang), { immediate: true });
+// 语言选择保存到后端，下次 build 时 apply-locale 生效
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);
@@ -190,7 +187,7 @@ const applyProviderDefault = () => {
 const createAdmin = async () => {
   error.value = '';
   if (admin.value.password !== admin.value.confirm) {
-    error.value = t('welcome_err_mismatch');
+    error.value = '__T_WELCOME_ERR_MISMATCH__';
     return;
   }
   pending.value = true;
@@ -202,11 +199,11 @@ const createAdmin = async () => {
       body: JSON.stringify({ username: admin.value.username, password: admin.value.password })
     });
     const data = await res.json();
-    if (!res.ok || data?.success === false) throw new Error(data?.message || t('welcome_err_admin'));
+    if (!res.ok || data?.success === false) throw new Error(data?.message || '__T_WELCOME_ERR_ADMIN__');
     clearAuthCache();
     step.value = 3;
   } catch (e) {
-    error.value = e?.message || t('welcome_err_admin');
+    error.value = e?.message || '__T_WELCOME_ERR_ADMIN__';
   } finally {
     pending.value = false;
   }
@@ -245,9 +242,8 @@ const saveModelAndTest = async () => {
     });
     const saveData = await saveRes.json();
     if (!saveRes.ok || saveData?.success === false || saveData?.error) {
-      throw new Error(saveData?.message || saveData?.error || t('welcome_err_save'));
+      throw new Error(saveData?.message || saveData?.error || '__T_WELCOME_ERR_SAVE__');
     }
-    setLocale(model.value.language);
     const isZh = model.value.language === 'zh';
     const testRes = await fetch('/aios/api/task/create/instant', {
       method: 'POST',
@@ -272,14 +268,14 @@ const saveModelAndTest = async () => {
     });
     const testData = await testRes.json();
     if (!testRes.ok || testData?.success === false) {
-      throw new Error(testData?.message || t('welcome_err_test'));
+      throw new Error(testData?.message || '__T_WELCOME_ERR_TEST__');
     }
     const parsed = JSON.parse(String(testData.response || '{}'));
     step.value = 4;
     welcomeText.value = parsed?.intro || (isZh ? '你好，我是 AIOS。很高兴认识你。' : 'Hello, I am AIOS. Nice to meet you.');
     startTypewriter(welcomeText.value);
   } catch (e) {
-    error.value = e?.message || t('welcome_err_test');
+    error.value = e?.message || '__T_WELCOME_ERR_TEST__';
   } finally {
     pending.value = false;
   }

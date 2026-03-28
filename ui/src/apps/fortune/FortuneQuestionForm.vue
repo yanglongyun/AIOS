@@ -3,7 +3,7 @@
     <textarea
       :value="question"
       rows="2"
-      :placeholder="t('fortune_input_placeholder')"
+      placeholder="__T_FORTUNE_INPUT_PLACEHOLDER__"
       :disabled="shaking || loading"
       class="w-full resize-none border-none bg-transparent text-sm leading-[1.6] text-[#3a2e20] outline-none placeholder:text-[#b0a080] disabled:opacity-50"
       @input="$emit('update:question', $event.target.value)"
@@ -13,14 +13,12 @@
       @click="$emit('divine')"
       :disabled="shaking || loading || !question.trim()"
     >
-      {{ shaking ? t('fortune_shaking') : loading ? t('fortune_reading') : t('fortune_divine') }}
+      {{ shaking ? '__T_FORTUNE_SHAKING__' : loading ? '__T_FORTUNE_READING__' : '__T_FORTUNE_DIVINE__' }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   question: { type: String, required: true },
   shaking: { type: Boolean, required: true },
@@ -29,5 +27,4 @@ defineProps({
 
 defineEmits(['update:question', 'divine']);
 
-const { t } = useI18n();
 </script>

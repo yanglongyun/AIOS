@@ -3,7 +3,7 @@
     <div class="grille-shadow"></div>
 
     <div v-if="!today && !items.length" class="flex flex-1 items-center justify-center py-20">
-      <p class="text-center text-[13px] text-[#604830]">{{ t('subscriber_fill_focus_hint') }}</p>
+      <p class="text-center text-[13px] text-[#604830]">__T_SUBSCRIBER_FILL_FOCUS_HINT__</p>
     </div>
 
     <div v-if="today" class="relative mb-8 border-b-2 border-dashed border-[rgba(232,192,96,0.12)] pb-8" :class="{ 'cursor-pointer': selectedId && selectedId !== today.id }" @click="$emit('select-article', today)">
@@ -35,16 +35,14 @@
     </div>
 
     <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-6 pb-4">
-      <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page <= 1" @click="$emit('change-page', page - 1)">{{ t('subscriber_prev_page') }}</button>
+      <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page <= 1" @click="$emit('change-page', page - 1)">__T_SUBSCRIBER_PREV_PAGE__</button>
       <span class="text-[10px] text-[#604830]">{{ page }} / {{ totalPages }}</span>
-      <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page >= totalPages" @click="$emit('change-page', page + 1)">{{ t('subscriber_next_page') }}</button>
+      <button class="text-[12px] font-bold text-[#806040] disabled:opacity-30" :disabled="page >= totalPages" @click="$emit('change-page', page + 1)">__T_SUBSCRIBER_NEXT_PAGE__</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   today: { type: Object, default: null },
   items: { type: Array, required: true },
@@ -57,5 +55,4 @@ defineProps({
 
 defineEmits(['select-article', 'change-page']);
 
-const { t } = useI18n();
 </script>

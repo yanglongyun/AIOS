@@ -26,12 +26,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
 import PokerControlPanel from './PokerControlPanel.vue';
 import PokerTableView from './PokerTableView.vue';
-const { t } = useI18n();
-
 const game = ref(null);
 const busy = ref(false);
 const lastActionText = ref('');
@@ -48,13 +45,13 @@ const displayAiCards = computed(() => {
 });
 
 const roundStatusText = computed(() => {
-  if (!game.value) return t('poker_round') + '0';
+  if (!game.value) return '__T_POKER_ROUND__' + '0';
   if (game.value.status === 'done') {
-    if (game.value.winner === 'player') return t('poker_you_win');
-    if (game.value.winner === 'draw') return t('poker_draw');
-    return t('poker_ai_wins');
+    if (game.value.winner === 'player') return '__T_POKER_YOU_WIN__';
+    if (game.value.winner === 'draw') return '__T_POKER_DRAW__';
+    return '__T_POKER_AI_WINS__';
   }
-  return t('poker_round') + game.value.round;
+  return '__T_POKER_ROUND__' + game.value.round;
 });
 
 const request = async (url, opts) => {
@@ -80,8 +77,8 @@ const loadStatus = async () => {
 
 onMounted(() => {
   loadStatus();
-  chatPanel.setContext({ scene: 'poker', label: t('app_sidebar_poker') });
-  chatPanel.setQuickMessages([t('poker_chat_quick_1'), t('poker_chat_quick_2'), t('poker_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'poker', label: '__T_APP_SIDEBAR_POKER__' });
+  chatPanel.setQuickMessages(['__T_POKER_CHAT_QUICK_1__', '__T_POKER_CHAT_QUICK_2__', '__T_POKER_CHAT_QUICK_3__']);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
@@ -92,7 +89,7 @@ const startGame = async () => {
     if (data.success) {
       game.value = data.game;
       economy.value = data.economy || economy.value;
-      lastActionText.value = t('poker_turn_start');
+      lastActionText.value = '__T_POKER_TURN_START__';
       aiSpeech.value = '';
       aiExpression.value = '';
       return;
@@ -124,11 +121,11 @@ const handleAction = async (action) => {
       aiExpression.value = data.meta?.aiExpression || '';
 
       if (game.value.status === 'done') {
-        lastActionText.value = t('poker_game_over');
+        lastActionText.value = '__T_POKER_GAME_OVER__';
       } else {
-        if (aiResponseAction === 'fold') lastActionText.value = t('poker_ai_folded');
-        else if (aiResponseAction === 'raise') lastActionText.value = t('poker_ai_raised', { 0: data.meta?.aiBet ?? '' });
-        else lastActionText.value = t('poker_ai_called', { 0: data.meta?.aiBet ?? '' });
+        if (aiResponseAction === 'fold') lastActionText.value = '__T_POKER_AI_FOLDED__';
+        else if (aiResponseAction === 'raise') lastActionText.value = '__T_POKER_AI_RAISED__'.replace('{0}', data.meta?.aiBet ?? '');
+        else lastActionText.value = '__T_POKER_AI_CALLED__'.replace('{0}', data.meta?.aiBet ?? '');
       }
       return;
     }

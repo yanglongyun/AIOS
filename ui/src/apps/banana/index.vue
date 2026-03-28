@@ -26,12 +26,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
+import { LOCALE } from '../../locale.ts';
 import BananaControls from './BananaControls.vue';
 import BananaScreen from './BananaScreen.vue';
 
-const { t, locale } = useI18n();
 const API_BASE = '/aios/apps/banana';
 
 const currentIndex = ref(0);
@@ -43,8 +42,8 @@ const toast = ref('');
 
 onMounted(() => {
   init();
-  chatPanel.setContext({ scene: 'banana', label: t('app_sidebar_banana') });
-  chatPanel.setQuickMessages([t('banana_chat_quick_1'), t('banana_chat_quick_2'), t('banana_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'banana', label: '__T_APP_SIDEBAR_BANANA__' });
+  chatPanel.setQuickMessages(['__T_BANANA_CHAT_QUICK_1__', '__T_BANANA_CHAT_QUICK_2__', '__T_BANANA_CHAT_QUICK_3__']);
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
@@ -71,7 +70,7 @@ function goHomePage() {
 
 async function init() {
   isLoading.value = true;
-  toast.value = t('banana_booting');
+  toast.value = '__T_BANANA_BOOTING__';
 
   try {
     const res = await fetch(`${API_BASE}/progress`);
@@ -93,12 +92,12 @@ async function init() {
 
   try {
     const params = buildBananaTaskParams({
-      now: t('banana_boot_screen'),
-      next: t('banana_enter_home')
+      now: '__T_BANANA_BOOT_SCREEN__',
+      next: '__T_BANANA_ENTER_HOME__'
     });
     const result = await api('/generation', {
-      now: t('banana_boot_screen'),
-      next: t('banana_enter_home'),
+      now: '__T_BANANA_BOOT_SCREEN__',
+      next: '__T_BANANA_ENTER_HOME__',
       ...params
     });
 
@@ -130,7 +129,7 @@ async function chooseOption(option) {
   timeLine.value[currentIndex.value].choices = option.text;
 
   const history = timeLine.value.slice(1, 3).reverse().map(item => {
-    return `${t('banana_ctx_screen')}${item.content}` + (item.choices ? `${t('banana_ctx_choice')}${item.choices}` : '');
+    return `${'__T_BANANA_CTX_SCREEN__'}${item.content}` + (item.choices ? `${'__T_BANANA_CTX_CHOICE__'}${item.choices}` : '');
   });
 
   try {
@@ -174,7 +173,7 @@ async function api(path, body) {
 }
 
 function buildBananaTaskParams({ history = [], now = '', choices = '', next = '' }) {
-  const lang = locale.value === 'en' ? 'en' : 'zh';
+  const lang = LOCALE;
   const prompt = lang === 'en'
     ? 'Generate the next old-phone screen by context and return strict JSON.'
     : '根据上下文生成下一屏老手机界面。';

@@ -5,11 +5,11 @@
     <div class="mx-auto my-4 h-px w-[60px] bg-[#c8a868]"></div>
     <div class="flex justify-center gap-12">
       <div class="text-center">
-        <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#6a9a50]">{{ t('fortune_good') }}</div>
+        <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#6a9a50]">__T_FORTUNE_GOOD__</div>
         <div class="mt-1 text-xs text-[#5a4a30]">{{ result.good }}</div>
       </div>
       <div class="text-center">
-        <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#b05040]">{{ t('fortune_bad') }}</div>
+        <div class="font-serif text-[13px] font-extrabold tracking-[0.1em] text-[#b05040]">__T_FORTUNE_BAD__</div>
         <div class="mt-1 text-xs text-[#5a4a30]">{{ result.bad }}</div>
       </div>
     </div>
@@ -18,14 +18,11 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   result: { type: Object, default: null },
   formatPoem: { type: Function, required: true }
 });
 
-const { t } = useI18n();
 </script>
 
 <style scoped>

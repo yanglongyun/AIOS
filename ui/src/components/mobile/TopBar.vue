@@ -41,9 +41,6 @@
 import { computed, ref } from 'vue';
 import { X } from 'lucide-vue-next';
 import { appRegistry } from '../../apps.ts';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 const avatarBtn = ref(null);
 
 const props = defineProps({

@@ -6,7 +6,7 @@
         <input
           v-model="prompt"
           class="flex-1 rounded-xl border border-[#d4c0a0] bg-[#fffdf8] px-4 py-2.5 text-sm text-[#4a3a28] placeholder-[#b0a090] outline-none focus:border-[#c8a060]"
-          :placeholder="t('createapp_placeholder')"
+          placeholder="__T_CREATEAPP_PLACEHOLDER__"
           @compositionstart="composing = true"
           @compositionend="composing = false"
           @keydown.enter="!composing && create()"
@@ -16,7 +16,7 @@
           :disabled="!prompt.trim()"
           @click="create"
         >
-          {{ t('createapp_button') }}
+          __T_CREATEAPP_BUTTON__
         </button>
       </div>
     </div>
@@ -27,9 +27,6 @@
 import { ref } from 'vue';
 import CreateAppHero from './CreateAppHero.vue';
 import { windowManager } from '../../stores/windowManager.ts';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 const prompt = ref('');
 const composing = ref(false);
 

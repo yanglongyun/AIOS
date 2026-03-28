@@ -35,13 +35,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
+import { LOCALE } from '../../locale.ts';
 import ReaderCreateView from './ReaderCreateView.vue';
 import ReaderDetailView from './ReaderDetailView.vue';
 import ReaderListView from './ReaderListView.vue';
 
-const { t, locale } = useI18n();
 const props = defineProps({
   initialView: {
     type: String,
@@ -62,8 +61,8 @@ const loading = ref(false);
 const newTitle = ref('');
 const newPremise = ref('');
 const customAction = ref('');
-const startAction = computed(() => t('reader_start_reader'));
-const readerLocale = computed(() => (locale.value === 'en' ? 'en' : 'zh'));
+const startAction = computed(() => '__T_READER_START_READER__');
+const readerLocale = LOCALE;
 
 const shelfTiers = computed(() => {
   const tiers = [];
@@ -159,7 +158,7 @@ const createReader = async () => {
     await loadSessions();
     await selectSession(data.session.id);
   } catch (e) {
-    error.value = e.message || t('reader_create_failed');
+    error.value = e.message || '__T_READER_CREATE_FAILED__';
   } finally {
     creating.value = false;
   }
@@ -197,7 +196,7 @@ const runGenerate = async (action) => {
     });
     await selectSession(activeSession.value.id);
   } catch (e) {
-    error.value = e.message || t('reader_generate_failed');
+    error.value = e.message || '__T_READER_GENERATE_FAILED__';
   } finally {
     loading.value = false;
     customAction.value = '';
@@ -214,7 +213,7 @@ const isStartReaderAction = (action) => action === startAction.value || action =
 
 const resetReader = async () => {
   if (!activeSession.value || loading.value) return;
-  if (!confirm(t('reader_reset_confirm', { title: activeSession.value.title }))) return;
+  if (!confirm('__T_READER_RESET_CONFIRM__'.replace('{title}', activeSession.value.title))) return;
   error.value = '';
   loading.value = true;
   try {
@@ -225,15 +224,15 @@ const resetReader = async () => {
     });
     await selectSession(activeSession.value.id);
   } catch (e) {
-    error.value = e.message || t('reader_reset_failed');
+    error.value = e.message || '__T_READER_RESET_FAILED__';
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'reader', label: t('app_sidebar_reader') });
-  chatPanel.setQuickMessages([t('reader_chat_quick_1'), t('reader_chat_quick_2'), t('reader_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'reader', label: '__T_APP_SIDEBAR_READER__' });
+  chatPanel.setQuickMessages(['__T_READER_CHAT_QUICK_1__', '__T_READER_CHAT_QUICK_2__', '__T_READER_CHAT_QUICK_3__']);
   try {
     await loadSessions();
     if (view.value === 'detail') {
@@ -241,7 +240,7 @@ onMounted(async () => {
       view.value = 'list';
     }
   } catch (e) {
-    error.value = e.message || t('reader_init_failed');
+    error.value = e.message || '__T_READER_INIT_FAILED__';
   }
 });
 onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });

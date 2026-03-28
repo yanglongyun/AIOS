@@ -5,9 +5,9 @@
       <!-- 顶栏 -->
       <div class="border-b border-[rgba(200,170,130,0.25)] px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-[13px] font-bold text-[#3a2a18]">{{ t('tasks_center') }}</span>
+          <span class="text-[13px] font-bold text-[#3a2a18]">__T_TASKS_CENTER__</span>
           <div class="flex items-center gap-1.5">
-            <button type="button" class="rounded-md border border-[#d4c8b8] bg-[#fffdf8] px-2 py-1 text-[11px] text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('tasks_refresh') }}</button>
+            <button type="button" class="rounded-md border border-[#d4c8b8] bg-[#fffdf8] px-2 py-1 text-[11px] text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">__T_TASKS_REFRESH__</button>
             <button @click="$emit('close')" class="flex h-6 w-6 items-center justify-center rounded-md text-[#9a8870] transition-colors hover:bg-black/5 hover:text-[#5a4a38]">
               <X class="h-4 w-4" />
             </button>
@@ -19,7 +19,7 @@
       <div class="min-h-0 flex-1 overflow-y-auto">
         <div v-if="error" class="m-3 rounded-lg border border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-[11px] text-[#c06040]">{{ error }}</div>
 
-        <div v-if="allItems.length === 0" class="py-16 text-center text-[13px] text-[#a09080]">{{ t('tasks_empty_running') }}</div>
+        <div v-if="allItems.length === 0" class="py-16 text-center text-[13px] text-[#a09080]">__T_TASKS_EMPTY_RUNNING__</div>
         <div v-else>
           <div
             v-for="item in allItems"
@@ -35,7 +35,7 @@
               <span v-else class="text-[12px] text-[#c04040]">✗</span>
             </div>
             <div class="min-w-0 flex-1">
-              <div class="truncate text-[13px] text-[#3a2a18]">{{ item._type === 'schedule' ? (item.name || t('tasks_unnamed')) : (item.title || t('tasks_unnamed')) }}</div>
+              <div class="truncate text-[13px] text-[#3a2a18]">{{ item._type === 'schedule' ? (item.name || '__T_TASKS_UNNAMED__') : (item.title || '__T_TASKS_UNNAMED__') }}</div>
               <div class="mt-0.5 flex items-center gap-2 text-[11px] text-[#a09080]">
                 <span v-if="item._type === 'schedule' && item.cron" class="font-mono">{{ item.cron }}</span>
                 <span v-if="item._type === 'task'">{{ item.created_at }}</span>
@@ -54,10 +54,8 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { X } from 'lucide-vue-next';
 import { windowManager } from '../../stores/windowManager.ts';
-import { useI18n } from '../../i18n/index.ts';
 import { on } from '../../ws.ts';
 
-const { t } = useI18n();
 const emit = defineEmits(['close']);
 
 const tasks = ref([]);
@@ -92,7 +90,7 @@ const loadAll = async () => {
   try {
     await Promise.all([loadTasks(), loadSchedules()]);
   } catch (e) {
-    error.value = e.message || t('tasks_load_fail');
+    error.value = e.message || '__T_TASKS_LOAD_FAIL__';
   }
 };
 

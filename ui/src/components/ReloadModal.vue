@@ -6,7 +6,7 @@
         class="w-[400px] rounded-xl border border-[#3a2a18] bg-gradient-to-br from-[#2a2018] to-[#1a1410] p-6 shadow-2xl">
 
         <!-- 标题 -->
-        <h3 class="text-base font-bold text-[#e8d4b8]">{{ t('reload_title') }}</h3>
+        <h3 class="text-base font-bold text-[#e8d4b8]">__T_RELOAD_TITLE__</h3>
 
         <!-- 说明 -->
         <p v-if="message" class="mt-3 rounded-lg border border-[#3a2a18] bg-[#1a1410]/60 px-3 py-2 text-[13px] leading-relaxed text-[#a09078]">{{ message }}</p>
@@ -15,11 +15,11 @@
         <div class="mt-3 space-y-1 text-[12px] text-[#8a7860]">
           <div v-if="pendingOptions.build" class="flex items-center gap-1.5">
             <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#c8a060]"></span>
-            {{ t('reload_will_build') }}
+            __T_RELOAD_WILL_BUILD__
           </div>
           <div v-if="pendingOptions.restart" class="flex items-center gap-1.5">
             <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#c8a060]"></span>
-            {{ t('reload_will_restart') }}
+            __T_RELOAD_WILL_RESTART__
           </div>
         </div>
 
@@ -29,24 +29,24 @@
           <div v-if="phase === 'confirm'" class="flex items-center justify-end gap-3">
             <button @click="dismiss"
               class="cursor-pointer rounded-lg border border-[#3a2a18] px-4 py-2 text-[13px] text-[#a09078] transition hover:bg-white/5">
-              {{ t('common_cancel') }}
+              __T_COMMON_CANCEL__
             </button>
             <button @click="doReload"
               class="cursor-pointer rounded-lg bg-gradient-to-br from-[#c8a060] to-[#a07840] px-4 py-2 text-[13px] font-semibold text-[#1a1410] transition hover:opacity-85">
-              {{ t('reload_confirm') }}
+              __T_RELOAD_CONFIRM__
             </button>
           </div>
 
           <!-- 编译中 -->
           <div v-else-if="phase === 'building'" class="flex items-center gap-3 text-[13px] text-[#c8a060]">
             <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#c8a060] border-t-transparent"></span>
-            {{ t('reload_building') }}
+            __T_RELOAD_BUILDING__
           </div>
 
           <!-- 重启中 -->
           <div v-else-if="phase === 'restarting'" class="flex items-center gap-3 text-[13px] text-[#c8a060]">
             <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#c8a060] border-t-transparent"></span>
-            {{ t('reload_restarting') }}
+            __T_RELOAD_RESTARTING__
           </div>
 
           <!-- 错误 -->
@@ -55,11 +55,11 @@
             <div class="flex items-center justify-end gap-3">
               <button @click="dismiss"
                 class="cursor-pointer rounded-lg border border-[#3a2a18] px-4 py-2 text-[13px] text-[#a09078] transition hover:bg-white/5">
-                {{ t('common_close') }}
+                __T_COMMON_CLOSE__
               </button>
               <button @click="doReload"
                 class="cursor-pointer rounded-lg bg-gradient-to-br from-[#c8a060] to-[#a07840] px-4 py-2 text-[13px] font-semibold text-[#1a1410] transition hover:opacity-85">
-                {{ t('reload_retry') }}
+                __T_RELOAD_RETRY__
               </button>
             </div>
           </div>
@@ -72,10 +72,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, reactive } from 'vue';
 import { on } from '../ws.ts';
-import { useI18n } from '../i18n/index.ts';
-
-const { t } = useI18n();
-
 const visible = ref(false);
 const phase = ref('confirm'); // confirm | building | restarting | error
 const message = ref('');

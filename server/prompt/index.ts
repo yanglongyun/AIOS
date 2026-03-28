@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { getSettings } from '../service/settings/get.ts';
@@ -88,13 +88,7 @@ export const buildSystemPrompt = (currentConversationId = '') => {
   // 会话段：把当前 conversation 的上下文约束拼到最后。
   prompt += chatsSection(currentConversationId);
 
-  // debug: 把完整 system prompt 写到 debug 目录供检查
-  try {
-    const debugDir = join(cwd, 'debug');
-    mkdirSync(debugDir, { recursive: true });
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    writeFileSync(join(debugDir, `system-prompt-${ts}.md`), prompt, 'utf8');
-  } catch {}
+  // debug: 完整 system prompt 落盘已禁用，避免持续生成 debug/system-prompt-*.md
 
   return prompt;
 };

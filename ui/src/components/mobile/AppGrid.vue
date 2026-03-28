@@ -3,7 +3,7 @@
     <input
       v-model="search"
       class="mb-4 w-full rounded-[12px] border border-[rgba(200,160,96,0.3)] bg-white px-4 py-2.5 text-[14px] text-[#3a2a18] shadow-sm outline-none placeholder-[#b0a090] focus:border-[#c8a060]"
-      :placeholder="t('launcher_search')"
+      placeholder="__T_LAUNCHER_SEARCH__"
     />
     <div class="grid grid-cols-4 gap-3">
       <button
@@ -22,9 +22,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { appRegistry } from '../../apps.ts';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 defineEmits(['open']);
 
 const search = ref('');

@@ -17,6 +17,8 @@ COPY tsconfig.backend.json ./
 
 RUN mkdir -p /app/database /app/files
 
+ARG LOCALE=zh
+RUN npx tsx scripts/apply-locale.ts ${LOCALE}
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime

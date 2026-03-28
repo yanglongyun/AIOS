@@ -76,10 +76,6 @@ import LauncherPanel from './LauncherPanel.vue';
 import TaskCenter from './TaskCenter.vue';
 import { windowManager } from '../../stores/windowManager.ts';
 import { appRegistry } from '../../apps.ts';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
-
 const windows = computed(() => windowManager.state.windows);
 const launcherOpen = ref(false);
 const taskCenterOpen = ref(false);

@@ -1,7 +1,7 @@
 <template>
   <template v-if="view === 'list'">
     <div class="wood-dark flex-1 overflow-y-auto">
-      <div v-if="!sessions.length" class="flex h-full items-center justify-center text-[13px] text-[#9a8060]">{{ t('reader_empty') }}</div>
+      <div v-if="!sessions.length" class="flex h-full items-center justify-center text-[13px] text-[#9a8060]">__T_READER_EMPTY__</div>
       <template v-else>
         <div v-for="(tier, ti) in shelfTiers" :key="ti" class="relative">
           <div class="book-row relative z-[2] grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-x-2.5 gap-y-3 px-5 pb-[18px] pt-8">
@@ -16,7 +16,7 @@
                 <div class="relative z-[1]">
                   <div class="font-serif text-[13px] font-extrabold leading-tight text-left [text-shadow:0_1px_4px_rgba(0,0,0,.6)]">{{ s.title }}</div>
                   <div class="my-1 h-[1.5px] w-[22px] bg-current opacity-35"></div>
-                  <div class="text-[9px] tracking-wider opacity-55">{{ t('reader_chapter_count', { n: s.chapterCount || 0 }) }}</div>
+                  <div class="text-[9px] tracking-wider opacity-55">{{ '__T_READER_CHAPTER_COUNT__'.replace('{n}', s.chapterCount || 0) }}</div>
                 </div>
               </div>
               <div class="w-full truncate text-center text-[10px] font-semibold text-[#6a5838]">{{ s.title }}</div>
@@ -29,7 +29,7 @@
               <div class="book-cover flex w-full items-center justify-center overflow-hidden rounded-[2px_6px_6px_2px] p-0" style="aspect-ratio:2/3">
                 <span class="text-[28px] text-black/15">+</span>
               </div>
-              <div class="w-full truncate text-center text-[10px] font-semibold text-[#5a4828]">{{ t('reader_create') }}</div>
+              <div class="w-full truncate text-center text-[10px] font-semibold text-[#5a4828]">__T_READER_CREATE__</div>
             </button>
           </div>
           <div class="plank wood-plank relative z-[3] h-[22px]"></div>
@@ -41,10 +41,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
-
 defineProps({
   view: { type: String, required: true },
   sessions: { type: Array, required: true },

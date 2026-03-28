@@ -26,7 +26,7 @@
             class="inline-flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] border-[#b09050] text-[8px] font-bold"
             :class="c ? 'bg-[#d4b870] text-[#5a4020]' : 'bg-[#f0e4d0] text-[#8a7a58]'"
           >
-            {{ c ? t('fortune_coin_char') : t('fortune_coin_back') }}
+            {{ c ? '__T_FORTUNE_COIN_CHAR__' : '__T_FORTUNE_COIN_BACK__' }}
           </span>
         </span>
       </div>
@@ -34,14 +34,12 @@
 
     <div v-if="!shaking && !hexagramName && !result" class="py-7 text-center text-[13px] text-[#b0a080]">
       <div class="mb-2 text-4xl opacity-35">☰</div>
-      <div>{{ t('fortune_empty_prompt') }}</div>
+      <div>__T_FORTUNE_EMPTY_PROMPT__</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   hexagramName: { type: String, required: true },
   result: { type: Object, default: null },
@@ -51,7 +49,6 @@ defineProps({
   shaking: { type: Boolean, required: true }
 });
 
-const { t } = useI18n();
 </script>
 
 <style scoped>

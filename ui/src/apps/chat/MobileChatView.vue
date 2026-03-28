@@ -8,13 +8,13 @@
         class="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#d4c0a0] bg-white py-2.5 text-[13px] text-[#8a6a40] transition-colors active:bg-[#f5ead8]"
       >
         <span class="text-[16px] leading-none">+</span>
-        {{ t('chat_new_title') }}
+        __T_CHAT_NEW_TITLE__
       </button>
     </div>
 
     <!-- 对话列表 -->
     <div class="min-h-0 flex-1 overflow-y-auto">
-      <div v-if="!chats.length" class="py-16 text-center text-[13px] text-[#a09080]">{{ t('history_empty') }}</div>
+      <div v-if="!chats.length" class="py-16 text-center text-[13px] text-[#a09080]">__T_HISTORY_EMPTY__</div>
       <button
         v-for="c in chats"
         :key="c.conversation_id"
@@ -38,9 +38,6 @@
 <script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import MobileChatPanel from './MobileChatPanel.vue';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 const setMobileNav = inject('mobileNav');
 
 const chats = ref([]);
@@ -64,11 +61,11 @@ async function newChat() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ title: t('chat_new_title') })
+    body: JSON.stringify({ title: '__T_CHAT_NEW_TITLE__' })
   });
   const data = await res.json().catch(() => ({}));
   if (!data.conversationId) return;
-  const c = { conversation_id: data.conversationId, title: t('chat_new_title') };
+  const c = { conversation_id: data.conversationId, title: '__T_CHAT_NEW_TITLE__' };
   openChat(c);
 }
 

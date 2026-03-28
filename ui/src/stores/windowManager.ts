@@ -1,7 +1,5 @@
 import { reactive, shallowRef } from 'vue';
 import { appRegistry } from '../apps.ts';
-import { useI18n } from '../i18n/index.ts';
-
 const TASKBAR_H = 44;
 
 const state = reactive({
@@ -26,7 +24,6 @@ async function open(appId, props = {}) {
   const app = findApp(appId);
   if (!app) return null;
 
-  const { t } = useI18n();
   const mod = await app.load();
   const component = shallowRef(mod.default);
 
@@ -37,7 +34,7 @@ async function open(appId, props = {}) {
   const win = reactive({
     id: appId + '-' + Date.now(),
     appId,
-    title: t(app.name),
+    title: app.name,
     component,
     props: { ...props },
     x: 120 + cascade,

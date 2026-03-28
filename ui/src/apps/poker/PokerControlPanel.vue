@@ -3,24 +3,22 @@
     <div v-if="lastActionText && game?.status !== 'done'" class="mb-3 text-center text-[11px] tracking-wide text-[#9bc49b] sm:text-[12px]">{{ lastActionText }}</div>
     <div v-if="!game || game.status === 'done'" class="mt-1 flex flex-col items-center">
       <div class="mb-3 px-2 text-center text-[11px] leading-relaxed text-[#8a7a58]/80 sm:text-xs">
-        <p>{{ t('poker_game_rules') }} <span class="font-bold text-[#c8a060]">{{ t('poker_call') }}</span>、<span class="font-bold text-[#a07a4a]">{{ t('poker_raise') }}</span> {{ t('poker_or') }} <span class="font-bold text-[#8a5a4a]">{{ t('poker_fold') }}</span>。</p>
-        <p class="mt-0.5">{{ t('poker_rules_round_limit') }} <span class="font-bold text-[#c8a060]">{{ t('poker_rules_max_round') }}</span>{{ t('poker_rules_auto_compare') }}</p>
+        <p>__T_POKER_GAME_RULES__ <span class="font-bold text-[#c8a060]">__T_POKER_CALL__</span>、<span class="font-bold text-[#a07a4a]">__T_POKER_RAISE__</span> __T_POKER_OR__ <span class="font-bold text-[#8a5a4a]">__T_POKER_FOLD__</span>。</p>
+        <p class="mt-0.5">__T_POKER_RULES_ROUND_LIMIT__ <span class="font-bold text-[#c8a060]">__T_POKER_RULES_MAX_ROUND__</span>__T_POKER_RULES_AUTO_COMPARE__</p>
       </div>
       <button @click="$emit('start')" :disabled="busy" class="w-full rounded-xl bg-[#c8a060] px-8 py-2.5 text-[14px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,160,96,0.3)] transition-all hover:-translate-y-1 hover:bg-[#d4b070] disabled:opacity-40 sm:w-auto">
-        {{ game ? t('poker_play_again') : t('poker_start') }}
+        {{ game ? '__T_POKER_PLAY_AGAIN__' : '__T_POKER_START__' }}
       </button>
     </div>
     <div v-else class="flex justify-center gap-2 sm:gap-3">
-      <button @click="$emit('action', 'call')" :disabled="busy" class="flex-1 rounded-xl bg-[#c8a060] py-2 text-[12px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,160,96,0.3)] transition-all hover:-translate-y-1 hover:bg-[#d4b070] disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">{{ t('poker_call') }}</button>
-      <button @click="$emit('action', 'raise')" :disabled="busy" class="flex-1 rounded-xl bg-[#c89050] py-2 text-[12px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,144,80,0.35)] transition-all hover:-translate-y-1 hover:bg-[#d7a060] disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">{{ t('poker_raise') }}</button>
-      <button @click="$emit('action', 'fold')" :disabled="busy" class="flex-1 rounded-xl border border-[#8a5a4a] bg-transparent py-2 text-[12px] font-bold tracking-wider text-[#8a5a4a] transition-all hover:-translate-y-1 hover:bg-[#8a5a4a] hover:text-white disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">{{ t('poker_fold') }}</button>
+      <button @click="$emit('action', 'call')" :disabled="busy" class="flex-1 rounded-xl bg-[#c8a060] py-2 text-[12px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,160,96,0.3)] transition-all hover:-translate-y-1 hover:bg-[#d4b070] disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">__T_POKER_CALL__</button>
+      <button @click="$emit('action', 'raise')" :disabled="busy" class="flex-1 rounded-xl bg-[#c89050] py-2 text-[12px] font-bold tracking-wider text-[#1a1008] shadow-[0_4px_15px_rgba(200,144,80,0.35)] transition-all hover:-translate-y-1 hover:bg-[#d7a060] disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">__T_POKER_RAISE__</button>
+      <button @click="$emit('action', 'fold')" :disabled="busy" class="flex-1 rounded-xl border border-[#8a5a4a] bg-transparent py-2 text-[12px] font-bold tracking-wider text-[#8a5a4a] transition-all hover:-translate-y-1 hover:bg-[#8a5a4a] hover:text-white disabled:opacity-40 disabled:hover:translate-y-0 sm:py-2.5 sm:text-[13px]">__T_POKER_FOLD__</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../../i18n/index.ts';
-
 defineProps({
   lastActionText: { type: String, required: true },
   game: { type: Object, default: null },
@@ -29,5 +27,4 @@ defineProps({
 
 defineEmits(['start', 'action']);
 
-const { t } = useI18n();
 </script>

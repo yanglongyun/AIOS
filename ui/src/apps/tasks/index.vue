@@ -2,14 +2,14 @@
   <div class="h-full overflow-y-auto bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)] p-6 font-['Georgia','PingFang_SC',serif]">
     <div class="mx-auto max-w-[960px]">
       <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">{{ t('tasks_center') }}</h1>
-        <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">{{ t('tasks_refresh') }}</button>
+        <h1 class="m-0 text-xl font-bold text-[#4a3a28]">__T_TASKS_CENTER__</h1>
+        <button type="button" class="cursor-pointer rounded-lg border border-[#d4c8b8] bg-[#fffdf8] px-3 py-1.5 text-xs text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">__T_TASKS_REFRESH__</button>
       </div>
 
       <div v-if="error" class="mb-3 rounded-xl border border-dashed border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-xs text-[#c06040]">{{ error }}</div>
 
       <div class="rounded-2xl border border-[#e8dcc8] bg-[#fffdf8] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div v-if="allItems.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">{{ t('tasks_empty_running') }}</div>
+        <div v-if="allItems.length === 0" class="rounded-lg border border-dashed border-[#e8dcc8] py-8 text-center text-xs text-[#a0907a]">__T_TASKS_EMPTY_RUNNING__</div>
         <div v-else class="space-y-2">
           <component
             :is="item._type === 'task' ? 'button' : 'div'"
@@ -28,7 +28,7 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="line-clamp-1 text-[12px] font-semibold leading-relaxed text-[#4a3a28]">
-                {{ item._type === 'schedule' ? (item.name || t('tasks_unnamed')) : (item.title || t('tasks_unnamed')) }}
+                {{ item._type === 'schedule' ? (item.name || '__T_TASKS_UNNAMED__') : (item.title || '__T_TASKS_UNNAMED__') }}
               </div>
               <div class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#5a4a38]">
                 {{ item._type === 'schedule' ? (item.prompt || '-') : (item.response || item.prompt || '-') }}
@@ -37,9 +37,9 @@
                 <span v-if="item._type === 'schedule' && item.cron" class="rounded bg-[#eef0f8] px-1.5 py-0.5 font-mono text-[#5a6a8a]">{{ item.cron }}</span>
                 <span v-if="item._type === 'schedule'" class="flex shrink-0 items-center gap-1.5">
                   <button type="button" class="cursor-pointer rounded border px-2 py-0.5 text-[10px] transition" :class="item.enabled ? 'border-[#c8d8c0] bg-[#f0f8ec] text-[#5a8a48] hover:bg-[#e0f0d8]' : 'border-[#e0d8c8] bg-[#f8f4ec] text-[#a09080] hover:bg-[#f0e8d8]'" @click.stop="toggleSchedule(item)">
-                    {{ item.enabled ? t('tasks_enabled') : t('tasks_disabled') }}
+                    {{ item.enabled ? '__T_TASKS_ENABLED__' : '__T_TASKS_DISABLED__' }}
                   </button>
-                  <button type="button" class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]" @click.stop="removeSchedule(item.id)">{{ t('tasks_delete') }}</button>
+                  <button type="button" class="cursor-pointer rounded border border-[#e8c8b8] bg-[#fdf5f0] px-2 py-0.5 text-[10px] text-[#c06040] transition hover:bg-[#f8e8e0]" @click.stop="removeSchedule(item.id)">__T_TASKS_DELETE__</button>
                 </span>
                 <span v-if="item.app" class="rounded bg-[#f0e5d5] px-1.5 py-0.5 text-[#7a6a58]">{{ item.app }}</span>
                 <span v-if="item._type === 'task'">{{ item.created_at || '' }}</span>
@@ -55,10 +55,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { on } from '../../ws.ts';
-import { useI18n } from '../../i18n/index.ts';
 import { windowManager } from '../../stores/windowManager.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
-const { t } = useI18n();
 const tasks = ref([]);
 const schedules = ref([]);
 const error = ref('');
@@ -91,7 +89,7 @@ const loadAll = async () => {
   try {
     await Promise.all([loadTasks(), loadSchedules()]);
   } catch (e) {
-    error.value = e.message || t('tasks_load_fail');
+    error.value = e.message || '__T_TASKS_LOAD_FAIL__';
   }
 };
 
@@ -106,7 +104,7 @@ const toggleSchedule = async (s) => {
     });
     await loadSchedules();
   } catch (e) {
-    error.value = e.message || t('tasks_update_fail');
+    error.value = e.message || '__T_TASKS_UPDATE_FAIL__';
   }
 };
 
@@ -119,15 +117,15 @@ const removeSchedule = async (id) => {
     });
     await loadSchedules();
   } catch (e) {
-    error.value = e.message || t('tasks_delete_fail');
+    error.value = e.message || '__T_TASKS_DELETE_FAIL__';
   }
 };
 
 const unsubs = [];
 onMounted(async () => {
   await loadAll();
-  chatPanel.setContext({ scene: 'tasks', label: t('app_sidebar_tasks') });
-  chatPanel.setQuickMessages([t('tasks_chat_quick_1'), t('tasks_chat_quick_2'), t('tasks_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'tasks', label: '__T_APP_SIDEBAR_TASKS__' });
+  chatPanel.setQuickMessages(['__T_TASKS_CHAT_QUICK_1__', '__T_TASKS_CHAT_QUICK_2__', '__T_TASKS_CHAT_QUICK_3__']);
   unsubs.push(on('tasks_changed', loadTasks));
   unsubs.push(on('schedules_changed', loadSchedules));
 });

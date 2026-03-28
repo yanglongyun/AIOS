@@ -35,14 +35,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
 import CryptobotMachinePanel from './CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from './CryptobotDecisionPaper.vue';
 
 const API = '/aios/apps/cryptobot';
-const { t } = useI18n();
-
 const INTERVALS = [1, 2, 5, 10, 15, 30, 60];
 
 const error = ref('');
@@ -188,9 +185,9 @@ const countdownSec = computed(() => {
 });
 
 const countdownLabel = computed(() => {
-  if (countdownSec.value === null) return t('cryptobot_countdown_paused');
-  if (status.state.executing) return t('cryptobot_countdown_executing');
-  if (countdownSec.value <= 0) return t('cryptobot_countdown_due');
+  if (countdownSec.value === null) return '__T_CRYPTOBOT_COUNTDOWN_PAUSED__';
+  if (status.state.executing) return '__T_CRYPTOBOT_COUNTDOWN_EXECUTING__';
+  if (countdownSec.value <= 0) return '__T_CRYPTOBOT_COUNTDOWN_DUE__';
   const total = countdownSec.value;
   const mm = Math.floor(total / 60);
   const ss = total % 60;
@@ -225,11 +222,11 @@ const minToSliderIdx = (min) => {
 let pendingRefresh = false;
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'cryptobot', label: t('app_sidebar_cryptobot') });
-  chatPanel.setQuickMessages([t('cryptobot_chat_quick_1'), t('cryptobot_chat_quick_2'), t('cryptobot_chat_quick_3')]);
+  chatPanel.setContext({ scene: 'cryptobot', label: '__T_APP_SIDEBAR_CRYPTOBOT__' });
+  chatPanel.setQuickMessages(['__T_CRYPTOBOT_CHAT_QUICK_1__', '__T_CRYPTOBOT_CHAT_QUICK_2__', '__T_CRYPTOBOT_CHAT_QUICK_3__']);
   try {
     await loadAll();
-    goal.value = status.config.goal || t('cryptobot_default_directive');
+    goal.value = status.config.goal || '__T_CRYPTOBOT_DEFAULT_DIRECTIVE__';
     sliderIdx.value = minToSliderIdx(Math.round((status.config.interval_sec || 300) / 60));
     syncExFormFromStatus();
     if (!status.config.has_keys) panelOpen.value = true;
@@ -246,7 +243,7 @@ onMounted(async () => {
 
     poller = setInterval(() => loadAll().catch(() => {}), 30000);
   } catch (e) {
-    error.value = e.message || t('cryptobot_init_failed');
+    error.value = e.message || '__T_CRYPTOBOT_INIT_FAILED__';
   }
 });
 

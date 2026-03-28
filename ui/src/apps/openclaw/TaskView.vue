@@ -5,10 +5,10 @@
     <div class="page absolute inset-0 flex flex-col overflow-hidden" :class="view === 'timetable' ? 'active' : 'hide-left'">
       <div class="flex-1 min-h-0 overflow-y-auto pb-8 scrollbar-hide" ref="timetableRef">
         <template v-if="cronLoading">
-          <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_loading') }}</div>
+          <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">__T_OPENCLAW_LOADING__</div>
         </template>
         <template v-else-if="!cronJobs.length && !cronError">
-          <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_cron_empty') }}</div>
+          <div class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">__T_OPENCLAW_CRON_EMPTY__</div>
         </template>
         <template v-else>
           <template v-for="slot in pastSlots" :key="'past-'+slot.key">
@@ -22,7 +22,7 @@
                     <span class="text-xl shrink-0">{{ jobEmoji(slot.idx) }}</span>
                     <div class="flex-1 min-w-0">
                       <div class="text-sm font-bold text-[#3a2810] truncate">{{ slot.job.name || slot.job.id }}</div>
-                      <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · {{ t('openclaw_executed') }}</div>
+                      <div class="text-[9px] text-[#9a8a68] font-['Courier_New',monospace] mt-px">{{ scheduleText(slot.job) }} · __T_OPENCLAW_EXECUTED__</div>
                     </div>
                   </div>
                   <div v-if="slot.job.message" class="mt-1.5 text-[11px] leading-relaxed text-[#6a5838] italic line-clamp-2">{{ slot.job.message }}</div>
@@ -35,7 +35,7 @@
             <div class="hour-label now-label absolute -top-0.5 left-1.5 w-[42px] text-right text-sm font-black font-['Courier_New',monospace] leading-none">{{ nowLabel }}</div>
           </div>
           <div class="now-line relative ml-[52px] mr-4 h-0">
-            <span class="absolute -top-2.5 left-3.5 text-[11px] font-black text-[rgba(255,160,80,0.85)] tracking-widest font-['Courier_New',monospace]">{{ t('openclaw_now') }}</span>
+            <span class="absolute -top-2.5 left-3.5 text-[11px] font-black text-[rgba(255,160,80,0.85)] tracking-widest font-['Courier_New',monospace]">__T_OPENCLAW_NOW__</span>
           </div>
 
           <template v-for="slot in futureSlots" :key="'future-'+slot.key">
@@ -65,7 +65,7 @@
     <!-- 详情页 -->
     <div class="page page-bg absolute inset-0 flex flex-col overflow-hidden z-[3]" :class="view === 'detail' ? 'active' : (view === 'viz' ? 'hide-left' : 'hide-right')">
       <div class="flex shrink-0 items-center gap-2.5 px-4 pt-1 pb-1.5">
-        <button class="back-btn px-3 py-1 rounded cursor-pointer text-[10px] font-bold border border-[#3a2810] text-[rgba(255,220,150,0.6)]" @click="view = 'timetable'">{{ t('openclaw_back') }}</button>
+        <button class="back-btn px-3 py-1 rounded cursor-pointer text-[10px] font-bold border border-[#3a2810] text-[rgba(255,220,150,0.6)]" @click="view = 'timetable'">__T_OPENCLAW_BACK__</button>
         <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ selectedJob?.name || '' }}</div>
       </div>
       <div class="flex-1 min-h-0 overflow-y-auto px-4 pb-6 scrollbar-hide">
@@ -78,31 +78,31 @@
             </div>
           </div>
           <div v-if="selectedJob.message" class="text-xs leading-relaxed text-[#5a4830] italic py-2 border-t border-dashed border-[rgba(160,140,100,0.2)] mt-1.5">{{ selectedJob.message }}</div>
-          <div v-if="selectedJob.lastRunAt" class="text-[10px] text-[#9a8a68] mt-1.5">{{ t('openclaw_last_run') }} {{ new Date(selectedJob.lastRunAt).toLocaleString() }}</div>
+          <div v-if="selectedJob.lastRunAt" class="text-[10px] text-[#9a8a68] mt-1.5">__T_OPENCLAW_LAST_RUN__ {{ new Date(selectedJob.lastRunAt).toLocaleString() }}</div>
           <div v-if="selectedJob.state?.lastStatus" class="text-[10px] mt-0.5" :class="selectedJob.state.lastStatus === 'error' ? 'text-[#c05040]' : 'text-[#4a8a40]'">{{ selectedJob.state.lastStatus }}</div>
           <div class="flex gap-1.5 mt-2.5 pt-2 border-t border-dashed border-[rgba(160,140,100,0.2)]">
-            <button class="ib ib-run px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold disabled:opacity-50" :disabled="runBusy" @click="doRun(selectedJob.id)">{{ runBusy ? t('openclaw_running') : '▶ ' + t('openclaw_run') }}</button>
-            <button class="ib ib-del px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doDelete(selectedJob.id)">{{ t('openclaw_delete') }}</button>
+            <button class="ib ib-run px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold disabled:opacity-50" :disabled="runBusy" @click="doRun(selectedJob.id)">{{ runBusy ? '__T_OPENCLAW_RUNNING__' : '▶ ' + '__T_OPENCLAW_RUN__' }}</button>
+            <button class="ib ib-del px-3.5 py-1.5 rounded cursor-pointer text-[9px] font-bold" @click="doDelete(selectedJob.id)">__T_OPENCLAW_DELETE__</button>
           </div>
         </div>
 
-        <div class="text-[10px] font-bold text-[rgba(255,230,180,0.5)] tracking-widest mb-2">{{ t('openclaw_runs_label') }}</div>
-        <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_loading') }}</div>
-        <div v-else-if="!runs.length" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">{{ t('openclaw_no_runs') }}</div>
+        <div class="text-[10px] font-bold text-[rgba(255,230,180,0.5)] tracking-widest mb-2">__T_OPENCLAW_RUNS_LABEL__</div>
+        <div v-if="runsLoading" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">__T_OPENCLAW_LOADING__</div>
+        <div v-else-if="!runs.length" class="py-10 text-center text-xs text-[rgba(255,230,180,0.3)]">__T_OPENCLAW_NO_RUNS__</div>
         <div v-for="(r, ri) in runs" :key="ri" class="run-card rounded-sm mb-2 overflow-hidden cursor-pointer" :class="{ open: expandedRun === ri }" @click="expandedRun = expandedRun === ri ? -1 : ri">
           <div class="flex items-center gap-2 px-3 py-2.5">
             <div class="w-2 h-2 rounded-full shrink-0" :class="r.ok ? 'rd-ok' : 'rd-fail'"></div>
             <div class="flex-1 min-w-0">
               <div class="text-xs font-semibold text-[#3a2810]">{{ r.time || '—' }}</div>
-              <div class="text-[9px] text-[#9a8a68] mt-px">{{ t('openclaw_run_duration') }} {{ r.duration || '—' }}</div>
+              <div class="text-[9px] text-[#9a8a68] mt-px">__T_OPENCLAW_RUN_DURATION__ {{ r.duration || '—' }}</div>
             </div>
-            <div class="shrink-0 text-[9px] font-bold" :class="r.ok ? 'text-[#4a8a40]' : 'text-[#c05040]'">{{ r.ok ? t('openclaw_run_ok') : t('openclaw_run_fail') }}</div>
+            <div class="shrink-0 text-[9px] font-bold" :class="r.ok ? 'text-[#4a8a40]' : 'text-[#c05040]'">{{ r.ok ? '__T_OPENCLAW_RUN_OK__' : '__T_OPENCLAW_RUN_FAIL__' }}</div>
             <div class="run-arrow shrink-0 text-[10px] text-[#c0b090] transition-transform duration-200">▸</div>
           </div>
           <div class="run-detail hidden border-t border-dashed border-[rgba(160,140,100,0.2)] px-3 py-2.5" @click.stop>
             <div class="run-output font-['Courier_New',monospace] text-[10px] leading-relaxed text-[#4a3a20] rounded p-2 max-h-[140px] overflow-y-auto whitespace-pre-wrap break-all scrollbar-hide">{{ r.output || '—' }}</div>
             <div v-if="r.ok" class="flex gap-1.5 mt-2">
-              <button class="viz-btn px-3.5 py-1 rounded cursor-pointer text-[9px] font-bold text-[#d0d8f0]" @click="openViz(r)">{{ t('openclaw_visualize') }}</button>
+              <button class="viz-btn px-3.5 py-1 rounded cursor-pointer text-[9px] font-bold text-[#d0d8f0]" @click="openViz(r)">__T_OPENCLAW_VISUALIZE__</button>
             </div>
           </div>
         </div>
@@ -112,14 +112,14 @@
     <!-- 可视化页 -->
     <div class="page page-bg absolute inset-0 flex flex-col overflow-hidden z-[4]" :class="view === 'viz' ? 'active' : 'hide-right'">
       <div class="flex shrink-0 items-center gap-2.5 px-4 pt-1 pb-1.5">
-        <button class="back-btn px-3 py-1 rounded cursor-pointer text-[10px] font-bold border border-[#3a2810] text-[rgba(255,220,150,0.6)]" @click="view = 'detail'">{{ t('openclaw_back') }}</button>
-        <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">{{ t('openclaw_visualize') }}</div>
+        <button class="back-btn px-3 py-1 rounded cursor-pointer text-[10px] font-bold border border-[#3a2810] text-[rgba(255,220,150,0.6)]" @click="view = 'detail'">__T_OPENCLAW_BACK__</button>
+        <div class="flex-1 text-[13px] font-bold text-[#3a2810] truncate">__T_OPENCLAW_VISUALIZE__</div>
       </div>
       <div class="flex-1 min-h-0 mx-4 mb-4 rounded overflow-hidden bg-white relative shadow-md">
         <iframe class="w-full h-full border-none" ref="vizFrameRef"></iframe>
         <div class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center gap-3 transition-opacity" :class="vizLoading ? '' : 'opacity-0 pointer-events-none'">
           <div class="w-7 h-7 rounded-full border-[3px] border-[rgba(90,100,160,0.15)] border-t-[#5868a8] animate-spin"></div>
-          <div class="text-xs text-[#8a8aaa] font-sans">{{ t('openclaw_viz_loading') }}</div>
+          <div class="text-xs text-[#8a8aaa] font-sans">__T_OPENCLAW_VIZ_LOADING__</div>
         </div>
       </div>
     </div>
@@ -131,28 +131,28 @@
     <div class="absolute inset-0 z-20 bg-[rgba(30,20,12,0.7)] backdrop-blur-sm flex-col items-center justify-center p-5" :class="showNew ? 'flex' : 'hidden'" @click.self="showNew = false">
       <div class="info-card w-full max-w-[320px] rounded-sm p-[18px] relative shadow-xl">
         <div class="pin pin-r absolute -top-[3px] right-4 z-[3] w-4 h-4 rounded-full"></div>
-        <div class="text-center text-[15px] font-bold text-[#3a2810] mb-3.5">📌 {{ t('openclaw_new_task') }}</div>
+        <div class="text-center text-[15px] font-bold text-[#3a2810] mb-3.5">📌 __T_OPENCLAW_NEW_TASK__</div>
         <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_name_ph') }}</div>
-          <input class="nc-input w-full border-none outline-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810]" v-model="addForm.name" :placeholder="t('openclaw_cron_name_ph')" />
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">__T_OPENCLAW_CRON_NAME_PH__</div>
+          <input class="nc-input w-full border-none outline-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810]" v-model="addForm.name" placeholder="__T_OPENCLAW_CRON_NAME_PH__" />
         </div>
         <div class="mb-2.5">
           <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">调度方式</div>
           <div class="flex gap-1 mb-2.5">
-            <div v-for="st in ['cron','every','at']" :key="st" class="sched-opt flex-1 py-1 rounded text-center cursor-pointer font-['Georgia',serif] text-[9px] font-bold" :class="{ sel: addForm.schedType === st }" @click="addForm.schedType = st">{{ t('openclaw_sched_' + st) }}</div>
+            <div v-for="st in ['cron','every','at']" :key="st" class="sched-opt flex-1 py-1 rounded text-center cursor-pointer font-['Georgia',serif] text-[9px] font-bold" :class="{ sel: addForm.schedType === st }" @click="addForm.schedType = st">{{ { cron: '__T_OPENCLAW_SCHED_CRON__', every: '__T_OPENCLAW_SCHED_EVERY__', at: '__T_OPENCLAW_SCHED_AT__' }[st] }}</div>
           </div>
         </div>
         <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_sched_label_' + addForm.schedType) }}</div>
-          <input class="nc-input w-full border-none outline-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810]" v-model="addForm.schedValue" :placeholder="t('openclaw_sched_' + addForm.schedType + '_ph')" />
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ { cron: '__T_OPENCLAW_SCHED_LABEL_CRON__', every: '__T_OPENCLAW_SCHED_LABEL_EVERY__', at: '__T_OPENCLAW_SCHED_LABEL_AT__' }[addForm.schedType] }}</div>
+          <input class="nc-input w-full border-none outline-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810]" v-model="addForm.schedValue" :placeholder="{ cron: '__T_OPENCLAW_SCHED_CRON_PH__', every: '__T_OPENCLAW_SCHED_EVERY_PH__', at: '__T_OPENCLAW_SCHED_AT_PH__' }[addForm.schedType]" />
         </div>
         <div class="mb-2.5">
-          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">{{ t('openclaw_cron_prompt_ph') }}</div>
-          <textarea class="nc-ta w-full border-none outline-none resize-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810] leading-relaxed" v-model="addForm.prompt" rows="3" :placeholder="t('openclaw_cron_prompt_ph')"></textarea>
+          <div class="text-[9px] text-[#9a8a68] tracking-wider font-bold mb-0.5">__T_OPENCLAW_CRON_PROMPT_PH__</div>
+          <textarea class="nc-ta w-full border-none outline-none resize-none bg-transparent py-[7px] px-0.5 font-['Georgia',serif] text-[13px] text-[#3a2810] leading-relaxed" v-model="addForm.prompt" rows="3" placeholder="__T_OPENCLAW_CRON_PROMPT_PH__"></textarea>
         </div>
         <div class="flex gap-2 mt-3.5 justify-center">
-          <button class="nc-btn nc-cancel px-5 py-[7px] rounded cursor-pointer font-['Georgia',serif] text-[11px] font-bold" @click="showNew = false">{{ t('openclaw_cancel') }}</button>
-          <button class="nc-btn nc-create px-5 py-[7px] rounded cursor-pointer font-['Georgia',serif] text-[11px] font-bold text-white" @click="doAdd" :disabled="addBusy">{{ t('openclaw_pin_it') }}</button>
+          <button class="nc-btn nc-cancel px-5 py-[7px] rounded cursor-pointer font-['Georgia',serif] text-[11px] font-bold" @click="showNew = false">__T_OPENCLAW_CANCEL__</button>
+          <button class="nc-btn nc-create px-5 py-[7px] rounded cursor-pointer font-['Georgia',serif] text-[11px] font-bold text-white" @click="doAdd" :disabled="addBusy">__T_OPENCLAW_PIN_IT__</button>
         </div>
       </div>
     </div>
@@ -161,9 +161,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted } from 'vue';
-import { useI18n } from '../../i18n/index.ts';
-
-const { t } = useI18n();
 const API = '/aios/apps/openclaw';
 
 const cronJobs = ref([]);

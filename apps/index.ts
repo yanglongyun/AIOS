@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import { json } from '../shared/http/json.ts';
 import { appLoaders } from './registry.ts';
 import { access } from '../shared/auth/index.ts';
+import { hasSystemLanguage } from './app_shared/settings/language.ts';
 
 const portArg = process.argv.find(arg => arg.startsWith('--port='));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
@@ -52,6 +53,9 @@ const initDbForApp = async (app) => {
 };
 
 const bootAppRuntimes = async () => {
+  if (!hasSystemLanguage()) {
+    return;
+  }
   for (const app of appModules) {
     await initDbForApp(app);
     if (typeof app.initRuntime === 'function') {
@@ -83,6 +87,10 @@ const appsServer = createServer(async (req, res) => {
     const gate = access(req, path, req.method || 'GET', 'apps');
     if (!gate.ok) {
       json(res, { success: false, message: gate.message }, gate.status || 401);
+      return;
+    }
+    if (!hasSystemLanguage()) {
+      json(res, { success: false, message: '系统语言未完成安装，请先完成欢迎安装流程' }, 423);
       return;
     }
 

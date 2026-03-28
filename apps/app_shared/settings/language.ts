@@ -8,6 +8,12 @@ const aiosDbPath = resolve(root, 'database', 'aios.db');
 
 const aiosDb = new Database(aiosDbPath, { readonly: true, fileMustExist: true });
 
+export const hasSystemLanguage = () => {
+  const row = aiosDb.prepare("SELECT value FROM settings WHERE key = 'language'").get();
+  const language = String(row?.value || '').trim();
+  return language === 'zh' || language === 'en';
+};
+
 export const getSystemLanguage = () => {
   const row = aiosDb.prepare("SELECT value FROM settings WHERE key = 'language'").get();
   const language = String(row?.value || '').trim();

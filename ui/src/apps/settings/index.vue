@@ -70,10 +70,12 @@
         <AboutTab v-else />
       </div>
 
+      <!--
       <p class="mx-auto mt-6 max-w-lg px-1 pb-4 text-center text-[12px] italic leading-6 text-[#9b896e]">
         <span class="block">“The people who are crazy enough to think they can change the world are the ones who do.”</span>
         <span class="mt-1 block">Think Different</span>
       </p>
+      -->
     </div>
   </div>
 </template>

@@ -9,6 +9,44 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..', '..');
 
+/** 在验活端口启动进程，health check 通过返回 true，失败返回 false。验活进程始终会被杀掉。 */
+const probeProcess = async (entry: string, probePort: number, healthPath: string): Promise<boolean> => {
+  const probe = spawn('node', [entry], {
+    cwd: ROOT_DIR,
+    detached: true,
+    stdio: 'pipe',
+    env: { ...process.env, PORT: String(probePort) }
+  });
+  probe.unref();
+
+  const healthUrl = `http://127.0.0.1:${probePort}${healthPath}`;
+  let alive = false;
+  for (let i = 0; i < 30; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    try {
+      const r = await fetch(healthUrl);
+      if (r.ok) { alive = true; break; }
+    } catch {}
+  }
+
+  // 杀掉验活进程
+  try { process.kill(-probe.pid!, 'SIGTERM'); } catch {}
+  try { execSync(`lsof -ti:${probePort} | xargs kill 2>/dev/null || true`, { stdio: 'pipe' }); } catch {}
+
+  return alive;
+};
+
+/** 杀掉端口上的进程，然后启动新进程 */
+const startOnPort = (entry: string) => {
+  const child = spawn('node', [entry], {
+    cwd: ROOT_DIR,
+    detached: true,
+    stdio: 'ignore',
+    env: { ...process.env }
+  });
+  child.unref();
+};
+
 export const handleSystemApi = async (req, res, path) => {
   if (path === '/api/system/setup' && req.method === 'GET') {
     return json(res, { success: true, initialized: countUsers() > 0 });
@@ -33,22 +71,20 @@ export const handleSystemApi = async (req, res, path) => {
         execSync('npm run build', { cwd: ROOT_DIR, timeout: 120000, stdio: 'pipe' });
       }
 
+      // apps 重启
       if (restart === 'apps' || restart === 'both') {
-        try {
-          execSync('lsof -ti:9701 | xargs kill 2>/dev/null || true', { cwd: ROOT_DIR, stdio: 'pipe' });
-        } catch {}
-        const appsChild = spawn('node', ['apps/index.ts'], {
-          cwd: ROOT_DIR,
-          detached: true,
-          stdio: 'ignore',
-          env: { ...process.env }
-        });
-        appsChild.unref();
+        const ok = await probeProcess('apps/index.ts', 9711, '/apps/health');
+        if (!ok) throw new Error('apps 服务验活失败，旧服务保持运行');
+        try { execSync('lsof -ti:9701 | xargs kill 2>/dev/null || true', { stdio: 'pipe' }); } catch {}
+        startOnPort('apps/index.ts');
       }
 
-      json(res, { success: true });
-
+      // server 重启
       if (restart === 'server' || restart === 'both') {
+        const ok = await probeProcess('server/index.ts', 9710, '/api/health');
+        if (!ok) throw new Error('server 服务验活失败，旧服务保持运行');
+        // 先返回成功，再自杀让出端口，由新进程接管
+        json(res, { success: true });
         setTimeout(() => {
           const child = spawn('sh', ['-c', 'sleep 1 && exec node server/index.ts'], {
             cwd: ROOT_DIR,
@@ -59,7 +95,10 @@ export const handleSystemApi = async (req, res, path) => {
           child.unref();
           process.exit(0);
         }, 300);
+        return;
       }
+
+      json(res, { success: true });
     } catch (e) {
       json(res, { success: false, message: e.message }, 500);
     }
@@ -68,4 +107,3 @@ export const handleSystemApi = async (req, res, path) => {
 
   json(res, { error: 'API endpoint not found' }, 404);
 };
-

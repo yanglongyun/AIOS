@@ -3,7 +3,7 @@ import { setupWebSocket } from './system/ws.ts';
 import { initSystemDirs } from './system/dir.ts';
 import { initDatabase } from './repository/init.ts';
 import { startTaskScheduler } from './task/schedule/scheduler.ts';
-const PORT = 9700;
+const PORT = Number(process.env.PORT) || 9700;
 
 initSystemDirs();
 initDatabase();

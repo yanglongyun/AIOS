@@ -3,7 +3,7 @@ import { json } from '../shared/http/json.ts';
 import { appLoaders } from './registry.ts';
 import { access } from '../shared/auth/index.ts';
 
-const APPS_PORT = 9701;
+const APPS_PORT = Number(process.env.PORT) || 9701;
 const APPS_HOST = '127.0.0.1';
 
 const moduleCache = new Map();

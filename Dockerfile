@@ -5,7 +5,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY AGENTS.md ./
 COPY README.md README_en.md ./
 COPY apps ./apps
 COPY memory ./memory
@@ -27,7 +26,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY AGENTS.md ./
 COPY README.md README_en.md ./
 COPY apps ./apps
 COPY memory ./memory

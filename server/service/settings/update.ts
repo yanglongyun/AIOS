@@ -13,7 +13,6 @@ const clampToolMaxRounds = (value: unknown) => {
 export const updateSettings = (body: AnyRecord = {}) => {
   if (body.provider !== undefined) saveSetting('provider', body.provider);
   if (body.systemPrompt !== undefined) saveSetting('systemPrompt', body.systemPrompt);
-  if (body.language !== undefined) saveSetting('language', body.language === 'en' ? 'en' : 'zh');
   if (body.contextRounds !== undefined) saveSetting('contextRounds', String(normalizeContextRounds(body.contextRounds)));
   if (body.apiUrl !== undefined) saveSetting('apiUrl', body.apiUrl);
   if (body.apiKey !== undefined) saveSetting('apiKey', body.apiKey);

@@ -70,10 +70,8 @@
         <GeneralTab
           v-else
           :theme="theme"
-          :language="language"
           @save="save"
           @set-theme="setTheme"
-          @set-language="setLanguage"
         />
       </div>
     </div>
@@ -92,7 +90,6 @@ import SkillTab from './SkillTab.vue';
 import { getProvider } from '../../data/providers.ts';
 import { toast } from '../../stores/toast.ts';
 import { chatPanel } from '../../stores/chatPanel.ts';
-import { LOCALE } from '../../locale.ts';
 const router = useRouter();
 const tabs = [
   { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
@@ -105,7 +102,6 @@ const tabs = [
 
 const activeTab = ref('account');
 const theme = ref(localStorage.getItem('theme') || 'dark');
-const language = ref(LOCALE);
 const provider = ref('openai');
 const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);
@@ -175,7 +171,6 @@ const onProviderChange = (nextProvider) => {
 const fetchSettings = async () => {
   const data = await request('/aios/api/settings');
   provider.value = data.provider || 'openai';
-  language.value = data.language === 'en' ? 'en' : LOCALE;
   editRounds.value = data.contextRounds || 100;
   enableToolResultTruncate.value = data.enableToolResultTruncate !== false;
   toolResultMaxChars.value = Number(data.toolResultMaxChars) || 12000;
@@ -216,12 +211,6 @@ const setTheme = (nextTheme) => {
   document.documentElement.classList.toggle('dark', nextTheme === 'dark');
 };
 
-const setLanguage = (nextLanguage) => {
-  const normalized = nextLanguage === 'en' ? 'en' : 'zh';
-  language.value = normalized;
-  
-};
-
 const save = async () => {
   try {
     const maxChars = Math.max(1000, Math.min(50000, Number(toolResultMaxChars.value) || 12000));
@@ -239,7 +228,6 @@ const save = async () => {
         toolResultMaxChars: maxChars,
         enableToolLoopLimit: enableToolLoopLimit.value,
         toolMaxRounds: maxRounds,
-        language: language.value,
         apiUrl: editApiUrl.value,
         apiKey: editApiKey.value,
         model: editModel.value

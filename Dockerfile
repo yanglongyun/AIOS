@@ -7,6 +7,7 @@ RUN npm ci
 
 COPY README.md README_en.md ./
 COPY apps ./apps
+COPY language ./language
 COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server
@@ -16,9 +17,6 @@ COPY ui ./ui
 COPY tsconfig.backend.json ./
 
 RUN mkdir -p /app/database /app/files
-
-ARG LOCALE=zh
-RUN npx tsx scripts/apply-locale.ts ${LOCALE}
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
@@ -30,6 +28,7 @@ RUN npm ci --omit=dev
 
 COPY README.md README_en.md ./
 COPY apps ./apps
+COPY language ./language
 COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server

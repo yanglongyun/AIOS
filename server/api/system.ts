@@ -5,6 +5,8 @@ import { requestReload } from '../service/reload.ts';
 import { execSync, spawn } from 'child_process';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { saveSetting } from '../repository/settings/save.ts';
+import { applyLanguage } from '../system/language.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..', '..');
@@ -60,6 +62,27 @@ export const handleSystemApi = async (req, res, path) => {
       message: body.message || ''
     });
     return json(res, { success: true });
+  }
+
+  if (path === '/api/system/install/complete' && req.method === 'POST') {
+    if (countUsers() === 0) {
+      return json(res, { success: false, message: '系统未初始化' }, 400);
+    }
+
+    const body = await readBody(req);
+    const language = body.language === 'zh' || body.language === 'en' ? body.language : '';
+    if (!language) {
+      return json(res, { success: false, message: '语言不合法' }, 400);
+    }
+
+    try {
+      applyLanguage(language);
+      saveSetting('language', language);
+      execSync('npm run build', { cwd: ROOT_DIR, timeout: 120000, stdio: 'pipe' });
+      return json(res, { success: true });
+    } catch (e) {
+      return json(res, { success: false, message: e instanceof Error ? e.message : '安装完成失败' }, 500);
+    }
   }
 
   if (path === '/api/system/reload' && req.method === 'POST') {

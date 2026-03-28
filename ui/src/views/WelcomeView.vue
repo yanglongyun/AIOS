@@ -152,7 +152,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.ts';
 import { clearAuthCache } from '../auth/session.ts';
 
@@ -229,7 +228,6 @@ const texts = {
   }
 };
 
-const router = useRouter();
 const step = ref(1);
 const pending = ref(false);
 const error = ref('');
@@ -310,8 +308,7 @@ const saveModelAndTest = async () => {
         provider: model.value.provider,
         apiUrl: model.value.apiUrl,
         apiKey: model.value.apiKey,
-        model: model.value.model,
-        language: model.value.language
+        model: model.value.model
       })
     });
     const saveData = await saveRes.json();
@@ -350,8 +347,26 @@ const saveModelAndTest = async () => {
 };
 
 const enterSystem = async () => {
-  clearAuthCache();
-  await router.replace('/chat');
+  error.value = '';
+  pending.value = true;
+  try {
+    const res = await fetch('/aios/api/system/install/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ language: model.value.language })
+    });
+    const data = await res.json();
+    if (!res.ok || data?.success === false) {
+      throw new Error(data?.message || '安装完成失败');
+    }
+    clearAuthCache();
+    window.location.href = '/aios/chat';
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '安装完成失败';
+  } finally {
+    pending.value = false;
+  }
 };
 
 onUnmounted(() => {

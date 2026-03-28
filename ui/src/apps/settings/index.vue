@@ -42,12 +42,6 @@
           @update:api-key="editApiKey = $event"
           @update:model="editModel = $event"
         />
-        <ContextTab
-          v-else-if="activeTab === 'messages'"
-          :context-rounds="editRounds"
-          @save="save"
-          @update:context-rounds="editRounds = $event"
-        />
         <ToolTab
           v-else-if="activeTab === 'tools'"
           :enable-tool-result-truncate="enableToolResultTruncate"
@@ -60,6 +54,12 @@
           @update:enable-tool-loop-limit="enableToolLoopLimit = $event"
           @update:tool-max-rounds="toolMaxRounds = $event"
         />
+        <ContextTab
+          v-else-if="activeTab === 'messages'"
+          :context-rounds="editRounds"
+          @save="save"
+          @update:context-rounds="editRounds = $event"
+        />
         <SkillTab
           v-else-if="activeTab === 'skills'"
           :items="skillItems"
@@ -67,13 +67,13 @@
           :error="skillsError"
           @refresh="fetchSkills"
         />
-        <GeneralTab
-          v-else
-          :theme="theme"
-          @save="save"
-          @set-theme="setTheme"
-        />
+        <AboutTab v-else />
       </div>
+
+      <p class="mx-auto mt-6 max-w-lg px-1 pb-4 text-center text-[12px] italic leading-6 text-[#9b896e]">
+        <span class="block">“The people who are crazy enough to think they can change the world are the ones who do.”</span>
+        <span class="mt-1 block">Think Different</span>
+      </p>
     </div>
   </div>
 </template>
@@ -85,7 +85,7 @@ import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
-import GeneralTab from './GeneralTab.vue';
+import AboutTab from './AboutTab.vue';
 import SkillTab from './SkillTab.vue';
 import { getProvider } from '../../data/providers.ts';
 import { toast } from '../../stores/toast.ts';
@@ -94,14 +94,13 @@ const router = useRouter();
 const tabs = [
   { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
   { key: 'model', label: '__T_SETTINGS_TAB_MODEL__' },
-  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__' },
   { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__' },
+  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__' },
   { key: 'skills', label: '__T_SETTINGS_TAB_SKILLS__' },
-  { key: 'general', label: '__T_SETTINGS_TAB_GENERAL__' }
+  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__' }
 ];
 
 const activeTab = ref('account');
-const theme = ref(localStorage.getItem('theme') || 'dark');
 const provider = ref('openai');
 const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);
@@ -203,12 +202,6 @@ const fetchSkills = async () => {
   } finally {
     skillsLoading.value = false;
   }
-};
-
-const setTheme = (nextTheme) => {
-  theme.value = nextTheme;
-  localStorage.setItem('theme', nextTheme);
-  document.documentElement.classList.toggle('dark', nextTheme === 'dark');
 };
 
 const save = async () => {

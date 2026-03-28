@@ -8,5 +8,5 @@ export const wallpaperList = [
   // 纹理
   { id: 'wp-wood', type: 'css', label: '木纹' },
   { id: 'wp-linen', type: 'css', label: '亚麻' },
-  { id: 'wp-dark-stone', type: 'css', label: '岩石', dark: true },
+  { id: 'wp-dark-stone', type: 'css', label: '岩石' },
 ];

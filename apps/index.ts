@@ -3,7 +3,11 @@ import { json } from '../shared/http/json.ts';
 import { appLoaders } from './registry.ts';
 import { access } from '../shared/auth/index.ts';
 
-const APPS_PORT = Number(process.env.PORT) || 9701;
+const portArg = process.argv.find(arg => arg.startsWith('--port='));
+if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
+  throw new Error('端口参数不合法');
+}
+const APPS_PORT = portArg ? Number(portArg.slice('--port='.length)) : 9701;
 const APPS_HOST = '127.0.0.1';
 
 const moduleCache = new Map();

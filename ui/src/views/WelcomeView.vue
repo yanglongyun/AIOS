@@ -136,13 +136,16 @@
               class="ml-0.5 inline-block h-[1em] w-[4px] animate-pulse bg-[#c8a060] align-text-bottom"></span>
           </div>
 
-          <div class="mt-12 flex items-center justify-between transition-opacity duration-500"
+          <div class="mt-12 flex flex-col items-center gap-4 transition-opacity duration-500"
             :class="typing ? 'opacity-0' : 'opacity-100'">
-            <button class="cursor-pointer text-[13px] tracking-wide text-[#6a5840] transition-colors hover:text-[#c8a060]"
-              @click="step = 3">{{ t.prev }}</button>
+            <p class="text-[12px] tracking-wide text-[#a09078]">
+              {{ installMessage }}
+            </p>
             <button
-              class="cursor-pointer rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070]"
-              @click="enterSystem">{{ t.enter }}</button>
+              class="cursor-pointer rounded bg-[#c8a060] px-10 py-3 text-[14px] font-semibold text-[#1a1008] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all hover:bg-[#d4b070] disabled:cursor-wait disabled:bg-[#8a7860] disabled:text-[#2a1e14]"
+              :disabled="installing || !installReady"
+              @click="enterSystem"
+            >{{ enterButtonLabel }}</button>
           </div>
         </div>
       </div>
@@ -182,6 +185,10 @@ const texts = {
     intro_title: '初始化完成',
     intro_hint: '系统已就绪，以下是来自 AI 核心的初次回应：',
     enter: '进入系统',
+    installing_hint: '正在应用语言并编译前端，请稍候…',
+    install_ready_hint: '系统已准备完成，可以进入系统。',
+    install_failed_hint: '系统准备失败，请返回上一页重新检查。',
+    enter_preparing: '准备中…',
     err_mismatch: '两次密码不一致',
     err_admin: '创建管理员失败',
     err_save: '模型配置保存失败',
@@ -217,6 +224,10 @@ const texts = {
     intro_title: 'Initialization Complete',
     intro_hint: 'System is ready. Here is the first response from the AI core:',
     enter: 'Enter System',
+    installing_hint: 'Applying language and rebuilding the frontend. Please wait…',
+    install_ready_hint: 'The system is ready. You can enter now.',
+    install_failed_hint: 'System preparation failed. Please go back and check again.',
+    enter_preparing: 'Preparing…',
     err_mismatch: 'Passwords do not match',
     err_admin: 'Failed to create admin',
     err_save: 'Failed to save model config',
@@ -234,6 +245,8 @@ const error = ref('');
 const welcomeText = ref('');
 const displayedText = ref('');
 const typing = ref(false);
+const installing = ref(false);
+const installReady = ref(false);
 let typeTimer = null;
 
 const detectedLanguage = String(navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
@@ -249,6 +262,15 @@ const model = ref({
 });
 
 const t = computed(() => texts[model.value.language] || texts.en);
+const installMessage = computed(() => {
+  if (error.value && !pending.value && !installing.value && !installReady.value && step.value === 4) {
+    return error.value || t.value.install_failed_hint;
+  }
+  if (installing.value) return t.value.installing_hint;
+  if (installReady.value) return t.value.install_ready_hint;
+  return t.value.installing_hint;
+});
+const enterButtonLabel = computed(() => (installing.value || !installReady.value ? t.value.enter_preparing : t.value.enter));
 
 const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);
@@ -296,9 +318,28 @@ const startTypewriter = (text) => {
   }, 50);
 };
 
+const prepareSystem = async () => {
+  installing.value = true;
+  installReady.value = false;
+  error.value = '';
+  const res = await fetch('/aios/api/system/install/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ language: model.value.language })
+  });
+  const data = await res.json();
+  if (!res.ok || data?.success === false) {
+    throw new Error(data?.message || '安装完成失败');
+  }
+  installReady.value = true;
+  installing.value = false;
+};
+
 const saveModelAndTest = async () => {
   error.value = '';
   pending.value = true;
+  installReady.value = false;
   try {
     const saveRes = await fetch('/aios/api/settings', {
       method: 'POST',
@@ -339,6 +380,11 @@ const saveModelAndTest = async () => {
     step.value = 4;
     welcomeText.value = parsed?.intro || t.value.default_intro;
     startTypewriter(welcomeText.value);
+    prepareSystem().catch((e) => {
+      error.value = e instanceof Error ? e.message : '安装完成失败';
+      installing.value = false;
+      installReady.value = false;
+    });
   } catch (e) {
     error.value = e?.message || t.value.err_test;
   } finally {
@@ -347,26 +393,9 @@ const saveModelAndTest = async () => {
 };
 
 const enterSystem = async () => {
-  error.value = '';
-  pending.value = true;
-  try {
-    const res = await fetch('/aios/api/system/install/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ language: model.value.language })
-    });
-    const data = await res.json();
-    if (!res.ok || data?.success === false) {
-      throw new Error(data?.message || '安装完成失败');
-    }
-    clearAuthCache();
-    window.location.href = '/aios/chat';
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : '安装完成失败';
-  } finally {
-    pending.value = false;
-  }
+  if (!installReady.value || installing.value) return;
+  clearAuthCache();
+  window.location.href = '/aios/chat';
 };
 
 onUnmounted(() => {

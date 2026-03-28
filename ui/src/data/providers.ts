@@ -18,7 +18,7 @@ export const PROVIDERS = [
     id: 'claude',
     name: 'Claude',
     group: 'default',
-    apiUrl: 'https://api.anthropic.com/v1/messages',
+    apiUrl: 'https://api.anthropic.com/v1/chat/completions',
     defaultModel: 'claude-sonnet-4-6',
   },
   {

@@ -6,9 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY AGENTS.md ./
+COPY README.md README_en.md ./
 COPY apps ./apps
-COPY database ./database
-COPY files ./files
 COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server
@@ -16,6 +15,8 @@ COPY shared ./shared
 COPY skills ./skills
 COPY ui ./ui
 COPY tsconfig.backend.json ./
+
+RUN mkdir -p /app/database /app/files
 
 RUN npm run build
 
@@ -27,16 +28,18 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 COPY AGENTS.md ./
+COPY README.md README_en.md ./
 COPY apps ./apps
-COPY database ./database
-COPY files ./files
 COPY memory ./memory
 COPY scripts ./scripts
 COPY server ./server
 COPY shared ./shared
 COPY skills ./skills
 COPY tsconfig.backend.json ./
+COPY ui ./ui
 COPY --from=build /app/ui/dist ./ui/dist
+
+RUN mkdir -p /app/database /app/files
 
 EXPOSE 9700
 

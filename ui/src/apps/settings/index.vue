@@ -11,7 +11,7 @@
             ? 'bg-[rgba(90,58,40,0.1)] text-[#5a3e28] dark:bg-[rgba(200,160,96,0.12)] dark:text-[#c8a060]'
             : 'text-[#b8a888] hover:text-[#7a6a50] hover:bg-[rgba(90,58,40,0.06)] dark:text-[#6a5840] dark:hover:text-[#a08c70] dark:hover:bg-[rgba(200,160,96,0.06)]'"
         >
-          {{ t(tab.labelKey) }}
+          {{ tab.label }}
         </button>
       </div>
     </div>
@@ -95,12 +95,12 @@ import { chatPanel } from '../../stores/chatPanel.ts';
 import { LOCALE } from '../../locale.ts';
 const router = useRouter();
 const tabs = [
-  { key: 'account', labelKey: 'settings_tab_account' },
-  { key: 'model', labelKey: 'settings_tab_model' },
-  { key: 'messages', labelKey: 'settings_tab_messages' },
-  { key: 'tools', labelKey: 'settings_tab_tools' },
-  { key: 'skills', labelKey: 'settings_tab_skills' },
-  { key: 'general', labelKey: 'settings_tab_general' }
+  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
+  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__' },
+  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__' },
+  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__' },
+  { key: 'skills', label: '__T_SETTINGS_TAB_SKILLS__' },
+  { key: 'general', label: '__T_SETTINGS_TAB_GENERAL__' }
 ];
 
 const activeTab = ref('account');

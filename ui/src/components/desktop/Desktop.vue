@@ -18,7 +18,7 @@
         <span class="text-[26px] transition-transform duration-200" :class="{ '-translate-y-0.5': selectedId !== app.id }">{{ app.icon }}</span>
         <span class="max-w-[80px] truncate text-center text-[11px] font-medium leading-tight text-[#2c2420] [text-shadow:0_1px_3px_rgba(255,255,255,0.8)]"
           :class="{ 'text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]': isDarkWallpaper }"
-        >{{ t(app.name) }}</span>
+        >{{ app.name }}</span>
       </div>
     </div>
   </div>

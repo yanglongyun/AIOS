@@ -60,7 +60,7 @@ const request = async (url, opts) => {
 };
 
 const resolveMessage = (data) => {
-  if (data?.messageKey) return t(data.messageKey);
+  if (data?.messageKey) return data.messageKey;
   const text = String(data?.message || '').trim();
   if (!text) {
     throw new Error('poker api 返回了空 message');

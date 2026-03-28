@@ -55,7 +55,7 @@ const usernameInitial = computed(() => (props.username || '?')[0].toUpperCase())
 const appTitle = computed(() => {
   if (!props.app) return '';
   const a = appRegistry.find(r => r.id === props.app.appId);
-  return a ? t(a.name) : '';
+  return a ? a.name : '';
 });
 const appIcon = computed(() => {
   if (!props.app) return '';

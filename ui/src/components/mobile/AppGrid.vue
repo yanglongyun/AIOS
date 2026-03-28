@@ -13,7 +13,7 @@
         @click="$emit('open', app.id)"
       >
         <div class="flex h-[56px] w-[56px] items-center justify-center rounded-[16px] bg-white text-[28px] shadow-[0_2px_8px_rgba(90,62,40,0.1)]">{{ app.icon }}</div>
-        <span class="text-center text-[11px] leading-tight text-[#5a4a38]">{{ t(app.name) }}</span>
+        <span class="text-center text-[11px] leading-tight text-[#5a4a38]">{{ app.name }}</span>
       </button>
     </div>
   </div>
@@ -29,6 +29,6 @@ const visible = appRegistry.filter(a => !a.hidden);
 const filtered = computed(() => {
   if (!search.value.trim()) return visible;
   const q = search.value.toLowerCase();
-  return visible.filter(a => t(a.name).toLowerCase().includes(q));
+  return visible.filter(a => a.name.toLowerCase().includes(q));
 });
 </script>

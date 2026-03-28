@@ -20,7 +20,7 @@
         @click="$emit('open', app.id)"
       >
         <span class="text-[20px]">{{ app.icon }}</span>
-        <span class="text-center text-[10.5px] leading-tight text-[#5a4a38]">{{ t(app.name) }}</span>
+        <span class="text-center text-[10.5px] leading-tight text-[#5a4a38]">{{ app.name }}</span>
       </button>
     </div>
 
@@ -71,7 +71,7 @@ const visibleApps = appRegistry.filter(a => !a.hidden);
 const filteredApps = computed(() => {
   if (!search.value.trim()) return visibleApps;
   const q = search.value.toLowerCase();
-  return visibleApps.filter(a => t(a.name).toLowerCase().includes(q));
+  return visibleApps.filter(a => a.name.toLowerCase().includes(q));
 });
 
 async function fetchMe() {

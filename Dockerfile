@@ -22,6 +22,20 @@ FROM node:22-bookworm-slim AS runtime
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    iputils-ping \
+    procps \
+    git \
+    python3 \
+    zip \
+    unzip \
+    vim-tiny \
+    nano \
+    && ln -sf /usr/bin/vim.tiny /usr/bin/vim \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 

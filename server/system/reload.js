@@ -3,6 +3,8 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "..", "..");
+const APPS_ENTRY = "apps/index.js";
+const SERVER_ENTRY = "server/index.js";
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const buildFrontend = () => {
   execSync("npm run build", { cwd: ROOT_DIR, timeout: 12e4, stdio: "pipe" });
@@ -49,17 +51,17 @@ const startDetachedNode = (entry) => {
   child.unref();
 };
 const restartAppsProcess = async () => {
-  await probeProcess("apps/index.ts", 9711, "/apps/health");
+  await probeProcess(APPS_ENTRY, 9711, "/apps/health");
   try {
     execSync("lsof -ti:9701 | xargs kill 2>/dev/null || true", { stdio: "pipe" });
   } catch {
   }
-  startDetachedNode("apps/index.ts");
+  startDetachedNode(APPS_ENTRY);
 };
 const scheduleServerRestart = async () => {
-  await probeProcess("server/index.ts", 9710, "/api/health");
+  await probeProcess(SERVER_ENTRY, 9710, "/api/health");
   setTimeout(() => {
-    const child = spawn("node", ["server/index.ts"], {
+    const child = spawn("node", [SERVER_ENTRY], {
       cwd: ROOT_DIR,
       detached: true,
       stdio: "ignore"

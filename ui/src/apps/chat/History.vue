@@ -51,7 +51,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, nextTick, onMounted } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
 defineProps({

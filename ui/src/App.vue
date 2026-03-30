@@ -3,7 +3,7 @@
   <RouterView v-else />
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 

@@ -18,7 +18,7 @@
   <div v-else-if="!result" class="py-8 text-center text-[13px] text-[#b0a080]">__T_FORTUNE_EMPTY_HISTORY__</div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   history: { type: Array, required: true },
   result: { type: Object, default: null },

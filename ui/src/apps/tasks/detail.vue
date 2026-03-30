@@ -100,11 +100,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { on } from '../../ws.ts';
-import { appRegistry } from '../../apps.ts';
+import { on } from '../../ws.js';
+import { appRegistry } from '../../apps.js';
 
 const viewProps = defineProps({ id: { type: [String, Number], default: null } });
 const route = useRoute();

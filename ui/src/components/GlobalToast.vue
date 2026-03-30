@@ -19,6 +19,6 @@
   </Transition>
 </template>
 
-<script setup lang="ts">
-import { toast } from '../stores/toast.ts';
+<script setup>
+import { toast } from '../stores/toast.js';
 </script>

@@ -80,7 +80,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
@@ -89,9 +89,9 @@ import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import AboutTab from './AboutTab.vue';
 import SkillTab from './SkillTab.vue';
-import { getProvider } from '../../data/providers.ts';
-import { toast } from '../../stores/toast.ts';
-import { chatPanel } from '../../stores/chatPanel.ts';
+import { getProvider } from '../../data/providers.js';
+import { toast } from '../../stores/toast.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 const router = useRouter();
 const tabs = [
   { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },

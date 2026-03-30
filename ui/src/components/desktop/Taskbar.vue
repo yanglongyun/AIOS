@@ -69,13 +69,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ListTodo } from 'lucide-vue-next';
 import LauncherPanel from './LauncherPanel.vue';
 import TaskCenter from './TaskCenter.vue';
-import { windowManager } from '../../stores/windowManager.ts';
-import { appRegistry } from '../../apps.ts';
+import { windowManager } from '../../stores/windowManager.js';
+import { appRegistry } from '../../apps.js';
 const windows = computed(() => windowManager.state.windows);
 const launcherOpen = ref(false);
 const taskCenterOpen = ref(false);

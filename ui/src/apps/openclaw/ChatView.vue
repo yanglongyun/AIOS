@@ -27,7 +27,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, nextTick } from 'vue';
 const API = '/aios/apps/openclaw';
 

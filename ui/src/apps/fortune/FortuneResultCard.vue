@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   result: { type: Object, default: null },
   formatPoem: { type: Function, required: true }

@@ -19,9 +19,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../apps.ts';
+import { appRegistry } from '../../apps.js';
 defineEmits(['open']);
 
 const search = ref('');

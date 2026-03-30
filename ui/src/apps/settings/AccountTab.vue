@@ -49,7 +49,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   username: { type: String, default: '' },
   oldPassword: { type: String, default: '' },

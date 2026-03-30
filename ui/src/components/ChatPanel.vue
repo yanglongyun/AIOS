@@ -143,12 +143,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, History, Plus, Square } from 'lucide-vue-next';
-import { connect, send, on, wsStatus, ensureConnected } from '../ws.ts';
-import { chatPanel } from '../stores/chatPanel.ts';
+import { connect, send, on, wsStatus, ensureConnected } from '../ws.js';
+import { chatPanel } from '../stores/chatPanel.js';
 const props = defineProps({
   pendingMessage: { type: String, default: null }
 });

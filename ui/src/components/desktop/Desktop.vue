@@ -22,11 +22,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../apps.ts';
-import { windowManager } from '../../stores/windowManager.ts';
-import { wallpaperList } from './wallpapers.ts';
+import { appRegistry } from '../../apps.js';
+import { windowManager } from '../../stores/windowManager.js';
+import { wallpaperList } from './wallpapers.js';
 
 defineEmits(['contextmenu']);
 

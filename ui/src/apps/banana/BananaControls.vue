@@ -26,7 +26,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   timeLine: { type: Array, required: true },
   currentIndex: { type: Number, required: true },

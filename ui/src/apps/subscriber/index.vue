@@ -30,10 +30,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
-import { LOCALE, LOCALE_FULL } from '../../locale.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
+import { LOCALE, LOCALE_FULL } from '../../locale.js';
 import SubscriberArticlePanel from './SubscriberArticlePanel.vue';
 import SubscriberControlPanel from './SubscriberControlPanel.vue';
 

@@ -29,7 +29,7 @@
   </template>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   view: { type: String, required: true },
   newTitle: { type: String, required: true },

@@ -20,7 +20,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   contextRounds: { type: Number, default: 100 }
 });

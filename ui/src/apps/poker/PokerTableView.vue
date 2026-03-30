@@ -66,7 +66,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   aiSpeech: { type: String, required: true },
   aiExpression: { type: String, required: true },

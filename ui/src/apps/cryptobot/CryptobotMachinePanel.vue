@@ -163,7 +163,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   status: { type: Object, required: true },
   error: { type: String, required: true },

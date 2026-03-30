@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   lastActionText: { type: String, required: true },
   game: { type: Object, default: null },

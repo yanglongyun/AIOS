@@ -1,0 +1,15 @@
+const environment = (cwd) => {
+  return `
+
+## \u73AF\u5883
+- \u9879\u76EE\u6839\u76EE\u5F55\uFF1A${cwd}
+- \u7CFB\u7EDF\u6570\u636E\u5E93\uFF1A${cwd}/database/aios.db\uFF08SQLite\uFF0C\u8868\uFF1Achats, messages, settings\uFF09
+- \u5E94\u7528\u6570\u636E\u5E93\u76EE\u5F55\uFF1A${cwd}/database/apps/\uFF08SQLite\uFF0C\u6BCF\u4E2A\u5E94\u7528\u72EC\u7ACB db \u6587\u4EF6\uFF09
+- \u6587\u4EF6\u7CFB\u7EDF\u76EE\u5F55\uFF1A${cwd}/files/
+- \u4E0A\u4F20\u76EE\u5F55\uFF1A${cwd}/files/uploads/
+- \u5BFC\u51FA\u76EE\u5F55\uFF1A${cwd}/files/exports/
+- \u8BB0\u5FC6\u76EE\u5F55\uFF1A${cwd}/memory/\uFF08index.md \u4E3A\u7D22\u5F15\uFF0C\u6309\u9700 cat \u5177\u4F53\u6587\u4EF6\uFF09`;
+};
+export {
+  environment
+};

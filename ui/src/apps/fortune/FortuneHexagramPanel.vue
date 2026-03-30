@@ -39,7 +39,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   hexagramName: { type: String, required: true },
   result: { type: Object, default: null },

@@ -47,10 +47,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { clearAuthCache } from '../auth/session.ts';
+import { clearAuthCache } from '../auth/session.js';
 const router = useRouter();
 const username = ref('');
 const password = ref('');

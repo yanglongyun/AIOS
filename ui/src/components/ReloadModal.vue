@@ -69,9 +69,9 @@
   </Teleport>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { onMounted, onUnmounted, ref, reactive } from 'vue';
-import { on } from '../ws.ts';
+import { on } from '../ws.js';
 const visible = ref(false);
 const phase = ref('confirm'); // confirm | building | restarting | error
 const message = ref('');

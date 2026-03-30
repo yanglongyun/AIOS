@@ -24,9 +24,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
 import PokerControlPanel from './PokerControlPanel.vue';
 import PokerTableView from './PokerTableView.vue';
 const game = ref(null);

@@ -49,7 +49,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   status: { type: Object, required: true },
   decisions: { type: Array, required: true },

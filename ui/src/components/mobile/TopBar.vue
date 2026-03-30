@@ -37,10 +37,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue';
 import { X } from 'lucide-vue-next';
-import { appRegistry } from '../../apps.ts';
+import { appRegistry } from '../../apps.js';
 const avatarBtn = ref(null);
 
 const props = defineProps({

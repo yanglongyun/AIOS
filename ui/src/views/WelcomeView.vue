@@ -153,10 +153,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onUnmounted } from 'vue';
-import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.ts';
-import { clearAuthCache } from '../auth/session.ts';
+import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
+import { clearAuthCache } from '../auth/session.js';
 
 const texts = {
   zh: {

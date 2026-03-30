@@ -28,7 +28,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   displayMonth: { type: String, required: true },
   isCurrentMonth: { type: Boolean, required: true },

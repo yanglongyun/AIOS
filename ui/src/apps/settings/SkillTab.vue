@@ -46,7 +46,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   items: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },

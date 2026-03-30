@@ -51,8 +51,8 @@
   </section>
 </template>
 
-<script setup lang="ts">
-import { PROVIDER_GROUPS, getProvidersByGroup } from '../../data/providers.ts';
+<script setup>
+import { PROVIDER_GROUPS, getProvidersByGroup } from '../../data/providers.js';
 defineProps({
   provider: { type: String, default: 'openrouter' },
   apiUrl: { type: String, default: '' },

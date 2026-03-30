@@ -40,7 +40,7 @@
   </template>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   view: { type: String, required: true },
   sessions: { type: Array, required: true },

@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   rows: { type: Array, required: true },
   editing: { type: Object, required: true },

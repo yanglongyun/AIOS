@@ -38,10 +38,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
-import { LOCALE_FULL } from '../../locale.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
+import { LOCALE_FULL } from '../../locale.js';
 import FinanceHeader from './FinanceHeader.vue';
 import FinanceLedgerTable from './FinanceLedgerTable.vue';
 

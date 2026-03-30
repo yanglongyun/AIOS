@@ -26,14 +26,14 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, shallowRef, reactive, onMounted, provide } from 'vue';
 import { useRouter } from 'vue-router';
 import TopBar from '../components/mobile/TopBar.vue';
 import AppGrid from '../components/mobile/AppGrid.vue';
 import UserMenu from '../components/mobile/UserMenu.vue';
-import { appRegistry } from '../apps.ts';
-import { clearAuthCache } from '../auth/session.ts';
+import { appRegistry } from '../apps.js';
+import { clearAuthCache } from '../auth/session.js';
 
 const router = useRouter();
 

@@ -159,7 +159,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, nextTick, onMounted } from 'vue';
 const API = '/aios/apps/openclaw';
 

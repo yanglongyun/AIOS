@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue';
 import Desktop from '../components/desktop/Desktop.vue';
 import AppWindow from '../components/desktop/Window.vue';
@@ -25,8 +25,8 @@ import WallpaperPicker from '../components/desktop/WallpaperPicker.vue';
 import Taskbar from '../components/desktop/Taskbar.vue';
 import GlobalToast from '../components/GlobalToast.vue';
 import ReloadModal from '../components/ReloadModal.vue';
-import { windowManager } from '../stores/windowManager.ts';
-import { connect } from '../ws.ts';
+import { windowManager } from '../stores/windowManager.js';
+import { connect } from '../ws.js';
 
 const desktopRef = ref(null);
 const ctxMenuRef = ref(null);

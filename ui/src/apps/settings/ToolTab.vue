@@ -58,7 +58,7 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   enableToolResultTruncate: { type: Boolean, default: true },
   toolResultMaxChars: { type: Number, default: 12000 },

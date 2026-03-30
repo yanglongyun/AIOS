@@ -36,10 +36,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
-import { LOCALE } from '../../locale.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
+import { LOCALE } from '../../locale.js';
 import FortuneHexagramPanel from './FortuneHexagramPanel.vue';
 import FortuneQuestionForm from './FortuneQuestionForm.vue';
 import FortuneResultCard from './FortuneResultCard.vue';

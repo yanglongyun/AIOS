@@ -87,9 +87,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
 
 const items = ref([]);
 const currentDir = ref('files');

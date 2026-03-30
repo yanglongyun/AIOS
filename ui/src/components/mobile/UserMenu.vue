@@ -28,7 +28,7 @@
   </Teleport>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { LogOut, RotateCcw } from 'lucide-vue-next';
 
 defineProps({

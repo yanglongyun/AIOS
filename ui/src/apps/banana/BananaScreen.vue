@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   isLoading: { type: Boolean, required: true },
   toast: { type: String, required: true },

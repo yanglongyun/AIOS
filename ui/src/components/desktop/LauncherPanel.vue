@@ -49,12 +49,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { LogOut, RotateCcw } from 'lucide-vue-next';
-import { appRegistry } from '../../apps.ts';
-import { clearAuthCache } from '../../auth/session.ts';
+import { appRegistry } from '../../apps.js';
+import { clearAuthCache } from '../../auth/session.js';
 
 const router = useRouter();
 defineEmits(['open', 'close']);

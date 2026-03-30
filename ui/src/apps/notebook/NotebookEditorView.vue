@@ -67,7 +67,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { nextTick, ref, watch } from 'vue';
 const props = defineProps({
   view: { type: String, required: true },

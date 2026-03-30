@@ -33,9 +33,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
 import CryptobotMachinePanel from './CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from './CryptobotDecisionPaper.vue';
 

@@ -36,7 +36,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   view: { type: String, required: true },
   notes: { type: Array, required: true },

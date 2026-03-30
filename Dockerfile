@@ -14,7 +14,6 @@ COPY server ./server
 COPY shared ./shared
 COPY skills ./skills
 COPY ui ./ui
-COPY tsconfig.backend.json ./
 
 RUN mkdir -p /app/database /app/files
 RUN npm run build
@@ -34,7 +33,6 @@ COPY scripts ./scripts
 COPY server ./server
 COPY shared ./shared
 COPY skills ./skills
-COPY tsconfig.backend.json ./
 COPY ui ./ui
 COPY --from=build /app/ui/dist ./ui/dist
 

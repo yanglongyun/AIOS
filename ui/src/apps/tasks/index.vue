@@ -52,11 +52,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { on } from '../../ws.ts';
-import { windowManager } from '../../stores/windowManager.ts';
-import { chatPanel } from '../../stores/chatPanel.ts';
+import { on } from '../../ws.js';
+import { windowManager } from '../../stores/windowManager.js';
+import { chatPanel } from '../../stores/chatPanel.js';
 const tasks = ref([]);
 const schedules = ref([]);
 const error = ref('');

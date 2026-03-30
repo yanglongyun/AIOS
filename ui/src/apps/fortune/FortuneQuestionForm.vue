@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   question: { type: String, required: true },
   shaking: { type: Boolean, required: true },

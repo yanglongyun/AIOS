@@ -50,7 +50,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   refreshing: { type: Boolean, required: true },
   scheduleTimeStr: { type: String, required: true },

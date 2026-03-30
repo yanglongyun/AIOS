@@ -63,10 +63,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import { marked } from 'marked';
-import { connect, send, on, wsStatus, ensureConnected } from '../../ws.ts';
+import { connect, send, on, wsStatus, ensureConnected } from '../../ws.js';
 const props = defineProps({
   conversationId: { type: String, default: null }
 });

@@ -23,10 +23,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue';
 import CreateAppHero from './CreateAppHero.vue';
-import { windowManager } from '../../stores/windowManager.ts';
+import { windowManager } from '../../stores/windowManager.js';
 const prompt = ref('');
 const composing = ref(false);
 

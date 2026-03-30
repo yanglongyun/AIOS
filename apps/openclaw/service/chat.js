@@ -1,0 +1,37 @@
+import { readFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
+const GATEWAY = "http://localhost:18789";
+const getToken = () => {
+  try {
+    const cfg = JSON.parse(readFileSync(join(homedir(), ".openclaw/openclaw.json"), "utf-8"));
+    return cfg?.gateway?.auth?.token || "";
+  } catch {
+    return "";
+  }
+};
+const chat = async ({ message, history = [] }) => {
+  if (!message?.trim()) return { status: 400, message: "message \u4E0D\u80FD\u4E3A\u7A7A" };
+  const messages = [
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user", content: message }
+  ];
+  const token = getToken();
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${GATEWAY}/v1/chat/completions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ model: "openclaw:main", messages, stream: false })
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return { status: res.status, message: `OpenClaw Gateway \u9519\u8BEF: ${res.status} ${text}` };
+  }
+  const data = await res.json();
+  const reply = data.choices?.[0]?.message?.content || "";
+  return { success: true, reply };
+};
+export {
+  chat
+};

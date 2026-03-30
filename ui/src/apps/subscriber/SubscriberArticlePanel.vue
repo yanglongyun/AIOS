@@ -42,7 +42,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 defineProps({
   today: { type: Object, default: null },
   items: { type: Array, required: true },

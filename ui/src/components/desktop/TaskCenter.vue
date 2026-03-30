@@ -50,11 +50,11 @@
   </Teleport>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { X } from 'lucide-vue-next';
-import { windowManager } from '../../stores/windowManager.ts';
-import { on } from '../../ws.ts';
+import { windowManager } from '../../stores/windowManager.js';
+import { on } from '../../ws.js';
 
 const emit = defineEmits(['close']);
 

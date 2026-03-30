@@ -24,10 +24,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.ts';
-import { LOCALE } from '../../locale.ts';
+import { chatPanel } from '../../stores/chatPanel.js';
+import { LOCALE } from '../../locale.js';
 import BananaControls from './BananaControls.vue';
 import BananaScreen from './BananaScreen.vue';
 

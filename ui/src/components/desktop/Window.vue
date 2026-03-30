@@ -57,10 +57,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue';
-import { windowManager } from '../../stores/windowManager.ts';
-import { appRegistry } from '../../apps.ts';
+import { windowManager } from '../../stores/windowManager.js';
+import { appRegistry } from '../../apps.js';
 import ChatPanel from '../ChatPanel.vue';
 
 const props = defineProps({ win: { type: Object, required: true } });

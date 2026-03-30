@@ -10,17 +10,12 @@
 git clone https://github.com/valueriver/aios.git
 cd aios
 npm install
-npm run dev
-```
-
-Open: `http://localhost:5173/aios`
-
-If you want to start services separately:
-
-```bash
-npm run start
+npm run build
+npm run start &
 npm run start:apps
 ```
+
+Open: `http://localhost:9700`
 
 ## Community & Feedback
 

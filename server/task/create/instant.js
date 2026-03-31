@@ -38,7 +38,7 @@ const runInstantTask = async ({
         role: "user",
         content: schema ? `${prompt}
 
-\u8F93\u51FA\u5FC5\u987B\u662F JSON\uFF0C\u5BF9\u5E94 schema\uFF1A${JSON.stringify(schema)}` : prompt
+输出必须是 JSON，对应 schema：${JSON.stringify(schema)}` : prompt
       }
     ]
   };
@@ -106,7 +106,7 @@ const createInstantTask = async ({
     if (error?.name === "AbortError") {
       updateTaskAborted({ taskId });
     } else {
-      updateTaskError({ taskId, message: error?.message || "\u4EFB\u52A1\u6267\u884C\u5931\u8D25" });
+      updateTaskError({ taskId, message: error?.message || "任务执行失败" });
     }
     broadcast({ type: "tasks_changed" });
     throw error;

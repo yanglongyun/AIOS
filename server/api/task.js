@@ -24,9 +24,9 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       tool_choice = void 0,
       parallel_tool_calls = void 0
     } = await readBody(req);
-    if (!String(app || "").trim()) return json(res, { success: false, message: "app \u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+    if (!String(app || "").trim()) return json(res, { success: false, message: "app 不能为空" }, 400);
     if (!String(prompt || "").trim() && (!Array.isArray(messages) || messages.length === 0)) {
-      return json(res, { success: false, message: "prompt/messages \u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+      return json(res, { success: false, message: "prompt/messages 不能为空" }, 400);
     }
     const result = await createInstantTask({
       app: String(app || "").trim(),
@@ -41,15 +41,15 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
     });
     return json(res, result);
   } catch (e) {
-    return json(res, { success: false, message: e?.message || "\u4EFB\u52A1\u6267\u884C\u5931\u8D25" }, 500);
+    return json(res, { success: false, message: e?.message || "任务执行失败" }, 500);
   }
 };
 const handleTaskCreateAgentApi = async (req, res, path) => {
   if (path !== "/api/task/create/agent" || req.method !== "POST") return false;
   try {
     const { app, title = "", prompt, meta = null } = await readBody(req);
-    if (!String(app || "").trim()) return json(res, { success: false, message: "app \u4E0D\u80FD\u4E3A\u7A7A" }, 400);
-    if (!String(prompt || "").trim()) return json(res, { success: false, message: "prompt \u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+    if (!String(app || "").trim()) return json(res, { success: false, message: "app 不能为空" }, 400);
+    if (!String(prompt || "").trim()) return json(res, { success: false, message: "prompt 不能为空" }, 400);
     const result = await createAgentTask({
       app: String(app || "").trim(),
       title: String(title || "").trim(),
@@ -58,7 +58,7 @@ const handleTaskCreateAgentApi = async (req, res, path) => {
     });
     return json(res, result);
   } catch (e) {
-    return json(res, { success: false, message: e?.message || "\u4EFB\u52A1\u6267\u884C\u5931\u8D25" }, 500);
+    return json(res, { success: false, message: e?.message || "任务执行失败" }, 500);
   }
 };
 const handleTaskApi = async (req, res, path, url) => {
@@ -68,16 +68,16 @@ const handleTaskApi = async (req, res, path, url) => {
   }
   if (path === "/api/task/detail" && req.method === "GET") {
     const id = Number(url.searchParams.get("id") || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id \u65E0\u6548" }, 400);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id 无效" }, 400);
     const task = getTaskDetail({ id });
-    if (!task) return json(res, { success: false, message: "\u4EFB\u52A1\u4E0D\u5B58\u5728" }, 404);
+    if (!task) return json(res, { success: false, message: "任务不存在" }, 404);
     return json(res, { success: true, task });
   }
   if (path === "/api/task/messages" && req.method === "GET") {
     const id = Number(url.searchParams.get("id") || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id \u65E0\u6548" }, 400);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id 无效" }, 400);
     const task = getTaskDetail({ id });
-    if (!task) return json(res, { success: false, message: "\u4EFB\u52A1\u4E0D\u5B58\u5728" }, 404);
+    if (!task) return json(res, { success: false, message: "任务不存在" }, 404);
     return json(res, { success: true, messages: listTaskMessages({ conversationId: task.conversation_id || "" }) });
   }
   if (path.startsWith("/api/task/create")) {
@@ -95,13 +95,13 @@ const handleTaskApi = async (req, res, path, url) => {
       const body = await readBody(req);
       return json(res, createSchedule(body));
     } catch (e) {
-      return json(res, { success: false, message: e?.message || "\u521B\u5EFA\u8BA1\u5212\u5931\u8D25" }, 400);
+      return json(res, { success: false, message: e?.message || "创建计划失败" }, 400);
     }
   }
   if (path === "/api/task/schedule/update" && req.method === "POST") {
     const body = await readBody(req);
     const id = Number(body.id || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id \u65E0\u6548" }, 400);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id 无效" }, 400);
     const result = updateSchedule({ id, ...body });
     if (result?.status) return json(res, { success: false, message: result.message }, result.status);
     return json(res, result);
@@ -109,7 +109,7 @@ const handleTaskApi = async (req, res, path, url) => {
   if (path === "/api/task/schedule/delete" && req.method === "POST") {
     const body = await readBody(req);
     const id = Number(body.id || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id \u65E0\u6548" }, 400);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id 无效" }, 400);
     const result = deleteSchedule({ id });
     if (result?.status) return json(res, { success: false, message: result.message }, result.status);
     return json(res, result);
@@ -117,7 +117,7 @@ const handleTaskApi = async (req, res, path, url) => {
   if (path === "/api/task/stop" && req.method === "POST") {
     const body = await readBody(req);
     const id = Number(body.id || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id \u65E0\u6548" }, 400);
+    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "id 无效" }, 400);
     const result = stopTask({ id });
     if (result?.status) return json(res, { success: false, message: result.message }, result.status);
     return json(res, result);

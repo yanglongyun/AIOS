@@ -6,17 +6,17 @@ import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL
 import { normalizeUsername } from "../../../shared/auth/index.js";
 const login = async (req, res) => {
   if (countUsers() === 0) {
-    return json(res, { success: false, message: "\u7CFB\u7EDF\u672A\u521D\u59CB\u5316\uFF0C\u8BF7\u5148\u5B8C\u6210\u6B22\u8FCE\u5B89\u88C5\u6D41\u7A0B" }, 400);
+    return json(res, { success: false, message: "系统未初始化，请先完成欢迎安装流程" }, 400);
   }
   const body = await readBody(req);
   const username = normalizeUsername(body.username);
   const password = String(body.password || "");
   if (!username || !password) {
-    return json(res, { success: false, message: "\u7528\u6237\u540D\u548C\u5BC6\u7801\u4E0D\u80FD\u4E3A\u7A7A" }, 400);
+    return json(res, { success: false, message: "用户名和密码不能为空" }, 400);
   }
   const user = findUserByUsername(username);
   if (!user || !verifyPassword(password, user.password_hash)) {
-    return json(res, { success: false, message: "\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF" }, 401);
+    return json(res, { success: false, message: "用户名或密码错误" }, 401);
   }
   const token = generateSessionToken();
   createAuthSession(user.id, hashSessionToken(token), SESSION_TTL_SECONDS);

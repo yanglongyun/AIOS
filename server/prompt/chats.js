@@ -15,17 +15,17 @@ const chats = (currentConversationId) => {
   const currentId = String(currentConversationId || "").trim();
   const list = recentChats();
   if (!currentId && (!Array.isArray(list) || list.length === 0)) return "";
-  const recentLines = list.slice(0, 3).map((c, i) => `${i + 1}. ${c.title || "\u672A\u547D\u540D"} \uFF5C ${String(c.description || "").slice(0, 100)}`);
+  const recentLines = list.slice(0, 3).map((c, i) => `${i + 1}. ${c.title || "未命名"} ｜ ${String(c.description || "").slice(0, 100)}`);
   let block = `
 
-## \u4F1A\u8BDD\u4E0A\u4E0B\u6587`;
+## 会话上下文`;
   if (currentId) {
     block += `
-- \u5F53\u524D\u4F1A\u8BDDID\uFF1A${currentId}`;
+- 当前会话ID：${currentId}`;
   }
   if (recentLines.length) {
     block += `
-- \u6700\u8FD1 3 \u6B21\u4F1A\u8BDD\uFF08\u6807\u9898\uFF5C\u63CF\u8FF0\u524D100\u5B57\uFF09\uFF1A
+- 最近 3 次会话（标题｜描述前100字）：
 ${recentLines.join("\n")}`;
   }
   return block;

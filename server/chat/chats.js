@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { db } from "../repository/client.js";
-const createChat = (title = "\u65B0\u5BF9\u8BDD", scene = "chat", meta = null) => {
+const createChat = (title = "新对话", scene = "chat", meta = null) => {
   const conversationId = randomUUID();
   db.prepare("INSERT INTO chats (conversation_id, title, scene, meta) VALUES (?, ?, ?, ?)").run(conversationId, title, scene, meta ? JSON.stringify(meta) : null);
   return { conversationId };

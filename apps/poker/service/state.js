@@ -2,9 +2,9 @@ import { getGameById } from "../repository/game.js";
 import { getPokerEconomy } from "../repository/economy.js";
 const getGameState = (query = {}) => {
   const id = Number(query.id || 0);
-  if (!id) return { status: 400, message: "\u7F3A\u5C11 id" };
+  if (!id) return { status: 400, message: "缺少 id" };
   const row = getGameById(id);
-  if (!row) return { status: 404, message: "\u724C\u5C40\u4E0D\u5B58\u5728" };
+  if (!row) return { status: 404, message: "牌局不存在" };
   const playerCards = JSON.parse(row.player_cards);
   const aiCards = JSON.parse(row.ai_cards);
   return {

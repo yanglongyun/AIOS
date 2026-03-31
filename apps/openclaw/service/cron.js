@@ -33,12 +33,12 @@ const normalizeJob = (job) => {
 const listCron = async () => {
   const out = await run("openclaw cron list --json");
   const data = parseJson(out);
-  if (!data) return { status: 500, message: "openclaw cron list \u8F93\u51FA\u89E3\u6790\u5931\u8D25" };
+  if (!data) return { status: 500, message: "openclaw cron list 输出解析失败" };
   const rawJobs = Array.isArray(data) ? data : Array.isArray(data.jobs) ? data.jobs : [];
   return { success: true, jobs: rawJobs.map(normalizeJob) };
 };
 const addCron = async ({ name, schedule, prompt, sessionTarget }) => {
-  if (!name || !prompt) return { status: 400, message: "name \u548C prompt \u5FC5\u586B" };
+  if (!name || !prompt) return { status: 400, message: "name 和 prompt 必填" };
   const args = [`--name ${quote(name)}`];
   if (schedule?.cron) args.push(`--cron ${quote(schedule.cron)}`);
   else if (schedule?.at) args.push(`--at ${quote(schedule.at)}`);
@@ -52,9 +52,9 @@ const updateCron = async ({ jobId, name, schedule, prompt, sessionTarget }) => {
   const id = String(jobId || "").trim();
   const n = String(name || "").trim();
   const p = String(prompt || "").trim();
-  if (!id) return { status: 400, message: "jobId \u5FC5\u586B" };
-  if (!n || !p) return { status: 400, message: "name \u548C prompt \u5FC5\u586B" };
-  if (!schedule?.cron && !schedule?.at && !schedule?.every) return { status: 400, message: "schedule \u5FC5\u586B" };
+  if (!id) return { status: 400, message: "jobId 必填" };
+  if (!n || !p) return { status: 400, message: "name 和 prompt 必填" };
+  if (!schedule?.cron && !schedule?.at && !schedule?.every) return { status: 400, message: "schedule 必填" };
   const args = [id, `--name ${quote(n)}`];
   if (schedule?.cron) args.push(`--cron ${quote(schedule.cron)}`);
   else if (schedule?.at) args.push(`--at ${quote(schedule.at)}`);
@@ -65,18 +65,18 @@ const updateCron = async ({ jobId, name, schedule, prompt, sessionTarget }) => {
   return { success: true, output: out };
 };
 const runCron = async (jobId) => {
-  if (!jobId) return { status: 400, message: "jobId \u5FC5\u586B" };
+  if (!jobId) return { status: 400, message: "jobId 必填" };
   const out = await run(`openclaw cron run ${jobId} --session main`);
   return { success: true, output: out };
 };
 const listCronRuns = async ({ jobId, limit = 20 }) => {
   const id = String(jobId || "").trim();
   const n = Number(limit);
-  if (!id) return { status: 400, message: "jobId \u5FC5\u586B" };
-  if (!Number.isInteger(n) || n <= 0 || n > 100) return { status: 400, message: "limit \u5FC5\u987B\u662F 1-100 \u7684\u6574\u6570" };
+  if (!id) return { status: 400, message: "jobId 必填" };
+  if (!Number.isInteger(n) || n <= 0 || n > 100) return { status: 400, message: "limit 必须是 1-100 的整数" };
   const out = await run(`openclaw cron runs --id ${id} --limit ${n}`);
   const data = parseJson(out);
-  if (!data || !Array.isArray(data.entries)) return { status: 500, message: "openclaw cron runs \u8F93\u51FA\u89E3\u6790\u5931\u8D25" };
+  if (!data || !Array.isArray(data.entries)) return { status: 500, message: "openclaw cron runs 输出解析失败" };
   const entries = data.entries.map((it) => ({
     ts: Number(it.ts || 0) || 0,
     action: String(it.action || ""),
@@ -90,7 +90,7 @@ const listCronRuns = async ({ jobId, limit = 20 }) => {
   return { success: true, entries };
 };
 const deleteCron = async (jobId) => {
-  if (!jobId) return { status: 400, message: "jobId \u5FC5\u586B" };
+  if (!jobId) return { status: 400, message: "jobId 必填" };
   const out = await run(`openclaw cron delete ${jobId}`);
   return { success: true, output: out };
 };

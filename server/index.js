@@ -5,7 +5,7 @@ import { initDatabase } from "./repository/init.js";
 import { startTaskScheduler } from "./task/schedule/scheduler.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
-  throw new Error("\u7AEF\u53E3\u53C2\u6570\u4E0D\u5408\u6CD5");
+  throw new Error("端口参数不合法");
 }
 const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9700;
 initSystemDirs();
@@ -16,6 +16,6 @@ httpServer.listen(PORT, () => {
   console.log("");
   console.log("  AIOS is running");
   console.log("");
-  console.log(`  > \u672C\u5730: http://localhost:${PORT}`);
+  console.log(`  > 本地: http://localhost:${PORT}`);
   console.log("");
 });

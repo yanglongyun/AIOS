@@ -5,7 +5,7 @@ import { access } from "../shared/auth/index.js";
 import { hasSystemLanguage } from "./app_shared/settings/language.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
-  throw new Error("\u7AEF\u53E3\u53C2\u6570\u4E0D\u5408\u6CD5");
+  throw new Error("端口参数不合法");
 }
 const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9701;
 const APPS_HOST = "127.0.0.1";
@@ -77,7 +77,7 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
     if (!hasSystemLanguage()) {
-      json(res, { success: false, message: "\u7CFB\u7EDF\u8BED\u8A00\u672A\u5B8C\u6210\u5B89\u88C5\uFF0C\u8BF7\u5148\u5B8C\u6210\u6B22\u8FCE\u5B89\u88C5\u6D41\u7A0B" }, 423);
+      json(res, { success: false, message: "系统语言未完成安装，请先完成欢迎安装流程" }, 423);
       return;
     }
     const app = appModules.find((item) => item.match(path));

@@ -2,7 +2,7 @@ const memory = (overview) => {
   if (!overview) return "";
   return `
 
-## \u8BB0\u5FC6
+## 记忆
 ${overview}`;
 };
 export {

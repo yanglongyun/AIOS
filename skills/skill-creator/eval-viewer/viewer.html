@@ -889,7 +889,7 @@
       html += '<ul class="assertion-list">';
       for (const exp of expectations) {
         const statusClass = exp.passed ? "pass" : "fail";
-        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        const statusIcon = exp.passed ? "✓" : "✗";
         html += '<li class="assertion-item">';
         html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
         html += '<span>' + escapeHtml(exp.text) + '</span>';
@@ -1288,7 +1288,7 @@
                   const exp = (run.expectations || []).find(e => e.text === assertionText);
                   if (exp) {
                     const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
-                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    const icon = exp.passed ? "✓" : "✗";
                     html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
                   } else {
                     html += "— ";

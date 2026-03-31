@@ -5,7 +5,7 @@ const saveExchange = (body = {}) => {
   const apiSecret = String(body.api_secret ?? "").trim();
   const passphrase = String(body.passphrase ?? "").trim();
   if (!apiKey || !apiSecret || !passphrase) {
-    throw new Error("API Key\u3001Secret\u3001Passphrase \u5747\u4E0D\u80FD\u4E3A\u7A7A");
+    throw new Error("API Key、Secret、Passphrase 均不能为空");
   }
   saveConfig({
     base_url: String(cfg.base_url || "").trim(),

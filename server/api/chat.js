@@ -12,25 +12,25 @@ const handleChatApi = async (req, res, path, url) => {
   }
   if (path === "/api/chat/create" && req.method === "POST") {
     const body = await readBody(req);
-    return json(res, createChat(body.title || "\u65B0\u5BF9\u8BDD", body.scene || "chat", body.meta || null));
+    return json(res, createChat(body.title || "新对话", body.scene || "chat", body.meta || null));
   }
   if (path === "/api/chat/messages" && req.method === "GET") {
     const conversationId = url.searchParams.get("conversationId");
-    if (!conversationId) return json(res, { error: "\u7F3A\u5C11 conversationId" }, 400);
-    if (!hasChat(conversationId)) return json(res, { error: "\u4F1A\u8BDD\u4E0D\u5B58\u5728" }, 404);
+    if (!conversationId) return json(res, { error: "缺少 conversationId" }, 400);
+    if (!hasChat(conversationId)) return json(res, { error: "会话不存在" }, 404);
     const limit = Number(url.searchParams.get("limit") || 20);
     const offset = Number(url.searchParams.get("offset") || 0);
     return json(res, getChatMessagesPaged(conversationId, limit, offset));
   }
   if (path === "/api/chat/rename" && req.method === "POST") {
     const body = await readBody(req);
-    if (!body.conversationId) return json(res, { error: "\u7F3A\u5C11 conversationId" }, 400);
-    if (!body.title) return json(res, { error: "\u7F3A\u5C11 title" }, 400);
+    if (!body.conversationId) return json(res, { error: "缺少 conversationId" }, 400);
+    if (!body.title) return json(res, { error: "缺少 title" }, 400);
     return json(res, renameChat(body.conversationId, body.title));
   }
   if (path === "/api/chat/delete" && req.method === "POST") {
     const body = await readBody(req);
-    if (!body.conversationId) return json(res, { error: "\u7F3A\u5C11 conversationId" }, 400);
+    if (!body.conversationId) return json(res, { error: "缺少 conversationId" }, 400);
     return json(res, deleteChat(body.conversationId));
   }
   return json(res, { error: "API endpoint not found" }, 404);

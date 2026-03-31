@@ -4,7 +4,7 @@ const getTaskStatusById = (id) => {
 };
 const markTaskAbortedById = (id) => {
   db.prepare(
-    "UPDATE tasks SET status = 'aborted', error = '\u7528\u6237\u7EC8\u6B62\u4EFB\u52A1', finished_at = datetime('now') WHERE id = ?"
+    "UPDATE tasks SET status = 'aborted', error = '用户终止任务', finished_at = datetime('now') WHERE id = ?"
   ).run(id);
 };
 export {

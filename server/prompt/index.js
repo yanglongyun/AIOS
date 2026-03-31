@@ -17,7 +17,7 @@ const instruction = () => {
   try {
     return readFileSync(INSTRUCTION_PATH, "utf8").trim();
   } catch {
-    return "\u4F60\u662F AIOS\u3002";
+    return "你是 AIOS。";
   }
 };
 const memoryIndexOverview = () => {

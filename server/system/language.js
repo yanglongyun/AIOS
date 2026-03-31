@@ -19,12 +19,12 @@ const listFiles = (dir) => {
 };
 const loadMessages = (lang) => {
   if (!ALLOWED_LANGUAGES.has(lang)) {
-    throw new Error("\u8BED\u8A00\u4E0D\u5408\u6CD5");
+    throw new Error("语言不合法");
   }
   const langDir = join(LANGUAGE_DIR, lang);
   const stat = statSync(langDir);
   if (!stat.isDirectory()) {
-    throw new Error(`\u8BED\u8A00\u76EE\u5F55\u4E0D\u5B58\u5728\uFF1A${lang}`);
+    throw new Error(`语言目录不存在：${lang}`);
   }
   const messages = {};
   for (const file of listFiles(langDir)) {
@@ -41,7 +41,7 @@ const applyLanguage = (lang) => {
     const replaced = content.replace(/__T_([A-Z0-9_]+)__/g, (match, rawKey) => {
       const key = rawKey.toLowerCase();
       if (!(key in messages)) {
-        throw new Error(`\u7F3A\u5C11\u8BED\u8A00\u952E\uFF1A${key}`);
+        throw new Error(`缺少语言键：${key}`);
       }
       return messages[key];
     });

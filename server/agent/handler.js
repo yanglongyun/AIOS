@@ -52,8 +52,8 @@ const chat = async (messages, {
     send({ type: "done", message: replyMsg });
     return text;
   }
-  send({ type: "done", message: { role: "assistant", content: "(\u8FBE\u5230\u6700\u5927\u8F6E\u6B21\u9650\u5236)" } });
-  return "(\u8FBE\u5230\u6700\u5927\u8F6E\u6B21\u9650\u5236)";
+  send({ type: "done", message: { role: "assistant", content: "(达到最大轮次限制)" } });
+  return "(达到最大轮次限制)";
 };
 export {
   chat

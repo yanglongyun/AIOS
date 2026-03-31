@@ -6,11 +6,11 @@ const tools = ({
 }) => {
   return `
 
-## \u5DE5\u5177\u914D\u7F6E
-- \u5DE5\u5177\u7ED3\u679C\u622A\u65AD\uFF1A${enableToolResultTruncate ? "\u5F00\u542F" : "\u5173\u95ED"}
-- \u5DE5\u5177\u7ED3\u679C\u6700\u5927\u957F\u5EA6\uFF1A${toolResultMaxChars ?? "-"}
-- \u5DE5\u5177\u5FAA\u73AF\u9650\u5236\uFF1A${enableToolLoopLimit ? "\u5F00\u542F" : "\u5173\u95ED"}
-- \u5DE5\u5177\u6700\u5927\u5FAA\u73AF\u8F6E\u6B21\uFF1A${toolMaxRounds ?? "-"}`;
+## 工具配置
+- 工具结果截断：${enableToolResultTruncate ? "开启" : "关闭"}
+- 工具结果最大长度：${toolResultMaxChars ?? "-"}
+- 工具循环限制：${enableToolLoopLimit ? "开启" : "关闭"}
+- 工具最大循环轮次：${toolMaxRounds ?? "-"}`;
 };
 export {
   tools

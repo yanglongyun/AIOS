@@ -1,14 +1,14 @@
 const environment = (cwd) => {
   return `
 
-## \u73AF\u5883
-- \u9879\u76EE\u6839\u76EE\u5F55\uFF1A${cwd}
-- \u7CFB\u7EDF\u6570\u636E\u5E93\uFF1A${cwd}/database/aios.db\uFF08SQLite\uFF0C\u8868\uFF1Achats, messages, settings\uFF09
-- \u5E94\u7528\u6570\u636E\u5E93\u76EE\u5F55\uFF1A${cwd}/database/apps/\uFF08SQLite\uFF0C\u6BCF\u4E2A\u5E94\u7528\u72EC\u7ACB db \u6587\u4EF6\uFF09
-- \u6587\u4EF6\u7CFB\u7EDF\u76EE\u5F55\uFF1A${cwd}/files/
-- \u4E0A\u4F20\u76EE\u5F55\uFF1A${cwd}/files/uploads/
-- \u5BFC\u51FA\u76EE\u5F55\uFF1A${cwd}/files/exports/
-- \u8BB0\u5FC6\u76EE\u5F55\uFF1A${cwd}/memory/\uFF08index.md \u4E3A\u7D22\u5F15\uFF0C\u6309\u9700 cat \u5177\u4F53\u6587\u4EF6\uFF09`;
+## 环境
+- 项目根目录：${cwd}
+- 系统数据库：${cwd}/database/aios.db（SQLite，表：chats, messages, settings）
+- 应用数据库目录：${cwd}/database/apps/（SQLite，每个应用独立 db 文件）
+- 文件系统目录：${cwd}/files/
+- 上传目录：${cwd}/files/uploads/
+- 导出目录：${cwd}/files/exports/
+- 记忆目录：${cwd}/memory/（index.md 为索引，按需 cat 具体文件）`;
 };
 export {
   environment

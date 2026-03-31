@@ -39,7 +39,7 @@ const probeProcess = async (entry, probePort, healthPath) => {
   } catch {
   }
   if (!alive) {
-    throw new Error(`${entry} \u670D\u52A1\u9A8C\u6D3B\u5931\u8D25\uFF0C\u65E7\u670D\u52A1\u4FDD\u6301\u8FD0\u884C`);
+    throw new Error(`${entry} 服务验活失败，旧服务保持运行`);
   }
 };
 const startDetachedNode = (entry) => {

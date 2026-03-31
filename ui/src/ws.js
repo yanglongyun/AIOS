@@ -86,7 +86,7 @@ const ensureConnected = () => {
   if (ws?.readyState === WebSocket.OPEN) return Promise.resolve();
   if (wsStatus.value !== "connecting") connect();
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("WebSocket \u8FDE\u63A5\u8D85\u65F6")), 5e3);
+    const timeout = setTimeout(() => reject(new Error("WebSocket 连接超时")), 5e3);
     const unsub = on("open", () => {
       clearTimeout(timeout);
       unsub();

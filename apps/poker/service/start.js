@@ -23,7 +23,7 @@ const startGame = () => {
   const playerChips = economyBefore.playerBalance - ante;
   const aiChips = economyBefore.aiBalance - ante;
   const actionHistory = [
-    { actor: "system", action: "ante", amount: ante, text: `\u53CC\u65B9\u4E0B\u5E95\u6CE8 ${ante}` }
+    { actor: "system", action: "ante", amount: ante, text: `双方下底注 ${ante}` }
   ];
   setPokerBalances({ playerBalance: playerChips, aiBalance: aiChips });
   const ret = insertGame({

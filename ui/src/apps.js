@@ -13,7 +13,7 @@ const appRegistry = [
   {
     id: "tasks",
     name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "\u2705",
+    icon: "✅",
     iconClass: "icon-tasks",
     load: () => import("./apps/tasks/index.vue"),
     defaultSize: { w: 700, h: 500 }
@@ -103,7 +103,7 @@ const appRegistry = [
   {
     id: "settings",
     name: "__T_APP_SIDEBAR_SETTINGS__",
-    icon: "\u2699\uFE0F",
+    icon: "⚙️",
     iconClass: "icon-settings",
     load: () => import("./apps/settings/index.vue"),
     defaultSize: { w: 750, h: 520 }
@@ -111,7 +111,7 @@ const appRegistry = [
   {
     id: "create-app",
     name: "__T_APP_SIDEBAR_CREATE_APP__",
-    icon: "\u2795",
+    icon: "➕",
     iconClass: "icon-create",
     load: () => import("./apps/createapp/index.vue"),
     defaultSize: { w: 700, h: 500 }
@@ -120,7 +120,7 @@ const appRegistry = [
   {
     id: "task-detail",
     name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "\u2705",
+    icon: "✅",
     iconClass: "icon-tasks",
     load: () => import("./apps/tasks/detail.vue"),
     hidden: true,
@@ -129,7 +129,7 @@ const appRegistry = [
   {
     id: "task-create",
     name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "\u2705",
+    icon: "✅",
     iconClass: "icon-tasks",
     load: () => import("./apps/tasks/create.vue"),
     hidden: true,

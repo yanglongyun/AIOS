@@ -11,7 +11,7 @@ const getToken = () => {
   }
 };
 const chat = async ({ message, history = [] }) => {
-  if (!message?.trim()) return { status: 400, message: "message \u4E0D\u80FD\u4E3A\u7A7A" };
+  if (!message?.trim()) return { status: 400, message: "message 不能为空" };
   const messages = [
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: "user", content: message }
@@ -26,7 +26,7 @@ const chat = async ({ message, history = [] }) => {
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    return { status: res.status, message: `OpenClaw Gateway \u9519\u8BEF: ${res.status} ${text}` };
+    return { status: res.status, message: `OpenClaw Gateway 错误: ${res.status} ${text}` };
   }
   const data = await res.json();
   const reply = data.choices?.[0]?.message?.content || "";

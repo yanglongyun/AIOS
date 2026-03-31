@@ -5,7 +5,7 @@ const skills = () => {
   return `
 
 ## Skills
-\u4EE5\u4E0B\u662F\u53EF\u7528\u6280\u80FD\u7684\u5B8C\u6574\u6307\u4EE4\uFF0C\u76F4\u63A5\u6309\u8BF4\u660E\u4F7F\u7528\u5373\u53EF\u3002
+以下是可用技能的完整指令，直接按说明使用即可。
 
 ${sections.join("\n\n---\n\n")}`;
 };

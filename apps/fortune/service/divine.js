@@ -2,12 +2,12 @@ import { instantTaskJson } from "../../app_shared/instantTask.js";
 import { insertRecord } from "../repository/divine.js";
 const divine = async ({ question, hexagram, prompt, messages, taskTitle, req }) => {
   const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt \u4E0D\u80FD\u4E3A\u7A7A" };
+  if (!promptText) return { status: 400, message: "prompt 不能为空" };
   const taskMessages = Array.isArray(messages) ? messages : [];
-  if (taskMessages.length === 0) return { status: 400, message: "messages \u4E0D\u80FD\u4E3A\u7A7A" };
+  if (taskMessages.length === 0) return { status: 400, message: "messages 不能为空" };
   const parsed = await instantTaskJson({
     app: "fortune",
-    title: String(taskTitle || "").trim() || "\u5468\u6613\u89E3\u5366",
+    title: String(taskTitle || "").trim() || "周易解卦",
     schema: { required: ["signName", "signPoem", "good", "bad", "advice"] },
     prompt: promptText,
     messages: taskMessages,
@@ -15,7 +15,7 @@ const divine = async ({ question, hexagram, prompt, messages, taskTitle, req }) 
   });
   const record = {
     question,
-    signName: String(parsed.signName || "").trim() || "\u672A\u77E5",
+    signName: String(parsed.signName || "").trim() || "未知",
     signPoem: String(parsed.signPoem || "").trim() || "",
     good: String(parsed.good || "").trim() || "",
     bad: String(parsed.bad || "").trim() || "",

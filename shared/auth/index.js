@@ -43,13 +43,13 @@ const access = (req, path, method, scope) => {
       return { ok: true, initialized, user: null };
     }
     if (!initialized && !allowServerDuringSetup(path, method)) {
-      return { ok: false, status: 423, message: "\u7CFB\u7EDF\u672A\u521D\u59CB\u5316\uFF0C\u8BF7\u5148\u5B8C\u6210\u6B22\u8FCE\u5B89\u88C5\u6D41\u7A0B" };
+      return { ok: false, status: 423, message: "系统未初始化，请先完成欢迎安装流程" };
     }
     if (!initialized && allowServerDuringSetup(path, method)) {
       return { ok: true, initialized, user: null };
     }
     const user = getAuthUser(req);
-    if (!user) return { ok: false, status: 401, message: "\u672A\u767B\u5F55" };
+    if (!user) return { ok: false, status: 401, message: "未登录" };
     return { ok: true, initialized, user };
   }
   if (scope === "apps") {
@@ -58,10 +58,10 @@ const access = (req, path, method, scope) => {
     }
     if (allowAppsPublic(path)) return { ok: true, initialized, user: null };
     if (!initialized) {
-      return { ok: false, status: 423, message: "\u7CFB\u7EDF\u672A\u521D\u59CB\u5316\uFF0C\u8BF7\u5148\u5B8C\u6210\u6B22\u8FCE\u5B89\u88C5\u6D41\u7A0B" };
+      return { ok: false, status: 423, message: "系统未初始化，请先完成欢迎安装流程" };
     }
     const user = getAuthUser(req);
-    if (!user) return { ok: false, status: 401, message: "\u672A\u767B\u5F55" };
+    if (!user) return { ok: false, status: 401, message: "未登录" };
     return { ok: true, initialized, user };
   }
   return { ok: true, initialized, user: null };

@@ -32,8 +32,8 @@ const apps = () => {
   if (!existsSync(APPS_ROOT)) {
     return `
 
-## \u5E94\u7528\u76EE\u5F55
-\u4F60\u53EF\u4EE5\u5E2E\u52A9\u7528\u6237\u6784\u5EFA\u5E94\u7528\u3001\u4F7F\u7528\u5E94\u7528\u3001\u7BA1\u7406\u5E94\u7528\u3002`;
+## 应用目录
+你可以帮助用户构建应用、使用应用、管理应用。`;
   }
   const list = [];
   for (const name of readdirSync(APPS_ROOT)) {
@@ -60,8 +60,8 @@ const apps = () => {
   if (!Array.isArray(list) || list.length === 0) {
     return `
 
-## \u5E94\u7528\u76EE\u5F55
-\u4F60\u53EF\u4EE5\u5E2E\u52A9\u7528\u6237\u6784\u5EFA\u5E94\u7528\u3001\u4F7F\u7528\u5E94\u7528\u3001\u7BA1\u7406\u5E94\u7528\u3002`;
+## 应用目录
+你可以帮助用户构建应用、使用应用、管理应用。`;
   }
   const lines = list.map((app, i) => {
     const summary = app.summary ? ` - ${app.summary}` : "";
@@ -71,8 +71,8 @@ const apps = () => {
   });
   return `
 
-## \u5E94\u7528\u76EE\u5F55
-\u4F60\u53EF\u4EE5\u5E2E\u52A9\u7528\u6237\u6784\u5EFA\u5E94\u7528\u3001\u4F7F\u7528\u5E94\u7528\u3001\u7BA1\u7406\u5E94\u7528\u3002
+## 应用目录
+你可以帮助用户构建应用、使用应用、管理应用。
 ${lines.join("\n")}`;
 };
 export {

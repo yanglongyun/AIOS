@@ -113,7 +113,7 @@ const createAgentTask = async ({
     if (error?.name === "AbortError") {
       updateTaskAborted({ taskId });
     } else {
-      updateTaskError({ taskId, message: error?.message || "\u4EFB\u52A1\u6267\u884C\u5931\u8D25" });
+      updateTaskError({ taskId, message: error?.message || "任务执行失败" });
     }
     broadcast({ type: "tasks_changed" });
     throw error;

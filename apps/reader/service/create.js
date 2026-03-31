@@ -1,6 +1,6 @@
 import { insertSession } from "../repository/create.js";
 const create = (body = {}) => {
-  const title = String(body.title || "").trim() || "\u672A\u547D\u540D\u6545\u4E8B";
+  const title = String(body.title || "").trim() || "未命名故事";
   const premise = String(body.premise || "").trim();
   const session = insertSession({ title, premise });
   return {

@@ -14,7 +14,7 @@ const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
       const label = String(item.label || "").trim();
       if (label) {
         validAttachments.push({ type: "context", scene: item.scene, label });
-        contextParts.push(`[\u5F53\u524D\u5E94\u7528: ${label}]`);
+        contextParts.push(`[当前应用: ${label}]`);
       }
       continue;
     }
@@ -32,7 +32,7 @@ const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
   const parts = [];
   if (contextParts.length) parts.push(contextParts.join("\n"));
   if (fileParts.length) {
-    parts.push(["\u3010\u9644\u4EF6\u6587\u4EF6\u8DEF\u5F84\u3011", ...fileParts, "\u8BF7\u5148\u8BFB\u53D6\u8FD9\u4E9B\u6587\u4EF6\u5185\u5BB9\uFF0C\u518D\u7ED3\u5408\u7528\u6237\u95EE\u9898\u56DE\u7B54\u3002"].join("\n"));
+    parts.push(["【附件文件路径】", ...fileParts, "请先读取这些文件内容，再结合用户问题回答。"].join("\n"));
   }
   if (parts.length) {
     const lastIndex = list.length - 1;

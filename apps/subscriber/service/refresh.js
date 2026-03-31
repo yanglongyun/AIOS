@@ -4,7 +4,7 @@ import { getProfileFocus, upsertProfile, insertDaily, getDailyFullByDate } from 
 const taskAgent = async ({ prompt, taskTitle, req }) => {
   const parsed = await agentTaskJson({
     app: "subscriber",
-    title: String(taskTitle || "").trim() || `\u8BA2\u9605\u6536\u62A5`,
+    title: String(taskTitle || "").trim() || `订阅收报`,
     prompt: String(prompt || "").trim(),
     req
   });
@@ -19,16 +19,16 @@ const refresh = async (body = {}, req) => {
   const profile = getProfileFocus();
   const focus = String(body.focus || profile?.focus || "").trim();
   if (!focus) {
-    return { status: 400, message: "focus \u4E0D\u80FD\u4E3A\u7A7A" };
+    return { status: 400, message: "focus 不能为空" };
   }
   upsertProfile(focus);
   const date = toDateKey();
   const promptText = String(body.prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt \u4E0D\u80FD\u4E3A\u7A7A" };
+  if (!promptText) return { status: 400, message: "prompt 不能为空" };
   const taskTitle = String(body.taskTitle || "").trim();
   const result = await taskAgent({ prompt: promptText, taskTitle, req });
   if (!result.title || !result.brief || !result.content) {
-    return { status: 500, message: "\u751F\u6210\u7ED3\u679C\u4E0D\u5B8C\u6574" };
+    return { status: 500, message: "生成结果不完整" };
   }
   insertDaily(date, focus, result.title, result.brief, result.content, result.note);
   const today = getDailyFullByDate(date);

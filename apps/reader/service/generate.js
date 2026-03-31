@@ -10,21 +10,21 @@ const normalizeChoices = (choices = [], locale = "zh") => {
     if (out.length >= 3) break;
   }
   while (out.length < 3) {
-    out.push(locale === "en" ? `Continue option ${out.length + 1}` : `\u7EE7\u7EED\u884C\u52A8 ${out.length + 1}`);
+    out.push(locale === "en" ? `Continue option ${out.length + 1}` : `继续行动 ${out.length + 1}`);
   }
   return out;
 };
 const generate = async ({ sessionId, action, prompt, locale, taskTitle, req }) => {
   if (!Number.isInteger(sessionId) || sessionId <= 0) {
-    return { status: 400, message: "sessionId \u65E0\u6548" };
+    return { status: 400, message: "sessionId 无效" };
   }
   const session = findSessionById(sessionId);
-  if (!session) return { status: 404, message: "\u6545\u4E8B\u4E0D\u5B58\u5728" };
+  if (!session) return { status: 404, message: "故事不存在" };
   const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt \u4E0D\u80FD\u4E3A\u7A7A" };
+  if (!promptText) return { status: 400, message: "prompt 不能为空" };
   const lang = normalizeLocale(locale);
-  const actionText = String(action || "").trim() || (lang === "en" ? "Start Reader" : "\u5F00\u59CB\u9605\u8BFB");
-  const title = String(taskTitle || "").trim() || (lang === "en" ? `Story Progress #${sessionId}` : `\u6545\u4E8B\u63A8\u8FDB #${sessionId}`);
+  const actionText = String(action || "").trim() || (lang === "en" ? "Start Reader" : "开始阅读");
+  const title = String(taskTitle || "").trim() || (lang === "en" ? `Story Progress #${sessionId}` : `故事推进 #${sessionId}`);
   const result = await agentTaskJson({
     app: "reader",
     title,
@@ -32,10 +32,10 @@ const generate = async ({ sessionId, action, prompt, locale, taskTitle, req }) =
     req
   });
   const content = String(result.content || "").trim();
-  if (!content) return { status: 500, message: "\u751F\u6210\u7ED3\u679C\u7F3A\u5C11 content" };
+  if (!content) return { status: 500, message: "生成结果缺少 content" };
   const choices = normalizeChoices(result.choices, lang);
   const summary = String(result.summary || "").trim() || content.slice(0, 120);
-  const progress = String(result.progress || "").trim() || (lang === "en" ? "Chapter" : "\u7AE0\u8282\u63A8\u8FDB");
+  const progress = String(result.progress || "").trim() || (lang === "en" ? "Chapter" : "章节推进");
   const prevCount = countChapters(sessionId);
   const idx = prevCount + 1;
   insertChapter({

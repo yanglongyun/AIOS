@@ -18,10 +18,10 @@ const runBotOnce = async () => {
 const startBot = (intervalSec) => {
   const cfg = getConfig();
   if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
-    throw new Error("\u8BF7\u5148\u914D\u7F6E OKX API Key/Secret/Passphrase");
+    throw new Error("请先配置 OKX API Key/Secret/Passphrase");
   }
   if (!cfg.goal) {
-    throw new Error("\u8BF7\u5148\u8BBE\u7F6E\u76EE\u6807");
+    throw new Error("请先设置目标");
   }
   const sec = Math.max(60, parseInt(intervalSec || cfg.interval_sec || 300));
   if (timer) {

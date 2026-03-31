@@ -4,10 +4,10 @@ const createFinance = (body = {}) => {
   const amount = Number(body.amount);
   const note = String(body.note || "");
   if (!["income", "expense"].includes(type)) {
-    return { success: false, message: "type \u5FC5\u987B\u662F income \u6216 expense" };
+    return { success: false, message: "type 必须是 income 或 expense" };
   }
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { success: false, message: "amount \u5FC5\u987B\u662F\u5927\u4E8E 0 \u7684\u6570\u5B57" };
+    return { success: false, message: "amount 必须是大于 0 的数字" };
   }
   const date = body.date ? String(body.date) : void 0;
   createTransaction({ type, amount, note, date });

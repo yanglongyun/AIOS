@@ -56,7 +56,7 @@ const normalizeAgentMessages = (messages = []) => {
       toolMap.set(msg.tool_call_id, msg);
     }
   }
-  const TOOL_MISSING = "\u5DE5\u5177\u8C03\u7528\u672A\u8FD4\u56DE\u7ED3\u679C\uFF1A\u53EF\u80FD\u56E0\u7CFB\u7EDF\u4E2D\u65AD\u3001\u670D\u52A1\u91CD\u542F\u3001\u8D85\u65F6\u6216\u5176\u5B83\u672A\u77E5\u539F\u56E0\uFF0C\u5BFC\u81F4\u672C\u6B21\u6267\u884C\u7ED3\u679C\u672A\u88AB\u8BB0\u5F55\u3002";
+  const TOOL_MISSING = "工具调用未返回结果：可能因系统中断、服务重启、超时或其它未知原因，导致本次执行结果未被记录。";
   const out = [];
   for (const msg of normalized) {
     if (msg.role === "tool") continue;

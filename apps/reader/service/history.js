@@ -2,9 +2,9 @@ import { parseJson } from "../../../shared/json/parse.js";
 import { findSessionWithChapters } from "../repository/history.js";
 const history = ({ sessionId }) => {
   const id = Number(sessionId);
-  if (!Number.isInteger(id) || id <= 0) return { status: 400, message: "sessionId \u65E0\u6548" };
+  if (!Number.isInteger(id) || id <= 0) return { status: 400, message: "sessionId 无效" };
   const result = findSessionWithChapters(id);
-  if (!result) return { status: 404, message: "\u6545\u4E8B\u4E0D\u5B58\u5728" };
+  if (!result) return { status: 404, message: "故事不存在" };
   const { session, chapters } = result;
   return {
     success: true,

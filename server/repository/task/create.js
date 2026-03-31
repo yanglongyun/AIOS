@@ -53,7 +53,7 @@ const updateTaskDone = ({ taskId, response }) => {
 };
 const updateTaskAborted = ({ taskId }) => {
   db.prepare(
-    "UPDATE tasks SET error = '\u7528\u6237\u7EC8\u6B62\u4EFB\u52A1', status = 'aborted', finished_at = datetime('now') WHERE id = ?"
+    "UPDATE tasks SET error = '用户终止任务', status = 'aborted', finished_at = datetime('now') WHERE id = ?"
   ).run(taskId);
 };
 const updateTaskError = ({ taskId, message }) => {

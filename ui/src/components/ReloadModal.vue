@@ -104,40 +104,11 @@ const doReload = async () => {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-    // 需要重启服务 → 轮询 health
-    if (pendingOptions.restart === 'server' || pendingOptions.restart === 'both') {
-      phase.value = 'restarting';
-      await pollHealth();
-    }
-
     location.reload();
   } catch (e) {
     phase.value = 'error';
     errorMsg.value = e.message || 'Unknown error';
   }
-};
-
-const pollHealth = () => {
-  return new Promise((resolve, reject) => {
-    let attempts = 0;
-    const maxAttempts = 60;
-
-    const check = async () => {
-      attempts++;
-      if (attempts > maxAttempts) {
-        reject(new Error('Server restart timed out'));
-        return;
-      }
-      try {
-        const res = await fetch('/aios/api/health', { credentials: 'include' });
-        if (res.ok) { resolve(); return; }
-      } catch {}
-      setTimeout(check, 1000);
-    };
-
-    // 等 2 秒让旧进程退出
-    setTimeout(check, 2000);
-  });
 };
 
 let unsub;

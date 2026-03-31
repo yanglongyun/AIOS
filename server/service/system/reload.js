@@ -1,17 +1,13 @@
-import { buildFrontend, restartAppsProcess, scheduleServerRestart } from "../../system/reload.js";
+import { buildFrontend, restartAppsProcess } from "../../system/reload.js";
 const runReload = async (build, restart) => {
   if (build) {
     buildFrontend();
   }
-  if (restart === "apps" || restart === "both") {
+  if (restart === "apps") {
     await restartAppsProcess();
   }
-  return restart === "server" || restart === "both";
-};
-const restartServerAfterResponse = async () => {
-  await scheduleServerRestart();
+  return false;
 };
 export {
-  restartServerAfterResponse,
   runReload
 };

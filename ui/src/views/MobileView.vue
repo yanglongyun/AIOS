@@ -84,7 +84,7 @@ async function doRestart() {
     await fetch('/aios/api/system/reload/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ restart: 'server' })
+      body: JSON.stringify({ restart: 'apps' })
     });
   } catch {}
 }

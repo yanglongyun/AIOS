@@ -34,7 +34,7 @@
         class="flex h-[26px] items-center rounded-[6px] px-2 text-[#7a6a58] transition-colors hover:bg-[rgba(200,160,96,0.12)] hover:text-[#5a3e28] disabled:opacity-40"
         :disabled="restarting"
         @click="doRestart"
-        title="重启服务"
+        title="重启应用服务"
       >
         <RotateCcw class="h-[13px] w-[13px]" :class="restarting ? 'animate-spin' : ''" />
       </button>
@@ -97,7 +97,7 @@ async function doRestart() {
     await fetch('/aios/api/system/reload/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ restart: 'server' })
+      body: JSON.stringify({ restart: 'apps' })
     });
   } catch {}
   restarting.value = false;

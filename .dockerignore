@@ -2,6 +2,8 @@
 .DS_Store
 node_modules
 ui/dist
+database
+files
 landing
 debug
 .playwright-cli

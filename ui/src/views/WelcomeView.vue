@@ -278,6 +278,57 @@ const applyProviderDefault = () => {
   model.value.model = item?.defaultModel || '';
 };
 
+const hasBootstrapModel = (settings) => {
+  return Boolean(settings?.provider && settings?.apiUrl && settings?.apiKey && settings?.model);
+};
+
+const loadSettings = async () => {
+  const res = await fetch('/aios/api/settings', {
+    credentials: 'include'
+  });
+  const data = await res.json();
+  if (!res.ok || data?.success === false || data?.error) {
+    throw new Error(data?.message || data?.error || t.value.err_save);
+  }
+  return data?.data || data || {};
+};
+
+const finishWelcome = async (intro) => {
+  step.value = 4;
+  welcomeText.value = intro || t.value.default_intro;
+  startTypewriter(welcomeText.value);
+  prepareSystem().catch((e) => {
+    error.value = e instanceof Error ? e.message : '安装完成失败';
+    installing.value = false;
+    installReady.value = false;
+  });
+};
+
+const generateIntro = async () => {
+  const testRes = await fetch('/aios/api/task/create/instant', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      app: 'setup',
+      title: t.value.prompt_intro,
+      prompt: t.value.prompt_intro,
+      schema: { required: ['intro'] },
+      messages: [
+        { role: 'system', content: '只输出 JSON：{"intro":"..."}' },
+        { role: 'system', content: t.value.prompt_system },
+        { role: 'user', content: t.value.prompt_user }
+      ]
+    })
+  });
+  const testData = await testRes.json();
+  if (!testRes.ok || testData?.success === false) {
+    throw new Error(testData?.message || t.value.err_test);
+  }
+  const parsed = JSON.parse(String(testData.response || '{}'));
+  return parsed?.intro || t.value.default_intro;
+};
+
 const createAdmin = async () => {
   error.value = '';
   if (admin.value.password !== admin.value.confirm) {
@@ -295,6 +346,16 @@ const createAdmin = async () => {
     const data = await res.json();
     if (!res.ok || data?.success === false) throw new Error(data?.message || t.value.err_admin);
     clearAuthCache();
+    const settings = await loadSettings();
+    if (hasBootstrapModel(settings)) {
+      model.value.provider = settings.provider;
+      model.value.apiUrl = settings.apiUrl;
+      model.value.apiKey = settings.apiKey;
+      model.value.model = settings.model;
+      const intro = await generateIntro();
+      await finishWelcome(intro);
+      return;
+    }
     step.value = 3;
   } catch (e) {
     error.value = e?.message || t.value.err_admin;
@@ -356,35 +417,8 @@ const saveModelAndTest = async () => {
     if (!saveRes.ok || saveData?.success === false || saveData?.error) {
       throw new Error(saveData?.message || saveData?.error || t.value.err_save);
     }
-    const testRes = await fetch('/aios/api/task/create/instant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        app: 'setup',
-        title: t.value.prompt_intro,
-        prompt: t.value.prompt_intro,
-        schema: { required: ['intro'] },
-        messages: [
-          { role: 'system', content: '只输出 JSON：{"intro":"..."}' },
-          { role: 'system', content: t.value.prompt_system },
-          { role: 'user', content: t.value.prompt_user }
-        ]
-      })
-    });
-    const testData = await testRes.json();
-    if (!testRes.ok || testData?.success === false) {
-      throw new Error(testData?.message || t.value.err_test);
-    }
-    const parsed = JSON.parse(String(testData.response || '{}'));
-    step.value = 4;
-    welcomeText.value = parsed?.intro || t.value.default_intro;
-    startTypewriter(welcomeText.value);
-    prepareSystem().catch((e) => {
-      error.value = e instanceof Error ? e.message : '安装完成失败';
-      installing.value = false;
-      installReady.value = false;
-    });
+    const intro = await generateIntro();
+    await finishWelcome(intro);
   } catch (e) {
     error.value = e?.message || t.value.err_test;
   } finally {

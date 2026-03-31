@@ -95,10 +95,8 @@ const iconProps = { className: 'w-6 h-6 text-muted-foreground', strokeWidth: 1.5
 
 const featureIcons: LucideIcon[] = [
   MessageCircle,
-  Layers,
-  Shield,
   Sparkles,
-  Bot,
+  Layers,
   Brain,
 ]
 
@@ -220,7 +218,7 @@ export default function App() {
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
             {features.map((f, i) => (
               <Reveal key={f.title} delay={0.1 + i * 0.08} className="h-full">
                 <div className="liquid-glass rounded-2xl p-8 h-full">

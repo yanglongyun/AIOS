@@ -8,8 +8,7 @@ COPY . .
 # 安装依赖（含 better-sqlite3 native rebuild）
 RUN npm install
 
-# 替换语言占位符，编译前端
-RUN node dev/docker/apply-lang.js
+# 编译前端
 RUN npm run build
 
 EXPOSE 9700

@@ -56,8 +56,11 @@ const aiDecideByLlm = async ({ req, aiCards, round, aiChips, playerChips, pot, p
       ],
       req
     });
-  } catch {
-    return { status: 502, message: "LLM 决策失败" };
+  } catch (error) {
+    return {
+      status: 502,
+      message: `LLM 决策失败: ${error instanceof Error ? error.message : String(error)}`
+    };
   }
   const action = String(parsed?.action || "").toLowerCase();
   if (action !== "call" && action !== "fold" && action !== "raise") {
@@ -100,8 +103,11 @@ const aiSpeakOnCompareByLlm = async ({ req, actionHistory, winner, round, potBef
       ],
       req
     });
-  } catch {
-    return { status: 502, message: "LLM 台词生成失败" };
+  } catch (error) {
+    return {
+      status: 502,
+      message: `LLM 台词生成失败: ${error instanceof Error ? error.message : String(error)}`
+    };
   }
   const speech = String(parsed?.speech || parsed?.line || "").trim();
   const expression = String(parsed?.expression || "").trim();

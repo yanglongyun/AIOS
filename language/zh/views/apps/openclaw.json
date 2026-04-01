@@ -1,6 +1,10 @@
 {
   "openclaw_online": "在线",
   "openclaw_offline": "未检测到 OpenClaw",
+  "openclaw_not_installed_title": "OpenClaw 未安装",
+  "openclaw_not_installed_desc": "当前电脑上未检测到 OpenClaw CLI，请先完成安装后刷新。",
+  "openclaw_install_hint": "安装命令",
+  "openclaw_recheck": "重新检测",
   "openclaw_no_gateway": "CLI 可用，Gateway 未启动",
   "openclaw_cron_empty": "暂无定时任务",
   "openclaw_cron_name_ph": "起个名...",

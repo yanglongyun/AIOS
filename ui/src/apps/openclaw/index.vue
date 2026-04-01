@@ -22,9 +22,26 @@
         </div>
       </div>
 
+      <!-- 未安装遮罩 -->
+      <div v-if="!status.online" class="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div class="text-4xl mb-4">🦞</div>
+        <div class="text-sm font-bold text-[#3a2810] mb-2">__T_OPENCLAW_NOT_INSTALLED_TITLE__</div>
+        <div class="text-xs text-[rgba(60,40,20,0.5)] mb-6 leading-relaxed max-w-[260px]">__T_OPENCLAW_NOT_INSTALLED_DESC__</div>
+        <div class="w-full max-w-[280px] mb-5">
+          <div class="text-[9px] text-[rgba(60,40,20,0.35)] uppercase tracking-wider mb-1">__T_OPENCLAW_INSTALL_HINT__</div>
+          <div class="bg-[rgba(0,0,0,0.15)] rounded px-3 py-2 text-[11px] text-[#3a2810] font-mono select-all">npm i -g openclaw</div>
+        </div>
+        <button @click="recheck"
+          class="px-4 py-1.5 text-[10px] font-bold tracking-wider rounded tab-on cursor-pointer">
+          __T_OPENCLAW_RECHECK__
+        </button>
+      </div>
+
       <!-- 内容区 -->
-      <TaskView v-show="activeTab === 'tasks'" />
-      <ChatView v-show="activeTab === 'chat'" />
+      <template v-else>
+        <TaskView v-show="activeTab === 'tasks'" />
+        <ChatView v-show="activeTab === 'chat'" />
+      </template>
     </div>
 
     <div class="frame-b shrink-0 h-1.5 relative z-[5]"></div>
@@ -41,12 +58,14 @@ const API = '/aios/apps/openclaw';
 const status = ref({ online: false, version: null, gateway: false });
 const activeTab = ref('tasks');
 
-onMounted(async () => {
+async function recheck() {
   try {
     const res = await fetch(`${API}/status`);
     status.value = await res.json();
   } catch { status.value = { online: false, version: null, gateway: false }; }
-});
+}
+
+onMounted(recheck);
 </script>
 
 <style scoped>

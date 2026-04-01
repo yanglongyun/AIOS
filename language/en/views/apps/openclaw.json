@@ -1,6 +1,10 @@
 {
   "openclaw_online": "Online",
   "openclaw_offline": "OpenClaw not detected",
+  "openclaw_not_installed_title": "OpenClaw Not Installed",
+  "openclaw_not_installed_desc": "OpenClaw CLI was not detected on this machine. Please install it and refresh.",
+  "openclaw_install_hint": "Install command",
+  "openclaw_recheck": "Re-check",
   "openclaw_no_gateway": "CLI available, Gateway not running",
   "openclaw_cron_empty": "No cron jobs",
   "openclaw_cron_name_ph": "Give it a name...",

@@ -42,8 +42,7 @@ const instantTask = async ({
     tools,
     tool_choice,
     parallel_tool_calls,
-    meta,
-    req
+    meta
   });
 };
 const instantTaskJson = async (args = {}) => {

@@ -107,6 +107,11 @@ const startGame = async () => {
 const handleAction = async (action) => {
   if (busy.value || !game.value) return;
   busy.value = true;
+  aiSpeech.value = '__T_POKER_AI_THINKING__';
+  aiExpression.value = '';
+  if (action === 'fold') lastActionText.value = '__T_POKER_PLAYER_FOLDED_WAITING__';
+  else if (action === 'raise') lastActionText.value = '__T_POKER_PLAYER_RAISED_WAITING__';
+  else lastActionText.value = '__T_POKER_PLAYER_CALLED_WAITING__';
   try {
     const data = await request('/aios/apps/poker/action', {
       method: 'POST',
@@ -129,10 +134,14 @@ const handleAction = async (action) => {
       }
       return;
     }
+    aiSpeech.value = '';
+    aiExpression.value = '';
     lastActionText.value = resolveMessage(data);
   } catch (error) {
     const text = String(error?.message || '').trim();
     if (!text) throw new Error('poker action failed without error message');
+    aiSpeech.value = '';
+    aiExpression.value = '';
     lastActionText.value = text;
   } finally {
     busy.value = false;

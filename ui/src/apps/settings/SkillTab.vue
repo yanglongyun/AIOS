@@ -36,9 +36,6 @@
             <div class="text-[14px] font-semibold text-[#4a3622] dark:text-[#ead8bc]">{{ item.name }}</div>
             <div v-if="item.description" class="mt-1 text-[13px] leading-5 text-[#7f6b52] dark:text-[#9e8a72]">{{ item.description }}</div>
           </div>
-          <span class="shrink-0 rounded-full bg-[#f0e4d0] px-2 py-1 text-[11px] font-medium text-[#7a5e3d] dark:bg-[rgba(200,160,96,0.12)] dark:text-[#c8a060]">
-            {{ item.source === 'project' ? '__T_SETTINGS_SKILLS_SOURCE_PROJECT__' : '__T_SETTINGS_SKILLS_SOURCE_SYSTEM__' }}
-          </span>
         </div>
         <div class="mt-2 text-[12px] text-[#9b896e] dark:text-[#7e6a54]">{{ item.path }}</div>
       </article>

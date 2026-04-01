@@ -1,7 +1,6 @@
 node_modules
 .DS_Store
 database/
-dev/
 uploads/
 /files/
 ui/dist/

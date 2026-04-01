@@ -7,7 +7,6 @@ const appLoaders = [
   () => import("./fortune/index.js"),
   () => import("./poker/index.js"),
   () => import("./banana/index.js"),
-  () => import("./openclaw/index.js"),
   () => import("./createapp/index.js")
 ];
 export {

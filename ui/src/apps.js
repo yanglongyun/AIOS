@@ -91,14 +91,6 @@ const appRegistry = [
     load: () => import("./apps/banana/index.vue"),
     defaultSize: { w: 420, h: 700 }
   },
-  {
-    id: "openclaw",
-    name: "__T_APP_SIDEBAR_OPENCLAW__",
-    icon: "\u{1F99E}",
-    iconClass: "icon-openclaw",
-    load: () => import("./apps/openclaw/index.vue"),
-    defaultSize: { w: 520, h: 700 }
-  },
   // 工具
   {
     id: "settings",

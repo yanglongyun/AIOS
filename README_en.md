@@ -4,6 +4,8 @@
 
 > The Operating System for the AI Era
 
+**Maybe what you need isn't OpenClaw — what you need is AIOS.**
+
 ## Quick Start
 
 ```bash

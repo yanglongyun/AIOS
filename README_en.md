@@ -23,15 +23,11 @@ Open: `http://localhost:9700`
 
 ## Core Philosophy
 
-### Dialogue, the New HCI Paradigm
+### Dialogue, a New Paradigm for Human-Computer Interaction
 
-AIOS, as the name suggests, is an operating system driven by AI. In AIOS, you can issue instructions to your computer or server in the most natural way—**dialogue**.
+AIOS, as the name suggests, is an operating system driven by AI. In AIOS, you can issue instructions to your computer or server in natural language. Dialogue is a natural mode of expression — simple, efficient, and highly personal. You can convey multiple complex needs within a single continuous conversation, one that naturally carries context, situational continuity, and memory.
 
-In the past, we had to learn and adapt to complex software menus and interaction logic; now, you can simply tell the computer what you want, and it will respond to you like a human.
-
-Dialogue is the most natural form of expression, combining high efficiency with personalization. Traditional mouse clicks are mechanical instructions, while dialogue is a **direct transmission of intent**. You can express multiple complex needs in a continuous conversation, which naturally possesses context, situational coherence, and memory.
-
-Undoubtedly, dialogue is becoming a revolutionary human-computer interaction paradigm. It redefines the relationship between humans and computers: the machine is no longer a tool requiring laborious operation, but a collaborator that understands your intentions.
+Dialogue is becoming a new paradigm for human-computer interaction, further closing the distance between people and computers.
 
 ---
 
@@ -39,40 +35,36 @@ Undoubtedly, dialogue is becoming a revolutionary human-computer interaction par
 
 Although dialogue is a natural way of interacting, it cannot replace Graphical User Interfaces (GUI).
 
-Language is inherently abstract, and sometimes even arduous. When you try to describe a complex interface layout through text, or precisely specify a color or typography, language becomes a hindrance—nowhere near as direct and efficient as a mouse click or a finger touch. More importantly, dialogue is linear and fluid—it excels at expressing intent, but struggles to bear results.
+Language is inherently abstract, and sometimes even laborious. When you try to describe a complex interface layout in words, or precisely specify a color or typography, language becomes an obstacle — far less direct and efficient than a mouse click or a finger touch. More importantly, dialogue is linear and fluid — it excels at expressing intent, but struggles to present results.
 
-Imagine a system with only a chat window. When you want to take a note, it gets buried in scrolling chat logs: no collection, no folders, unorganizable, hard to search, impossible to pin, and entirely unformatted. Without the concrete carrier of a "notes interface," you won't seamlessly record anything.
+Imagine a system with only a chat window. When you want to jot down a note, it gets buried in scrolling conversation history: no collection, no folders, impossible to organize, hard to search, impossible to pin, and completely unformatted. Without the concrete form of a "notes app," you wouldn't even think to take a note there.
 
-Dialogue often comes with uncertainty. To get a good result, you need to craft a high-quality "prompt"; and even with the same prompt, the outcome might vary each time. But a calendar, a ledger, a reader, a sketchpad—every concrete need demands a matching functional morphology. Morphology is not mere decoration; morphology is function, morphology is value itself.
+Dialogue often comes with uncertainty. To get a good result, you need to craft a high-quality prompt — and even with the same prompt, the outcome may differ each time. But a calendar, a ledger, a reader, a sketchpad — every definite need demands a matching functional form. Form is not decoration; form is function, form is value itself.
 
-**The future will not flow formless; it will remain in physical form.**
-
-Dialogue and interface are not in competition or mutually exclusive; they complement each other and are both indispensable. In a true AI operating system, GUI applications remain an essential core hub.
+**The future will not dissolve into formlessness; it will remain in concrete form.** Dialogue and interface are not competing or replacing each other — they are complementary and both indispensable. In a true AI operating system, GUI applications remain an essential core hub.
 
 ---
 
 ### Everyone Can Have Their Own Dedicated Software
 
-We are on the verge of the biggest paradigm shift in software engineering history: moving from "passive consumption" to "active generation." Soon, almost all code will be written by AI.
+We are on the verge of the biggest paradigm shift in software engineering history: soon, almost all code will be written by AI.
 
-This means you can build **software exclusively for you**, tailored to your own needs, habits, and preferences. You don't need to learn any programming language, hire developers, or wait for a product team to schedule your feature requests into a long roadmap. You simply tell the AI your ideas.
+This means you can build software exclusively for you, tailored to your own needs, habits, and preferences. You don't need to learn any programming language, hire a developer, or wait for a product team to schedule your feature request into a long roadmap. You simply tell the AI your idea.
 
-In the traditional software world, most people can only accept products defined by developers: accepting their design language, their functional boundaries, and how they think you "should" use them. Past software was developers' software; in AIOS, this will be completely overturned.
+In the traditional software world, most people can only accept products defined by a small group of people with programming skills: accepting their design language, their functional boundaries, and their idea of how you "should" use it. Software used to belong to developers — in AIOS, all of this will be completely overturned.
 
-For the first time, software can truly belong to the people using it. Without the "third-party developer" middleman to earn margins and harvest attention, these softwares born for you will have **no ads, no subscription limits, and will not harvest or leak your privacy**.
-
-Software will become an extension and realization of people's needs, preferences, and will, bringing it closer to the user.
+Software will truly belong to the people who use it. It will have no ads, no subscriptions, and its data belongs to the people who use it. It will become an extension and realization of people's needs, preferences, and will — truly reaching every individual.
 
 ---
 
-### AI Empowers Applications to be Stronger
+### AI Makes Applications Themselves More Powerful
 
-In AIOS, an unprecedented bi-directional relationship is established between AI and applications: **AI can understand and operate applications, and applications can reversely dispatch the AI.**
+In AIOS, an unprecedented bidirectional relationship is established between AI and applications: **AI can understand and operate applications, and applications can in turn dispatch the AI**.
 
-On one hand, because these dedicated softwares are generated by AI, the AI naturally understands their underlying structure. It can directly and efficiently utilize, schedule, and update them. Through these applications, AI also gains a multi-dimensional understanding of you. Applications are not only your workspace for collaborating with AI, but also the best window for AI to deeply grasp your local context.
+On one hand, because these applications are generated by AI, the AI can understand their underlying structure — enabling it to use, schedule, and update them more directly and efficiently. Through applications, AI also gains a multi-dimensional understanding of the user. Applications are not only your workspace for collaborating with AI, but also the window through which AI better understands your context.
 
-On the other hand, applications themselves are evolving. In traditional applications, functionality is determined by program code, workflows are fixed, and boundaries are constrained—you simply get what the developer wrote. But in AIOS, an application can directly issue tasks to the AI. This means the application is no longer bound by inflexible pre-written logic; it can tap into the underlying AI's generalized capabilities at any time.
+On the other hand, applications themselves are evolving. In traditional applications, functionality is determined by code, workflows are fixed, and boundaries are constrained — you simply get what the developer wrote, nothing more, nothing less. In AIOS, an application can directly issue tasks to the AI. This means applications are no longer bound by fixed pre-written logic; they can tap into the underlying AI's general capabilities at any time.
 
-Take an "Interactive Fiction App" as an example: In traditional development, to ensure the AI-generated new chapter remains coherent with previous text without losing plot and settings, developers must rack their brains coding complex logic to manually orchestrate, truncate, and compress context. Even then, due to rigid code logic, the results are often inadequate.
+Take an "Interactive Fiction App" as an example: in traditional development, to keep AI-generated new chapters coherent with previous text — without forgetting earlier plot and settings — you must account for all kinds of situations and write complex logic to manually orchestrate, truncate, and compress context. Even then, constrained by rigid code logic, the results often fall short.
 
-But in AIOS, "generating the next chapter" is no longer a passive API call where developers feed data, but a **Task** dispatched by the application to the underlying system. The basic AI engine takes over autonomously: it can actively query the database, review massive historical logs, dynamically extract and integrate relevant settings, and ultimately generate a new chapter that is far more aligned with character logic.
+But in AIOS, "generate the next chapter" is no longer a passive API call requiring complex context orchestration. It becomes a Task dispatched by the application to the underlying system. The AI engine takes over autonomously: it actively queries the database, reviews vast historical records, dynamically extracts and integrates relevant settings, and ultimately generates a new chapter far more consistent with the story's logic.

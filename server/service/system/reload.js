@@ -7,34 +7,54 @@ const ROOT_DIR = join(__dirname, "..", "..", "..");
 const APPS_ENTRY = "apps/index.js";
 const SERVER_ENTRY = "server/index.js";
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const HEALTHCHECK_TIMEOUT_MS = 1000;
+
+const probeHealth = async (url) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), HEALTHCHECK_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const stopProbe = async (probe) => {
+  if (!probe || probe.exitCode !== null) return;
+  probe.kill("SIGTERM");
+  for (let i = 0; i < 10; i++) {
+    if (probe.exitCode !== null) return;
+    await wait(100);
+  }
+  if (probe.exitCode === null) {
+    probe.kill("SIGKILL");
+  }
+};
+
 const buildFrontend = () => {
   execSync("npm run build", { cwd: ROOT_DIR, timeout: 12e4, stdio: "pipe" });
 };
 const probeProcess = async (entry, probePort, healthPath) => {
   const probe = spawn("node", [entry, `--port=${probePort}`], {
     cwd: ROOT_DIR,
-    detached: true,
-    stdio: "pipe"
+    stdio: "ignore"
   });
-  probe.unref();
   const healthUrl = `http://127.0.0.1:${probePort}${healthPath}`;
   let alive = false;
   for (let i = 0; i < 30; i++) {
     await wait(500);
-    try {
-      const response = await fetch(healthUrl);
-      if (response.ok) {
-        alive = true;
-        break;
-      }
-    } catch {
-      continue;
+    if (probe.exitCode !== null) {
+      break;
+    }
+    if (await probeHealth(healthUrl)) {
+      alive = true;
+      break;
     }
   }
-  try {
-    process.kill(-probe.pid, "SIGTERM");
-  } catch {
-  }
+  await stopProbe(probe);
   try {
     execSync(`lsof -ti:${probePort} | xargs kill 2>/dev/null || true`, { stdio: "pipe" });
   } catch {

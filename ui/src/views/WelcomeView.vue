@@ -181,7 +181,7 @@ const texts = {
     api_url: 'API 链接 (可选)',
     api_key: 'API Key',
     testing: '检查中…',
-    save_test: '检查可用性',
+    save_test: '连接大模型',
     intro_title: '初始化完成',
     intro_hint: '系统已就绪，以下是来自 AI 核心的初次回应：',
     enter: '进入系统',
@@ -220,7 +220,7 @@ const texts = {
     api_url: 'API URL (Optional)',
     api_key: 'API Key',
     testing: 'Checking…',
-    save_test: 'Check Availability',
+    save_test: 'Connect Model',
     intro_title: 'Initialization Complete',
     intro_hint: 'System is ready. Here is the first response from the AI core:',
     enter: 'Enter System',
@@ -293,7 +293,7 @@ const loadSettings = async () => {
   return data?.data || data || {};
 };
 
-const finishWelcome = async (intro) => {
+const showWelcome = (intro) => {
   step.value = 4;
   welcomeText.value = intro || t.value.default_intro;
   startTypewriter(welcomeText.value);
@@ -329,6 +329,11 @@ const generateIntro = async () => {
   return parsed?.intro || t.value.default_intro;
 };
 
+const enterWelcome = async () => {
+  const intro = await generateIntro();
+  showWelcome(intro);
+};
+
 const createAdmin = async () => {
   error.value = '';
   if (admin.value.password !== admin.value.confirm) {
@@ -352,8 +357,7 @@ const createAdmin = async () => {
       model.value.apiUrl = settings.apiUrl;
       model.value.apiKey = settings.apiKey;
       model.value.model = settings.model;
-      const intro = await generateIntro();
-      await finishWelcome(intro);
+      await enterWelcome();
       return;
     }
     step.value = 3;
@@ -365,6 +369,7 @@ const createAdmin = async () => {
 };
 
 const startTypewriter = (text) => {
+  if (typeTimer) clearInterval(typeTimer);
   welcomeText.value = text;
   displayedText.value = '';
   typing.value = true;
@@ -417,8 +422,7 @@ const saveModelAndTest = async () => {
     if (!saveRes.ok || saveData?.success === false || saveData?.error) {
       throw new Error(saveData?.message || saveData?.error || t.value.err_save);
     }
-    const intro = await generateIntro();
-    await finishWelcome(intro);
+    await enterWelcome();
   } catch (e) {
     error.value = e?.message || t.value.err_test;
   } finally {
@@ -429,7 +433,7 @@ const saveModelAndTest = async () => {
 const enterSystem = async () => {
   if (!installReady.value || installing.value) return;
   clearAuthCache();
-  window.location.href = '/aios/chat';
+  window.location.href = '/aios/';
 };
 
 onUnmounted(() => {

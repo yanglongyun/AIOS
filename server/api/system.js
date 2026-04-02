@@ -1,9 +1,25 @@
 import { readBody } from "../../shared/http/readBody.js";
 import { json } from "../../shared/http/json.js";
+import { getAuthUser } from "../../shared/auth/guard.js";
 import { countUsers } from "../../shared/auth/repository.js";
 import { completeInstall } from "../service/system/install.js";
 import { requestReload, runReload } from "../service/system/reload.js";
 import { runReloadTest } from "../service/system/test.js";
+
+const logReloadRequest = (req, body, stage, extra = {}) => {
+  const user = getAuthUser(req);
+  console.log("[reload.request]", JSON.stringify({
+    stage,
+    body,
+    user: user ? { id: user.id, username: user.username, role: user.role || "" } : null,
+    remoteAddress: req.socket?.remoteAddress || "",
+    forwardedFor: String(req.headers["x-forwarded-for"] || ""),
+    referer: String(req.headers.referer || ""),
+    userAgent: String(req.headers["user-agent"] || ""),
+    ...extra
+  }));
+};
+
 const handleSystemApi = async (req, res, path) => {
   if (path === "/api/system/setup" && req.method === "GET") {
     return json(res, { success: true, initialized: countUsers() > 0 });
@@ -13,18 +29,14 @@ const handleSystemApi = async (req, res, path) => {
     const build = body.build ?? false;
     const restartApps = body.restartApps === true || body.restart === "apps";
     const restartServer = body.restartServer === true;
-    try {
-      await runReloadTest(build, restartApps, restartServer);
-      requestReload({
-        build,
-        restartApps,
-        restartServer,
-        message: body.message || ""
-      });
-      return json(res, { success: true, tested: true });
-    } catch (e) {
-      return json(res, { success: false, message: e instanceof Error ? e.message : "系统预检失败" }, 500);
-    }
+    logReloadRequest(req, body, "received", { build, restartApps, restartServer });
+    requestReload({
+      build,
+      restartApps,
+      restartServer,
+      message: body.message || ""
+    });
+    return json(res, { success: true, tested: false });
   }
   if (path === "/api/system/reload/test" && req.method === "POST") {
     const body = await readBody(req);

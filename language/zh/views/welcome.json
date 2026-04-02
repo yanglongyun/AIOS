@@ -25,7 +25,7 @@
   "welcome_api_url": "API 链接 (可选)",
   "welcome_api_key": "API Key",
   "welcome_testing": "检查中…",
-  "welcome_save_test": "检查可用性",
+  "welcome_save_test": "连接大模型",
   "welcome_intro_title": "初始化完成",
   "welcome_intro_hint": "系统已就绪，以下是来自 AI 核心的初次回应：",
   "welcome_enter": "进入系统",

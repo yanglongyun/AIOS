@@ -72,13 +72,15 @@ const scheduleServerRestart = async () => {
   }, 300);
 };
 const requestReload = (options = {}) => {
-  broadcast({
+  const payload = {
     type: "reload_request",
     build: options.build ?? false,
     restartApps: options.restartApps === true,
     restartServer: options.restartServer === true,
     message: options.message || ""
-  });
+  };
+  console.log("[reload.broadcast]", JSON.stringify(payload));
+  broadcast(payload);
 };
 const runReload = async (build, restartApps, restartServer, options = {}) => {
   if (build) {

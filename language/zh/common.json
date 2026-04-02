@@ -15,7 +15,9 @@
   "reload_restarting": "正在重启服务…",
   "reload_retry": "重试",
   "reload_will_build": "重新编译前端",
-  "reload_will_restart": "重启服务",
+  "reload_will_restart_apps": "重启应用服务",
+  "reload_will_restart_server": "重启主服务",
+  "logout_confirm": "确认退出登录？",
   "_locale": "zh",
   "_locale_full": "zh-CN"
 }

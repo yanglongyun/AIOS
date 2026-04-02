@@ -6,9 +6,9 @@ var stdin_default = defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
     proxy: {
-      "/aios/ws": { target: "ws://localhost:9700", ws: true },
-      "/aios/api": { target: "http://localhost:9700" },
-      "/aios/apps": { target: "http://localhost:9700" }
+      "/aios/ws": { target: "ws://localhost:9500", ws: true },
+      "/aios/api": { target: "http://localhost:9500" },
+      "/aios/apps": { target: "http://localhost:9500" }
     }
   },
   build: {

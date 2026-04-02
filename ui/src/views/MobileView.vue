@@ -71,6 +71,7 @@ function onToggleMenu(btnEl) {
 
 async function doLogout() {
   menuOpen.value = false;
+  if (!window.confirm('__T_LOGOUT_CONFIRM__')) return;
   try {
     await fetch('/aios/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
   } catch {}
@@ -84,7 +85,7 @@ async function doRestart() {
     await fetch('/aios/api/system/reload/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ restart: 'apps' })
+      body: JSON.stringify({ build: false, restartApps: true, restartServer: false })
     });
   } catch {}
 }

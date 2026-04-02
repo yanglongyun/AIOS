@@ -15,7 +15,7 @@ npm run start &
 npm run start:apps
 ```
 
-打开：`http://localhost:9700`
+打开：`http://localhost:9500`
 
 ## 交流反馈
 

@@ -7,7 +7,7 @@ const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("端口参数不合法");
 }
-const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9700;
+const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9500;
 initSystemDirs();
 initDatabase();
 setupWebSocket(httpServer);

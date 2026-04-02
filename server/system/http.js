@@ -20,7 +20,7 @@ const MIME = {
   ".jpeg": "image/jpeg",
   ".webp": "image/webp"
 };
-const APPS_PORT = 9701;
+const APPS_PORT = 9501;
 const readRawBody = async (req) => {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);

@@ -64,7 +64,7 @@ const PROVIDERS = [
   },
   {
     id: "zai",
-    name: "z.ai",
+    name: "Z.ai",
     group: "default",
     apiUrl: "https://api.z.ai/api/paas/v4/chat/completions",
     defaultModel: "glm-5"

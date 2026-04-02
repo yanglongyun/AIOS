@@ -12,15 +12,19 @@
         <p v-if="message" class="mt-3 rounded-lg border border-[#3a2a18] bg-[#1a1410]/60 px-3 py-2 text-[13px] leading-relaxed text-[#a09078]">{{ message }}</p>
 
         <!-- 操作摘要 -->
-        <div class="mt-3 space-y-1 text-[12px] text-[#8a7860]">
-          <div v-if="pendingOptions.build" class="flex items-center gap-1.5">
-            <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#c8a060]"></span>
-            __T_RELOAD_WILL_BUILD__
-          </div>
-          <div v-if="pendingOptions.restart" class="flex items-center gap-1.5">
-            <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#c8a060]"></span>
-            __T_RELOAD_WILL_RESTART__
-          </div>
+        <div class="mt-3 space-y-2 text-[12px] text-[#8a7860]">
+          <label class="flex cursor-pointer items-center gap-2">
+            <input v-model="pendingOptions.build" type="checkbox" class="h-3.5 w-3.5 rounded border-[#7a5e3d] bg-transparent accent-[#c8a060]" />
+            <span>__T_RELOAD_WILL_BUILD__</span>
+          </label>
+          <label class="flex cursor-pointer items-center gap-2">
+            <input v-model="pendingOptions.restartApps" type="checkbox" class="h-3.5 w-3.5 rounded border-[#7a5e3d] bg-transparent accent-[#c8a060]" />
+            <span>__T_RELOAD_WILL_RESTART_APPS__</span>
+          </label>
+          <label class="flex cursor-pointer items-center gap-2">
+            <input v-model="pendingOptions.restartServer" type="checkbox" class="h-3.5 w-3.5 rounded border-[#7a5e3d] bg-transparent accent-[#c8a060]" />
+            <span>__T_RELOAD_WILL_RESTART_SERVER__</span>
+          </label>
         </div>
 
         <!-- 状态区 -->
@@ -76,7 +80,7 @@ const visible = ref(false);
 const phase = ref('confirm'); // confirm | building | restarting | error
 const message = ref('');
 const errorMsg = ref('');
-const pendingOptions = reactive({ build: false, restart: null });
+const pendingOptions = reactive({ build: false, restartApps: false, restartServer: false });
 
 const dismiss = () => {
   visible.value = false;
@@ -84,11 +88,12 @@ const dismiss = () => {
   message.value = '';
   errorMsg.value = '';
   pendingOptions.build = false;
-  pendingOptions.restart = null;
+  pendingOptions.restartApps = false;
+  pendingOptions.restartServer = false;
 };
 
 const doReload = async () => {
-  phase.value = 'building';
+  phase.value = pendingOptions.build ? 'building' : 'restarting';
   errorMsg.value = '';
 
   try {
@@ -98,13 +103,14 @@ const doReload = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         build: pendingOptions.build,
-        restart: pendingOptions.restart
+        restartApps: pendingOptions.restartApps,
+        restartServer: pendingOptions.restartServer
       })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-    location.reload();
+    setTimeout(() => location.reload(), pendingOptions.restartApps || pendingOptions.restartServer ? 1200 : 200);
   } catch (e) {
     phase.value = 'error';
     errorMsg.value = e.message || 'Unknown error';
@@ -115,7 +121,8 @@ let unsub;
 onMounted(() => {
   unsub = on('reload_request', (data) => {
     pendingOptions.build = data.build ?? false;
-    pendingOptions.restart = data.restart || null;
+    pendingOptions.restartApps = data.restartApps === true || data.restart === 'apps';
+    pendingOptions.restartServer = data.restartServer === true;
     message.value = data.message || '';
     phase.value = 'confirm';
     visible.value = true;

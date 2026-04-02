@@ -18,7 +18,7 @@ const buildAutonomousPrompt = (cfg) => {
 };
 const requestDecisionTask = async (cfg) => {
   const prompt = buildAutonomousPrompt(cfg);
-  const resp = await fetch("http://localhost:9700/api/task/create/agent", {
+  const resp = await fetch("http://localhost:9500/api/task/create/agent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

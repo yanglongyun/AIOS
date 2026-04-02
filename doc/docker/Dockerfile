@@ -1,5 +1,5 @@
 FROM node:22-alpine
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash curl
 
 WORKDIR /app
 
@@ -11,6 +11,6 @@ RUN npm install
 # 编译前端
 RUN npm run build
 
-EXPOSE 9700
+EXPOSE 9500
 
 CMD ["sh", "-c", "node apps/index.js & node server/index.js"]

@@ -15,7 +15,7 @@ npm run start &
 npm run start:apps
 ```
 
-Open: `http://localhost:9700`
+Open: `http://localhost:9500`
 
 ## Community & Feedback
 

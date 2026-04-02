@@ -15,7 +15,9 @@
   "reload_restarting": "Restarting service…",
   "reload_retry": "Retry",
   "reload_will_build": "Rebuild frontend",
-  "reload_will_restart": "Restart service",
+  "reload_will_restart_apps": "Restart app service",
+  "reload_will_restart_server": "Restart main service",
+  "logout_confirm": "Confirm logout?",
   "_locale": "en",
   "_locale_full": "en-US"
 }

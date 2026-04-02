@@ -1,20 +1,16 @@
 <template>
-  <div
-    class="fixed bottom-0 left-0 right-0 z-[200] flex h-[44px] items-center gap-0 border-t border-[rgba(200,170,130,0.4)] bg-[rgba(250,245,238,0.88)] px-2 shadow-[0_-2px_16px_rgba(90,62,40,0.07)] backdrop-blur-2xl"
-    @click="closeLauncher"
-  >
-    <!-- 应用启动器 -->
+  <div class="fixed bottom-0 left-0 right-0 z-[200] flex h-[44px] items-center gap-0 border-t border-[rgba(200,170,130,0.4)] bg-[rgba(250,245,238,0.88)] px-2 shadow-[0_-2px_16px_rgba(90,62,40,0.07)] backdrop-blur-2xl">
     <button
+      ref="launcherButtonEl"
       class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border text-[20px] text-[#5a3e28] transition-all"
       :class="launcherOpen
         ? 'border-[rgba(200,160,96,0.4)] bg-[rgba(200,160,96,0.15)]'
         : 'border-transparent hover:border-[rgba(200,160,96,0.25)] hover:bg-[rgba(200,160,96,0.12)]'"
-      @click.stop="toggleLauncher"
+      @click.stop="$emit('toggle-launcher')"
     >⊞</button>
 
     <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
 
-    <!-- 运行中的窗口标签 -->
     <div class="flex flex-1 items-center gap-1 overflow-hidden px-0.5">
       <button
         v-for="win in windows"
@@ -43,44 +39,36 @@
       :class="taskCenterOpen
         ? 'border-[rgba(200,160,96,0.4)] bg-[rgba(200,160,96,0.15)]'
         : 'border-transparent hover:border-[rgba(200,160,96,0.25)] hover:bg-[rgba(200,160,96,0.12)]'"
-      @click.stop="toggleTaskCenter"
+      @click.stop="$emit('toggle-task-center')"
     >
       <ListTodo class="h-[15px] w-[15px] text-[#5a3e28]" />
     </button>
 
     <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
 
-    <!-- 时钟（最右侧） -->
     <div class="flex-shrink-0 cursor-default px-1.5 text-right">
       <div class="text-[13px] font-semibold leading-[1.25] text-[#3a2a18]">{{ clockTime }}</div>
       <div class="text-[10px] leading-[1.25] text-[#9a8870]">{{ clockDate }}</div>
     </div>
-
-    <!-- 任务中心面板 -->
-    <TaskCenter v-if="taskCenterOpen" @close="taskCenterOpen = false" />
-
-    <!-- 启动器面板 -->
-    <LauncherPanel
-      v-if="launcherOpen"
-      @open="onLauncherOpen"
-      @close="launcherOpen = false"
-      @create-app="onCreateApp"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ListTodo } from 'lucide-vue-next';
-import LauncherPanel from './LauncherPanel.vue';
-import TaskCenter from './TaskCenter.vue';
 import { windowManager } from '../../stores/windowManager.js';
 import { appRegistry } from '../../apps.js';
-const windows = computed(() => windowManager.state.windows);
-const launcherOpen = ref(false);
-const taskCenterOpen = ref(false);
 
-// 时钟
+defineProps({
+  launcherOpen: { type: Boolean, default: false },
+  taskCenterOpen: { type: Boolean, default: false }
+});
+
+defineEmits(['toggle-launcher', 'toggle-task-center']);
+
+const windows = computed(() => windowManager.state.windows);
+const launcherButtonEl = ref(null);
+
 const clockTime = ref('');
 const clockDate = ref('');
 
@@ -94,21 +82,23 @@ function updateClock() {
 }
 
 let clockTimer;
-onMounted(() => { updateClock(); clockTimer = setInterval(updateClock, 10000); });
-onUnmounted(() => clearInterval(clockTimer));
+onMounted(() => {
+  updateClock();
+  clockTimer = setInterval(updateClock, 10000);
+});
+onUnmounted(() => {
+  clearInterval(clockTimer);
+});
 
-// 图标查找
 function appIcon(appId) {
   return appRegistry.find(a => a.id === appId)?.icon || '🪟';
 }
 
-// 当前最高 z 的窗口为 active
 function isActive(win) {
   const maxZ = Math.max(...windows.value.map(w => w.zIndex));
   return win.zIndex === maxZ && win.state !== 'minimized';
 }
 
-// 点击窗口标签
 function clickTab(win) {
   if (win.state === 'minimized') {
     win.state = 'normal';
@@ -120,31 +110,5 @@ function clickTab(win) {
   }
 }
 
-// 任务中心
-function toggleTaskCenter() {
-  taskCenterOpen.value = !taskCenterOpen.value;
-  if (taskCenterOpen.value) launcherOpen.value = false;
-}
-
-// 应用启动器
-function toggleLauncher() {
-  launcherOpen.value = !launcherOpen.value;
-  if (launcherOpen.value) taskCenterOpen.value = false;
-}
-
-function closeLauncher() {
-  launcherOpen.value = false;
-  taskCenterOpen.value = false;
-}
-
-function onLauncherOpen(appId) {
-  windowManager.open(appId);
-  launcherOpen.value = false;
-}
-
-function onCreateApp() {
-  windowManager.open('create-app');
-  launcherOpen.value = false;
-}
-
+defineExpose({ launcherButtonEl });
 </script>

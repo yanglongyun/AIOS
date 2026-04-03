@@ -71,6 +71,27 @@
           </div>
         </div>
 
+        <!-- Tabs -->
+        <div class="mb-4 flex items-center gap-2 border-b border-[#1e2329] pb-3">
+          <button
+            type="button"
+            class="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
+            :class="detailTab === 'overview' ? 'bg-[#f0b90b]/15 text-[#f0b90b]' : 'text-[#848e9c] hover:bg-[#1e2329]'"
+            @click="detailTab = 'overview'"
+          >
+            __T_COIN_TAB_OVERVIEW__
+          </button>
+          <button
+            type="button"
+            class="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
+            :class="detailTab === 'analysis' ? 'bg-[#f0b90b]/15 text-[#f0b90b]' : 'text-[#848e9c] hover:bg-[#1e2329]'"
+            @click="detailTab = 'analysis'"
+          >
+            __T_COIN_TAB_ANALYSIS__
+          </button>
+        </div>
+
+        <template v-if="detailTab === 'overview'">
         <!-- Chart -->
         <div class="bg-[#1e2329] rounded-xl p-4 mb-4 border border-[#2b3139]">
           <div class="text-[10px] text-[#474d57] uppercase tracking-wider mb-3">__T_COIN_7D_PRICE__</div>
@@ -93,6 +114,53 @@
             <div class="font-mono text-sm">{{ stat.value }}</div>
           </div>
         </div>
+
+        <div v-if="dc.description" class="mt-4 rounded-xl border border-[#2b3139] bg-[#1e2329] p-4">
+          <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_ABOUT__</div>
+          <p class="text-sm leading-7 text-[#b7bdc6]">{{ dc.description }}</p>
+        </div>
+        </template>
+
+        <template v-else>
+          <div class="rounded-xl border border-[#2b3139] bg-[#1e2329] p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold text-[#eaecef]">__T_COIN_ANALYZE__</div>
+                <div class="mt-1 text-[11px] leading-relaxed text-[#848e9c]">__T_COIN_ANALYZE_DESC__</div>
+              </div>
+              <button
+                type="button"
+                @click="analyzeCoin"
+                :disabled="detailAnalyzing"
+                class="shrink-0 rounded-lg px-3 py-2 text-[11px] font-medium transition-all disabled:opacity-30"
+                :class="detailAnalyzing ? 'bg-[#2b3139] text-[#848e9c]' : 'bg-[#f0b90b]/10 text-[#f0b90b] hover:bg-[#f0b90b]/20'"
+              >
+                {{ detailAnalyzing ? '__T_COIN_ANALYZING__' : '__T_COIN_NEW_ANALYSIS__' }}
+              </button>
+            </div>
+
+            <div v-if="detailAnalysisText" class="mt-4 rounded-xl border border-[#2b3139] bg-[#15191e] p-4">
+              <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_LATEST__</div>
+              <div class="coin-analysis text-sm leading-relaxed text-[#b7bdc6]" v-html="renderMd(detailAnalysisText)"></div>
+            </div>
+
+            <div class="mt-4">
+              <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_HISTORY__</div>
+              <div v-if="!detailAnalysisHistory.length" class="rounded-xl border border-dashed border-[#2b3139] px-4 py-6 text-center text-[12px] text-[#6b7280]">
+                __T_COIN_NO_HISTORY__
+              </div>
+              <div v-else class="space-y-3">
+                <div v-for="item in detailAnalysisHistory" :key="item.id" class="rounded-xl border border-[#2b3139] bg-[#15191e] p-4">
+                  <div class="mb-2 flex items-center justify-between gap-3">
+                    <div class="text-[11px] font-medium text-[#eaecef]">{{ item.coin_name }} ({{ item.coin_symbol?.toUpperCase() }}) · ${{ fmtPrice(item.price) }}</div>
+                    <div class="text-[10px] text-[#6b7280]">{{ item.created_at?.slice(0, 16).replace('T', ' ') }}</div>
+                  </div>
+                  <div class="coin-analysis text-sm leading-relaxed text-[#b7bdc6]" v-html="renderMd(item.analysis)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -108,10 +176,21 @@ const renderMd = (t) => marked.parse(t || '');
 const view = ref('list'); const coins = ref([]); const loading = ref(false);
 const analyzing = ref(false); const analysisText = ref('');
 const dc = ref(null); const detailChart = ref([]); const detailLoading = ref(false);
+const detailTab = ref('overview');
+const detailAnalyzing = ref(false);
+const detailAnalysisText = ref('');
+const detailAnalysisHistory = ref([]);
 
 const fmtPrice = (n) => n >= 1 ? Number(n).toLocaleString('en', { maximumFractionDigits: 2 }) : Number(n).toPrecision(4);
 const fmtPct = (n) => (n >= 0 ? '+' : '') + Number(n || 0).toFixed(2);
 const fmtCap = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(0) + 'M' : String(n || 0);
+const fmtSupply = (n) => Number(n || 0).toLocaleString('en', { maximumFractionDigits: 0 });
+const fmtHistoryTime = (v) => new Date(v).toLocaleString(LOCALE === 'zh' ? 'zh-CN' : 'en-US', {
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit'
+});
 
 const miniChart = (data) => {
   if (!data?.length) return '';
@@ -131,15 +210,35 @@ const detailStats = computed(() => dc.value ? [
   { label: '__T_COIN_24H_HIGH__', value: '$' + fmtPrice(dc.value.high24h) },
   { label: '__T_COIN_24H_LOW__', value: '$' + fmtPrice(dc.value.low24h) },
   { label: '__T_COIN_MARKET_CAP__', value: '$' + fmtCap(dc.value.marketCap) },
-  { label: '__T_COIN_ATH__', value: '$' + fmtPrice(dc.value.ath) }
+  { label: '__T_COIN_ATH__', value: '$' + fmtPrice(dc.value.ath) },
+  { label: '__T_COIN_24H_VOLUME__', value: '$' + fmtCap(dc.value.volume24h) },
+  { label: '__T_COIN_CIRCULATING__', value: fmtSupply(dc.value.circulatingSupply) },
+  { label: '__T_COIN_TOTAL_SUPPLY__', value: dc.value.totalSupply ? fmtSupply(dc.value.totalSupply) : '--' },
+  { label: '__T_COIN_ATH_DRAWDOWN__', value: `${fmtPct(dc.value.athChangePct)}%` }
 ] : []);
+
+const loadCoinHistory = async (coinId) => {
+  try {
+    const data = await (await fetch(`/aios/apps/coinmarket/coin-history?coinId=${coinId}`)).json();
+    detailAnalysisHistory.value = data.analyses || [];
+    detailAnalysisText.value = detailAnalysisHistory.value[0]?.analysis || '';
+  } catch { detailAnalysisHistory.value = []; }
+};
 
 const api = async (p) => { const r = await fetch(`/aios/apps/coinmarket/${p}`); return r.json(); };
 const loadCoins = async () => { loading.value = true; try { coins.value = (await api('list')).coins || []; } catch {} loading.value = false; };
 
 const openDetail = async (id) => {
   view.value = 'detail'; detailLoading.value = true;
-  try { const d = await api(`detail?id=${id}`); dc.value = d.coin; detailChart.value = d.chart || []; } catch {}
+  detailTab.value = 'overview';
+  detailAnalysisText.value = '';
+  detailAnalysisHistory.value = [];
+  try {
+    const d = await api(`detail?id=${id}`);
+    dc.value = d.coin;
+    detailChart.value = d.chart || [];
+    if (d.coin?.id) await loadCoinHistory(d.coin.id);
+  } catch {}
   detailLoading.value = false;
 };
 
@@ -149,5 +248,31 @@ const doAnalyze = async () => {
   catch { analysisText.value = 'Failed'; } analyzing.value = false;
 };
 
+const analyzeCoin = async () => {
+  if (!dc.value || detailAnalyzing.value) return;
+  detailAnalyzing.value = true;
+  try {
+    const data = await (await fetch('/aios/apps/coinmarket/coin-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coin: dc.value, locale: LOCALE })
+    })).json();
+    detailAnalysisText.value = data.analysis || '';
+    await loadCoinHistory(dc.value.id);
+  } catch {
+    detailAnalysisText.value = 'Failed';
+  }
+  detailAnalyzing.value = false;
+};
+
 onMounted(() => loadCoins());
 </script>
+
+<style scoped>
+.coin-analysis :deep(p) { margin: 0.35em 0; }
+.coin-analysis :deep(p:first-child) { margin-top: 0; }
+.coin-analysis :deep(p:last-child) { margin-bottom: 0; }
+.coin-analysis :deep(strong) { color: #f3f4f6; }
+.coin-analysis :deep(ul),
+.coin-analysis :deep(ol) { padding-left: 1.2rem; margin: 0.35em 0; }
+</style>

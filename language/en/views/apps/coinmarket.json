@@ -14,5 +14,17 @@
   "coin_rank": "Rank",
   "coin_chat_quick_1": "Analyze today's crypto market",
   "coin_chat_quick_2": "Which coins are pumping",
-  "coin_chat_quick_3": "Give me a market sentiment overview"
+  "coin_chat_quick_3": "Give me a market sentiment overview",
+  "coin_tab_overview": "Overview",
+  "coin_tab_analysis": "Analysis",
+  "coin_analyze_desc": "Use AI to conduct an in-depth analysis of the coin's fundamentals and recent performance.",
+  "coin_new_analysis": "New Analysis",
+  "coin_no_history": "No analysis history available",
+  "coin_about": "About",
+  "coin_latest": "Latest",
+  "coin_history": "History",
+  "coin_24h_volume": "24h Volume",
+  "coin_circulating": "Circulating",
+  "coin_total_supply": "Total Supply",
+  "coin_ath_drawdown": "ATH Drawdown"
 }

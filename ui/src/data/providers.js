@@ -54,7 +54,7 @@ const PROVIDERS = [
     name: "Qwen (通义千问)",
     group: "default",
     apiUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-    defaultModel: "qwen3.5-plus"
+    defaultModel: "qwen3.6-plus"
   },
   {
     id: "glm",
@@ -89,7 +89,7 @@ const PROVIDERS = [
     name: "MiniMax",
     group: "default",
     apiUrl: "https://api.minimaxi.com/v1/chat/completions",
-    defaultModel: "MiniMax-M2.5"
+    defaultModel: "MiniMax-M2.7"
   },
   {
     id: "doubao",

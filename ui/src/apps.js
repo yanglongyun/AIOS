@@ -132,14 +132,7 @@ const appRegistry = [
     load: () => import("./apps/ghtrending/index.vue"),
     defaultSize: { w: 900, h: 620 }
   },
-  {
-    id: "producthunt",
-    name: "__T_APP_SIDEBAR_PRODUCTHUNT__",
-    icon: "\u{1F680}",
-    iconClass: "icon-producthunt",
-    load: () => import("./apps/producthunt/index.vue"),
-    defaultSize: { w: 800, h: 580 }
-  },
+
   {
     id: "rssreader",
     name: "__T_APP_SIDEBAR_RSSREADER__",

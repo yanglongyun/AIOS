@@ -30,6 +30,21 @@
     <div v-if="view === 'list'" class="flex-1 overflow-y-auto">
       <div v-if="loading" class="text-center text-[#999] text-sm py-16 font-sans">__T_HN_LOADING__</div>
       <div v-else class="max-w-[680px] mx-auto py-4">
+        <!-- Digest -->
+        <div class="px-5 pb-3 mb-1 border-b border-[#e8e5d8]">
+          <button v-if="!digestText" @click="doDigest" :disabled="digesting"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-sans font-medium rounded-lg transition-all disabled:opacity-40"
+            :class="digesting ? 'bg-[#f0ede4] text-[#999]' : 'bg-[#fff8e1] text-[#f57f17] hover:bg-[#fff3c4]'">
+            <span>✦</span> {{ digesting ? '__T_HN_DIGESTING__' : '__T_HN_DIGEST__' }}
+          </button>
+          <div v-if="digestText" class="bg-white border border-[#e0ddd0] rounded-lg p-4 text-[14px] leading-relaxed font-sans shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-bold text-[#c45500] uppercase tracking-wider">__T_HN_DIGEST__</span>
+              <button @click="digestText = ''" class="text-[10px] text-[#ccc] hover:text-[#999]">✕</button>
+            </div>
+            <div v-html="renderMd(digestText)"></div>
+          </div>
+        </div>
         <div v-for="(s, i) in stories" :key="s.id"
           class="group flex gap-3 px-5 py-3.5 transition-colors hover:bg-[#eeebdf] cursor-pointer border-b border-[#e8e5d8]"
           @click="openDetail(s.id)">
@@ -122,6 +137,7 @@ const tabs = [{ id: 'top', label: '__T_HN_TOP__' }, { id: 'new', label: '__T_HN_
 const stories = ref([]); const loading = ref(false); const bookmarks = ref([]);
 const story = ref(null); const comments = ref([]); const detailLoading = ref(false);
 const summarizing = ref(false); const summaryText = ref('');
+const digesting = ref(false); const digestText = ref('');
 
 const isBookmarked = (id) => bookmarks.value.some((b) => b.hn_id === id);
 const getDomain = (u) => { try { return new URL(u).hostname.replace('www.', ''); } catch { return ''; } };
@@ -129,7 +145,7 @@ const api = async (p, o) => { const r = await fetch(`/aios/apps/hackernews/${p}`
 
 const loadStories = async (type = 'top') => { loading.value = true; try { stories.value = (await api(`list?type=${type}`)).stories || []; } catch {} loading.value = false; };
 const loadBookmarks = async () => { try { bookmarks.value = (await api('bookmarks')).bookmarks || []; } catch {} };
-const switchTab = (t) => { activeTab.value = t; view.value = 'list'; loadStories(t); };
+const switchTab = (t) => { activeTab.value = t; view.value = 'list'; digestText.value = ''; loadStories(t); };
 
 const openDetail = async (id) => {
   view.value = 'detail'; detailLoading.value = true; summaryText.value = '';
@@ -148,6 +164,15 @@ const doSummarize = async () => {
   if (!story.value) return; summarizing.value = true;
   try { summaryText.value = (await api('summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: story.value.title, url: story.value.url, text: story.value.text, locale: LOCALE }) })).summary || ''; }
   catch { summaryText.value = 'Failed'; } summarizing.value = false;
+};
+
+const doDigest = async () => {
+  digesting.value = true;
+  try {
+    const list = stories.value.slice(0, 20).map((s, i) => `${i + 1}. ${s.title} (${s.score} pts, ${s.descendants} comments)`).join('\n');
+    digestText.value = (await api('summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Hacker News Digest', text: list, locale: LOCALE }) })).summary || '';
+  } catch { digestText.value = 'Failed'; }
+  digesting.value = false;
 };
 
 onMounted(() => { loadStories('top'); loadBookmarks(); });

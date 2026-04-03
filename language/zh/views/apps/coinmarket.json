@@ -14,5 +14,17 @@
   "coin_rank": "排名",
   "coin_chat_quick_1": "分析今天的加密货币行情",
   "coin_chat_quick_2": "哪些币在涨",
-  "coin_chat_quick_3": "给我一个市场情绪概览"
+  "coin_chat_quick_3": "给我一个市场情绪概览",
+  "coin_tab_overview": "概览",
+  "coin_tab_analysis": "解读",
+  "coin_analyze_desc": "使用 AI 对该币种的基本面与近期表现进行深度分析。",
+  "coin_new_analysis": "进行最新解读",
+  "coin_no_history": "暂无历史解读记录",
+  "coin_about": "简介",
+  "coin_latest": "最新解读",
+  "coin_history": "历史解读",
+  "coin_24h_volume": "24h 成交额",
+  "coin_circulating": "流通量",
+  "coin_total_supply": "总发行量",
+  "coin_ath_drawdown": "历史高点回撤"
 }

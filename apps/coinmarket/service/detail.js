@@ -19,7 +19,12 @@ const detail = async ({ id }) => {
       low24h: info.market_data?.low_24h?.usd,
       ath: info.market_data?.ath?.usd,
       athDate: info.market_data?.ath_date?.usd,
-      description: info.description?.en?.slice(0, 500) || ''
+      athChangePct: info.market_data?.ath_change_percentage?.usd,
+      volume24h: info.market_data?.total_volume?.usd,
+      circulatingSupply: info.market_data?.circulating_supply,
+      totalSupply: info.market_data?.total_supply,
+      maxSupply: info.market_data?.max_supply,
+      description: info.description?.en?.slice(0, 1200) || ''
     },
     chart: (chart.prices || []).map(([t, p]) => ({ t, p }))
   };

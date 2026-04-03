@@ -13,7 +13,7 @@ const appLoaders = [
   () => import("./earthquake/index.js"),
   () => import("./weather/index.js"),
   () => import("./ghtrending/index.js"),
-  () => import("./producthunt/index.js"),
+
   () => import("./rssreader/index.js")
 ];
 export {

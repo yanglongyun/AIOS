@@ -9,6 +9,11 @@
   "gh_forks": "forks",
   "gh_analyze": "AI Analysis",
   "gh_analyzing": "Analyzing...",
+  "gh_analyzed": "Analyzed",
+  "gh_digest": "AI Digest",
+  "gh_digesting": "Digesting...",
+  "gh_history": "Analysis History",
+  "gh_history_empty": "No analyses yet",
   "gh_chat_quick_1": "What's trending on GitHub",
   "gh_chat_quick_2": "Recommend interesting open source projects",
   "gh_chat_quick_3": "Explain a trending repo"

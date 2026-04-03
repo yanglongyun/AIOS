@@ -6,10 +6,6 @@ services:
     ports:
       - "9500:9500"
     volumes:
-      - aios_database:/app/database
-      - aios_files:/app/files
+      - ../../database:/app/database
+      - ../../files:/app/files
     restart: unless-stopped
-
-volumes:
-  aios_database:
-  aios_files:

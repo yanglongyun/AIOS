@@ -36,11 +36,14 @@
           :api-url="editApiUrl"
           :api-key="editApiKey"
           :model="editModel"
+          :auth-method="authMethod"
+          :oauth-connected="oauthConnected"
           @save="save"
           @update:provider="onProviderChange"
           @update:api-url="editApiUrl = $event"
           @update:api-key="editApiKey = $event"
           @update:model="editModel = $event"
+          @update:auth-method="authMethod = $event"
         />
         <ToolTab
           v-else-if="activeTab === 'tools'"
@@ -111,6 +114,8 @@ const toolMaxRounds = ref(50);
 const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
+const authMethod = ref('apikey');
+const oauthConnected = ref(false);
 const accountUsername = ref('');
 const oldPassword = ref('');
 const newPassword = ref('');
@@ -179,6 +184,8 @@ const fetchSettings = async () => {
   editApiUrl.value = data.apiUrl || '';
   editApiKey.value = data.apiKey || '';
   editModel.value = data.model || '';
+  authMethod.value = data.authMethod || 'apikey';
+  oauthConnected.value = data.oauthConnected === true;
   providerConfigs.value[provider.value] = {
     apiUrl: editApiUrl.value,
     apiKey: editApiKey.value,
@@ -224,7 +231,8 @@ const save = async () => {
         toolMaxRounds: maxRounds,
         apiUrl: editApiUrl.value,
         apiKey: editApiKey.value,
-        model: editModel.value
+        model: editModel.value,
+        authMethod: authMethod.value
       })
     });
 

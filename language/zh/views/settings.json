@@ -42,6 +42,12 @@
   "settings_skills_source_project": "项目",
   "settings_skills_source_system": "系统",
   "settings_skills_empty_group": "当前分组没有可用技能。",
+  "settings_oauth_connected": "已通过 OAuth 连接 OpenAI",
+  "settings_oauth_disconnect": "断开连接",
+  "settings_oauth_hint": "通过 OpenAI 账号授权登录，无需手动填写 API Key。",
+  "settings_oauth_connecting": "连接中…",
+  "settings_oauth_login": "使用 OpenAI 账号登录",
+  "settings_oauth_login_short": "登录",
   "settings_saved": "配置已保存",
   "settings_save_failed": "保存失败：{message}",
   "settings_saving": "保存中…"

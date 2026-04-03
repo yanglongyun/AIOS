@@ -12,7 +12,8 @@ const PROVIDERS = [
     name: "OpenAI",
     group: "default",
     apiUrl: "https://api.openai.com/v1/chat/completions",
-    defaultModel: "gpt-5.4"
+    defaultModel: "gpt-5.4",
+    supportsOAuth: true
   },
   {
     id: "claude",

@@ -42,6 +42,12 @@
   "settings_skills_source_project": "Project",
   "settings_skills_source_system": "System",
   "settings_skills_empty_group": "No skills found in this group.",
+  "settings_oauth_connected": "Connected to OpenAI via OAuth",
+  "settings_oauth_disconnect": "Disconnect",
+  "settings_oauth_hint": "Sign in with your OpenAI account. No API key needed.",
+  "settings_oauth_connecting": "Connecting…",
+  "settings_oauth_login": "Sign in with OpenAI",
+  "settings_oauth_login_short": "Login",
   "settings_saved": "Saved",
   "settings_save_failed": "Save failed: {message}",
   "settings_saving": "Saving…"

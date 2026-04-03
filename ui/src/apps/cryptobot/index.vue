@@ -35,7 +35,6 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
 import CryptobotMachinePanel from './CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from './CryptobotDecisionPaper.vue';
 
@@ -222,8 +221,6 @@ const minToSliderIdx = (min) => {
 let pendingRefresh = false;
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'cryptobot', label: '__T_APP_SIDEBAR_CRYPTOBOT__' });
-  chatPanel.setQuickMessages(['__T_CRYPTOBOT_CHAT_QUICK_1__', '__T_CRYPTOBOT_CHAT_QUICK_2__', '__T_CRYPTOBOT_CHAT_QUICK_3__']);
   try {
     await loadAll();
     goal.value = status.config.goal || '__T_CRYPTOBOT_DEFAULT_DIRECTIVE__';
@@ -256,8 +253,6 @@ onUnmounted(() => {
     clearInterval(ticker);
     ticker = null;
   }
-  chatPanel.clearContext();
-  chatPanel.setQuickMessages([]);
 });
 </script>
 

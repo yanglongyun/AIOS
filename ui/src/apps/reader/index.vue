@@ -34,8 +34,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { computed, onMounted, ref } from 'vue';
 import { LOCALE } from '../../locale.js';
 import ReaderCreateView from './ReaderCreateView.vue';
 import ReaderDetailView from './ReaderDetailView.vue';
@@ -231,8 +230,6 @@ const resetReader = async () => {
 };
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'reader', label: '__T_APP_SIDEBAR_READER__' });
-  chatPanel.setQuickMessages(['__T_READER_CHAT_QUICK_1__', '__T_READER_CHAT_QUICK_2__', '__T_READER_CHAT_QUICK_3__']);
   try {
     await loadSessions();
     if (view.value === 'detail') {
@@ -243,7 +240,6 @@ onMounted(async () => {
     error.value = e.message || '__T_READER_INIT_FAILED__';
   }
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style>

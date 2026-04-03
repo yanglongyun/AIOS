@@ -32,7 +32,6 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
 import { LOCALE, LOCALE_FULL } from '../../locale.js';
 import SubscriberArticlePanel from './SubscriberArticlePanel.vue';
 import SubscriberControlPanel from './SubscriberControlPanel.vue';
@@ -204,8 +203,6 @@ const formatTime = (value) => {
 onMounted(async () => {
   updateNow();
   dialTimer = setInterval(updateNow, 10000);
-  chatPanel.setContext({ scene: 'subscriber', label: '__T_APP_SIDEBAR_SUBSCRIBER__' });
-  chatPanel.setQuickMessages(['__T_SUBSCRIBER_CHAT_QUICK_1__', '__T_SUBSCRIBER_CHAT_QUICK_2__', '__T_SUBSCRIBER_CHAT_QUICK_3__']);
   try {
     await loadToday();
     await loadHistory();
@@ -216,8 +213,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (dialTimer) clearInterval(dialTimer);
-  chatPanel.clearContext();
-  chatPanel.setQuickMessages([]);
 });
 </script>
 

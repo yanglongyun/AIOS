@@ -1,98 +1,106 @@
 <template>
-  <div class="flex h-full flex-col bg-[#fafafa] text-[#1a1a1a]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
+  <div class="flex h-full flex-col bg-[#f6f5ef] text-[#2c2c2c]" style="font-family: Georgia, 'PingFang SC', serif;">
     <!-- Header -->
-    <div class="flex items-center gap-3 px-4 py-3 border-b border-[#eee] bg-white shrink-0">
-      <template v-if="view === 'detail'">
-        <button @click="view = 'list'" class="text-[#f60] hover:text-[#e50] text-sm">← __T_HN_BACK__</button>
-      </template>
-      <template v-else>
-        <span class="font-bold text-[#f60] text-sm tracking-wide">Y</span>
-        <span class="font-semibold text-sm">__T_HN_TITLE__</span>
-        <div class="flex gap-1 ml-3">
-          <button v-for="tab in tabs" :key="tab.id" @click="switchTab(tab.id)"
-            class="px-2.5 py-1 text-xs rounded-full transition-colors"
-            :class="activeTab === tab.id ? 'bg-[#f60] text-white' : 'text-[#666] hover:bg-[#f0f0f0]'">
-            {{ tab.label }}
-          </button>
-        </div>
-      </template>
-      <div class="ml-auto flex gap-2">
+    <div class="flex items-center justify-between px-5 py-3 border-b-2 border-[#f60] bg-[#f60] shrink-0">
+      <div class="flex items-center gap-3">
+        <template v-if="view === 'detail'">
+          <button @click="view = 'list'" class="text-white/80 hover:text-white text-sm font-sans">← __T_HN_BACK__</button>
+        </template>
+        <template v-else>
+          <span class="text-white font-bold text-lg tracking-tight">Y</span>
+          <span class="text-white font-bold text-sm font-sans tracking-wide">__T_HN_TITLE__</span>
+        </template>
+      </div>
+      <div v-if="view !== 'detail'" class="flex items-center gap-2">
+        <button v-for="tab in tabs" :key="tab.id" @click="switchTab(tab.id)"
+          class="px-2.5 py-0.5 text-[11px] font-sans rounded transition-colors"
+          :class="activeTab === tab.id ? 'bg-white/25 text-white' : 'text-white/60 hover:text-white'">
+          {{ tab.label }}
+        </button>
+        <span class="text-white/30 mx-1">|</span>
         <button @click="view = view === 'bookmarks' ? 'list' : 'bookmarks'"
-          class="px-2.5 py-1 text-xs rounded-full transition-colors"
-          :class="view === 'bookmarks' ? 'bg-[#f60] text-white' : 'text-[#666] hover:bg-[#f0f0f0]'">
-          ★ {{ bookmarks.length }}
+          class="text-[11px] font-sans transition-colors"
+          :class="view === 'bookmarks' ? 'text-white' : 'text-white/60 hover:text-white'">
+          ★ __T_HN_BOOKMARKS__ ({{ bookmarks.length }})
         </button>
       </div>
     </div>
 
-    <!-- List View -->
+    <!-- List -->
     <div v-if="view === 'list'" class="flex-1 overflow-y-auto">
-      <div v-if="loading" class="text-center text-[#999] text-sm py-12">__T_HN_LOADING__</div>
-      <div v-else>
-        <div v-for="(story, i) in stories" :key="story.id"
-          class="flex gap-3 px-4 py-3 border-b border-[#f0f0f0] hover:bg-[#f5f5f5] cursor-pointer transition-colors"
-          @click="openDetail(story.id)">
-          <span class="text-[#999] text-xs w-5 text-right shrink-0 pt-0.5">{{ i + 1 }}</span>
+      <div v-if="loading" class="text-center text-[#999] text-sm py-16 font-sans">__T_HN_LOADING__</div>
+      <div v-else class="max-w-[680px] mx-auto py-4">
+        <div v-for="(s, i) in stories" :key="s.id"
+          class="group flex gap-3 px-5 py-3.5 transition-colors hover:bg-[#eeebdf] cursor-pointer border-b border-[#e8e5d8]"
+          @click="openDetail(s.id)">
+          <span class="text-[#c4c0b0] text-[13px] font-sans w-6 text-right shrink-0 pt-0.5 font-medium">{{ i + 1 }}</span>
           <div class="flex-1 min-w-0">
-            <div class="text-sm leading-snug mb-1">{{ story.title }}</div>
-            <div class="text-[11px] text-[#999]">
-              {{ story.score }} __T_HN_PTS__ · {{ story.by }} · {{ story.descendants }} __T_HN_COMMENTS_COUNT__
-              <span v-if="story.url" class="text-[#ccc] ml-1">{{ getDomain(story.url) }}</span>
+            <div class="text-[15px] leading-snug mb-1.5 group-hover:text-[#c45500]">{{ s.title }}</div>
+            <div class="flex items-center gap-3 text-[11px] text-[#999] font-sans">
+              <span>▲ {{ s.score }}</span>
+              <span>{{ s.by }}</span>
+              <span>{{ s.descendants }} __T_HN_COMMENTS_COUNT__</span>
+              <span v-if="s.url" class="text-[#c4c0b0]">{{ getDomain(s.url) }}</span>
             </div>
           </div>
+          <button @click.stop="toggleBookmark(s)"
+            class="shrink-0 text-lg opacity-0 group-hover:opacity-100 transition-opacity"
+            :class="isBookmarked(s.id) ? 'text-[#f60] opacity-100' : 'text-[#ddd] hover:text-[#f60]'">
+            {{ isBookmarked(s.id) ? '★' : '☆' }}
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Bookmarks View -->
+    <!-- Bookmarks -->
     <div v-if="view === 'bookmarks'" class="flex-1 overflow-y-auto">
-      <div v-if="!bookmarks.length" class="text-center text-[#999] text-sm py-12">__T_HN_NO_BOOKMARKS__</div>
-      <div v-for="bm in bookmarks" :key="bm.id"
-        class="flex gap-3 px-4 py-3 border-b border-[#f0f0f0] hover:bg-[#f5f5f5] cursor-pointer transition-colors"
-        @click="openDetail(bm.hn_id)">
-        <div class="flex-1 min-w-0">
-          <div class="text-sm leading-snug mb-1">{{ bm.title }}</div>
-          <div class="text-[11px] text-[#999]">{{ bm.score }} __T_HN_PTS__ · {{ bm.by }}</div>
+      <div class="max-w-[680px] mx-auto py-4">
+        <div v-if="!bookmarks.length" class="text-center text-[#bbb] text-sm py-16 font-sans">__T_HN_NO_BOOKMARKS__</div>
+        <div v-for="bm in bookmarks" :key="bm.id"
+          class="group flex items-center gap-3 px-5 py-3.5 border-b border-[#e8e5d8] hover:bg-[#eeebdf] cursor-pointer transition-colors"
+          @click="openDetail(bm.hn_id)">
+          <div class="flex-1 min-w-0">
+            <div class="text-[15px] leading-snug mb-1">{{ bm.title }}</div>
+            <div class="text-[11px] text-[#999] font-sans">▲ {{ bm.score }} · {{ bm.by }}</div>
+          </div>
+          <button @click.stop="toggleBookmark(bm)" class="text-[#f60] text-lg shrink-0 hover:scale-110 transition-transform">★</button>
         </div>
-        <button @click.stop="toggleBookmark(bm)" class="text-[#f60] text-sm shrink-0">★</button>
       </div>
     </div>
 
-    <!-- Detail View -->
+    <!-- Detail -->
     <div v-if="view === 'detail'" class="flex-1 overflow-y-auto">
-      <div v-if="detailLoading" class="text-center text-[#999] text-sm py-12">__T_HN_LOADING__</div>
-      <div v-else-if="story" class="px-4 py-4">
-        <h1 class="text-base font-semibold mb-2 leading-snug">{{ story.title }}</h1>
-        <div class="text-[11px] text-[#999] mb-3">
-          {{ story.score }} __T_HN_PTS__ · {{ story.by }} · {{ story.descendants }} __T_HN_COMMENTS_COUNT__
-          <a v-if="story.url" :href="story.url" target="_blank" class="text-[#f60] ml-2 hover:underline">{{ getDomain(story.url) }} →</a>
+      <div v-if="detailLoading" class="text-center text-[#999] text-sm py-16 font-sans">__T_HN_LOADING__</div>
+      <div v-else-if="story" class="max-w-[680px] mx-auto py-6 px-5">
+        <!-- Article header -->
+        <h1 class="text-xl font-bold leading-tight mb-2">{{ story.title }}</h1>
+        <div class="flex items-center gap-3 text-[12px] text-[#999] font-sans mb-5 pb-4 border-b border-[#e8e5d8]">
+          <span>▲ {{ story.score }} __T_HN_PTS__</span>
+          <span>{{ story.by }}</span>
+          <span>{{ story.descendants }} __T_HN_COMMENTS_COUNT__</span>
+          <a v-if="story.url" :href="story.url" target="_blank"
+            class="ml-auto text-[#c45500] hover:underline">{{ getDomain(story.url) }} ↗</a>
         </div>
-        <!-- Actions -->
-        <div class="flex gap-2 mb-4 flex-wrap">
-          <button @click="toggleBookmark(story)" class="px-3 py-1.5 text-xs rounded-full border transition-colors"
-            :class="isStoryBookmarked ? 'bg-[#f60] text-white border-[#f60]' : 'border-[#ddd] text-[#666] hover:border-[#f60]'">
-            {{ isStoryBookmarked ? '★ __T_HN_SAVED__' : '☆ __T_HN_SAVE__' }}
-          </button>
+
+        <!-- AI Summary -->
+        <div class="mb-6">
           <button @click="doSummarize" :disabled="summarizing"
-            class="px-3 py-1.5 text-xs rounded-full border border-[#ddd] text-[#666] hover:border-[#4a9] hover:text-[#4a9] disabled:opacity-40 transition-colors">
-            {{ summarizing ? '__T_HN_SUMMARIZING__' : '✦ __T_HN_SUMMARIZE__' }}
+            class="inline-flex items-center gap-1.5 px-4 py-2 text-[12px] font-sans font-medium rounded-lg transition-all disabled:opacity-40"
+            :class="summaryText ? 'bg-[#e8f5e9] text-[#2e7d32]' : 'bg-[#fff8e1] text-[#f57f17] hover:bg-[#fff3c4]'">
+            <span>✦</span> {{ summarizing ? '__T_HN_SUMMARIZING__' : '__T_HN_SUMMARIZE__' }}
           </button>
-          <button @click="doTranslate" :disabled="translating"
-            class="px-3 py-1.5 text-xs rounded-full border border-[#ddd] text-[#666] hover:border-[#47a] hover:text-[#47a] disabled:opacity-40 transition-colors">
-            {{ translating ? '__T_HN_TRANSLATING__' : '🌐 __T_HN_TRANSLATE__' }}
-          </button>
+          <div v-if="summaryText" class="mt-3 bg-white border border-[#e0ddd0] rounded-lg p-4 text-[14px] leading-relaxed font-sans shadow-sm" v-html="renderMd(summaryText)"></div>
         </div>
-        <div v-if="summaryText" class="bg-[#f0faf5] border border-[#d0e8d8] rounded-lg p-3 mb-4 text-sm leading-relaxed whitespace-pre-wrap">{{ summaryText }}</div>
-        <div v-if="translationText" class="bg-[#f0f5fa] border border-[#d0d8e8] rounded-lg p-3 mb-4 text-sm leading-relaxed whitespace-pre-wrap">{{ translationText }}</div>
+
         <!-- Comments -->
-        <div v-if="comments.length" class="border-t border-[#eee] pt-3">
-          <div class="text-xs font-semibold text-[#999] uppercase mb-3">__T_HN_COMMENTS__</div>
-          <div v-for="c in comments" :key="c.id" class="mb-3">
-            <div class="text-[11px] text-[#999] mb-1">{{ c.by }}</div>
-            <div class="text-sm text-[#444] leading-relaxed" v-html="c.text"></div>
-            <div v-for="child in c.children" :key="child.id" class="ml-4 mt-2 pl-3 border-l-2 border-[#eee]">
-              <div class="text-[11px] text-[#999] mb-1">{{ child.by }}</div>
-              <div class="text-sm text-[#444] leading-relaxed" v-html="child.text"></div>
+        <div v-if="comments.length">
+          <div class="text-[11px] font-sans font-bold text-[#999] uppercase tracking-wider mb-4">__T_HN_COMMENTS__</div>
+          <div v-for="c in comments" :key="c.id" class="mb-4 pb-4 border-b border-[#f0ede4] last:border-0">
+            <div class="text-[11px] text-[#c45500] font-sans font-medium mb-1.5">{{ c.by }}</div>
+            <div class="text-[13.5px] text-[#444] leading-relaxed font-sans" v-html="c.text"></div>
+            <div v-for="child in c.children" :key="child.id" class="ml-5 mt-3 pl-4 border-l-2 border-[#e8e5d8]">
+              <div class="text-[11px] text-[#999] font-sans mb-1">{{ child.by }}</div>
+              <div class="text-[13px] text-[#666] leading-relaxed font-sans" v-html="child.text"></div>
             </div>
           </div>
         </div>
@@ -103,65 +111,44 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { marked } from 'marked';
 import { LOCALE } from '../../locale.js';
+marked.setOptions({ breaks: true, gfm: true });
+const renderMd = (t) => marked.parse(t || '');
 
 const view = ref('list');
 const activeTab = ref('top');
-const tabs = [
-  { id: 'top', label: '__T_HN_TOP__' },
-  { id: 'new', label: '__T_HN_NEW__' },
-  { id: 'best', label: '__T_HN_BEST__' }
-];
-const stories = ref([]);
-const loading = ref(false);
-const bookmarks = ref([]);
-const story = ref(null);
-const comments = ref([]);
-const detailLoading = ref(false);
-const summarizing = ref(false);
-const translating = ref(false);
-const summaryText = ref('');
-const translationText = ref('');
+const tabs = [{ id: 'top', label: '__T_HN_TOP__' }, { id: 'new', label: '__T_HN_NEW__' }, { id: 'best', label: '__T_HN_BEST__' }];
+const stories = ref([]); const loading = ref(false); const bookmarks = ref([]);
+const story = ref(null); const comments = ref([]); const detailLoading = ref(false);
+const summarizing = ref(false); const summaryText = ref('');
 
-const isStoryBookmarked = computed(() => story.value && bookmarks.value.some((b) => b.hn_id === story.value.id));
-const getDomain = (url) => { try { return new URL(url).hostname.replace('www.', ''); } catch { return ''; } };
+const isBookmarked = (id) => bookmarks.value.some((b) => b.hn_id === id);
+const getDomain = (u) => { try { return new URL(u).hostname.replace('www.', ''); } catch { return ''; } };
+const api = async (p, o) => { const r = await fetch(`/aios/apps/hackernews/${p}`, o); return r.json(); };
 
-const api = async (path, opts) => { const res = await fetch(`/aios/apps/hackernews/${path}`, opts); return res.json(); };
+const loadStories = async (type = 'top') => { loading.value = true; try { stories.value = (await api(`list?type=${type}`)).stories || []; } catch {} loading.value = false; };
+const loadBookmarks = async () => { try { bookmarks.value = (await api('bookmarks')).bookmarks || []; } catch {} };
+const switchTab = (t) => { activeTab.value = t; view.value = 'list'; loadStories(t); };
 
-const loadStories = async (type = 'top') => { loading.value = true; try { const data = await api(`list?type=${type}`); stories.value = data.stories || []; } catch {} loading.value = false; };
-const loadBookmarks = async () => { try { const data = await api('bookmarks'); bookmarks.value = data.bookmarks || []; } catch {} };
-
-const switchTab = (tab) => { activeTab.value = tab; view.value = 'list'; loadStories(tab); };
 const openDetail = async (id) => {
-  view.value = 'detail'; detailLoading.value = true; summaryText.value = ''; translationText.value = '';
-  try { const data = await api(`detail?id=${id}`); story.value = data.story || null; comments.value = data.comments || []; } catch {}
+  view.value = 'detail'; detailLoading.value = true; summaryText.value = '';
+  try { const d = await api(`detail?id=${id}`); story.value = d.story; comments.value = d.comments || []; } catch {}
   detailLoading.value = false;
 };
 
 const toggleBookmark = async (item) => {
   const hnId = item.hn_id || item.id;
-  const exists = bookmarks.value.some((b) => b.hn_id === hnId);
-  if (exists) { await api('unbookmark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hnId }) }); }
-  else { await api('bookmark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hnId, title: item.title, url: item.url, by: item.by, score: item.score }) }); }
+  if (isBookmarked(hnId)) await api('unbookmark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hnId }) });
+  else await api('bookmark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hnId, title: item.title, url: item.url, by: item.by, score: item.score }) });
   await loadBookmarks();
 };
 
 const doSummarize = async () => {
   if (!story.value) return; summarizing.value = true;
-  try { const data = await api('summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: story.value.title, url: story.value.url, text: story.value.text, locale: LOCALE }) }); summaryText.value = data.summary || ''; }
+  try { summaryText.value = (await api('summarize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: story.value.title, url: story.value.url, text: story.value.text, locale: LOCALE }) })).summary || ''; }
   catch { summaryText.value = 'Failed'; } summarizing.value = false;
 };
 
-const doTranslate = async () => {
-  if (!story.value) return; translating.value = true;
-  try { const topComments = comments.value.slice(0, 5).map((c) => c.text).join('\n\n'); const data = await api('translate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: story.value.title, text: topComments || story.value.title, locale: LOCALE }) }); translationText.value = data.translation || ''; }
-  catch { translationText.value = 'Failed'; } translating.value = false;
-};
-
-onMounted(() => {
-  loadStories('top'); loadBookmarks();
-  chatPanel.setContext({ scene: 'hackernews', label: '__T_APP_SIDEBAR_HACKERNEWS__' });
-  chatPanel.setQuickMessages(['__T_HN_CHAT_QUICK_1__', '__T_HN_CHAT_QUICK_2__', '__T_HN_CHAT_QUICK_3__']);
-});
+onMounted(() => { loadStories('top'); loadBookmarks(); });
 </script>

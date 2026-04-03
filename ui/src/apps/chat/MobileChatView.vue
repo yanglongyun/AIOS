@@ -1,11 +1,11 @@
 <template>
   <!-- 对话列表 -->
-  <div v-if="!currentChat" class="flex h-full flex-col bg-[#f5f0e8]">
+  <div v-if="!currentChat" class="flex h-full flex-col bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]">
     <!-- 新建按钮 -->
-    <div class="shrink-0 border-b border-[#e0d0b8] px-4 py-3">
+    <div class="shrink-0 border-b border-[#e0d0b8] bg-[#ece4d8] px-4 py-3">
       <button
         @click="newChat"
-        class="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#d4c0a0] bg-white py-2.5 text-[13px] text-[#8a6a40] transition-colors active:bg-[#f5ead8]"
+        class="flex w-full items-center justify-center gap-2 rounded-lg border border-[#d4c0a0] bg-[rgba(200,160,96,0.08)] py-2.5 text-[13px] text-[#8a6a40] transition-colors active:bg-[rgba(200,160,96,0.15)]"
       >
         <span class="text-[16px] leading-none">+</span>
         __T_CHAT_NEW_TITLE__
@@ -13,15 +13,15 @@
     </div>
 
     <!-- 对话列表 -->
-    <div class="min-h-0 flex-1 overflow-y-auto">
+    <div class="min-h-0 flex-1 overflow-y-auto px-2 py-2 [scrollbar-width:thin]">
       <div v-if="!chats.length" class="py-16 text-center text-[13px] text-[#a09080]">__T_HISTORY_EMPTY__</div>
       <button
         v-for="c in chats"
         :key="c.conversation_id"
-        class="flex w-full items-center gap-3 border-b border-[#e0d0b8] px-4 py-3.5 text-left transition-colors active:bg-[rgba(200,160,96,0.1)]"
+        class="mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors active:bg-[rgba(200,160,96,0.15)]"
         @click="openChat(c)"
       >
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ece4d8] text-[18px]">💬</div>
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ece4d8] text-[18px] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">💬</div>
         <div class="min-w-0 flex-1">
           <div class="truncate text-[14px] text-[#4a3a28]">{{ c.title || c.conversation_id.slice(0, 12) }}</div>
           <div class="mt-0.5 text-[11px] text-[#a09080]">{{ c.created_at }}</div>

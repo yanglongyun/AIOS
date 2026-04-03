@@ -88,8 +88,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { computed, ref, onMounted } from 'vue';
 
 const items = ref([]);
 const currentDir = ref('files');
@@ -238,8 +237,5 @@ const onDrop = (e) => { dragOver.value = false; uploadFiles(e.dataTransfer.files
 
 onMounted(() => {
   loadDir('files');
-  chatPanel.setContext({ scene: 'files', label: '__T_APP_SIDEBAR_FILES__' });
-  chatPanel.setQuickMessages(['__T_FILES_CHAT_QUICK_1__', '__T_FILES_CHAT_QUICK_2__', '__T_FILES_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

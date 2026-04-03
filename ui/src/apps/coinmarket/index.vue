@@ -1,63 +1,97 @@
 <template>
-  <div class="flex h-full flex-col bg-[#0d1117] text-[#e6edf3]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
-    <div class="flex items-center gap-3 px-4 py-3 border-b border-[#21262d] shrink-0">
-      <template v-if="view === 'detail'">
-        <button @click="view = 'list'" class="text-[#58a6ff] hover:text-[#79c0ff] text-sm">← __T_COIN_BACK__</button>
-      </template>
-      <template v-else>
-        <span class="text-lg">📈</span>
-        <span class="font-semibold text-sm">__T_COIN_TITLE__</span>
-      </template>
-      <div class="ml-auto">
-        <button v-if="view === 'list'" @click="doAnalyze" :disabled="analyzing"
-          class="px-3 py-1.5 text-xs rounded-full border border-[#30363d] text-[#8b949e] hover:border-[#58a6ff] hover:text-[#58a6ff] disabled:opacity-40 transition-colors">
-          {{ analyzing ? '__T_COIN_ANALYZING__' : '✦ __T_COIN_ANALYZE__' }}
-        </button>
+  <div class="flex h-full flex-col bg-[#0b0e11] text-[#eaecef]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-[#1e2329] shrink-0">
+      <div class="flex items-center gap-3">
+        <template v-if="view === 'detail'">
+          <button @click="view = 'list'" class="text-[#f0b90b] hover:text-[#fcd535] text-sm">← __T_COIN_BACK__</button>
+        </template>
+        <template v-else>
+          <span class="text-[#f0b90b] font-bold text-base">₿</span>
+          <span class="font-semibold text-sm">__T_COIN_TITLE__</span>
+        </template>
+      </div>
+      <button v-if="view === 'list'" @click="doAnalyze" :disabled="analyzing"
+        class="px-3 py-1.5 text-[11px] font-medium rounded transition-all disabled:opacity-30"
+        :class="analyzing ? 'bg-[#1e2329] text-[#848e9c]' : 'bg-[#f0b90b]/10 text-[#f0b90b] hover:bg-[#f0b90b]/20'">
+        {{ analyzing ? '__T_COIN_ANALYZING__' : '✦ __T_COIN_ANALYZE__' }}
+      </button>
+    </div>
+
+    <!-- AI Analysis -->
+    <div v-if="analysisText" class="mx-4 mt-3 bg-[#1e2329] rounded-xl p-4 text-sm leading-relaxed text-[#848e9c] border border-[#2b3139]">
+      <div v-html="renderMd(analysisText)"></div>
+      <button @click="analysisText = ''" class="mt-2 text-[10px] text-[#474d57] hover:text-[#848e9c]">__T_COIN_DISMISS__</button>
+    </div>
+
+    <!-- Coin List -->
+    <div v-if="view === 'list'" class="flex-1 overflow-y-auto">
+      <div v-if="loading" class="text-center text-[#474d57] text-sm py-16">__T_COIN_LOADING__</div>
+      <div v-else>
+        <!-- Table header -->
+        <div class="sticky top-0 bg-[#0b0e11] grid grid-cols-[2.5rem_1fr_5.5rem_4.5rem_6rem_5rem] gap-2 px-4 py-2 text-[10px] text-[#474d57] uppercase tracking-wider border-b border-[#1e2329]">
+          <span>#</span><span>Coin</span><span class="text-right">__T_COIN_PRICE__</span><span class="text-right">24h</span><span class="text-right">__T_COIN_MARKET_CAP__</span><span class="text-right">7d</span>
+        </div>
+        <div v-for="coin in coins" :key="coin.id"
+          class="grid grid-cols-[2.5rem_1fr_5.5rem_4.5rem_6rem_5rem] gap-2 items-center px-4 py-2.5 border-b border-[#1e2329]/50 hover:bg-[#1e2329]/60 cursor-pointer transition-colors"
+          @click="openDetail(coin.id)">
+          <span class="text-[#474d57] text-xs">{{ coin.rank }}</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <img :src="coin.image" class="w-5 h-5 rounded-full shrink-0" />
+            <span class="font-medium text-sm truncate">{{ coin.symbol.toUpperCase() }}</span>
+          </div>
+          <span class="text-right text-sm font-mono">${{ fmtPrice(coin.price) }}</span>
+          <span class="text-right text-xs font-mono" :class="coin.change24h >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'">{{ fmtPct(coin.change24h) }}%</span>
+          <span class="text-right text-xs text-[#848e9c]">${{ fmtCap(coin.marketCap) }}</span>
+          <!-- Mini sparkline -->
+          <div class="flex justify-end">
+            <svg viewBox="0 0 60 20" class="w-[50px] h-[18px]">
+              <polyline :points="miniChart(coin.sparkline)" fill="none"
+                :stroke="coin.change7d >= 0 ? '#0ecb81' : '#f6465d'" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
-    <div v-if="analysisText" class="mx-4 mt-3 bg-[#161b22] border border-[#30363d] rounded-lg p-3 text-sm leading-relaxed text-[#8b949e] whitespace-pre-wrap">
-      {{ analysisText }}
-      <button @click="analysisText = ''" class="block mt-2 text-[11px] text-[#484f58] hover:text-[#8b949e]">__T_COIN_DISMISS__</button>
-    </div>
-    <div v-if="view === 'list'" class="flex-1 overflow-y-auto">
-      <div v-if="loading" class="text-center text-[#484f58] text-sm py-12">__T_COIN_LOADING__</div>
-      <table v-else class="w-full text-sm">
-        <thead class="text-[11px] text-[#484f58] uppercase sticky top-0 bg-[#0d1117]">
-          <tr class="border-b border-[#21262d]">
-            <th class="text-left px-4 py-2 w-8">#</th><th class="text-left px-2 py-2">Coin</th>
-            <th class="text-right px-2 py-2">__T_COIN_PRICE__</th><th class="text-right px-2 py-2">24h</th>
-            <th class="text-right px-2 py-2">7d</th><th class="text-right px-4 py-2 hidden sm:table-cell">__T_COIN_MARKET_CAP__</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="coin in coins" :key="coin.id" class="border-b border-[#161b22] hover:bg-[#161b22] cursor-pointer transition-colors" @click="openDetail(coin.id)">
-            <td class="px-4 py-2.5 text-[#484f58]">{{ coin.rank }}</td>
-            <td class="px-2 py-2.5"><div class="flex items-center gap-2"><img :src="coin.image" class="w-5 h-5 rounded-full" /><span class="font-medium">{{ coin.symbol.toUpperCase() }}</span><span class="text-[#484f58] text-xs hidden sm:inline">{{ coin.name }}</span></div></td>
-            <td class="px-2 py-2.5 text-right font-mono">${{ formatPrice(coin.price) }}</td>
-            <td class="px-2 py-2.5 text-right font-mono" :class="coin.change24h >= 0 ? 'text-[#3fb950]' : 'text-[#f85149]'">{{ formatPct(coin.change24h) }}%</td>
-            <td class="px-2 py-2.5 text-right font-mono" :class="coin.change7d >= 0 ? 'text-[#3fb950]' : 'text-[#f85149]'">{{ formatPct(coin.change7d) }}%</td>
-            <td class="px-4 py-2.5 text-right text-[#8b949e] hidden sm:table-cell">${{ formatCap(coin.marketCap) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div v-if="view === 'detail'" class="flex-1 overflow-y-auto px-4 py-4">
-      <div v-if="detailLoading" class="text-center text-[#484f58] text-sm py-12">__T_COIN_LOADING__</div>
-      <div v-else-if="detailCoin">
-        <div class="flex items-center gap-3 mb-4">
-          <img :src="detailCoin.image" class="w-8 h-8 rounded-full" />
-          <div><div class="font-semibold">{{ detailCoin.name }} <span class="text-[#484f58]">{{ detailCoin.symbol?.toUpperCase() }}</span></div><div class="text-xs text-[#484f58]">__T_COIN_RANK__ #{{ detailCoin.rank }}</div></div>
-          <div class="ml-auto text-right"><div class="text-xl font-mono font-semibold">${{ formatPrice(detailCoin.price) }}</div><div class="text-sm font-mono" :class="detailCoin.change24h >= 0 ? 'text-[#3fb950]' : 'text-[#f85149]'">{{ formatPct(detailCoin.change24h) }}% (24h)</div></div>
+
+    <!-- Detail -->
+    <div v-if="view === 'detail'" class="flex-1 overflow-y-auto">
+      <div v-if="detailLoading" class="text-center text-[#474d57] text-sm py-16">__T_COIN_LOADING__</div>
+      <div v-else-if="dc" class="px-4 py-5">
+        <!-- Hero -->
+        <div class="flex items-center gap-4 mb-5">
+          <img :src="dc.image" class="w-10 h-10 rounded-full" />
+          <div class="flex-1">
+            <div class="font-bold text-lg">{{ dc.name }} <span class="text-[#474d57] text-sm font-normal">{{ dc.symbol?.toUpperCase() }}</span></div>
+            <div class="text-[11px] text-[#474d57]">__T_COIN_RANK__ #{{ dc.rank }}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-mono font-bold">${{ fmtPrice(dc.price) }}</div>
+            <div class="text-sm font-mono" :class="dc.change24h >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'">{{ fmtPct(dc.change24h) }}%</div>
+          </div>
         </div>
-        <div class="bg-[#161b22] border border-[#21262d] rounded-lg p-4 mb-4">
-          <div class="text-[11px] text-[#484f58] uppercase mb-2">__T_COIN_7D_PRICE__</div>
-          <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" class="w-full" style="height: 160px;"><polyline :points="chartPoints" fill="none" :stroke="detailCoin.change7d >= 0 ? '#3fb950' : '#f85149'" stroke-width="1.5" /></svg>
+
+        <!-- Chart -->
+        <div class="bg-[#1e2329] rounded-xl p-4 mb-4 border border-[#2b3139]">
+          <div class="text-[10px] text-[#474d57] uppercase tracking-wider mb-3">__T_COIN_7D_PRICE__</div>
+          <svg :viewBox="`0 0 400 140`" class="w-full" style="height: 140px;">
+            <defs>
+              <linearGradient :id="'cg'+dc.symbol" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" :stop-color="dc.change7d >= 0 ? '#0ecb81' : '#f6465d'" stop-opacity="0.15" />
+                <stop offset="100%" :stop-color="dc.change7d >= 0 ? '#0ecb81' : '#f6465d'" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <polygon :points="areaPoints" :fill="`url(#cg${dc.symbol})`" />
+            <polyline :points="linePoints" fill="none" :stroke="dc.change7d >= 0 ? '#0ecb81' : '#f6465d'" stroke-width="1.5" />
+          </svg>
         </div>
+
+        <!-- Stats -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-[#161b22] border border-[#21262d] rounded-lg p-3"><div class="text-[11px] text-[#484f58] uppercase mb-1">__T_COIN_24H_HIGH__</div><div class="font-mono text-sm">${{ formatPrice(detailCoin.high24h) }}</div></div>
-          <div class="bg-[#161b22] border border-[#21262d] rounded-lg p-3"><div class="text-[11px] text-[#484f58] uppercase mb-1">__T_COIN_24H_LOW__</div><div class="font-mono text-sm">${{ formatPrice(detailCoin.low24h) }}</div></div>
-          <div class="bg-[#161b22] border border-[#21262d] rounded-lg p-3"><div class="text-[11px] text-[#484f58] uppercase mb-1">__T_COIN_MARKET_CAP__</div><div class="font-mono text-sm">${{ formatCap(detailCoin.marketCap) }}</div></div>
-          <div class="bg-[#161b22] border border-[#21262d] rounded-lg p-3"><div class="text-[11px] text-[#484f58] uppercase mb-1">__T_COIN_ATH__</div><div class="font-mono text-sm">${{ formatPrice(detailCoin.ath) }}</div></div>
+          <div v-for="stat in detailStats" :key="stat.label" class="bg-[#1e2329] rounded-xl p-3 border border-[#2b3139]">
+            <div class="text-[10px] text-[#474d57] uppercase tracking-wider mb-1">{{ stat.label }}</div>
+            <div class="font-mono text-sm">{{ stat.value }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -66,17 +100,54 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { marked } from 'marked';
 import { LOCALE } from '../../locale.js';
-const view = ref('list'); const coins = ref([]); const loading = ref(false); const analyzing = ref(false); const analysisText = ref('');
-const detailCoin = ref(null); const detailChart = ref([]); const detailLoading = ref(false); const chartWidth = 400; const chartHeight = 120;
-const chartPoints = computed(() => { const d = detailChart.value; if (!d.length) return ''; const ps = d.map(v => v.p); const mn = Math.min(...ps); const mx = Math.max(...ps); const r = mx - mn || 1; return d.map((v, i) => `${(i/(d.length-1))*chartWidth},${chartHeight-((v.p-mn)/r)*(chartHeight-10)-5}`).join(' '); });
-const formatPrice = (n) => n >= 1 ? Number(n).toLocaleString('en', { maximumFractionDigits: 2 }) : Number(n).toPrecision(4);
-const formatPct = (n) => (n >= 0 ? '+' : '') + Number(n || 0).toFixed(1);
-const formatCap = (n) => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : Number(n||0).toLocaleString();
-const api = async (path) => { const res = await fetch(`/aios/apps/coinmarket/${path}`); return res.json(); };
-const loadCoins = async () => { loading.value = true; try { const data = await api('list'); coins.value = data.coins || []; } catch {} loading.value = false; };
-const openDetail = async (id) => { view.value = 'detail'; detailLoading.value = true; try { const data = await api(`detail?id=${id}`); detailCoin.value = data.coin || null; detailChart.value = data.chart || []; } catch {} detailLoading.value = false; };
-const doAnalyze = async () => { analyzing.value = true; try { const res = await fetch('/aios/apps/coinmarket/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ coins: coins.value.slice(0, 10), locale: LOCALE }) }); const data = await res.json(); analysisText.value = data.analysis || ''; } catch { analysisText.value = 'Failed'; } analyzing.value = false; };
-onMounted(() => { loadCoins(); chatPanel.setContext({ scene: 'coinmarket', label: '__T_APP_SIDEBAR_COINMARKET__' }); chatPanel.setQuickMessages(['__T_COIN_CHAT_QUICK_1__', '__T_COIN_CHAT_QUICK_2__', '__T_COIN_CHAT_QUICK_3__']); });
+marked.setOptions({ breaks: true, gfm: true });
+const renderMd = (t) => marked.parse(t || '');
+
+const view = ref('list'); const coins = ref([]); const loading = ref(false);
+const analyzing = ref(false); const analysisText = ref('');
+const dc = ref(null); const detailChart = ref([]); const detailLoading = ref(false);
+
+const fmtPrice = (n) => n >= 1 ? Number(n).toLocaleString('en', { maximumFractionDigits: 2 }) : Number(n).toPrecision(4);
+const fmtPct = (n) => (n >= 0 ? '+' : '') + Number(n || 0).toFixed(2);
+const fmtCap = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(0) + 'M' : String(n || 0);
+
+const miniChart = (data) => {
+  if (!data?.length) return '';
+  const mn = Math.min(...data); const mx = Math.max(...data); const r = mx - mn || 1;
+  return data.filter((_, i) => i % Math.ceil(data.length / 30) === 0).map((v, i, a) => `${(i / (a.length - 1)) * 60},${20 - ((v - mn) / r) * 18}`).join(' ');
+};
+
+const chartPts = (data, w, h) => {
+  if (!data.length) return '';
+  const ps = data.map(d => d.p); const mn = Math.min(...ps); const mx = Math.max(...ps); const r = mx - mn || 1;
+  return data.map((d, i) => `${(i / (data.length - 1)) * w},${h - ((d.p - mn) / r) * (h - 10) - 5}`).join(' ');
+};
+const linePoints = computed(() => chartPts(detailChart.value, 400, 140));
+const areaPoints = computed(() => { const lp = linePoints.value; return lp ? `0,140 ${lp} 400,140` : ''; });
+
+const detailStats = computed(() => dc.value ? [
+  { label: '__T_COIN_24H_HIGH__', value: '$' + fmtPrice(dc.value.high24h) },
+  { label: '__T_COIN_24H_LOW__', value: '$' + fmtPrice(dc.value.low24h) },
+  { label: '__T_COIN_MARKET_CAP__', value: '$' + fmtCap(dc.value.marketCap) },
+  { label: '__T_COIN_ATH__', value: '$' + fmtPrice(dc.value.ath) }
+] : []);
+
+const api = async (p) => { const r = await fetch(`/aios/apps/coinmarket/${p}`); return r.json(); };
+const loadCoins = async () => { loading.value = true; try { coins.value = (await api('list')).coins || []; } catch {} loading.value = false; };
+
+const openDetail = async (id) => {
+  view.value = 'detail'; detailLoading.value = true;
+  try { const d = await api(`detail?id=${id}`); dc.value = d.coin; detailChart.value = d.chart || []; } catch {}
+  detailLoading.value = false;
+};
+
+const doAnalyze = async () => {
+  analyzing.value = true;
+  try { analysisText.value = (await (await fetch('/aios/apps/coinmarket/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ coins: coins.value.slice(0, 10), locale: LOCALE }) })).json()).analysis || ''; }
+  catch { analysisText.value = 'Failed'; } analyzing.value = false;
+};
+
+onMounted(() => loadCoins());
 </script>

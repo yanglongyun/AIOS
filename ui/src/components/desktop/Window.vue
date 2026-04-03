@@ -13,32 +13,24 @@
         @mousedown.left="startDrag"
         @dblclick="toggleMaximize"
       >
-        <!-- 左侧红绿灯 -->
-        <div class="traffic-lights mr-3 flex items-center gap-[7px]">
-          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="关闭">
-            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="#4a0000" stroke-width="1.2" fill="none"/></svg>
+        <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
+        <!-- 右侧红绿灯 -->
+        <div class="traffic-lights ml-3 flex items-center gap-[7px]">
+          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '还原' : '最大化'">
+            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 5.5L4 2l2.5 3.5" stroke="#006500" stroke-width="1.2" fill="none"/></svg>
           </button>
           <button @click.stop="doMinimize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#febc2e] transition-opacity" title="最小化">
             <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><line x1="1" y1="4" x2="7" y2="4" stroke="#995700" stroke-width="1.2"/></svg>
           </button>
-          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '还原' : '最大化'">
-            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 5.5L4 2l2.5 3.5" stroke="#006500" stroke-width="1.2" fill="none"/></svg>
+          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="关闭">
+            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="#4a0000" stroke-width="1.2" fill="none"/></svg>
           </button>
         </div>
-        <span class="flex-1 truncate text-center text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
-        <!-- 右侧聊天按钮 -->
-        <button v-if="sideChatEnabled" @click.stop="showSideChat = !showSideChat" class="ml-3 flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[5px] border-none bg-transparent transition-all duration-100 hover:bg-black/[0.06]" :class="showSideChat ? 'text-[#c8a060]' : 'text-[#8a7a68] hover:text-[#5a4a38]'" title="侧边对话">
-          <svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2h8a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-        </button>
       </div>
 
       <!-- 内容区 -->
       <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#2a2218]">
         <component :is="win.component" v-bind="win.props" />
-        <!-- 聊天小面板 -->
-        <div v-if="sideChatEnabled && showSideChat" class="absolute right-2 top-2 bottom-[30%] z-10 flex w-80 flex-col overflow-hidden rounded-lg border border-[#3a2010] shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-          <ChatPanel @close="showSideChat = false" />
-        </div>
       </div>
     </div>
 
@@ -58,18 +50,10 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { windowManager } from '../../stores/windowManager.js';
-import { appRegistry } from '../../apps.js';
-import ChatPanel from '../ChatPanel.vue';
 
 const props = defineProps({ win: { type: Object, required: true } });
-
-const showSideChat = ref(false);
-const sideChatEnabled = computed(() => {
-  const app = appRegistry.find(a => a.id === props.win.appId);
-  return app?.sideChat !== false;
-});
 
 const windowStyle = computed(() => {
   const w = props.win;

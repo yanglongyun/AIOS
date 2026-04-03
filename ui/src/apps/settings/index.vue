@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
@@ -91,7 +91,6 @@ import AboutTab from './AboutTab.vue';
 import SkillTab from './SkillTab.vue';
 import { getProvider } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
-import { chatPanel } from '../../stores/chatPanel.js';
 const router = useRouter();
 const tabs = [
   { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
@@ -280,10 +279,7 @@ const logout = async () => {
 };
 
 onMounted(async () => {
-  chatPanel.setContext({ scene: 'settings', label: '__T_APP_SIDEBAR_SETTINGS__' });
-  chatPanel.setQuickMessages(['__T_SETTINGS_CHAT_QUICK_1__', '__T_SETTINGS_CHAT_QUICK_2__', '__T_SETTINGS_CHAT_QUICK_3__']);
   loadProviderConfigs();
   await Promise.all([fetchMe(), fetchSettings(), fetchSkills()]);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

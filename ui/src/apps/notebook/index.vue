@@ -38,8 +38,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { computed, onMounted, ref } from 'vue';
 import { LOCALE, LOCALE_FULL } from '../../locale.js';
 import NotebookEditorView from './NotebookEditorView.vue';
 import NotebookListView from './NotebookListView.vue';
@@ -239,10 +238,7 @@ const formatTime = (v) => {
 
 onMounted(() => {
   fetchNotes();
-  chatPanel.setContext({ scene: 'notebook', label: '__T_APP_SIDEBAR_NOTEBOOK__' });
-  chatPanel.setQuickMessages(['__T_NOTEBOOK_CHAT_QUICK_1__', '__T_NOTEBOOK_CHAT_QUICK_2__', '__T_NOTEBOOK_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style>

@@ -39,8 +39,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { LOCALE_FULL } from '../../locale.js';
 import FinanceHeader from './FinanceHeader.vue';
 import FinanceLedgerTable from './FinanceLedgerTable.vue';
@@ -223,10 +222,7 @@ const remove = async (id) => {
 
 onMounted(() => {
   fetchData();
-  chatPanel.setContext({ scene: 'finance', label: '__T_APP_SIDEBAR_FINANCE__' });
-  chatPanel.setQuickMessages(['__T_FINANCE_CHAT_QUICK_1__', '__T_FINANCE_CHAT_QUICK_2__', '__T_FINANCE_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>
 
 <style scoped>

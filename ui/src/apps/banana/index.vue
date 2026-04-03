@@ -25,8 +25,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { ref, onMounted } from 'vue';
 import { LOCALE } from '../../locale.js';
 import BananaControls from './BananaControls.vue';
 import BananaScreen from './BananaScreen.vue';
@@ -42,10 +41,7 @@ const toast = ref('');
 
 onMounted(() => {
   init();
-  chatPanel.setContext({ scene: 'banana', label: '__T_APP_SIDEBAR_BANANA__' });
-  chatPanel.setQuickMessages(['__T_BANANA_CHAT_QUICK_1__', '__T_BANANA_CHAT_QUICK_2__', '__T_BANANA_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
 function goHomePage() {
   timeLine.value = [{

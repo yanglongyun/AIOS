@@ -37,8 +37,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { computed, onMounted, ref } from 'vue';
 import { LOCALE } from '../../locale.js';
 import FortuneHexagramPanel from './FortuneHexagramPanel.vue';
 import FortuneQuestionForm from './FortuneQuestionForm.vue';
@@ -201,8 +200,5 @@ const loadHistory = async () => {
 
 onMounted(() => {
   loadHistory();
-  chatPanel.setContext({ scene: 'fortune', label: '__T_APP_SIDEBAR_FORTUNE__' });
-  chatPanel.setQuickMessages(['__T_FORTUNE_CHAT_QUICK_1__', '__T_FORTUNE_CHAT_QUICK_2__', '__T_FORTUNE_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 </script>

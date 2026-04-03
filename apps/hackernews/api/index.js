@@ -3,7 +3,6 @@ import { json } from "../../../shared/http/json.js";
 import { list } from "../service/list.js";
 import { detail } from "../service/detail.js";
 import { summarize } from "../service/summarize.js";
-import { translate } from "../service/translate.js";
 import { addBookmark, removeBookmark, listBookmarks } from "../repository/bookmark.js";
 
 const handleHackernewsApi = async (req, res, path) => {
@@ -23,11 +22,6 @@ const handleHackernewsApi = async (req, res, path) => {
   if (path === "/apps/hackernews/summarize" && req.method === "POST") {
     const body = await readBody(req);
     const data = await summarize(body);
-    return json(res, data);
-  }
-  if (path === "/apps/hackernews/translate" && req.method === "POST") {
-    const body = await readBody(req);
-    const data = await translate(body);
     return json(res, data);
   }
   if (path === "/apps/hackernews/bookmarks" && req.method === "GET") {

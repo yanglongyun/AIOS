@@ -25,8 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { ref, computed, onMounted } from 'vue';
 import PokerControlPanel from './PokerControlPanel.vue';
 import PokerTableView from './PokerTableView.vue';
 const game = ref(null);
@@ -77,10 +76,7 @@ const loadStatus = async () => {
 
 onMounted(() => {
   loadStatus();
-  chatPanel.setContext({ scene: 'poker', label: '__T_APP_SIDEBAR_POKER__' });
-  chatPanel.setQuickMessages(['__T_POKER_CHAT_QUICK_1__', '__T_POKER_CHAT_QUICK_2__', '__T_POKER_CHAT_QUICK_3__']);
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
 
 const startGame = async () => {
   busy.value = true;

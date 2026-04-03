@@ -1,65 +1,129 @@
 <template>
-  <div class="flex h-full flex-col bg-[#1a1a2e] text-[#e0e0e0]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
-    <div class="flex items-center gap-3 px-4 py-3 border-b border-[#2a2a4a] shrink-0">
-      <span class="text-lg">🌍</span>
-      <span class="font-semibold text-sm">__T_EQ_TITLE__</span>
-      <div class="flex gap-1 ml-3">
+  <div class="flex h-full flex-col bg-[#0a0f1a] text-[#c8d6e5]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#1a2332] shrink-0 bg-[#0d1320]">
+      <div class="flex items-center gap-2.5">
+        <span class="text-base">🌍</span>
+        <span class="font-semibold text-sm">__T_EQ_TITLE__</span>
+      </div>
+      <div class="flex items-center gap-1.5">
         <button v-for="f in magFilters" :key="f.value" @click="minMag = f.value; loadQuakes()"
-          class="px-2.5 py-1 text-xs rounded-full transition-colors"
-          :class="minMag === f.value ? 'bg-[#e94560] text-white' : 'text-[#888] hover:bg-[#2a2a4a]'">
+          class="px-2 py-0.5 text-[10px] rounded transition-colors"
+          :class="minMag === f.value ? 'bg-[#e94560] text-white' : 'text-[#576574] hover:text-[#c8d6e5]'">
           {{ f.label }}
         </button>
-      </div>
-      <div class="ml-auto">
+        <span class="text-[#1a2332] mx-1">|</span>
         <button @click="doAnalyze" :disabled="analyzing"
-          class="px-3 py-1.5 text-xs rounded-full border border-[#2a2a4a] text-[#888] hover:border-[#e94560] hover:text-[#e94560] disabled:opacity-40 transition-colors">
+          class="px-2.5 py-0.5 text-[10px] rounded transition-all disabled:opacity-30"
+          :class="analyzing ? 'text-[#576574]' : 'text-[#e94560] hover:bg-[#e94560]/10'">
           {{ analyzing ? '__T_EQ_ANALYZING__' : '✦ __T_EQ_ANALYZE__' }}
         </button>
       </div>
     </div>
-    <div v-if="analysisText" class="mx-4 mt-3 bg-[#16213e] border border-[#2a2a4a] rounded-lg p-3 text-sm leading-relaxed text-[#aaa] whitespace-pre-wrap">
-      {{ analysisText }}
-      <button @click="analysisText = ''" class="block mt-2 text-[11px] text-[#555] hover:text-[#aaa]">__T_EQ_DISMISS__</button>
+
+    <!-- AI Analysis -->
+    <div v-if="analysisText" class="mx-3 mt-2 bg-[#111927] rounded-lg p-3 text-[12px] leading-relaxed text-[#576574] border border-[#1a2332]">
+      <div v-html="renderMd(analysisText)"></div>
+      <button @click="analysisText = ''" class="mt-1 text-[10px] text-[#2a3442] hover:text-[#576574]">__T_EQ_DISMISS__</button>
     </div>
+
+    <!-- Map + List split -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <div class="relative shrink-0" style="height: 280px;">
-        <svg viewBox="-180 -90 360 180" class="w-full h-full bg-[#0f3460]" preserveAspectRatio="xMidYMid meet">
-          <rect x="-180" y="-90" width="360" height="180" fill="#0f3460" />
-          <line v-for="lng in [-120,-60,0,60,120]" :key="'lng'+lng" :x1="lng" y1="-90" :x2="lng" y2="90" stroke="#1a1a4a" stroke-width="0.3" />
-          <line v-for="lat in [-60,-30,0,30,60]" :key="'lat'+lat" x1="-180" :y1="-lat" x2="180" :y2="-lat" stroke="#1a1a4a" stroke-width="0.3" />
-          <circle v-for="q in quakes" :key="q.id" :cx="q.lng" :cy="-q.lat" :r="Math.max(0.8, (q.mag - 2) * 0.8)" :fill="magColor(q.mag)" :fill-opacity="0.7" class="cursor-pointer" @click="selectQuake(q)"><title>M{{ q.mag }} - {{ q.place }}</title></circle>
+      <!-- Map area -->
+      <div class="relative shrink-0 bg-[#071020]" style="height: 55%;">
+        <svg viewBox="-180 -90 360 180" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+          <rect x="-180" y="-90" width="360" height="180" fill="#071020" />
+          <!-- Grid -->
+          <g stroke="#0d1a30" stroke-width="0.2">
+            <line v-for="lng in [-150,-120,-90,-60,-30,0,30,60,90,120,150]" :key="'lo'+lng" :x1="lng" y1="-90" :x2="lng" y2="90" />
+            <line v-for="lat in [-60,-30,0,30,60]" :key="'la'+lat" x1="-180" :y1="-lat" x2="180" :y2="-lat" />
+          </g>
+          <!-- Equator -->
+          <line x1="-180" y1="0" x2="180" y2="0" stroke="#0f2240" stroke-width="0.3" />
+          <!-- Quake dots -->
+          <circle v-for="q in quakes" :key="q.id"
+            :cx="q.lng" :cy="-q.lat"
+            :r="magRadius(q.mag)" :fill="magColor(q.mag)"
+            :fill-opacity="q.id === selected?.id ? 0.95 : 0.55"
+            :stroke="q.id === selected?.id ? '#fff' : 'none'" stroke-width="0.3"
+            class="cursor-pointer transition-all duration-200" @click="selected = q">
+          </circle>
         </svg>
-        <div v-if="selected" class="absolute bottom-2 left-2 right-2 bg-[#16213e]/95 border border-[#2a2a4a] rounded-lg p-3 text-sm">
-          <div class="flex justify-between items-start">
-            <div><span class="font-bold text-base" :style="{ color: magColor(selected.mag) }">M{{ selected.mag }}</span><span class="text-[#aaa] ml-2">{{ selected.place }}</span></div>
-            <button @click="selected = null" class="text-[#555] hover:text-[#aaa] text-xs">✕</button>
+
+        <!-- Selected popup -->
+        <transition name="fade">
+          <div v-if="selected" class="absolute bottom-3 left-3 right-3 bg-[#111927]/95 backdrop-blur-sm border border-[#1a2332] rounded-xl p-3">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="inline-block px-2 py-0.5 rounded-md text-sm font-bold font-mono mr-2"
+                  :style="{ color: magColor(selected.mag), background: magColor(selected.mag) + '15' }">
+                  M{{ selected.mag }}
+                </span>
+                <span class="text-sm">{{ selected.place }}</span>
+              </div>
+              <button @click="selected = null" class="text-[#576574] hover:text-[#c8d6e5] text-xs ml-2">✕</button>
+            </div>
+            <div class="text-[11px] text-[#576574] mt-1.5 flex gap-3">
+              <span>__T_EQ_DEPTH__ {{ selected.depth }}km</span>
+              <span>{{ new Date(selected.time).toLocaleString() }}</span>
+              <span v-if="selected.tsunami" class="text-[#e94560]">⚠ __T_EQ_TSUNAMI__</span>
+            </div>
           </div>
-          <div class="text-[11px] text-[#666] mt-1">__T_EQ_DEPTH__: {{ selected.depth }}km · {{ new Date(selected.time).toLocaleString() }}<span v-if="selected.tsunami" class="text-[#e94560] ml-1">⚠ __T_EQ_TSUNAMI__</span></div>
-        </div>
+        </transition>
       </div>
-      <div class="flex-1 overflow-y-auto border-t border-[#2a2a4a]">
-        <div v-if="loading" class="text-center text-[#555] text-sm py-8">__T_EQ_LOADING__</div>
-        <div v-else class="text-[11px] text-[#555] px-4 py-2">{{ quakes.length }} earthquakes (M{{ minMag }}+)</div>
-        <div v-for="q in quakes" :key="q.id" class="flex items-center gap-3 px-4 py-2.5 border-b border-[#1a1a2e] hover:bg-[#16213e] cursor-pointer transition-colors" :class="selected?.id === q.id ? 'bg-[#16213e]' : ''" @click="selectQuake(q)">
-          <span class="font-mono font-bold text-sm w-10 text-center rounded px-1 py-0.5" :style="{ color: magColor(q.mag), backgroundColor: magColor(q.mag) + '18' }">{{ q.mag.toFixed(1) }}</span>
-          <div class="flex-1 min-w-0"><div class="text-sm truncate">{{ q.place }}</div><div class="text-[11px] text-[#555]">{{ timeAgo(q.time) }} · __T_EQ_DEPTH__ {{ q.depth }}km</div></div>
-          <span v-if="q.tsunami" class="text-[#e94560] text-xs">🌊</span>
+
+      <!-- Quake list -->
+      <div class="flex-1 overflow-y-auto border-t border-[#1a2332]">
+        <div class="px-4 py-1.5 text-[10px] text-[#2a3442] bg-[#0d1320] sticky top-0">
+          {{ quakes.length }} earthquakes · M{{ minMag }}+ · 7d
+        </div>
+        <div v-if="loading" class="text-center text-[#2a3442] text-sm py-8">__T_EQ_LOADING__</div>
+        <div v-for="q in quakes" :key="q.id"
+          class="flex items-center gap-3 px-4 py-2 border-b border-[#111927] hover:bg-[#111927] cursor-pointer transition-colors"
+          :class="selected?.id === q.id ? 'bg-[#111927]' : ''"
+          @click="selected = q">
+          <span class="font-mono font-bold text-xs w-9 text-center rounded-md py-0.5"
+            :style="{ color: magColor(q.mag), background: magColor(q.mag) + '12' }">
+            {{ q.mag.toFixed(1) }}
+          </span>
+          <div class="flex-1 min-w-0">
+            <div class="text-[13px] truncate">{{ q.place }}</div>
+            <div class="text-[10px] text-[#2a3442]">{{ timeAgo(q.time) }} · {{ q.depth }}km</div>
+          </div>
+          <span v-if="q.tsunami" class="text-[#e94560] text-[10px]">🌊</span>
         </div>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity .2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
+
 <script setup>
 import { ref, onMounted } from 'vue';
-import { chatPanel } from '../../stores/chatPanel.js';
+import { marked } from 'marked';
 import { LOCALE } from '../../locale.js';
-const quakes = ref([]); const loading = ref(false); const analyzing = ref(false); const analysisText = ref(''); const selected = ref(null); const minMag = ref(4);
+marked.setOptions({ breaks: true, gfm: true });
+const renderMd = (t) => marked.parse(t || '');
+
+const quakes = ref([]); const loading = ref(false); const analyzing = ref(false);
+const analysisText = ref(''); const selected = ref(null); const minMag = ref(4);
 const magFilters = [{ label: 'M2.5+', value: 2.5 }, { label: 'M4+', value: 4 }, { label: 'M5+', value: 5 }, { label: 'M6+', value: 6 }];
-const magColor = (m) => m >= 7 ? '#ff0040' : m >= 6 ? '#e94560' : m >= 5 ? '#ff8c00' : m >= 4 ? '#ffc107' : '#4ecca3';
-const timeAgo = (ts) => { const d = Date.now() - ts; if (d < 3600000) return Math.floor(d/60000) + 'm'; if (d < 86400000) return Math.floor(d/3600000) + 'h'; return Math.floor(d/86400000) + 'd'; };
-const selectQuake = (q) => { selected.value = selected.value?.id === q.id ? null : q; };
-const loadQuakes = async () => { loading.value = true; try { const res = await fetch(`/aios/apps/earthquake/list?minMagnitude=${minMag.value}`); const data = await res.json(); quakes.value = data.quakes || []; } catch {} loading.value = false; };
-const doAnalyze = async () => { analyzing.value = true; try { const res = await fetch('/aios/apps/earthquake/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quakes: quakes.value.slice(0, 20), locale: LOCALE }) }); const data = await res.json(); analysisText.value = data.analysis || ''; } catch { analysisText.value = 'Failed'; } analyzing.value = false; };
-onMounted(() => { loadQuakes(); chatPanel.setContext({ scene: 'earthquake', label: '__T_APP_SIDEBAR_EARTHQUAKE__' }); chatPanel.setQuickMessages(['__T_EQ_CHAT_QUICK_1__', '__T_EQ_CHAT_QUICK_2__', '__T_EQ_CHAT_QUICK_3__']); });
+
+const magColor = (m) => m >= 7 ? '#ff2e63' : m >= 6 ? '#e94560' : m >= 5 ? '#ff8c42' : m >= 4 ? '#ffc93c' : '#4ecca3';
+const magRadius = (m) => Math.max(1, (m - 2) * 1.2);
+const timeAgo = (ts) => { const d = Date.now() - ts; return d < 3600000 ? Math.floor(d / 60000) + 'm' : d < 86400000 ? Math.floor(d / 3600000) + 'h' : Math.floor(d / 86400000) + 'd'; };
+
+const loadQuakes = async () => { loading.value = true; selected.value = null; try { quakes.value = (await (await fetch(`/aios/apps/earthquake/list?minMagnitude=${minMag.value}`)).json()).quakes || []; } catch {} loading.value = false; };
+
+const doAnalyze = async () => {
+  analyzing.value = true;
+  try { analysisText.value = (await (await fetch('/aios/apps/earthquake/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quakes: quakes.value.slice(0, 20), locale: LOCALE }) })).json()).analysis || ''; }
+  catch { analysisText.value = 'Failed'; } analyzing.value = false;
+};
+
+onMounted(() => loadQuakes());
 </script>

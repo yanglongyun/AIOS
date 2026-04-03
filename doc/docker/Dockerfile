@@ -1,5 +1,5 @@
 FROM node:22-alpine
-RUN apk add --no-cache bash curl
+RUN apk add --no-cache bash curl python3 make g++
 
 WORKDIR /app
 

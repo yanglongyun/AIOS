@@ -55,7 +55,7 @@
     </div>
 
     <!-- Detail -->
-    <div v-if="view === 'detail'" class="flex-1 overflow-y-auto">
+    <div v-if="view === 'detail'" class="flex-1 overflow-y-auto relative">
       <div v-if="detailLoading" class="text-center text-[#474d57] text-sm py-16">__T_COIN_LOADING__</div>
       <div v-else-if="dc" class="px-4 py-5">
         <!-- Hero -->
@@ -71,27 +71,6 @@
           </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="mb-4 flex items-center gap-2 border-b border-[#1e2329] pb-3">
-          <button
-            type="button"
-            class="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-            :class="detailTab === 'overview' ? 'bg-[#f0b90b]/15 text-[#f0b90b]' : 'text-[#848e9c] hover:bg-[#1e2329]'"
-            @click="detailTab = 'overview'"
-          >
-            __T_COIN_TAB_OVERVIEW__
-          </button>
-          <button
-            type="button"
-            class="rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors"
-            :class="detailTab === 'analysis' ? 'bg-[#f0b90b]/15 text-[#f0b90b]' : 'text-[#848e9c] hover:bg-[#1e2329]'"
-            @click="detailTab = 'analysis'"
-          >
-            __T_COIN_TAB_ANALYSIS__
-          </button>
-        </div>
-
-        <template v-if="detailTab === 'overview'">
         <!-- Chart -->
         <div class="bg-[#1e2329] rounded-xl p-4 mb-4 border border-[#2b3139]">
           <div class="text-[10px] text-[#474d57] uppercase tracking-wider mb-3">__T_COIN_7D_PRICE__</div>
@@ -108,59 +87,49 @@
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3 mb-6">
           <div v-for="stat in detailStats" :key="stat.label" class="bg-[#1e2329] rounded-xl p-3 border border-[#2b3139]">
             <div class="text-[10px] text-[#474d57] uppercase tracking-wider mb-1">{{ stat.label }}</div>
             <div class="font-mono text-sm">{{ stat.value }}</div>
           </div>
         </div>
 
-        <div v-if="dc.description" class="mt-4 rounded-xl border border-[#2b3139] bg-[#1e2329] p-4">
-          <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_ABOUT__</div>
-          <p class="text-sm leading-7 text-[#b7bdc6]">{{ dc.description }}</p>
-        </div>
-        </template>
-
-        <template v-else>
-          <div class="rounded-xl border border-[#2b3139] bg-[#1e2329] p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <div class="text-sm font-semibold text-[#eaecef]">__T_COIN_ANALYZE__</div>
-                <div class="mt-1 text-[11px] leading-relaxed text-[#848e9c]">__T_COIN_ANALYZE_DESC__</div>
+        <!-- History -->
+        <div>
+          <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_HISTORY__</div>
+          <div v-if="!detailAnalysisHistory.length" class="rounded-xl border border-dashed border-[#2b3139] px-4 py-6 text-center text-[12px] text-[#6b7280]">
+            __T_COIN_NO_HISTORY__
+          </div>
+          <div v-else class="space-y-3 pb-16">
+            <div v-for="item in detailAnalysisHistory" :key="item.id" class="rounded-xl border border-[#2b3139] bg-[#1e2329] p-4">
+              <div class="mb-2 flex items-center justify-between gap-3">
+                <div class="text-[11px] font-medium text-[#eaecef]">__T_COIN_ANALYZE__ · ${{ fmtPrice(item.price) }}</div>
+                <div class="text-[10px] text-[#6b7280]">{{ item.created_at?.slice(0, 16).replace('T', ' ') }}</div>
               </div>
-              <button
-                type="button"
-                @click="analyzeCoin"
-                :disabled="detailAnalyzing"
-                class="shrink-0 rounded-lg px-3 py-2 text-[11px] font-medium transition-all disabled:opacity-30"
-                :class="detailAnalyzing ? 'bg-[#2b3139] text-[#848e9c]' : 'bg-[#f0b90b]/10 text-[#f0b90b] hover:bg-[#f0b90b]/20'"
-              >
-                {{ detailAnalyzing ? '__T_COIN_ANALYZING__' : '__T_COIN_NEW_ANALYSIS__' }}
-              </button>
-            </div>
-
-            <div v-if="detailAnalysisText" class="mt-4 rounded-xl border border-[#2b3139] bg-[#15191e] p-4">
-              <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_LATEST__</div>
-              <div class="coin-analysis text-sm leading-relaxed text-[#b7bdc6]" v-html="renderMd(detailAnalysisText)"></div>
-            </div>
-
-            <div class="mt-4">
-              <div class="mb-2 text-[10px] uppercase tracking-wider text-[#474d57]">__T_COIN_HISTORY__</div>
-              <div v-if="!detailAnalysisHistory.length" class="rounded-xl border border-dashed border-[#2b3139] px-4 py-6 text-center text-[12px] text-[#6b7280]">
-                __T_COIN_NO_HISTORY__
-              </div>
-              <div v-else class="space-y-3">
-                <div v-for="item in detailAnalysisHistory" :key="item.id" class="rounded-xl border border-[#2b3139] bg-[#15191e] p-4">
-                  <div class="mb-2 flex items-center justify-between gap-3">
-                    <div class="text-[11px] font-medium text-[#eaecef]">{{ item.coin_name }} ({{ item.coin_symbol?.toUpperCase() }}) · ${{ fmtPrice(item.price) }}</div>
-                    <div class="text-[10px] text-[#6b7280]">{{ item.created_at?.slice(0, 16).replace('T', ' ') }}</div>
-                  </div>
-                  <div class="coin-analysis text-sm leading-relaxed text-[#b7bdc6]" v-html="renderMd(item.analysis)"></div>
-                </div>
-              </div>
+              <div class="coin-analysis text-sm leading-relaxed text-[#b7bdc6]" v-html="renderMd(item.analysis)"></div>
             </div>
           </div>
-        </template>
+        </div>
+
+        <!-- Floating Analyze Button -->
+        <button
+          type="button"
+          @click="analyzeCoin"
+          :disabled="detailAnalyzing"
+          class="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full shadow-lg transition-all disabled:opacity-50 z-10"
+          :class="detailAnalyzing ? 'bg-[#2b3139] text-[#848e9c] cursor-not-allowed w-12 h-12' : 'bg-[#f0b90b] text-[#0b0e11] hover:bg-[#fcd535] px-4 py-3 gap-2'"
+        >
+          <template v-if="detailAnalyzing">
+             <!-- Spinner icon -->
+             <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+             </svg>
+          </template>
+          <template v-else>
+             <span class="font-bold text-[12px] tracking-wide">✦ __T_COIN_NEW_ANALYSIS__</span>
+          </template>
+        </button>
       </div>
     </div>
   </div>
@@ -176,7 +145,6 @@ const renderMd = (t) => marked.parse(t || '');
 const view = ref('list'); const coins = ref([]); const loading = ref(false);
 const analyzing = ref(false); const analysisText = ref('');
 const dc = ref(null); const detailChart = ref([]); const detailLoading = ref(false);
-const detailTab = ref('overview');
 const detailAnalyzing = ref(false);
 const detailAnalysisText = ref('');
 const detailAnalysisHistory = ref([]);
@@ -230,7 +198,6 @@ const loadCoins = async () => { loading.value = true; try { coins.value = (await
 
 const openDetail = async (id) => {
   view.value = 'detail'; detailLoading.value = true;
-  detailTab.value = 'overview';
   detailAnalysisText.value = '';
   detailAnalysisHistory.value = [];
   try {

@@ -49,7 +49,6 @@ const applyLanguage = (lang) => {
       writeFileSync(file, replaced, "utf8");
     }
   }
-  rmSync(LANGUAGE_DIR, { recursive: true, force: true });
 };
 export {
   applyLanguage

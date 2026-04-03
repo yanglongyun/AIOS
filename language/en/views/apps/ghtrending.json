@@ -16,5 +16,7 @@
   "gh_history_empty": "No analyses yet",
   "gh_chat_quick_1": "What's trending on GitHub",
   "gh_chat_quick_2": "Recommend interesting open source projects",
-  "gh_chat_quick_3": "Explain a trending repo"
+  "gh_chat_quick_3": "Explain a trending repo",
+  "gh_digest_title": "GitHub Trending Digest",
+  "gh_digest_desc": "Get a quick summary of the top open-source projects and their core highlights for the current timeframe"
 }

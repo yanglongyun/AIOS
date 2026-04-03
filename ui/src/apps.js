@@ -136,10 +136,18 @@ const appRegistry = [
   {
     id: "rssreader",
     name: "__T_APP_SIDEBAR_RSSREADER__",
-    icon: "\u{1F4E1}",
+    icon: "📡",
     iconClass: "icon-rssreader",
     load: () => import("./apps/rssreader/index.vue"),
     defaultSize: { w: 850, h: 600 }
+  },
+  {
+    id: "wikitree",
+    name: "__T_APP_SIDEBAR_WIKITREE__",
+    icon: "📜",
+    iconClass: "icon-wikitree",
+    load: () => import("./apps/wikitree/index.vue"),
+    defaultSize: { w: 900, h: 650 }
   },
   // 工具
   {

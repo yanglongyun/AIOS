@@ -6,12 +6,15 @@
       <div class="flex items-center justify-between px-4 py-3 shrink-0">
         <span class="font-semibold text-sm">__T_WEATHER_TITLE__</span>
       </div>
-      <div class="flex-1 overflow-y-auto px-4 pb-4">
-        <div v-if="!cities.length && !citiesLoading" class="flex flex-col items-center justify-center h-full text-center">
-          <div class="text-5xl mb-4 opacity-30">🌤</div>
-          <div class="text-white/40 text-sm mb-4">__T_WEATHER_EMPTY__</div>
-        </div>
-        <div v-else class="space-y-2.5 pt-1">
+      <div v-if="!cities.length && !citiesLoading" class="flex-1 flex flex-col items-center justify-center text-center px-4 pb-12">
+        <div class="text-5xl mb-4 opacity-30">🌤</div>
+        <div class="text-white/40 text-sm mb-6">__T_WEATHER_EMPTY__</div>
+        <button @click="view = 'search'" class="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors text-sm font-medium shadow-sm">
+          + __T_WEATHER_ADD_CITY__
+        </button>
+      </div>
+      <div v-else class="flex-1 overflow-y-auto px-4 pb-4">
+        <div class="space-y-2.5 pt-1">
           <div v-for="c in cities" :key="c.id"
             class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-4 cursor-pointer hover:bg-white/15 transition-all"
             @click="openCity(c)">

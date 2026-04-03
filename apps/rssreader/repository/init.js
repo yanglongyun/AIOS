@@ -3,14 +3,19 @@ import { getSystemLanguage } from "../../app_shared/settings/language.js";
 
 const SEED = {
   zh: [
-    { name: "少数派", url: "https://sspai.com/feed" },
-    { name: "阮一峰周刊", url: "https://www.ruanyifeng.com/blog/atom.xml" },
-    { name: "Hacker News", url: "https://hnrss.org/frontpage" }
+    { name: "少 数 派", url: "https://sspai.com/feed" },
+    { name: "机 核", url: "https://www.gcores.com/rss" },
+    { name: "36氪", url: "https://36kr.com/feed" },
+    { name: "虎嗅", url: "https://www.huxiu.com/rss/0.xml" },
+    { name: "The Verge", url: "https://www.theverge.com/rss/index.xml" },
+    { name: "Wired", url: "https://www.wired.com/feed/rss" }
   ],
   en: [
-    { name: "Hacker News", url: "https://hnrss.org/frontpage" },
     { name: "TechCrunch", url: "https://techcrunch.com/feed/" },
-    { name: "The Verge", url: "https://www.theverge.com/rss/index.xml" }
+    { name: "The Verge", url: "https://www.theverge.com/rss/index.xml" },
+    { name: "Wired", url: "https://www.wired.com/feed/rss" },
+    { name: "Smashing Magazine", url: "https://www.smashingmagazine.com/feed" },
+    { name: "Ars Technica", url: "https://feeds.arstechnica.com/arstechnica/index" }
   ]
 };
 

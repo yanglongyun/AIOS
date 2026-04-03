@@ -18,5 +18,7 @@
   "hn_comments_count": "comments",
   "hn_chat_quick_1": "Summarize the top HN stories",
   "hn_chat_quick_2": "What's trending in tech today",
-  "hn_chat_quick_3": "Find interesting Show HN projects"
+  "hn_chat_quick_3": "Find interesting Show HN projects",
+  "hn_digest_title": "Hacker News Daily Digest",
+  "hn_digest_desc": "Get a quick summary of the hottest tech topics today"
 }

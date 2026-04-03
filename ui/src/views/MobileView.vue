@@ -9,7 +9,11 @@
     />
 
     <div class="relative min-h-0 flex-1 overflow-hidden">
-      <div v-if="openedApp" class="absolute inset-0 flex flex-col overflow-hidden bg-white">
+      <div
+        v-if="openedApp"
+        class="absolute inset-0 flex flex-col overflow-hidden"
+        :class="openedApp.shellClass || 'bg-white'"
+      >
         <component :is="openedApp.component" v-bind="openedApp.props" />
       </div>
       <AppGrid v-else @open="openApp" />
@@ -99,7 +103,12 @@ async function openApp(appId) {
   navOverride.back = null;
   const loader = app.mobileLoad || app.load;
   const mod = await loader();
-  openedApp.value = { appId, component: mod.default, props: {} };
+  openedApp.value = {
+    appId,
+    component: mod.default,
+    props: {},
+    shellClass: app.mobileShellClass || ''
+  };
 }
 function closeApp() {
   openedApp.value = null;

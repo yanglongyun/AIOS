@@ -7,7 +7,14 @@ const appLoaders = [
   () => import("./fortune/index.js"),
   () => import("./poker/index.js"),
   () => import("./banana/index.js"),
-  () => import("./createapp/index.js")
+  () => import("./createapp/index.js"),
+  () => import("./hackernews/index.js"),
+  () => import("./coinmarket/index.js"),
+  () => import("./earthquake/index.js"),
+  () => import("./weather/index.js"),
+  () => import("./ghtrending/index.js"),
+  () => import("./producthunt/index.js"),
+  () => import("./rssreader/index.js")
 ];
 export {
   appLoaders

@@ -1,0 +1,20 @@
+{
+  "weather_title": "天气",
+  "weather_search": "搜索",
+  "weather_search_placeholder": "搜索城市...",
+  "weather_loading": "加载中...",
+  "weather_empty": "搜索一个城市查看天气",
+  "weather_feels_like": "体感",
+  "weather_humidity": "湿度",
+  "weather_wind": "风速",
+  "weather_advice": "AI 生活建议",
+  "weather_advising": "思考中...",
+  "weather_7day": "7 天预报",
+  "weather_today": "今天",
+  "weather_save": "收藏",
+  "weather_saved_cities": "收藏城市",
+  "weather_no_cities": "暂无收藏城市",
+  "weather_chat_quick_1": "今天穿什么合适",
+  "weather_chat_quick_2": "适合户外活动吗",
+  "weather_chat_quick_3": "这周天气怎么样"
+}

@@ -1,0 +1,22 @@
+{
+  "hn_title": "黑客新闻",
+  "hn_top": "热门",
+  "hn_new": "最新",
+  "hn_best": "精选",
+  "hn_loading": "加载中...",
+  "hn_back": "返回",
+  "hn_bookmarks": "收藏",
+  "hn_no_bookmarks": "暂无收藏",
+  "hn_save": "收藏",
+  "hn_saved": "已收藏",
+  "hn_summarize": "AI 总结",
+  "hn_summarizing": "总结中...",
+  "hn_translate": "翻译",
+  "hn_translating": "翻译中...",
+  "hn_comments": "评论",
+  "hn_pts": "分",
+  "hn_comments_count": "条评论",
+  "hn_chat_quick_1": "总结今天热门的 HN 文章",
+  "hn_chat_quick_2": "今天科技圈有什么动态",
+  "hn_chat_quick_3": "找一些有趣的 Show HN 项目"
+}

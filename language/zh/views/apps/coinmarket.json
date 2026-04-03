@@ -1,0 +1,18 @@
+{
+  "coin_title": "币行情",
+  "coin_loading": "加载中...",
+  "coin_back": "返回",
+  "coin_analyze": "AI 分析",
+  "coin_analyzing": "分析中...",
+  "coin_dismiss": "关闭",
+  "coin_price": "价格",
+  "coin_market_cap": "市值",
+  "coin_24h_high": "24h 最高",
+  "coin_24h_low": "24h 最低",
+  "coin_ath": "历史最高",
+  "coin_7d_price": "7 天走势",
+  "coin_rank": "排名",
+  "coin_chat_quick_1": "分析今天的加密货币行情",
+  "coin_chat_quick_2": "哪些币在涨",
+  "coin_chat_quick_3": "给我一个市场情绪概览"
+}

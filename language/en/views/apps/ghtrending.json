@@ -1,0 +1,15 @@
+{
+  "gh_title": "GitHub Trending",
+  "gh_loading": "Loading...",
+  "gh_daily": "Daily",
+  "gh_weekly": "Weekly",
+  "gh_monthly": "Monthly",
+  "gh_all": "All",
+  "gh_stars": "stars",
+  "gh_forks": "forks",
+  "gh_analyze": "AI Analysis",
+  "gh_analyzing": "Analyzing...",
+  "gh_chat_quick_1": "What's trending on GitHub",
+  "gh_chat_quick_2": "Recommend interesting open source projects",
+  "gh_chat_quick_3": "Explain a trending repo"
+}

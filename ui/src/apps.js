@@ -73,6 +73,7 @@ const appRegistry = [
     icon: "\u{1F0CF}",
     iconClass: "icon-poker",
     load: () => import("./apps/poker/index.vue"),
+    mobileShellClass: "bg-[#1a1410]",
     defaultSize: { w: 900, h: 700 }
   },
   {
@@ -90,6 +91,63 @@ const appRegistry = [
     iconClass: "icon-banana",
     load: () => import("./apps/banana/index.vue"),
     defaultSize: { w: 420, h: 700 }
+  },
+  // 信息 & 工具类应用
+  {
+    id: "hackernews",
+    name: "__T_APP_SIDEBAR_HACKERNEWS__",
+    icon: "\u{1F4F0}",
+    iconClass: "icon-hackernews",
+    load: () => import("./apps/hackernews/index.vue"),
+    defaultSize: { w: 850, h: 600 }
+  },
+  {
+    id: "coinmarket",
+    name: "__T_APP_SIDEBAR_COINMARKET__",
+    icon: "\u{1F4B9}",
+    iconClass: "icon-coinmarket",
+    load: () => import("./apps/coinmarket/index.vue"),
+    defaultSize: { w: 900, h: 620 }
+  },
+  {
+    id: "earthquake",
+    name: "__T_APP_SIDEBAR_EARTHQUAKE__",
+    icon: "\u{1F30D}",
+    iconClass: "icon-earthquake",
+    load: () => import("./apps/earthquake/index.vue"),
+    defaultSize: { w: 900, h: 620 }
+  },
+  {
+    id: "weather",
+    name: "__T_APP_SIDEBAR_WEATHER__",
+    icon: "\u26C5",
+    iconClass: "icon-weather",
+    load: () => import("./apps/weather/index.vue"),
+    defaultSize: { w: 800, h: 580 }
+  },
+  {
+    id: "ghtrending",
+    name: "__T_APP_SIDEBAR_GHTRENDING__",
+    icon: "\u{1F4BB}",
+    iconClass: "icon-ghtrending",
+    load: () => import("./apps/ghtrending/index.vue"),
+    defaultSize: { w: 900, h: 620 }
+  },
+  {
+    id: "producthunt",
+    name: "__T_APP_SIDEBAR_PRODUCTHUNT__",
+    icon: "\u{1F680}",
+    iconClass: "icon-producthunt",
+    load: () => import("./apps/producthunt/index.vue"),
+    defaultSize: { w: 800, h: 580 }
+  },
+  {
+    id: "rssreader",
+    name: "__T_APP_SIDEBAR_RSSREADER__",
+    icon: "\u{1F4E1}",
+    iconClass: "icon-rssreader",
+    load: () => import("./apps/rssreader/index.vue"),
+    defaultSize: { w: 850, h: 600 }
   },
   // 工具
   {

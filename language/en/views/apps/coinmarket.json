@@ -1,0 +1,18 @@
+{
+  "coin_title": "Crypto Market",
+  "coin_loading": "Loading...",
+  "coin_back": "Back",
+  "coin_analyze": "AI Analysis",
+  "coin_analyzing": "Analyzing...",
+  "coin_dismiss": "Dismiss",
+  "coin_price": "Price",
+  "coin_market_cap": "Market Cap",
+  "coin_24h_high": "24h High",
+  "coin_24h_low": "24h Low",
+  "coin_ath": "ATH",
+  "coin_7d_price": "7 Day Price",
+  "coin_rank": "Rank",
+  "coin_chat_quick_1": "Analyze today's crypto market",
+  "coin_chat_quick_2": "Which coins are pumping",
+  "coin_chat_quick_3": "Give me a market sentiment overview"
+}

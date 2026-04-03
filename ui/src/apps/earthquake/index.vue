@@ -40,6 +40,8 @@
           </g>
           <!-- Equator -->
           <line x1="-180" y1="0" x2="180" y2="0" stroke="#0f2240" stroke-width="0.3" />
+          <!-- Land -->
+          <path v-for="(d, i) in landPaths" :key="'land'+i" :d="d" fill="#0f1d35" stroke="#1a3050" stroke-width="0.3" />
           <!-- Quake dots -->
           <circle v-for="q in quakes" :key="q.id"
             :cx="q.lng" :cy="-q.lat"
@@ -106,6 +108,7 @@
 import { ref, onMounted } from 'vue';
 import { marked } from 'marked';
 import { LOCALE } from '../../locale.js';
+import { landPaths } from './worldmap.js';
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (t) => marked.parse(t || '');
 

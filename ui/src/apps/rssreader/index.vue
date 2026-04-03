@@ -22,6 +22,7 @@
             class="w-full bg-white border border-[#ddd] rounded px-2 py-1 text-[11px] outline-none focus:border-[#d4a574]" />
           <div class="flex gap-1">
             <input v-model="newName" :placeholder="'__T_RSS_NAME_PLACEHOLDER__'" class="flex-1 bg-white border border-[#ddd] rounded px-2 py-1 text-[11px] outline-none focus:border-[#d4a574]" />
+            <button @click="showAdd = false; newUrl = ''; newName = ''" class="px-2 py-1 bg-[#e8e5d8] text-[#999] text-[10px] rounded hover:bg-[#ddd8ce]">__T_RSS_CANCEL__</button>
             <button @click="doAddFeed" class="px-2 py-1 bg-[#d4a574] text-white text-[10px] rounded hover:bg-[#c49464]">__T_RSS_ADD__</button>
           </div>
         </div>
@@ -58,13 +59,16 @@
                 <a :href="item.url" target="_blank" class="text-[13px] font-medium text-[#333] hover:text-[#d4a574] leading-snug">{{ item.title }}</a>
                 <p class="text-[#aaa] text-[11px] mt-1 leading-relaxed line-clamp-2">{{ item.description }}</p>
                 <div class="text-[10px] text-[#ccc] mt-1">{{ item.pubDate }}</div>
+                <div class="mt-1.5 flex items-center gap-2">
+                  <button v-if="!summaries[item.url]" @click="doSummarize(item)" :disabled="summarizingUrl === item.url"
+                    class="text-[11px] text-[#d4a574] hover:text-[#c49464] transition-colors disabled:text-[#ccc]">
+                    {{ summarizingUrl === item.url ? '__T_RSS_SUMMARIZING__' : '__T_RSS_QUICK_LOOK__' }}
+                  </button>
+                  <button v-if="!summaries[item.url] && summarizingUrl !== item.url" @click="doBookmark(item)"
+                    class="text-[11px] text-[#bbb] hover:text-[#d4a574] transition-colors">__T_RSS_SAVE__</button>
+                </div>
               </div>
-              <div class="flex gap-1 shrink-0 pt-0.5">
-                <button @click="doSummarize(item)" :disabled="summarizingUrl === item.url"
-                  class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] transition-all disabled:opacity-30"
-                  :class="summaries[item.url] ? 'bg-[#e8f5e9] text-[#4caf50]' : 'bg-[#f5f5f2] text-[#bbb] hover:text-[#d4a574] hover:bg-[#faf5ef]'">
-                  ✦
-                </button>
+              <div v-if="summaries[item.url]" class="flex gap-1 shrink-0 pt-0.5">
                 <button @click="doBookmark(item)"
                   class="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] bg-[#f5f5f2] text-[#bbb] hover:text-[#d4a574] hover:bg-[#faf5ef] transition-all">
                   ★

@@ -169,11 +169,7 @@ function stopResize() {
 }
 
 .traffic-icon {
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.traffic-lights:hover .traffic-icon {
-  opacity: 1;
+  display: none;
 }
 
 </style>

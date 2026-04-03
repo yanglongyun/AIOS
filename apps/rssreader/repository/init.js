@@ -5,9 +5,7 @@ const SEED = {
   zh: [
     { name: "少 数 派", url: "https://sspai.com/feed" },
     { name: "机 核", url: "https://www.gcores.com/rss" },
-    { name: "36氪", url: "https://36kr.com/feed" },
-    { name: "虎嗅", url: "https://www.huxiu.com/rss/0.xml" },
-    { name: "The Verge", url: "https://www.theverge.com/rss/index.xml" },
+{ name: "The Verge", url: "https://www.theverge.com/rss/index.xml" },
     { name: "Wired", url: "https://www.wired.com/feed/rss" }
   ],
   en: [

@@ -25,6 +25,14 @@ const appRegistry = [
     load: () => import("./apps/files/index.vue"),
     defaultSize: { w: 750, h: 520 }
   },
+  {
+    id: "weather",
+    name: "__T_APP_SIDEBAR_WEATHER__",
+    icon: "\u26C5",
+    iconClass: "icon-weather",
+    load: () => import("./apps/weather/index.vue"),
+    defaultSize: { w: 800, h: 580 }
+  },
   // 应用
   {
     id: "notebook",
@@ -111,18 +119,10 @@ const appRegistry = [
   {
     id: "earthquake",
     name: "__T_APP_SIDEBAR_EARTHQUAKE__",
-    icon: "\u{1F30D}",
+    icon: "🌋",
     iconClass: "icon-earthquake",
     load: () => import("./apps/earthquake/index.vue"),
     defaultSize: { w: 900, h: 620 }
-  },
-  {
-    id: "weather",
-    name: "__T_APP_SIDEBAR_WEATHER__",
-    icon: "\u26C5",
-    iconClass: "icon-weather",
-    load: () => import("./apps/weather/index.vue"),
-    defaultSize: { w: 800, h: 580 }
   },
   {
     id: "ghtrending",
@@ -144,7 +144,7 @@ const appRegistry = [
   {
     id: "wikitree",
     name: "__T_APP_SIDEBAR_WIKITREE__",
-    icon: "📜",
+    icon: "🌍",
     iconClass: "icon-wikitree",
     load: () => import("./apps/wikitree/index.vue"),
     defaultSize: { w: 900, h: 650 }

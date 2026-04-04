@@ -1,5 +1,14 @@
-import { buildLlmHeaders } from "./common.js";
+import { buildLlmHeaders, resolveOAuth } from "./common.js";
+import { callCodexStream } from "./codex.js";
+
 const callLlmRegular = async (provider, apiUrl, apiKey, payload, signal) => {
+  // Check if we should use the Codex OAuth path
+  // Codex only supports streaming, so we use stream and collect the result
+  const oauth = await resolveOAuth();
+  if (oauth.useCodex && provider === "openai") {
+    return callCodexStream(oauth.accessToken, oauth.accountId, payload, { signal });
+  }
+
   try {
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -17,6 +26,5 @@ const callLlmRegular = async (provider, apiUrl, apiKey, payload, signal) => {
     throw error;
   }
 };
-export {
-  callLlmRegular
-};
+
+export { callLlmRegular };

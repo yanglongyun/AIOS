@@ -1,5 +1,7 @@
-import { buildLlmHeaders } from "./common.js";
+import { buildLlmHeaders, resolveOAuth } from "./common.js";
+import { callCodexStream } from "./codex.js";
 import { parseJson } from "../../shared/json/parse.js";
+
 const ensureToolCall = (toolCalls, index) => {
   if (!toolCalls[index]) {
     toolCalls[index] = {
@@ -10,6 +12,7 @@ const ensureToolCall = (toolCalls, index) => {
   }
   return toolCalls[index];
 };
+
 const parseOpenAiDelta = (json, state, onDelta) => {
   const choice = json?.choices?.[0];
   if (!choice) return;
@@ -30,7 +33,15 @@ const parseOpenAiDelta = (json, state, onDelta) => {
     }
   }
 };
+
 const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelta } = {}) => {
+  // Check if we should use the Codex OAuth path
+  const oauth = await resolveOAuth();
+  if (oauth.useCodex && provider === "openai") {
+    return callCodexStream(oauth.accessToken, oauth.accountId, payload, { signal, onDelta });
+  }
+
+  // Standard Chat Completions path
   const streamPayload = { ...payload, stream: true };
   const state = { content: "", toolCalls: [] };
   try {
@@ -78,6 +89,5 @@ const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelt
     throw error;
   }
 };
-export {
-  callLlmStream
-};
+
+export { callLlmStream };

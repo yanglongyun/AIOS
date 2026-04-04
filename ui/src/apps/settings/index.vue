@@ -33,6 +33,8 @@
         <ModelTab
           v-else-if="activeTab === 'model'"
           :provider="provider"
+          :provider-groups="providerGroups"
+          :providers="providers"
           :api-url="editApiUrl"
           :api-key="editApiKey"
           :model="editModel"
@@ -92,7 +94,7 @@ import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import AboutTab from './AboutTab.vue';
 import SkillTab from './SkillTab.vue';
-import { getProvider } from '../../data/providers.js';
+import { createProviderCatalog, fetchProviderCatalog } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
 const router = useRouter();
 const tabs = [
@@ -121,9 +123,13 @@ const oldPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 const providerConfigs = ref({});
+const providerGroups = ref(createProviderCatalog().groups);
+const providers = ref(createProviderCatalog().providers);
 const skillItems = ref([]);
 const skillsLoading = ref(false);
 const skillsError = ref('');
+
+const getProvider = (id) => providers.value.find((item) => item.id === id);
 
 const PROVIDER_CONFIGS_KEY = 'aios.providerConfigs.v1';
 
@@ -171,6 +177,16 @@ const applyProviderConfig = (providerId) => {
 const onProviderChange = (nextProvider) => {
   provider.value = nextProvider;
   applyProviderConfig(nextProvider);
+};
+
+const fetchProviderDefinitions = async () => {
+  try {
+    const catalog = await fetchProviderCatalog();
+    providerGroups.value = catalog.groups;
+    providers.value = catalog.providers;
+  } catch (e) {
+    toast.show('__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message), { type: 'error' });
+  }
 };
 
 const fetchSettings = async () => {
@@ -288,6 +304,7 @@ const logout = async () => {
 
 onMounted(async () => {
   loadProviderConfigs();
+  await fetchProviderDefinitions();
   await Promise.all([fetchMe(), fetchSettings(), fetchSkills()]);
 });
 </script>

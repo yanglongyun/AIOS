@@ -89,7 +89,7 @@
               <div>
                 <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.provider }}</label>
                 <select v-model="model.provider" class="wiz-input wiz-select" @change="applyProviderDefault">
-                  <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
+                  <optgroup v-for="group in providerGroups" :key="group.id" :label="group.name">
                     <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </optgroup>
                 </select>
@@ -208,7 +208,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
+import { createProviderCatalog, fetchProviderCatalog } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
 
 const texts = {
@@ -319,6 +319,12 @@ let typeTimer = null;
 const detectedLanguage = String(navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
 
 const admin = ref({ username: '', password: '', confirm: '' });
+const fallbackCatalog = createProviderCatalog();
+const providerGroups = ref(fallbackCatalog.groups);
+const providers = ref(fallbackCatalog.providers);
+
+const getProvider = (id) => providers.value.find((item) => item.id === id);
+const getProvidersByGroup = (groupId) => providers.value.filter((item) => item.group === groupId);
 
 const model = ref({
   provider: 'openai',
@@ -372,6 +378,17 @@ const loadSettings = async () => {
     throw new Error(data?.message || data?.error || t.value.err_save);
   }
   return data?.data || data || {};
+};
+
+const loadProviderDefinitions = async () => {
+  const catalog = await fetchProviderCatalog();
+  providerGroups.value = catalog.groups;
+  providers.value = catalog.providers;
+  const provider = getProvider(model.value.provider);
+  if (provider) {
+    model.value.apiUrl = provider.apiUrl || model.value.apiUrl;
+    model.value.model = provider.defaultModel || model.value.model;
+  }
 };
 
 const showWelcome = (intro) => {
@@ -441,6 +458,7 @@ const createAdmin = async () => {
       await enterWelcome();
       return;
     }
+    await loadProviderDefinitions();
     step.value = 3;
   } catch (e) {
     error.value = e?.message || t.value.err_admin;
@@ -606,6 +624,12 @@ const enterSystem = async () => {
 
 onUnmounted(() => {
   if (typeTimer) clearInterval(typeTimer);
+});
+
+onMounted(async () => {
+  try {
+    await loadProviderDefinitions();
+  } catch {}
 });
 </script>
 

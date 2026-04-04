@@ -181,11 +181,34 @@ const PROVIDERS = [
     defaultModel: ""
   }
 ];
+const createProviderCatalog = (data = {}) => {
+  const groups = Array.isArray(data.groups) && data.groups.length ? data.groups : PROVIDER_GROUPS;
+  const providers = Array.isArray(data.providers) && data.providers.length ? data.providers : PROVIDERS;
+  const providerMap = new Map(providers.map((item) => [item.id, item]));
+  return {
+    groups,
+    providers,
+    getProvider: (id) => providerMap.get(id),
+    getProvidersByGroup: (groupId) => providers.filter((item) => item.group === groupId)
+  };
+};
+const fetchProviderCatalog = async () => {
+  const res = await fetch("/aios/api/settings/providers", {
+    credentials: "include"
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.message || data?.error || `${res.status} ${res.statusText}`);
+  }
+  return createProviderCatalog(data);
+};
 const getProvider = (id) => PROVIDERS.find((p) => p.id === id);
 const getProvidersByGroup = (groupId) => PROVIDERS.filter((p) => p.group === groupId);
 export {
   PROVIDERS,
   PROVIDER_GROUPS,
+  createProviderCatalog,
+  fetchProviderCatalog,
   getProvider,
   getProvidersByGroup
 };

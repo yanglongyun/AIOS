@@ -5,8 +5,10 @@ import { refreshOAuthToken } from "../api/auth/openai-oauth.js";
  * Check if the current request should use the Codex OAuth path.
  * Returns { useCodex, accessToken, accountId } or { useCodex: false }.
  */
-const resolveOAuth = async () => {
+const resolveOAuth = async (provider) => {
   const settings = getSettings();
+  if (provider && settings.provider && provider !== settings.provider) return { useCodex: false };
+  if (provider && provider !== "openai") return { useCodex: false };
   if (settings.authMethod !== "oauth") return { useCodex: false };
 
   const { oauthRefreshToken, oauthAccessToken, oauthTokenExpiresAt, oauthAccountId } = settings;

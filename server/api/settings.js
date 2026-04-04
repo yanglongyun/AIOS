@@ -1,6 +1,7 @@
 import { readBody } from "../../shared/http/readBody.js";
 import { json } from "../../shared/http/json.js";
 import { getSettings } from "../service/settings/get.js";
+import { listProviderCatalog } from "../service/settings/providers.js";
 import { updateSettings } from "../service/settings/update.js";
 import { listSkills } from "../service/skills/list.js";
 const handleSettingsApi = async (req, res, path) => {
@@ -16,6 +17,9 @@ const handleSettingsApi = async (req, res, path) => {
     return json(res, {
       items: listSkills().map(({ content, ...skill }) => skill)
     });
+  }
+  if (path === "/api/settings/providers" && req.method === "GET") {
+    return json(res, listProviderCatalog());
   }
   if (path === "/api/settings" && req.method === "POST") {
     const body = await readBody(req);

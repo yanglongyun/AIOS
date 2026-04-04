@@ -8,7 +8,7 @@
         class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] outline-none focus:border-[#b08a40] transition-colors cursor-pointer appearance-none dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
         style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a9a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;"
       >
-        <optgroup v-for="group in PROVIDER_GROUPS" :key="group.id" :label="group.name">
+        <optgroup v-for="group in providerGroups" :key="group.id" :label="group.name">
           <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
         </optgroup>
       </select>
@@ -92,8 +92,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../../data/providers.js';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
   provider: { type: String, default: 'openrouter' },
@@ -101,7 +100,9 @@ const props = defineProps({
   apiKey: { type: String, default: '' },
   model: { type: String, default: '' },
   authMethod: { type: String, default: 'apikey' },
-  oauthConnected: { type: Boolean, default: false }
+  oauthConnected: { type: Boolean, default: false },
+  providerGroups: { type: Array, default: () => [] },
+  providers: { type: Array, default: () => [] }
 });
 
 const emit = defineEmits([
@@ -121,9 +122,16 @@ const authMethods = [
   { id: 'oauth', label: 'OAuth __T_SETTINGS_OAUTH_LOGIN_SHORT__' }
 ];
 
+const getProvider = (id) => props.providers.find((item) => item.id === id);
+const getProvidersByGroup = (groupId) => props.providers.filter((item) => item.group === groupId);
+
 const providerSupportsOAuth = computed(() => {
   const p = getProvider(props.provider);
   return p?.supportsOAuth === true;
+});
+
+watch(() => props.oauthConnected, (value) => {
+  isOAuthConnected.value = value === true;
 });
 
 const onProviderChange = (e) => {

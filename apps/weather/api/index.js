@@ -9,7 +9,8 @@ const handleWeatherApi = async (req, res, path) => {
   if (path === "/apps/weather/search" && req.method === "GET") {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const query = url.searchParams.get("q") || "";
-    const data = await search({ query });
+    const locale = url.searchParams.get("locale") || "";
+    const data = await search({ query, locale });
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);
   }

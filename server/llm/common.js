@@ -1,5 +1,5 @@
 import { getSettings } from "../service/settings/get.js";
-import { refreshOAuthToken } from "../api/auth/openai-oauth.js";
+import { refreshOAuthToken } from "../api/providers/openai.js";
 
 /**
  * Check if the current request should use the Codex OAuth path.

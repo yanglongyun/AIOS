@@ -47,7 +47,7 @@ const cleanupFlow = () => {
 };
 
 /**
- * GET /api/auth/openai/authorize
+ * GET /api/providers/openai/authorize
  *
  * 1. Generates PKCE verifier/challenge + random state
  * 2. Starts a temporary HTTP server on port 1455 to capture the callback
@@ -140,7 +140,7 @@ export const authorize = async (req, res) => {
 };
 
 /**
- * POST /api/auth/openai/poll
+ * POST /api/providers/openai/poll
  *
  * Frontend polls this endpoint to check if the OAuth callback was received.
  * When the user completes login in the browser, the callback server captures
@@ -231,7 +231,7 @@ export const poll = async (req, res) => {
 };
 
 /**
- * POST /api/auth/openai/refresh
+ * POST /api/providers/openai/refresh
  * Refreshes the OAuth access token using the stored refresh token.
  */
 export const refresh = async (req, res) => {
@@ -295,7 +295,7 @@ export const refreshOAuthToken = async (refreshToken) => {
 };
 
 /**
- * POST /api/auth/openai/manual-tokens
+ * POST /api/providers/openai/manual-tokens
  * Debug: manually set access/refresh tokens without going through OAuth flow.
  */
 export const manualTokens = async (req, res) => {
@@ -340,7 +340,7 @@ export const manualTokens = async (req, res) => {
 };
 
 /**
- * POST /api/auth/openai/disconnect
+ * POST /api/providers/openai/disconnect
  * Clears OAuth tokens and reverts to API key auth.
  */
 export const disconnect = async (req, res) => {

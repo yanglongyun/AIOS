@@ -51,8 +51,22 @@
         <span class="text-sm font-medium">__T_WEATHER_ADD_CITY__</span>
       </div>
       <div class="px-4 pb-4">
-        <input ref="searchInput" v-model="searchQuery" @keydown.enter="doSearch" :placeholder="'__T_WEATHER_SEARCH_PLACEHOLDER__'"
-          class="w-full bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-2.5 text-sm placeholder-white/40 outline-none focus:border-white/40 transition-colors" />
+        <div class="relative">
+          <input ref="searchInput" v-model="searchQuery" @keydown.enter="doSearch" :placeholder="'__T_WEATHER_SEARCH_PLACEHOLDER__'"
+            class="w-full bg-white/10 backdrop-blur border border-white/15 rounded-xl px-4 py-2.5 pr-12 text-sm placeholder-white/40 outline-none focus:border-white/40 transition-colors" />
+          <button
+            type="button"
+            @click="doSearch"
+            :disabled="searching || !searchQuery.trim()"
+            class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white/70 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Search city"
+          >
+            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="M20 20l-3.5-3.5"></path>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto px-4">
         <div v-if="searching" class="text-center text-white/30 text-sm py-12">__T_WEATHER_LOADING__</div>
@@ -163,7 +177,7 @@ const loadCities = async () => {
 const doSearch = async () => {
   if (!searchQuery.value.trim()) return;
   searching.value = true;
-  try { searchResults.value = (await (await fetch(`/aios/apps/weather/search?q=${encodeURIComponent(searchQuery.value)}`)).json()).cities || []; } catch {}
+  try { searchResults.value = (await (await fetch(`/aios/apps/weather/search?q=${encodeURIComponent(searchQuery.value)}&locale=${encodeURIComponent(navigator.language || '')}`)).json()).cities || []; } catch {}
   searching.value = false;
 };
 

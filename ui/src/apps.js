@@ -6,7 +6,7 @@ const appRegistry = [
     icon: "\u{1F4AC}",
     iconClass: "icon-chat",
     load: () => import("./apps/chat/index.vue"),
-    mobileLoad: () => import("./apps/chat/MobileChatView.vue"),
+    mobileLoad: () => import("./apps/chat/chatMobile.vue"),
     defaultSize: { w: 900, h: 640 }
   },
   {

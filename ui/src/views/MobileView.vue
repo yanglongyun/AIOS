@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, reactive, onMounted, provide } from 'vue';
+import { onMounted, provide, reactive, ref, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import TopBar from '../components/mobile/TopBar.vue';
 import AppGrid from '../components/mobile/AppGrid.vue';
@@ -41,7 +41,6 @@ import { clearAuthCache } from '../auth/session.js';
 
 const router = useRouter();
 
-// 二级导航
 const navOverride = reactive({ title: null, back: null });
 function setMobileNav(title, back) {
   navOverride.title = title;

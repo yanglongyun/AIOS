@@ -1,7 +1,15 @@
 <template>
-  <div class="flex h-full bg-[#f8f7f4] text-[#333]" style="font-family: -apple-system, 'PingFang SC', sans-serif;">
+  <div
+    class="h-full bg-[#f8f7f4] text-[#333]"
+    :class="isMobile ? 'flex flex-col' : 'flex'"
+    style="font-family: -apple-system, 'PingFang SC', sans-serif;"
+  >
     <!-- Sidebar -->
-    <div class="w-[200px] shrink-0 bg-[#eae8e2] border-r border-[#ddd8ce] flex flex-col">
+    <div
+      v-if="!isMobile || mobilePage === 'feeds'"
+      class="bg-[#eae8e2] flex flex-col"
+      :class="isMobile ? 'flex-1 min-h-0' : 'w-[200px] shrink-0 border-r border-[#ddd8ce]'"
+    >
       <div class="px-3 py-3 text-[11px] font-bold text-[#999] uppercase tracking-wider">__T_RSS_FEEDS__</div>
       <!-- Feed list -->
       <div class="flex-1 overflow-y-auto">
@@ -37,10 +45,22 @@
     </div>
 
     <!-- Main content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div
+      v-if="!isMobile || mobilePage !== 'feeds'"
+      class="flex-1 flex flex-col overflow-hidden"
+    >
       <!-- Articles header -->
       <div v-if="activeFeed || view === 'bookmarks'" class="px-4 py-2.5 border-b border-[#e8e5d8] bg-white shrink-0">
-        <div class="text-sm font-semibold">{{ view === 'bookmarks' ? '__T_RSS_BOOKMARKS__' : activeFeed?.name }}</div>
+        <div class="flex items-center gap-3">
+          <button
+            v-if="isMobile"
+            @click="goBackToFeeds"
+            class="text-[12px] text-[#a88864] hover:text-[#8b5e3c] transition-colors"
+          >
+            ← __T_RSS_BACK__
+          </button>
+          <div class="text-sm font-semibold truncate">{{ view === 'bookmarks' ? '__T_RSS_BOOKMARKS__' : activeFeed?.name }}</div>
+        </div>
       </div>
 
       <!-- Empty state -->
@@ -97,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { marked } from 'marked';
 import { LOCALE } from '../../locale.js';
 marked.setOptions({ breaks: true, gfm: true });
@@ -107,6 +127,14 @@ const view = ref('empty'); const feeds = ref([]); const bookmarks = ref([]);
 const activeFeed = ref(null); const articles = ref([]); const articlesLoading = ref(false);
 const showAdd = ref(false); const newUrl = ref(''); const newName = ref('');
 const summarizingUrl = ref(null); const summaries = reactive({});
+const isMobile = ref(false);
+const mobilePage = ref('feeds');
+
+const syncViewport = () => {
+  isMobile.value = window.innerWidth < 768;
+  if (!isMobile.value) mobilePage.value = 'content';
+  else if (mobilePage.value !== 'bookmarks' && mobilePage.value !== 'articles') mobilePage.value = 'feeds';
+};
 
 const api = async (p, o) => (await fetch(`/aios/apps/rssreader/${p}`, o)).json();
 const loadFeeds = async () => { try { feeds.value = (await api('feeds')).feeds || []; } catch {} };
@@ -117,14 +145,32 @@ const doAddFeed = async () => {
   await api('feed/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName.value.trim() || newUrl.value.trim(), url: newUrl.value.trim() }) });
   newUrl.value = ''; newName.value = ''; showAdd.value = false; await loadFeeds();
 };
-const doRemoveFeed = async (id) => { await api('feed/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); if (activeFeed.value?.id === id) { activeFeed.value = null; view.value = 'empty'; } await loadFeeds(); };
+const doRemoveFeed = async (id) => {
+  await api('feed/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+  if (activeFeed.value?.id === id) {
+    activeFeed.value = null;
+    view.value = 'empty';
+    if (isMobile.value) mobilePage.value = 'feeds';
+  }
+  await loadFeeds();
+};
 
 const openFeed = async (feed) => {
   activeFeed.value = feed; view.value = 'articles'; articlesLoading.value = true;
+  if (isMobile.value) mobilePage.value = 'articles';
   try { articles.value = (await api(`fetch?url=${encodeURIComponent(feed.url)}`)).items || []; } catch { articles.value = []; }
   articlesLoading.value = false;
 };
-const showBookmarks = () => { activeFeed.value = null; view.value = 'bookmarks'; };
+const showBookmarks = () => {
+  activeFeed.value = null;
+  view.value = 'bookmarks';
+  if (isMobile.value) mobilePage.value = 'bookmarks';
+};
+const goBackToFeeds = () => {
+  activeFeed.value = null;
+  view.value = 'empty';
+  mobilePage.value = 'feeds';
+};
 
 const doSummarize = async (item) => {
   summarizingUrl.value = item.url;
@@ -134,5 +180,14 @@ const doSummarize = async (item) => {
 const doBookmark = async (item) => { await api('bookmark/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: item.title, url: item.url, summary: summaries[item.url] || '' }) }); await loadBookmarks(); };
 const doRemoveBookmark = async (id) => { await api('bookmark/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); await loadBookmarks(); };
 
-onMounted(() => { loadFeeds(); loadBookmarks(); });
+onMounted(() => {
+  syncViewport();
+  window.addEventListener('resize', syncViewport);
+  loadFeeds();
+  loadBookmarks();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', syncViewport);
+});
 </script>

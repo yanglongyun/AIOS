@@ -37,18 +37,22 @@ const routeMap = [
 ];
 router.beforeEach(async (to) => {
   const setup = await getSetupStatus();
-  if (!setup.initialized) {
+  if (setup.reachable && setup.initialized === false) {
     if (to.path !== "/welcome") return "/welcome";
     return true;
   }
-  if (to.path === "/welcome") return "/login";
+  if (to.path === "/welcome") {
+    if (!setup.reachable) return true;
+    return "/login";
+  }
   if (to.path === "/login") {
-    const ok2 = await ensureAuth();
-    if (ok2) return isMobile() ? "/mobile" : "/";
+    const auth = await ensureAuth();
+    if (!auth.reachable) return true;
+    if (auth.authenticated) return isMobile() ? "/mobile" : "/";
     return true;
   }
-  const ok = await ensureAuth();
-  if (!ok) return "/login";
+  const auth = await ensureAuth();
+  if (auth.reachable && !auth.authenticated) return "/login";
   if (to.path === "/" && isMobile()) return "/mobile";
   if (to.path === "/") return true;
   for (const rule of routeMap) {

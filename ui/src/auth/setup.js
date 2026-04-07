@@ -2,9 +2,15 @@ const getSetupStatus = async () => {
   try {
     const res = await fetch("/aios/api/system/setup", { credentials: "include" });
     const data = await res.json();
-    return { initialized: Boolean(res.ok && data?.initialized) };
+    return {
+      reachable: true,
+      initialized: Boolean(res.ok && data?.initialized)
+    };
   } catch {
-    return { initialized: false };
+    return {
+      reachable: false,
+      initialized: null
+    };
   }
 };
 export {

@@ -11,7 +11,6 @@ const appLoaders = [
   () => import("./hackernews/index.js"),
   () => import("./coinmarket/index.js"),
   () => import("./earthquake/index.js"),
-  () => import("./weather/index.js"),
   () => import("./ghtrending/index.js"),
   () => import("./wikitree/index.js"),
 

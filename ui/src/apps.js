@@ -25,14 +25,6 @@ const appRegistry = [
     load: () => import("./apps/files/index.vue"),
     defaultSize: { w: 750, h: 520 }
   },
-  {
-    id: "weather",
-    name: "__T_APP_SIDEBAR_WEATHER__",
-    icon: "\u26C5",
-    iconClass: "icon-weather",
-    load: () => import("./apps/weather/index.vue"),
-    defaultSize: { w: 800, h: 580 }
-  },
   // 应用
   {
     id: "notebook",

@@ -9,11 +9,17 @@ const checkAuth = async () => {
     const res = await fetch("/aios/api/auth/me", { credentials: "include" });
     const data = await res.json();
     authed = Boolean(res.ok && data?.success);
+    checked = true;
+    return {
+      reachable: true,
+      authenticated: authed
+    };
   } catch {
-    authed = false;
+    return {
+      reachable: false,
+      authenticated: null
+    };
   }
-  checked = true;
-  return authed;
 };
 const ensureAuth = async () => {
   return checkAuth();

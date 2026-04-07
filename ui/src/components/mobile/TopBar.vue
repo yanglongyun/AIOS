@@ -1,11 +1,11 @@
 <template>
-  <div class="flex h-[52px] shrink-0 items-center border-b border-[#e0d0b8] bg-[rgba(250,245,238,0.97)] px-4 backdrop-blur-xl">
+  <div class="flex h-[52px] shrink-0 items-center border-b border-[rgba(200,170,130,0.4)] bg-[rgba(250,245,238,0.88)] px-4 shadow-[0_2px_16px_rgba(90,62,40,0.07)] backdrop-blur-2xl">
     <!-- 应用打开状态 -->
     <template v-if="app">
       <!-- 二级页面：返回箭头 + 动态标题 -->
       <template v-if="nav.back">
         <button
-          class="mr-2 flex h-[32px] w-[32px] items-center justify-center rounded-full text-[#7a6a58] transition-colors active:bg-[rgba(200,160,96,0.12)]"
+          class="mr-2 flex h-[32px] w-[32px] items-center justify-center rounded-[8px] text-[#5a3e28] transition-all active:bg-[rgba(200,160,96,0.12)]"
           @click="nav.back"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -18,7 +18,7 @@
         <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">{{ appTitle }}</div>
       </template>
       <button
-        class="flex h-[32px] w-[32px] items-center justify-center rounded-full text-[#7a6a58] transition-colors active:bg-[rgba(200,160,96,0.12)]"
+        class="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] text-[#5a3e28] transition-all active:bg-[rgba(200,160,96,0.12)]"
         @click="$emit('close')"
       >
         <X class="h-[18px] w-[18px]" />
@@ -30,7 +30,7 @@
       <div class="flex-1 text-[15px] font-bold text-[#3a2a18]">AIOS</div>
       <button
         ref="avatarBtn"
-        class="flex h-[32px] w-[32px] items-center justify-center rounded-full bg-[rgba(200,160,96,0.22)] text-[13px] font-semibold text-[#5a3e28]"
+        class="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-transparent bg-[rgba(200,160,96,0.15)] text-[13px] font-semibold text-[#5a3e28] transition-all active:border-[rgba(200,160,96,0.25)] active:bg-[rgba(200,160,96,0.12)]"
         @click.stop="$emit('toggle-menu', avatarBtn)"
       >{{ usernameInitial }}</button>
     </template>

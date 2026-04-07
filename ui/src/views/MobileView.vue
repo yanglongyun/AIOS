@@ -1,6 +1,7 @@
 <template>
-  <div class="flex h-dvh flex-col overflow-hidden bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]" @click="menuOpen = false">
+  <div class="mobile-desktop-shell flex h-dvh flex-col overflow-hidden font-['Georgia','PingFang_SC',serif]" @click="menuOpen = false">
     <TopBar
+      v-if="openedApp"
       :app="openedApp"
       :nav="navOverride"
       :username="username"
@@ -27,6 +28,8 @@
       @restart="doRestart"
       @logout="doLogout"
     />
+
+    <ReloadModal />
   </div>
 </template>
 
@@ -36,8 +39,10 @@ import { useRouter } from 'vue-router';
 import TopBar from '../components/mobile/TopBar.vue';
 import AppGrid from '../components/mobile/AppGrid.vue';
 import UserMenu from '../components/mobile/UserMenu.vue';
+import ReloadModal from '../components/ReloadModal.vue';
 import { appRegistry } from '../apps.js';
 import { clearAuthCache } from '../auth/session.js';
+import { connect } from '../ws.js';
 
 const router = useRouter();
 
@@ -115,5 +120,16 @@ function closeApp() {
   navOverride.back = null;
 }
 
-onMounted(fetchMe);
+onMounted(() => {
+  connect();
+  fetchMe();
+});
 </script>
+
+<style scoped>
+.mobile-desktop-shell {
+  background:
+    radial-gradient(ellipse at top, rgba(255, 255, 255, 0.28), transparent 55%),
+    linear-gradient(135deg, #e6f2f8 0%, #c8dfe8 30%, #a0c8d8 60%, #78b0c8 100%);
+}
+</style>

@@ -1,19 +1,25 @@
 import { db } from "./client.js";
 import { getSystemLanguage } from "../../app_shared/settings/language.js";
+const daysAgo = (days, hour, minute) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString().slice(0, 19).replace("T", " ");
+};
 const FINANCE_SEEDS_BY_LANGUAGE = {
   zh: [
-    ["income", 88e4, "卖掉了老家祖传的陨石，鉴定说是火星来的", "2026-01-03 09:15:00"],
-    ["income", 52e3, "帮邻居大妈设计了一款广场舞队服，爆单了", "2026-01-18 11:00:00"],
-    ["income", 15e3, "教楼下咖啡店老板拉花，他按杯付费", "2026-02-14 08:30:00"],
-    ["expense", 14e4, "冲动买了一匹退役赛马，说是要陪它跑步", "2026-02-20 14:30:00"],
-    ["expense", 299, "给自己买了一本《如何停止乱花钱》", "2026-03-03 15:30:00"]
+    ["income", 88e4, "卖掉了老家祖传的陨石，鉴定说是火星来的", () => daysAgo(30, 9, 15)],
+    ["income", 52e3, "帮邻居大妈设计了一款广场舞队服，爆单了", () => daysAgo(20, 11, 0)],
+    ["income", 15e3, "教楼下咖啡店老板拉花，他按杯付费", () => daysAgo(12, 8, 30)],
+    ["expense", 14e4, "冲动买了一匹退役赛马，说是要陪它跑步", () => daysAgo(5, 14, 30)],
+    ["expense", 299, "给自己买了一本《如何停止乱花钱》", () => daysAgo(1, 15, 30)]
   ],
   en: [
-    ["income", 88e4, "Sold a family meteorite from my hometown; appraisal said it was from Mars", "2026-01-03 09:15:00"],
-    ["income", 52e3, "Designed dance team uniforms for a neighbor and it unexpectedly went viral", "2026-01-18 11:00:00"],
-    ["income", 15e3, "Taught the cafe owner downstairs latte art and got paid per cup", "2026-02-14 08:30:00"],
-    ["expense", 14e4, "Impulse-bought a retired racehorse and promised to run with it daily", "2026-02-20 14:30:00"],
-    ["expense", 299, 'Bought a book titled "How to Stop Impulse Spending"', "2026-03-03 15:30:00"]
+    ["income", 88e4, "Sold a family meteorite from my hometown; appraisal said it was from Mars", () => daysAgo(30, 9, 15)],
+    ["income", 52e3, "Designed dance team uniforms for a neighbor and it unexpectedly went viral", () => daysAgo(20, 11, 0)],
+    ["income", 15e3, "Taught the cafe owner downstairs latte art and got paid per cup", () => daysAgo(12, 8, 30)],
+    ["expense", 14e4, "Impulse-bought a retired racehorse and promised to run with it daily", () => daysAgo(5, 14, 30)],
+    ["expense", 299, 'Bought a book titled "How to Stop Impulse Spending"', () => daysAgo(1, 15, 30)]
   ]
 };
 const initFinanceTables = () => {
@@ -39,8 +45,8 @@ const seedFinanceIfEmpty = () => {
     INSERT INTO finance_transactions (type, amount, note, date)
     VALUES (?, ?, ?, ?)
   `);
-  for (const [type, amount, note, date] of seeds) {
-    insert.run(type, amount, note, date);
+  for (const [type, amount, note, dateFn] of seeds) {
+    insert.run(type, amount, note, dateFn());
   }
 };
 const initFinanceDatabase = () => {

@@ -16,12 +16,12 @@ const normalizeChoices = (choices = [], locale = "zh") => {
 };
 const generate = async ({ sessionId, action, prompt, locale, taskTitle, req }) => {
   if (!Number.isInteger(sessionId) || sessionId <= 0) {
-    return { status: 400, message: "sessionId 无效" };
+    return { status: 400, message: "Invalid sessionId" };
   }
   const session = findSessionById(sessionId);
-  if (!session) return { status: 404, message: "故事不存在" };
+  if (!session) return { status: 404, message: "Story not found" };
   const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt 不能为空" };
+  if (!promptText) return { status: 400, message: "prompt is required" };
   const lang = normalizeLocale(locale);
   const actionText = String(action || "").trim() || (lang === "en" ? "Start Reader" : "开始阅读");
   const title = String(taskTitle || "").trim() || (lang === "en" ? `Story Progress #${sessionId}` : `故事推进 #${sessionId}`);
@@ -32,7 +32,7 @@ const generate = async ({ sessionId, action, prompt, locale, taskTitle, req }) =
     req
   });
   const content = String(result.content || "").trim();
-  if (!content) return { status: 500, message: "生成结果缺少 content" };
+  if (!content) return { status: 500, message: "Generated result is missing content" };
   const choices = normalizeChoices(result.choices, lang);
   const summary = String(result.summary || "").trim() || content.slice(0, 120);
   const progress = String(result.progress || "").trim() || (lang === "en" ? "Chapter" : "章节推进");

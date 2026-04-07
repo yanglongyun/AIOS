@@ -5,7 +5,7 @@ import { initDatabase } from "./repository/init.js";
 import { startTaskScheduler } from "./task/schedule/scheduler.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
-  throw new Error("端口参数不合法");
+  throw new Error("Invalid port argument");
 }
 const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9500;
 initSystemDirs();

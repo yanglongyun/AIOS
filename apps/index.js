@@ -5,7 +5,7 @@ import { access } from "../shared/auth/index.js";
 import { hasSystemLanguage } from "./app_shared/settings/language.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
-  throw new Error("端口参数不合法");
+  throw new Error("Invalid port argument");
 }
 const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9501;
 const APPS_HOST = "127.0.0.1";
@@ -77,7 +77,7 @@ const appsServer = createServer(async (req, res) => {
       return;
     }
     if (!hasSystemLanguage()) {
-      json(res, { success: false, message: "系统语言未完成安装，请先完成欢迎安装流程" }, 423);
+      json(res, { success: false, message: "System language is not installed. Complete setup first." }, 423);
       return;
     }
     const app = appModules.find((item) => item.match(path));

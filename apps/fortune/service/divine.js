@@ -2,9 +2,9 @@ import { instantTaskJson } from "../../app_shared/instantTask.js";
 import { insertRecord } from "../repository/divine.js";
 const divine = async ({ question, hexagram, prompt, messages, taskTitle, req }) => {
   const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt 不能为空" };
+  if (!promptText) return { status: 400, message: "prompt is required" };
   const taskMessages = Array.isArray(messages) ? messages : [];
-  if (taskMessages.length === 0) return { status: 400, message: "messages 不能为空" };
+  if (taskMessages.length === 0) return { status: 400, message: "messages are required" };
   const parsed = await instantTaskJson({
     app: "fortune",
     title: String(taskTitle || "").trim() || "周易解卦",

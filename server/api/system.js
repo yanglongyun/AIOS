@@ -47,23 +47,23 @@ const handleSystemApi = async (req, res, path) => {
       await runReloadTest(build, restartApps, restartServer);
       return json(res, { success: true });
     } catch (e) {
-      return json(res, { success: false, message: e instanceof Error ? e.message : "系统预检失败" }, 500);
+      return json(res, { success: false, message: e instanceof Error ? e.message : "System preflight check failed" }, 500);
     }
   }
   if (path === "/api/system/install/complete" && req.method === "POST") {
     if (countUsers() === 0) {
-      return json(res, { success: false, message: "系统未初始化" }, 400);
+      return json(res, { success: false, message: "System is not initialized" }, 400);
     }
     const body = await readBody(req);
     const language = body.language === "zh" || body.language === "en" ? body.language : "";
     if (!language) {
-      return json(res, { success: false, message: "语言不合法" }, 400);
+      return json(res, { success: false, message: "Invalid language" }, 400);
     }
     try {
       completeInstall(language);
       return json(res, { success: true });
     } catch (e) {
-      return json(res, { success: false, message: e instanceof Error ? e.message : "安装完成失败" }, 500);
+      return json(res, { success: false, message: e instanceof Error ? e.message : "Failed to complete installation" }, 500);
     }
   }
   if (path === "/api/system/reload" && req.method === "POST") {
@@ -75,7 +75,7 @@ const handleSystemApi = async (req, res, path) => {
       await runReload(build, restartApps, restartServer, { defer: restartApps || restartServer, delayMs: 300 });
       json(res, { success: true });
     } catch (e) {
-      json(res, { success: false, message: e instanceof Error ? e.message : "系统重载失败" }, 500);
+      json(res, { success: false, message: e instanceof Error ? e.message : "System reload failed" }, 500);
     }
     return;
   }

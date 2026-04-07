@@ -21,11 +21,11 @@ const createSession = (wsSend) => {
     if (data.type === "message") {
       const cid = data.conversationId || null;
       if (!cid) {
-        wsSend({ type: "error", content: "缺少 conversationId" });
+        wsSend({ type: "error", content: "Missing conversationId" });
         return;
       }
       if (!hasChat(cid)) {
-        wsSend({ type: "error", content: "会话不存在，请新建对话后重试" });
+        wsSend({ type: "error", content: "Conversation not found. Create a new conversation and try again." });
         return;
       }
       if (conversations.has(cid)) {

@@ -13,7 +13,7 @@ const testExchange = async (body = {}) => {
     passphrase
   };
   if (!cfg.base_url || !cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
-    throw new Error("base_url、API Key、Secret、Passphrase 均不能为空");
+    throw new Error("base_url, API Key, Secret, and Passphrase are required");
   }
   await okxRequest(cfg, "GET", "/api/v5/account/balance");
   return { success: true, message: "连接成功" };

@@ -56,7 +56,7 @@ const normalizeAgentMessages = (messages = []) => {
       toolMap.set(msg.tool_call_id, msg);
     }
   }
-  const TOOL_MISSING = "工具调用未返回结果：可能因系统中断、服务重启、超时或其它未知原因，导致本次执行结果未被记录。";
+  const TOOL_MISSING = "Tool call result is missing. The system may have been interrupted, restarted, timed out, or failed for another unknown reason.";
   const out = [];
   for (const msg of normalized) {
     if (msg.role === "tool") continue;

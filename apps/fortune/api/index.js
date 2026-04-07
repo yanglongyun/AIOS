@@ -6,7 +6,7 @@ const handleFortuneApi = async (req, res, path) => {
   if (path === "/apps/fortune/divine" && req.method === "POST") {
     const body = await readBody(req);
     const question = String(body.question || "").trim();
-    if (!question) return json(res, { success: false, message: "请输入你的问题" }, 400);
+    if (!question) return json(res, { success: false, message: "Question is required" }, 400);
     const hexagram = String(body.hexagram || "").trim();
     const prompt = String(body.prompt || "").trim();
     const messages = Array.isArray(body.messages) ? body.messages : [];
@@ -15,7 +15,7 @@ const handleFortuneApi = async (req, res, path) => {
     try {
       data = await divine({ question, hexagram, prompt, messages, taskTitle, req });
     } catch (e) {
-      data = { status: 500, message: e.message || "占卜失败" };
+      data = { status: 500, message: e.message || "Divination failed" };
     }
     if (data?.status) return json(res, { success: false, message: data.message }, data.status);
     return json(res, data);

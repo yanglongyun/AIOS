@@ -2,7 +2,7 @@ import { getTaskScheduleById, deleteTaskScheduleById } from "../../repository/ta
 import { broadcast } from "../../system/ws.js";
 const deleteSchedule = ({ id }) => {
   const row = getTaskScheduleById(id);
-  if (!row) return { status: 404, message: "计划不存在" };
+  if (!row) return { status: 404, message: "Schedule not found" };
   deleteTaskScheduleById(id);
   broadcast({ type: "schedules_changed" });
   return { success: true };

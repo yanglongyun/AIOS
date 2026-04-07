@@ -18,10 +18,10 @@ const runBotOnce = async () => {
 const startBot = (intervalSec) => {
   const cfg = getConfig();
   if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
-    throw new Error("请先配置 OKX API Key/Secret/Passphrase");
+    throw new Error("Configure OKX API Key/Secret/Passphrase first");
   }
   if (!cfg.goal) {
-    throw new Error("请先设置目标");
+    throw new Error("Set a goal first");
   }
   const sec = Math.max(60, parseInt(intervalSec || cfg.interval_sec || 300));
   if (timer) {

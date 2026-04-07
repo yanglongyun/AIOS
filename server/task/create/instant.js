@@ -106,7 +106,7 @@ const createInstantTask = async ({
     if (error?.name === "AbortError") {
       updateTaskAborted({ taskId });
     } else {
-      updateTaskError({ taskId, message: error?.message || "任务执行失败" });
+      updateTaskError({ taskId, message: error?.message || "Task execution failed" });
     }
     broadcast({ type: "tasks_changed" });
     throw error;

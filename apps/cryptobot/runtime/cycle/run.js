@@ -6,8 +6,8 @@ import { fetchAccountTotalEq } from "../okx.js";
 import { requestDecisionTask } from "../task/decision.js";
 const runTradingCycle = async () => {
   const cfg = getConfig();
-  if (!cfg.goal) throw new Error("请先设置目标");
-  if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) throw new Error("请先配置 OKX API Key/Secret/Passphrase");
+  if (!cfg.goal) throw new Error("Set a goal first");
+  if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) throw new Error("Configure OKX API Key/Secret/Passphrase first");
   const result = await requestDecisionTask(cfg);
   let equity = 0;
   try {

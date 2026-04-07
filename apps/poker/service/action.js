@@ -59,12 +59,12 @@ const aiDecideByLlm = async ({ req, aiCards, round, aiChips, playerChips, pot, p
   } catch (error) {
     return {
       status: 502,
-      message: `LLM 决策失败: ${error instanceof Error ? error.message : String(error)}`
+      message: `LLM decision failed: ${error instanceof Error ? error.message : String(error)}`
     };
   }
   const action = String(parsed?.action || "").toLowerCase();
   if (action !== "call" && action !== "fold" && action !== "raise") {
-    return { status: 502, message: "LLM 决策无效" };
+    return { status: 502, message: "LLM returned an invalid decision" };
   }
   return {
     action,
@@ -106,19 +106,19 @@ const aiSpeakOnCompareByLlm = async ({ req, actionHistory, winner, round, potBef
   } catch (error) {
     return {
       status: 502,
-      message: `LLM 台词生成失败: ${error instanceof Error ? error.message : String(error)}`
+      message: `LLM line generation failed: ${error instanceof Error ? error.message : String(error)}`
     };
   }
   const speech = String(parsed?.speech || parsed?.line || "").trim();
   const expression = String(parsed?.expression || "").trim();
-  if (!speech) return { status: 502, message: "LLM 台词为空" };
+  if (!speech) return { status: 502, message: "LLM returned an empty line" };
   return { speech, expression };
 };
 const performAction = async ({ id, action, req }) => {
-  if (!id) return { status: 400, message: "缺少 id" };
+  if (!id) return { status: 400, message: "Missing id" };
   const row = getGameById(id);
-  if (!row) return { status: 404, message: "牌局不存在" };
-  if (row.status !== "playing") return { status: 400, message: "牌局已结束" };
+  if (!row) return { status: 404, message: "Game not found" };
+  if (row.status !== "playing") return { status: 400, message: "Game is already finished" };
   const playerCards = JSON.parse(row.player_cards);
   const aiCards = JSON.parse(row.ai_cards);
   let actionHistory = [];
@@ -154,7 +154,7 @@ const performAction = async ({ id, action, req }) => {
     }
     let betAmount = action === "raise" ? currentBet * 3 : currentBet;
     betAmount = Math.min(betAmount, playerChips);
-    if (betAmount <= 0) return { status: 400, message: "筹码不足" };
+    if (betAmount <= 0) return { status: 400, message: "Insufficient chips" };
     playerChips -= betAmount;
     pot += betAmount;
     actionHistory.push({
@@ -231,7 +231,7 @@ const performAction = async ({ id, action, req }) => {
       }
     }
   } else {
-    return { status: 400, message: "无效操作" };
+    return { status: 400, message: "Invalid action" };
   }
   updateGame({ id, playerChips, aiChips, pot, round, status, winner, actionHistory });
   setPokerBalances({ playerBalance: playerChips, aiBalance: aiChips });

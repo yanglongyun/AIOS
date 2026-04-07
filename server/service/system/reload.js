@@ -60,7 +60,7 @@ const probeProcess = async (entry, probePort, healthPath) => {
   } catch {
   }
   if (!alive) {
-    throw new Error(`${entry} 服务验活失败，旧服务保持运行`);
+    throw new Error(`${entry} health check failed. Existing service remains running.`);
   }
 };
 const startDetachedNode = (entry) => {

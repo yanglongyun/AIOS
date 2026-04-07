@@ -6,19 +6,19 @@ import { buildSessionCookie, generateSessionToken, hashSessionToken, SESSION_TTL
 import { normalizeUsername } from "../../../shared/auth/index.js";
 const register = async (req, res) => {
   if (countUsers() > 0) {
-    return json(res, { success: false, message: "系统已初始化，禁止公开注册" }, 403);
+    return json(res, { success: false, message: "System is already initialized. Public registration is disabled." }, 403);
   }
   const body = await readBody(req);
   const username = normalizeUsername(body.username);
   const password = String(body.password || "");
   if (!username || username.length < 3) {
-    return json(res, { success: false, message: "用户名至少 3 个字符" }, 400);
+    return json(res, { success: false, message: "Username must be at least 3 characters" }, 400);
   }
   if (!password || password.length < 6) {
-    return json(res, { success: false, message: "密码至少 6 位" }, 400);
+    return json(res, { success: false, message: "Password must be at least 6 characters" }, 400);
   }
   if (findUserByUsername(username)) {
-    return json(res, { success: false, message: "用户名已存在" }, 409);
+    return json(res, { success: false, message: "Username already exists" }, 409);
   }
   const user = createUser(username, hashPassword(password));
   const token = generateSessionToken();

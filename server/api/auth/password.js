@@ -6,20 +6,20 @@ import { getAuthUser } from "../../../shared/auth/guard.js";
 const changePassword = async (req, res) => {
   const user = getAuthUser(req);
   if (!user) {
-    return json(res, { success: false, message: "未登录" }, 401);
+    return json(res, { success: false, message: "Unauthorized" }, 401);
   }
   const body = await readBody(req);
   const oldPassword = String(body.oldPassword || "");
   const newPassword = String(body.newPassword || "");
   if (!oldPassword || !newPassword) {
-    return json(res, { success: false, message: "旧密码和新密码不能为空" }, 400);
+    return json(res, { success: false, message: "Old password and new password are required" }, 400);
   }
   if (newPassword.length < 6) {
-    return json(res, { success: false, message: "新密码至少 6 位" }, 400);
+    return json(res, { success: false, message: "New password must be at least 6 characters" }, 400);
   }
   const authUser = findUserAuthById(user.id);
   if (!authUser || !verifyPassword(oldPassword, authUser.password_hash)) {
-    return json(res, { success: false, message: "旧密码错误" }, 400);
+    return json(res, { success: false, message: "Old password is incorrect" }, 400);
   }
   updateUserPasswordById(user.id, hashPassword(newPassword));
   deleteAuthSessionsByUserId(user.id);

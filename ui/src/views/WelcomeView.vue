@@ -100,58 +100,13 @@
               </div>
             </div>
 
-            <!-- Auth method toggle (only for providers that support OAuth) -->
-            <div v-if="currentProviderSupportsOAuth" class="flex gap-3">
-              <button
-                v-for="m in [{ id: 'apikey', label: t.auth_apikey }, { id: 'oauth', label: t.auth_oauth }]"
-                :key="m.id"
-                class="relative flex-1 rounded-lg border px-4 py-2.5 text-[13px] tracking-wide transition-all cursor-pointer"
-                :class="model.authMethod === m.id
-                  ? 'border-[#c8a060] bg-[rgba(200,160,96,0.1)] text-[#c8a060] font-semibold'
-                  : 'border-[#3a2a18] text-[#6a5840] hover:border-[#5a4a35] hover:text-[#a08c70]'"
-                @click="model.authMethod = m.id">
-                {{ m.label }}
-              </button>
+            <div>
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_url }}</label>
+              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
             </div>
-
-            <!-- API Key fields (shown when authMethod is apikey) -->
-            <template v-if="model.authMethod !== 'oauth'">
-              <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_url }}</label>
-                <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
-              </div>
-              <div>
-                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_key }}</label>
-                <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
-              </div>
-            </template>
-
-            <!-- OAuth login (shown when authMethod is oauth) -->
-            <div v-else class="rounded-lg border border-[#3a2a18] bg-[rgba(0,0,0,0.2)] p-5">
-              <div v-if="oauthConnected" class="flex items-center gap-3">
-                <div class="h-2 w-2 rounded-full bg-green-500"></div>
-                <span class="text-[13px] text-[#a09078]">{{ t.oauth_connected }}</span>
-              </div>
-              <div v-else>
-                <p class="mb-4 text-[13px] leading-relaxed text-[#8a7860]">{{ t.oauth_hint }}</p>
-                <button
-                  class="rounded bg-[#10a37f] px-6 py-2.5 text-[13px] font-semibold text-white hover:bg-[#0d8c6d] shadow-[0_4px_14px_rgba(16,163,127,0.3)] transition-all cursor-pointer disabled:opacity-40"
-                  :disabled="pending"
-                  @click="startOAuthLogin">
-                  {{ pending ? t.oauth_connecting : t.oauth_login }}
-                </button>
-              </div>
-              <div class="mt-4 space-y-3 border-t border-[#3a2a18] pt-4">
-                <p class="text-[11px] uppercase tracking-widest text-[#6a5840]">{{ t.oauth_manual_hint }}</p>
-                <div>
-                  <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">Access Token</label>
-                  <input v-model.trim="model.accessToken" placeholder="eyJhbGci..." class="wiz-input" />
-                </div>
-                <div>
-                  <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">Refresh Token</label>
-                  <input v-model.trim="model.refreshToken" placeholder="eyJhbGci..." class="wiz-input" />
-                </div>
-              </div>
+            <div>
+              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_key }}</label>
+              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
             </div>
           </div>
           <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
@@ -160,15 +115,8 @@
             <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
               @click="step = 2">{{ t.prev }}</button>
             <button
-              v-if="model.authMethod !== 'oauth'"
               class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
               :disabled="pending" @click="saveModelAndTest">
-              {{ pending ? t.testing : t.save_test }}
-            </button>
-            <button
-              v-else-if="oauthConnected || model.accessToken"
-              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
-              :disabled="pending" @click="saveOAuthAndTest">
               {{ pending ? t.testing : t.save_test }}
             </button>
           </div>
@@ -207,8 +155,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { createProviderCatalog, fetchProviderCatalog } from '../data/providers.js';
+import { ref, computed, onUnmounted } from 'vue';
+import { createProviderCatalog } from '../data/providers.js';
 import { clearAuthCache } from '../auth/session.js';
 
 const texts = {
@@ -233,13 +181,6 @@ const texts = {
     model_label: '模型',
     api_url: 'API 链接 (可选)',
     api_key: 'API Key',
-    auth_apikey: 'API Key',
-    auth_oauth: 'OAuth 登录',
-    oauth_hint: '通过 OpenAI 账号授权登录，无需手动填写 API Key。',
-    oauth_login: '使用 OpenAI 账号登录',
-    oauth_connecting: '连接中…',
-    oauth_connected: '已通过 OAuth 连接 OpenAI',
-    oauth_manual_hint: '或手动填写 Token',
     testing: '检查中…',
     save_test: '连接大模型',
     intro_title: '初始化完成',
@@ -279,13 +220,6 @@ const texts = {
     model_label: 'Model',
     api_url: 'API URL (Optional)',
     api_key: 'API Key',
-    auth_apikey: 'API Key',
-    auth_oauth: 'OAuth Login',
-    oauth_hint: 'Sign in with your OpenAI account. No API key needed.',
-    oauth_login: 'Sign in with OpenAI',
-    oauth_connecting: 'Connecting…',
-    oauth_connected: 'Connected to OpenAI via OAuth',
-    oauth_manual_hint: 'Or enter tokens manually',
     testing: 'Checking…',
     save_test: 'Connect Model',
     intro_title: 'Initialization Complete',
@@ -331,17 +265,7 @@ const model = ref({
   apiUrl: getProvider('openai')?.apiUrl || '',
   model: getProvider('openai')?.defaultModel || '',
   apiKey: '',
-  accessToken: '',
-  refreshToken: '',
-  authMethod: 'apikey',
   language: detectedLanguage
-});
-
-const oauthConnected = ref(false);
-
-const currentProviderSupportsOAuth = computed(() => {
-  const p = getProvider(model.value.provider);
-  return p?.supportsOAuth === true;
 });
 
 const t = computed(() => texts[model.value.language] || texts.en);
@@ -359,10 +283,6 @@ const applyProviderDefault = () => {
   const item = getProvider(model.value.provider);
   model.value.apiUrl = item?.apiUrl || '';
   model.value.model = item?.defaultModel || '';
-  model.value.authMethod = 'apikey';
-  model.value.accessToken = '';
-  model.value.refreshToken = '';
-  oauthConnected.value = false;
 };
 
 const hasBootstrapModel = (settings) => {
@@ -378,17 +298,6 @@ const loadSettings = async () => {
     throw new Error(data?.message || data?.error || t.value.err_save);
   }
   return data?.data || data || {};
-};
-
-const loadProviderDefinitions = async () => {
-  const catalog = await fetchProviderCatalog();
-  providerGroups.value = catalog.groups;
-  providers.value = catalog.providers;
-  const provider = getProvider(model.value.provider);
-  if (provider) {
-    model.value.apiUrl = provider.apiUrl || model.value.apiUrl;
-    model.value.model = provider.defaultModel || model.value.model;
-  }
 };
 
 const showWelcome = (intro) => {
@@ -458,7 +367,6 @@ const createAdmin = async () => {
       await enterWelcome();
       return;
     }
-    await loadProviderDefinitions();
     step.value = 3;
   } catch (e) {
     error.value = e?.message || t.value.err_admin;
@@ -529,93 +437,6 @@ const saveModelAndTest = async () => {
   }
 };
 
-const startOAuthLogin = async () => {
-  error.value = '';
-  pending.value = true;
-  try {
-    // 1. Ask server to start OAuth flow (creates temp server on port 1455)
-    const res = await fetch('/aios/api/auth/openai/authorize', {
-      credentials: 'include'
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) throw new Error(data.message || 'Failed to start OAuth');
-
-    // 2. Open OpenAI login page in a new tab
-    window.open(data.authorizationUrl, '_blank');
-
-    // 3. Poll server until the callback is received
-    const pollInterval = setInterval(async () => {
-      try {
-        const pollRes = await fetch('/aios/api/auth/openai/poll', {
-          method: 'POST',
-          credentials: 'include'
-        });
-        const pollData = await pollRes.json();
-
-        if (pollData.status === 'pending') return; // still waiting
-
-        clearInterval(pollInterval);
-
-        if (pollData.status === 'complete') {
-          oauthConnected.value = true;
-          pending.value = false;
-        } else {
-          error.value = pollData.message || 'OAuth failed';
-          pending.value = false;
-        }
-      } catch {
-        clearInterval(pollInterval);
-        error.value = 'OAuth polling failed';
-        pending.value = false;
-      }
-    }, 1500);
-  } catch (e) {
-    error.value = e?.message || 'OAuth login failed';
-    pending.value = false;
-  }
-};
-
-const saveOAuthAndTest = async () => {
-  error.value = '';
-  pending.value = true;
-  try {
-    // If user manually filled in tokens, use manual-tokens endpoint
-    if (model.value.accessToken) {
-      const tokenRes = await fetch('/aios/api/auth/openai/manual-tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          accessToken: model.value.accessToken,
-          refreshToken: model.value.refreshToken || undefined
-        })
-      });
-      const tokenData = await tokenRes.json();
-      if (!tokenRes.ok || tokenData?.success === false) {
-        throw new Error(tokenData?.message || t.value.err_save);
-      }
-    }
-    // Save the model name
-    const saveRes = await fetch('/aios/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        model: model.value.model
-      })
-    });
-    const saveData = await saveRes.json();
-    if (!saveRes.ok || saveData?.success === false) {
-      throw new Error(saveData?.message || t.value.err_save);
-    }
-    await enterWelcome();
-  } catch (e) {
-    error.value = e?.message || t.value.err_test;
-  } finally {
-    pending.value = false;
-  }
-};
-
 const enterSystem = async () => {
   if (!installReady.value || installing.value) return;
   clearAuthCache();
@@ -626,11 +447,6 @@ onUnmounted(() => {
   if (typeTimer) clearInterval(typeTimer);
 });
 
-onMounted(async () => {
-  try {
-    await loadProviderDefinitions();
-  } catch {}
-});
 </script>
 
 <style scoped>

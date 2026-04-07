@@ -4,7 +4,6 @@ import { handleSettingsApi } from "./settings.js";
 import { handleFilesApi } from "../../apps/files/api/index.js";
 import { handleTaskApi } from "./task.js";
 import { handleAuthApi } from "./auth/index.js";
-import { handleProvidersApi } from "./providers/index.js";
 import { handleSystemApi } from "./system.js";
 import { access } from "../../shared/auth/index.js";
 const handleApiRequest = async (req, res, url) => {
@@ -21,10 +20,6 @@ const handleApiRequest = async (req, res, url) => {
     }
     if (path.startsWith("/api/auth/")) {
       await handleAuthApi(req, res, path);
-      return true;
-    }
-    if (path.startsWith("/api/providers/")) {
-      await handleProvidersApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/system/")) {

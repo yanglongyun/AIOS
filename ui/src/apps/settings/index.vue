@@ -38,14 +38,11 @@
           :api-url="editApiUrl"
           :api-key="editApiKey"
           :model="editModel"
-          :auth-method="authMethod"
-          :oauth-connected="oauthConnected"
           @save="save"
           @update:provider="onProviderChange"
           @update:api-url="editApiUrl = $event"
           @update:api-key="editApiKey = $event"
           @update:model="editModel = $event"
-          @update:auth-method="authMethod = $event"
         />
         <ToolTab
           v-else-if="activeTab === 'tools'"
@@ -94,7 +91,7 @@ import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import AboutTab from './AboutTab.vue';
 import SkillTab from './SkillTab.vue';
-import { createProviderCatalog, fetchProviderCatalog } from '../../data/providers.js';
+import { createProviderCatalog } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
 const router = useRouter();
 const tabs = [
@@ -116,8 +113,6 @@ const toolMaxRounds = ref(50);
 const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
-const authMethod = ref('apikey');
-const oauthConnected = ref(false);
 const accountUsername = ref('');
 const oldPassword = ref('');
 const newPassword = ref('');
@@ -179,16 +174,6 @@ const onProviderChange = (nextProvider) => {
   applyProviderConfig(nextProvider);
 };
 
-const fetchProviderDefinitions = async () => {
-  try {
-    const catalog = await fetchProviderCatalog();
-    providerGroups.value = catalog.groups;
-    providers.value = catalog.providers;
-  } catch (e) {
-    toast.show('__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message), { type: 'error' });
-  }
-};
-
 const fetchSettings = async () => {
   const data = await request('/aios/api/settings');
   provider.value = data.provider || 'openai';
@@ -200,8 +185,6 @@ const fetchSettings = async () => {
   editApiUrl.value = data.apiUrl || '';
   editApiKey.value = data.apiKey || '';
   editModel.value = data.model || '';
-  authMethod.value = data.authMethod || 'apikey';
-  oauthConnected.value = data.oauthConnected === true;
   providerConfigs.value[provider.value] = {
     apiUrl: editApiUrl.value,
     apiKey: editApiKey.value,
@@ -247,8 +230,7 @@ const save = async () => {
         toolMaxRounds: maxRounds,
         apiUrl: editApiUrl.value,
         apiKey: editApiKey.value,
-        model: editModel.value,
-        authMethod: authMethod.value
+        model: editModel.value
       })
     });
 
@@ -304,7 +286,6 @@ const logout = async () => {
 
 onMounted(async () => {
   loadProviderConfigs();
-  await fetchProviderDefinitions();
   await Promise.all([fetchMe(), fetchSettings(), fetchSkills()]);
 });
 </script>

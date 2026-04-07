@@ -12,8 +12,7 @@ const PROVIDERS = [
     name: "OpenAI",
     group: "default",
     apiUrl: "https://api.openai.com/v1/chat/completions",
-    defaultModel: "gpt-5.4",
-    supportsOAuth: true
+    defaultModel: "gpt-5.4"
   },
   {
     id: "claude",
@@ -192,23 +191,12 @@ const createProviderCatalog = (data = {}) => {
     getProvidersByGroup: (groupId) => providers.filter((item) => item.group === groupId)
   };
 };
-const fetchProviderCatalog = async () => {
-  const res = await fetch("/aios/api/settings/providers", {
-    credentials: "include"
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data?.message || data?.error || `${res.status} ${res.statusText}`);
-  }
-  return createProviderCatalog(data);
-};
 const getProvider = (id) => PROVIDERS.find((p) => p.id === id);
 const getProvidersByGroup = (groupId) => PROVIDERS.filter((p) => p.group === groupId);
 export {
   PROVIDERS,
   PROVIDER_GROUPS,
   createProviderCatalog,
-  fetchProviderCatalog,
   getProvider,
   getProvidersByGroup
 };

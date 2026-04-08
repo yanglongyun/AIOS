@@ -2,7 +2,6 @@ const PROVIDER_GROUPS = [
   { id: "default", name: "默认" },
   { id: "aggregator", name: "聚合平台" },
   { id: "coding", name: "Coding Plan" },
-  { id: "wandesk", name: "Wandesk" },
   { id: "custom", name: "自定义" }
 ];
 const PROVIDERS = [
@@ -162,14 +161,6 @@ const PROVIDERS = [
     group: "coding",
     apiUrl: "https://api.kimi.com/coding/v1/chat/completions",
     defaultModel: "kimi-for-coding"
-  },
-  // Wandesk
-  {
-    id: "wandesk",
-    name: "Wandesk",
-    group: "wandesk",
-    apiUrl: "https://wandesk.ai/api/agent/chat/completions",
-    defaultModel: "aios-nova"
   },
   // 自定义
   {

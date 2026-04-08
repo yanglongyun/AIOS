@@ -6,7 +6,13 @@
     @click="onDesktopClick"
     @contextmenu.prevent="$emit('contextmenu', $event)"
   >
-    <div class="desktop-icons absolute inset-6">
+    <div v-if="hasWallpaperEffect" class="absolute inset-0 overflow-hidden">
+      <div class="wallpaper-image-layer" :style="wallpaperImageStyle"></div>
+      <div class="wallpaper-overlay-layer" :style="wallpaperOverlayStyle"></div>
+      <div class="wallpaper-glass-layer" :style="wallpaperGlassStyle"></div>
+    </div>
+
+    <div class="desktop-icons absolute inset-6 z-[1]">
       <div
         v-for="app in visibleApps"
         :key="app.id"
@@ -32,16 +38,48 @@ defineEmits(['contextmenu']);
 
 const visibleApps = computed(() => appRegistry.filter(a => !a.hidden));
 const selectedId = ref(null);
-const wallpaperId = ref(localStorage.getItem('aios-wallpaper') || 'wp-ocean-breeze');
+const wallpaperId = ref(localStorage.getItem('aios-wallpaper') || 'wp-sea-mist-blue-bay');
 
 const currentWp = computed(() => wallpaperList.find(w => w.id === wallpaperId.value) || wallpaperList[0]);
+const isUrlWallpaper = computed(() => currentWp.value.type === 'url');
+const hasWallpaperEffect = computed(() => isUrlWallpaper.value && !!currentWp.value.effect);
 const wallpaperClass = computed(() => currentWp.value.type === 'css' ? currentWp.value.id : '');
 const wallpaperStyle = computed(() => {
   if (currentWp.value.type !== 'url') return {};
+  if (!currentWp.value.effect) {
+    return {
+      backgroundImage: `url(${currentWp.value.url})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    };
+  }
+  return {
+    backgroundColor: currentWp.value.effect?.backgroundColor || '#d8e1e6'
+  };
+});
+const wallpaperImageStyle = computed(() => {
+  if (currentWp.value.type !== 'url' || !currentWp.value.effect) return {};
+  const effect = currentWp.value.effect || {};
   return {
     backgroundImage: `url(${currentWp.value.url})`,
     backgroundSize: 'cover',
-    backgroundPosition: 'center'
+    backgroundPosition: 'center',
+    opacity: effect.imageOpacity ?? 0.85,
+    filter: `blur(${effect.blur || '18px'}) saturate(1.04) brightness(1.06)`,
+    transform: `scale(${effect.scale || 1.05})`
+  };
+});
+const wallpaperOverlayStyle = computed(() => {
+  if (currentWp.value.type !== 'url' || !currentWp.value.effect) return {};
+  return {
+    background: currentWp.value.effect?.overlay || 'transparent'
+  };
+});
+const wallpaperGlassStyle = computed(() => {
+  if (currentWp.value.type !== 'url' || !currentWp.value.effect) return {};
+  const effect = currentWp.value.effect || {};
+  return {
+    backgroundImage: [effect.glass, effect.vignette].filter(Boolean).join(', ')
   };
 });
 function selectIcon(id) {
@@ -66,37 +104,102 @@ defineExpose({ setWallpaper, wallpaper: wallpaperId });
 </script>
 
 <style scoped>
-/* 渐变壁纸 — 必须原生 */
-.wp-warm-morning  { background: linear-gradient(135deg, #fdf5e6 0%, #f5e0c3 30%, #e8c9a0 60%, #d4a574 100%); }
-.wp-soft-lavender { background: linear-gradient(135deg, #f0e6f6 0%, #e0d0f0 30%, #c9b8e8 60%, #b8a0d8 100%); }
-.wp-ocean-breeze  { background: linear-gradient(135deg, #e6f2f8 0%, #c8dfe8 30%, #a0c8d8 60%, #78b0c8 100%); }
-.wp-forest-mist   { background: linear-gradient(135deg, #e8f0e6 0%, #c8d8c0 30%, #a8c8a0 60%, #88b880 100%); }
-.wp-sunset-glow   { background: linear-gradient(135deg, #fef0e6 0%, #fdd8c0 30%, #f0b898 60%, #e89870 100%); }
-
-/* 纹理壁纸 — 必须原生 */
-.wp-wood {
-  background-color: #b8884c;
+.wp-sea-mist-blue-bay {
+  background-color: #b9ccda;
   background-image:
-    repeating-linear-gradient(82deg, rgba(0,0,0,0) 0, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 7px),
-    repeating-linear-gradient(0deg, rgba(100,60,20,0.08) 0, transparent 2px, transparent 24px),
-    linear-gradient(180deg, #c89858 0%, #b88848 30%, #a87838 60%, #c09050 100%);
+    radial-gradient(ellipse at 50% 12%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.12) 34%, transparent 64%),
+    radial-gradient(ellipse at 50% 68%, rgba(104,150,176,0.34) 0%, rgba(104,150,176,0.08) 28%, transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.02) 46%, rgba(74,124,156,0.1) 100%),
+    linear-gradient(180deg, #dfeaf1 0%, #c7d8e3 42%, #adc4d3 74%, #90adc0 100%);
 }
 
-.wp-linen {
-  background-color: #e4d8c8;
+.wp-morning-sandbar {
+  background-color: #e5ccb2;
   background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.025) 3px, rgba(0,0,0,0.025) 4px),
-    linear-gradient(160deg, #ece0d0 0%, #ddd0be 50%, #e4d8c8 100%);
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.36) 0%, rgba(255,248,235,0.14) 30%, transparent 60%),
+    linear-gradient(180deg, transparent 0%, transparent 60%, rgba(255,243,221,0.2) 61%, rgba(255,243,221,0.08) 70%, transparent 78%),
+    radial-gradient(ellipse at 50% 84%, rgba(224,192,146,0.28) 0%, rgba(224,192,146,0.06) 34%, transparent 68%),
+    linear-gradient(180deg, #f8f0e3 0%, #efdcc1 38%, #dfc09a 72%, #c6a177 100%);
 }
 
-.wp-dark-stone {
-  background-color: #2a2a2e;
+.wp-forest-mist {
+  background-color: #9fb4a3;
   background-image:
-    radial-gradient(ellipse at 15% 60%, rgba(60,58,65,0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 75% 25%, rgba(55,50,58,0.5) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 80%, rgba(45,42,50,0.4) 0%, transparent 55%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+    radial-gradient(ellipse at 50% 10%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.08) 28%, transparent 58%),
+    radial-gradient(ellipse at 18% 72%, rgba(120,149,126,0.38) 0%, rgba(120,149,126,0.06) 34%, transparent 70%),
+    radial-gradient(ellipse at 52% 64%, rgba(85,116,95,0.4) 0%, rgba(85,116,95,0.08) 28%, transparent 62%),
+    radial-gradient(ellipse at 86% 70%, rgba(110,138,116,0.32) 0%, rgba(110,138,116,0.07) 30%, transparent 66%),
+    linear-gradient(180deg, #e3ece5 0%, #c8d8cc 40%, #99b19f 76%, #75917c 100%);
+}
+
+.wp-silver-cyan-lake {
+  background-color: #aac2cf;
+  background-image:
+    radial-gradient(ellipse at 50% 16%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.12) 30%, transparent 62%),
+    linear-gradient(180deg, transparent 0%, transparent 60%, rgba(244,250,252,0.18) 61%, rgba(244,250,252,0.08) 68%, transparent 76%),
+    radial-gradient(ellipse at 50% 78%, rgba(110,166,194,0.34) 0%, rgba(110,166,194,0.06) 34%, transparent 68%),
+    linear-gradient(180deg, #e6eef2 0%, #cddbe2 42%, #a6bfca 75%, #84a3b4 100%);
+}
+
+.wp-dusk-rock-shore {
+  background-color: #5f6a7d;
+  background-image:
+    radial-gradient(ellipse at 50% 12%, rgba(214,222,242,0.2) 0%, rgba(214,222,242,0.05) 30%, transparent 62%),
+    radial-gradient(ellipse at 20% 72%, rgba(88,103,128,0.3) 0%, rgba(88,103,128,0.08) 34%, transparent 70%),
+    radial-gradient(ellipse at 82% 76%, rgba(62,73,94,0.36) 0%, rgba(62,73,94,0.08) 34%, transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 36%, rgba(18,24,38,0.1) 100%),
+    linear-gradient(180deg, #8f9cb0 0%, #758196 38%, #596377 72%, #3c4456 100%);
+}
+
+.wp-linen-warm-paper {
+  background-color: #ddd0bc;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(110,96,78,0.035) 0px, rgba(110,96,78,0.035) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(90deg, rgba(110,96,78,0.03) 0px, rgba(110,96,78,0.03) 1px, transparent 1px, transparent 5px),
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 34%, transparent 62%),
+    linear-gradient(180deg, #f1eadf 0%, #e3d7c7 46%, #d0bea8 100%);
+}
+
+.wp-amber-clouds {
+  background-color: #d8ab8a;
+  background-image:
+    radial-gradient(ellipse at 22% 24%, rgba(255,242,230,0.34) 0%, rgba(255,242,230,0.08) 34%, transparent 64%),
+    radial-gradient(ellipse at 58% 18%, rgba(255,224,202,0.28) 0%, rgba(255,224,202,0.07) 30%, transparent 58%),
+    radial-gradient(ellipse at 84% 30%, rgba(235,183,146,0.24) 0%, rgba(235,183,146,0.05) 30%, transparent 58%),
+    linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 38%, rgba(132,74,42,0.06) 100%),
+    linear-gradient(180deg, #f3ddcf 0%, #ebbfa5 42%, #d79f80 74%, #b77758 100%);
+}
+
+.wp-snowlight-peak {
+  background-color: #b8cedd;
+  background-image:
+    radial-gradient(ellipse at 50% 10%, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.14) 28%, transparent 58%),
+    linear-gradient(180deg, transparent 0%, transparent 62%, rgba(247,251,255,0.2) 63%, rgba(247,251,255,0.08) 70%, transparent 78%),
+    radial-gradient(ellipse at 18% 82%, rgba(163,191,214,0.26) 0%, rgba(163,191,214,0.05) 36%, transparent 70%),
+    radial-gradient(ellipse at 84% 84%, rgba(120,155,184,0.22) 0%, rgba(120,155,184,0.05) 32%, transparent 66%),
+    linear-gradient(180deg, #eef5fa 0%, #dbe8f1 42%, #b8cfdf 76%, #8eb0c5 100%);
+}
+
+.wallpaper-image-layer,
+.wallpaper-overlay-layer,
+.wallpaper-glass-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wallpaper-image-layer {
+  transform-origin: center;
+  will-change: transform, filter;
+}
+
+.wallpaper-overlay-layer {
+  opacity: 0.72;
+}
+
+.wallpaper-glass-layer {
+  mix-blend-mode: screen;
+  opacity: 1;
 }
 
 /* grid 纵向排列 — Tailwind 不支持 grid-auto-flow: column */

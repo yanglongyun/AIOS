@@ -4,13 +4,13 @@
       <div class="picker absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl p-6" @click.stop>
         <h3 class="mb-4 text-[15px] font-semibold text-[#2c2420]">选择壁纸</h3>
         <div class="grid grid-cols-4 gap-2.5">
-          <div
-            v-for="wp in wallpapers" :key="wp.id"
-            class="group relative h-14 w-20 cursor-pointer overflow-hidden rounded-lg border-2 border-transparent transition-all duration-150 hover:-translate-y-0.5"
-            :class="[wp.id, current === wp.id && 'border-[#e08850] shadow-[0_0_0_3px_rgba(224,136,80,0.15)]']"
-            :style="wp.type === 'url' ? { backgroundImage: `url(${wp.url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}"
-            @click="select(wp.id)"
-          >
+        <div
+          v-for="wp in wallpapers" :key="wp.id"
+          class="group relative h-14 w-20 cursor-pointer overflow-hidden rounded-lg border-2 border-transparent transition-all duration-150 hover:-translate-y-0.5"
+          :class="[wp.id, current === wp.id && 'border-[#e08850] shadow-[0_0_0_3px_rgba(224,136,80,0.15)]']"
+          :style="thumbnailStyle(wp)"
+          @click="select(wp.id)"
+        >
             <span class="absolute inset-x-0 bottom-0 bg-black/30 px-1 py-0.5 text-center text-[9px] text-white opacity-0 transition-opacity group-hover:opacity-100">{{ wp.label }}</span>
           </div>
         </div>
@@ -25,7 +25,7 @@ import { wallpaperList } from './wallpapers.js';
 
 const emit = defineEmits(['select']);
 const visible = ref(false);
-const current = ref(localStorage.getItem('aios-wallpaper') || 'wp-ocean-breeze');
+const current = ref(localStorage.getItem('aios-wallpaper') || 'wp-sea-mist-blue-bay');
 const wallpapers = wallpaperList;
 
 function show() { visible.value = true; }
@@ -35,6 +35,15 @@ function select(id) {
   current.value = id;
   emit('select', id);
   close();
+}
+
+function thumbnailStyle(wp) {
+  if (wp.type !== 'url') return {};
+  return {
+    backgroundImage: `${wp.effect?.overlay || 'none'}, url(${wp.url})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
+  };
 }
 
 defineExpose({ show });
@@ -50,30 +59,52 @@ defineExpose({ show });
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
 }
 
-/* 渐变缩略图 */
-.wp-warm-morning  { background: linear-gradient(135deg, #fdf5e6, #d4a574); }
-.wp-soft-lavender { background: linear-gradient(135deg, #f0e6f6, #b8a0d8); }
-.wp-ocean-breeze  { background: linear-gradient(135deg, #e6f2f8, #78b0c8); }
-.wp-forest-mist   { background: linear-gradient(135deg, #e8f0e6, #88b880); }
-.wp-sunset-glow   { background: linear-gradient(135deg, #fef0e6, #e89870); }
+.wp-sea-mist-blue-bay {
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 34%, transparent 62%),
+    linear-gradient(180deg, #dfeaf1 0%, #b6ccda 64%, #90adc0 100%);
+}
 
-/* 纹理缩略图 */
-.wp-wood {
-  background-color: #b8884c;
-  background-image:
-    repeating-linear-gradient(82deg, rgba(0,0,0,0) 0, rgba(0,0,0,0.04) 1px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 5px),
-    linear-gradient(180deg, #c89858, #a87838);
+.wp-morning-sandbar {
+  background:
+    radial-gradient(ellipse at 50% 16%, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.06) 32%, transparent 60%),
+    linear-gradient(180deg, #f8f0e3 0%, #e9d2ae 62%, #c6a177 100%);
 }
-.wp-linen {
-  background-color: #e4d8c8;
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 3px),
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 3px);
+
+.wp-forest-mist {
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 30%, transparent 58%),
+    linear-gradient(180deg, #e3ece5 0%, #adc1b0 56%, #75917c 100%);
 }
-.wp-dark-stone {
-  background-color: #2a2a2e;
-  background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(60,58,65,0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 75% 25%, rgba(55,50,58,0.5) 0%, transparent 45%);
+
+.wp-silver-cyan-lake {
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 32%, transparent 60%),
+    linear-gradient(180deg, #e6eef2 0%, #b8cdd7 58%, #84a3b4 100%);
+}
+
+.wp-dusk-rock-shore {
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(214,222,242,0.18) 0%, rgba(214,222,242,0.04) 30%, transparent 60%),
+    linear-gradient(180deg, #8f9cb0 0%, #687389 58%, #3c4456 100%);
+}
+
+.wp-linen-warm-paper {
+  background:
+    repeating-linear-gradient(0deg, rgba(110,96,78,0.035) 0px, rgba(110,96,78,0.035) 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(90deg, rgba(110,96,78,0.03) 0px, rgba(110,96,78,0.03) 1px, transparent 1px, transparent 4px),
+    linear-gradient(180deg, #f1eadf 0%, #dfd0bb 58%, #d0bea8 100%);
+}
+
+.wp-amber-clouds {
+  background:
+    radial-gradient(ellipse at 34% 20%, rgba(255,242,230,0.28) 0%, rgba(255,242,230,0.06) 30%, transparent 58%),
+    linear-gradient(180deg, #f3ddcf 0%, #e3b392 58%, #b77758 100%);
+}
+
+.wp-snowlight-peak {
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.1) 28%, transparent 56%),
+    linear-gradient(180deg, #eef5fa 0%, #cfe0ec 58%, #8eb0c5 100%);
 }
 </style>

@@ -1,13 +1,17 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center text-sm text-black/35">__T_HISTORY_EMPTY__</div>
+    <div v-if="!chats.length" class="py-12 text-center text-sm" style="color:rgba(0,0,0,0.35)">__T_HISTORY_EMPTY__</div>
 
     <div
       v-for="c in chats"
       :key="c.conversation_id"
-      class="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors"
-      :class="activeId === c.conversation_id ? 'bg-black/[0.06]' : 'hover:bg-black/[0.03]'"
+      class="group flex items-center gap-2 rounded-[9px] px-3 py-2 transition-colors"
+      :style="activeId === c.conversation_id
+        ? 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)'
+        : ''"
+      @mouseover="activeId !== c.conversation_id && ($event.currentTarget.style.background='rgba(0,0,0,0.04)')"
+      @mouseleave="activeId !== c.conversation_id && ($event.currentTarget.style.background='transparent')"
     >
       <!-- 编辑状态 -->
       <template v-if="editingId === c.conversation_id">
@@ -17,15 +21,16 @@
           @keydown.enter="confirmRename(c.conversation_id)"
           @keydown.escape="cancelRename"
           @blur="confirmRename(c.conversation_id)"
-          class="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[13px] text-[#222] outline-none"
+          class="min-w-0 flex-1 rounded-[8px] border px-2.5 py-1 text-[13px] outline-none"
+          style="border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13"
         />
       </template>
 
       <!-- 正常状态 -->
       <template v-else>
         <button @click="$emit('open-chat', c)" class="min-w-0 flex-1 cursor-pointer border-none bg-transparent p-0 text-left">
-          <div class="truncate text-[13px] text-[#222]">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
-          <div class="mt-0.5 text-[11px] text-black/35">{{ c.created_at }}</div>
+          <div class="truncate text-[13px] font-medium" :style="activeId === c.conversation_id ? 'color:#3d2f1e' : 'color:rgba(0,0,0,0.6)'">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+          <div class="mt-0.5 text-[10px]" style="color:rgba(0,0,0,0.3)">{{ c.created_at }}</div>
         </button>
 
         <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -33,16 +38,21 @@
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
             title="__T_HISTORY_RENAME__"
-            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-black/35 transition-all hover:bg-black/[0.05] hover:text-[#222]">
-            <Pencil class="h-3.5 w-3.5" />
+            class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none bg-transparent transition-all"
+            style="color:rgba(0,0,0,0.3)"
+            @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.1)';$event.currentTarget.style.color='#5c4332'"
+            @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(0,0,0,0.3)'">
+            <Pencil class="h-3 w-3" />
           </button>
-          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] text-red-600">__T_HISTORY_CONFIRM_DELETE__</span>
+          <span v-if="deletingId === c.conversation_id" class="px-1 text-[10px] text-red-500">__T_HISTORY_CONFIRM_DELETE__</span>
           <button
             @click.stop="confirmDelete(c.conversation_id)"
             :title="deletingId === c.conversation_id ? '__T_HISTORY_CLICK_CONFIRM__' : '__T_COMMON_DELETE__'"
-            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-black/35 transition-all hover:bg-black/[0.05] hover:text-[#222]"
-            :class="deletingId === c.conversation_id ? 'bg-red-500 !text-white hover:!bg-red-500' : ''">
-            <Trash2 class="h-3.5 w-3.5" />
+            class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none transition-all"
+            :style="deletingId === c.conversation_id ? 'background:#dc2626;color:#fff' : 'background:transparent;color:rgba(0,0,0,0.3)'"
+            @mouseover="deletingId !== c.conversation_id && ($event.currentTarget.style.background='rgba(220,38,38,0.1)') && ($event.currentTarget.style.color='#dc2626')"
+            @mouseleave="deletingId !== c.conversation_id && ($event.currentTarget.style.background='transparent') && ($event.currentTarget.style.color='rgba(0,0,0,0.3)')">
+            <Trash2 class="h-3 w-3" />
           </button>
         </div>
       </template>

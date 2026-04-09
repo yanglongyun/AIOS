@@ -13,9 +13,7 @@
     <WindowBar
       ref="windowBarRef"
       :launcher-open="launcherOpen"
-      :task-center-open="taskCenterOpen"
       @toggle-launcher="toggleLauncher"
-      @toggle-task-center="toggleTaskCenter"
     />
     <LauncherPanel
       v-if="launcherOpen"
@@ -23,10 +21,6 @@
       @open="onLauncherOpen"
       @close="launcherOpen = false"
       @create-app="onCreateApp"
-    />
-    <TaskCenter
-      v-if="taskCenterOpen"
-      @close="taskCenterOpen = false"
     />
     <GlobalToast />
     <ReloadModal />
@@ -41,11 +35,11 @@ import ContextMenu from '../components/desktop/ContextMenu.vue';
 import WallpaperPicker from '../components/desktop/WallpaperPicker.vue';
 import WindowBar from '../components/desktop/WindowBar.vue';
 import LauncherPanel from '../components/desktop/LauncherPanel.vue';
-import TaskCenter from '../components/desktop/TaskCenter.vue';
 import GlobalToast from '../components/GlobalToast.vue';
 import ReloadModal from '../components/ReloadModal.vue';
-import { windowManager } from '../stores/windowManager.js';
-import { connect } from '../ws.js';
+import { getApp } from '../apps.js';
+import { windowManager } from '../system/windows.js';
+import { connect } from '../system/ws.js';
 
 const desktopRef = ref(null);
 const ctxMenuRef = ref(null);
@@ -53,7 +47,6 @@ const wpPickerRef = ref(null);
 const windowBarRef = ref(null);
 const launcherPanelRef = ref(null);
 const launcherOpen = ref(false);
-const taskCenterOpen = ref(false);
 
 function onContextMenu(e) {
   ctxMenuRef.value?.show(e);
@@ -65,21 +58,21 @@ function onWallpaperSelect(cls) {
 
 function toggleLauncher() {
   launcherOpen.value = !launcherOpen.value;
-  if (launcherOpen.value) taskCenterOpen.value = false;
-}
-
-function toggleTaskCenter() {
-  taskCenterOpen.value = !taskCenterOpen.value;
-  if (taskCenterOpen.value) launcherOpen.value = false;
 }
 
 function onLauncherOpen(appId) {
-  windowManager.open(appId);
+  const app = getApp(appId);
+  if (app) {
+    windowManager.openWindow(app);
+  }
   launcherOpen.value = false;
 }
 
 function onCreateApp() {
-  windowManager.open('create-app');
+  const app = getApp('createapp');
+  if (app) {
+    windowManager.openWindow(app);
+  }
   launcherOpen.value = false;
 }
 

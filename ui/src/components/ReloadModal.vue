@@ -75,7 +75,7 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref, reactive } from 'vue';
-import { on } from '../ws.js';
+import { on } from '../system/ws.js';
 const visible = ref(false);
 const phase = ref('confirm'); // confirm | building | restarting | error
 const message = ref('');

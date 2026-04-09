@@ -1,17 +1,18 @@
 <template>
   <section class="space-y-3">
-    <div class="rounded-xl border border-black/[0.08] bg-white p-4">
-      <label class="flex items-center gap-2 text-[13px] text-[#222] cursor-pointer">
+    <!-- 截断设置 -->
+    <div class="rounded-[13px] border px-4 py-4" style="background:#fff;border-color:rgba(0,0,0,0.08)">
+      <label class="flex cursor-pointer items-center gap-2.5">
         <input
           type="checkbox"
           :checked="enableToolResultTruncate"
           @change="$emit('update:enable-tool-result-truncate', $event.target.checked)"
-          class="cursor-pointer accent-black"
+          class="s-checkbox"
         />
-        __T_SETTINGS_TOOL_TRUNCATE_ENABLE__
+        <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_TRUNCATE_ENABLE__</span>
       </label>
-      <div class="mt-3 flex items-center gap-3">
-        <span class="text-xs text-black/40">__T_SETTINGS_TOOL_MAX_CHARS__</span>
+      <div class="mt-3.5 flex items-center gap-3">
+        <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_CHARS__</span>
         <input
           :value="toolResultMaxChars"
           @input="$emit('update:tool-result-max-chars', Number($event.target.value || 0))"
@@ -20,24 +21,25 @@
           max="50000"
           step="1000"
           :disabled="!enableToolResultTruncate"
-          class="w-28 rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-xs text-[#222] outline-none focus:border-[#222] disabled:opacity-40 transition-colors"
+          class="s-number-input"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-black/25">__T_SETTINGS_TOOL_MAX_CHARS_HINT__</div>
+      <div class="mt-1.5 text-[11px]" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TOOL_MAX_CHARS_HINT__</div>
     </div>
 
-    <div class="rounded-xl border border-black/[0.08] bg-white p-4">
-      <label class="flex items-center gap-2 text-[13px] text-[#222] cursor-pointer">
+    <!-- 循环限制 -->
+    <div class="rounded-[13px] border px-4 py-4" style="background:#fff;border-color:rgba(0,0,0,0.08)">
+      <label class="flex cursor-pointer items-center gap-2.5">
         <input
           type="checkbox"
           :checked="enableToolLoopLimit"
           @change="$emit('update:enable-tool-loop-limit', $event.target.checked)"
-          class="cursor-pointer accent-black"
+          class="s-checkbox"
         />
-        __T_SETTINGS_TOOL_LOOP_LIMIT_ENABLE__
+        <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_LOOP_LIMIT_ENABLE__</span>
       </label>
-      <div class="mt-3 flex items-center gap-3">
-        <span class="text-xs text-black/40">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
+      <div class="mt-3.5 flex items-center gap-3">
+        <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
         <input
           :value="toolMaxRounds"
           @input="$emit('update:tool-max-rounds', Number($event.target.value || 0))"
@@ -46,14 +48,14 @@
           max="500"
           step="1"
           :disabled="!enableToolLoopLimit"
-          class="w-28 rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-xs text-[#222] outline-none focus:border-[#222] disabled:opacity-40 transition-colors"
+          class="s-number-input"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-black/25">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</div>
+      <div class="mt-1.5 text-[11px]" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</div>
     </div>
 
-    <div class="pt-2 flex justify-start">
-      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-[#222] text-white cursor-pointer hover:bg-black transition-colors">__T_COMMON_SAVE__</button>
+    <div class="flex justify-end pt-1">
+      <button @click="$emit('save')" class="s-btn-primary">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>
@@ -74,3 +76,39 @@ defineEmits([
   'save'
 ]);
 </script>
+
+<style scoped>
+.s-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #5c4332;
+  flex-shrink: 0;
+}
+.s-number-input {
+  width: 100px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: #faf8f5;
+  font-size: 13px;
+  color: #2a1f13;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.s-number-input:focus { border-color: #a07850; background: #fff; }
+.s-number-input:disabled { opacity: 0.4; }
+
+.s-btn-primary {
+  padding: 8px 20px;
+  border-radius: 9px;
+  background: #5c4332;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+.s-btn-primary:hover { background: #3d2a1e; }
+</style>

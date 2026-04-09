@@ -20,19 +20,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { wallpaperList } from './wallpapers.js';
+import { wallpaperId, setWallpaper } from '../../stores/appearance.js';
 
 const emit = defineEmits(['select']);
 const visible = ref(false);
-const current = ref(localStorage.getItem('aios-wallpaper') || 'wp-sea-mist-blue-bay');
+const current = computed(() => wallpaperId.value);
 const wallpapers = wallpaperList;
 
 function show() { visible.value = true; }
 function close() { visible.value = false; }
 
 function select(id) {
-  current.value = id;
+  setWallpaper(id);
   emit('select', id);
   close();
 }
@@ -60,15 +61,14 @@ defineExpose({ show });
 }
 
 .wp-sea-mist-blue-bay {
-  background:
-    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 34%, transparent 62%),
-    linear-gradient(180deg, #dfeaf1 0%, #b6ccda 64%, #90adc0 100%);
+  background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
 }
 
 .wp-morning-sandbar {
   background:
-    radial-gradient(ellipse at 50% 16%, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.06) 32%, transparent 60%),
-    linear-gradient(180deg, #f8f0e3 0%, #e9d2ae 62%, #c6a177 100%);
+    radial-gradient(circle at 24% 20%, rgba(122,157,255,0.3) 0%, transparent 34%),
+    radial-gradient(circle at 78% 72%, rgba(255,96,144,0.22) 0%, transparent 28%),
+    linear-gradient(180deg, #293252 0%, #1f2640 56%, #101321 100%);
 }
 
 .wp-forest-mist {

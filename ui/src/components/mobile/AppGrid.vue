@@ -15,8 +15,8 @@
 </template>
 
 <script setup>
-import { appRegistry } from '../../apps.js';
+import { apps } from '../../apps.js';
 defineEmits(['open']);
 
-const visible = appRegistry.filter(a => !a.hidden);
+const visible = apps;
 </script>

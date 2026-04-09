@@ -39,7 +39,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { LOCALE, LOCALE_FULL } from '../../locale.js';
+import { LOCALE, LOCALE_FULL } from '../../system/locale.js';
 import NotebookEditorView from './NotebookEditorView.vue';
 import NotebookListView from './NotebookListView.vue';
 

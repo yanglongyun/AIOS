@@ -40,9 +40,9 @@ import TopBar from '../components/mobile/TopBar.vue';
 import AppGrid from '../components/mobile/AppGrid.vue';
 import UserMenu from '../components/mobile/UserMenu.vue';
 import ReloadModal from '../components/ReloadModal.vue';
-import { appRegistry } from '../apps.js';
+import { getApp } from '../apps.js';
 import { clearAuthCache } from '../auth/session.js';
-import { connect } from '../ws.js';
+import { connect } from '../system/ws.js';
 
 const router = useRouter();
 
@@ -101,11 +101,12 @@ async function doRestart() {
 // 应用
 const openedApp = shallowRef(null);
 async function openApp(appId) {
-  const app = appRegistry.find(a => a.id === appId);
+  const app = getApp(appId);
   if (!app) return;
   navOverride.title = null;
   navOverride.back = null;
-  const loader = app.mobileLoad || app.load;
+  const loader = app.mobileLoad || app.desktopLoad;
+  if (!loader) return;
   const mod = await loader();
   openedApp.value = {
     appId,

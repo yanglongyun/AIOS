@@ -1,147 +1,171 @@
 <template>
-  <div class="relative min-h-screen overflow-hidden" style="background-color:#f7f3ee; font-family:'Barlow',system-ui,sans-serif;">
-    <!-- 背景光晕 -->
-    <div class="pointer-events-none fixed inset-0"
-      style="background:radial-gradient(ellipse 70% 60% at 15% 0%,rgba(255,220,160,.55) 0%,transparent 55%),radial-gradient(ellipse 60% 55% at 90% 95%,rgba(200,210,255,.5) 0%,transparent 55%),radial-gradient(ellipse 50% 45% at 75% 10%,rgba(220,200,255,.35) 0%,transparent 50%)">
-    </div>
+  <div class="relative min-h-screen overflow-hidden bg-[#f7f3ee] [font-family:'Barlow',system-ui,sans-serif]">
+    <div
+      class="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_60%_at_15%_0%,rgba(255,220,160,.55)_0%,transparent_55%),radial-gradient(ellipse_60%_55%_at_90%_95%,rgba(200,210,255,.5)_0%,transparent_55%),radial-gradient(ellipse_50%_45%_at_75%_10%,rgba(220,200,255,.35)_0%,transparent_50%)]"
+    ></div>
 
-    <!-- 居中卡片 -->
     <div class="relative z-10 flex min-h-screen items-center justify-center p-6">
-      <div class="wiz-card w-full max-w-[500px]">
-
-        <!-- 进度条 -->
-        <div class="flex gap-1.5 px-10 pt-9 pb-0">
-          <div v-for="i in 4" :key="i" class="h-[3px] flex-1 rounded-full transition-all duration-300"
-            :style="i < step ? 'background:#222' : i === step ? 'background:#222;opacity:.45' : 'background:rgba(0,0,0,.1)'">
-          </div>
+      <div class="w-full max-w-[500px] rounded-[32px] border border-white/80 bg-white/90 shadow-[0_20px_60px_rgba(0,0,0,0.1),0_4px_16px_rgba(0,0,0,0.06)]">
+        <div class="flex gap-1.5 px-10 pt-9">
+          <div
+            v-for="i in 4"
+            :key="i"
+            class="h-[3px] flex-1 rounded-full transition-all duration-300"
+            :style="i < step ? 'background:#222' : i === step ? 'background:#222;opacity:.45' : 'background:rgba(0,0,0,.1)'"
+          ></div>
         </div>
 
-        <!-- Step 1: 欢迎 + 语言 -->
         <div v-if="step === 1" class="px-10 py-9">
-          <div class="wiz-step-label">Step 01 — Language</div>
-          <h2 class="wiz-heading">{{ t.desc_1 }}</h2>
-          <p class="wiz-sub">{{ t.desc_2 }}</p>
+          <div class="mb-[10px] text-[11px] font-bold uppercase tracking-[1.8px] text-black/35">Step 01 — Language</div>
+          <h2 class="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-[-0.5px] text-[#222]">{{ t.desc_1 }}</h2>
+          <p class="mb-7 text-[14px] font-medium leading-[1.6] text-black/45">{{ t.desc_2 }}</p>
 
           <div class="grid grid-cols-2 gap-2.5">
             <button
               v-for="lang in [{ id: 'zh', flag: '🇨🇳', label: '简体中文' }, { id: 'en', flag: '🇺🇸', label: 'English' }]"
               :key="lang.id"
-              class="wiz-lang-btn"
-              :class="model.language === lang.id ? 'wiz-lang-sel' : 'wiz-lang-idle'"
-              @click="model.language = lang.id">
+              class="flex items-center justify-center gap-2.5 rounded-2xl border px-4 py-[14px] text-[14px] font-semibold text-left transition-all duration-200"
+              :class="model.language === lang.id
+                ? 'border-[#222] bg-[#222] text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)]'
+                : 'border-black/10 bg-black/[0.02] text-black/60 hover:-translate-y-px hover:border-black/30 hover:text-[#222] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]'"
+              @click="model.language = lang.id"
+            >
               <span class="text-[20px]">{{ lang.flag }}</span>
               <span>{{ lang.label }}</span>
             </button>
           </div>
 
-          <div class="wiz-footer">
+          <div class="mt-7 flex items-center justify-between border-t border-black/[0.06] pt-[22px]">
             <span></span>
-            <button class="wiz-btn-next" @click="step = 2">
+            <button
+              class="inline-flex items-center rounded-full bg-[#222] px-[22px] py-[10px] pr-[10px] text-[14px] font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-all duration-300 hover:scale-[1.04] hover:bg-black hover:shadow-[0_8px_28px_rgba(0,0,0,0.28)]"
+              @click="step = 2"
+            >
               <span>{{ t.next }}</span>
-              <div class="wiz-icon-circle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+              <span class="ml-3 inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white text-[#222]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
             </button>
           </div>
         </div>
 
-        <!-- Step 2: 创建管理员 -->
         <div v-if="step === 2" class="px-10 py-9">
-          <div class="wiz-step-label">Step 02 — Account</div>
-          <h2 class="wiz-heading">{{ t.admin_title }}</h2>
-          <p class="wiz-sub">{{ t.admin_hint }}</p>
+          <div class="mb-[10px] text-[11px] font-bold uppercase tracking-[1.8px] text-black/35">Step 02 — Account</div>
+          <h2 class="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-[-0.5px] text-[#222]">{{ t.admin_title }}</h2>
+          <p class="mb-7 text-[14px] font-medium leading-[1.6] text-black/45">{{ t.admin_hint }}</p>
 
           <div class="space-y-4">
             <div>
-              <label class="wiz-label">{{ t.username }}</label>
-              <input v-model.trim="admin.username" :placeholder="t.username_ph" class="wiz-input" />
+              <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.username }}</label>
+              <input v-model.trim="admin.username" :placeholder="t.username_ph" class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="wiz-label">{{ t.password }}</label>
-                <input v-model="admin.password" type="password" :placeholder="t.password_ph" class="wiz-input" />
+                <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.password }}</label>
+                <input v-model="admin.password" type="password" :placeholder="t.password_ph" class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
               </div>
               <div>
-                <label class="wiz-label">{{ t.confirm }}</label>
-                <input v-model="admin.confirm" type="password" :placeholder="t.confirm_ph" class="wiz-input" />
+                <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.confirm }}</label>
+                <input v-model="admin.confirm" type="password" :placeholder="t.confirm_ph" class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
               </div>
             </div>
           </div>
 
           <div v-if="error" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-600">{{ error }}</div>
 
-          <div class="wiz-footer">
-            <button class="wiz-btn-back" @click="step = 1">← {{ t.prev }}</button>
-            <button class="wiz-btn-next" :disabled="pending" @click="createAdmin">
+          <div class="mt-7 flex items-center justify-between border-t border-black/[0.06] pt-[22px]">
+            <button class="text-[14px] font-semibold text-black/35 transition-colors hover:text-[#222]" @click="step = 1">← {{ t.prev }}</button>
+            <button
+              class="inline-flex items-center rounded-full bg-[#222] px-[22px] py-[10px] pr-[10px] text-[14px] font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-all duration-300 hover:scale-[1.04] hover:bg-black hover:shadow-[0_8px_28px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-45"
+              :disabled="pending"
+              @click="createAdmin"
+            >
               <span>{{ pending ? t.creating : t.next }}</span>
-              <div class="wiz-icon-circle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+              <span class="ml-3 inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white text-[#222]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
             </button>
           </div>
         </div>
 
-        <!-- Step 3: 配置模型 -->
         <div v-if="step === 3" class="px-10 py-9">
-          <div class="wiz-step-label">Step 03 — AI Model</div>
-          <h2 class="wiz-heading">{{ t.model_title }}</h2>
-          <p class="wiz-sub">{{ t.model_hint }}</p>
+          <div class="mb-[10px] text-[11px] font-bold uppercase tracking-[1.8px] text-black/35">Step 03 — AI Model</div>
+          <h2 class="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-[-0.5px] text-[#222]">{{ t.model_title }}</h2>
+          <p class="mb-7 text-[14px] font-medium leading-[1.6] text-black/45">{{ t.model_hint }}</p>
 
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="wiz-label">{{ t.provider }}</label>
-                <select v-model="model.provider" class="wiz-input wiz-select" @change="applyProviderDefault">
-                  <optgroup v-for="group in providerGroups" :key="group.id" :label="group.name">
-                    <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </optgroup>
-                </select>
+                <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.provider }}</label>
+                <div class="relative">
+                  <select
+                    v-model="model.provider"
+                    class="w-full appearance-none rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] pr-10 text-[14px] font-medium text-[#222] outline-none transition-all focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]"
+                    @change="applyProviderDefault"
+                  >
+                    <optgroup v-for="group in providerGroups" :key="group.id" :label="group.name">
+                      <option v-for="p in getProvidersByGroup(group.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
+                    </optgroup>
+                  </select>
+                  <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" /></svg>
+                </div>
               </div>
               <div>
-                <label class="wiz-label">{{ t.model_label }}</label>
-                <input v-model.trim="model.model" placeholder="gpt-4o" class="wiz-input" />
+                <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.model_label }}</label>
+                <input v-model.trim="model.model" placeholder="gpt-4o" class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
               </div>
             </div>
             <div>
-              <label class="wiz-label">{{ t.api_url }}</label>
-              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
+              <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.api_url }}</label>
+              <input v-model.trim="model.apiUrl" placeholder="https://..." class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
             </div>
             <div>
-              <label class="wiz-label">{{ t.api_key }}</label>
-              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
+              <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.api_key }}</label>
+              <input v-model.trim="model.apiKey" placeholder="sk-..." class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
             </div>
           </div>
 
           <div v-if="error" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-600">{{ error }}</div>
 
-          <div class="wiz-footer">
-            <button class="wiz-btn-back" @click="step = 2">← {{ t.prev }}</button>
-            <button class="wiz-btn-next" :disabled="pending" @click="saveModelAndTest">
+          <div class="mt-7 flex items-center justify-between border-t border-black/[0.06] pt-[22px]">
+            <button class="text-[14px] font-semibold text-black/35 transition-colors hover:text-[#222]" @click="step = 2">← {{ t.prev }}</button>
+            <button
+              class="inline-flex items-center rounded-full bg-[#222] px-[22px] py-[10px] pr-[10px] text-[14px] font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-all duration-300 hover:scale-[1.04] hover:bg-black hover:shadow-[0_8px_28px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-45"
+              :disabled="pending"
+              @click="saveModelAndTest"
+            >
               <span>{{ pending ? t.testing : t.save_test }}</span>
-              <div class="wiz-icon-circle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+              <span class="ml-3 inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white text-[#222]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
             </button>
           </div>
         </div>
 
-        <!-- Step 4: 完成 -->
         <div v-if="step === 4" class="px-10 py-9">
-          <div class="wiz-step-label">All set</div>
-          <h2 class="wiz-heading">{{ t.intro_title }}</h2>
-          <p class="wiz-sub">{{ t.intro_hint }}</p>
+          <div class="mb-[10px] text-[11px] font-bold uppercase tracking-[1.8px] text-black/35">All set</div>
+          <h2 class="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-[-0.5px] text-[#222]">{{ t.intro_title }}</h2>
+          <p class="mb-7 text-[14px] font-medium leading-[1.6] text-black/45">{{ t.intro_hint }}</p>
 
           <div class="min-h-[90px] rounded-2xl border border-black/[0.07] bg-black/[0.03] p-5 text-[14px] leading-relaxed text-[#444]">
             <span>{{ displayedText }}</span>
             <span v-if="typing" class="ml-0.5 inline-block h-[1em] w-[3px] animate-pulse bg-[#222] align-text-bottom"></span>
           </div>
 
-          <div class="mt-6 flex flex-col items-center gap-3 border-t border-black/[0.06] pt-6 transition-opacity duration-500"
-            :class="typing ? 'opacity-0 pointer-events-none' : 'opacity-100'">
+          <div class="mt-6 flex flex-col items-center gap-3 border-t border-black/[0.06] pt-6 transition-opacity duration-500" :class="typing ? 'pointer-events-none opacity-0' : 'opacity-100'">
             <p class="text-[12px] font-medium text-black/40">{{ installMessage }}</p>
-            <button class="wiz-btn-next wiz-btn-finish" :disabled="installing || !installReady" @click="enterSystem">
+            <button
+              class="inline-flex items-center rounded-full bg-[#222] px-[26px] py-[12px] pr-[12px] text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-all duration-300 hover:scale-[1.04] hover:bg-black hover:shadow-[0_8px_28px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-45"
+              :disabled="installing || !installReady"
+              @click="enterSystem"
+            >
               <span>{{ enterButtonLabel }}</span>
-              <div class="wiz-icon-circle">
+              <span class="ml-3 inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white text-[#222]">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              </div>
+              </span>
             </button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -439,190 +463,4 @@ const enterSystem = async () => {
 onUnmounted(() => {
   if (typeTimer) clearInterval(typeTimer);
 });
-
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.wiz-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 32px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.1), 0 4px 16px rgba(0,0,0,.06);
-  animation: fadeInUp .7s cubic-bezier(.16,1,.3,1) forwards;
-}
-
-.wiz-step-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: rgba(0,0,0,.35);
-  margin-bottom: 10px;
-}
-
-.wiz-heading {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: #222;
-  margin-bottom: 6px;
-  line-height: 1.2;
-}
-
-.wiz-sub {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0,0,0,.45);
-  line-height: 1.6;
-  margin-bottom: 28px;
-}
-
-.wiz-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(0,0,0,.4);
-  margin-bottom: 7px;
-}
-
-.wiz-input {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1.5px solid rgba(0,0,0,.1);
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  outline: none;
-  background: rgba(0,0,0,.02);
-  color: #222;
-  transition: all 0.2s;
-}
-.wiz-input::placeholder { color: rgba(0,0,0,.25); }
-.wiz-input:focus {
-  border-color: #222;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
-}
-
-.wiz-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23999'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-position: right 12px center;
-  background-repeat: no-repeat;
-  background-size: 16px;
-  padding-right: 40px;
-  cursor: pointer;
-}
-
-/* Language buttons */
-.wiz-lang-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 16px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: left;
-  transition: all .2s cubic-bezier(.16,1,.3,1);
-}
-.wiz-lang-idle {
-  border-color: rgba(0,0,0,.1);
-  background: rgba(0,0,0,.02);
-  color: rgba(0,0,0,.6);
-}
-.wiz-lang-idle:hover {
-  border-color: rgba(0,0,0,.3);
-  color: #222;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
-}
-.wiz-lang-sel {
-  border-color: #222;
-  background: #222;
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,.2);
-}
-
-/* Footer row */
-.wiz-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 28px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(0,0,0,.06);
-}
-
-.wiz-btn-back {
-  background: none;
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  color: rgba(0,0,0,.35);
-  cursor: pointer;
-  padding: 0;
-  transition: color .2s;
-}
-.wiz-btn-back:hover { color: #222; }
-
-/* Next / finish pill button — matches landing page .primary-cta */
-.wiz-btn-next {
-  display: inline-flex;
-  align-items: center;
-  background: #222;
-  color: #fff;
-  border: none;
-  padding: 10px 10px 10px 22px;
-  border-radius: 9999px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all .3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 4px 16px rgba(0,0,0,.18);
-}
-.wiz-btn-next:hover:not(:disabled) {
-  background: #000;
-  transform: scale(1.04);
-  box-shadow: 0 8px 28px rgba(0,0,0,.28);
-}
-.wiz-btn-next:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-.wiz-icon-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: #fff;
-  color: #222;
-  border-radius: 50%;
-  margin-left: 12px;
-  transition: transform .3s ease;
-  flex-shrink: 0;
-}
-.wiz-btn-next:hover:not(:disabled) .wiz-icon-circle {
-  transform: rotate(45deg);
-}
-.wiz-btn-finish {
-  padding: 12px 12px 12px 26px;
-  font-size: 15px;
-}
-</style>

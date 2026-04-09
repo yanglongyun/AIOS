@@ -1,7 +1,7 @@
 import { json } from "../../shared/http/json.js";
 import { handleChatApi } from "./chat.js";
 import { handleSettingsApi } from "./settings.js";
-import { handleFilesApi } from "../../apps/files/api/index.js";
+import { handleFilesApi } from "./files.js";
 import { handleTaskApi } from "./task.js";
 import { handleAuthApi } from "./auth/index.js";
 import { handleSystemApi } from "./system.js";

@@ -1,69 +1,70 @@
-const appRegistry = [
-  // 核心
+const apps = [
   {
-    id: "chat",
-    name: "__T_APP_SIDEBAR_CHAT__",
-    icon: "\u{1F4AC}",
-    iconClass: "icon-chat",
-    load: () => import("./apps/chat/index.vue"),
-    protocol: () => import("./apps/chat/protocol.js"),
-    mobileLoad: () => import("./apps/chat/chatMobile.vue"),
-    defaultSize: { w: 900, h: 640 }
+    id: 'chat',
+    name: '__T_APP_SIDEBAR_CHAT__',
+    icon: '\u{1F4AC}',
+    desktopLoad: () => import('./apps/chat/index.vue'),
+    mobileLoad: () => import('./apps/chat/chatMobile.vue'),
+    intent: () => import('./apps/chat/intent.js'),
+    defaultDesktopWindowSize: { w: 900, h: 640 }
   },
   {
-    id: "tasks",
-    name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "✅",
-    iconClass: "icon-tasks",
-    load: () => import("./apps/tasks/index.vue"),
-    defaultSize: { w: 700, h: 500 }
+    id: 'tasks',
+    name: '__T_APP_SIDEBAR_TASKS__',
+    icon: '✅',
+    desktopLoad: () => import('./apps/tasks/index.vue'),
+    intent: () => import('./apps/tasks/intent.js'),
+    defaultDesktopWindowSize: { w: 700, h: 500 }
   },
   {
-    id: "files",
-    name: "__T_APP_SIDEBAR_FILES__",
-    icon: "\u{1F4C1}",
-    iconClass: "icon-files",
-    load: () => import("./apps/files/index.vue"),
-    defaultSize: { w: 750, h: 520 }
-  },
-  // 应用
-  {
-    id: "notebook",
-    name: "__T_APP_SIDEBAR_NOTEBOOK__",
-    icon: "\u{1F4D3}",
-    iconClass: "icon-notebook",
-    load: () => import("./apps/notebook/index.vue"),
-    defaultSize: { w: 850, h: 600 }
-  },
-  // 工具
-  {
-    id: "settings",
-    name: "__T_APP_SIDEBAR_SETTINGS__",
-    icon: "⚙️",
-    iconClass: "icon-settings",
-    load: () => import("./apps/settings/index.vue"),
-    defaultSize: { w: 750, h: 520 }
-  },
-  // 隐藏（不在桌面显示，程序内导航打开）
-  {
-    id: "task-detail",
-    name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "✅",
-    iconClass: "icon-tasks",
-    load: () => import("./apps/tasks/detail.vue"),
-    hidden: true,
-    defaultSize: { w: 800, h: 560 }
+    id: 'notebook',
+    name: '__T_APP_SIDEBAR_NOTEBOOK__',
+    icon: '\u{1F4D3}',
+    desktopLoad: () => import('./apps/notebook/index.vue'),
+    defaultDesktopWindowSize: { w: 850, h: 600 }
   },
   {
-    id: "task-create",
-    name: "__T_APP_SIDEBAR_TASKS__",
-    icon: "✅",
-    iconClass: "icon-tasks",
-    load: () => import("./apps/tasks/create.vue"),
-    hidden: true,
-    defaultSize: { w: 700, h: 500 }
+    id: 'finance',
+    name: '记账本',
+    icon: '\u{1F4D2}',
+    desktopLoad: () => import('./apps/finance/index.vue'),
+    defaultDesktopWindowSize: { w: 980, h: 720 }
+  },
+  {
+    id: 'cryptobot',
+    name: '炒币机',
+    icon: '\u{1F916}',
+    desktopLoad: () => import('./apps/cryptobot/index.vue'),
+    defaultDesktopWindowSize: { w: 980, h: 720 }
+  },
+  {
+    id: 'ghtrending',
+    name: '开源新知',
+    icon: '\u{1F4A1}',
+    desktopLoad: () => import('./apps/ghtrending/index.vue'),
+    defaultDesktopWindowSize: { w: 960, h: 720 }
+  },
+  {
+    id: 'createapp',
+    name: '应用工坊',
+    icon: '\u{1FA84}',
+    desktopLoad: () => import('./apps/createapp/index.vue'),
+    intent: () => import('./apps/createapp/intent.js'),
+    defaultDesktopWindowSize: { w: 720, h: 640 }
+  },
+  {
+    id: 'settings',
+    name: '__T_APP_SIDEBAR_SETTINGS__',
+    icon: '⚙️',
+    desktopLoad: () => import('./apps/settings/index.vue'),
+    intent: () => import('./apps/settings/intent.js'),
+    defaultDesktopWindowSize: { w: 750, h: 520 }
   }
 ];
+
+const getApp = (appId) => apps.find((item) => item.id === appId) || null;
+
 export {
-  appRegistry
+  apps,
+  getApp
 };

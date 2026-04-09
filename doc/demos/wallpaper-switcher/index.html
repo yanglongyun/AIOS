@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Wallpaper Switcher | AIOS Demo</title>
+    <meta name="description" content="A beautiful wallpaper switcher featuring high-end CSS gradients for AIOS.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --transition-speed: 0.6s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            transition: background var(--transition-speed) ease-in-out;
+        }
+
+        /* Content */
+        .content {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .content h1 {
+            font-size: 3.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .content p {
+            font-size: 1rem;
+            opacity: 0.6;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Switcher Bar */
+        .switcher-wrapper {
+            position: fixed;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .switcher-container {
+            max-width: 900px;
+            padding: 10px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .switcher-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .thumb {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .thumb:hover {
+            transform: scale(1.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .thumb.active {
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* 1-10: Soft Muted Gradients */
+        .wp-0 { background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); } /* Soft White */
+        .wp-1 { background: linear-gradient(135deg, #e6e9f0 0%, #eef1f5 100%); } /* Muted Blue */
+        .wp-2 { background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); } /* Soft Sand */
+        .wp-3 { background: linear-gradient(180deg, #d9e4f5 0%, #f5e3e6 100%); } /* Pastel Sky */
+        .wp-4 { background: linear-gradient(120deg, #f6d365 0%, #fda085 100%); opacity: 0.6; } /* Soft Peach */
+        .wp-5 { background: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); } /* Cool Grey */
+        .wp-6 { background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%); opacity: 0.7; } /* Warm Sunset */
+        .wp-7 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); opacity: 0.4; } /* Muted Purple */
+        .wp-8 { background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%); } /* Morning Mist */
+        .wp-9 { background: linear-gradient(to top, #c1dfc4 0%, #deecdd 100%); } /* Sage Green */
+
+        /* 11-20: Soft Textures & Patterns */
+        .wp-10 { /* Pink Grid */
+            background-color: #fff0f5;
+            background-image: linear-gradient(rgba(255, 182, 193, 0.2) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 182, 193, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .wp-11 { /* Rock / Grain */
+            background-color: #f0f0f0;
+            background-image: radial-gradient(#d1d1d1 1px, transparent 0);
+            background-size: 4px 4px;
+        }
+        .wp-12 { /* Fresh Dots */
+            background-color: #e0f7fa;
+            background-image: radial-gradient(#b2ebf2 2px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .wp-13 { /* Boho Stripes */
+            background: repeating-linear-gradient(45deg, #fdf5e6, #fdf5e6 10px, #faf0e6 10px, #faf0e6 20px);
+        }
+        .wp-14 { /* Linen */
+            background-color: #faf9f6;
+            background-image: 
+                linear-gradient(90deg, rgba(200,200,200,.05) 50%, transparent 50%),
+                linear-gradient(rgba(200,200,200,.05) 50%, transparent 50%);
+            background-size: 4px 4px;
+        }
+        .wp-15 { /* Small Checks */
+            background-color: #ffffff;
+            background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
+                              linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        .wp-16 { /* Bohemian Wave */
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 0, rgba(255,255,255,0) 5px, #f5f5dc 5px, #f5f5dc 6px, rgba(255,255,255,0) 6px);
+            background-color: #fffaf0;
+            background-size: 20px 20px;
+        }
+        .wp-17 { /* Minimalist Blue Line */
+            background-color: #f7f9fc;
+            background-image: linear-gradient(to right, #e1e8ed 1px, transparent 1px);
+            background-size: 40px 100%;
+        }
+        .wp-18 { /* Soft Carbon */
+            background: linear-gradient(27deg, #fbfbfb 5px, transparent 5px) 0 5px,
+                        linear-gradient(207deg, #fbfbfb 5px, transparent 5px) 10px 0px,
+                        linear-gradient(27deg, #f5f5f5 5px, transparent 5px) 0px 10px,
+                        linear-gradient(207deg, #f5f5f5 5px, transparent 5px) 10px 5px,
+                        linear-gradient(90deg, #fcfcfc 10px, transparent 10px),
+                        linear-gradient(#fdfdfd 25%, #f9f9f9 25%, #f9f9f9 50%, transparent 50%, transparent 75%, #f7f7f7 75%, #f7f7f7);
+            background-color: #ffffff;
+            background-size: 20px 20px;
+        }
+        .wp-19 { /* Vintage Paper */
+            background-color: #fdf6e3;
+            background-image: url("https://www.transparenttextures.com/patterns/notebook.png"); /* Using a known light pattern URL as a fallback or just CSS */
+        }
+
+        @keyframes wpFade {
+            from { opacity: 0.9; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .content h1 { font-size: 2rem; }
+            .switcher-container { border-radius: 15px; }
+        }
+    </style>
+</head>
+<body class="wp-0">
+    <div class="content">
+        <h1 id="wp-name">Soft White</h1>
+        <p>Soft & Textured Collection</p>
+    </div>
+
+    <div class="switcher-wrapper">
+        <div class="switcher-container" id="switcher">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <script>
+        const themes = [
+            { name: "Cloud White", class: "wp-0" },
+            { name: "Soft Steel", class: "wp-1" },
+            { name: "Beach Sand", class: "wp-2" },
+            { name: "Sky Pastel", class: "wp-3" },
+            { name: "Peach Fuzz", class: "wp-4" },
+            { name: "Cool Grey", class: "wp-5" },
+            { name: "Muted Sun", class: "wp-6" },
+            { name: "Mist Purple", class: "wp-7" },
+            { name: "Morning", class: "wp-8" },
+            { name: "Sage", class: "wp-9" },
+            { name: "Pink Grid", class: "wp-10" },
+            { name: "Stone Grain", class: "wp-11" },
+            { name: "Fresh Dots", class: "wp-12" },
+            { name: "Boho Stripes", class: "wp-13" },
+            { name: "Fine Linen", class: "wp-14" },
+            { name: "Soft Checks", class: "wp-15" },
+            { name: "Boho Circle", class: "wp-16" },
+            { name: "Clean Lines", class: "wp-17" },
+            { name: "Soft Geo", class: "wp-18" },
+            { name: "Vintage Paper", class: "wp-19" }
+        ];
+
+        const switcher = document.getElementById('switcher');
+        const wpName = document.getElementById('wp-name');
+
+        function init() {
+            themes.forEach((theme, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = `thumb ${theme.class} ${index === 0 ? 'active' : ''}`;
+                thumb.title = theme.name;
+                thumb.onclick = () => setWP(index);
+                switcher.appendChild(thumb);
+            });
+            setWP(0);
+        }
+
+        function setWP(index) {
+            const theme = themes[index];
+            document.body.className = theme.class;
+            wpName.innerText = theme.name;
+
+            // Update active state
+            const thumbs = document.querySelectorAll('.thumb');
+            thumbs.forEach((t, i) => {
+                if (i === index) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+
+            // Smooth background transition effect
+            document.body.style.animation = 'none';
+            document.body.offsetHeight;
+            document.body.style.animation = 'wpFade 0.6s ease';
+        }
+
+        init();
+    </script>
+</body>
+</html>

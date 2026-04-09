@@ -2,28 +2,29 @@
   <Teleport to="body">
     <div v-if="visible" class="fixed inset-0 z-[500]" @click="close" @contextmenu.prevent="close">
       <div
-        class="ctx-menu absolute min-w-[180px] rounded-xl p-1.5"
+        class="absolute min-w-[180px] rounded-xl border p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.06)] backdrop-blur-2xl"
+        :class="menuClass"
         :style="{ left: x + 'px', top: y + 'px' }"
         @click.stop
       >
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('chat')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('chat')">
           <span class="text-sm">💬</span>新建对话
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('task-create')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('task-create')">
           <span class="text-sm">✅</span>新建任务
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('create-app')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('createapp')">
           <span class="text-sm">➕</span>新建应用
         </div>
-        <div class="mx-2 my-1 h-px bg-black/[0.06]" />
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="refresh">
+        <div class="mx-2 my-1 h-px" :class="dividerClass" />
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="refresh">
           <span class="text-sm">🔄</span>刷新
         </div>
-        <div class="mx-2 my-1 h-px bg-black/[0.06]" />
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="$emit('wallpaper'); close()">
+        <div class="mx-2 my-1 h-px" :class="dividerClass" />
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="$emit('wallpaper'); close()">
           <span class="text-sm">🖼️</span>更换壁纸
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('settings')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('settings')">
           <span class="text-sm">⚙️</span>系统设置
         </div>
       </div>
@@ -32,14 +33,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { windowManager } from '../../stores/windowManager.js';
+import { computed, ref } from 'vue';
+import { openIntent } from '../../system/intent.js';
+import { desktopTheme } from '../../stores/appearance.js';
 
 defineEmits(['wallpaper']);
 
 const visible = ref(false);
 const x = ref(0);
 const y = ref(0);
+const isDarkTheme = computed(() => desktopTheme.value === 'dark');
+const menuClass = computed(() => isDarkTheme.value
+  ? 'border-white/[0.08] bg-[#141a2b]/[0.84]'
+  : 'border-white/[0.5] bg-white/[0.78]');
+const itemClass = computed(() => isDarkTheme.value
+  ? 'text-white hover:bg-white/[0.08]'
+  : 'text-[#222] hover:bg-black/[0.05]');
+const dividerClass = computed(() => isDarkTheme.value ? 'bg-white/[0.08]' : 'bg-black/[0.06]');
 
 function show(e) {
   x.value = Math.min(e.clientX, window.innerWidth - 200);
@@ -51,9 +61,24 @@ function close() {
   visible.value = false;
 }
 
-function action(appId) {
+async function action(appId) {
   close();
-  windowManager.open(appId);
+  if (appId === 'chat') {
+    await openIntent({ app: 'chat', action: 'open_new' });
+    return;
+  }
+  if (appId === 'task-create') {
+    await openIntent({ app: 'tasks', action: 'open_create' });
+    return;
+  }
+  if (appId === 'createapp') {
+    await openIntent({ app: 'createapp', action: 'open' });
+    return;
+  }
+  if (appId === 'settings') {
+    await openIntent({ app: 'settings', action: 'open' });
+    return;
+  }
 }
 
 function refresh() {
@@ -63,14 +88,3 @@ function refresh() {
 
 defineExpose({ show });
 </script>
-
-<style scoped>
-/* 毛玻璃 + 多层 shadow — 必须原生 */
-.ctx-menu {
-  background: rgba(255,255,255,0.78);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border: 1px solid rgba(255,255,255,0.5);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
-}
-</style>

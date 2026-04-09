@@ -76,7 +76,7 @@ const requestAuth = async (url) => {
       throw new Error(data?.message || '__T_LOGIN_OPERATION_FAILED__');
     }
     clearAuthCache();
-    await router.replace('/chat');
+    await router.replace('/');
   } catch (e) {
     error.value = e?.message || '__T_LOGIN_REQUEST_FAILED__';
   } finally {

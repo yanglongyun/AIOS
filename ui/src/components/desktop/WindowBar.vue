@@ -1,15 +1,20 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-[1000] flex h-[44px] items-center gap-0 border-t border-black/[0.07] bg-white/[0.88] px-2 shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-2xl">
+  <div
+    class="fixed bottom-0 left-0 right-0 z-[1000] flex h-[44px] items-center gap-0 border-t px-2 backdrop-blur-2xl"
+    :class="barClass"
+  >
     <button
       ref="launcherButtonEl"
-      class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border text-[20px] text-[#222] transition-all"
+      class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border transition-all"
       :class="launcherOpen
-        ? 'border-black/[0.14] bg-black/[0.07]'
-        : 'border-transparent hover:border-black/[0.09] hover:bg-black/[0.05]'"
+        ? launcherActiveClass
+        : launcherIdleClass"
       @click.stop="$emit('toggle-launcher')"
-    >⊞</button>
+    >
+      <LayoutGrid class="h-[16px] w-[16px]" :stroke-width="1.8" />
+    </button>
 
-    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
+    <div class="mx-1.5 h-[22px] w-px flex-shrink-0" :class="dividerClass"></div>
 
     <div class="flex flex-1 items-center gap-1 overflow-hidden px-0.5">
       <button
@@ -17,57 +22,63 @@
         :key="win.id"
         class="flex h-[32px] min-w-[72px] max-w-[150px] flex-shrink-0 items-center gap-1.5 rounded-[7px] border px-[9px] text-left transition-all"
         :class="win.state === 'minimized'
-          ? 'border-transparent opacity-40 hover:border-black/[0.07] hover:bg-black/[0.04] hover:opacity-70'
+          ? minimizedClass
           : isActive(win)
-            ? 'border-black/[0.12] bg-black/[0.06]'
-            : 'border-transparent hover:border-black/[0.07] hover:bg-black/[0.04]'"
+            ? activeTabClass
+            : idleTabClass"
         @click="clickTab(win)"
       >
         <span class="text-[14px] leading-none">{{ appIcon(win.appId) }}</span>
-        <span class="flex-1 truncate text-[12px] font-medium text-[#222]">{{ win.title }}</span>
-        <span
-          class="h-[5px] w-[5px] flex-shrink-0 rounded-full"
-          :class="win.state === 'minimized' ? 'border border-black/[0.3]' : 'bg-[#222]'"
-        ></span>
+        <span class="flex-1 truncate text-[12px] font-medium" :class="titleClass">{{ win.title }}</span>
       </button>
     </div>
 
-    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
-
-    <button
-      class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-[8px] border transition-all"
-      :class="taskCenterOpen
-        ? 'border-black/[0.14] bg-black/[0.07]'
-        : 'border-transparent hover:border-black/[0.09] hover:bg-black/[0.05]'"
-      @click.stop="$emit('toggle-task-center')"
-    >
-      <ListTodo class="h-[15px] w-[15px] text-[#222]" />
-    </button>
-
-    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
+    <div class="mx-1.5 h-[22px] w-px flex-shrink-0" :class="dividerClass"></div>
 
     <div class="flex-shrink-0 cursor-default px-1.5 text-right">
-      <div class="text-[13px] font-semibold leading-[1.25] text-[#222]">{{ clockTime }}</div>
-      <div class="text-[10px] leading-[1.25] text-black/[0.38]">{{ clockDate }}</div>
+      <div class="text-[13px] font-semibold leading-[1.25]" :class="titleClass">{{ clockTime }}</div>
+      <div class="text-[10px] leading-[1.25]" :class="subtleTextClass">{{ clockDate }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { ListTodo } from 'lucide-vue-next';
-import { windowManager } from '../../stores/windowManager.js';
-import { appRegistry } from '../../apps.js';
+import { LayoutGrid } from 'lucide-vue-next';
+import { windowManager } from '../../system/windows.js';
+import { getApp } from '../../apps.js';
+import { desktopTheme } from '../../stores/appearance.js';
 
 defineProps({
-  launcherOpen: { type: Boolean, default: false },
-  taskCenterOpen: { type: Boolean, default: false }
+  launcherOpen: { type: Boolean, default: false }
 });
 
-defineEmits(['toggle-launcher', 'toggle-task-center']);
+defineEmits(['toggle-launcher']);
 
 const windows = computed(() => windowManager.state.windows);
 const launcherButtonEl = ref(null);
+const isDarkTheme = computed(() => desktopTheme.value === 'dark');
+const barClass = computed(() => isDarkTheme.value
+  ? 'border-white/[0.08] bg-[#0f1322]/[0.82] shadow-[0_-1px_0_rgba(255,255,255,0.03)]'
+  : 'border-black/[0.07] bg-white/[0.88] shadow-[0_-1px_0_rgba(0,0,0,0.04)]');
+const launcherIdleClass = computed(() => isDarkTheme.value
+  ? 'border-transparent text-white hover:border-white/[0.1] hover:bg-white/[0.08]'
+  : 'border-transparent text-[#222] hover:border-black/[0.09] hover:bg-black/[0.05]');
+const launcherActiveClass = computed(() => isDarkTheme.value
+  ? 'border-white/[0.14] bg-white/[0.1] text-white'
+  : 'border-black/[0.14] bg-black/[0.07] text-[#222]');
+const dividerClass = computed(() => isDarkTheme.value ? 'bg-white/[0.08]' : 'bg-black/[0.07]');
+const minimizedClass = computed(() => isDarkTheme.value
+  ? 'border-transparent opacity-45 hover:border-white/[0.08] hover:bg-white/[0.06] hover:opacity-75'
+  : 'border-transparent opacity-40 hover:border-black/[0.07] hover:bg-black/[0.04] hover:opacity-70');
+const activeTabClass = computed(() => isDarkTheme.value
+  ? 'border-white/[0.12] bg-white/[0.1]'
+  : 'border-black/[0.12] bg-black/[0.06]');
+const idleTabClass = computed(() => isDarkTheme.value
+  ? 'border-transparent hover:border-white/[0.08] hover:bg-white/[0.06]'
+  : 'border-transparent hover:border-black/[0.07] hover:bg-black/[0.04]');
+const titleClass = computed(() => isDarkTheme.value ? 'text-white' : 'text-[#222]');
+const subtleTextClass = computed(() => isDarkTheme.value ? 'text-white/45' : 'text-black/[0.38]');
 
 const clockTime = ref('');
 const clockDate = ref('');
@@ -91,7 +102,7 @@ onUnmounted(() => {
 });
 
 function appIcon(appId) {
-  return appRegistry.find(a => a.id === appId)?.icon || '🪟';
+  return getApp(appId)?.icon || '🪟';
 }
 
 function isActive(win) {

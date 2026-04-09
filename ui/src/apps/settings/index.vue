@@ -1,23 +1,29 @@
 <template>
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-    <div class="px-4 pt-4 shrink-0">
-      <div class="max-w-lg mx-auto flex items-center gap-1.5">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          @click="activeTab = tab.key"
-          class="px-3.5 py-1.5 text-xs shrink-0 cursor-pointer transition-all rounded-full font-medium"
-          :class="activeTab === tab.key
-            ? 'bg-[#222] text-white'
-            : 'text-black/40 hover:text-black/60 hover:bg-black/[0.04]'"
-        >
-          {{ tab.label }}
-        </button>
-      </div>
+  <div class="flex h-full min-w-0 overflow-hidden" style="background:#f5f3ef">
+    <!-- 左侧导航 -->
+    <div class="flex w-[160px] shrink-0 flex-col border-r py-4" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
+      <div class="mb-3 px-4 text-[11px] font-semibold uppercase tracking-widest" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TAB_ACCOUNT__</div>
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        class="mx-2 mb-0.5 flex items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[13px] font-medium transition-all"
+        :class="activeTab === tab.key
+          ? 'shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+          : 'hover:bg-black/[0.05]'"
+        :style="activeTab === tab.key
+          ? 'background:#fff;color:#3d2f1e'
+          : 'color:rgba(0,0,0,0.5)'"
+        @click="activeTab = tab.key"
+      >
+        <span class="text-[14px]">{{ tab.icon }}</span>
+        {{ tab.label }}
+      </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-4 py-5">
-      <div class="max-w-lg mx-auto">
+    <!-- 右侧内容 -->
+    <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:thin]">
+      <div class="mx-auto max-w-[520px]">
+        <h2 class="mb-4 text-[16px] font-bold" style="color:#2a1f13">{{ currentTabLabel }}</h2>
         <AccountTab
           v-if="activeTab === 'account'"
           :username="accountUsername"
@@ -67,23 +73,15 @@
           :items="skillItems"
           :loading="skillsLoading"
           :error="skillsError"
-          @refresh="fetchSkills"
         />
         <AboutTab v-else />
       </div>
-
-      <!--
-      <p class="mx-auto mt-6 max-w-lg px-1 pb-4 text-center text-[12px] italic leading-6 text-[#9b896e]">
-        <span class="block">“The people who are crazy enough to think they can change the world are the ones who do.”</span>
-        <span class="mt-1 block">Think Different</span>
-      </p>
-      -->
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
@@ -95,15 +93,17 @@ import { createProviderCatalog } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
 const router = useRouter();
 const tabs = [
-  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
-  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__' },
-  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__' },
-  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__' },
-  { key: 'skills', label: '__T_SETTINGS_TAB_SKILLS__' },
-  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__' }
+  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__', icon: '👤' },
+  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
+  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__', icon: '🔧' },
+  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__', icon: '💬' },
+  { key: 'skills', label: '__T_SETTINGS_TAB_SKILLS__', icon: '⚡' },
+  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
 ];
 
 const activeTab = ref('account');
+const currentTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '');
+
 const provider = ref('openai');
 const editRounds = ref(100);
 const enableToolResultTruncate = ref(true);

@@ -133,7 +133,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, History, Plus, Square } from 'lucide-vue-next';
-import { connect, ensureConnected, on, send, wsStatus } from '../../ws.js';
+import { connect, ensureConnected, on, send, wsStatus } from '../../system/ws.js';
 
 const props = defineProps({
   conversationId: { type: String, default: null },

@@ -1,21 +1,21 @@
 <template>
-  <section class="space-y-3">
-    <div class="text-xs font-medium text-black/40">__T_SETTINGS_CONTEXT_ROUNDS__</div>
-    <div class="flex gap-2">
-      <button
-        v-for="n in [30, 100, 500]"
-        :key="n"
-        @click="$emit('update:context-rounds', n)"
-        class="flex-1 px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-all border"
-        :class="contextRounds === n
-          ? 'bg-[#222] border-[#222] text-white font-semibold'
-          : 'border-black/10 text-black/40 hover:border-black/20 hover:text-black/60'"
-      >
-        {{ n }}
-      </button>
+  <section class="space-y-4">
+    <div class="rounded-[13px] border px-4 py-4" style="background:#fff;border-color:rgba(0,0,0,0.08)">
+      <div class="mb-3 text-[12px] font-semibold uppercase tracking-wide" style="color:rgba(0,0,0,0.35)">__T_SETTINGS_CONTEXT_ROUNDS__</div>
+      <div class="flex gap-2">
+        <button
+          v-for="n in [30, 100, 500]"
+          :key="n"
+          @click="$emit('update:context-rounds', n)"
+          class="flex-1 rounded-[9px] border py-2.5 text-[14px] font-semibold transition-all"
+          :style="contextRounds === n
+            ? 'background:#5c4332;border-color:#5c4332;color:#fff'
+            : 'background:#faf8f5;border-color:rgba(0,0,0,0.1);color:rgba(0,0,0,0.4)'"
+        >{{ n }}</button>
+      </div>
     </div>
-    <div class="pt-2 flex justify-start">
-      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-[#222] text-white cursor-pointer hover:bg-black transition-colors">__T_COMMON_SAVE__</button>
+    <div class="flex justify-end">
+      <button @click="$emit('save')" class="s-btn-primary">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>
@@ -24,6 +24,20 @@
 defineProps({
   contextRounds: { type: Number, default: 100 }
 });
-
 defineEmits(['update:context-rounds', 'save']);
 </script>
+
+<style scoped>
+.s-btn-primary {
+  padding: 8px 20px;
+  border-radius: 9px;
+  background: #5c4332;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+.s-btn-primary:hover { background: #3d2a1e; }
+</style>

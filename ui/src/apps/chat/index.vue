@@ -1,9 +1,15 @@
 <template>
-  <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-white">
+  <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden" style="background:#f5f3ef">
     <!-- 左侧对话列表 -->
-    <div class="flex w-56 shrink-0 flex-col border-r border-black/[0.07] bg-[#f7f7f7]">
-      <div class="border-b border-black/[0.07] px-3 py-2.5">
-        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[13px] font-semibold text-[#222] transition-colors hover:bg-black/[0.04]" @click="newChat">
+    <div class="flex w-56 shrink-0 flex-col border-r" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
+      <div class="border-b px-3 py-2.5" style="border-color:rgba(0,0,0,0.07)">
+        <button
+          class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-[9px] border px-3 py-2 text-[13px] font-semibold transition-all"
+          style="border-color:rgba(92,67,50,0.25);background:#fff;color:#3d2f1e"
+          @mouseover="$event.currentTarget.style.background='#f5f0ea'"
+          @mouseleave="$event.currentTarget.style.background='#fff'"
+          @click="newChat"
+        >
           <Plus class="h-3.5 w-3.5" />
           __T_CHAT_NEW_TITLE__
         </button>
@@ -14,21 +20,21 @@
     </div>
 
     <!-- 右侧聊天区 -->
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#fafafa]">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col" style="background:#f5f3ef">
     <div class="flex min-h-0 flex-1 flex-col">
-      <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar]:w-1.5" @scroll="onScroll">
+      <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" style="scrollbar-color:rgba(160,120,80,0.2) transparent" @scroll="onScroll">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
 
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
-            <div class="mb-4 text-[40px] grayscale-[0.2]">💬</div>
-            <h2 class="mb-2 text-xl font-bold text-[#222]">__T_CHAT_EMPTY_TITLE__</h2>
-            <p class="max-w-[320px] text-[13px] leading-relaxed text-black/35">__T_CHAT_EMPTY_DESC__</p>
+            <div class="mb-4 text-[40px]">💬</div>
+            <h2 class="mb-2 text-xl font-bold" style="color:#2a1f13">__T_CHAT_EMPTY_TITLE__</h2>
+            <p class="max-w-[320px] text-[13px] leading-relaxed" style="color:rgba(0,0,0,0.38)">__T_CHAT_EMPTY_DESC__</p>
           </div>
 
           <!-- 消息列表 -->
           <template v-else>
-            <div v-if="hasMore" class="py-2 text-center text-xs text-black/35">
+            <div v-if="hasMore" class="py-2 text-center text-xs" style="color:rgba(0,0,0,0.35)">
               <span>__T_CHAT_LOAD_MORE__</span>
             </div>
 
@@ -36,15 +42,15 @@
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-black/[0.07] px-4 py-3 text-sm leading-relaxed text-[#222] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] px-4 py-3 text-sm leading-relaxed" style="background:#e8e0d4;color:#2a1f13;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
                     <template v-for="(f, idx) in m.attachments" :key="idx">
-                      <div v-if="f.type === 'file'" class="mb-1 rounded-lg border border-black/[0.08] bg-black/[0.05] px-2 py-1">
-                        <div class="text-[11px] font-semibold text-[#222]">{{ f.name }}</div>
-                        <div class="break-all text-[10px] text-black/40">{{ f.path }}</div>
+                      <div v-if="f.type === 'file'" class="mb-1 rounded-lg px-2 py-1" style="border:1px solid rgba(160,120,80,0.2);background:rgba(255,255,255,0.4)">
+                        <div class="text-[11px] font-semibold" style="color:#2a1f13">{{ f.name }}</div>
+                        <div class="break-all text-[10px]" style="color:rgba(0,0,0,0.4)">{{ f.path }}</div>
                       </div>
-                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-black/[0.08] bg-black/[0.04] px-2.5 py-0.5 text-[10px] text-black/40">{{ f.label }}</div>
+                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full px-2.5 py-0.5 text-[10px]" style="border:1px solid rgba(160,120,80,0.2);background:rgba(255,255,255,0.3);color:rgba(0,0,0,0.45)">{{ f.label }}</div>
                     </template>
                   </div>
                 </div>
@@ -53,23 +59,24 @@
               <!-- 助手消息 -->
               <div v-else-if="m.role === 'assistant'" class="flex items-start">
                 <div class="min-w-0 flex-1">
-                  <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-black/[0.06] bg-white px-4 py-3 text-[#333] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#222] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-black/[0.08] prose-pre:bg-[#f5f5f5] prose-code:rounded prose-code:bg-black/[0.06] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-black/15 prose-blockquote:text-black/50" v-html="renderMd(m.content)" />
+                  <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] px-4 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)] prose-headings:text-[#2a1f13] prose-pre:overflow-x-auto prose-pre:border prose-pre:bg-[#f0ece5] prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-blockquote:text-[rgba(0,0,0,0.5)]"
+                    style="background:#fff;border:1px solid rgba(160,120,80,0.15);color:#3d2f1e;--tw-prose-pre-border-color:rgba(160,120,80,0.2);--tw-prose-code-bg:rgba(160,120,80,0.1)"
+                    v-html="renderMd(m.content)" />
                 </div>
               </div>
 
               <!-- 工具调用 -->
               <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-2.5">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">⚙️</div>
-                <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
-                  <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-black/[0.02] px-3 py-2 text-left transition-colors hover:bg-black/[0.04]">
-                    <ChevronRight class="h-3 w-3 shrink-0 text-black/35 transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#333]">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[11px] text-black/35">__T_CHAT_DONE__</span>
+                <div class="min-w-0 flex-1 overflow-hidden rounded-xl" style="border:1px solid rgba(160,120,80,0.18);background:#fff">
+                  <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none px-3 py-2 text-left transition-colors" style="background:rgba(160,120,80,0.05)" @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.09)'" @mouseleave="$event.currentTarget.style.background='rgba(160,120,80,0.05)'">
+                    <ChevronRight class="h-3 w-3 shrink-0 transition-transform" :class="m.expanded ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CHAT_DONE__</span>
                   </button>
-                  <div v-if="m.expanded" class="border-t border-black/[0.06]">
-                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-black/[0.02] px-3 py-2.5 font-mono text-xs text-emerald-700"><span class="select-none text-black/35">$ </span>{{ m.command }}</div>
-                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-white px-3 py-2.5 font-mono text-xs text-emerald-700">{{ m.detail }}</div>
-                    <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-black/[0.06] bg-black/[0.02] px-3 py-2.5 font-mono text-[11px] text-black/50">{{ m.result }}</div>
+                  <div v-if="m.expanded" style="border-top:1px solid rgba(160,120,80,0.12)">
+                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:rgba(160,120,80,0.04);color:#5c7a50"><span class="select-none" style="color:rgba(0,0,0,0.3)">$ </span>{{ m.command }}</div>
+                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:#fff;color:#5c7a50">{{ m.detail }}</div>
+                    <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre px-3 py-2.5 font-mono text-[11px]" style="border-top:1px solid rgba(160,120,80,0.1);background:rgba(160,120,80,0.03);color:rgba(0,0,0,0.45)">{{ m.result }}</div>
                   </div>
                 </div>
               </div>
@@ -77,23 +84,23 @@
               <!-- tool 结果兜底 -->
               <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="flex items-start gap-2.5">
                 <div class="flex h-7 w-7 shrink-0 items-center justify-center">
-                  <span class="h-1.5 w-1.5 rounded-full bg-black/15"></span>
+                  <span class="h-1.5 w-1.5 rounded-full" style="background:rgba(160,120,80,0.3)"></span>
                 </div>
-                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-black/35">{{ m.result || m.content }}</div>
+                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed" style="color:rgba(0,0,0,0.35)">{{ m.result || m.content }}</div>
               </div>
 
             </div>
 
             <!-- 思考中 -->
             <div v-if="busy" class="flex items-start">
-              <div class="py-2 text-sm text-black/35">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
+              <div class="py-2 text-sm" style="color:rgba(160,120,80,0.6)">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
       </div>
 
       <!-- 底部输入 -->
-      <div class="shrink-0 bg-[linear-gradient(to_top,#fafafa_60%,transparent)] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-0">
+      <div class="shrink-0 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-0" style="background:linear-gradient(to top,#f5f3ef 60%,transparent)">
         <div class="mx-auto max-w-[720px]">
           <form
             @submit.prevent="handleSend"
@@ -101,22 +108,24 @@
             @dragover.prevent="onDragOver"
             @dragleave="onDragLeave"
             @drop.prevent="onDropFiles"
-            class="relative flex flex-col rounded-2xl border border-black/[0.06] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
-            :class="dragActive ? 'ring-2 ring-black/30 ring-offset-2 ring-offset-[#fafafa]' : ''"
+            class="relative flex flex-col rounded-2xl"
+            :class="dragActive ? 'ring-2 ring-offset-2' : ''"
+            :style="dragActive ? 'border:1px solid rgba(160,120,80,0.4);background:#fff;box-shadow:0 2px 12px rgba(160,120,80,0.12);ring-color:rgba(160,120,80,0.4)' : 'border:1px solid rgba(160,120,80,0.18);background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.05)'"
           >
             <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
 
             <div
               v-if="dragActive"
-              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-black/20 bg-black/[0.03] px-6 text-center text-sm font-semibold text-[#333]"
+              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed px-6 text-center text-sm font-semibold"
+              style="border-color:rgba(160,120,80,0.4);background:rgba(160,120,80,0.04);color:#5c4332"
             >
               {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_DROP_FILES__' }}
             </div>
 
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
-              <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-black/[0.03] px-2.5 py-0.5 text-[11px] text-[#333]">
+              <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px]" style="border:1px solid rgba(160,120,80,0.2);background:rgba(160,120,80,0.06);color:#3d2f1e">
                 <span class="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">{{ f.name }}</span>
-                <button type="button" @click="removePendingFile(idx)" class="border-none bg-none text-xs text-black/35 hover:text-[#333]">x</button>
+                <button type="button" @click="removePendingFile(idx)" class="border-none bg-none text-xs" style="color:rgba(0,0,0,0.35)">x</button>
               </div>
             </div>
             <p v-if="uploadError" class="px-3.5 pb-0 pt-2 text-xs text-red-500">{{ uploadError }}</p>
@@ -131,28 +140,31 @@
               :placeholder="busy ? '__T_CHAT_INPUT_PLACEHOLDER_BUSY__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
               rows="1"
               :disabled="busy"
-              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#222] outline-none placeholder:text-black/25 disabled:opacity-50"
+              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed outline-none disabled:opacity-50"
+              style="color:#2a1f13"
+              :style="{ '--placeholder-color': 'rgba(160,120,80,0.4)' }"
             />
 
             <div class="flex items-center px-3.5 pb-2.5">
-              <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-black/35 transition-all hover:bg-black/[0.04] hover:text-[#333] disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs transition-all disabled:cursor-not-allowed disabled:opacity-50" style="color:rgba(160,120,80,0.6)" @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'" @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.6)'">
                 <Paperclip class="h-3.5 w-3.5" />
                 {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_UPLOAD_FILE__' }}
               </button>
             </div>
 
             <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
-              <button v-if="busy" type="button" @click="stopBusy" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none bg-[#222] text-white transition-opacity hover:opacity-80">
+              <button v-if="busy" type="button" @click="stopBusy" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none text-white transition-opacity hover:opacity-80" style="background:#5c4332">
                 <Square class="h-3.5 w-3.5 fill-current" />
               </button>
-              <button v-else type="submit" :disabled="!input.trim()" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border text-[#b8a888] transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#222] text-white shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:opacity-85' : 'cursor-default border-black/[0.08] bg-black/[0.04] text-black/25'">
+              <button v-else type="submit" :disabled="!input.trim()" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border transition-all"
+                :style="input.trim() ? 'cursor:pointer;border-color:transparent;background:#5c4332;color:#fff;box-shadow:0 2px 8px rgba(92,67,50,0.3)' : 'cursor:default;border-color:rgba(160,120,80,0.2);background:rgba(160,120,80,0.06);color:rgba(160,120,80,0.35)'">
                 <ArrowUp class="h-4 w-4" />
               </button>
             </div>
           </form>
         </div>
-        <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-black/30">
-          <span class="h-1.5 w-1.5 rounded-full" :class="wsStatus === 'connected' ? 'bg-emerald-500' : wsStatus === 'connecting' ? 'animate-pulse bg-amber-400' : 'bg-red-400'""></span>
+        <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px]" style="color:rgba(0,0,0,0.3)">
+          <span class="h-1.5 w-1.5 rounded-full" :class="wsStatus === 'connected' ? 'bg-emerald-500' : wsStatus === 'connecting' ? 'animate-pulse bg-amber-400' : 'bg-red-400'"></span>
           <span>{{ wsStatus === 'connected' ? '__T_COMMON_CONNECTED__' : wsStatus === 'connecting' ? '__T_COMMON_CONNECTING__' : '__T_COMMON_DISCONNECTED__' }}</span>
         </div>
       </div>
@@ -167,11 +179,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, Paperclip, Plus, Square } from 'lucide-vue-next';
 import HistoryPanel from './History.vue';
-import { connect, send, on, wsStatus, ensureConnected } from '../../ws.js';
+import { connect, send, on, wsStatus, ensureConnected } from '../../system/ws.js';
 const viewProps = defineProps({
   id: { type: String, default: null },
   pendingMessage: { type: String, default: null },
-  protocolRequest: { type: Object, default: null }
+  intentRequest: { type: Object, default: null }
 });
 const route = useRoute();
 const router = useRouter();
@@ -199,7 +211,7 @@ const dragCounter = ref(0);
 const seenKeys = ref(new Set());
 const historyRef = ref(null);
 const unsubs = [];
-const lastProtocolRequestId = ref(null);
+const lastIntentRequestId = ref(null);
 
 const saveLastChatId = (id) => { if (id) localStorage.setItem(LAST_CHAT_KEY, String(id)); };
 
@@ -384,12 +396,12 @@ const stopBusy = () => { send({ type: 'abort', conversationId: currentConversati
 
 const newChat = () => {
   resetState();
-  router.replace('/chat').catch(() => {});
+  router.replace('/').catch(() => {});
 };
 
-const handleProtocolRequest = (req) => {
-  if (!req?.requestId || req.requestId === lastProtocolRequestId.value) return;
-  lastProtocolRequestId.value = req.requestId;
+const handleIntentRequest = (req) => {
+  if (!req?.requestId || req.requestId === lastIntentRequestId.value) return;
+  lastIntentRequestId.value = req.requestId;
   const intent = req.intent || 'open';
   const payload = req.payload || {};
 
@@ -491,13 +503,13 @@ watch([() => viewProps.id, () => route.fullPath], () => {
   loadChatPage(id, 0, 20).then(() => {
     scrollToBottom(false);
   }).catch((e) => {
-    if (e?.status === 404) { resetState(); router.replace('/chat'); return; }
+    if (e?.status === 404) { resetState(); router.replace('/'); return; }
     messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
   });
 }, { immediate: true });
 
-watch(() => viewProps.protocolRequest?.requestId, () => {
-  handleProtocolRequest(viewProps.protocolRequest);
+watch(() => viewProps.intentRequest?.requestId, () => {
+  handleIntentRequest(viewProps.intentRequest);
 }, { immediate: true });
 
 // 消息变化时自动滚动
@@ -575,3 +587,7 @@ onMounted(() => {
 
 onUnmounted(() => { unsubs.forEach(fn => fn()); });
 </script>
+
+<style scoped>
+textarea::placeholder { color: rgba(160,120,80,0.4); }
+</style>

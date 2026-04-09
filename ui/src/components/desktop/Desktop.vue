@@ -17,12 +17,12 @@
         v-for="app in visibleApps"
         :key="app.id"
         class="flex cursor-pointer select-none flex-col items-center gap-1.5 rounded-[10px] px-1 py-2 transition-all duration-150 active:scale-95"
-        :class="selectedId === app.id ? 'bg-black/[0.08] ring-1 ring-black/[0.18]' : 'hover:bg-white/50'"
+        :class="selectedId === app.id ? iconSelectedClass : iconIdleClass"
         @click.stop="selectIcon(app.id)"
         @dblclick.stop="openApp(app.id)"
       >
         <span class="text-[26px] transition-transform duration-200" :class="{ '-translate-y-0.5': selectedId !== app.id }">{{ app.icon }}</span>
-        <span class="max-w-[80px] truncate text-center text-[11px] font-semibold leading-tight text-[#222] [text-shadow:0_1px_4px_rgba(255,255,255,0.9)]">{{ app.name }}</span>
+        <span class="max-w-[80px] truncate text-center text-[11px] font-semibold leading-tight" :class="iconLabelClass">{{ app.name }}</span>
       </div>
     </div>
   </div>
@@ -30,20 +30,25 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { appRegistry } from '../../apps.js';
-import { windowManager } from '../../stores/windowManager.js';
-import { wallpaperList } from './wallpapers.js';
+import { apps, getApp } from '../../apps.js';
+import { windowManager } from '../../system/windows.js';
+import { currentWallpaper, desktopTheme, setWallpaper as applyWallpaper, wallpaperId } from '../../stores/appearance.js';
 
 defineEmits(['contextmenu']);
 
-const visibleApps = computed(() => appRegistry.filter(a => !a.hidden));
+const visibleApps = computed(() => apps);
 const selectedId = ref(null);
-const wallpaperId = ref(localStorage.getItem('aios-wallpaper') || 'wp-sea-mist-blue-bay');
-
-const currentWp = computed(() => wallpaperList.find(w => w.id === wallpaperId.value) || wallpaperList[0]);
+const currentWp = currentWallpaper;
 const isUrlWallpaper = computed(() => currentWp.value.type === 'url');
 const hasWallpaperEffect = computed(() => isUrlWallpaper.value && !!currentWp.value.effect);
 const wallpaperClass = computed(() => currentWp.value.type === 'css' ? currentWp.value.id : '');
+const iconIdleClass = computed(() => desktopTheme.value === 'dark' ? 'hover:bg-white/[0.08]' : 'hover:bg-white/50');
+const iconSelectedClass = computed(() => desktopTheme.value === 'dark'
+  ? 'bg-white/[0.12] ring-1 ring-white/[0.22]'
+  : 'bg-black/[0.08] ring-1 ring-black/[0.18]');
+const iconLabelClass = computed(() => desktopTheme.value === 'dark'
+  ? 'text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.72)]'
+  : 'text-[#222] [text-shadow:0_1px_4px_rgba(255,255,255,0.9)]');
 const wallpaperStyle = computed(() => {
   if (currentWp.value.type !== 'url') return {};
   if (!currentWp.value.effect) {
@@ -87,7 +92,10 @@ function selectIcon(id) {
 }
 
 function openApp(id) {
-  windowManager.open(id);
+  const app = getApp(id);
+  if (app) {
+    windowManager.openWindow(app);
+  }
   selectedId.value = null;
 }
 
@@ -96,8 +104,7 @@ function onDesktopClick() {
 }
 
 function setWallpaper(id) {
-  wallpaperId.value = id;
-  localStorage.setItem('aios-wallpaper', id);
+  applyWallpaper(id);
 }
 
 defineExpose({ setWallpaper, wallpaper: wallpaperId });
@@ -105,21 +112,16 @@ defineExpose({ setWallpaper, wallpaper: wallpaperId });
 
 <style scoped>
 .wp-sea-mist-blue-bay {
-  background-color: #b9ccda;
-  background-image:
-    radial-gradient(ellipse at 50% 12%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.12) 34%, transparent 64%),
-    radial-gradient(ellipse at 50% 68%, rgba(104,150,176,0.34) 0%, rgba(104,150,176,0.08) 28%, transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.02) 46%, rgba(74,124,156,0.1) 100%),
-    linear-gradient(180deg, #dfeaf1 0%, #c7d8e3 42%, #adc4d3 74%, #90adc0 100%);
+  background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
 }
 
 .wp-morning-sandbar {
-  background-color: #e5ccb2;
+  background-color: #1a1f33;
   background-image:
-    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.36) 0%, rgba(255,248,235,0.14) 30%, transparent 60%),
-    linear-gradient(180deg, transparent 0%, transparent 60%, rgba(255,243,221,0.2) 61%, rgba(255,243,221,0.08) 70%, transparent 78%),
-    radial-gradient(ellipse at 50% 84%, rgba(224,192,146,0.28) 0%, rgba(224,192,146,0.06) 34%, transparent 68%),
-    linear-gradient(180deg, #f8f0e3 0%, #efdcc1 38%, #dfc09a 72%, #c6a177 100%);
+    radial-gradient(circle at 22% 18%, rgba(122, 157, 255, 0.28) 0%, transparent 34%),
+    radial-gradient(circle at 78% 74%, rgba(255, 96, 144, 0.18) 0%, transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 24%, rgba(0,0,0,0.16) 100%),
+    linear-gradient(180deg, #293252 0%, #1f2640 42%, #171b2f 76%, #101321 100%);
 }
 
 .wp-forest-mist {

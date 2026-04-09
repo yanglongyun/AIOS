@@ -51,7 +51,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { windowManager } from '../../stores/windowManager.js';
+import { windowManager } from '../../system/windows.js';
 
 const props = defineProps({ win: { type: Object, required: true } });
 

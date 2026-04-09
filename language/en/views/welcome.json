@@ -33,5 +33,5 @@
   "welcome_err_admin": "Failed to create admin",
   "welcome_err_save": "Failed to save model config",
   "welcome_err_test": "Model connection test failed",
-  "welcome_default_intro": "Hi, I am AIOS. Nice to meet you."
+  "welcome_default_intro": "Hello, I'm AIOS, your AI personal operating system. I can help you manage your schedule, sort out information, and gradually hand over the tedious affairs to automation. More importantly, I will accompany you to build your own application and build an intelligent digital world that truly serves you."
 }

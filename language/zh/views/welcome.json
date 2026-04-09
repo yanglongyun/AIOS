@@ -33,5 +33,5 @@
   "welcome_err_admin": "创建管理员失败",
   "welcome_err_save": "模型配置保存失败",
   "welcome_err_test": "模型连通测试失败",
-  "welcome_default_intro": "你好，我是 AIOS。很高兴认识你。"
+  "welcome_default_intro": "你好，我是 AIOS，你的 AI 个人操作系统。我可以帮你管理日程、整理信息，并逐步把繁琐事务交给自动化处理。更重要的是，我会陪你一起打造属于自己的应用，构建真正为你服务的智能数字世界。"
 }

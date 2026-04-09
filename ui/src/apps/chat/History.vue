@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center text-sm text-[#a09080]">__T_HISTORY_EMPTY__</div>
+    <div v-if="!chats.length" class="py-12 text-center text-sm text-black/35">__T_HISTORY_EMPTY__</div>
 
     <div
       v-for="c in chats"
       :key="c.conversation_id"
       class="group flex items-center gap-2 rounded-lg px-3 py-2 transition-colors"
-      :class="activeId === c.conversation_id ? 'bg-[rgba(200,160,96,0.15)]' : 'hover:bg-[rgba(200,160,96,0.08)]'"
+      :class="activeId === c.conversation_id ? 'bg-black/[0.06]' : 'hover:bg-black/[0.03]'"
     >
       <!-- 编辑状态 -->
       <template v-if="editingId === c.conversation_id">
@@ -17,15 +17,15 @@
           @keydown.enter="confirmRename(c.conversation_id)"
           @keydown.escape="cancelRename"
           @blur="confirmRename(c.conversation_id)"
-          class="min-w-0 flex-1 rounded-lg border border-[#d4c0a0] bg-white px-2.5 py-1 text-[13px] text-[#4a3a28] outline-none"
+          class="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[13px] text-[#222] outline-none"
         />
       </template>
 
       <!-- 正常状态 -->
       <template v-else>
         <button @click="$emit('open-chat', c)" class="min-w-0 flex-1 cursor-pointer border-none bg-transparent p-0 text-left">
-          <div class="truncate text-[13px] text-[#4a3a28]">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
-          <div class="mt-0.5 text-[11px] text-[#a09080]">{{ c.created_at }}</div>
+          <div class="truncate text-[13px] text-[#222]">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+          <div class="mt-0.5 text-[11px] text-black/35">{{ c.created_at }}</div>
         </button>
 
         <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -33,15 +33,15 @@
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
             title="__T_HISTORY_RENAME__"
-            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#a09080] transition-all hover:bg-[rgba(200,160,96,0.12)] hover:text-[#8a6a40]">
+            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-black/35 transition-all hover:bg-black/[0.05] hover:text-[#222]">
             <Pencil class="h-3.5 w-3.5" />
           </button>
-          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] text-[#c04040]">__T_HISTORY_CONFIRM_DELETE__</span>
+          <span v-if="deletingId === c.conversation_id" class="px-1 text-[11px] text-red-600">__T_HISTORY_CONFIRM_DELETE__</span>
           <button
             @click.stop="confirmDelete(c.conversation_id)"
             :title="deletingId === c.conversation_id ? '__T_HISTORY_CLICK_CONFIRM__' : '__T_COMMON_DELETE__'"
-            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-[#a09080] transition-all hover:bg-[rgba(200,160,96,0.12)] hover:text-[#8a6a40]"
-            :class="deletingId === c.conversation_id ? 'bg-[#c04040] !text-white hover:!bg-[#c04040]' : ''">
+            class="flex h-7 w-7 items-center justify-center rounded-lg border-none bg-transparent text-black/35 transition-all hover:bg-black/[0.05] hover:text-[#222]"
+            :class="deletingId === c.conversation_id ? 'bg-red-500 !text-white hover:!bg-red-500' : ''">
             <Trash2 class="h-3.5 w-3.5" />
           </button>
         </div>

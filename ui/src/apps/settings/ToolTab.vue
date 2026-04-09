@@ -1,17 +1,17 @@
 <template>
   <section class="space-y-3">
-    <div class="rounded-xl border border-[#dcd0b8] bg-[#fffdf8] p-4 dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.4)]">
-      <label class="flex items-center gap-2 text-[13px] text-[#4a3a28] cursor-pointer dark:text-[#c8b898]">
+    <div class="rounded-xl border border-black/[0.08] bg-white p-4">
+      <label class="flex items-center gap-2 text-[13px] text-[#222] cursor-pointer">
         <input
           type="checkbox"
           :checked="enableToolResultTruncate"
           @change="$emit('update:enable-tool-result-truncate', $event.target.checked)"
-          class="cursor-pointer accent-[#c8a060]"
+          class="cursor-pointer accent-black"
         />
         __T_SETTINGS_TOOL_TRUNCATE_ENABLE__
       </label>
       <div class="mt-3 flex items-center gap-3">
-        <span class="text-xs text-[#a0907a] dark:text-[#6a5840]">__T_SETTINGS_TOOL_MAX_CHARS__</span>
+        <span class="text-xs text-black/40">__T_SETTINGS_TOOL_MAX_CHARS__</span>
         <input
           :value="toolResultMaxChars"
           @input="$emit('update:tool-result-max-chars', Number($event.target.value || 0))"
@@ -20,24 +20,24 @@
           max="50000"
           step="1000"
           :disabled="!enableToolResultTruncate"
-          class="w-28 rounded-lg border border-[#dcd0b8] bg-[#f5f0e8] px-2.5 py-1.5 text-xs text-[#4a3a28] outline-none focus:border-[#b08a40] disabled:opacity-40 transition-colors dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
+          class="w-28 rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-xs text-[#222] outline-none focus:border-[#222] disabled:opacity-40 transition-colors"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-[#c0b098] dark:text-[#5a4a30]">__T_SETTINGS_TOOL_MAX_CHARS_HINT__</div>
+      <div class="mt-1.5 text-[11px] text-black/25">__T_SETTINGS_TOOL_MAX_CHARS_HINT__</div>
     </div>
 
-    <div class="rounded-xl border border-[#dcd0b8] bg-[#fffdf8] p-4 dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.4)]">
-      <label class="flex items-center gap-2 text-[13px] text-[#4a3a28] cursor-pointer dark:text-[#c8b898]">
+    <div class="rounded-xl border border-black/[0.08] bg-white p-4">
+      <label class="flex items-center gap-2 text-[13px] text-[#222] cursor-pointer">
         <input
           type="checkbox"
           :checked="enableToolLoopLimit"
           @change="$emit('update:enable-tool-loop-limit', $event.target.checked)"
-          class="cursor-pointer accent-[#c8a060]"
+          class="cursor-pointer accent-black"
         />
         __T_SETTINGS_TOOL_LOOP_LIMIT_ENABLE__
       </label>
       <div class="mt-3 flex items-center gap-3">
-        <span class="text-xs text-[#a0907a] dark:text-[#6a5840]">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
+        <span class="text-xs text-black/40">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
         <input
           :value="toolMaxRounds"
           @input="$emit('update:tool-max-rounds', Number($event.target.value || 0))"
@@ -46,14 +46,14 @@
           max="500"
           step="1"
           :disabled="!enableToolLoopLimit"
-          class="w-28 rounded-lg border border-[#dcd0b8] bg-[#f5f0e8] px-2.5 py-1.5 text-xs text-[#4a3a28] outline-none focus:border-[#b08a40] disabled:opacity-40 transition-colors dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#e8dcc8] dark:focus:border-[#c8a060]"
+          class="w-28 rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-xs text-[#222] outline-none focus:border-[#222] disabled:opacity-40 transition-colors"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-[#c0b098] dark:text-[#5a4a30]">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</div>
+      <div class="mt-1.5 text-[11px] text-black/25">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</div>
     </div>
 
     <div class="pt-2 flex justify-start">
-      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-gradient-to-br from-[#c8a060] to-[#a07840] text-[#1a1410] cursor-pointer hover:opacity-85 transition-opacity">__T_COMMON_SAVE__</button>
+      <button @click="$emit('save')" class="px-5 py-2 rounded-lg text-[13px] font-semibold bg-[#222] text-white cursor-pointer hover:bg-black transition-colors">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>

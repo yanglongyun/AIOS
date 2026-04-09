@@ -2,26 +2,26 @@
   <section class="space-y-4">
     <div class="flex items-center justify-between gap-3">
       <div>
-        <div class="text-sm font-semibold text-[#5a3e28] dark:text-[#e8dcc8]">__T_SETTINGS_SKILLS_TITLE__</div>
-        <div class="mt-1 text-xs text-[#8e7c62] dark:text-[#7a6752]">__T_SETTINGS_SKILLS_HINT__</div>
+        <div class="text-sm font-semibold text-[#222]">__T_SETTINGS_SKILLS_TITLE__</div>
+        <div class="mt-1 text-xs text-black/40">__T_SETTINGS_SKILLS_HINT__</div>
       </div>
       <button
         @click="$emit('refresh')"
-        class="rounded-lg border border-[#d6c7ae] px-3 py-1.5 text-[12px] font-medium text-[#6a4f32] transition-colors hover:border-[#b08a40] hover:text-[#4a321c] dark:border-[#3a2a18] dark:text-[#c8a060] dark:hover:border-[#c8a060]"
+        class="rounded-lg border border-black/10 px-3 py-1.5 text-[12px] font-medium text-black/50 transition-colors hover:border-[#222] hover:text-[#222]"
       >
         __T_SETTINGS_SKILLS_REFRESH__
       </button>
     </div>
 
-    <div v-if="loading" class="rounded-xl border border-[#e3d8c4] bg-[#fffdf8] px-4 py-3 text-[13px] text-[#8e7c62] dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)] dark:text-[#7a6752]">
+    <div v-if="loading" class="rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-[13px] text-black/40">
       __T_SETTINGS_SKILLS_LOADING__
     </div>
 
-    <div v-else-if="error" class="rounded-xl border border-[#c78686] bg-[#fff4f4] px-4 py-3 text-[13px] text-[#8a3838] dark:border-[#6a2a2a] dark:bg-[rgba(80,24,24,0.45)] dark:text-[#d7aaaa]">
+    <div v-else-if="error" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-600">
       {{ error }}
     </div>
 
-    <div v-else-if="items.length === 0" class="rounded-xl border border-dashed border-[#ddd1bc] px-4 py-3 text-[13px] text-[#9d8a6f] dark:border-[#3a2a18] dark:text-[#7e6a54]">
+    <div v-else-if="items.length === 0" class="rounded-xl border border-dashed border-black/10 px-4 py-3 text-[13px] text-black/35">
       __T_SETTINGS_SKILLS_EMPTY_GROUP__
     </div>
 
@@ -29,15 +29,15 @@
       <article
         v-for="item in items"
         :key="item.id"
-        class="rounded-xl border border-[#e3d8c4] bg-[#fffdf8] px-4 py-3 dark:border-[#2a1e14] dark:bg-[rgba(30,22,14,0.8)]"
+        class="rounded-xl border border-black/[0.08] bg-white px-4 py-3"
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <div class="text-[14px] font-semibold text-[#4a3622] dark:text-[#ead8bc]">{{ item.name }}</div>
-            <div v-if="item.description" class="mt-1 text-[13px] leading-5 text-[#7f6b52] dark:text-[#9e8a72]">{{ item.description }}</div>
+            <div class="text-[14px] font-semibold text-[#222]">{{ item.name }}</div>
+            <div v-if="item.description" class="mt-1 text-[13px] leading-5 text-black/50">{{ item.description }}</div>
           </div>
         </div>
-        <div class="mt-2 text-[12px] text-[#9b896e] dark:text-[#7e6a54]">{{ item.path }}</div>
+        <div class="mt-2 text-[12px] text-black/30">{{ item.path }}</div>
       </article>
     </div>
   </section>

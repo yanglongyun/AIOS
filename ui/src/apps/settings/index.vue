@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f5f0e8] dark:bg-[#1a1410]">
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
     <div class="px-4 pt-4 shrink-0">
       <div class="max-w-lg mx-auto flex items-center gap-1.5">
         <button
@@ -8,8 +8,8 @@
           @click="activeTab = tab.key"
           class="px-3.5 py-1.5 text-xs shrink-0 cursor-pointer transition-all rounded-full font-medium"
           :class="activeTab === tab.key
-            ? 'bg-[rgba(90,58,40,0.1)] text-[#5a3e28] dark:bg-[rgba(200,160,96,0.12)] dark:text-[#c8a060]'
-            : 'text-[#b8a888] hover:text-[#7a6a50] hover:bg-[rgba(90,58,40,0.06)] dark:text-[#6a5840] dark:hover:text-[#a08c70] dark:hover:bg-[rgba(200,160,96,0.06)]'"
+            ? 'bg-[#222] text-white'
+            : 'text-black/40 hover:text-black/60 hover:bg-black/[0.04]'"
         >
           {{ tab.label }}
         </button>

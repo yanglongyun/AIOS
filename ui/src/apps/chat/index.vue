@@ -14,7 +14,7 @@
     </div>
 
     <!-- 右侧聊天区 -->
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#f5f0e8] bg-[repeating-linear-gradient(0deg,transparent_0,transparent_28px,rgba(0,0,0,0.02)_28px,rgba(0,0,0,0.02)_29px)]">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-[#fafafa]">
     <div class="flex min-h-0 flex-1 flex-col">
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar]:w-1.5" @scroll="onScroll">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
@@ -22,13 +22,13 @@
           <!-- 空状态 -->
           <div v-if="!messages.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
             <div class="mb-4 text-[40px] grayscale-[0.2]">💬</div>
-            <h2 class="mb-2 text-xl font-bold text-[#5a4a38]">__T_CHAT_EMPTY_TITLE__</h2>
-            <p class="max-w-[320px] text-[13px] leading-relaxed text-[#a0907a]">__T_CHAT_EMPTY_DESC__</p>
+            <h2 class="mb-2 text-xl font-bold text-[#222]">__T_CHAT_EMPTY_TITLE__</h2>
+            <p class="max-w-[320px] text-[13px] leading-relaxed text-black/35">__T_CHAT_EMPTY_DESC__</p>
           </div>
 
           <!-- 消息列表 -->
           <template v-else>
-            <div v-if="hasMore" class="py-2 text-center text-xs text-[#a0907a]">
+            <div v-if="hasMore" class="py-2 text-center text-xs text-black/35">
               <span>__T_CHAT_LOAD_MORE__</span>
             </div>
 
@@ -36,15 +36,15 @@
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#5a3e28] px-4 py-3 text-sm leading-relaxed text-[#f0e8d8] shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
+                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#222] px-4 py-3 text-sm leading-relaxed text-white shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
                     <template v-for="(f, idx) in m.attachments" :key="idx">
                       <div v-if="f.type === 'file'" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1">
                         <div class="text-[11px] font-semibold">{{ f.name }}</div>
-                        <div class="break-all text-[10px] text-[#c0a878]">{{ f.path }}</div>
+                        <div class="break-all text-[10px] text-white/60">{{ f.path }}</div>
                       </div>
-                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-[#c0a878]">{{ f.label }}</div>
+                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-white/60">{{ f.label }}</div>
                     </template>
                   </div>
                 </div>
@@ -52,25 +52,25 @@
 
               <!-- 助手消息 -->
               <div v-else-if="m.role === 'assistant'" class="flex items-start gap-2.5">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/[0.06] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
                 <div class="min-w-0 flex-1">
-                  <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-[#e8dcc8] bg-[#fffdf8] px-4 py-3 text-[#4a3a28] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#3a2a18] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-[#e8dcc8] prose-pre:bg-[#f5ead8] prose-code:rounded prose-code:bg-[rgba(90,62,40,0.08)] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-[#d4c0a0] prose-blockquote:text-[#8a7a60]" v-html="renderMd(m.content)" />
+                  <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-black/[0.06] bg-white px-4 py-3 text-[#333] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#222] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-black/[0.08] prose-pre:bg-[#f5f5f5] prose-code:rounded prose-code:bg-black/[0.06] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-black/15 prose-blockquote:text-black/50" v-html="renderMd(m.content)" />
                 </div>
               </div>
 
               <!-- 工具调用 -->
               <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-2.5">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#dce8d4] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">⚙️</div>
-                <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-[#dcd0b8] bg-[#fffdf8]">
-                  <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-[#f5ead8] px-3 py-2 text-left transition-colors hover:bg-[#ece0c8]">
-                    <ChevronRight class="h-3 w-3 shrink-0 text-[#a0907a] transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#5a4a38]">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[11px] text-[#a0907a]">__T_CHAT_DONE__</span>
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">⚙️</div>
+                <div class="min-w-0 flex-1 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
+                  <button type="button" @click="m.expanded = !m.expanded" class="flex w-full cursor-pointer items-center gap-2 border-none bg-black/[0.02] px-3 py-2 text-left transition-colors hover:bg-black/[0.04]">
+                    <ChevronRight class="h-3 w-3 shrink-0 text-black/35 transition-transform" :class="m.expanded ? 'rotate-90' : ''" />
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#333]">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[11px] text-black/35">__T_CHAT_DONE__</span>
                   </button>
-                  <div v-if="m.expanded" class="border-t border-[#e8dcc8]">
-                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-[#f5ead8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]"><span class="select-none text-[#a0907a]">$ </span>{{ m.command }}</div>
-                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-[#fffdf8] px-3 py-2.5 font-mono text-xs text-[#2d6a30]">{{ m.detail }}</div>
-                    <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-[#e8dcc8] bg-[#f5ead8] px-3 py-2.5 font-mono text-[11px] text-[#7a6a50]">{{ m.result }}</div>
+                  <div v-if="m.expanded" class="border-t border-black/[0.06]">
+                    <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre bg-black/[0.02] px-3 py-2.5 font-mono text-xs text-emerald-700"><span class="select-none text-black/35">$ </span>{{ m.command }}</div>
+                    <div v-else-if="m.detail" class="overflow-x-auto whitespace-pre bg-white px-3 py-2.5 font-mono text-xs text-emerald-700">{{ m.detail }}</div>
+                    <div v-if="m.result" class="max-h-48 overflow-auto whitespace-pre border-t border-black/[0.06] bg-black/[0.02] px-3 py-2.5 font-mono text-[11px] text-black/50">{{ m.result }}</div>
                   </div>
                 </div>
               </div>
@@ -78,24 +78,24 @@
               <!-- tool 结果兜底 -->
               <div v-else-if="m.role === 'tool' || m.type === 'tool_result'" class="flex items-start gap-2.5">
                 <div class="flex h-7 w-7 shrink-0 items-center justify-center">
-                  <span class="h-1.5 w-1.5 rounded-full bg-[#d4c0a0]"></span>
+                  <span class="h-1.5 w-1.5 rounded-full bg-black/15"></span>
                 </div>
-                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-[#a0907a]">{{ m.result || m.content }}</div>
+                <div class="min-w-0 flex-1 overflow-x-auto whitespace-pre font-mono text-xs leading-relaxed text-black/35">{{ m.result || m.content }}</div>
               </div>
 
             </div>
 
             <!-- 思考中 -->
             <div v-if="busy" class="flex items-start gap-2.5">
-              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8dcc8] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
-              <div class="py-2 text-sm text-[#a0907a]">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/[0.06] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
+              <div class="py-2 text-sm text-black/35">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
       </div>
 
       <!-- 底部输入 -->
-      <div class="shrink-0 bg-[linear-gradient(to_top,#f5f0e8_60%,transparent)] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-0">
+      <div class="shrink-0 bg-[linear-gradient(to_top,#fafafa_60%,transparent)] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] pt-0">
         <div class="mx-auto max-w-[720px]">
           <form
             @submit.prevent="handleSend"
@@ -103,25 +103,25 @@
             @dragover.prevent="onDragOver"
             @dragleave="onDragLeave"
             @drop.prevent="onDropFiles"
-            class="relative flex flex-col rounded-2xl border border-[#dcd0b8] bg-[#fffdf8] shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
-            :class="dragActive ? 'ring-2 ring-[#c8a060] ring-offset-2 ring-offset-[#f5f0e8]' : ''"
+            class="relative flex flex-col rounded-2xl border border-black/[0.06] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+            :class="dragActive ? 'ring-2 ring-black/30 ring-offset-2 ring-offset-[#fafafa]' : ''"
           >
             <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
 
             <div
               v-if="dragActive"
-              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#c8a060] bg-[rgba(200,160,96,0.14)] px-6 text-center text-sm font-semibold text-[#5a3e28]"
+              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-black/20 bg-black/[0.03] px-6 text-center text-sm font-semibold text-[#333]"
             >
               {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_DROP_FILES__' }}
             </div>
 
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
-              <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full border border-[#dcd0b8] bg-[#f5ead8] px-2.5 py-0.5 text-[11px] text-[#5a4a38]">
+              <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-black/[0.03] px-2.5 py-0.5 text-[11px] text-[#333]">
                 <span class="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">{{ f.name }}</span>
-                <button type="button" @click="removePendingFile(idx)" class="border-none bg-none text-xs text-[#a0907a] hover:text-[#5a4a38]">x</button>
+                <button type="button" @click="removePendingFile(idx)" class="border-none bg-none text-xs text-black/35 hover:text-[#333]">x</button>
               </div>
             </div>
-            <p v-if="uploadError" class="px-3.5 pb-0 pt-2 text-xs text-[#c04040]">{{ uploadError }}</p>
+            <p v-if="uploadError" class="px-3.5 pb-0 pt-2 text-xs text-red-500">{{ uploadError }}</p>
 
             <textarea
               ref="textarea"
@@ -133,28 +133,28 @@
               :placeholder="busy ? '__T_CHAT_INPUT_PLACEHOLDER_BUSY__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
               rows="1"
               :disabled="busy"
-              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#4a3a28] outline-none placeholder:text-[#c0b098] disabled:opacity-50"
+              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed text-[#222] outline-none placeholder:text-black/25 disabled:opacity-50"
             />
 
             <div class="flex items-center px-3.5 pb-2.5">
-              <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-[#a0907a] transition-all hover:bg-[#f5ead8] hover:text-[#5a4a38] disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" @click="openFilePicker" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs text-black/35 transition-all hover:bg-black/[0.04] hover:text-[#333] disabled:cursor-not-allowed disabled:opacity-50">
                 <Paperclip class="h-3.5 w-3.5" />
                 {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_UPLOAD_FILE__' }}
               </button>
             </div>
 
             <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
-              <button v-if="busy" type="button" @click="stopBusy" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none bg-[#5a3e28] text-[#f0e8d8] transition-opacity hover:opacity-80">
+              <button v-if="busy" type="button" @click="stopBusy" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none bg-[#222] text-white transition-opacity hover:opacity-80">
                 <Square class="h-3.5 w-3.5 fill-current" />
               </button>
-              <button v-else type="submit" :disabled="!input.trim()" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border text-[#b8a888] transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#5a3e28] text-[#f0e8d8] shadow-[0_2px_8px_rgba(90,62,40,0.3)] hover:opacity-85' : 'cursor-default border-[#dcd0b8] bg-[#e8dcc8]'">
+              <button v-else type="submit" :disabled="!input.trim()" class="flex h-[34px] w-[34px] items-center justify-center rounded-full border text-[#b8a888] transition-all" :class="input.trim() ? 'cursor-pointer border-transparent bg-[#222] text-white shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:opacity-85' : 'cursor-default border-black/[0.08] bg-black/[0.04] text-black/25'">
                 <ArrowUp class="h-4 w-4" />
               </button>
             </div>
           </form>
         </div>
-        <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#b0a090]">
-          <span class="h-1.5 w-1.5 rounded-full bg-[#ccc]" :class="wsStatus === 'connected' ? 'bg-[#6a9a4a]' : wsStatus === 'connecting' ? 'animate-pulse bg-[#d4a840]' : 'bg-[#c04040]'"></span>
+        <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-black/30">
+          <span class="h-1.5 w-1.5 rounded-full" :class="wsStatus === 'connected' ? 'bg-emerald-500' : wsStatus === 'connecting' ? 'animate-pulse bg-amber-400' : 'bg-red-400'""></span>
           <span>{{ wsStatus === 'connected' ? '__T_COMMON_CONNECTED__' : wsStatus === 'connecting' ? '__T_COMMON_CONNECTING__' : '__T_COMMON_DISCONNECTED__' }}</span>
         </div>
       </div>

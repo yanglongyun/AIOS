@@ -141,7 +141,7 @@ const fullBreadcrumbs = computed(() => {
 const loadDir = async (dir = '') => {
   loading.value = true;
   try {
-    const res = await fetch(`/aios/api/files/list?dir=${encodeURIComponent(dir)}`);
+    const res = await fetch(`/api/files/list?dir=${encodeURIComponent(dir)}`);
     const data = await res.json();
     items.value = (data.data || []).map(f => ({ ...f, _deleting: false }));
     currentDir.value = dir;
@@ -185,7 +185,7 @@ const filePath = (item) => currentDir.value ? absPath(currentDir.value, item.nam
 
 const download = (item) => {
   const a = document.createElement('a');
-  a.href = `/aios/api/files/download?path=${encodeURIComponent(filePath(item))}`;
+  a.href = `/api/files/download?path=${encodeURIComponent(filePath(item))}`;
   a.download = item.name;
   a.click();
 };
@@ -196,7 +196,7 @@ const confirmDelete = async (item) => {
     setTimeout(() => { item._deleting = false; }, 2000);
     return;
   }
-  await fetch('/aios/api/files/delete', {
+  await fetch('/api/files/delete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: filePath(item) })
@@ -213,7 +213,7 @@ const uploadFiles = async (fileList) => {
     const reader = new FileReader();
     await new Promise((resolve) => {
       reader.onload = async () => {
-        await fetch('/aios/api/files/upload', {
+        await fetch('/api/files/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

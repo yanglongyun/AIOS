@@ -85,7 +85,7 @@ const requestAuth = async (url) => {
 };
 
 const submitLogin = async () => {
-  await requestAuth('/aios/api/auth/login');
+  await requestAuth('/api/auth/login');
 };
 
 </script>

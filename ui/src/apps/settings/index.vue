@@ -175,7 +175,7 @@ const onProviderChange = (nextProvider) => {
 };
 
 const fetchSettings = async () => {
-  const data = await request('/aios/api/settings');
+  const data = await request('/api/settings');
   provider.value = data.provider || 'openai';
   editRounds.value = data.contextRounds || 100;
   enableToolResultTruncate.value = data.enableToolResultTruncate !== false;
@@ -194,7 +194,7 @@ const fetchSettings = async () => {
 };
 
 const fetchMe = async () => {
-  const data = await request('/aios/api/auth/me');
+  const data = await request('/api/auth/me');
   accountUsername.value = data?.user?.username || '';
 };
 
@@ -202,7 +202,7 @@ const fetchSkills = async () => {
   skillsLoading.value = true;
   skillsError.value = '';
   try {
-    const data = await request('/aios/api/settings/skills');
+    const data = await request('/api/settings/skills');
     skillItems.value = Array.isArray(data.items) ? data.items : [];
   } catch (e) {
     skillsError.value = '__T_SETTINGS_SKILLS_LOAD_FAILED__'.replace('{message}', e.message);
@@ -218,7 +218,7 @@ const save = async () => {
     toolResultMaxChars.value = maxChars;
     toolMaxRounds.value = maxRounds;
 
-    await request('/aios/api/settings', {
+    await request('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -255,7 +255,7 @@ const changePassword = async () => {
       throw new Error('__T_SETTINGS_PASSWORD_MISMATCH__');
     }
 
-    await request('/aios/api/auth/password', {
+    await request('/api/auth/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -276,7 +276,7 @@ const changePassword = async () => {
 
 const logout = async () => {
   try {
-    await request('/aios/api/auth/logout', {
+    await request('/api/auth/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });

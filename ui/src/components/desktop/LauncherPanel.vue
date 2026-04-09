@@ -76,7 +76,7 @@ const filteredApps = computed(() => {
 
 async function fetchMe() {
   try {
-    const res = await fetch('/aios/api/auth/me', { credentials: 'include' });
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
     const data = await res.json();
     username.value = data?.user?.username || '';
   } catch {}
@@ -85,7 +85,7 @@ async function fetchMe() {
 async function doLogout() {
   if (!window.confirm('__T_LOGOUT_CONFIRM__')) return;
   try {
-    await fetch('/aios/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    await fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
   } catch {}
   clearAuthCache();
   router.push('/login');
@@ -95,7 +95,7 @@ async function doRestart() {
   if (restarting.value) return;
   restarting.value = true;
   try {
-    await fetch('/aios/api/system/reload/request', {
+    await fetch('/api/system/reload/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ build: false, restartApps: true, restartServer: false })

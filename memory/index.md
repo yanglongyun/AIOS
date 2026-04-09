@@ -1,5 +1,3 @@
 # Memory Index
 
-- [核心理念.md](./核心理念.md): AIOS 的设计哲学 — 对话范式、GUI 不可或缺、个人化软件、AI 与应用双向调用
-- [应用创建指导.md](./应用创建指导.md): 创建应用前必读的基础约束、目录规范与完整交付清单
-- [architecture/](./architecture/): 系统架构详解 — 整体架构、代码目录结构、前端结构
+- [app-creation-guide.md](./app-creation-guide.md): English app creation guide

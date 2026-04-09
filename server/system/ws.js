@@ -12,7 +12,7 @@ const broadcast = (msg) => {
   }
 };
 const setupWebSocket = (httpServer) => {
-  const wss = new WebSocketServer({ server: httpServer, path: "/aios/ws" });
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
   wss.on("connection", (ws, req) => {
     const user = getAuthUser(req);
     if (!user) {

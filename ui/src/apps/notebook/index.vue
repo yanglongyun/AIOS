@@ -43,7 +43,7 @@ import { LOCALE, LOCALE_FULL } from '../../locale.js';
 import NotebookEditorView from './NotebookEditorView.vue';
 import NotebookListView from './NotebookListView.vue';
 
-const API_BASE = '/aios/apps/notebook';
+const API_BASE = '/apps/notebook';
 const PAGE_SIZE = 12;
 
 const view = ref('list');

@@ -283,7 +283,7 @@ const hasBootstrapModel = (settings) => {
 };
 
 const loadSettings = async () => {
-  const res = await fetch('/aios/api/settings', {
+  const res = await fetch('/api/settings', {
     credentials: 'include'
   });
   const data = await res.json();
@@ -305,7 +305,7 @@ const showWelcome = (intro) => {
 };
 
 const generateIntro = async () => {
-  const testRes = await fetch('/aios/api/task/create/instant', {
+  const testRes = await fetch('/api/task/create/instant', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -342,7 +342,7 @@ const createAdmin = async () => {
   }
   pending.value = true;
   try {
-    const res = await fetch('/aios/api/auth/register', {
+    const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -388,7 +388,7 @@ const prepareSystem = async () => {
   installing.value = true;
   installReady.value = false;
   error.value = '';
-  const res = await fetch('/aios/api/system/install/complete', {
+  const res = await fetch('/api/system/install/complete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -407,7 +407,7 @@ const saveModelAndTest = async () => {
   pending.value = true;
   installReady.value = false;
   try {
-    const saveRes = await fetch('/aios/api/settings', {
+    const saveRes = await fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -433,7 +433,7 @@ const saveModelAndTest = async () => {
 const enterSystem = async () => {
   if (!installReady.value || installing.value) return;
   clearAuthCache();
-  window.location.href = '/aios/';
+  window.location.href = '/';
 };
 
 onUnmounted(() => {

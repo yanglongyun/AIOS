@@ -234,7 +234,7 @@ const parseMessages = (raw) => {
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
   const params = new URLSearchParams({ conversationId: id, offset: String(offset), limit: String(limit) });
-  const data = await request(`/aios/api/chat/messages?${params.toString()}`);
+  const data = await request(`/api/chat/messages?${params.toString()}`);
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
   const parsed = parseMessages(data.messages);
@@ -259,7 +259,7 @@ const resetState = () => {
 const buildChatTitleFromFirstMessage = (text = '') => String(text).replace(/\s+/g, ' ').trim().slice(0, 20) || '__T_CHAT_NEW_TITLE__';
 
 const createNewChat = async (title = '__T_CHAT_NEW_TITLE__') => {
-  const data = await request('/aios/api/chat/create', {
+  const data = await request('/api/chat/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, scene: contextScene.value })
@@ -363,7 +363,7 @@ const sendQuick = (msg) => {
 
 const fetchHistory = async () => {
   try {
-    historyList.value = await request('/aios/api/chat/list');
+    historyList.value = await request('/api/chat/list');
   } catch {
     historyList.value = [];
   }
@@ -410,7 +410,7 @@ onMounted(async () => {
     } catch {}
   } else {
     try {
-      const list = await request('/aios/api/chat/list');
+      const list = await request('/api/chat/list');
       if (list.length > 0) {
         const last = list[0];
         currentConversationId.value = last.conversation_id;

@@ -74,7 +74,7 @@ const request = async (url, options = {}) => {
 };
 
 const fetchChats = async () => {
-  chats.value = await request('/aios/api/chat/list');
+  chats.value = await request('/api/chat/list');
 };
 
 const startRename = (chat) => {
@@ -89,7 +89,7 @@ const confirmRename = (conversationId) => {
   if (editingId.value !== conversationId) return;
   const title = editTitle.value.trim();
   if (title) {
-    request('/aios/api/chat/rename', {
+    request('/api/chat/rename', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId, title })
@@ -102,7 +102,7 @@ const confirmDelete = (conversationId) => {
   if (deletingId.value === conversationId) {
     clearTimeout(deleteTimer);
     deletingId.value = null;
-    request('/aios/api/chat/delete', {
+    request('/api/chat/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId })

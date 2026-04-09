@@ -74,7 +74,6 @@ const proxyAppsRequest = async (req, res, url) => {
 };
 const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  if (url.pathname.startsWith("/aios/")) url.pathname = url.pathname.slice(5);
   if (url.pathname.startsWith("/files/")) {
     const filePath2 = join(ROOT_DIR, url.pathname);
     if (existsSync(filePath2) && statSync(filePath2).isFile()) {

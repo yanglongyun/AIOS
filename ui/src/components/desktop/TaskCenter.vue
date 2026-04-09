@@ -74,13 +74,13 @@ const allItems = computed(() => {
 });
 
 const loadTasks = async () => {
-  const res = await fetch('/aios/api/task?limit=200');
+  const res = await fetch('/api/task?limit=200');
   const data = await res.json().catch(() => []);
   tasks.value = Array.isArray(data) ? data : [];
 };
 
 const loadSchedules = async () => {
-  const res = await fetch('/aios/api/task/schedule?limit=200');
+  const res = await fetch('/api/task/schedule?limit=200');
   const data = await res.json().catch(() => []);
   schedules.value = Array.isArray(data) ? data : [];
 };

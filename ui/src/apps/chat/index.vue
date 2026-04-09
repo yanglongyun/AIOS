@@ -85,8 +85,7 @@
             </div>
 
             <!-- 思考中 -->
-            <div v-if="busy" class="flex items-start gap-2.5">
-              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/[0.06] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
+            <div v-if="busy" class="flex items-start">
               <div class="py-2 text-sm text-black/35">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
@@ -273,7 +272,7 @@ const parseMessages = (raw) => {
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
   const params = new URLSearchParams({ conversationId: id, offset: String(offset), limit: String(limit) });
-  const data = await request(`/aios/api/chat/messages?${params.toString()}`);
+  const data = await request(`/api/chat/messages?${params.toString()}`);
   hasMore.value = data.hasMore;
   loadedOffset.value = (data.offset || 0) + data.messages.length;
   const parsed = parseMessages(data.messages);
@@ -301,7 +300,7 @@ const buildChatTitleFromFirstMessage = (text = '') => {
 };
 
 const createNewChat = async (title = '__T_CHAT_NEW_TITLE__') => {
-  const data = await request('/aios/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
+  const data = await request('/api/chat/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }) });
   currentConversationId.value = data.conversationId;
   messages.value = [];
   hasMore.value = false;
@@ -440,7 +439,7 @@ const toDataUrl = (file) => new Promise((resolve, reject) => {
 
 const uploadSingleFile = async (file) => {
   const dataUrl = await toDataUrl(file);
-  const res = await request('/aios/api/files/upload', {
+  const res = await request('/api/files/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: file.name, data: dataUrl, dir: 'files/uploads/chat' })

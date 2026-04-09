@@ -97,7 +97,7 @@ const doReload = async () => {
   errorMsg.value = '';
 
   try {
-    const res = await fetch('/aios/api/system/reload', {
+    const res = await fetch('/api/system/reload', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

@@ -1,9 +1,9 @@
 <template>
-  <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#f5f0e8] font-['Georgia','PingFang_SC',serif]">
+  <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden bg-white">
     <!-- 左侧对话列表 -->
-    <div class="flex w-56 shrink-0 flex-col border-r border-[#e0d0b8] bg-[#ece4d8]">
-      <div class="border-b border-[#e0d0b8] px-3 py-2.5">
-        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-[#d4c0a0] bg-[rgba(200,160,96,0.08)] px-3 py-2 text-[13px] text-[#8a6a40] transition-colors hover:bg-[rgba(200,160,96,0.15)]" @click="newChat">
+    <div class="flex w-56 shrink-0 flex-col border-r border-black/[0.07] bg-[#f7f7f7]">
+      <div class="border-b border-black/[0.07] px-3 py-2.5">
+        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[13px] font-semibold text-[#222] transition-colors hover:bg-black/[0.04]" @click="newChat">
           <Plus class="h-3.5 w-3.5" />
           __T_CHAT_NEW_TITLE__
         </button>

@@ -6,24 +6,24 @@
         :style="{ left: x + 'px', top: y + 'px' }"
         @click.stop
       >
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="action('chat')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('chat')">
           <span class="text-sm">💬</span>新建对话
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="action('task-create')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('task-create')">
           <span class="text-sm">✅</span>新建任务
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="action('create-app')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('create-app')">
           <span class="text-sm">➕</span>新建应用
         </div>
         <div class="mx-2 my-1 h-px bg-black/[0.06]" />
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="refresh">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="refresh">
           <span class="text-sm">🔄</span>刷新
         </div>
         <div class="mx-2 my-1 h-px bg-black/[0.06]" />
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="$emit('wallpaper'); close()">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="$emit('wallpaper'); close()">
           <span class="text-sm">🖼️</span>更换壁纸
         </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-[#2c2420] transition-all duration-100 hover:bg-[rgba(224,136,80,0.12)] hover:text-[#e08850]" @click="action('settings')">
+        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium text-[#222] transition-all duration-100 hover:bg-black/[0.05]" @click="action('settings')">
           <span class="text-sm">⚙️</span>系统设置
         </div>
       </div>

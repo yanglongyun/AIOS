@@ -1,14 +1,14 @@
 <template>
   <Teleport to="body">
   <div class="fixed inset-x-0 top-0 bottom-[44px] z-[199]" @click.self="$emit('close')">
-    <div class="absolute right-0 top-0 bottom-0 flex w-[380px] flex-col border-l border-[rgba(200,170,130,0.3)] bg-[rgba(250,245,238,0.96)] shadow-[-4px_0_24px_rgba(90,62,40,0.12)] backdrop-blur-2xl">
+    <div class="absolute right-0 top-0 bottom-0 flex w-[380px] flex-col border-l border-black/[0.07] bg-white/[0.96] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] backdrop-blur-2xl">
       <!-- 顶栏 -->
-      <div class="border-b border-[rgba(200,170,130,0.25)] px-4 py-3">
+      <div class="border-b border-black/[0.06] px-4 py-3">
         <div class="flex items-center justify-between">
-          <span class="text-[13px] font-bold text-[#3a2a18]">__T_TASKS_CENTER__</span>
+          <span class="text-[13px] font-bold text-[#222]">__T_TASKS_CENTER__</span>
           <div class="flex items-center gap-1.5">
-            <button type="button" class="rounded-md border border-[#d4c8b8] bg-[#fffdf8] px-2 py-1 text-[11px] text-[#7a6a58] transition hover:bg-[#f6ecde]" @click="loadAll">__T_TASKS_REFRESH__</button>
-            <button @click="$emit('close')" class="flex h-6 w-6 items-center justify-center rounded-md text-[#9a8870] transition-colors hover:bg-black/5 hover:text-[#5a4a38]">
+            <button type="button" class="rounded-[8px] border border-black/[0.1] bg-white px-2.5 py-1 text-[11px] font-medium text-black/[0.5] transition hover:bg-black/[0.04]" @click="loadAll">__T_TASKS_REFRESH__</button>
+            <button @click="$emit('close')" class="flex h-6 w-6 items-center justify-center rounded-[6px] text-black/[0.35] transition-colors hover:bg-black/[0.05] hover:text-[#222]">
               <X class="h-4 w-4" />
             </button>
           </div>
@@ -17,29 +17,29 @@
 
       <!-- 任务列表 -->
       <div class="min-h-0 flex-1 overflow-y-auto">
-        <div v-if="error" class="m-3 rounded-lg border border-[#e8b8a0] bg-[#fdf5f0] px-3 py-2 text-[11px] text-[#c06040]">{{ error }}</div>
+        <div v-if="error" class="m-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-500">{{ error }}</div>
 
-        <div v-if="allItems.length === 0" class="py-16 text-center text-[13px] text-[#a09080]">__T_TASKS_EMPTY_RUNNING__</div>
+        <div v-if="allItems.length === 0" class="py-16 text-center text-[13px] text-black/[0.35]">__T_TASKS_EMPTY_RUNNING__</div>
         <div v-else>
           <div
             v-for="item in allItems"
             :key="item._key"
-            class="flex items-start gap-3 border-b border-[rgba(200,170,130,0.15)] px-4 py-3 transition-colors hover:bg-[rgba(200,160,96,0.06)]"
+            class="flex items-start gap-3 border-b border-black/[0.05] px-4 py-3 transition-colors hover:bg-black/[0.03]"
             :class="item._type === 'task' ? 'cursor-pointer' : ''"
             @click="item._type === 'task' && openTaskById(item.id)"
           >
             <div class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-              <span v-if="item._type === 'schedule'" class="text-[12px] text-[#8a6a40]">⏱</span>
-              <span v-else-if="item.status === 'pending'" class="h-2.5 w-2.5 animate-pulse rounded-full bg-[#c8a060]"></span>
-              <span v-else-if="item.status === 'done'" class="text-[12px] text-[#6a9a4a]">✓</span>
-              <span v-else class="text-[12px] text-[#c04040]">✗</span>
+              <span v-if="item._type === 'schedule'" class="text-[12px] text-black/[0.4]">⏱</span>
+              <span v-else-if="item.status === 'pending'" class="h-2.5 w-2.5 animate-pulse rounded-full bg-[#222]"></span>
+              <span v-else-if="item.status === 'done'" class="text-[12px] text-emerald-500">✓</span>
+              <span v-else class="text-[12px] text-red-400">✗</span>
             </div>
             <div class="min-w-0 flex-1">
-              <div class="truncate text-[13px] text-[#3a2a18]">{{ item._type === 'schedule' ? (item.name || '__T_TASKS_UNNAMED__') : (item.title || '__T_TASKS_UNNAMED__') }}</div>
-              <div class="mt-0.5 flex items-center gap-2 text-[11px] text-[#a09080]">
+              <div class="truncate text-[13px] font-medium text-[#222]">{{ item._type === 'schedule' ? (item.name || '__T_TASKS_UNNAMED__') : (item.title || '__T_TASKS_UNNAMED__') }}</div>
+              <div class="mt-0.5 flex items-center gap-2 text-[11px] text-black/[0.38]">
                 <span v-if="item._type === 'schedule' && item.cron" class="font-mono">{{ item.cron }}</span>
                 <span v-if="item._type === 'task'">{{ item.created_at }}</span>
-                <span v-if="item.app" class="rounded bg-[rgba(200,160,96,0.12)] px-1.5 py-0.5 text-[10px] text-[#8a6a40]">{{ item.app }}</span>
+                <span v-if="item.app" class="rounded-[4px] bg-black/[0.05] px-1.5 py-0.5 text-[10px] text-black/[0.45]">{{ item.app }}</span>
               </div>
             </div>
           </div>

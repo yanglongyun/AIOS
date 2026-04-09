@@ -1,15 +1,15 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-[200] flex h-[44px] items-center gap-0 border-t border-[rgba(200,170,130,0.4)] bg-[rgba(250,245,238,0.88)] px-2 shadow-[0_-2px_16px_rgba(90,62,40,0.07)] backdrop-blur-2xl">
+  <div class="fixed bottom-0 left-0 right-0 z-[200] flex h-[44px] items-center gap-0 border-t border-black/[0.07] bg-white/[0.88] px-2 shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-2xl">
     <button
       ref="launcherButtonEl"
-      class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border text-[20px] text-[#5a3e28] transition-all"
+      class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border text-[20px] text-[#222] transition-all"
       :class="launcherOpen
-        ? 'border-[rgba(200,160,96,0.4)] bg-[rgba(200,160,96,0.15)]'
-        : 'border-transparent hover:border-[rgba(200,160,96,0.25)] hover:bg-[rgba(200,160,96,0.12)]'"
+        ? 'border-black/[0.14] bg-black/[0.07]'
+        : 'border-transparent hover:border-black/[0.09] hover:bg-black/[0.05]'"
       @click.stop="$emit('toggle-launcher')"
     >⊞</button>
 
-    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
+    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
 
     <div class="flex flex-1 items-center gap-1 overflow-hidden px-0.5">
       <button
@@ -17,38 +17,38 @@
         :key="win.id"
         class="flex h-[32px] min-w-[72px] max-w-[150px] flex-shrink-0 items-center gap-1.5 rounded-[7px] border px-[9px] text-left transition-all"
         :class="win.state === 'minimized'
-          ? 'border-transparent opacity-50 hover:border-[rgba(200,160,96,0.2)] hover:bg-[rgba(200,160,96,0.08)] hover:opacity-80'
+          ? 'border-transparent opacity-40 hover:border-black/[0.07] hover:bg-black/[0.04] hover:opacity-70'
           : isActive(win)
-            ? 'border-[rgba(200,160,96,0.35)] bg-[rgba(200,160,96,0.14)]'
-            : 'border-transparent hover:border-[rgba(200,160,96,0.2)] hover:bg-[rgba(200,160,96,0.08)]'"
+            ? 'border-black/[0.12] bg-black/[0.06]'
+            : 'border-transparent hover:border-black/[0.07] hover:bg-black/[0.04]'"
         @click="clickTab(win)"
       >
         <span class="text-[14px] leading-none">{{ appIcon(win.appId) }}</span>
-        <span class="flex-1 truncate text-[12px] text-[#3a2a18]">{{ win.title }}</span>
+        <span class="flex-1 truncate text-[12px] font-medium text-[#222]">{{ win.title }}</span>
         <span
           class="h-[5px] w-[5px] flex-shrink-0 rounded-full"
-          :class="win.state === 'minimized' ? 'border border-[#c8a060]' : 'bg-[#c8a060]'"
+          :class="win.state === 'minimized' ? 'border border-black/[0.3]' : 'bg-[#222]'"
         ></span>
       </button>
     </div>
 
-    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
+    <div class="mx-1.5 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
 
     <button
       class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-[8px] border transition-all"
       :class="taskCenterOpen
-        ? 'border-[rgba(200,160,96,0.4)] bg-[rgba(200,160,96,0.15)]'
-        : 'border-transparent hover:border-[rgba(200,160,96,0.25)] hover:bg-[rgba(200,160,96,0.12)]'"
+        ? 'border-black/[0.14] bg-black/[0.07]'
+        : 'border-transparent hover:border-black/[0.09] hover:bg-black/[0.05]'"
       @click.stop="$emit('toggle-task-center')"
     >
-      <ListTodo class="h-[15px] w-[15px] text-[#5a3e28]" />
+      <ListTodo class="h-[15px] w-[15px] text-[#222]" />
     </button>
 
-    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-[rgba(200,160,96,0.22)]"></div>
+    <div class="mx-1 h-[22px] w-px flex-shrink-0 bg-black/[0.07]"></div>
 
     <div class="flex-shrink-0 cursor-default px-1.5 text-right">
-      <div class="text-[13px] font-semibold leading-[1.25] text-[#3a2a18]">{{ clockTime }}</div>
-      <div class="text-[10px] leading-[1.25] text-[#9a8870]">{{ clockDate }}</div>
+      <div class="text-[13px] font-semibold leading-[1.25] text-[#222]">{{ clockTime }}</div>
+      <div class="text-[10px] leading-[1.25] text-black/[0.38]">{{ clockDate }}</div>
     </div>
   </div>
 </template>

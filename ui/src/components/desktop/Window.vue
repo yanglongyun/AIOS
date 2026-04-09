@@ -6,14 +6,14 @@
     @mousedown="onFocus"
   >
     <!-- 内部容器：裁剪圆角，resize 热区在外层不受影响 -->
-    <div class="flex h-full w-full flex-col overflow-hidden" :class="win.state !== 'maximized' ? 'rounded-[10px]' : ''">
+    <div class="flex h-full w-full flex-col overflow-hidden" :class="win.state !== 'maximized' ? 'rounded-[12px]' : ''">
       <!-- 标题栏 -->
       <div
-        class="title-bar flex h-9 shrink-0 cursor-default items-center border-b border-black/[0.08] px-3"
+        class="title-bar flex h-9 shrink-0 cursor-default items-center border-b border-black/[0.07] px-3"
         @mousedown.left="startDrag"
         @dblclick="toggleMaximize"
       >
-        <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[#4a3a28]">{{ win.title }}</span>
+        <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[#222]">{{ win.title }}</span>
         <!-- 右侧红绿灯 -->
         <div class="traffic-lights ml-3 flex items-center gap-[7px]">
           <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '还原' : '最大化'">
@@ -29,7 +29,7 @@
       </div>
 
       <!-- 内容区 -->
-      <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#2a2218]">
+      <div class="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
         <component :is="win.component" v-bind="win.props" />
       </div>
     </div>
@@ -157,19 +157,17 @@ function stopResize() {
 </script>
 
 <style scoped>
-/* 多层 shadow + 半透明 border + 渐变 — 必须原生 */
 .window-frame {
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .title-bar {
-  background: linear-gradient(180deg, #f5ece0 0%, #e8dcc8 100%);
+  background: #ffffff;
 }
 
 .traffic-icon {
   display: none;
 }
-
 </style>

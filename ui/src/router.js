@@ -25,15 +25,7 @@ const routeMap = [
   { pattern: /^\/tasks$/, appId: "tasks" },
   { pattern: /^\/files$/, appId: "files" },
   { pattern: /^\/notebook/, appId: "notebook" },
-  { pattern: /^\/finance/, appId: "finance" },
-  { pattern: /^\/subscriber/, appId: "subscriber" },
-  { pattern: /^\/cryptobot/, appId: "cryptobot" },
-  { pattern: /^\/reader/, appId: "reader" },
-  { pattern: /^\/poker/, appId: "poker" },
-  { pattern: /^\/fortune/, appId: "fortune" },
-  { pattern: /^\/banana/, appId: "banana" },
-  { pattern: /^\/settings$/, appId: "settings" },
-  { pattern: /^\/apps\/create$/, appId: "create-app" }
+  { pattern: /^\/settings$/, appId: "settings" }
 ];
 router.beforeEach(async (to) => {
   const setup = await getSetupStatus();

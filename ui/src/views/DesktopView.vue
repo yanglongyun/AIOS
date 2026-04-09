@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[100dvh] w-screen overflow-hidden font-['Georgia','PingFang_SC',serif]">
+  <div class="h-[100dvh] w-screen overflow-hidden font-['Barlow',system-ui,sans-serif]">
     <Desktop ref="desktopRef" @contextmenu="onContextMenu" />
 
     <AppWindow

@@ -17,12 +17,12 @@
         v-for="app in visibleApps"
         :key="app.id"
         class="flex cursor-pointer select-none flex-col items-center gap-1.5 rounded-[10px] px-1 py-2 transition-all duration-150 active:scale-95"
-        :class="selectedId === app.id ? 'bg-[rgba(224,136,80,0.12)] outline outline-[1.5px] outline-[rgba(224,136,80,0.3)]' : 'hover:bg-white/35'"
+        :class="selectedId === app.id ? 'bg-black/[0.08] ring-1 ring-black/[0.18]' : 'hover:bg-white/50'"
         @click.stop="selectIcon(app.id)"
         @dblclick.stop="openApp(app.id)"
       >
         <span class="text-[26px] transition-transform duration-200" :class="{ '-translate-y-0.5': selectedId !== app.id }">{{ app.icon }}</span>
-        <span class="max-w-[80px] truncate text-center text-[11px] font-medium leading-tight text-[#2c2420] [text-shadow:0_1px_3px_rgba(255,255,255,0.8)]">{{ app.name }}</span>
+        <span class="max-w-[80px] truncate text-center text-[11px] font-semibold leading-tight text-[#222] [text-shadow:0_1px_4px_rgba(255,255,255,0.9)]">{{ app.name }}</span>
       </div>
     </div>
   </div>

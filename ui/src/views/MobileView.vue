@@ -1,5 +1,5 @@
 <template>
-  <div class="mobile-desktop-shell flex h-dvh flex-col overflow-hidden font-['Georgia','PingFang_SC',serif]" @click="menuOpen = false">
+  <div class="flex h-dvh flex-col overflow-hidden font-['Georgia','PingFang_SC',serif] transition-[background] duration-500" :class="wallpaperClass" @click="menuOpen = false">
     <TopBar
       v-if="openedApp"
       :app="openedApp"
@@ -34,17 +34,22 @@
 </template>
 
 <script setup>
-import { onMounted, provide, reactive, ref, shallowRef } from 'vue';
+import { computed, onMounted, provide, reactive, ref, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import TopBar from '../components/mobile/TopBar.vue';
 import AppGrid from '../components/mobile/AppGrid.vue';
 import UserMenu from '../components/mobile/UserMenu.vue';
 import ReloadModal from '../components/ReloadModal.vue';
 import { getApp } from '../apps.js';
+import { currentWallpaper } from '../stores/appearance.js';
 import { clearAuthCache } from '../auth/session.js';
 import { connect } from '../system/ws.js';
 
 const router = useRouter();
+
+const wallpaperClass = computed(() =>
+  currentWallpaper.value?.type === 'css' ? currentWallpaper.value.id : ''
+);
 
 const navOverride = reactive({ title: null, back: null });
 function setMobileNav(title, back) {
@@ -127,10 +132,3 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.mobile-desktop-shell {
-  background:
-    radial-gradient(ellipse at top, rgba(255, 255, 255, 0.28), transparent 55%),
-    linear-gradient(135deg, #e6f2f8 0%, #c8dfe8 30%, #a0c8d8 60%, #78b0c8 100%);
-}
-</style>

@@ -72,39 +72,121 @@ defineExpose({ show });
 }
 
 .wp-forest-mist {
-  background:
-    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 30%, transparent 58%),
-    linear-gradient(180deg, #e3ece5 0%, #adc1b0 56%, #75917c 100%);
+  background-color: #c8849a;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255,235,242,0.78) 0%, rgba(248,205,222,0.38) 32%, transparent 62%),
+    radial-gradient(ellipse at 22% 55%, rgba(215,145,175,0.45) 0%, transparent 44%),
+    radial-gradient(ellipse at 80% 62%, rgba(195,120,155,0.38) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 100%, rgba(145,68,98,0.52) 0%, transparent 52%),
+    linear-gradient(180deg, #fce5ef 0%, #edb5ce 38%, #d08aaa 70%, #aa5878 100%);
 }
 
 .wp-silver-cyan-lake {
-  background:
-    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 32%, transparent 60%),
-    linear-gradient(180deg, #e6eef2 0%, #b8cdd7 58%, #84a3b4 100%);
+  background-color: #b098cc;
+  background-image:
+    radial-gradient(ellipse at 32% 18%, rgba(255,250,255,0.55) 0%, transparent 42%),
+    radial-gradient(ellipse at 70% 30%, rgba(228,212,248,0.32) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 65%, rgba(172,142,215,0.35) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 100%, rgba(112,82,160,0.48) 0%, transparent 50%),
+    linear-gradient(180deg, #f2e8fc 0%, #d5bcea 48%, #b098d4 78%, #8862b8 100%);
 }
 
 .wp-dusk-rock-shore {
-  background:
-    radial-gradient(ellipse at 50% 14%, rgba(214,222,242,0.18) 0%, rgba(214,222,242,0.04) 30%, transparent 60%),
-    linear-gradient(180deg, #8f9cb0 0%, #687389 58%, #3c4456 100%);
+  background-color: #505d6e;
+  background-image:
+    repeating-linear-gradient(
+      38deg,
+      transparent 0px, transparent 5px,
+      rgba(255,255,255,0.055) 5px, rgba(255,255,255,0.055) 6px
+    ),
+    repeating-linear-gradient(
+      -38deg,
+      transparent 0px, transparent 5px,
+      rgba(0,0,0,0.08) 5px, rgba(0,0,0,0.08) 6px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px, transparent 20px,
+      rgba(0,0,0,0.045) 20px, rgba(0,0,0,0.045) 21px,
+      transparent 21px, transparent 42px,
+      rgba(255,255,255,0.03) 42px, rgba(255,255,255,0.03) 43px
+    ),
+    radial-gradient(ellipse at 50% 8%, rgba(198,212,235,0.24) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(18,22,32,0.45) 0%, transparent 50%),
+    linear-gradient(180deg, #8c99ac 0%, #637282 40%, #4a5668 72%, #2c3440 100%);
 }
 
 .wp-linen-warm-paper {
-  background:
-    repeating-linear-gradient(0deg, rgba(110,96,78,0.035) 0px, rgba(110,96,78,0.035) 1px, transparent 1px, transparent 4px),
-    repeating-linear-gradient(90deg, rgba(110,96,78,0.03) 0px, rgba(110,96,78,0.03) 1px, transparent 1px, transparent 4px),
-    linear-gradient(180deg, #f1eadf 0%, #dfd0bb 58%, #d0bea8 100%);
+  background-color: #d5c8ac;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(75,55,30,0.09) 0px, rgba(75,55,30,0.09) 1px,
+      transparent 1px, transparent 2px,
+      rgba(75,55,30,0.055) 2px, rgba(75,55,30,0.055) 3px,
+      transparent 3px, transparent 5px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(75,55,30,0.08) 0px, rgba(75,55,30,0.08) 1px,
+      transparent 1px, transparent 2px,
+      rgba(75,55,30,0.045) 2px, rgba(75,55,30,0.045) 3px,
+      transparent 3px, transparent 5px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,242,215,0.07) 0px, rgba(255,242,215,0.07) 1px,
+      transparent 1px, transparent 5px
+    ),
+    radial-gradient(ellipse at 50% 15%, rgba(255,250,238,0.32) 0%, transparent 55%),
+    linear-gradient(165deg, #f6ede0 0%, #e2d1bc 48%, #cdbfa5 100%);
 }
 
 .wp-amber-clouds {
-  background:
-    radial-gradient(ellipse at 34% 20%, rgba(255,242,230,0.28) 0%, rgba(255,242,230,0.06) 30%, transparent 58%),
-    linear-gradient(180deg, #f3ddcf 0%, #e3b392 58%, #b77758 100%);
+  background-color: #d48898;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px, transparent 2px,
+      rgba(255,210,222,0.14) 2px, rgba(255,210,222,0.14) 3px,
+      transparent 3px, transparent 5px,
+      rgba(200,138,158,0.09) 5px, rgba(200,138,158,0.09) 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px, transparent 4px,
+      rgba(255,225,235,0.09) 4px, rgba(255,225,235,0.09) 5px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 9px,
+      rgba(255,235,242,0.06) 9px, rgba(255,235,242,0.06) 10px
+    ),
+    radial-gradient(ellipse at 28% 20%, rgba(255,238,245,0.52) 0%, rgba(255,215,230,0.22) 36%, transparent 62%),
+    radial-gradient(ellipse at 76% 82%, rgba(175,82,112,0.28) 0%, transparent 44%),
+    linear-gradient(160deg, #fce2ea 0%, #f0b0c4 38%, #d888a0 68%, #bc6280 100%);
 }
 
 .wp-snowlight-peak {
-  background:
-    radial-gradient(ellipse at 50% 12%, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.1) 28%, transparent 56%),
-    linear-gradient(180deg, #eef5fa 0%, #cfe0ec 58%, #8eb0c5 100%);
+  background-color: #a5c5da;
+  background-image:
+    repeating-linear-gradient(
+      60deg,
+      transparent 0px, transparent 13px,
+      rgba(175,212,238,0.16) 13px, rgba(175,212,238,0.16) 14px
+    ),
+    repeating-linear-gradient(
+      -60deg,
+      transparent 0px, transparent 13px,
+      rgba(155,198,228,0.11) 13px, rgba(155,198,228,0.11) 14px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 13px,
+      rgba(195,222,242,0.09) 13px, rgba(195,222,242,0.09) 14px
+    ),
+    radial-gradient(ellipse at 50% 6%, rgba(255,255,255,0.7) 0%, rgba(238,250,255,0.22) 26%, transparent 56%),
+    radial-gradient(ellipse at 50% 100%, rgba(88,138,175,0.32) 0%, transparent 48%),
+    linear-gradient(180deg, #f2f8fc 0%, #d2e8f2 38%, #a5c8de 72%, #78aac4 100%);
 }
 </style>

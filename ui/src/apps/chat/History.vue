@@ -1,16 +1,14 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center text-sm" style="color:rgba(0,0,0,0.35)">__T_HISTORY_EMPTY__</div>
+    <div v-if="!chats.length" class="py-12 text-center text-sm" :style="emptyStyle">__T_HISTORY_EMPTY__</div>
 
     <div
       v-for="c in chats"
       :key="c.conversation_id"
       class="group flex items-center gap-2 rounded-[9px] px-3 py-2 transition-colors"
-      :style="activeId === c.conversation_id
-        ? 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)'
-        : ''"
-      @mouseover="activeId !== c.conversation_id && ($event.currentTarget.style.background='rgba(0,0,0,0.04)')"
+      :style="activeId === c.conversation_id ? activeRowStyle : ''"
+      @mouseover="activeId !== c.conversation_id && ($event.currentTarget.style.background = hoverBackground)"
       @mouseleave="activeId !== c.conversation_id && ($event.currentTarget.style.background='transparent')"
     >
       <!-- 编辑状态 -->
@@ -22,15 +20,15 @@
           @keydown.escape="cancelRename"
           @blur="confirmRename(c.conversation_id)"
           class="min-w-0 flex-1 rounded-[8px] border px-2.5 py-1 text-[13px] outline-none"
-          style="border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13"
+          :style="inputStyle"
         />
       </template>
 
       <!-- 正常状态 -->
       <template v-else>
         <button @click="$emit('open-chat', c)" class="min-w-0 flex-1 cursor-pointer border-none bg-transparent p-0 text-left">
-          <div class="truncate text-[13px] font-medium" :style="activeId === c.conversation_id ? 'color:#3d2f1e' : 'color:rgba(0,0,0,0.6)'">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
-          <div class="mt-0.5 text-[10px]" style="color:rgba(0,0,0,0.3)">{{ c.created_at }}</div>
+          <div class="truncate text-[13px] font-medium" :style="activeId === c.conversation_id ? activeTitleStyle : titleStyle">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+          <div class="mt-0.5 text-[10px]" :style="subtleStyle">{{ c.created_at }}</div>
         </button>
 
         <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -39,9 +37,9 @@
             @click.stop="startRename(c)"
             title="__T_HISTORY_RENAME__"
             class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none bg-transparent transition-all"
-            style="color:rgba(0,0,0,0.3)"
-            @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.1)';$event.currentTarget.style.color='#5c4332'"
-            @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(0,0,0,0.3)'">
+            :style="iconButtonStyle"
+            @mouseover="$event.currentTarget.style.background=actionHoverBackground;$event.currentTarget.style.color=actionHoverColor"
+            @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color=actionColor">
             <Pencil class="h-3 w-3" />
           </button>
           <span v-if="deletingId === c.conversation_id" class="px-1 text-[10px] text-red-500">__T_HISTORY_CONFIRM_DELETE__</span>
@@ -49,9 +47,9 @@
             @click.stop="confirmDelete(c.conversation_id)"
             :title="deletingId === c.conversation_id ? '__T_HISTORY_CLICK_CONFIRM__' : '__T_COMMON_DELETE__'"
             class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none transition-all"
-            :style="deletingId === c.conversation_id ? 'background:#dc2626;color:#fff' : 'background:transparent;color:rgba(0,0,0,0.3)'"
+            :style="deletingId === c.conversation_id ? 'background:#dc2626;color:#fff' : iconButtonStyle"
             @mouseover="deletingId !== c.conversation_id && ($event.currentTarget.style.background='rgba(220,38,38,0.1)') && ($event.currentTarget.style.color='#dc2626')"
-            @mouseleave="deletingId !== c.conversation_id && ($event.currentTarget.style.background='transparent') && ($event.currentTarget.style.color='rgba(0,0,0,0.3)')">
+            @mouseleave="deletingId !== c.conversation_id && ($event.currentTarget.style.background='transparent') && ($event.currentTarget.style.color=actionColor)">
             <Trash2 class="h-3 w-3" />
           </button>
         </div>
@@ -62,9 +60,10 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
+import { computed, ref, nextTick, onMounted } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
-defineProps({
+const props = defineProps({
+  variant: { type: String, default: 'desktop' },
   activeId: { type: String, default: null }
 });
 defineEmits(['open-chat']);
@@ -75,6 +74,22 @@ const editTitle = ref('');
 const editInput = ref(null);
 const deletingId = ref(null);
 let deleteTimer = null;
+const isMobile = computed(() => props.variant === 'mobile');
+const emptyStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.35)' : 'color:rgba(0,0,0,0.35)');
+const activeRowStyle = computed(() => isMobile.value
+  ? 'background:rgba(255,255,255,0.08);box-shadow:none'
+  : 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)');
+const hoverBackground = computed(() => isMobile.value ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)');
+const inputStyle = computed(() => isMobile.value
+  ? 'border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff'
+  : 'border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13');
+const titleStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.68)' : 'color:rgba(0,0,0,0.6)');
+const activeTitleStyle = computed(() => isMobile.value ? 'color:#fff' : 'color:#3d2f1e');
+const subtleStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.35)' : 'color:rgba(0,0,0,0.3)');
+const actionColor = computed(() => isMobile.value ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)');
+const actionHoverBackground = computed(() => isMobile.value ? 'rgba(255,255,255,0.08)' : 'rgba(160,120,80,0.1)');
+const actionHoverColor = computed(() => isMobile.value ? '#fff' : '#5c4332');
+const iconButtonStyle = computed(() => `background:transparent;color:${actionColor.value}`);
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);

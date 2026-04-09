@@ -1,87 +1,59 @@
 <template>
   <div class="flex h-full min-w-0 overflow-hidden" style="background:#f5f3ef">
-    <!-- 左侧导航 -->
-    <div class="flex w-[160px] shrink-0 flex-col border-r py-4" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
-      <div class="mb-3 px-4 text-[11px] font-semibold uppercase tracking-widest" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TAB_ACCOUNT__</div>
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="mx-2 mb-0.5 flex items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[13px] font-medium transition-all"
-        :class="activeTab === tab.key
-          ? 'shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-          : 'hover:bg-black/[0.05]'"
-        :style="activeTab === tab.key
-          ? 'background:#fff;color:#3d2f1e'
-          : 'color:rgba(0,0,0,0.5)'"
-        @click="activeTab = tab.key"
-      >
-        <span class="text-[14px]">{{ tab.icon }}</span>
-        {{ tab.label }}
-      </button>
-    </div>
 
-    <!-- 右侧内容 -->
-    <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:thin]">
-      <div class="mx-auto max-w-[520px]">
-        <h2 class="mb-4 text-[16px] font-bold" style="color:#2a1f13">{{ currentTabLabel }}</h2>
-        <AccountTab
-          v-if="activeTab === 'account'"
-          :username="accountUsername"
-          :old-password="oldPassword"
-          :new-password="newPassword"
-          :confirm-password="confirmPassword"
-          @update:old-password="oldPassword = $event"
-          @update:new-password="newPassword = $event"
-          @update:confirm-password="confirmPassword = $event"
-          @change-password="changePassword"
-          @logout="logout"
-        />
-        <ModelTab
-          v-else-if="activeTab === 'model'"
-          :provider="provider"
-          :provider-groups="providerGroups"
-          :providers="providers"
-          :api-url="editApiUrl"
-          :api-key="editApiKey"
-          :model="editModel"
-          @save="save"
-          @update:provider="onProviderChange"
-          @update:api-url="editApiUrl = $event"
-          @update:api-key="editApiKey = $event"
-          @update:model="editModel = $event"
-        />
-        <ToolTab
-          v-else-if="activeTab === 'tools'"
-          :enable-tool-result-truncate="enableToolResultTruncate"
-          :tool-result-max-chars="toolResultMaxChars"
-          :enable-tool-loop-limit="enableToolLoopLimit"
-          :tool-max-rounds="toolMaxRounds"
-          @save="save"
-          @update:enable-tool-result-truncate="enableToolResultTruncate = $event"
-          @update:tool-result-max-chars="toolResultMaxChars = $event"
-          @update:enable-tool-loop-limit="enableToolLoopLimit = $event"
-          @update:tool-max-rounds="toolMaxRounds = $event"
-        />
-        <ContextTab
-          v-else-if="activeTab === 'messages'"
-          :context-rounds="editRounds"
-          @save="save"
-          @update:context-rounds="editRounds = $event"
-        />
-        <SkillTab
-          v-else-if="activeTab === 'skills'"
-          :items="skillItems"
-          :loading="skillsLoading"
-          :error="skillsError"
-        />
-        <AboutTab v-else />
+    <!-- ── Desktop：左侧导航 + 右侧内容 ── -->
+    <template v-if="!isMobile">
+      <div class="flex w-[160px] shrink-0 flex-col border-r py-4" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
+        <div class="mb-3 px-4 text-[11px] font-semibold uppercase tracking-widest" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TAB_ACCOUNT__</div>
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="mx-2 mb-0.5 flex items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[13px] font-medium transition-all"
+          :class="activeTab === tab.key ? 'shadow-[0_1px_3px_rgba(0,0,0,0.1)]' : 'hover:bg-black/[0.05]'"
+          :style="activeTab === tab.key ? 'background:#fff;color:#3d2f1e' : 'color:rgba(0,0,0,0.5)'"
+          @click="activeTab = tab.key"
+        >
+          <span class="text-[14px]">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </button>
       </div>
-    </div>
+      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:thin]">
+        <div class="mx-auto max-w-[520px]">
+          <h2 class="mb-4 text-[16px] font-bold" style="color:#2a1f13">{{ currentTabLabel }}</h2>
+          <TabContent v-bind="tabContentProps" />
+        </div>
+      </div>
+    </template>
+
+    <!-- ── Mobile：列表 → 详情 ── -->
+    <template v-else>
+      <!-- 列表页 -->
+      <div v-if="!activeTab" class="w-full overflow-y-auto px-4 pt-4 pb-8">
+        <div class="overflow-hidden rounded-2xl" style="background:rgba(255,255,255,0.72);border:1px solid rgba(0,0,0,0.06)">
+          <button
+            v-for="(tab, idx) in tabs"
+            :key="tab.key"
+            class="flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-all active:bg-black/[0.05]"
+            :class="idx < tabs.length - 1 ? 'border-b border-black/[0.06]' : ''"
+            @click="openMobileTab(tab)"
+          >
+            <span class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[8px] text-[16px]" style="background:rgba(0,0,0,0.06)">{{ tab.icon }}</span>
+            <span class="flex-1 text-[15px] font-medium" style="color:#1a1a1a">{{ tab.label }}</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(0,0,0,0.25)"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- 详情页 -->
+      <div v-else class="w-full overflow-y-auto px-4 py-4 pb-8">
+        <TabContent v-bind="tabContentProps" />
+      </div>
+    </template>
+
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineComponent, h, inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
@@ -92,6 +64,9 @@ import SkillTab from './SkillTab.vue';
 import { createProviderCatalog } from '../../data/providers.js';
 import { toast } from '../../stores/toast.js';
 const router = useRouter();
+const setMobileNav = inject('mobileNav', null);
+const isMobile = computed(() => !!setMobileNav);
+
 const tabs = [
   { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__', icon: '👤' },
   { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
@@ -103,6 +78,70 @@ const tabs = [
 
 const activeTab = ref('account');
 const currentTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '');
+
+function openMobileTab(tab) {
+  activeTab.value = tab.key;
+  setMobileNav?.(tab.label, () => {
+    activeTab.value = null;
+    setMobileNav?.(null, null);
+  });
+}
+
+// 统一传给 TabContent 的 props
+const tabContentProps = computed(() => ({
+  activeTab: activeTab.value,
+  username: accountUsername.value,
+  oldPassword: oldPassword.value,
+  newPassword: newPassword.value,
+  confirmPassword: confirmPassword.value,
+  provider: provider.value,
+  providerGroups: providerGroups.value,
+  providers: providers.value,
+  apiUrl: editApiUrl.value,
+  apiKey: editApiKey.value,
+  model: editModel.value,
+  enableToolResultTruncate: enableToolResultTruncate.value,
+  toolResultMaxChars: toolResultMaxChars.value,
+  enableToolLoopLimit: enableToolLoopLimit.value,
+  toolMaxRounds: toolMaxRounds.value,
+  contextRounds: editRounds.value,
+  skillItems: skillItems.value,
+  skillsLoading: skillsLoading.value,
+  skillsError: skillsError.value,
+  onSave: save,
+  onChangePassword: changePassword,
+  onLogout: logout,
+  'onUpdate:oldPassword': v => { oldPassword.value = v; },
+  'onUpdate:newPassword': v => { newPassword.value = v; },
+  'onUpdate:confirmPassword': v => { confirmPassword.value = v; },
+  'onUpdate:provider': onProviderChange,
+  'onUpdate:apiUrl': v => { editApiUrl.value = v; },
+  'onUpdate:apiKey': v => { editApiKey.value = v; },
+  'onUpdate:model': v => { editModel.value = v; },
+  'onUpdate:enableToolResultTruncate': v => { enableToolResultTruncate.value = v; },
+  'onUpdate:toolResultMaxChars': v => { toolResultMaxChars.value = v; },
+  'onUpdate:enableToolLoopLimit': v => { enableToolLoopLimit.value = v; },
+  'onUpdate:toolMaxRounds': v => { toolMaxRounds.value = v; },
+  'onUpdate:contextRounds': v => { editRounds.value = v; },
+}));
+
+// TabContent 动态分发到各子 Tab
+const TabContent = defineComponent({
+  props: { activeTab: String },
+  setup(props, { attrs }) {
+    return () => {
+      const map = {
+        account: AccountTab,
+        model: ModelTab,
+        tools: ToolTab,
+        messages: ContextTab,
+        skills: SkillTab,
+      };
+      const C = map[props.activeTab] || AboutTab;
+      return h(C, attrs);
+    };
+  }
+});
 
 const provider = ref('openai');
 const editRounds = ref(100);

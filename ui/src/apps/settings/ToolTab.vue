@@ -11,7 +11,7 @@
         />
         <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_TRUNCATE_ENABLE__</span>
       </label>
-      <div class="mt-3.5 flex items-center gap-3">
+      <div class="mt-3.5 flex flex-wrap items-center gap-3">
         <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_CHARS__</span>
         <input
           :value="toolResultMaxChars"
@@ -38,7 +38,7 @@
         />
         <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_LOOP_LIMIT_ENABLE__</span>
       </label>
-      <div class="mt-3.5 flex items-center gap-3">
+      <div class="mt-3.5 flex flex-wrap items-center gap-3">
         <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
         <input
           :value="toolMaxRounds"

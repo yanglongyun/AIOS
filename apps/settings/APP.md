@@ -12,17 +12,34 @@ database: database/aios.db（settings 表）
 - `server/api/settings.js`：HTTP 路由入口
 - `server/service/settings/`：业务逻辑（get, update）
 - `server/repository/settings/`：数据库读写（get, save）
+- `server/service/skills/list.js`：扫描项目和系统技能目录
+- `ui/src/apps/settings/`：设置页前端，各 tab 独立组件
 
 ## API
 - `GET /api/settings`：获取所有设置
-- `POST /api/settings`：更新设置（`key`, `value`）
+- `GET /api/settings/skills`：读取技能列表
+- `POST /api/settings`：批量更新设置（provider、apiUrl、apiKey、model、tool/context 相关项）
 
 ## 前端 Tab
-- GeneralTab：语言
-- ModelTab：API URL / Key / 模型
+- AccountTab：账户信息、密码修改、退出登录
+- ModelTab：Provider / API URL / Key / 模型
 - ToolTab：工具开关
-- ContextTab：上下文管理
-- AccountTab：修改密码
+- ContextTab：上下文轮数
+- SkillTab：技能列表
+- AboutTab：关于
 
 ## 数据表
 - `settings`：key, value（键值对存储）
+
+## 当前设置项
+- `provider`
+- `apiUrl`
+- `apiKey`
+- `model`
+- `contextRounds`
+- `enableToolResultTruncate`
+- `toolResultMaxChars`
+- `enableToolLoopLimit`
+- `toolMaxRounds`
+- `systemPrompt`
+- `language`

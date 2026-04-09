@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-[200] flex h-[44px] items-center gap-0 border-t border-black/[0.07] bg-white/[0.88] px-2 shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-2xl">
+  <div class="fixed bottom-0 left-0 right-0 z-[1000] flex h-[44px] items-center gap-0 border-t border-black/[0.07] bg-white/[0.88] px-2 shadow-[0_-1px_0_rgba(0,0,0,0.04)] backdrop-blur-2xl">
     <button
       ref="launcherButtonEl"
       class="flex h-[34px] w-[40px] flex-shrink-0 items-center justify-center rounded-[8px] border text-[20px] text-[#222] transition-all"

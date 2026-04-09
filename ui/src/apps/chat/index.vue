@@ -36,23 +36,22 @@
 
               <!-- 用户消息 -->
               <div v-if="m.role === 'user'" class="flex justify-end">
-                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-[#222] px-4 py-3 text-sm leading-relaxed text-white shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
+                <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] bg-black/[0.07] px-4 py-3 text-sm leading-relaxed text-[#222] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
                   <div v-if="m.attachments?.length" class="mt-2">
                     <template v-for="(f, idx) in m.attachments" :key="idx">
-                      <div v-if="f.type === 'file'" class="mb-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1">
-                        <div class="text-[11px] font-semibold">{{ f.name }}</div>
-                        <div class="break-all text-[10px] text-white/60">{{ f.path }}</div>
+                      <div v-if="f.type === 'file'" class="mb-1 rounded-lg border border-black/[0.08] bg-black/[0.05] px-2 py-1">
+                        <div class="text-[11px] font-semibold text-[#222]">{{ f.name }}</div>
+                        <div class="break-all text-[10px] text-black/40">{{ f.path }}</div>
                       </div>
-                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-white/60">{{ f.label }}</div>
+                      <div v-else-if="f.type === 'context'" class="mb-1 inline-block rounded-full border border-black/[0.08] bg-black/[0.04] px-2.5 py-0.5 text-[10px] text-black/40">{{ f.label }}</div>
                     </template>
                   </div>
                 </div>
               </div>
 
               <!-- 助手消息 -->
-              <div v-else-if="m.role === 'assistant'" class="flex items-start gap-2.5">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/[0.06] text-base shadow-[0_1px_4px_rgba(0,0,0,0.08)]">🤖</div>
+              <div v-else-if="m.role === 'assistant'" class="flex items-start">
                 <div class="min-w-0 flex-1">
                   <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] border border-black/[0.06] bg-white px-4 py-3 text-[#333] shadow-[0_1px_4px_rgba(0,0,0,0.04)] prose-headings:text-[#222] prose-pre:overflow-x-auto prose-pre:border prose-pre:border-black/[0.08] prose-pre:bg-[#f5f5f5] prose-code:rounded prose-code:bg-black/[0.06] prose-code:px-1 prose-code:py-0.5 prose-blockquote:border-black/15 prose-blockquote:text-black/50" v-html="renderMd(m.content)" />
                 </div>
@@ -172,7 +171,8 @@ import HistoryPanel from './History.vue';
 import { connect, send, on, wsStatus, ensureConnected } from '../../ws.js';
 const viewProps = defineProps({
   id: { type: String, default: null },
-  pendingMessage: { type: String, default: null }
+  pendingMessage: { type: String, default: null },
+  protocolRequest: { type: Object, default: null }
 });
 const route = useRoute();
 const router = useRouter();
@@ -200,6 +200,7 @@ const dragCounter = ref(0);
 const seenKeys = ref(new Set());
 const historyRef = ref(null);
 const unsubs = [];
+const lastProtocolRequestId = ref(null);
 
 const saveLastChatId = (id) => { if (id) localStorage.setItem(LAST_CHAT_KEY, String(id)); };
 
@@ -387,6 +388,34 @@ const newChat = () => {
   router.replace('/chat').catch(() => {});
 };
 
+const handleProtocolRequest = (req) => {
+  if (!req?.requestId || req.requestId === lastProtocolRequestId.value) return;
+  lastProtocolRequestId.value = req.requestId;
+  const intent = req.intent || 'open';
+  const payload = req.payload || {};
+
+  if (intent === 'new') {
+    newChat();
+    return;
+  }
+
+  if (intent === 'new_and_send') {
+    newChat();
+    input.value = String(payload.message || '');
+    nextTick(() => {
+      autoResize();
+      handleSend();
+    });
+    return;
+  }
+
+  if (intent === 'load_conversation') {
+    const conversationId = String(payload.conversationId || '').trim();
+    if (!conversationId) return;
+    router.replace({ path: `/chat/${conversationId}` }).catch(() => {});
+  }
+};
+
 const openChatFromHistory = (chat) => {
   const id = chat.conversation_id;
   if (id === currentConversationId.value) return;
@@ -466,6 +495,10 @@ watch([() => viewProps.id, () => route.fullPath], () => {
     if (e?.status === 404) { resetState(); router.replace('/chat'); return; }
     messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
   });
+}, { immediate: true });
+
+watch(() => viewProps.protocolRequest?.requestId, () => {
+  handleProtocolRequest(viewProps.protocolRequest);
 }, { immediate: true });
 
 // 消息变化时自动滚动

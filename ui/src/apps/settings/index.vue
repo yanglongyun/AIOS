@@ -76,7 +76,7 @@ const tabs = [
   { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
 ];
 
-const activeTab = ref('account');
+const activeTab = ref(setMobileNav ? null : 'account');
 const currentTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '');
 
 function openMobileTab(tab) {
@@ -108,6 +108,9 @@ const tabContentProps = computed(() => ({
   skillItems: skillItems.value,
   skillsLoading: skillsLoading.value,
   skillsError: skillsError.value,
+  items: skillItems.value,
+  loading: skillsLoading.value,
+  error: skillsError.value,
   onSave: save,
   onChangePassword: changePassword,
   onLogout: logout,

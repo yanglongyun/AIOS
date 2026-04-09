@@ -1,5 +1,14 @@
 <template>
   <div class="cryptobot-page flex h-full flex-col items-center overflow-y-auto font-['Courier_New',Courier,monospace]">
+
+    <!-- 实盘风险警告横条 -->
+    <div class="w-full max-w-[620px] shrink-0">
+      <div class="flex items-start gap-2.5 border-x border-t border-[#5a3a08] bg-[#1a0e00] px-4 py-2.5" style="background:linear-gradient(90deg,rgba(90,45,0,0.55),rgba(60,30,0,0.45))">
+        <span class="mt-px shrink-0 text-[13px] leading-none text-[#e8900a]">⚠</span>
+        <p class="text-[10px] leading-relaxed tracking-[0.3px] text-[#c07808]">__T_CRYPTOBOT_RISK_WARNING__</p>
+      </div>
+    </div>
+
     <CryptobotMachinePanel
       :status="status"
       :error="error"

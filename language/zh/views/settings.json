@@ -41,7 +41,7 @@
   "settings_skills_group_system": "系统技能",
   "settings_skills_source_project": "项目",
   "settings_skills_source_system": "系统",
-  "settings_skills_empty_group": "当前分组没有可用技能。",
+  "settings_skills_empty_group": "当前没有可用技能。",
   "settings_saved": "配置已保存",
   "settings_save_failed": "保存失败：{message}",
   "settings_saving": "保存中…"

@@ -27,32 +27,91 @@ textarea { field-sizing: content; }
 }
 
 .wp-morning-sandbar {
-  background-color: #1a1f33;
+  background-color: #000408;
   background-image:
-    radial-gradient(circle at 22% 18%, rgba(122,157,255,0.28) 0%, transparent 34%),
-    radial-gradient(circle at 78% 74%, rgba(255,96,144,0.18) 0%, transparent 28%),
-    linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 24%, rgba(0,0,0,0.16) 100%),
-    linear-gradient(180deg, #293252 0%, #1f2640 42%, #171b2f 76%, #101321 100%);
+    /* 星点 — 最亮 */
+    radial-gradient(circle 2.5px at 8% 14%, rgba(255,248,220,0.96) 0%, transparent 100%),
+    radial-gradient(circle 2.2px at 52% 4%, rgba(255,255,255,0.92) 0%, transparent 100%),
+    radial-gradient(circle 2px at 84% 9%, rgba(200,220,255,0.90) 0%, transparent 100%),
+    radial-gradient(circle 2.3px at 91% 42%, rgba(255,255,255,0.93) 0%, transparent 100%),
+    radial-gradient(circle 2px at 22% 52%, rgba(255,235,180,0.88) 0%, transparent 100%),
+    /* 星点 — 亮 */
+    radial-gradient(circle 1.6px at 15% 28%, rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(circle 1.7px at 72% 22%, rgba(255,255,255,0.82) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 45% 35%, rgba(255,240,200,0.76) 0%, transparent 100%),
+    radial-gradient(circle 1.6px at 62% 48%, rgba(255,255,255,0.78) 0%, transparent 100%),
+    radial-gradient(circle 1.4px at 38% 18%, rgba(200,215,255,0.75) 0%, transparent 100%),
+    radial-gradient(circle 1.4px at 78% 58%, rgba(180,200,255,0.74) 0%, transparent 100%),
+    radial-gradient(circle 1.6px at 30% 65%, rgba(255,255,255,0.76) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 88% 72%, rgba(255,248,210,0.78) 0%, transparent 100%),
+    /* 星点 — 中等 */
+    radial-gradient(circle 1px at 5% 38%, rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(circle 1.1px at 25% 72%, rgba(200,210,255,0.62) 0%, transparent 100%),
+    radial-gradient(circle 1px at 48% 55%, rgba(255,255,255,0.68) 0%, transparent 100%),
+    radial-gradient(circle 1.2px at 58% 68%, rgba(180,220,255,0.64) 0%, transparent 100%),
+    radial-gradient(circle 1px at 65% 28%, rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(circle 1px at 82% 30%, rgba(255,255,255,0.62) 0%, transparent 100%),
+    radial-gradient(circle 1.1px at 12% 82%, rgba(255,255,255,0.58) 0%, transparent 100%),
+    radial-gradient(circle 1px at 70% 12%, rgba(255,230,180,0.62) 0%, transparent 100%),
+    radial-gradient(circle 0.9px at 95% 62%, rgba(255,255,255,0.58) 0%, transparent 100%),
+    /* 银河带 */
+    radial-gradient(ellipse 88% 22% at 52% 50%, rgba(158,178,242,0.20) 0%, rgba(128,152,232,0.10) 45%, transparent 68%),
+    radial-gradient(ellipse 115% 40% at 55% 52%, rgba(98,118,212,0.12) 0%, transparent 62%),
+    /* 星云色块 */
+    radial-gradient(ellipse 22% 16% at 35% 38%, rgba(78,128,242,0.18) 0%, transparent 62%),
+    radial-gradient(ellipse 18% 12% at 68% 55%, rgba(222,148,88,0.12) 0%, transparent 58%),
+    radial-gradient(ellipse 15% 10% at 82% 35%, rgba(58,198,192,0.10) 0%, transparent 58%),
+    radial-gradient(ellipse 20% 14% at 18% 42%, rgba(158,78,232,0.12) 0%, transparent 62%),
+    /* 亮星光晕 */
+    radial-gradient(circle 100px at 88% 14%, rgba(255,252,235,0.22) 0%, rgba(240,240,210,0.06) 30%, transparent 60%),
+    /* 地平线大气散射 */
+    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(14,24,72,0.68) 0%, transparent 50%),
+    linear-gradient(180deg, #000205 0%, #010408 30%, #020610 60%, #010508 88%, #000204 100%);
 }
 
 .wp-forest-mist {
-  background-color: #c8849a;
+  background-color: #020c14;
   background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(255,235,242,0.78) 0%, rgba(248,205,222,0.38) 32%, transparent 62%),
-    radial-gradient(ellipse at 22% 55%, rgba(215,145,175,0.45) 0%, transparent 44%),
-    radial-gradient(ellipse at 80% 62%, rgba(195,120,155,0.38) 0%, transparent 42%),
-    radial-gradient(ellipse at 50% 100%, rgba(145,68,98,0.52) 0%, transparent 52%),
-    linear-gradient(180deg, #fce5ef 0%, #edb5ce 38%, #d08aaa 70%, #aa5878 100%);
+    /* 极光帷幕 1 — 翠绿 */
+    radial-gradient(ellipse 20% 80% at 28% 42%, rgba(28,218,128,0.62) 0%, rgba(20,200,112,0.22) 52%, transparent 80%),
+    /* 极光帷幕 2 — 青绿 */
+    radial-gradient(ellipse 15% 72% at 42% 38%, rgba(18,208,175,0.52) 0%, rgba(12,188,162,0.18) 52%, transparent 78%),
+    /* 极光帷幕 3 — 湛蓝 */
+    radial-gradient(ellipse 17% 75% at 57% 35%, rgba(38,178,222,0.48) 0%, rgba(28,158,210,0.16) 52%, transparent 80%),
+    /* 极光帷幕 4 — 深紫 */
+    radial-gradient(ellipse 13% 68% at 70% 40%, rgba(128,55,235,0.45) 0%, rgba(108,38,215,0.15) 52%, transparent 78%),
+    /* 极光帷幕 5 — 洋红尾焰 */
+    radial-gradient(ellipse 10% 58% at 83% 45%, rgba(225,55,188,0.32) 0%, transparent 74%),
+    /* 极光天空底色辉光 */
+    radial-gradient(ellipse 150% 52% at 50% 42%, rgba(12,78,78,0.38) 0%, transparent 64%),
+    /* 地面反光 */
+    radial-gradient(ellipse 100% 22% at 50% 100%, rgba(8,58,45,0.58) 0%, transparent 52%),
+    /* 极光中稀疏星点 */
+    radial-gradient(circle 1.5px at 12% 12%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(circle 1px at 35% 8%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(circle 1.2px at 88% 10%, rgba(255,255,255,0.50) 0%, transparent 100%),
+    radial-gradient(circle 0.8px at 62% 6%, rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(circle 1px at 92% 22%, rgba(255,255,255,0.42) 0%, transparent 100%),
+    linear-gradient(180deg, #010608 0%, #020b14 28%, #030e1c 58%, #020c16 82%, #010609 100%);
 }
 
 .wp-silver-cyan-lake {
-  background-color: #b098cc;
+  background-color: #c07085;
   background-image:
-    radial-gradient(ellipse at 32% 18%, rgba(255,250,255,0.55) 0%, transparent 42%),
-    radial-gradient(ellipse at 70% 30%, rgba(228,212,248,0.32) 0%, transparent 38%),
-    radial-gradient(ellipse at 50% 65%, rgba(172,142,215,0.35) 0%, transparent 42%),
-    radial-gradient(ellipse at 50% 100%, rgba(112,82,160,0.48) 0%, transparent 50%),
-    linear-gradient(180deg, #f2e8fc 0%, #d5bcea 48%, #b098d4 78%, #8862b8 100%);
+    /* 地平线暖阳光晕 */
+    radial-gradient(ellipse 75% 38% at 50% 105%, rgba(255,185,100,0.72) 0%, rgba(255,140,90,0.38) 38%, transparent 60%),
+    /* 珊瑚晨带 */
+    radial-gradient(ellipse 100% 28% at 50% 88%, rgba(255,138,118,0.48) 0%, rgba(242,108,128,0.22) 48%, transparent 65%),
+    /* 左云霞 */
+    radial-gradient(ellipse 38% 18% at 18% 68%, rgba(255,175,190,0.38) 0%, transparent 58%),
+    /* 右云霞 */
+    radial-gradient(ellipse 32% 15% at 82% 65%, rgba(255,168,185,0.32) 0%, transparent 55%),
+    /* 中心暖晕 */
+    radial-gradient(ellipse 55% 28% at 50% 75%, rgba(255,200,155,0.28) 0%, transparent 52%),
+    /* 顶部深紫夜空 */
+    radial-gradient(ellipse 85% 52% at 50% 0%, rgba(72,32,118,0.52) 0%, rgba(55,24,95,0.24) 52%, transparent 78%),
+    /* 深紫→玫红→珊瑚→金橙→暖杏 */
+    linear-gradient(180deg, #221038 0%, #581840 22%, #a84868 42%, #d87868 62%, #f0a870 80%, #ffd898 100%);
 }
 
 .wp-dusk-rock-shore {
@@ -77,39 +136,50 @@ textarea { field-sizing: content; }
 }
 
 .wp-amber-clouds {
-  background-color: #d48898;
+  background-color: #f0c8e0;
   background-image:
-    repeating-linear-gradient(
-      45deg,
-      transparent 0px, transparent 2px,
-      rgba(255,210,222,0.14) 2px, rgba(255,210,222,0.14) 3px,
-      transparent 3px, transparent 5px,
-      rgba(200,138,158,0.09) 5px, rgba(200,138,158,0.09) 6px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0px, transparent 4px,
-      rgba(255,225,235,0.09) 4px, rgba(255,225,235,0.09) 5px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px, transparent 9px,
-      rgba(255,235,242,0.06) 9px, rgba(255,235,242,0.06) 10px
-    ),
-    radial-gradient(ellipse at 28% 20%, rgba(255,238,245,0.52) 0%, rgba(255,215,230,0.22) 36%, transparent 62%),
-    radial-gradient(ellipse at 76% 82%, rgba(175,82,112,0.28) 0%, transparent 44%),
-    linear-gradient(160deg, #fce2ea 0%, #f0b0c4 38%, #d888a0 68%, #bc6280 100%);
+    /* 波点层 1 — 粉 */
+    radial-gradient(circle 1.8px at 15px 15px, rgba(255,130,190,0.32) 0%, transparent 100%),
+    /* 波点层 2 — 紫，错位半格 */
+    radial-gradient(circle 1.4px at 30px 30px, rgba(175,135,255,0.26) 0%, transparent 100%),
+    /* 左上粉白光晕 */
+    radial-gradient(ellipse 55% 42% at 20% 22%, rgba(255,228,242,0.70) 0%, rgba(255,198,230,0.28) 44%, transparent 68%),
+    /* 右下丁香光晕 */
+    radial-gradient(ellipse 48% 38% at 84% 80%, rgba(215,185,255,0.55) 0%, rgba(195,158,250,0.20) 44%, transparent 65%),
+    /* 中心薄荷柔光 */
+    radial-gradient(ellipse 42% 32% at 55% 52%, rgba(180,248,228,0.28) 0%, transparent 55%),
+    /* 粉→丁香→薄荷三色渐变 */
+    linear-gradient(135deg, #ffd8ec 0%, #f5c5e8 22%, #e8bef5 46%, #d2cbff 68%, #bef0ea 100%);
+  background-size: 30px 30px, 30px 30px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
 }
 
 .wp-snowlight-peak {
-  background-color: #a5c5da;
+  background-color: #000810;
   background-image:
-    repeating-linear-gradient(60deg, transparent 0px, transparent 13px, rgba(175,212,238,0.16) 13px, rgba(175,212,238,0.16) 14px),
-    repeating-linear-gradient(-60deg, transparent 0px, transparent 13px, rgba(155,198,228,0.11) 13px, rgba(155,198,228,0.11) 14px),
-    repeating-linear-gradient(0deg, transparent 0px, transparent 13px, rgba(195,222,242,0.09) 13px, rgba(195,222,242,0.09) 14px),
-    radial-gradient(ellipse at 50% 6%, rgba(255,255,255,0.7) 0%, rgba(238,250,255,0.22) 26%, transparent 56%),
-    radial-gradient(ellipse at 50% 100%, rgba(88,138,175,0.32) 0%, transparent 48%),
-    linear-gradient(180deg, #f2f8fc 0%, #d2e8f2 38%, #a5c8de 72%, #78aac4 100%);
+    /* 水面焦散光纹 */
+    repeating-linear-gradient(
+      65deg,
+      transparent 0px, transparent 9px,
+      rgba(0,210,200,0.055) 9px, rgba(0,210,200,0.055) 10px
+    ),
+    repeating-linear-gradient(
+      -25deg,
+      transparent 0px, transparent 12px,
+      rgba(0,190,220,0.045) 12px, rgba(0,190,220,0.045) 13px
+    ),
+    /* 生物荧光 1 — 青绿大光团 */
+    radial-gradient(ellipse 28% 20% at 38% 48%, rgba(0,228,195,0.30) 0%, rgba(0,205,178,0.12) 45%, transparent 72%),
+    /* 生物荧光 2 — 水蓝中等光团 */
+    radial-gradient(ellipse 20% 14% at 70% 60%, rgba(0,205,232,0.24) 0%, rgba(0,182,215,0.08) 45%, transparent 68%),
+    /* 生物荧光 3 — 小亮点 */
+    radial-gradient(circle 70px at 55% 35%, rgba(0,245,210,0.20) 0%, rgba(0,215,185,0.06) 45%, transparent 62%),
+    /* 深蓝幽光 */
+    radial-gradient(ellipse 15% 10% at 22% 65%, rgba(30,100,200,0.18) 0%, transparent 62%),
+    /* 深海底压光晕 */
+    radial-gradient(ellipse 100% 45% at 50% 100%, rgba(0,35,75,0.65) 0%, transparent 55%),
+    /* 深渊顶部 */
+    radial-gradient(ellipse 80% 38% at 50% 0%, rgba(0,5,15,0.55) 0%, transparent 60%),
+    linear-gradient(180deg, #000305 0%, #000810 32%, #000c18 62%, #000a14 86%, #000508 100%);
 }
 
 .loading-dots::after {

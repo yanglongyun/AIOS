@@ -41,7 +41,7 @@
   "settings_skills_group_system": "System Skills",
   "settings_skills_source_project": "Project",
   "settings_skills_source_system": "System",
-  "settings_skills_empty_group": "No skills found in this group.",
+  "settings_skills_empty_group": "No skills are currently available.",
   "settings_saved": "Saved",
   "settings_save_failed": "Save failed: {message}",
   "settings_saving": "Saving…"

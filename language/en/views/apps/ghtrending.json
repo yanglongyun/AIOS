@@ -22,5 +22,10 @@
   "gh_chat_quick_2": "Recommend interesting open source projects",
   "gh_chat_quick_3": "Explain a trending repo",
   "gh_digest_title": "Open Source Brief Digest",
-  "gh_digest_desc": "Get a quick summary of the most noteworthy open-source projects and their core highlights for the current timeframe"
+  "gh_digest_desc": "Get a quick summary of the most noteworthy open-source projects and their core highlights for the current timeframe",
+  "gh_analyze_task_title": "Analyze: {name}",
+  "gh_analyze_task_prompt": "Analyze this trending GitHub project in English.\n\nYou must investigate the repository before writing the analysis.\n\nRequired workflow:\n1. Use shell commands to inspect the repository.\n2. First fetch and read the README.\n3. If helpful, inspect key files such as package.json, pyproject.toml, Cargo.toml, go.mod, or requirements.txt.\n4. If the repository files are still not enough, perform necessary web searches, prioritizing official docs or the project site.\n5. Then write the final analysis.\n\nFocus on:\n- what the project does\n- why it may be popular\n- who should use it\n- notable technical highlights\n- important limitations or caveats\n\nReturn only the final analysis.\n\nRepository: {name}\nDescription: {description}\nLanguage: {language}\nStars: {stars}\nURL: {url}",
+  "gh_digest_repo_name": "GitHub Trending Digest",
+  "gh_digest_task_title": "Analyze: GitHub Trending Digest",
+  "gh_digest_task_prompt": "Summarize this batch of trending GitHub repositories in English.\n\nUse only the project list below. Highlight the most notable themes, representative projects, and the problems they are solving.\n\nReturn only the final digest.\n\nProject list:\n{list}"
 }

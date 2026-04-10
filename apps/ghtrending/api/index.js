@@ -2,6 +2,7 @@ import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { list } from "../service/list.js";
 import { analyze } from "../service/analyze.js";
+import { digest } from "../service/digest.js";
 import { saveAnalysis, getAnalysis, listAnalyses } from "../repository/analysis.js";
 
 const handleGhtrendingApi = async (req, res, path) => {
@@ -26,6 +27,10 @@ const handleGhtrendingApi = async (req, res, path) => {
       });
     }
     return json(res, data);
+  }
+  if (path === "/apps/ghtrending/digest" && req.method === "POST") {
+    const body = await readBody(req);
+    return json(res, await digest(body));
   }
   if (path === "/apps/ghtrending/check" && req.method === "POST") {
     const body = await readBody(req);

@@ -121,7 +121,7 @@
             </div>
             <div>
               <label class="mb-[7px] block text-[11px] font-bold uppercase tracking-[1px] text-black/40">{{ t.api_key }}</label>
-              <input v-model.trim="model.apiKey" placeholder="sk-..." class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
+              <input v-model.trim="model.apiKey" type="password" placeholder="sk-..." class="w-full rounded-xl border-[1.5px] border-black/10 bg-black/[0.02] px-[14px] py-[11px] text-[14px] font-medium text-[#222] outline-none transition-all placeholder:text-black/25 focus:border-[#222] focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.06)]" />
             </div>
           </div>
 

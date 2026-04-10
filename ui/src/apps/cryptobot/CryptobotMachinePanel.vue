@@ -128,15 +128,15 @@
         <div class="mb-2 grid grid-cols-2 gap-1.5">
           <div class="exchange-field rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">__T_CRYPTOBOT_API_KEY__</div>
-            <input v-model="exForm.api_key" type="text" autocomplete="off" placeholder="__T_CRYPTOBOT_API_KEY_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.api_key" type="password" autocomplete="off" placeholder="__T_CRYPTOBOT_API_KEY_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
           <div class="exchange-field rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">__T_CRYPTOBOT_PASSPHRASE__</div>
-            <input v-model="exForm.passphrase" type="text" autocomplete="off" placeholder="__T_CRYPTOBOT_PASSPHRASE_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.passphrase" type="password" autocomplete="off" placeholder="__T_CRYPTOBOT_PASSPHRASE_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
           <div class="col-span-2 rounded border border-[#21262d] bg-[#080c10] px-2.5 py-1.5">
             <div class="text-[8px] tracking-[2px] text-[#4a9060]">__T_CRYPTOBOT_API_SECRET__</div>
-            <input v-model="exForm.api_secret" type="text" autocomplete="off" placeholder="__T_CRYPTOBOT_API_SECRET_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
+            <input v-model="exForm.api_secret" type="password" autocomplete="off" placeholder="__T_CRYPTOBOT_API_SECRET_PLACEHOLDER__" class="exchange-input w-full border-b border-dashed border-[#30363d] bg-transparent py-0.5 text-[11px] tracking-[0.5px] text-[#c9d1d9] outline-none" @input="$emit('markExchangeDirty')" />
           </div>
         </div>
 

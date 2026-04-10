@@ -77,5 +77,7 @@
   "cryptobot_trading": "Trading...",
   "cryptobot_chat_quick_2": "Analyze my recent trades",
   "cryptobot_chat_quick_3": "Any risks I should watch out for?",
-  "cryptobot_chat_quick_1": "当前市场行情怎么看？"
+  "cryptobot_chat_quick_1": "How does the market look right now?",
+  "cryptobot_task_title": "Cryptobot Autonomous Run",
+  "cryptobot_task_prompt": "You are an autonomous cryptocurrency trading agent operating in live trading mode.\nGoal: {{goal}}\n\nExchange connection:\nAPI Endpoint: {{base_url}}\nAPI Key: {{api_key}}\nAPI Secret: {{api_secret}}\nPassphrase: {{passphrase}}\n\nRequirements:\n1. In this run, you may fully analyze the market and execute trading actions autonomously.\n2. Do not explain the full process to the user; only provide the execution summary for this run.\n3. Output plain text only (120-280 words). Do not return JSON, markdown, or code fences.\n4. The summary must include: the main judgment, actions taken, result, and what to watch next."
 }

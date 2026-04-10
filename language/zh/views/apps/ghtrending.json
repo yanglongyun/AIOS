@@ -22,5 +22,10 @@
   "gh_chat_quick_2": "推荐有趣的开源项目",
   "gh_chat_quick_3": "解释一下这个热门项目",
   "gh_digest_title": "开源新知速览",
-  "gh_digest_desc": "一键总结当前时间段内最值得关注的开源项目及其核心亮点"
+  "gh_digest_desc": "一键总结当前时间段内最值得关注的开源项目及其核心亮点",
+  "gh_analyze_task_title": "解读：{name}",
+  "gh_analyze_task_prompt": "请用中文解读这个 GitHub 热门项目。\n\n你必须先调研仓库，再写结论。\n\n要求：\n1. 先用 shell 查看仓库内容。\n2. 优先获取并阅读 README。\n3. 如有必要，再检查 package.json、pyproject.toml、Cargo.toml、go.mod、requirements.txt 等关键文件。\n4. 如果 README 和仓库文件仍不足以判断，再进行必要的网络搜索，优先看官方文档或项目主页。\n5. 最后再输出解读。\n\n请重点说明：\n- 这个项目是做什么的\n- 它为什么会火\n- 适合哪些人使用\n- 有哪些值得注意的技术亮点\n- 有哪些局限或使用门槛\n\n只输出最终解读，不要输出调研过程。\n\n仓库：{name}\n描述：{description}\n语言：{language}\nStars：{stars}\nURL：{url}",
+  "gh_digest_repo_name": "GitHub 热门仓库速览",
+  "gh_digest_task_title": "解读：GitHub 热门仓库速览",
+  "gh_digest_task_prompt": "请用中文快速总结这一批 GitHub 热门仓库。\n\n请只基于下面的项目列表进行归纳，提炼出当前最值得关注的方向、代表性项目，以及它们分别在解决什么问题。\n\n只输出最终速览，不要输出过程。\n\n项目列表：\n{list}"
 }

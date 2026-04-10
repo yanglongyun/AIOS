@@ -4,9 +4,9 @@
       <div class="border-b px-3 py-2.5" style="border-color:rgba(0,0,0,0.07)">
         <button
           class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-[9px] border px-3 py-2 text-[13px] font-semibold transition-all"
-          style="border-color:rgba(92,67,50,0.25);background:#fff;color:#3d2f1e"
-          @mouseover="$event.currentTarget.style.background='#f5f0ea'"
-          @mouseleave="$event.currentTarget.style.background='#fff'"
+          style="border-color:rgba(92,67,50,0.14);background:rgba(255,255,255,0.58);color:rgba(61,47,30,0.82)"
+          @mouseover="$event.currentTarget.style.background='rgba(255,255,255,0.78)'"
+          @mouseleave="$event.currentTarget.style.background='rgba(255,255,255,0.58)'"
           @click="newChat"
         >
           <Plus class="h-3.5 w-3.5" />

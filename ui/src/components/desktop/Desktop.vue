@@ -22,7 +22,7 @@
         @dblclick.stop="openApp(app.id)"
       >
         <span class="text-[26px] transition-transform duration-200" :class="{ '-translate-y-0.5': selectedId !== app.id }">{{ app.icon }}</span>
-        <span class="max-w-[80px] truncate text-center text-[11px] font-semibold leading-tight" :class="iconLabelClass">{{ app.name }}</span>
+        <span class="line-clamp-2 max-w-[80px] text-center text-[11px] font-semibold leading-tight break-words" :class="iconLabelClass">{{ app.name }}</span>
       </div>
     </div>
   </div>

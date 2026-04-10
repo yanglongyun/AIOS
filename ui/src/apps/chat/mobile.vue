@@ -12,7 +12,7 @@
       <div class="flex items-center gap-2">
         <button
           class="flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all"
-          style="border-color:rgba(92,67,50,0.2);background:rgba(255,255,255,0.75);color:#3d2f1e"
+          style="border-color:rgba(92,67,50,0.14);background:rgba(255,255,255,0.58);color:rgba(61,47,30,0.82)"
           title="__T_CHAT_NEW_TITLE__"
           @click="newChat"
         >

@@ -4,11 +4,37 @@
 
 > The Operating System for the AI Era
 
-## Quick Start
+## Install
+
+Requirements:
+- Node.js 20+
+- `git`
+- `npm`
+
+One-line install:
+
+macOS
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-macos.sh | sh
+```
+
+Linux
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-linux.sh | sh
+```
+
+Windows
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-windows.ps1 | iex"
+```
+
+After installation, open: `http://localhost:9500`
+
+## Manual Start
 
 ```bash
 git clone https://github.com/valueriver/aios.git
-cd aios
+cd aios/AIOS
 npm install
 npm run build
 npm run start &

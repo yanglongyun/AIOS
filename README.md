@@ -1,70 +1,96 @@
 # AIOS
 
-[简体中文](./README_zh.md) | **English**
+**简体中文** | [English](./README_en.md)
 
-> The Operating System for the AI Era
+> AI时代的操作系统
 
-## Quick Start
+## 安装
+
+要求：
+- Node.js 20+
+- `git`
+- `npm`
+
+一键安装：
+
+macOS
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-macos.sh | sh
+```
+
+Linux
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-linux.sh | sh
+```
+
+Windows
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-windows.ps1 | iex"
+```
+
+安装完成后默认打开：`http://localhost:9500`
+
+## 手动启动
 
 ```bash
 git clone https://github.com/valueriver/aios.git
-cd aios
+cd aios/AIOS
 npm install
 npm run build
 npm run start &
 npm run start:apps
 ```
 
-Open: `http://localhost:9500`
+打开：`http://localhost:9500`
 
-## Community & Feedback
+## 交流反馈
 
-**💬 [Join our Discord Community](https://discord.gg/7YnDeKE8)**
+**💬 [加入 Discord 社区参与交流](https://discord.gg/7YnDeKE8)**
 
-## Core Philosophy
+## 核心理念
 
-### Dialogue, a New Paradigm for Human-Computer Interaction
+### 对话，新的人机交互范式
 
-AIOS, as the name suggests, is an operating system driven by AI. In AIOS, you can issue instructions to your computer or server in natural language. Dialogue is a natural mode of expression — simple, efficient, and highly personal. You can convey multiple complex needs within a single continuous conversation, one that naturally carries context, situational continuity, and memory.
+AIOS，顾名思义，即由 AI 驱动的操作系统。在 AIOS 中，你可以用自然语言的方式向你的计算机或服务器发出指示，对话是一种自然的表达方式，它简单高效又高度个性化。你可以在一段连续的对话中表达多个复杂的需求，它天然具备上下文，具有情景的连贯性和记忆。
 
-Dialogue is becoming a new paradigm for human-computer interaction, further closing the distance between people and computers.
-
----
-
-### UI is Still Indispensable
-
-Although dialogue is a natural way of interacting, it cannot replace Graphical User Interfaces (GUI).
-
-Language is inherently abstract, and sometimes even laborious. When you try to describe a complex interface layout in words, or precisely specify a color or typography, language becomes an obstacle — far less direct and efficient than a mouse click or a finger touch. More importantly, dialogue is linear and fluid — it excels at expressing intent, but struggles to present results.
-
-Imagine a system with only a chat window. When you want to jot down a note, it gets buried in scrolling conversation history: no collection, no folders, impossible to organize, hard to search, impossible to pin, and completely unformatted. Without the concrete form of a "notes app," you wouldn't even think to take a note there.
-
-Dialogue often comes with uncertainty. To get a good result, you need to craft a high-quality prompt — and even with the same prompt, the outcome may differ each time. But a calendar, a ledger, a reader, a sketchpad — every definite need demands a matching functional form. Form is not decoration; form is function, form is value itself.
-
-**The future will not dissolve into formlessness; it will remain in concrete form.** Dialogue and interface are not competing or replacing each other — they are complementary and both indispensable. In a true AI operating system, GUI applications remain an essential core hub.
+对话正在成为一种全新的人机交互范式，它进一步拉近了人与计算机之间的距离。
 
 ---
 
-### Everyone Can Have Their Own Dedicated Software
+### 界面，依然不可或缺
 
-We are on the verge of the biggest paradigm shift in software engineering history: soon, almost all code will be written by AI.
+尽管对话是一种自然的交互方式，但它并不能取代图形界面（GUI）。
 
-This means you can build software exclusively for you, tailored to your own needs, habits, and preferences. You don't need to learn any programming language, hire a developer, or wait for a product team to schedule your feature request into a long roadmap. You simply tell the AI your idea.
+语言本质上是抽象的，有时甚至是费力的。当你试图通过文字描述一个复杂的界面布局，或者精确指定某个颜色、某种排版时，语言反而成了阻碍，远没有鼠标点击或者手指触摸来得直接高效。更重要的是，对话是线性的、流动的——它擅长表达意图，却不擅长承载结果。
 
-In the traditional software world, most people can only accept products defined by a small group of people with programming skills: accepting their design language, their functional boundaries, and their idea of how you "should" use it. Software used to belong to developers — in AIOS, all of this will be completely overturned.
+想象一个只有聊天窗口的系统。当你想记录一篇笔记，它会被淹没在滚动的对话记录里：没有归集，没有文件夹，无法组织，难以搜索，不能置顶，也无从排版。没有"笔记应用"这个具体的物形，你甚至都想不到这里可以记笔记。
 
-Software will truly belong to the people who use it. It will have no ads, no subscriptions, and its data belongs to the people who use it. It will become an extension and realization of people's needs, preferences, and will — truly reaching every individual.
+对话往往具有不确定性，想要得到一个好的结果，你需要编辑一份高质量的"提示词"；而即使是同一份提示词，每次也可能带来不同的结果。但日历、账本、阅读器、画板——每一个确定的需求背后，都需要一个与之匹配的具体功能形态。形态不是装饰，形态即是功能，形态就是价值本身。
+
+**未来不会流于无形，依然会留于物形。** 对话与界面，不是竞争和替代关系，而是相辅相成，缺一不可。在真正的 AI 操作系统里，图形界面应用依然是不可或缺的核心枢纽。
 
 ---
 
-### AI Makes Applications Themselves More Powerful
+### 每个人都可以拥有专属的软件
 
-In AIOS, an unprecedented bidirectional relationship is established between AI and applications: **AI can understand and operate applications, and applications can in turn dispatch the AI**.
+我们即将迎来软件工程史上最大的一次范式转移：很快，几乎所有的代码都将由 AI 完成。
 
-On one hand, because these applications are generated by AI, the AI can understand their underlying structure — enabling it to use, schedule, and update them more directly and efficiently. Through applications, AI also gains a multi-dimensional understanding of the user. Applications are not only your workspace for collaborating with AI, but also the window through which AI better understands your context.
+这意味着，你可以根据自己的需求、习惯与喜好，打造专属于你的软件。你不需要学习任何编程语言，不需要雇佣开发者，也不需要等待某个产品团队把你的需求排进漫长的路线图。你只需要向 AI 说出你的想法。
 
-On the other hand, applications themselves are evolving. In traditional applications, functionality is determined by code, workflows are fixed, and boundaries are constrained — you simply get what the developer wrote, nothing more, nothing less. In AIOS, an application can directly issue tasks to the AI. This means applications are no longer bound by fixed pre-written logic; they can tap into the underlying AI's general capabilities at any time.
+在传统软件世界里，大多数人只能接受由少数掌握编程技能的人定义的产品：接受它的设计语言，接受它的功能边界，接受它认为你"应该"怎么使用。过去的软件，是开发者的软件；而在 AIOS 中，这一切将被彻底颠覆。
 
-Take an "Interactive Fiction App" as an example: in traditional development, to keep AI-generated new chapters coherent with previous text — without forgetting earlier plot and settings — you must account for all kinds of situations and write complex logic to manually orchestrate, truncate, and compress context. Even then, constrained by rigid code logic, the results often fall short.
+软件将真正属于使用它的人。它将不再有广告，没有订阅，它的数据属于使用它的人，它将成为人们需求、喜好、意志的延伸和实现，真正的走进每一个人。
 
-But in AIOS, "generate the next chapter" is no longer a passive API call requiring complex context orchestration. It becomes a Task dispatched by the application to the underlying system. The AI engine takes over autonomously: it actively queries the database, reviews vast historical records, dynamically extracts and integrates relevant settings, and ultimately generates a new chapter far more consistent with the story's logic.
+---
+
+### AI，让应用本身变得更强大
+
+在 AIOS 中，AI 与应用之间建立了一种前所未有的双向调用关系：**AI 可以理解并操作应用，应用也可以反向调度 AI**。
+
+一方面，因为这些应用本身是由 AI 生成的，AI 能够了解它们的底层结构，因此能够更直接、高效地使用它、调度它，更新它。AI 也通过应用更多维度地理解了用户，应用不仅是你与 AI 协作的工作台，更成为了 AI 更好理解你的上下文的窗口。
+
+另一方面，应用本身也迎来了进化。在传统应用中，功能由程序代码决定，流程固定，边界受限——开发者写了什么，用户就能用什么，不多也不少。而在 AIOS 中，应用可以直接向 AI 发送任务。这意味着应用不再受限于预先编写的固定逻辑，它可以随时调用底层 AI 的通用能力。
+
+以"互动小说应用"为例：在传统的开发模式下，要想让 AI 生成的新章节与前文保持连贯，不遗忘之前的剧情和设定，你必须考虑各种情况，编写复杂的逻辑去手动编排、截断和压缩上下文。即便如此，受限于代码逻辑的僵化，效果依然常常捉襟见肘。
+
+但在 AIOS 中，"生成下一章"不再是一个需要复杂编排上下文的被动 API 调用，而是应用向底层系统下发的一个任务（Task）。底层的 AI 引擎会自主接管：它能够主动查询数据库，自行回顾海量的历史发生记录，动态提取并整合相关设定，最终生成更符合故事逻辑的新章节。

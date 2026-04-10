@@ -8,24 +8,21 @@
         @click.stop
       >
         <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('chat')">
-          <span class="text-sm">💬</span>新建对话
-        </div>
-        <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('task-create')">
-          <span class="text-sm">✅</span>新建任务
+          <span class="text-sm">💬</span>__T_CONTEXT_NEW_CHAT__
         </div>
         <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('createapp')">
-          <span class="text-sm">➕</span>新建应用
+          <span class="text-sm">➕</span>__T_CONTEXT_NEW_APP__
         </div>
         <div class="mx-2 my-1 h-px" :class="dividerClass" />
         <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="refresh">
-          <span class="text-sm">🔄</span>刷新
+          <span class="text-sm">🔄</span>__T_CONTEXT_REFRESH__
         </div>
         <div class="mx-2 my-1 h-px" :class="dividerClass" />
         <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="$emit('wallpaper'); close()">
-          <span class="text-sm">🖼️</span>更换壁纸
+          <span class="text-sm">🖼️</span>__T_CONTEXT_CHANGE_WALLPAPER__
         </div>
         <div class="flex cursor-pointer items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-medium transition-all duration-100" :class="itemClass" @click="action('settings')">
-          <span class="text-sm">⚙️</span>系统设置
+          <span class="text-sm">⚙️</span>__T_CONTEXT_SETTINGS__
         </div>
       </div>
     </div>
@@ -65,10 +62,6 @@ async function action(appId) {
   close();
   if (appId === 'chat') {
     await openIntent({ app: 'chat', action: 'open_new' });
-    return;
-  }
-  if (appId === 'task-create') {
-    await openIntent({ app: 'tasks', action: 'open_create' });
     return;
   }
   if (appId === 'createapp') {

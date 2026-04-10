@@ -46,8 +46,7 @@ const createAgentTask = async ({
   app,
   title = "",
   prompt,
-  meta = null,
-  schedule_id = null
+  meta = null
 }) => {
   const {
     apiUrl,
@@ -65,8 +64,7 @@ const createAgentTask = async ({
     app,
     title,
     prompt,
-    meta,
-    schedule_id
+    meta
   });
   broadcast({ type: "tasks_changed" });
   const send = (msg) => {

@@ -16,13 +16,13 @@
         <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[#222]">{{ win.title }}</span>
         <!-- 右侧红绿灯 -->
         <div class="traffic-lights ml-3 flex items-center gap-[7px]">
-          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '还原' : '最大化'">
+          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '__T_WINDOW_RESTORE__' : '__T_WINDOW_MAXIMIZE__'">
             <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 5.5L4 2l2.5 3.5" stroke="#006500" stroke-width="1.2" fill="none"/></svg>
           </button>
-          <button @click.stop="doMinimize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#febc2e] transition-opacity" title="最小化">
+          <button @click.stop="doMinimize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#febc2e] transition-opacity" title="__T_WINDOW_MINIMIZE__">
             <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><line x1="1" y1="4" x2="7" y2="4" stroke="#995700" stroke-width="1.2"/></svg>
           </button>
-          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="关闭">
+          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="__T_WINDOW_CLOSE__">
             <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="#4a0000" stroke-width="1.2" fill="none"/></svg>
           </button>
         </div>

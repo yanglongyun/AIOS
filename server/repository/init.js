@@ -27,7 +27,6 @@ const initDatabase = () => {
     CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       conversation_id TEXT,
-      schedule_id TEXT,
       app TEXT NOT NULL,
       title TEXT NOT NULL DEFAULT '',
       mode TEXT NOT NULL DEFAULT 'agent',
@@ -39,19 +38,6 @@ const initDatabase = () => {
       error TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       finished_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS schedules (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      prompt TEXT NOT NULL,
-      run_at TEXT,
-      cron TEXT,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      last_run_at TEXT,
-      last_task_id INTEGER,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
     );
 
     CREATE TABLE IF NOT EXISTS users (

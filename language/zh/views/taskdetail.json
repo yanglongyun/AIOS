@@ -7,6 +7,8 @@
   "taskdetail_unnamed_task": "未命名任务",
   "taskdetail_created_at": "创建时间：",
   "taskdetail_finished_at": "完成时间：",
+  "taskdetail_app_label": "应用：",
+  "taskdetail_prompt_label": "提示词",
   "taskdetail_conversation_id": "会话ID：",
   "taskdetail_input_label": "任务输入",
   "taskdetail_output_label": "任务输出",
@@ -20,7 +22,11 @@
   "taskdetail_status_done": "已完成",
   "taskdetail_status_error": "错误",
   "taskdetail_status_aborted": "已终止",
+  "taskdetail_role_ai": "AI",
   "taskdetail_role_user": "用户",
   "taskdetail_role_tool_call": "工具调用",
-  "taskdetail_role_tool_result": "工具结果"
+  "taskdetail_role_tool_result": "工具结果",
+  "taskdetail_role_unknown": "未知",
+  "taskdetail_tool_unknown": "未知工具",
+  "taskdetail_truncated_result": "内容过长，已省略 {count} 字"
 }

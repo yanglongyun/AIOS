@@ -7,6 +7,8 @@
   "taskdetail_unnamed_task": "Untitled Task",
   "taskdetail_created_at": "Created:",
   "taskdetail_finished_at": "Completed:",
+  "taskdetail_app_label": "App:",
+  "taskdetail_prompt_label": "Prompt",
   "taskdetail_conversation_id": "Conversation ID:",
   "taskdetail_input_label": "Task Input",
   "taskdetail_output_label": "Task Output",
@@ -20,7 +22,11 @@
   "taskdetail_status_done": "Done",
   "taskdetail_status_error": "Error",
   "taskdetail_status_aborted": "Aborted",
+  "taskdetail_role_ai": "AI",
   "taskdetail_role_user": "User",
   "taskdetail_role_tool_call": "Tool Call",
-  "taskdetail_role_tool_result": "Tool Result"
+  "taskdetail_role_tool_result": "Tool Result",
+  "taskdetail_role_unknown": "Unknown",
+  "taskdetail_tool_unknown": "Unknown Tool",
+  "taskdetail_truncated_result": "Content is too long. {count} characters were omitted"
 }

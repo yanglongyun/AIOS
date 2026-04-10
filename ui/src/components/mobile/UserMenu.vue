@@ -14,14 +14,14 @@
           @click="$emit('restart')"
         >
           <RotateCcw class="h-[14px] w-[14px] text-[#7a6a58]" />
-          重启应用服务
+          __T_LAUNCHER_RESTART_APPS__
         </button>
         <button
           class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] text-[#c04040] transition-colors active:bg-[rgba(200,80,50,0.06)]"
           @click="$emit('logout')"
         >
           <LogOut class="h-[14px] w-[14px]" />
-          退出登录
+          __T_LAUNCHER_LOGOUT__
         </button>
       </div>
     </div>

@@ -6,10 +6,6 @@ import { listTaskMessages } from "../task/messages.js";
 import { stopTask } from "../task/stop.js";
 import { createInstantTask } from "../task/create/instant.js";
 import { createAgentTask } from "../task/create/agent.js";
-import { listSchedules } from "../task/schedule/list.js";
-import { createSchedule } from "../task/schedule/create.js";
-import { updateSchedule } from "../task/schedule/update.js";
-import { deleteSchedule } from "../task/schedule/delete.js";
 const handleTaskCreateInstantApi = async (req, res, path) => {
   if (path !== "/api/task/create/instant" || req.method !== "POST") return false;
   try {
@@ -85,34 +81,6 @@ const handleTaskApi = async (req, res, path, url) => {
     if (handled !== false) return true;
     const handled2 = await handleTaskCreateAgentApi(req, res, path);
     if (handled2 !== false) return true;
-  }
-  if (path === "/api/task/schedule" && req.method === "GET") {
-    const limit = Number(url.searchParams.get("limit") || 200);
-    return json(res, listSchedules({ limit }));
-  }
-  if (path === "/api/task/schedule/create" && req.method === "POST") {
-    try {
-      const body = await readBody(req);
-      return json(res, createSchedule(body));
-    } catch (e) {
-      return json(res, { success: false, message: e?.message || "Failed to create schedule" }, 400);
-    }
-  }
-  if (path === "/api/task/schedule/update" && req.method === "POST") {
-    const body = await readBody(req);
-    const id = Number(body.id || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "Invalid id" }, 400);
-    const result = updateSchedule({ id, ...body });
-    if (result?.status) return json(res, { success: false, message: result.message }, result.status);
-    return json(res, result);
-  }
-  if (path === "/api/task/schedule/delete" && req.method === "POST") {
-    const body = await readBody(req);
-    const id = Number(body.id || 0);
-    if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "Invalid id" }, 400);
-    const result = deleteSchedule({ id });
-    if (result?.status) return json(res, { success: false, message: result.message }, result.status);
-    return json(res, result);
   }
   if (path === "/api/task/stop" && req.method === "POST") {
     const body = await readBody(req);

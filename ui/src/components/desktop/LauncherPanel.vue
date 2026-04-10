@@ -38,7 +38,7 @@
         :class="utilityButtonClass"
         :disabled="restarting"
         @click="doRestart"
-        title="重启应用服务"
+        title="__T_LAUNCHER_RESTART_APPS__"
       >
         <RotateCcw class="h-[13px] w-[13px]" :class="restarting ? 'animate-spin' : ''" />
       </button>
@@ -46,7 +46,7 @@
         class="flex h-[26px] items-center rounded-[6px] px-2 text-red-500 transition-colors"
         :class="logoutClass"
         @click="doLogout"
-        title="退出登录"
+        title="__T_LAUNCHER_LOGOUT__"
       >
         <LogOut class="h-[13px] w-[13px]" />
       </button>

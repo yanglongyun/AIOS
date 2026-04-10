@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div v-if="visible" class="fixed inset-0 z-[400]" @click="close">
       <div class="picker absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl p-6" @click.stop>
-        <h3 class="mb-4 text-[15px] font-semibold text-[#2c2420]">选择壁纸</h3>
+        <h3 class="mb-4 text-[15px] font-semibold text-[#2c2420]">__T_WALLPAPER_PICKER_TITLE__</h3>
         <div class="grid grid-cols-4 gap-2.5">
         <div
           v-for="wp in wallpapers" :key="wp.id"

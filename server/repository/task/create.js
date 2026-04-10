@@ -31,18 +31,16 @@ const insertAgentTaskRecord = ({
   app,
   title,
   prompt,
-  meta = null,
-  schedule_id = null
+  meta = null
 }) => {
   const row = db.prepare(
-    "INSERT INTO tasks (conversation_id, app, title, mode, prompt, schema, meta, status, schedule_id) VALUES (?, ?, ?, 'agent', ?, NULL, ?, 'pending', ?) RETURNING id"
+    "INSERT INTO tasks (conversation_id, app, title, mode, prompt, schema, meta, status) VALUES (?, ?, ?, 'agent', ?, NULL, ?, 'pending') RETURNING id"
   ).get(
     conversationId,
     app,
     String(title || ""),
     prompt,
-    meta ? JSON.stringify(meta) : null,
-    schedule_id
+    meta ? JSON.stringify(meta) : null
   );
   return { taskId: row.id };
 };

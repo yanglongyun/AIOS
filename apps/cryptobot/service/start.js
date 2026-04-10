@@ -6,10 +6,7 @@ const start = async (body = {}) => {
   const equity = await fetchAccountTotalEq(cfg);
   saveConfig({
     initial_equity: equity,
-    current_equity: equity,
-    locale: body.locale || cfg.locale || "en",
-    task_title_template: body.task_title_template || cfg.task_title_template || "",
-    task_prompt_template: body.task_prompt_template || cfg.task_prompt_template || ""
+    current_equity: equity
   });
   startBot(body.interval_sec);
   return { success: true };

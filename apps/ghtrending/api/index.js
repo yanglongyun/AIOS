@@ -30,7 +30,7 @@ const handleGhtrendingApi = async (req, res, path) => {
   }
   if (path === "/apps/ghtrending/digest" && req.method === "POST") {
     const body = await readBody(req);
-    return json(res, await digest(body));
+    return json(res, await digest({ list: body.list || "" }));
   }
   if (path === "/apps/ghtrending/check" && req.method === "POST") {
     const body = await readBody(req);

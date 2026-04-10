@@ -147,12 +147,12 @@
           <h2 class="mb-1.5 text-[26px] font-bold leading-[1.2] tracking-[-0.5px] text-[#222]">{{ t.intro_title }}</h2>
           <p class="mb-7 text-[14px] font-medium leading-[1.6] text-black/45">{{ t.intro_hint }}</p>
 
-          <div class="min-h-[90px] rounded-2xl border border-black/[0.07] bg-black/[0.03] p-5 text-[14px] leading-relaxed text-[#444]">
-            <span>{{ displayedText }}</span>
+          <div class="max-h-[220px] min-h-[120px] overflow-y-auto rounded-2xl border border-black/[0.07] bg-black/[0.03] p-5 text-[14px] leading-relaxed text-[#444]">
+            <span class="block whitespace-pre-wrap break-words">{{ displayedText }}</span>
             <span v-if="typing" class="ml-0.5 inline-block h-[1em] w-[3px] animate-pulse bg-[#222] align-text-bottom"></span>
           </div>
 
-          <div class="mt-6 flex flex-col items-center gap-3 border-t border-black/[0.06] pt-6 transition-opacity duration-500" :class="typing ? 'pointer-events-none opacity-0' : 'opacity-100'">
+          <div v-if="!typing" class="mt-6 flex flex-col items-center gap-3 border-t border-black/[0.06] pt-6">
             <p class="text-[12px] font-medium text-black/40">{{ installMessage }}</p>
             <button
               class="inline-flex items-center rounded-full bg-[#222] px-[26px] py-[12px] pr-[12px] text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-all duration-300 hover:scale-[1.04] hover:bg-black hover:shadow-[0_8px_28px_rgba(0,0,0,0.28)] disabled:cursor-not-allowed disabled:opacity-45"

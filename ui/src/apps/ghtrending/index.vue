@@ -151,7 +151,6 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { marked } from 'marked';
-import { LOCALE } from '../../system/locale.js';
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (t) => marked.parse(t || '');
 
@@ -165,20 +164,6 @@ const timeFilters = [{ id: 'weekly', label: '__T_GH_WEEKLY__' }, { id: 'monthly'
 const langClr = (l) => ({ JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572a5', Rust: '#dea584', Go: '#00add8', Java: '#b07219', 'C++': '#f34b7d', Swift: '#f05138', Kotlin: '#A97BFF' })[l] || '#8b949e';
 const fmtNum = (n) => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
 const api = async (p, o) => (await fetch(`/apps/ghtrending/${p}`, o)).json();
-const fillTemplate = (template, vars) => Object.entries(vars).reduce(
-  (text, [key, value]) => text.replaceAll(`{${key}}`, String(value ?? '')),
-  String(template || '')
-);
-const buildAnalyzeTitle = (repo) => fillTemplate('__T_GH_ANALYZE_TASK_TITLE__', { name: repo.name });
-const buildAnalyzePrompt = (repo) => fillTemplate('__T_GH_ANALYZE_TASK_PROMPT__', {
-  name: repo.name,
-  description: repo.description || '',
-  language: repo.language || '',
-  stars: repo.stars || 0,
-  url: repo.url || ''
-});
-const buildDigestTitle = () => '__T_GH_DIGEST_TASK_TITLE__';
-const buildDigestPrompt = (list) => fillTemplate('__T_GH_DIGEST_TASK_PROMPT__', { list });
 
 const loadRepos = async () => {
   loading.value = true;
@@ -201,7 +186,7 @@ const analyzeRepo = async (repo) => {
     analyses[repo.id] = (await api('analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ repo, title: buildAnalyzeTitle(repo), prompt: buildAnalyzePrompt(repo) })
+      body: JSON.stringify({ repo })
     })).analysis || '';
   }
   catch { analyses[repo.id] = '__T_GH_FAILED__'; }
@@ -212,13 +197,10 @@ const doDigest = async () => {
   digesting.value = true;
   try {
     const list = repos.value.slice(0, 15).map((r, i) => `${i + 1}. ${r.name} - ${r.description || 'N/A'} (⭐${r.stars}, ${r.language || 'N/A'})`).join('\n');
-    const repo = { name: '__T_GH_DIGEST_REPO_NAME__', description: list, language: '', stars: 0, url: '', id: 0 };
-    const title = buildDigestTitle();
-    const prompt = buildDigestPrompt(list);
     digestText.value = (await api('digest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ repo, title, prompt })
+      body: JSON.stringify({ list })
     })).analysis || '';
   } catch { digestText.value = '__T_GH_FAILED__'; }
   digesting.value = false;

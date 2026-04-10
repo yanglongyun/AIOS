@@ -1,14 +1,19 @@
-const applyTemplate = (template, cfg) => {
-  return String(template || "")
-    .replaceAll("{{goal}}", String(cfg.goal || ""))
-    .replaceAll("{{base_url}}", String(cfg.base_url || "https://www.okx.com"))
-    .replaceAll("{{api_key}}", String(cfg.api_key || ""))
-    .replaceAll("{{api_secret}}", String(cfg.api_secret || ""))
-    .replaceAll("{{passphrase}}", String(cfg.passphrase || ""));
-};
 const requestDecisionTask = async (cfg) => {
-  const title = applyTemplate(cfg.task_title_template, cfg).trim() || (cfg.locale === "zh" ? "炒币机自主执行" : "Cryptobot Autonomous Run");
-  const prompt = applyTemplate(cfg.task_prompt_template, cfg).trim();
+  const title = "Cryptobot Autonomous Run";
+  const prompt = `You are an autonomous cryptocurrency trading agent operating in live trading mode.
+Goal: ${cfg.goal || ""}
+
+Exchange connection:
+API Endpoint: ${cfg.base_url || "https://www.okx.com"}
+API Key: ${cfg.api_key || ""}
+API Secret: ${cfg.api_secret || ""}
+Passphrase: ${cfg.passphrase || ""}
+
+Requirements:
+1. In this run, you may fully analyze the market and execute trading actions autonomously.
+2. Do not explain the full process to the user; only provide the execution summary for this run.
+3. Output plain text only (120-280 words). Do not return JSON, markdown, or code fences.
+4. The summary must include: the main judgment, actions taken, result, and what to watch next.`;
   const resp = await fetch("http://localhost:9500/api/task/create/agent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -22,7 +27,7 @@ const requestDecisionTask = async (cfg) => {
   if (!resp.ok || data.success === false) {
     throw new Error(data.message || data.error || `request failed ${resp.status}`);
   }
-  const summary = String(data.response || "").trim() || (cfg.locale === "zh" ? "本轮任务已执行，但未返回有效总结。" : "This run completed, but no valid summary was returned.");
+  const summary = String(data.response || "").trim() || "This run completed, but no valid summary was returned.";
   return {
     summary: summary.slice(0, 1200),
     task_id: Number(data.id || 0)

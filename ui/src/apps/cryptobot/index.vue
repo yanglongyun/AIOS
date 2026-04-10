@@ -46,7 +46,6 @@
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import CryptobotMachinePanel from './CryptobotMachinePanel.vue';
 import CryptobotDecisionPaper from './CryptobotDecisionPaper.vue';
-import { LOCALE } from '../../system/locale.js';
 
 const API = '/apps/cryptobot';
 const INTERVALS = [1, 2, 5, 10, 15, 30, 60];
@@ -85,9 +84,6 @@ const post = (path, body) => api(path, {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(body)
 });
-
-const taskTitleTemplate = () => '__T_CRYPTOBOT_TASK_TITLE__';
-const taskPromptTemplate = () => '__T_CRYPTOBOT_TASK_PROMPT__';
 
 const loadStatus = async () => {
   const d = await api('/status');
@@ -157,12 +153,7 @@ const doSaveAll = async () => {
 const doStart = async () => {
   error.value = '';
   try {
-    await post('/start', {
-      interval_sec: INTERVALS[sliderIdx.value] * 60,
-      locale: LOCALE,
-      task_title_template: taskTitleTemplate(),
-      task_prompt_template: taskPromptTemplate()
-    });
+    await post('/start', { interval_sec: INTERVALS[sliderIdx.value] * 60 });
     await loadAll();
   } catch (e) {
     error.value = e.message;

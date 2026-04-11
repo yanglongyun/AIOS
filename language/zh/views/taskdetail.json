@@ -1,4 +1,5 @@
 {
+  "taskdetail_back": "返回",
   "taskdetail_title": "任务详情",
   "taskdetail_subtitle": "查看任务信息、完整消息记录，并在进行中时终止任务",
   "taskdetail_stop_button": "终止任务",

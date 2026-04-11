@@ -46,6 +46,7 @@
   "tasks_load_fail": "加载失败",
   "tasks_update_fail": "更新失败",
   "tasks_delete_fail": "删除失败",
+  "tasks_tab_all": "全部",
   "tasks_tab_scheduled": "待执行",
   "tasks_tab_running": "进行中",
   "tasks_tab_history": "已完成",

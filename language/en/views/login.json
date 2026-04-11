@@ -1,8 +1,10 @@
 {
   "login_title": "AIOS Login",
   "login_subtitle": "Sign in with system credentials",
-  "login_username_placeholder": "Username",
-  "login_password_placeholder": "Password",
+  "login_username_label": "Username",
+  "login_username_placeholder": "Enter username",
+  "login_password_label": "Password",
+  "login_password_placeholder": "Enter password",
   "login_button": "Login",
   "login_processing": "Processing...",
   "login_forgot_password": "Forgot password?",

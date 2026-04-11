@@ -1,4 +1,5 @@
 {
+  "taskdetail_back": "Back",
   "taskdetail_title": "Task Details",
   "taskdetail_subtitle": "View task info, full message history, and stop running tasks",
   "taskdetail_stop_button": "Stop Task",

@@ -46,6 +46,7 @@
   "tasks_load_fail": "Failed to load",
   "tasks_update_fail": "Failed to update",
   "tasks_delete_fail": "Failed to delete",
+  "tasks_tab_all": "All",
   "tasks_tab_scheduled": "Pending",
   "tasks_tab_running": "Running",
   "tasks_tab_history": "Completed",

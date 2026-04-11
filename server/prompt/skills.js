@@ -1,4 +1,4 @@
-import { listSkills } from "../service/skills/list.js";
+import { listSkills } from "../main/service/skills/list.js";
 const skills = () => {
   const sections = listSkills().map((skill) => skill.content);
   if (sections.length === 0) return "";

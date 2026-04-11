@@ -1,5 +1,5 @@
 import { buildLlmHeaders } from "./common.js";
-import { parseJson } from "../../shared/json/parse.js";
+import { parseJson } from "../shared/json/parse.js";
 
 const ensureToolCall = (toolCalls, index) => {
   if (!toolCalls[index]) {

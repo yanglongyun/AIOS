@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "server/index.js",
+  "main": "server/main/index.js",
   "scripts": {
-    "dev": "node server/index.js & node apps/index.js & vite --config ui/vite.config.js ui",
-    "build": "vite build --config ui/vite.config.js ui",
-    "start": "node server/index.js",
-    "start:apps": "node apps/index.js",
+    "dev": "node server/main/index.js & node server/apps/index.js & vite --config gui/vite.config.js gui",
+    "build": "vite build --config gui/vite.config.js gui",
+    "start": "node server/main/index.js",
+    "start:apps": "node server/apps/index.js",
     "docker": "docker compose -f doc/docker/docker-compose.yml up -d --build",
     "docker:stop": "docker compose -f doc/docker/docker-compose.yml down"
   },

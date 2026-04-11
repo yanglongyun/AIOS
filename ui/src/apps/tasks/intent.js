@@ -1,5 +1,14 @@
+const taskDetailWindow = {
+  key: 'tasks:detail',
+  appId: 'tasks',
+  title: '__T_APP_SIDEBAR_TASKS__',
+  icon: '✅',
+  desktopLoad: () => import('./detail.vue'),
+  defaultDesktopWindowSize: { w: 800, h: 560 }
+};
+
 const intent = {
-  async open({ payload, existingWindow, openWindow, focusWindow }) {
+  async open({ payload, existingWindow, openWindow, openComponent, focusWindow }) {
     const action = payload.action || 'open';
 
     if (action === 'open') {
@@ -15,5 +24,6 @@ const intent = {
 };
 
 export {
-  intent
+  intent,
+  taskDetailWindow
 };

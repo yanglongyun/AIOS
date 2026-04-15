@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * setup.mjs
+ * start.mjs
  *
  * AIOS 启动前置脚本。单文件负责：
  *
- *   1. 检查 .language-applied 标记文件
+ *   1. 检查 .aios/settings.json 标记文件的 locale 字段
  *   2. 如果已经为请求的 locale 烘焙过，直接跳过（零开销放行）
  *   3. 否则把 language/<locale>/**\/*.json 的文案烘焙进源码：
  *      - 源码里 __T_<KEY_UPPER>__ 占位符被替换成真实文案
  *      - 支持双引号 / 单引号 / 反引号 / 裸文本四种上下文的正确转义
  *      - language/<locale>/apps/<app>/APP.md 覆盖到 server/apps/<app>/APP.md
- *   4. 在 projectRoot 下写 .language-applied 标记（内容为 locale）
+ *   4. 在 projectRoot 下写 .aios/settings.json（locale + appliedAt）
  *
  * 本脚本自定位到 dirname($0)/..，可以跑在主仓 AIOS/ 或任何 AIOS/ 的副本里
  * （例如 AIOS-dev/aios、AIOS-wandesk-image/aios）。
  *
  * 用法:
- *   node scripts/setup.mjs                  # 默认 locale = zh，走缓存判断
- *   node scripts/setup.mjs en               # 指定 locale
- *   node scripts/setup.mjs --force          # 忽略缓存标记，强制重烘
- *   node scripts/setup.mjs en --force       # 组合
- *   AIOS_LANG=en node scripts/setup.mjs     # 通过环境变量指定 locale
+ *   node scripts/start.mjs                  # 默认 locale = zh，走缓存判断
+ *   node scripts/start.mjs en               # 指定 locale
+ *   node scripts/start.mjs --force          # 忽略缓存标记，强制重烘
+ *   node scripts/start.mjs en --force       # 组合
+ *   AIOS_LANG=en node scripts/start.mjs     # 通过环境变量指定 locale
  *
  * npm 生命周期:
  *   predev / prebuild / prestart / prestart:apps 都挂这个脚本
@@ -36,35 +36,52 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const projectRoot = path.resolve(__dirname, '..');
-const marker = path.join(projectRoot, '.language-applied');
+const settingsDir = path.join(projectRoot, '.aios');
+const settingsFile = path.join(settingsDir, 'settings.json');
+
+const readSettings = () => {
+  if (!fs.existsSync(settingsFile)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+  } catch {
+    return null;
+  }
+};
+
+const writeSettings = (patch) => {
+  const current = readSettings() || {};
+  const next = { ...current, ...patch };
+  fs.mkdirSync(settingsDir, { recursive: true });
+  fs.writeFileSync(settingsFile, JSON.stringify(next, null, 2) + '\n');
+};
 
 const rawArgs = process.argv.slice(2);
 const force = rawArgs.includes('--force');
 const locale = rawArgs.find((a) => !a.startsWith('--')) || process.env.AIOS_LANG || 'zh';
 
 if (!force) {
-  const current = fs.existsSync(marker) ? fs.readFileSync(marker, 'utf8').trim() : null;
+  const current = readSettings()?.locale || null;
   if (current === locale) {
-    console.log(`[setup] language '${locale}' already applied, skipping`);
+    console.log(`[start] language '${locale}' already applied, skipping`);
     process.exit(0);
   }
   if (current && current !== locale) {
-    console.log(`[setup] locale change detected: '${current}' -> '${locale}', re-applying`);
+    console.log(`[start] locale change detected: '${current}' -> '${locale}', re-applying`);
   } else {
-    console.log(`[setup] first run, applying '${locale}'`);
+    console.log(`[start] first run, applying '${locale}'`);
   }
 } else {
-  console.log(`[setup] --force: re-applying '${locale}'`);
+  console.log(`[start] --force: re-applying '${locale}'`);
 }
 
 const langDir = path.join(projectRoot, 'language', locale);
 if (!fs.existsSync(langDir)) {
-  console.error(`[setup] language pack not found: ${langDir}`);
+  console.error(`[start] language pack not found: ${langDir}`);
   process.exit(1);
 }
 
 const REPLACE_EXTS = new Set(['.js', '.mjs', '.ts', '.vue', '.json', '.md']);
-const EXCLUDE_DIRS = new Set(['node_modules', '.git', 'database', 'files', 'dist', 'language', 'scripts']);
+const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'database', 'files', 'dist', 'language', 'scripts']);
 
 const walk = (dir, visit, { exclude = false } = {}) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -84,19 +101,19 @@ walk(langDir, (file) => {
   try {
     data = JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch (err) {
-    console.error(`[setup] invalid JSON: ${file}\n  ${err.message}`);
+    console.error(`[start] invalid JSON: ${file}\n  ${err.message}`);
     process.exit(1);
   }
   for (const [key, value] of Object.entries(data)) {
     if (typeof value !== 'string') continue;
     const token = `__T_${key.toUpperCase()}__`;
     if (tokenMap.has(token) && tokenMap.get(token) !== value) {
-      console.warn(`[setup] duplicate token ${token} with different values (later wins)`);
+      console.warn(`[start] duplicate token ${token} with different values (later wins)`);
     }
     tokenMap.set(token, value);
   }
 });
-console.log(`[setup] ${tokenMap.size} tokens loaded from ${path.relative(projectRoot, langDir)}`);
+console.log(`[start] ${tokenMap.size} tokens loaded from ${path.relative(projectRoot, langDir)}`);
 
 const sortedTokens = [...tokenMap.entries()].sort((a, b) => b[0].length - a[0].length);
 
@@ -144,7 +161,7 @@ walk(projectRoot, (file) => {
     replacedCount += fileReplacements;
   }
 }, { exclude: true });
-console.log(`[setup] replaced ${replacedCount} tokens across ${replacedFiles} files`);
+console.log(`[start] replaced ${replacedCount} tokens across ${replacedFiles} files`);
 
 const langAppsDir = path.join(langDir, 'apps');
 let mdCount = 0;
@@ -158,7 +175,7 @@ if (fs.existsSync(langAppsDir)) {
     }
   }
 }
-console.log(`[setup] mirrored ${mdCount} app docs from language pack`);
+console.log(`[start] mirrored ${mdCount} app docs from language pack`);
 
 let unresolvedCount = 0;
 const unresolvedFiles = new Set();
@@ -173,10 +190,10 @@ walk(projectRoot, (file) => {
   }
 }, { exclude: true });
 if (unresolvedCount > 0) {
-  console.warn(`[setup] ${unresolvedCount} unresolved tokens in ${unresolvedFiles.size} files:`);
+  console.warn(`[start] ${unresolvedCount} unresolved tokens in ${unresolvedFiles.size} files:`);
   for (const f of [...unresolvedFiles].slice(0, 10)) console.warn(`  - ${f}`);
   if (unresolvedFiles.size > 10) console.warn(`  ... and ${unresolvedFiles.size - 10} more`);
 }
 
-fs.writeFileSync(marker, locale + '\n');
-console.log(`[setup] wrote .language-applied (${locale})`);
+writeSettings({ locale, appliedAt: new Date().toISOString() });
+console.log(`[start] wrote .aios/settings.json (locale=${locale})`);

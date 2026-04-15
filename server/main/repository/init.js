@@ -1,5 +1,6 @@
 import { db } from "./client.js";
-const initDatabase = () => {
+
+const createTables = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,6 +16,7 @@ const initDatabase = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       conversation_id TEXT NOT NULL,
       message TEXT NOT NULL,
+      summary TEXT,
       meta TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
@@ -40,25 +42,33 @@ const initDatabase = () => {
       finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS timeline (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
+      source_app TEXT NOT NULL,
+      source_ref TEXT,
+      kind TEXT NOT NULL DEFAULT 'event',
+      title TEXT,
+      content TEXT NOT NULL,
+      metadata TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      token_hash TEXT NOT NULL UNIQUE,
-      expires_at TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now')),
-      last_seen_at TEXT,
-      FOREIGN KEY(user_id) REFERENCES users(id)
-    );
-
   `);
 };
+
+const seedTimelineIfEmpty = () => {
+  const count = db.prepare("SELECT COUNT(*) as c FROM timeline").get().c;
+  if (count !== 0) return;
+  db.prepare(
+    `INSERT INTO timeline (source_app, kind, title, content)
+     VALUES (?, ?, ?, ?)`
+  ).run("system", "milestone", "__T_SYSTEM_BOOT_TITLE__", "__T_SYSTEM_BOOT_CONTENT__");
+};
+
+const initDatabase = () => {
+  createTables();
+  seedTimelineIfEmpty();
+};
+
 export {
   initDatabase
 };

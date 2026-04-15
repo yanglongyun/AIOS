@@ -5,7 +5,7 @@ const countChatMessages = (conversationId) => {
 };
 const listChatMessageRowsPaged = (conversationId, limit, offset) => {
   return db.prepare(
-    "SELECT id, message, meta FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT ? OFFSET ?"
+    "SELECT id, message, summary, meta FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT ? OFFSET ?"
   ).all(conversationId, limit, offset);
 };
 export {

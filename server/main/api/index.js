@@ -1,25 +1,16 @@
 import { json } from "../../shared/http/json.js";
 import { handleChatApi } from "./chat.js";
+import { handleMemoryApi } from "./memory.js";
 import { handleSettingsApi } from "./settings.js";
 import { handleFilesApi } from "./files.js";
 import { handleTaskApi } from "./task.js";
-import { handleAuthApi } from "./auth/index.js";
+import { handleTimelineApi } from "./timeline.js";
 import { handleSystemApi } from "./system.js";
-import { access } from "../../shared/auth/index.js";
 const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
   try {
-    const gate = access(req, path, req.method || "GET", "server-api");
-    if (!gate.ok) {
-      json(res, { success: false, message: gate.message }, gate.status || 401);
-      return true;
-    }
     if (path === "/api/health") {
       json(res, { success: true });
-      return true;
-    }
-    if (path.startsWith("/api/auth/")) {
-      await handleAuthApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/system/")) {
@@ -34,12 +25,20 @@ const handleApiRequest = async (req, res, url) => {
       await handleSettingsApi(req, res, path);
       return true;
     }
+    if (path.startsWith("/api/memory/")) {
+      await handleMemoryApi(req, res, path);
+      return true;
+    }
     if (path.startsWith("/api/files/")) {
       await handleFilesApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/task")) {
       await handleTaskApi(req, res, path, url);
+      return true;
+    }
+    if (path.startsWith("/api/timeline/")) {
+      await handleTimelineApi(req, res, path, url);
       return true;
     }
     json(res, { success: false, message: "API endpoint not found" }, 404);

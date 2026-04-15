@@ -5,7 +5,7 @@ const optimizeNotebook = async ({ content, prompt, taskTitle, req }) => {
   if (!promptText) return { error: "prompt is required", status: 400 };
   const data = await instantTask({
     app: "notebook",
-    title: String(taskTitle || "").trim() || "笔记润色",
+    title: String(taskTitle || "").trim() || "__T_NOTEBOOK_DEFAULT_TASK_TITLE__",
     prompt: promptText,
     req
   });

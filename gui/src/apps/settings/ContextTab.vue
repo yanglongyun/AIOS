@@ -6,16 +6,19 @@
         <button
           v-for="n in [30, 100, 500]"
           :key="n"
-          @click="$emit('update:context-rounds', n)"
           class="flex-1 rounded-[9px] border py-2.5 text-[14px] font-semibold transition-all"
           :style="contextRounds === n
             ? 'background:#5c4332;border-color:#5c4332;color:#fff'
             : 'background:#faf8f5;border-color:rgba(0,0,0,0.1);color:rgba(0,0,0,0.4)'"
+          @click="$emit('update:context-rounds', n)"
         >{{ n }}</button>
       </div>
     </div>
     <div class="flex justify-end">
-      <button @click="$emit('save')" class="s-btn-primary">__T_COMMON_SAVE__</button>
+      <button
+        class="rounded-[9px] bg-[#5c4332] px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#3d2a1e]"
+        @click="$emit('save')"
+      >__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>
@@ -26,18 +29,3 @@ defineProps({
 });
 defineEmits(['update:context-rounds', 'save']);
 </script>
-
-<style scoped>
-.s-btn-primary {
-  padding: 8px 20px;
-  border-radius: 9px;
-  background: #5c4332;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s;
-}
-.s-btn-primary:hover { background: #3d2a1e; }
-</style>

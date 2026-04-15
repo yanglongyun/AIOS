@@ -1,17 +1,15 @@
 import { readBody } from "../../shared/http/readBody.js";
 import { json } from "../../shared/http/json.js";
-import { getAuthUser } from "../../shared/auth/guard.js";
-import { countUsers } from "../../shared/auth/repository.js";
-import { completeInstall } from "../service/system/install.js";
 import { requestReload, runReload } from "../service/system/reload.js";
 import { runReloadTest } from "../service/system/test.js";
+import { hasConfiguredModelSettings } from "../service/settings/get.js";
+import { shell } from "../../agent/functions.js";
 
 const logReloadRequest = (req, body, stage, extra = {}) => {
-  const user = getAuthUser(req);
   console.log("[reload.request]", JSON.stringify({
     stage,
     body,
-    user: user ? { id: user.id, username: user.username, role: user.role || "" } : null,
+    user: null,
     remoteAddress: req.socket?.remoteAddress || "",
     forwardedFor: String(req.headers["x-forwarded-for"] || ""),
     referer: String(req.headers.referer || ""),
@@ -20,9 +18,39 @@ const logReloadRequest = (req, body, stage, extra = {}) => {
   }));
 };
 
+const isLocalRequest = (req) => {
+  const address = String(req.socket?.remoteAddress || "").trim();
+  return (
+    address === "127.0.0.1" ||
+    address === "::1" ||
+    address === "::ffff:127.0.0.1" ||
+    address === ""
+  );
+};
+
 const handleSystemApi = async (req, res, path) => {
   if (path === "/api/system/setup" && req.method === "GET") {
-    return json(res, { success: true, initialized: countUsers() > 0 });
+    return json(res, { success: true, initialized: hasConfiguredModelSettings() });
+  }
+  if (path === "/api/system/debug/exec" && req.method === "POST") {
+    if (!isLocalRequest(req)) {
+      return json(res, { success: false, message: "Debug API only allows local requests" }, 403);
+    }
+    const body = await readBody(req);
+    const command = String(body.command || "").trim();
+    if (!command) {
+      return json(res, { success: false, message: "Missing command" }, 400);
+    }
+    const output = await shell({
+      command,
+      cwd: body.cwd || "",
+      reason: body.reason || "Debug API command"
+    });
+    return json(res, {
+      success: true,
+      cwd: String(body.cwd || "").trim() || process.cwd(),
+      output
+    });
   }
   if (path === "/api/system/reload/request" && req.method === "POST") {
     const body = await readBody(req);
@@ -48,22 +76,6 @@ const handleSystemApi = async (req, res, path) => {
       return json(res, { success: true });
     } catch (e) {
       return json(res, { success: false, message: e instanceof Error ? e.message : "System preflight check failed" }, 500);
-    }
-  }
-  if (path === "/api/system/install/complete" && req.method === "POST") {
-    if (countUsers() === 0) {
-      return json(res, { success: false, message: "System is not initialized" }, 400);
-    }
-    const body = await readBody(req);
-    const language = body.language === "zh" || body.language === "en" ? body.language : "";
-    if (!language) {
-      return json(res, { success: false, message: "Invalid language" }, 400);
-    }
-    try {
-      completeInstall(language);
-      return json(res, { success: true });
-    } catch (e) {
-      return json(res, { success: false, message: e instanceof Error ? e.message : "Failed to complete installation" }, 500);
     }
   }
   if (path === "/api/system/reload" && req.method === "POST") {

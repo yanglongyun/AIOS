@@ -1,13 +1,32 @@
-import { execSync, spawn } from "child_process";
+import { execFileSync, execSync, spawn } from "child_process";
 import { dirname, join } from "path";
+import { existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { broadcast } from "../../system/ws.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "..", "..", "..", "..");
 const APPS_ENTRY = "server/apps/index.js";
 const SERVER_ENTRY = "server/main/index.js";
+const NODE_BIN = process.execPath;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const HEALTHCHECK_TIMEOUT_MS = 1000;
+
+const resolveNpmCli = () => {
+  const vendorRoot = join(dirname(dirname(NODE_BIN)), "npm", "bin", "npm-cli.js");
+  if (existsSync(vendorRoot)) return vendorRoot;
+  return join(ROOT_DIR, "node_modules", "npm", "bin", "npm-cli.js");
+};
+
+const withBundledNodePath = (extra = {}) => {
+  const nodeDir = dirname(NODE_BIN);
+  const currentPath = process.env.PATH || "";
+  return {
+    ...process.env,
+    ...extra,
+    PATH: currentPath ? `${nodeDir}:${currentPath}` : nodeDir,
+    npm_config_scripts_prepend_node_path: "true"
+  };
+};
 
 const probeHealth = async (url) => {
   const controller = new AbortController();
@@ -35,12 +54,21 @@ const stopProbe = async (probe) => {
 };
 
 const buildFrontend = () => {
-  execSync("npm run build", { cwd: ROOT_DIR, timeout: 12e4, stdio: "pipe" });
+  execFileSync(NODE_BIN, [resolveNpmCli(), "run", "build"], {
+    cwd: ROOT_DIR,
+    timeout: 12e4,
+    stdio: "pipe",
+    env: withBundledNodePath()
+  });
 };
 const probeProcess = async (entry, probePort, healthPath) => {
-  const probe = spawn("node", [entry, `--port=${probePort}`], {
+  const probe = spawn(NODE_BIN, [entry, `--port=${probePort}`], {
     cwd: ROOT_DIR,
-    stdio: "ignore"
+    stdio: "ignore",
+    env: withBundledNodePath({
+      AIOS_PORT: String(probePort),
+      AIOS_APPS_PORT: String(probePort)
+    })
   });
   const healthUrl = `http://127.0.0.1:${probePort}${healthPath}`;
   let alive = false;
@@ -64,10 +92,11 @@ const probeProcess = async (entry, probePort, healthPath) => {
   }
 };
 const startDetachedNode = (entry) => {
-  const child = spawn("node", [entry], {
+  const child = spawn(NODE_BIN, [entry], {
     cwd: ROOT_DIR,
     detached: true,
-    stdio: "ignore"
+    stdio: "ignore",
+    env: withBundledNodePath()
   });
   child.unref();
 };
@@ -82,10 +111,11 @@ const restartAppsProcess = async () => {
 const scheduleServerRestart = async () => {
   await probeProcess(SERVER_ENTRY, 9510, "/api/health");
   setTimeout(() => {
-    const child = spawn("node", [SERVER_ENTRY], {
+    const child = spawn(NODE_BIN, [SERVER_ENTRY], {
       cwd: ROOT_DIR,
       detached: true,
-      stdio: "ignore"
+      stdio: "ignore",
+      env: withBundledNodePath()
     });
     child.unref();
     process.exit(0);

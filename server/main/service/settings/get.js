@@ -1,4 +1,12 @@
 import { listSettingRows } from "../../repository/settings/get.js";
+
+const readSettingsMap = () => {
+  const rows = listSettingRows();
+  const obj = {};
+  for (const r of rows) obj[r.key] = r.value;
+  return obj;
+};
+
 const normalizeContextRounds = (value) => {
   const num = Number(value);
   if (!Number.isFinite(num)) return 100;
@@ -6,10 +14,18 @@ const normalizeContextRounds = (value) => {
   if (num <= 100) return 100;
   return 500;
 };
+
+const hasConfiguredModelSettings = () => {
+  const obj = readSettingsMap();
+  const provider = String(obj.provider || "").trim();
+  const model = String(obj.model || "").trim();
+  const apiUrl = String(obj.apiUrl || "").trim();
+  const apiKey = String(obj.apiKey || "").trim();
+  return Boolean(provider && model && apiUrl && apiKey);
+};
+
 const getSettings = () => {
-  const rows = listSettingRows();
-  const obj = {};
-  for (const r of rows) obj[r.key] = r.value;
+  const obj = readSettingsMap();
   const toolResultMaxChars = Math.max(1e3, Math.min(5e4, Number(obj.toolResultMaxChars) || 12e3));
   const toolMaxRounds = Math.max(1, Math.min(500, Number(obj.toolMaxRounds) || 50));
   const settings = {
@@ -29,5 +45,6 @@ const getSettings = () => {
 };
 export {
   getSettings,
+  hasConfiguredModelSettings,
   normalizeContextRounds
 };

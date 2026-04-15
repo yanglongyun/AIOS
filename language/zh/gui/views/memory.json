@@ -1,0 +1,21 @@
+{
+  "app_sidebar_memory": "记忆",
+  "memory_eyebrow": "Memory Workspace",
+  "memory_title": "记忆",
+  "memory_refresh": "刷新",
+  "memory_loading": "正在加载记忆目录…",
+  "memory_empty": "当前没有可用的记忆文件。",
+  "memory_no_file": "请选择一个记忆文件",
+  "memory_hint": "左侧选择文件，右侧编辑内容。",
+  "memory_save": "保存",
+  "memory_saving": "保存中…",
+  "memory_reading": "正在读取文件…",
+  "memory_create_dir": "新建目录",
+  "memory_create_file": "新建文件",
+  "memory_rename": "重命名",
+  "memory_delete": "删除",
+  "memory_create_dir_prompt": "输入新目录名称",
+  "memory_create_file_prompt": "输入新文件名称（例如 note.md）",
+  "memory_rename_prompt": "输入新的名称",
+  "memory_delete_confirm": "确认删除当前选中项？目录必须为空。"
+}

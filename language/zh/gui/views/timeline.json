@@ -1,0 +1,14 @@
+{
+  "app_sidebar_timeline": "时间线",
+  "timeline_eyebrow": "System Log",
+  "timeline_title": "时间线",
+  "timeline_desc": "系统中发生的一切都会在这里沉淀下来。",
+  "timeline_refresh": "刷新",
+  "timeline_loading": "正在加载…",
+  "timeline_empty_title": "系统尚无记录",
+  "timeline_empty_desc": "当 AIOS 开始运转，对话、任务、记忆以及其他来源产生的事件，会自动沉淀在此。",
+  "timeline_untitled": "未命名",
+  "timeline_count_suffix": "条记录",
+  "timeline_prev": "上一页",
+  "timeline_next": "下一页"
+}

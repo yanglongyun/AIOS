@@ -5,10 +5,17 @@
   "type": "module",
   "main": "server/main/index.js",
   "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "predev": "node scripts/setup.mjs",
     "dev": "node server/main/index.js & node server/apps/index.js & vite --config gui/vite.config.js gui",
+    "prebuild": "node scripts/setup.mjs",
     "build": "vite build --config gui/vite.config.js gui",
+    "prestart": "node scripts/setup.mjs",
     "start": "node server/main/index.js",
+    "prestart:apps": "node scripts/setup.mjs",
     "start:apps": "node server/apps/index.js",
+    "lang:apply": "node scripts/setup.mjs --force",
+    "lang:reset": "rm -f .language-applied",
     "docker": "docker compose -f doc/docker/docker-compose.yml up -d --build",
     "docker:stop": "docker compose -f doc/docker/docker-compose.yml down"
   },

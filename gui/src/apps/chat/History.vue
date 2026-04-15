@@ -60,10 +60,9 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { Pencil, Trash2 } from 'lucide-vue-next';
-const props = defineProps({
-  variant: { type: String, default: 'desktop' },
+defineProps({
   activeId: { type: String, default: null }
 });
 defineEmits(['open-chat']);
@@ -74,22 +73,17 @@ const editTitle = ref('');
 const editInput = ref(null);
 const deletingId = ref(null);
 let deleteTimer = null;
-const isMobile = computed(() => props.variant === 'mobile');
-const emptyStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.35)' : 'color:rgba(0,0,0,0.35)');
-const activeRowStyle = computed(() => isMobile.value
-  ? 'background:rgba(255,255,255,0.08);box-shadow:none'
-  : 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)');
-const hoverBackground = computed(() => isMobile.value ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)');
-const inputStyle = computed(() => isMobile.value
-  ? 'border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff'
-  : 'border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13');
-const titleStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.68)' : 'color:rgba(0,0,0,0.6)');
-const activeTitleStyle = computed(() => isMobile.value ? 'color:#fff' : 'color:#3d2f1e');
-const subtleStyle = computed(() => isMobile.value ? 'color:rgba(255,255,255,0.35)' : 'color:rgba(0,0,0,0.3)');
-const actionColor = computed(() => isMobile.value ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)');
-const actionHoverBackground = computed(() => isMobile.value ? 'rgba(255,255,255,0.08)' : 'rgba(160,120,80,0.1)');
-const actionHoverColor = computed(() => isMobile.value ? '#fff' : '#5c4332');
-const iconButtonStyle = computed(() => `background:transparent;color:${actionColor.value}`);
+const emptyStyle = 'color:rgba(0,0,0,0.35)';
+const activeRowStyle = 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)';
+const hoverBackground = 'rgba(0,0,0,0.04)';
+const inputStyle = 'border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13';
+const titleStyle = 'color:rgba(0,0,0,0.6)';
+const activeTitleStyle = 'color:#3d2f1e';
+const subtleStyle = 'color:rgba(0,0,0,0.3)';
+const actionColor = 'rgba(0,0,0,0.3)';
+const actionHoverBackground = 'rgba(160,120,80,0.1)';
+const actionHoverColor = '#5c4332';
+const iconButtonStyle = `background:transparent;color:${actionColor}`;
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);

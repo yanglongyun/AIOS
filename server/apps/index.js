@@ -1,8 +1,6 @@
 import { createServer } from "http";
 import { json } from "../shared/http/json.js";
 import { appLoaders } from "./registry.js";
-import { access } from "../shared/auth/index.js";
-import { hasSystemLanguage } from "./app_shared/settings/language.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
@@ -45,9 +43,6 @@ const initDbForApp = async (app) => {
   dbInitCache.add(app.name);
 };
 const bootAppRuntimes = async () => {
-  if (!hasSystemLanguage()) {
-    return;
-  }
   for (const app of appModules) {
     await initDbForApp(app);
     if (typeof app.initRuntime === "function") {
@@ -69,15 +64,6 @@ const appsServer = createServer(async (req, res) => {
     }
     if (path === "/apps/health") {
       json(res, { success: true });
-      return;
-    }
-    const gate = access(req, path, req.method || "GET", "apps");
-    if (!gate.ok) {
-      json(res, { success: false, message: gate.message }, gate.status || 401);
-      return;
-    }
-    if (!hasSystemLanguage()) {
-      json(res, { success: false, message: "System language is not installed. Complete setup first." }, 423);
       return;
     }
     const app = appModules.find((item) => item.match(path));

@@ -4,7 +4,6 @@ const apps = [
     name: '__T_APP_SIDEBAR_CHAT__',
     icon: '\u{1F4AC}',
     desktopLoad: () => import('./apps/chat/index.vue'),
-    mobileLoad: () => import('./apps/chat/mobile.vue'),
     intent: () => import('./apps/chat/intent.js'),
     defaultDesktopWindowSize: { w: 900, h: 640 }
   },
@@ -15,6 +14,28 @@ const apps = [
     desktopLoad: () => import('./apps/tasks/index.vue'),
     intent: () => import('./apps/tasks/intent.js'),
     defaultDesktopWindowSize: { w: 700, h: 500 }
+  },
+  {
+    id: 'timeline',
+    name: '__T_APP_SIDEBAR_TIMELINE__',
+    icon: '🕰️',
+    desktopLoad: () => import('./apps/timeline/index.vue'),
+    intent: () => import('./apps/timeline/intent.js'),
+    defaultDesktopWindowSize: { w: 900, h: 700 }
+  },
+  {
+    id: 'memory',
+    name: '__T_APP_SIDEBAR_MEMORY__',
+    icon: '🌳',
+    desktopLoad: () => import('./apps/memory/index.vue'),
+    defaultDesktopWindowSize: { w: 500, h: 360 }
+  },
+  {
+    id: 'files',
+    name: '__T_APP_SIDEBAR_FILES__',
+    icon: '\u{1F5C2}',
+    desktopLoad: () => import('./apps/files/index.vue'),
+    defaultDesktopWindowSize: { w: 500, h: 360 }
   },
   {
     id: 'notebook',
@@ -57,7 +78,6 @@ const apps = [
     name: '__T_APP_SIDEBAR_SETTINGS__',
     icon: '⚙️',
     desktopLoad: () => import('./apps/settings/index.vue'),
-    mobileLoad: () => import('./apps/settings/index.vue'),
     intent: () => import('./apps/settings/intent.js'),
     defaultDesktopWindowSize: { w: 750, h: 520 }
   }

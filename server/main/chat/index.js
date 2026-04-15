@@ -2,7 +2,9 @@ import { chat } from "../../agent/handler.js";
 import { getSettings } from "../service/settings/get.js";
 import { buildSystemPrompt } from "../../prompt/index.js";
 import { injectAttachmentsMessage } from "./attachments.js";
+import { parseAssistantSummary } from "./summary.js";
 import { getMessages, saveMessage } from "./messages.js";
+import { insertTimelineItem } from "../repository/timeline/create.js";
 import { hasChat } from "./chats.js";
 const createSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
@@ -91,7 +93,32 @@ const createSession = (wsSend) => {
           return;
         }
         if (msg.type === "done") {
-          if (msg.message) saveMessage(cid, msg.message, null);
+          if (msg.message) {
+            const rawContent = String(msg.message.content || "");
+            const parsed = parseAssistantSummary(rawContent);
+            const saved = saveMessage(
+              cid,
+              { ...msg.message, content: parsed.content },
+              null,
+              parsed.summary || null
+            );
+            if (parsed.summary) {
+              insertTimelineItem({
+                sourceApp: "chat",
+                sourceRef: cid,
+                kind: "summary",
+                content: parsed.summary,
+                metadata: { messageId: saved.id }
+              });
+            }
+            wsSend({
+              type: "done",
+              conversationId: cid,
+              content: rawContent,
+              summary: parsed.summary || ""
+            });
+            return;
+          }
           wsSend({ type: "done", conversationId: cid });
           return;
         }

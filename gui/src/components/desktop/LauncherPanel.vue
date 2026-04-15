@@ -27,12 +27,7 @@
       </button>
     </div>
 
-    <!-- 底部用户栏 -->
-    <div class="mt-2.5 flex items-center gap-1.5 border-t pt-2.5" :class="footerClass">
-      <div class="flex h-[28px] w-[28px] flex-shrink-0 items-center justify-center rounded-full text-[13px] font-bold" :class="avatarClass">
-        {{ usernameInitial }}
-      </div>
-      <span class="flex-1 truncate text-[12px] font-medium" :class="secondaryTextClass">{{ username || '...' }}</span>
+    <div class="mt-2.5 flex items-center justify-end gap-1.5 border-t pt-2.5" :class="footerClass">
       <button
         class="flex h-[26px] items-center rounded-[6px] px-2 transition-colors disabled:opacity-40"
         :class="utilityButtonClass"
@@ -42,32 +37,20 @@
       >
         <RotateCcw class="h-[13px] w-[13px]" :class="restarting ? 'animate-spin' : ''" />
       </button>
-      <button
-        class="flex h-[26px] items-center rounded-[6px] px-2 text-red-500 transition-colors"
-        :class="logoutClass"
-        @click="doLogout"
-        title="__T_LAUNCHER_LOGOUT__"
-      >
-        <LogOut class="h-[13px] w-[13px]" />
-      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { LogOut, RotateCcw } from 'lucide-vue-next';
+import { RotateCcw } from 'lucide-vue-next';
 import { apps } from '../../apps.js';
-import { clearAuthCache } from '../../auth/session.js';
 import { desktopTheme } from '../../stores/appearance.js';
 
-const router = useRouter();
 defineEmits(['open', 'close']);
 
 const search = ref('');
 const searchEl = ref(null);
-const username = ref('');
 const restarting = ref(false);
 const isDarkTheme = computed(() => desktopTheme.value === 'dark');
 const panelClass = computed(() => isDarkTheme.value
@@ -79,13 +62,9 @@ const inputClass = computed(() => isDarkTheme.value
 const appItemClass = computed(() => isDarkTheme.value ? 'hover:bg-white/[0.08]' : 'hover:bg-black/[0.05]');
 const secondaryTextClass = computed(() => isDarkTheme.value ? 'text-white/78' : 'text-[#444]');
 const footerClass = computed(() => isDarkTheme.value ? 'border-white/[0.08]' : 'border-black/[0.06]');
-const avatarClass = computed(() => isDarkTheme.value ? 'bg-white/[0.1] text-white' : 'bg-black/[0.08] text-[#222]');
 const utilityButtonClass = computed(() => isDarkTheme.value
   ? 'text-white/42 hover:bg-white/[0.08] hover:text-white'
   : 'text-black/[0.4] hover:bg-black/[0.06] hover:text-[#222]');
-const logoutClass = computed(() => isDarkTheme.value ? 'hover:bg-red-500/12' : 'hover:bg-red-50');
-
-const usernameInitial = computed(() => (username.value || '?')[0].toUpperCase());
 
 const visibleApps = apps;
 
@@ -94,23 +73,6 @@ const filteredApps = computed(() => {
   const q = search.value.toLowerCase();
   return visibleApps.filter(a => a.name.toLowerCase().includes(q));
 });
-
-async function fetchMe() {
-  try {
-    const res = await fetch('/api/auth/me', { credentials: 'include' });
-    const data = await res.json();
-    username.value = data?.user?.username || '';
-  } catch {}
-}
-
-async function doLogout() {
-  if (!window.confirm('__T_LOGOUT_CONFIRM__')) return;
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-  } catch {}
-  clearAuthCache();
-  router.push('/login');
-}
 
 async function doRestart() {
   if (restarting.value) return;
@@ -127,6 +89,5 @@ async function doRestart() {
 
 onMounted(() => {
   searchEl.value?.focus();
-  fetchMe();
 });
 </script>

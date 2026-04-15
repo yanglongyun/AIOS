@@ -12,7 +12,7 @@
           <template v-else>
             <div v-if="hasMore" class="py-2 text-center text-xs" style="color:rgba(0,0,0,0.35)">__T_CHAT_LOAD_MORE__</div>
 
-            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-5">
+            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-5" :data-message-key="m._key || ''">
               <div v-if="m.role === 'user'" class="flex justify-end">
                 <div class="max-w-[85%] overflow-x-auto rounded-[18px_18px_4px_18px] px-4 py-3 text-sm leading-relaxed" style="background:#e8e0d4;color:#2a1f13;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
                   <div class="whitespace-pre-wrap [word-break:break-word]">{{ m.content }}</div>
@@ -32,7 +32,16 @@
                 <div class="min-w-0 flex-1">
                   <div class="prose prose-sm max-w-none overflow-x-auto rounded-[18px_18px_18px_4px] px-4 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)] prose-headings:text-[#2a1f13] prose-pre:overflow-x-auto prose-pre:border prose-pre:bg-[#f0ece5] prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-blockquote:text-[rgba(0,0,0,0.5)]"
                     style="background:#fff;border:1px solid rgba(160,120,80,0.15);color:#3d2f1e;--tw-prose-pre-border-color:rgba(160,120,80,0.2);--tw-prose-code-bg:rgba(160,120,80,0.1)"
-                    v-html="renderMd(m.content)" />
+                    v-html="renderMdWithCommand(m.content, m.command)" />
+                  <div v-if="m.summary" class="mt-2 flex flex-wrap items-center gap-2 px-1">
+                    <div
+                      class="inline-flex max-w-full items-center gap-1.5 rounded-full border px-3 py-1 text-[11px]"
+                      style="border-color:rgba(160,120,80,0.16);background:rgba(160,120,80,0.06);color:rgba(61,47,30,0.72)"
+                    >
+                      <span class="font-semibold">总结</span>
+                      <span class="truncate">{{ m.summary }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -125,6 +134,107 @@
         </div>
       </div>
     </div>
+
+    <Transition name="command-modal">
+      <div v-if="commandDialogOpen" class="absolute inset-0 z-30 flex items-center justify-center px-6 py-8">
+        <button
+          type="button"
+          class="absolute inset-0 cursor-default border-none"
+          style="background:rgba(28,20,12,0.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)"
+          @click="closeCommandExecutor"
+        />
+        <div
+          class="relative z-10 flex w-full max-w-[480px] flex-col overflow-hidden rounded-[14px] border"
+          style="background:#fbfaf7;border-color:rgba(92,67,50,0.14);box-shadow:0 24px 56px rgba(28,20,12,0.3),0 6px 16px rgba(28,20,12,0.1)"
+        >
+          <div
+            class="flex items-center justify-between border-b py-[11px] pl-[18px] pr-[14px]"
+            style="border-color:rgba(92,67,50,0.08);background:rgba(92,67,50,0.025)"
+          >
+            <div class="text-[12px] font-bold tracking-wide" style="color:rgba(42,31,19,0.88)">执行命令</div>
+            <button
+              type="button"
+              class="inline-flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border-none bg-transparent transition-colors hover:bg-[rgba(92,67,50,0.1)] hover:text-[#2a1f13] disabled:cursor-not-allowed disabled:opacity-40"
+              style="color:rgba(61,47,30,0.5)"
+              :disabled="commandExecuting"
+              aria-label="关闭"
+              @click="closeCommandExecutor"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1.2 1.2L8.8 8.8M8.8 1.2L1.2 8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div v-if="selectedCommand" class="px-[18px] pb-[14px] pt-[16px]">
+            <div
+              class="mb-[10px] inline-block rounded-[4px] px-[8px] pb-[3px] pt-[2.5px] font-mono text-[9.5px] font-bold uppercase leading-[1.3] tracking-[0.09em]"
+              style="background:rgba(140,100,60,0.11);color:rgba(110,70,30,0.82)"
+            >{{ commandTypeLabel(selectedCommand.type) }}</div>
+
+            <div
+              class="break-words border-b pb-[12px] text-[14.5px] font-semibold leading-[1.5]"
+              style="color:#2a1f13;border-color:rgba(92,67,50,0.07)"
+            >{{ commandDisplayLabel(selectedCommand) }}</div>
+
+            <div
+              v-if="commandDetailFields(selectedCommand).length"
+              class="grid gap-x-[14px] gap-y-[7px] pb-[2px] pt-[12px]"
+              style="grid-template-columns:64px 1fr"
+            >
+              <template v-for="field in commandDetailFields(selectedCommand)" :key="field.key">
+                <div class="pt-[1px] text-[10.5px] font-semibold leading-[1.55] tracking-wide" style="color:rgba(92,67,50,0.48)">{{ field.label }}</div>
+                <div class="whitespace-pre-wrap break-all font-mono text-[11px] leading-[1.55]" style="color:rgba(42,31,19,0.86)">{{ field.value }}</div>
+              </template>
+            </div>
+
+            <div
+              v-if="commandExecResult"
+              class="mt-[14px] flex items-start gap-2 whitespace-pre-wrap break-words rounded-[8px] border px-[12px] py-[9px] text-[11.5px] leading-[1.6]"
+              style="border-color:rgba(52,168,83,0.22);background:rgba(52,168,83,0.07);color:#245634"
+            >
+              <svg class="mt-[3px] shrink-0" width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M1.5 5.5L4.5 8.5L9.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>{{ commandExecResult }}</span>
+            </div>
+            <div
+              v-if="commandExecError"
+              class="mt-[14px] flex items-start gap-2 whitespace-pre-wrap break-words rounded-[8px] border px-[12px] py-[9px] text-[11.5px] leading-[1.6]"
+              style="border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.055);color:#8a1f1f"
+            >
+              <svg class="mt-[3px] shrink-0" width="11" height="11" viewBox="0 0 11 11" fill="none">
+                <path d="M5.5 2V6M5.5 8.5V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <span>{{ commandExecError }}</span>
+            </div>
+          </div>
+
+          <div
+            class="flex items-center justify-end gap-2 border-t px-[16px] py-[11px]"
+            style="border-color:rgba(92,67,50,0.07);background:rgba(92,67,50,0.02)"
+          >
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-[7px] border bg-white px-[14px] py-[6px] text-[11.5px] font-semibold leading-[1.4] transition-colors hover:bg-[rgba(92,67,50,0.04)] hover:text-[#2a1f13] disabled:cursor-not-allowed disabled:opacity-40"
+              style="border-color:rgba(92,67,50,0.16);color:rgba(61,47,30,0.62)"
+              :disabled="commandExecuting"
+              @click="closeCommandExecutor"
+            >取消</button>
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-[7px] border px-[14px] py-[6px] text-[11.5px] font-semibold leading-[1.4] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              style="background:#5c4332;border-color:#5c4332;color:#fff6e0;box-shadow:0 2px 6px rgba(92,67,50,0.22)"
+              :disabled="commandExecuting || !selectedCommand"
+              @click="executeCommand"
+            >
+              <span v-if="commandExecuting" class="cmd-spinner"></span>
+              {{ commandExecuting ? '执行中' : '执行' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -133,6 +243,8 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, Paperclip, Square } from 'lucide-vue-next';
 import { connect, ensureConnected, on, send, wsStatus } from '../../system/ws.js';
+import { openIntent } from '../../system/intent.js';
+import { splitAssistantMeta } from './summaryMeta.js';
 
 const emit = defineEmits(['conversation-change', 'history-change']);
 
@@ -147,6 +259,12 @@ const props = defineProps({
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
+const escapeHtml = (text = '') => String(text)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
 const LAST_CHAT_KEY = 'lastConversationId';
 
 const currentConversationId = ref(null);
@@ -168,6 +286,11 @@ const dragCounter = ref(0);
 const seenKeys = ref(new Set());
 const unsubs = [];
 const lastIntentRequestId = ref(null);
+const commandDialogOpen = ref(false);
+const selectedCommand = ref(null);
+const commandExecuting = ref(false);
+const commandExecResult = ref('');
+const commandExecError = ref('');
 const canSend = computed(() => !!input.value.trim() || pendingFiles.value.length > 0);
 
 const saveLastChatId = (id) => {
@@ -236,7 +359,14 @@ const parseMessages = (raw) => {
       continue;
     }
     if (message.role === 'assistant' && message.content) {
-      list.push({ role: 'assistant', content: message.content, _key: base ? `${base}:assistant` : undefined });
+      const parsed = splitAssistantMeta(message.content);
+      list.push({
+        role: 'assistant',
+        content: parsed.content,
+        summary: message._summary || parsed.summary || '',
+        command: parsed.command || null,
+        _key: base ? `${base}:assistant` : undefined
+      });
       continue;
     }
     if (message.role === 'user' && message.content) {
@@ -245,6 +375,151 @@ const parseMessages = (raw) => {
     }
   }
   return list;
+};
+
+const commandTypeLabel = (type = '') => ({
+  intent: '意图命令',
+  task: '任务命令',
+  shell: 'Shell 命令'
+}[type] || String(type || '命令'));
+
+const commandDisplayLabel = (command) => {
+  if (!command) return '未命名命令';
+  return String(
+    command.label ||
+    command.title ||
+    command.run ||
+    command.action ||
+    command.app ||
+    '未命名命令'
+  ).trim();
+};
+
+const renderMdWithCommand = (content, command) => {
+  const html = renderMd(content);
+  if (!command) return html;
+  const label = escapeHtml(commandDisplayLabel(command));
+  return `${html}<p class="mt-3"><button type="button" class="chat-command-inline" data-command-label="${label}"><span class="chat-command-inline__icon">▶</span><span class="chat-command-inline__text">${label}</span></button></p>`;
+};
+
+const commandDetailFields = (command) => {
+  if (!command) return [];
+  const pairs = [];
+  const keyLabels = {
+    run: '执行',
+    app: '应用',
+    action: '动作',
+    path: '路径',
+    cwd: '目录',
+    prompt: '提示词',
+    title: '任务标题',
+    mode: '模式',
+    text: '文本'
+  };
+  for (const [key, value] of Object.entries(command)) {
+    if (['type', 'label', 'raw'].includes(key)) continue;
+    if (value == null || value === '') continue;
+    pairs.push({
+      key,
+      label: keyLabels[key] || key,
+      value: String(value)
+    });
+  }
+  return pairs;
+};
+
+const openCommandExecutor = (command) => {
+  selectedCommand.value = command;
+  commandExecResult.value = '';
+  commandExecError.value = '';
+  commandDialogOpen.value = true;
+};
+
+const closeCommandExecutor = () => {
+  if (commandExecuting.value) return;
+  commandDialogOpen.value = false;
+  selectedCommand.value = null;
+  commandExecResult.value = '';
+  commandExecError.value = '';
+};
+
+const executeShellCommand = async (command) => {
+  const payload = {
+    command: String(command.run || '').trim(),
+    reason: commandDisplayLabel(command)
+  };
+  if (command.cwd) payload.cwd = String(command.cwd).trim();
+  const data = await request('/api/system/debug/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return data.output || '(no output)';
+};
+
+const executeTaskCommand = async (command) => {
+  const mode = String(command.mode || 'agent').trim().toLowerCase() === 'instant' ? 'instant' : 'agent';
+  const endpoint = mode === 'instant' ? '/api/task/create/instant' : '/api/task/create/agent';
+  const payload = {
+    app: String(command.app || 'chat').trim(),
+    title: String(command.title || command.label || '').trim(),
+    prompt: String(command.prompt || command.run || '').trim()
+  };
+  if (!payload.prompt) {
+    throw new Error('任务命令缺少 prompt');
+  }
+  const data = await request(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return mode === 'instant'
+    ? '已提交即时任务'
+    : `已创建后台任务${data?.id ? ` #${data.id}` : ''}`;
+};
+
+const executeIntentCommand = async (command) => {
+  const action = String(command.action || command.run || 'open').trim();
+  const app = String(command.app || '').trim();
+  if (app === 'chat' && action === 'fill') {
+    input.value = String(command.text || command.prompt || command.run || '').trim();
+    nextTick(autoResize);
+    return '已填充到输入框';
+  }
+  if (!app) {
+    throw new Error('意图命令缺少 app');
+  }
+  const data = {};
+  for (const [key, value] of Object.entries(command)) {
+    if (['type', 'label', 'raw', 'app', 'action', 'run'].includes(key)) continue;
+    data[key] = value;
+  }
+  await openIntent({ app, action, data });
+  return '已执行意图命令';
+};
+
+const executeCommand = async () => {
+  const command = selectedCommand.value;
+  if (!command || commandExecuting.value) return;
+  commandExecuting.value = true;
+  commandExecResult.value = '';
+  commandExecError.value = '';
+  try {
+    if (command.type === 'shell') {
+      commandExecResult.value = await executeShellCommand(command);
+    } else if (command.type === 'task') {
+      commandExecResult.value = await executeTaskCommand(command);
+      emit('history-change');
+    } else if (command.type === 'intent') {
+      commandExecResult.value = await executeIntentCommand(command);
+    } else {
+      throw new Error('不支持的命令类型');
+    }
+  } catch (error) {
+    commandExecError.value = error?.message || '执行失败';
+  } finally {
+    commandExecuting.value = false;
+  }
 };
 
 const loadChatPage = async (id, offset = 0, limit = 20) => {
@@ -537,6 +812,11 @@ watch(() => messages.value.length, (nextLen, prevLen) => {
 onMounted(async () => {
   if (wsStatus.value === 'disconnected') connect();
 
+  // 如果挂载时已经有 intentRequest，交给 intentRequest watcher 处理，
+  // 不要再自动加载"上次的对话"——否则会和 new_and_send 的 handleSend 竞态，
+  // 导致界面显示老会话、用户的消息发到一个看不见的新会话。
+  if (props.intentRequest) return;
+
   if (props.pendingMessage) {
     input.value = props.pendingMessage;
     nextTick(() => handleSend());
@@ -572,7 +852,13 @@ onMounted(async () => {
     const key = streamingAssistantKey.value;
     if (key) {
       const msg = messages.value.find((m) => m._key === key);
-      if (msg) msg.streaming = false;
+      if (msg) {
+        const parsed = splitAssistantMeta(data.content || msg.content || '');
+        msg.content = parsed.content;
+        msg.summary = data.summary || parsed.summary || '';
+        msg.command = parsed.command || null;
+        msg.streaming = false;
+      }
     }
     streamingAssistantKey.value = '';
     busy.value = false;
@@ -620,11 +906,24 @@ onMounted(async () => {
     streamingAssistantKey.value = '';
     busy.value = false;
   }));
+
+  msgBox.value?.addEventListener('click', handleMessageClick);
 });
 
 onUnmounted(() => {
   unsubs.forEach((fn) => fn());
+  msgBox.value?.removeEventListener('click', handleMessageClick);
 });
+
+const handleMessageClick = (event) => {
+  const button = event.target?.closest?.('.chat-command-inline');
+  if (!button) return;
+  const messageEl = button.closest?.('[data-message-key]');
+  const key = messageEl?.getAttribute?.('data-message-key');
+  if (!key) return;
+  const target = messages.value.find((item) => item._key === key);
+  if (target?.command) openCommandExecutor(target.command);
+};
 
 defineExpose({
   newChat,
@@ -644,4 +943,57 @@ textarea::placeholder { color: rgba(160,120,80,0.4); }
 .chat-md :deep(blockquote) { border-left: 2px solid rgba(255,255,255,0.15); padding-left: 8px; margin: 4px 0; color: rgba(255,255,255,0.4); }
 .chat-md :deep(a) { color: white; text-decoration: underline; }
 .chat-md :deep(h1), .chat-md :deep(h2), .chat-md :deep(h3) { font-size: 13px; font-weight: bold; color: white; margin: 0.4em 0 0.2em; }
+.chat-md :deep(.chat-command-inline) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(192, 132, 82, 0.38);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 239, 226, 0.96), rgba(255, 247, 240, 0.96));
+  color: #7a4b28;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  box-shadow: 0 8px 20px rgba(122, 75, 40, 0.08);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.chat-md :deep(.chat-command-inline:hover) {
+  background: linear-gradient(135deg, rgba(255, 233, 214, 1), rgba(255, 245, 236, 1));
+  border-color: rgba(192, 132, 82, 0.52);
+  box-shadow: 0 10px 24px rgba(122, 75, 40, 0.12);
+  transform: translateY(-1px);
+}
+.chat-md :deep(.chat-command-inline__icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(192, 132, 82, 0.16);
+  font-size: 9px;
+  line-height: 1;
+}
+.chat-md :deep(.chat-command-inline__text) {
+  max-width: 100%;
+  white-space: nowrap;
+}
+.command-modal-enter-active,
+.command-modal-leave-active { transition: opacity 0.18s ease; }
+.command-modal-enter-from,
+.command-modal-leave-to { opacity: 0; }
+
+.cmd-spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 246, 224, 0.4);
+  border-top-color: #fff6e0;
+  animation: cmd-spin 0.7s linear infinite;
+}
+@keyframes cmd-spin {
+  to { transform: rotate(360deg); }
+}
 </style>

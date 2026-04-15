@@ -1,27 +1,20 @@
 import { db } from "./client.js";
-import { getSystemLanguage } from "../../app_shared/settings/language.js";
+
 const daysAgo = (days, hour, minute) => {
   const d = new Date();
   d.setDate(d.getDate() - days);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString().slice(0, 19).replace("T", " ");
 };
-const FINANCE_SEEDS_BY_LANGUAGE = {
-  zh: [
-    ["income", 88e4, "卖掉了老家祖传的陨石，鉴定说是火星来的", () => daysAgo(30, 9, 15)],
-    ["income", 52e3, "帮邻居大妈设计了一款广场舞队服，爆单了", () => daysAgo(20, 11, 0)],
-    ["income", 15e3, "教楼下咖啡店老板拉花，他按杯付费", () => daysAgo(12, 8, 30)],
-    ["expense", 14e4, "冲动买了一匹退役赛马，说是要陪它跑步", () => daysAgo(5, 14, 30)],
-    ["expense", 299, "给自己买了一本《如何停止乱花钱》", () => daysAgo(1, 15, 30)]
-  ],
-  en: [
-    ["income", 88e4, "Sold a family meteorite from my hometown; appraisal said it was from Mars", () => daysAgo(30, 9, 15)],
-    ["income", 52e3, "Designed dance team uniforms for a neighbor and it unexpectedly went viral", () => daysAgo(20, 11, 0)],
-    ["income", 15e3, "Taught the cafe owner downstairs latte art and got paid per cup", () => daysAgo(12, 8, 30)],
-    ["expense", 14e4, "Impulse-bought a retired racehorse and promised to run with it daily", () => daysAgo(5, 14, 30)],
-    ["expense", 299, 'Bought a book titled "How to Stop Impulse Spending"', () => daysAgo(1, 15, 30)]
-  ]
-};
+
+const FINANCE_SEEDS = [
+  ["income",  88e4, "__T_FINANCE_SEED_1_NOTE__", () => daysAgo(30, 9, 15)],
+  ["income",  52e3, "__T_FINANCE_SEED_2_NOTE__", () => daysAgo(20, 11, 0)],
+  ["income",  15e3, "__T_FINANCE_SEED_3_NOTE__", () => daysAgo(12, 8, 30)],
+  ["expense", 14e4, "__T_FINANCE_SEED_4_NOTE__", () => daysAgo(5, 14, 30)],
+  ["expense", 299,  "__T_FINANCE_SEED_5_NOTE__", () => daysAgo(1, 15, 30)]
+];
+
 const initFinanceTables = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS finance_transactions (
@@ -33,26 +26,24 @@ const initFinanceTables = () => {
     )
   `);
 };
+
 const seedFinanceIfEmpty = () => {
   const count = db.prepare("SELECT COUNT(*) as c FROM finance_transactions").get().c;
   if (count !== 0) return;
-  const language = getSystemLanguage();
-  const seeds = FINANCE_SEEDS_BY_LANGUAGE[language];
-  if (!seeds) {
-    throw new Error(`Unsupported system language: ${language}`);
-  }
   const insert = db.prepare(`
     INSERT INTO finance_transactions (type, amount, note, date)
     VALUES (?, ?, ?, ?)
   `);
-  for (const [type, amount, note, dateFn] of seeds) {
+  for (const [type, amount, note, dateFn] of FINANCE_SEEDS) {
     insert.run(type, amount, note, dateFn());
   }
 };
+
 const initFinanceDatabase = () => {
   initFinanceTables();
   seedFinanceIfEmpty();
 };
+
 export {
   initFinanceDatabase
 };

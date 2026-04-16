@@ -2,9 +2,7 @@ import { chat } from "../../agent/handler.js";
 import { getSettings } from "../service/settings/get.js";
 import { buildSystemPrompt } from "../../prompt/index.js";
 import { injectAttachmentsMessage } from "./attachments.js";
-import { parseAssistantSummary } from "./summary.js";
 import { getMessages, saveMessage } from "./messages.js";
-import { insertTimelineItem } from "../repository/timeline/create.js";
 import { hasChat } from "./chats.js";
 const createSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
@@ -49,10 +47,17 @@ const createSession = (wsSend) => {
         enableToolLoopLimit,
         toolMaxRounds
       } = settings;
+      const historyMessages = getMessages(cid, contextRounds).map((message) => {
+        if (message?.role !== "user") return message;
+        const attachments = Array.isArray(message._meta?.attachments) ? message._meta.attachments : [];
+        if (!attachments.length) return message;
+        const injected = injectAttachmentsMessage([message], attachments);
+        return injected.messages[0] || message;
+      });
       const messages = [{
         role: "system",
         content: buildSystemPrompt(cid)
-      }, ...getMessages(cid, contextRounds)];
+      }, ...historyMessages];
       const userMsg = { role: "user", content: data.content };
       let userMeta = null;
       let modelUserMsg = userMsg;
@@ -95,27 +100,11 @@ const createSession = (wsSend) => {
         if (msg.type === "done") {
           if (msg.message) {
             const rawContent = String(msg.message.content || "");
-            const parsed = parseAssistantSummary(rawContent);
-            const saved = saveMessage(
-              cid,
-              { ...msg.message, content: parsed.content },
-              null,
-              parsed.summary || null
-            );
-            if (parsed.summary) {
-              insertTimelineItem({
-                sourceApp: "chat",
-                sourceRef: cid,
-                kind: "summary",
-                content: parsed.summary,
-                metadata: { messageId: saved.id }
-              });
-            }
+            saveMessage(cid, msg.message);
             wsSend({
               type: "done",
               conversationId: cid,
-              content: rawContent,
-              summary: parsed.summary || ""
+              content: rawContent
             });
             return;
           }

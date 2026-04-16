@@ -4,14 +4,11 @@ import { fileURLToPath } from "url";
 import { getSettings } from "../main/service/settings/get.js";
 import { apps as appsSection } from "./apps.js";
 import { chats as chatsSection } from "./chats.js";
-// import { command as commandSection } from "./command.js";
 import { environment as environmentSection } from "./environment.js";
 import { language as languageSection } from "./language.js";
 import { memory as memorySection } from "./memory.js";
 import { model as modelSection } from "./model.js";
-// import { summary as summarySection } from "./summary.js";
 import { skills as skillsSection } from "./skills.js";
-import { timeline as timelineSection } from "./timeline.js";
 import { tools as toolsSection } from "./tools.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const INSTRUCTION_PATH = join(__dirname, "INSTRUCTION.md");
@@ -54,9 +51,6 @@ const buildSystemPrompt = (currentConversationId = "") => {
     enableToolLoopLimit,
     toolMaxRounds
   });
-  prompt += timelineSection(currentConversationId);
-  // prompt += commandSection();
-  // prompt += summarySection();
   prompt += appsSection();
   prompt += skillsSection();
   prompt += chatsSection(currentConversationId);

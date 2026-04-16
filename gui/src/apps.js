@@ -16,14 +16,6 @@ const apps = [
     defaultDesktopWindowSize: { w: 700, h: 500 }
   },
   {
-    id: 'timeline',
-    name: '__T_APP_SIDEBAR_TIMELINE__',
-    icon: '🕰️',
-    desktopLoad: () => import('./apps/timeline/index.vue'),
-    intent: () => import('./apps/timeline/intent.js'),
-    defaultDesktopWindowSize: { w: 900, h: 700 }
-  },
-  {
     id: 'memory',
     name: '__T_APP_SIDEBAR_MEMORY__',
     icon: '🌳',

@@ -4,7 +4,6 @@ import { handleMemoryApi } from "./memory.js";
 import { handleSettingsApi } from "./settings.js";
 import { handleFilesApi } from "./files.js";
 import { handleTaskApi } from "./task.js";
-import { handleTimelineApi } from "./timeline.js";
 import { handleSystemApi } from "./system.js";
 const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -35,10 +34,6 @@ const handleApiRequest = async (req, res, url) => {
     }
     if (path.startsWith("/api/task")) {
       await handleTaskApi(req, res, path, url);
-      return true;
-    }
-    if (path.startsWith("/api/timeline/")) {
-      await handleTimelineApi(req, res, path, url);
       return true;
     }
     json(res, { success: false, message: "API endpoint not found" }, 404);

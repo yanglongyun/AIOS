@@ -16,7 +16,6 @@ const createTables = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       conversation_id TEXT NOT NULL,
       message TEXT NOT NULL,
-      summary TEXT,
       meta TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
@@ -41,32 +40,11 @@ const createTables = () => {
       created_at TEXT DEFAULT (datetime('now')),
       finished_at TEXT
     );
-
-    CREATE TABLE IF NOT EXISTS timeline (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      source_app TEXT NOT NULL,
-      source_ref TEXT,
-      kind TEXT NOT NULL DEFAULT 'event',
-      title TEXT,
-      content TEXT NOT NULL,
-      metadata TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
   `);
-};
-
-const seedTimelineIfEmpty = () => {
-  const count = db.prepare("SELECT COUNT(*) as c FROM timeline").get().c;
-  if (count !== 0) return;
-  db.prepare(
-    `INSERT INTO timeline (source_app, kind, title, content)
-     VALUES (?, ?, ?, ?)`
-  ).run("system", "milestone", "__T_SYSTEM_BOOT_TITLE__", "__T_SYSTEM_BOOT_CONTENT__");
 };
 
 const initDatabase = () => {
   createTables();
-  seedTimelineIfEmpty();
 };
 
 export {

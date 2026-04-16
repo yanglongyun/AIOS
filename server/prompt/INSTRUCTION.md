@@ -24,7 +24,6 @@
 - `server/shared/` — 后端共享代码
 - `server/agent/` / `server/llm/` / `server/prompt/` — agent / 模型 / 提示词
 - `apps/` — 应用说明文档目录（运行态；只存 markdown，不是源码，不要往里写 `.js`/`.vue`）
-- `memory/` — 记忆文档目录（运行态；直接读写）
 - `database/` — SQLite 文件
 - `files/` — 工作文件
 - `skills/` — 本地技能
@@ -53,18 +52,11 @@
 
 ## 记忆系统
 
-记忆文档直接读写 `memory/` 下的文件。没有独立的语言源目录——你看到的就是最终态。
+记忆存储在数据库 `memories` 表中，通过 `/api/memory/*` 接口管理。
 
-分层索引结构：
-- `memory/index.md` 只列直属内容
-- 每个子目录都要有自己的 `index.md`
-- 新建记忆文件时必须带 frontmatter：
-
-```
----
-description: 一句话描述
----
-```
+- `pinned=1` 的记忆会自动注入系统提示词（必读记忆）
+- `enabled=0` 的记忆暂停生效但不删除
+- `creator` 标记创建者：`user`（用户）、`ai`（AI）、`system`（系统）
 
 以下信息应主动写入记忆：
 - 用户长期偏好

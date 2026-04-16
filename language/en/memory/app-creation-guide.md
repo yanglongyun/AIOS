@@ -1,52 +1,52 @@
 ---
-description: Full AIOS app creation and modification skeleton, API contract, database patterns, frontend registration, and reload flow
+description: AIOS 新建和修改应用的完整骨架、API 契约、数据库写法、前端注册、重启流程
 ---
 
-# App Creation Guide
+# 应用创建指导
 
-This is the **single authoritative document** for AIOS app development. Read it in full before creating a new app. Do not write from habit, and do not copy the style of Express, Electron, or Fetch - AIOS has its own contract, and code that violates it will not run.
+这是 AIOS 应用开发的**唯一权威文档**。新建应用前必须完整读完。不要凭经验写，不要照搬 Express / Electron / Fetch 的风格——AIOS 有自己的契约，背离契约的代码一定跑不起来。
 
-## 0. Runtime Environment Assumptions
+## 0. 运行环境前提
 
-Your current working directory is the **runtime workspace**. Every file here is the one currently used by the two Node services on ports 9500 and 9501. So:
+你当前的工作目录就是**运行态 workspace**。这里的每一个文件都是 9500/9501 两个 Node 服务正在跑的那份。所以：
 
-- Changing a file means changing runtime code
-- After a change, you **must** trigger reload (see Section 10), or Node's module cache will keep the new code from taking effect
-- There is no "write in the source repo first, then sync to a runtime copy" model here - there is no two-codebase structure like that
-- There is no `__T_*__` placeholder mechanism and no runtime language replacement. Write literal UI strings directly. Do not write `__T_XXX__`; nothing will replace it
+- 改文件 = 改运行时代码
+- 改完**必须**触发 reload（见第 10 节），否则 Node 的模块缓存让新代码完全不生效
+- 不存在"先在源码仓库写，再同步到运行副本"这种事——没有那种两份代码的结构
+- 不存在 `__T_*__` 占位符机制，也不存在运行时的语言替换。写文案**直接写中文字面量**，别写 `__T_XXX__`，写了也没人会替换
 
-## 1. Directory Structure
+## 1. 目录结构
 
-Each app is split into three layers:
+每个应用分成三层：
 
 ```text
-server/apps/<appname>/       # backend code
-gui/src/apps/<appname>/      # frontend code
-apps/<appname>/APP.md        # app documentation
+server/apps/<appname>/       # 后端代码
+gui/src/apps/<appname>/      # 前端代码
+apps/<appname>/APP.md        # 应用说明文档
 ```
 
-In runtime, the `apps/` directory is for **markdown documentation only**. Do not put `.js` or `.vue` files there. Backend code always belongs in `server/apps/<appname>/`, and frontend code always belongs in `gui/src/apps/<appname>/`.
+运行态里 `apps/` 目录**只放 markdown 说明文档**，不要往里写 `.js` 或 `.vue`。后端代码永远在 `server/apps/<appname>/`，前端代码永远在 `gui/src/apps/<appname>/`。
 
-System-level apps such as `chat`, `settings`, and `tasks` are exceptions. Their backend lives in `server/main/`, `server/agent/`, `server/llm/`, and `server/prompt/`, not in `server/apps/`. Do not model a new app after them.
+系统级应用 `chat` / `settings` / `tasks` 是特例，它们的后端在 `server/main/`、`server/agent/`、`server/llm/`、`server/prompt/` 里，不在 `server/apps/`。建新 app 不要学它们。
 
-## 2. Backend Skeleton
+## 2. 后端骨架
 
-At minimum, include these files:
+最少包含这些文件：
 
 ```text
 server/apps/<appname>/
 ├── index.js
 ├── api/index.js
-├── service/<action>.js    # business logic
+├── service/<action>.js    # 业务逻辑
 └── repository/
-    ├── client.js          # database connection
-    ├── init.js            # create tables
-    └── <action>.js        # SQL operations
+    ├── client.js          # 数据库连接
+    ├── init.js            # 建表
+    └── <action>.js        # SQL 操作
 ```
 
-## 3. Backend Entry `index.js`
+## 3. 后端入口 `index.js`
 
-**Copy this skeleton as-is**:
+**原样抄这个骨架**：
 
 ```js
 import { initDb } from "./repository/init.js";
@@ -60,13 +60,13 @@ export default {
 };
 ```
 
-Required fields: `name`, `match`, `handleApi`. Optional fields: `initDb`, `initRuntime`.
+必需字段：`name`、`match`、`handleApi`。可选：`initDb`、`initRuntime`。
 
-**Do not** use the `export default function` style, and do not use `export { default as ... }` named exports. Use the default object shape shown above.
+**不要**用 `export default function` 的风格，不要用 named export 里 `export { default as ... }`——就是上面这种 default object。
 
-## 4. Register in the Registry
+## 4. 注册到 registry
 
-Edit `server/apps/registry.js` and add the new app loader to the array:
+改 `server/apps/registry.js`，把新 app 的 loader 加进数组：
 
 ```js
 const appLoaders = [
@@ -75,73 +75,73 @@ const appLoaders = [
   () => import("./cryptobot/index.js"),
   () => import("./ghtrending/index.js"),
   () => import("./createapp/index.js"),
-  () => import("./todo/index.js")   // new
+  () => import("./todo/index.js")   // 新增
 ];
 export {
   appLoaders
 };
 ```
 
-After changing the registry, you **must** trigger reload (Section 10). Otherwise the `appLoaders` array still held in the 9501 process memory will be the old one, the new app will never be imported, and every `/apps/<appname>/*` request will return 404.
+改完 registry 后**必须**调 reload（第 10 节），否则 9501 进程内存里的 `appLoaders` 还是旧数组，新 app 根本没被 import，任何 `/apps/<appname>/*` 请求都会 404。
 
-## 5. API Rules (The API Contract - This Is AIOS-Specific, Not Express or Fetch)
+## 5. API 规则（API 契约——这是 AIOS 自己的约定，和 Express/Fetch 无关）
 
-### 5.1 `handleApi` Function Signature
+### 5.1 `handleApi` 函数签名
 
-**Fixed signature. The parameter order cannot change**:
+**固定签名，顺序不能变**：
 
 ```js
 const handleApi = async (req, res, path) => { ... };
 ```
 
-- `req` is Node's native `http.IncomingMessage` (**not** a Fetch `Request`, and it does **not** have `.json()`)
-- `res` is Node's native `http.ServerResponse`
-- `path` is a string already extracted from the URL
+- `req` 是 Node 原生 `http.IncomingMessage`（**不是** Fetch 的 Request，**没有** `.json()` 方法）
+- `res` 是 Node 原生 `http.ServerResponse`
+- `path` 是字符串，已经从 URL 里取好了
 
-### 5.2 Read the Body with `readBody(req)`
+### 5.2 读 body：用 `readBody(req)`
 
-Do not call `req.json()` - that is Fetch API behavior and does not exist here. Use the built-in AIOS helper:
+不要调 `req.json()`——那是 Fetch API，这里没有。用 AIOS 内置的 helper：
 
 ```js
 import { readBody } from "../../../shared/http/readBody.js";
 
 const body = await readBody(req);
-// body is already a JSON.parse'd object
+// body 是已经 JSON.parse 好的对象
 ```
 
-### 5.3 Read Query Strings with `new URL(req.url, ...)`
+### 5.3 读 query string：用 `new URL(req.url, ...)`
 
 ```js
 const url = new URL(req.url, `http://${req.headers.host}`);
 const id = Number(url.searchParams.get("id") || 0);
 ```
 
-### 5.4 Write Responses with `json(res, data, status?)`
+### 5.4 写响应：用 `json(res, data, status?)`
 
-**Do not** return a `{ status, body }` object. That is Express-like style, and AIOS does not consume it. The handler must write to `res` itself:
+**不要** return `{ status, body }` 对象——那是 Express-like 的风格，AIOS 这里不接。handler 必须亲自往 `res` 里写：
 
 ```js
 import { json } from "../../../shared/http/json.js";
 
-return json(res, { ok: true, data });        // defaults to 200
-return json(res, { error: "..." }, 400);     // explicit status code
+return json(res, { ok: true, data });        // 默认 200
+return json(res, { error: "..." }, 400);     // 指定状态码
 ```
 
-`json()` calls `res.writeHead` and `res.end`, which closes the connection.
+`json()` 会调 `res.writeHead` + `res.end`，把连接关掉。
 
-### 5.5 Return `false` on an Unmatched Path
+### 5.5 未命中路径返回 `false`
 
-If the handler does not recognize a path, `return false`. The upper layer of the apps server will turn that into a 404. Do not `return json(res, { error: "not found" }, 404)`, and do not throw.
+handler 不认识的路径就 `return false`——apps server 的上层会把它变成 404。不要 `return json(res, { error: "not found" }, 404)`，不要 throw。
 
-### 5.6 URL Style
+### 5.6 URL 风格
 
-- All app APIs use `/apps/<appname>/<action>` with explicit paths, not dynamic route matching
-- Query operations use `GET + query string`
-- Mutation operations use `POST + JSON body`
+- 应用 API 全部走 `/apps/<appname>/<action>`，路径写死，不做动态路由匹配
+- 查询类走 `GET + query string`
+- 变更类走 `POST + JSON body`
 
-### 5.7 Full `api/index.js` Skeleton
+### 5.7 完整的 `api/index.js` 骨架
 
-**Copy this structure as-is**. Only change the app name, action names, and service function names:
+**原样抄这个结构**，改 app 名、action 名、service 函数名就行：
 
 ```js
 import { readBody } from "../../../shared/http/readBody.js";
@@ -187,11 +187,11 @@ const handleApi = async (req, res, path) => {
 export { handleApi };
 ```
 
-## 6. Database Rules
+## 6. 数据库规则
 
-### 6.1 `repository/client.js`: Use the `createAppDb` Helper
+### 6.1 `repository/client.js`：用 `createAppDb` helper
 
-**Never** create your own `new Database(...)`, **never** `import { app } from 'electron'` (AIOS is not Electron), and **never** build your own `userData` path. Use the built-in helper:
+**绝对不要**自己 `new Database(...)`，**绝对不要** `import { app } from 'electron'`（AIOS 不是 Electron），**绝对不要**自己拼 `userData` 路径。用内置 helper：
 
 ```js
 import { createAppDb } from "../../app_shared/db/createAppDb.js";
@@ -201,15 +201,14 @@ const db = createAppDb("todo.db");
 export { db };
 ```
 
-`createAppDb` will:
+`createAppDb` 会：
+- 把数据库文件放到 `database/apps/<filename>`
+- 自动创建目录
+- 打开 WAL 模式
 
-- put the database file under `database/apps/<filename>`
-- create the directory automatically
-- enable WAL mode
+返回一个 better-sqlite3 实例。**同步 API**（`db.prepare(...)` / `stmt.run(...)` / `stmt.get(...)` / `stmt.all(...)`），不是 Promise。
 
-It returns a better-sqlite3 instance. The API is **synchronous** (`db.prepare(...)`, `stmt.run(...)`, `stmt.get(...)`, `stmt.all(...)`), not promise-based.
-
-### 6.2 `repository/init.js`: Create Tables
+### 6.2 `repository/init.js`：建表
 
 ```js
 import { db } from "./client.js";
@@ -230,14 +229,13 @@ const initDb = () => {
 export { initDb };
 ```
 
-Hard rules:
+硬规则：
+- **禁止** `ALTER TABLE` / `DROP TABLE` / `PRAGMA table_info` 检测 / 版本判断
+- **禁止** backfill、fallback、兼容旧数据的条件分支
+- 每张表的 `CREATE TABLE` 就是它当前且唯一的形状，代码只保留"最终形态"
+- 改表结构就清 `database/apps/<app>.db` 重建
 
-- **Forbidden**: `ALTER TABLE`, `DROP TABLE`, `PRAGMA table_info`, version checks, or anything similar
-- **Forbidden**: backfills, fallbacks, or compatibility branches for old data
-- Each table's `CREATE TABLE` is the current and only shape. Keep only the final schema in code
-- If you change the schema, delete and rebuild `database/apps/<app>.db`
-
-### 6.3 Other `repository/<action>.js` Files: Concrete SQL
+### 6.3 其他 `repository/<action>.js`：具体 SQL
 
 ```js
 import { db } from "./client.js";
@@ -253,9 +251,9 @@ const createTodoRow = ({ title, description }) => {
 export { createTodoRow };
 ```
 
-### 6.4 `service/<action>.js`: Business Layer
+### 6.4 `service/<action>.js`：业务层
 
-The service layer handles validation, assembly, and repository calls. By convention it returns **plain objects** only. Success returns data, failure returns `{ error, status? }`. Do not throw up to the handler.
+service 层做校验、组装、调用 repository。约定返回**纯对象**（成功就是数据，失败就是 `{ error, status? }`，不要 throw 给 handler）：
 
 ```js
 import { createTodoRow } from "../repository/create.js";
@@ -270,38 +268,37 @@ const createTodo = ({ title = "", description = "" } = {}) => {
 export { createTodo };
 ```
 
-## 7. Frontend Structure
+## 7. 前端结构
 
 ```text
 gui/src/apps/<appname>/
-├── index.vue              # app entry: compose child components, own top-level state
-└── components/            # extracted child components
+├── index.vue              # 应用主入口：组合子组件，持有顶层状态
+└── components/            # 拆分出来的子组件
     ├── Toolbar.vue
     ├── ItemCard.vue
     └── ...
 ```
 
-**Component splitting is a hard rule**. Any structure that can stand on its own (toolbar, list item, sidebar, modal, settings panel, or a subview) should be split into an independent `.vue` file under `components/`.
+**组件拆分是硬规则**。凡是能独立成块的结构（工具条、列表项、侧边栏、弹层、设置面板、某个子视图），都拆到 `components/` 下作为独立的 `.vue` 文件。
 
-- `index.vue` should only load data, own top-level state, compose child components, and forward cross-component events
-- Child components should do one thing, taking props in and emitting events out
-- Size guideline: keep `index.vue` within 200 lines
+- `index.vue` 只负责：加载数据、持有顶层状态、组合子组件、处理跨组件的事件中转
+- 子组件职责单一，props-in / emit-out
+- 参考规模：`index.vue` 控制在 200 行以内
 
-If the app needs to be opened by business actions from other apps, also add `gui/src/apps/<appname>/intent.js`.
+如需被其他应用通过动作调用，再补 `gui/src/apps/<appname>/intent.js`。
 
-### Style Rules: Tailwind First
+### 样式规则：Tailwind 优先
 
-The project uses Tailwind v4 (`@tailwindcss/vite` zero-config). All frontend styles should default to Tailwind utility classes. `<style scoped>` is the exception, not the norm.
+项目用的是 Tailwind v4（`@tailwindcss/vite` 零配置），所有前端样式**默认走 Tailwind 工具类**。`<style scoped>` 块是例外，不是常规。
 
-**Write everything inline with Tailwind utilities**:
+**全部用 Tailwind 工具类写 inline**：
+- 布局、间距、圆角、字号、flex/grid
+- hover / disabled / focus / last-child 等变体
+- transition、opacity、transform
+- `before:` / `after:` 伪元素（Tailwind v4 的 arbitrary variant 足够表达）
+- 任意精确数值用 arbitrary value：`text-[9.5px]` / `rounded-[14px]` / `px-[18px]` / `tracking-[0.09em]` / `leading-[1.55]`
 
-- layout, spacing, border radius, font sizes, flex and grid
-- hover, disabled, focus, last-child, and other variants
-- transition, opacity, transform
-- `before:` and `after:` pseudo-elements (Tailwind v4 arbitrary variants are expressive enough)
-- exact values with arbitrary values: `text-[9.5px]`, `rounded-[14px]`, `px-[18px]`, `tracking-[0.09em]`, `leading-[1.55]`
-
-**Use inline `style` for brand colors**, not a global config palette:
+**品牌色走 inline `style` 属性**，不在全局 config 里加色板：
 
 ```vue
 <div
@@ -310,22 +307,21 @@ The project uses Tailwind v4 (`@tailwindcss/vite` zero-config). All frontend sty
 >
 ```
 
-**Use `<style scoped>` only in three cases**:
+**`<style scoped>` 只在三种情况用**：
+1. `@keyframes` 自定义关键帧动画（spinner、loading 动画等）
+2. Vue `<Transition>` 约定的类对（`.xxx-enter-active` / `.xxx-leave-to`）
+3. `:deep()` 穿透第三方组件或 markdown 渲染出的 HTML 结构
 
-1. Custom `@keyframes` animations (spinner, loading animation, and so on)
-2. Vue `<Transition>` class pairs (`.xxx-enter-active`, `.xxx-leave-to`)
-3. `:deep()` overrides for third-party components or markdown-rendered HTML
+**禁止**：给元素起 `.my-card / .my-btn` 这种自定义 class 然后在 scoped CSS 里写 padding/color/hover——这是在重复 Tailwind 已经做过的事。
 
-**Forbidden**: creating custom classes such as `.my-card` or `.my-btn` and then writing padding, color, or hover rules in scoped CSS. That just duplicates what Tailwind already provides.
+## 8. 前端注册
 
-## 8. Frontend Registration
-
-Edit `gui/src/apps.js` and add the app to the array:
+改 `gui/src/apps.js`，加进数组：
 
 ```js
 {
   id: "todo",
-  name: "Todo",
+  name: "待办",
   icon: "✅",
   desktopLoad: () => import("./apps/todo/index.vue"),
   intent: () => import("./apps/todo/intent.js"),
@@ -333,17 +329,16 @@ Edit `gui/src/apps.js` and add the app to the array:
 }
 ```
 
-Rules:
+规则：
+- `id` 与应用目录一致
+- `name` **直接写中文字面量**（不要 `__T_*__` 占位符，运行时没有替换机制）
+- `icon` 单个 emoji
+- `desktopLoad` 必须有
+- `intent` 可选
 
-- `id` must match the app directory name
-- `name` should be written as a literal display string (do not use `__T_*__` placeholders because runtime has no replacement mechanism)
-- `icon` must be a single emoji
-- `desktopLoad` is required
-- `intent` is optional
+## 9. Intent 规则
 
-## 9. Intent Rules
-
-Business-semantic calls between apps should always go through intent.
+应用之间有业务语义的调用，统一走 intent。
 
 ```js
 import { openIntent } from "../system/intent.js";
@@ -355,53 +350,52 @@ await openIntent({
 });
 ```
 
-Rules:
+规则：
+- 有业务语义的动作写进 `intent.js`
+- 纯窗口打开可以走窗口工具
+- 只要带状态和业务含义，就不要绕过 intent
 
-- Put business-semantic actions into `intent.js`
-- Pure window-open behavior can use window tools
-- If state and business meaning are involved, do not bypass intent
+## 10. 重启与验证（硬规则）
 
-## 10. Reload and Verification (Hard Rule)
+**改完代码必须调 reload，这是硬要求，不是可选建议**。
 
-**After changing code, you must call reload. This is mandatory, not optional advice.**
+9500 和 9501 是两个长期运行的 Node 进程，它们的模块树在启动时就烘焙在内存里了。你在磁盘上改了 `.js` 文件，进程内存里的旧代码不会自动更新。不调 reload = 白改。
 
-Ports 9500 and 9501 are two long-running Node processes. Their module trees are baked into memory at startup. Changing a `.js` file on disk does not update the old code already loaded in process memory. No reload means your change did not really take effect.
+### 10.1 典型场景
 
-### 10.1 Typical Scenarios
-
-**Only backend app code changed (`server/apps/<appname>/`, `registry.js`)**:
-
-```bash
-curl -X POST http://localhost:9500/api/system/reload/request \
-  -H "Content-Type: application/json" \
-  -d '{"build": false, "restartApps": true, "restartServer": false, "message": "add todo app"}'
-```
-
-**Only frontend changed (`gui/src/...`)**:
+**只改了后端 app 代码（`server/apps/<appname>/`、`registry.js`）**：
 
 ```bash
 curl -X POST http://localhost:9500/api/system/reload/request \
   -H "Content-Type: application/json" \
-  -d '{"build": true, "restartApps": false, "restartServer": false, "message": "todo frontend update"}'
+  -d '{"build": false, "restartApps": true, "restartServer": false, "message": "新增 todo 应用"}'
 ```
 
-**Both frontend and backend changed**: set both to `true`:
+**只改了前端（`gui/src/...`）**：
 
 ```bash
 curl -X POST http://localhost:9500/api/system/reload/request \
   -H "Content-Type: application/json" \
-  -d '{"build": true, "restartApps": true, "restartServer": false, "message": "add todo app"}'
+  -d '{"build": true, "restartApps": false, "restartServer": false, "message": "todo 前端更新"}'
 ```
 
-Use `restartServer: true` only if you changed `server/main/`, `server/shared/`, `server/agent/`, `server/llm/`, or `server/prompt/`. That will restart the main service and interrupt running tasks. **When creating a new app, do not include `restartServer`.**
+**前后端都改了**：两个 `true` 一起：
 
-### 10.2 Flow
+```bash
+curl -X POST http://localhost:9500/api/system/reload/request \
+  -H "Content-Type: application/json" \
+  -d '{"build": true, "restartApps": true, "restartServer": false, "message": "新增 todo 应用"}'
+```
 
-`/api/system/reload/request` -> the backend first probes whether a new process can start -> if it passes, the frontend shows a "Restart System" dialog -> the user confirms -> then the old process is killed and the new process starts.
+`restartServer: true` 只在改了 `server/main/` / `server/shared/` / `server/agent/` / `server/llm/` / `server/prompt/` 时才带——这会重启主服务，中断正在跑的任务。**建 app 的场景绝对不要带 `restartServer`**。
 
-If the preflight probe fails, it returns an error immediately and the current service is left untouched. So this endpoint is safe to call.
+### 10.2 流程
 
-### 10.3 Preflight Only, No Switch
+`/api/system/reload/request` → 后台先 probe 一个新进程确认能起来 → 通过后前端弹"重启系统"对话框 → 用户点确认 → 真正杀掉旧进程、启动新进程。
+
+预检失败会直接报错，当前服务不受影响——所以这条接口是安全的，放心调。
+
+### 10.3 只验证能不能起来、不切换
 
 ```bash
 curl -X POST http://localhost:9500/api/system/reload/test \
@@ -409,49 +403,48 @@ curl -X POST http://localhost:9500/api/system/reload/test \
   -d '{"restartApps": true}'
 ```
 
-This runs the probe only. It does not show a dialog and does not switch processes. Use it when you are not sure whether the code can import successfully and want a self-check first.
+这只跑 probe，不弹对话框，不切换。适合你不确定代码能不能 import 成功的时候先自检。
 
-### 10.4 Forbidden Patterns
+### 10.4 禁止的做法
 
-- Declaring "done" after changing code without calling reload
-- Calling `/api/system/reload` directly (the terminal endpoint), bypassing preflight and user confirmation
-- Including `restartServer: true` while creating a new app
+- 改完代码不调 reload 就告诉用户"做完了"
+- 直接调 `/api/system/reload`（终态接口），绕过预检和用户确认
+- 在建新 app 的场景里带 `restartServer: true`
 
-## 11. AI Calls
+## 11. AI 调用
 
-Reuse the system's existing AI wrappers whenever possible. Do not reinvent a new AI orchestration layer inside each app.
+优先复用系统已有封装，不要每个应用自己重造一套 AI 编排。
 
-Common entry points:
-
+常见入口：
 - `agentTaskJson`
 - `instantTaskJson`
 
-## 12. Minimum Delivery Checklist
+## 12. 最低交付清单
 
-To create a new app, write **everything** in this order:
+新建一个 app，**按这个顺序**写全部内容：
 
 1. `server/apps/<appname>/index.js`
 2. `server/apps/<appname>/repository/client.js`
 3. `server/apps/<appname>/repository/init.js`
-4. `server/apps/<appname>/repository/<action>.js` (create, list, update, delete, and so on)
+4. `server/apps/<appname>/repository/<action>.js`（create/list/update/delete 等）
 5. `server/apps/<appname>/service/<action>.js`
 6. `server/apps/<appname>/api/index.js`
-7. Edit `server/apps/registry.js` and add the new app to `appLoaders`
-8. `gui/src/apps/<appname>/index.vue` (at minimum this one; split subcomponents into `components/`)
-9. Edit `gui/src/apps.js` and add the registration item (`name` should be a literal display string)
-10. `apps/<appname>/APP.md` (short description)
-11. Call `/api/system/reload/request` to trigger reload
+7. 改 `server/apps/registry.js`，把新 app 加进 `appLoaders`
+8. `gui/src/apps/<appname>/index.vue`（至少这一个；组件拆 `components/`）
+9. 改 `gui/src/apps.js`，加注册项（`name` 写中文字面量）
+10. `apps/<appname>/APP.md`（简短说明）
+11. 调 `/api/system/reload/request` 触发重启
 
-Miss one step and the app is incomplete. Miss Step 7 and 9501 will never load the app. Miss Step 11 and the new code will never take effect.
+漏一步，app 就不完整。漏第 7 步，app 永远不会被 9501 加载。漏第 11 步，新代码永远不生效。
 
-## 13. Anti-Patterns (Recognize Them and Reject Them)
+## 13. 反模式（遇到要认出来并拒绝）
 
-- ❌ `import { app } from 'electron'` - AIOS is not Electron
-- ❌ `req.json()` - native Node http does not have this; use `readBody(req)`
-- ❌ `return { status, body }` - the upper layer does not consume that shape; use `json(res, data, status)`
-- ❌ `new Database(...)` in `repository/client.js` with a hand-built path - use `createAppDb("xxx.db")`
-- ❌ `__T_APP_SIDEBAR_XXX__` placeholders - runtime has no language replacement, so write literal strings
-- ❌ Express-style routers (`app.get(...)`, `app.post(...)`) - AIOS uses bare Node http
-- ❌ throwing inside `handleApi` - use `return json(res, { error }, status)` or `return false`
-- ❌ `handleApi(path, req, url)` - wrong parameter order; the correct order is `(req, res, path)`
-- ❌ changing code and declaring it done without calling reload - the new code is not active, and the user will immediately see 404s or old behavior
+- ❌ `import { app } from 'electron'` —— AIOS 不是 Electron
+- ❌ `req.json()` —— Node 原生 http 没这个方法，用 `readBody(req)`
+- ❌ `return { status, body }` —— 上层不消费这种结构，用 `json(res, data, status)`
+- ❌ `new Database(...)` 在 `repository/client.js` 自己拼路径 —— 用 `createAppDb("xxx.db")`
+- ❌ `__T_APP_SIDEBAR_XXX__` 占位符 —— 运行时没有语言替换机制，写中文字面量
+- ❌ Express 风格的 router (`app.get(...)` / `app.post(...)`) —— AIOS 用的是裸 Node http
+- ❌ 在 `handleApi` 里 throw —— 用 `return json(res, { error }, status)` 或 `return false`
+- ❌ `handleApi(path, req, url)` —— 参数顺序错了，正确是 `(req, res, path)`
+- ❌ 改完代码不调 reload 直接宣布完成 —— 新代码没生效，用户立刻会看到 404 或旧行为

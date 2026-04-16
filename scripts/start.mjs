@@ -83,11 +83,11 @@ if (!fs.existsSync(langDir)) {
 const REPLACE_EXTS = new Set(['.js', '.mjs', '.ts', '.vue', '.json', '.md']);
 const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'database', 'files', 'dist', 'language', 'scripts']);
 
-const walk = (dir, visit, { exclude = false } = {}) => {
+const walk = (dir, visit, { exclude = false, root = dir } = {}) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      if (exclude && EXCLUDE_DIRS.has(entry.name)) continue;
-      walk(path.join(dir, entry.name), visit, { exclude });
+      if (exclude && dir === root && EXCLUDE_DIRS.has(entry.name)) continue;
+      walk(path.join(dir, entry.name), visit, { exclude, root });
     } else {
       visit(path.join(dir, entry.name));
     }

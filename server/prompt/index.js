@@ -12,19 +12,11 @@ import { skills as skillsSection } from "./skills.js";
 import { tools as toolsSection } from "./tools.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const INSTRUCTION_PATH = join(__dirname, "INSTRUCTION.md");
-const MEMORY_INDEX_PATH = join(process.cwd(), "memory", "index.md");
 const instruction = () => {
   try {
     return readFileSync(INSTRUCTION_PATH, "utf8").trim();
   } catch {
     return "你是 AIOS。";
-  }
-};
-const memoryIndexOverview = () => {
-  try {
-    return readFileSync(MEMORY_INDEX_PATH, "utf8").trim();
-  } catch {
-    return null;
   }
 };
 const buildSystemPrompt = (currentConversationId = "") => {
@@ -42,7 +34,7 @@ const buildSystemPrompt = (currentConversationId = "") => {
   const cwd = process.cwd();
   let prompt = instruction();
   prompt += languageSection(language);
-  prompt += memorySection(memoryIndexOverview());
+  prompt += memorySection();
   prompt += environmentSection(cwd);
   prompt += modelSection({ provider, name: model, apiUrl });
   prompt += toolsSection({

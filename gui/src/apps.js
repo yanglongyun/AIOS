@@ -10,7 +10,7 @@ const apps = [
   {
     id: 'tasks',
     name: '__T_APP_SIDEBAR_TASKS__',
-    icon: '✅',
+    icon: '⚡',
     desktopLoad: () => import('./apps/tasks/index.vue'),
     intent: () => import('./apps/tasks/intent.js'),
     defaultDesktopWindowSize: { w: 700, h: 500 }
@@ -18,9 +18,9 @@ const apps = [
   {
     id: 'memory',
     name: '__T_APP_SIDEBAR_MEMORY__',
-    icon: '🌳',
+    icon: '💭',
     desktopLoad: () => import('./apps/memory/index.vue'),
-    defaultDesktopWindowSize: { w: 500, h: 360 }
+    defaultDesktopWindowSize: { w: 600, h: 500 }
   },
   {
     id: 'files',
@@ -39,7 +39,7 @@ const apps = [
   {
     id: 'finance',
     name: '__T_APP_SIDEBAR_FINANCE__',
-    icon: '\u{1F4D2}',
+    icon: '💰',
     desktopLoad: () => import('./apps/finance/index.vue'),
     defaultDesktopWindowSize: { w: 980, h: 720 }
   },

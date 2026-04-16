@@ -77,5 +77,6 @@
   "cryptobot_trading": "自动交易中...",
   "cryptobot_chat_quick_1": "当前市场行情怎么看？",
   "cryptobot_chat_quick_2": "分析一下最近的交易操作",
-  "cryptobot_chat_quick_3": "有什么风险需要注意？"
+  "cryptobot_chat_quick_3": "有什么风险需要注意？",
+  "app_sidebar_cryptobot": "炒币机"
 }

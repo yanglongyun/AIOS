@@ -1,0 +1,21 @@
+{
+  "app_sidebar_memory": "Memory",
+  "memory_eyebrow": "Memory Workspace",
+  "memory_title": "Memory",
+  "memory_refresh": "Refresh",
+  "memory_loading": "Loading memory directory...",
+  "memory_empty": "There are no memory files available right now.",
+  "memory_no_file": "Please select a memory file",
+  "memory_hint": "Choose a file on the left and edit its content on the right.",
+  "memory_save": "Save",
+  "memory_saving": "Saving...",
+  "memory_reading": "Reading file...",
+  "memory_create_dir": "New Folder",
+  "memory_create_file": "New File",
+  "memory_rename": "Rename",
+  "memory_delete": "Delete",
+  "memory_create_dir_prompt": "Enter the new folder name",
+  "memory_create_file_prompt": "Enter the new file name (for example note.md)",
+  "memory_rename_prompt": "Enter the new name",
+  "memory_delete_confirm": "Delete the selected item? A directory must be empty first."
+}

@@ -51,5 +51,9 @@
   "createapp_tpl_board": "项目看板",
   "createapp_tpl_board_desc": "创建一个项目看板应用，支持待办、进行中、已完成三列，支持卡片拖拽、负责人、截止时间、标签和任务详情面板，适合个人或小团队管理项目。",
   "createapp_tpl_pomodoro": "番茄专注",
-  "createapp_tpl_pomodoro_desc": "创建一个番茄钟应用，支持专注计时、短休息和长休息切换，显示今日专注次数、总时长、专注记录和提醒状态，界面要安静克制，适合长期使用。"
+  "createapp_tpl_pomodoro_desc": "创建一个番茄钟应用，支持专注计时、短休息和长休息切换，显示今日专注次数、总时长、专注记录和提醒状态，界面要安静克制，适合长期使用。",
+  "app_sidebar_create_app": "应用工坊",
+  "createapp_title": "创建新应用",
+  "createapp_eyebrow": "App Workshop",
+  "createapp_empty_category": "这个分类暂时还没有灵感"
 }

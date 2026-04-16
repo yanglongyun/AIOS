@@ -36,5 +36,8 @@
   "notebook_optimize_empty": "优化结果为空",
   "notebook_chat_quick_1": "帮我整理最近的笔记",
   "notebook_chat_quick_2": "给我一些写作灵感",
-  "notebook_chat_quick_3": "帮我总结笔记要点"
+  "notebook_chat_quick_3": "帮我总结笔记要点",
+  "app_sidebar_notebook": "记事本",
+  "notebook_composer_placeholder": "写点什么...（Ctrl/Cmd + Enter 快速保存）",
+  "notebook_record": "记录"
 }

@@ -22,5 +22,6 @@
   "gh_chat_quick_2": "推荐有趣的开源项目",
   "gh_chat_quick_3": "解释一下这个热门项目",
   "gh_digest_title": "开源新知速览",
-  "gh_digest_desc": "一键总结当前时间段内最值得关注的开源项目及其核心亮点"
+  "gh_digest_desc": "一键总结当前时间段内最值得关注的开源项目及其核心亮点",
+  "app_sidebar_ghtrending": "开源新知"
 }

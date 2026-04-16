@@ -1,10 +1,14 @@
-import { resolve } from "path";
+import { resolve, sep } from "path";
+
+const CHAT_UPLOAD_BASE_DIR = resolve(process.cwd(), "files", "uploads", "chat");
+
+const pathStartsWith = (fullPath, basePath) => fullPath === basePath || fullPath.startsWith(`${basePath}${sep}`);
+
 const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
   const list = Array.isArray(messages) ? [...messages] : [];
   if (!Array.isArray(rawAttachments) || rawAttachments.length === 0 || list.length === 0) {
     return { messages: list, attachments: [] };
   }
-  const baseDir = resolve(process.cwd(), "files", "uploads", "chat");
   const validAttachments = [];
   const contextParts = [];
   const fileParts = [];
@@ -24,9 +28,9 @@ const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
     const size = Number(item.size || 0);
     if (!name || !path) continue;
     const abs = resolve(path);
-    if (!abs.startsWith(baseDir)) continue;
-    validAttachments.push({ type: "file", name, path, size });
-    fileParts.push(`${fileParts.length + 1}. ${name}: ${path}`);
+    if (!pathStartsWith(abs, CHAT_UPLOAD_BASE_DIR)) continue;
+    validAttachments.push({ type: "file", name, path: abs, size });
+    fileParts.push(`${fileParts.length + 1}. ${name}: ${abs}`);
   }
   if (!validAttachments.length) return { messages: list, attachments: [] };
   const parts = [];

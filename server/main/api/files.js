@@ -45,7 +45,6 @@ const TEXT_EXT = new Set([".txt", ".md", ".json", ".csv", ".log"]);
 
 const safeName = (name = "file") => String(name).replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
 const toUnix = (value = "") => String(value).replace(/\\/g, "/");
-
 const safeFilesPath = (sub = "") => {
   const base = resolve(FILES_DIR);
   const value = String(sub || "").trim();

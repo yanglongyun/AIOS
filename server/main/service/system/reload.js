@@ -15,8 +15,10 @@ const HEALTHCHECK_TIMEOUT_MS = 1000;
 
 const resolveNpmCli = () => {
   const vendorRoot = join(dirname(dirname(NODE_BIN)), "npm", "bin", "npm-cli.js");
-  if (existsSync(vendorRoot)) return vendorRoot;
-  return join(ROOT_DIR, "node_modules", "npm", "bin", "npm-cli.js");
+  if (existsSync(vendorRoot)) return { command: NODE_BIN, args: [vendorRoot] };
+  const localCli = join(ROOT_DIR, "node_modules", "npm", "bin", "npm-cli.js");
+  if (existsSync(localCli)) return { command: NODE_BIN, args: [localCli] };
+  return { command: "npm", args: [] };
 };
 
 const withBundledNodePath = (extra = {}) => {
@@ -56,7 +58,8 @@ const stopProbe = async (probe) => {
 };
 
 const buildFrontend = () => {
-  execFileSync(NODE_BIN, [resolveNpmCli(), "run", "build"], {
+  const npmCli = resolveNpmCli();
+  execFileSync(npmCli.command, [...npmCli.args, "run", "build"], {
     cwd: ROOT_DIR,
     timeout: 12e4,
     stdio: "pipe",

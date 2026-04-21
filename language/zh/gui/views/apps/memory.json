@@ -36,8 +36,6 @@
   "memory_creator_user": "用户",
   "memory_creator_ai": "AI",
   "memory_creator_system": "系统",
-  "memory_seed_title": "应用开发指导",
-  "memory_seed_desc": "AIOS 新建和修改应用的完整骨架、API 契约、数据库写法、前端注册、重启流程",
   "memory_group_pinned": "必读 · AI 阅读全文",
   "memory_group_enabled": "已启用 · AI 看到标题和描述",
   "memory_group_disabled": "已停用 · AI 不可见",

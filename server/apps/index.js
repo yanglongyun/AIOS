@@ -5,7 +5,8 @@ const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
 }
-const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9501;
+const DEFAULT_APPS_PORT = Number(process.env.AIOS_APPS_PORT || 9502);
+const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : DEFAULT_APPS_PORT;
 const APPS_HOST = "127.0.0.1";
 const moduleCache = /* @__PURE__ */ new Map();
 const appModules = [];

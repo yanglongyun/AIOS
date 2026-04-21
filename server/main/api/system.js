@@ -3,7 +3,7 @@ import { json } from "../../shared/http/json.js";
 import { requestReload, runReload } from "../service/system/reload.js";
 import { runReloadTest } from "../service/system/test.js";
 import { hasConfiguredModelSettings } from "../service/settings/get.js";
-import { shell } from "../../agent/functions.js";
+import { shell } from "../agent/functions.js";
 
 const logReloadRequest = (req, body, stage, extra = {}) => {
   console.log("[reload.request]", JSON.stringify({

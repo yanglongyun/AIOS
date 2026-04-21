@@ -36,8 +36,6 @@
   "memory_creator_user": "User",
   "memory_creator_ai": "AI",
   "memory_creator_system": "System",
-  "memory_seed_title": "App Creation Guide",
-  "memory_seed_desc": "Complete skeleton, API contract, database patterns, frontend registration and reload workflow for AIOS apps",
   "memory_group_pinned": "Pinned · AI reads full content",
   "memory_group_enabled": "Enabled · AI sees title & description",
   "memory_group_disabled": "Disabled · invisible to AI",

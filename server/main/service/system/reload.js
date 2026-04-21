@@ -8,6 +8,8 @@ const ROOT_DIR = join(__dirname, "..", "..", "..", "..");
 const APPS_ENTRY = "server/apps/index.js";
 const SERVER_ENTRY = "server/main/index.js";
 const NODE_BIN = process.execPath;
+const SERVER_PORT = Number(process.env.AIOS_SERVER_PORT || 9501);
+const APPS_PORT = Number(process.env.AIOS_APPS_PORT || 9502);
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const HEALTHCHECK_TIMEOUT_MS = 1000;
 
@@ -103,7 +105,7 @@ const startDetachedNode = (entry) => {
 const restartAppsProcess = async () => {
   await probeProcess(APPS_ENTRY, 9511, "/apps/health");
   try {
-    execSync("lsof -ti:9501 | xargs kill 2>/dev/null || true", { stdio: "pipe" });
+    execSync(`lsof -ti:${APPS_PORT} | xargs kill 2>/dev/null || true`, { stdio: "pipe" });
   } catch {
   }
   startDetachedNode(APPS_ENTRY);

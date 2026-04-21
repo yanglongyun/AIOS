@@ -1,6 +1,6 @@
 import { tools } from "./tools.js";
 import { runTools } from "./runner.js";
-import { callLlmStream } from "../llm/stream.js";
+import { callLlmStream } from "../llm/stream/index.js";
 import { normalizeAgentMessages, normalizeChatOptions } from "./utils.js";
 const chat = async (messages, {
   provider,
@@ -32,6 +32,11 @@ const chat = async (messages, {
         content: message.content ?? null,
         tool_calls: message.tool_calls
       };
+      if (message.reasoning_content !== undefined) {
+        assistantMsg.reasoning_content = message.reasoning_content ?? "";
+      } else if (apiUrl.includes("moonshot.cn") || apiUrl.includes("kimi.com")) {
+        assistantMsg.reasoning_content = "";
+      }
       workMessages.push(assistantMsg);
       send({ type: "assistant_tool_calls", message: assistantMsg });
       for (const toolCall of message.tool_calls) {

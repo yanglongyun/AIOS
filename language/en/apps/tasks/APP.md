@@ -1,7 +1,7 @@
 ---
 name: tasks
 description: Task center responsible for creating, executing, stopping, and viewing AI tasks.
-backend: server/main/api/task.js, server/main/task, server/agent, server/llm, server/prompt
+backend: server/main/api/task.js, server/main/task, server/main/agent, server/main/llm, server/main/prompt
 frontend: gui/src/apps/tasks
 database: database/aios.db (tasks, messages)
 ---
@@ -10,7 +10,7 @@ database: database/aios.db (tasks, messages)
 
 - Role: the system's core task app. It does not go through `server/apps/`; it is mounted directly on the main service.
 - Frontend: `gui/src/apps/tasks`
-- Backend: `server/main/api/task.js`, `server/main/task/`, `server/agent/`, `server/llm/`, `server/prompt/`
+- Backend: `server/main/api/task.js`, `server/main/task/`, `server/main/agent/`, `server/main/llm/`, `server/main/prompt/`
 - Data: `tasks` and `messages` in `database/aios.db`
 - Entry points:
   - `GET /api/task`

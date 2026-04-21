@@ -1,3 +1,5 @@
+const AIOS_SERVER_PORT = Number(process.env.AIOS_SERVER_PORT || 9501);
+
 const requestDecisionTask = async (cfg) => {
   const title = "Cryptobot Autonomous Run";
   const prompt = `You are an autonomous cryptocurrency trading agent operating in live trading mode.
@@ -14,7 +16,7 @@ Requirements:
 2. Do not explain the full process to the user; only provide the execution summary for this run.
 3. Output plain text only (120-280 words). Do not return JSON, markdown, or code fences.
 4. The summary must include: the main judgment, actions taken, result, and what to watch next.`;
-  const resp = await fetch("http://localhost:9500/api/task/create/agent", {
+  const resp = await fetch(`http://localhost:${AIOS_SERVER_PORT}/api/task/create/agent`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

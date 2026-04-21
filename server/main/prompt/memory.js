@@ -1,4 +1,4 @@
-import { db } from "../main/repository/client.js";
+import { db } from "../repository/client.js";
 
 const memory = () => {
   let rows;

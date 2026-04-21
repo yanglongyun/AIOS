@@ -19,9 +19,9 @@ AIOS 当前结构分成 6 层：
 - `server/main/`：主系统后端
 - `server/apps/`：应用后端
 - `server/shared/`：共享后端代码
-- `server/agent/`：Agent 层
-- `server/llm/`：模型层
-- `server/prompt/`：提示词层
+- `server/main/agent/`：Agent 层
+- `server/main/llm/`：模型层
+- `server/main/prompt/`：提示词层
 
 应用说明按语言存放在：
 - `language/<lang>/apps/<appname>/APP.md`
@@ -37,7 +37,7 @@ AIOS 当前结构分成 6 层：
 
 ## 应用开发
 
-- 新建或修改应用前，先读运行态 `memory/app-creation-guide.md`
+- 新建或修改应用前，先遵守系统提示词中的应用开发规则；如系统记忆中存在“应用开发指导”，以数据库里的该条记忆为准
 - 参考现有应用时，先读对应 `language/<lang>/apps/<appname>/APP.md`
 - 应用前端放在 `gui/src/apps/<appname>/`
 - 应用后端放在 `server/apps/<appname>/`
@@ -59,21 +59,12 @@ AIOS 当前结构分成 6 层：
 
 ## 记忆系统
 
-记忆文档按语言存放在：
-- `language/<lang>/memory/`
+记忆统一存储在数据库 `memories` 表中，通过 `/api/memory/*` 管理。
 
-顶层 `memory/` 不是源码目录，而是在语言应用阶段生成的运行态目录。
-
-运行态记忆采用分层索引结构：
-- `memory/index.md` 只列直属内容
-- 每个子目录都要有自己的 `index.md`
-- 新建记忆文件时必须带 frontmatter：
-
-```
----
-description: 一句话描述
----
-```
+记忆可分为三类状态：
+- `pinned=1`：系统提示词直接读取全文
+- `enabled=1 && pinned=0`：系统提示词读取标题和描述
+- `enabled=0`：对 AI 不可见
 
 以下信息应主动写入记忆：
 - 用户长期偏好
@@ -106,7 +97,7 @@ description: 一句话描述
 ## 自我修改
 
 如果要修改 AIOS 自己的提示词，改：
-- `server/prompt/INSTRUCTION.md`
+- `server/main/prompt/INSTRUCTION.md`
 
 ## 多模态
 
@@ -131,7 +122,7 @@ curl -X POST http://localhost:9500/api/system/reload/request \
 参数语义：
 - `build: true`：改了 `gui/` 前端
 - `restartApps: true`：改了 `server/apps/`
-- `restartServer: true`：改了 `server/main/`、`server/shared/`、`server/agent/`、`server/llm/`、`server/prompt/`
+- `restartServer: true`：改了 `server/main/`、`server/shared/`
 
 原则：
 - 正常情况只调用 `/api/system/reload/request`

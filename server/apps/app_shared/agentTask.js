@@ -1,8 +1,9 @@
 import { parseJsonObject } from "../../shared/ai/json.js";
+const AIOS_SERVER_PORT = Number(process.env.AIOS_SERVER_PORT || 9501);
 const requestTask = async (body = {}) => {
   let resp;
   try {
-    resp = await fetch("http://localhost:9500/api/task/create/agent", {
+    resp = await fetch(`http://localhost:${AIOS_SERVER_PORT}/api/task/create/agent`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)

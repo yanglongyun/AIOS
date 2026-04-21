@@ -43,6 +43,9 @@ const normalizeAgentMessages = (messages = []) => {
     } else {
       msg.content = item.content == null ? "" : String(item.content);
     }
+    if (role === "assistant" && item.reasoning_content !== undefined) {
+      msg.reasoning_content = item.reasoning_content == null ? "" : String(item.reasoning_content);
+    }
     if (role === "tool" && item.tool_call_id) {
       msg.tool_call_id = String(item.tool_call_id);
     }

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { callLlmRegular } from "../../../llm/regular.js";
-import { buildSystemPrompt } from "../../../prompt/index.js";
+import { callLlmRegular } from "../../llm/regular.js";
+import { buildSystemPrompt } from "../../prompt/index.js";
 import { getSettings } from "../../service/settings/get.js";
 import { registerTaskExecution, unregisterTaskExecution } from "../execution.js";
 import {

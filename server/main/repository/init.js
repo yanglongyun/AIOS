@@ -1,6 +1,15 @@
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
 import { db } from "./client.js";
+
+const SYSTEM_MEMORY_SEEDS = [
+  {
+    title: "__T_MEMORY_SEED_APP_CREATION_GUIDE_TITLE__",
+    description: "__T_MEMORY_SEED_APP_CREATION_GUIDE_DESCRIPTION__",
+    content: "__T_MEMORY_SEED_APP_CREATION_GUIDE_CONTENT__",
+    creator: "system",
+    pinned: 0,
+    enabled: 1
+  }
+];
 
 const createTables = () => {
   db.exec(`
@@ -57,32 +66,25 @@ const createTables = () => {
   `);
 };
 
-const stripFrontmatter = (text) => {
-  const trimmed = text.trimStart();
-  if (!trimmed.startsWith("---")) return trimmed;
-  const end = trimmed.indexOf("---", 3);
-  if (end === -1) return trimmed;
-  return trimmed.slice(end + 3).trimStart();
-};
-
 const seedMemoriesIfEmpty = () => {
   const count = db.prepare("SELECT COUNT(*) as c FROM memories").get().c;
   if (count !== 0) return;
   try {
-    const root = process.cwd();
-    const locale = (() => {
-      try { return JSON.parse(readFileSync(join(root, ".aios", "settings.json"), "utf8")).locale || "zh"; } catch { return "zh"; }
-    })();
-    const filePath = join(root, "language", locale, "memory", "app-creation-guide.md");
-    if (!existsSync(filePath)) return;
-    const raw = readFileSync(filePath, "utf8");
-    const content = stripFrontmatter(raw).trim();
-    if (content) {
+    for (const item of SYSTEM_MEMORY_SEEDS) {
       db.prepare(
-        "INSERT INTO memories (title, description, content, creator, pinned) VALUES (?, ?, ?, ?, ?)"
-      ).run("__T_MEMORY_SEED_TITLE__", "__T_MEMORY_SEED_DESC__", content, "system", 0);
+        "INSERT INTO memories (title, description, content, creator, pinned, enabled) VALUES (?, ?, ?, ?, ?, ?)"
+      ).run(
+        item.title,
+        item.description,
+        item.content,
+        item.creator || "system",
+        item.pinned ? 1 : 0,
+        item.enabled === 0 ? 0 : 1
+      );
     }
-  } catch {}
+  } catch (error) {
+    console.error("[memory-seeds] failed to seed system memories:", error);
+  }
 };
 
 const initDatabase = () => {

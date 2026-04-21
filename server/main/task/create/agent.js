@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { chat } from "../../../agent/handler.js";
-import { buildSystemPrompt } from "../../../prompt/index.js";
+import { chat } from "../../agent/handler.js";
+import { buildSystemPrompt } from "../../prompt/index.js";
 import { getSettings } from "../../service/settings/get.js";
 import { registerTaskExecution, unregisterTaskExecution } from "../execution.js";
 import {

@@ -201,6 +201,7 @@ const CTX_W = 188;
 const CTX_H = 180;
 const TEXT_EXT = new Set(['.txt', '.md', '.json', '.csv', '.log']);
 const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+const FS_ROOT = 'files';
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
@@ -235,7 +236,7 @@ const statusText = computed(() => {
 const loadItems = async (path = '') => {
   loading.value = true;
   try {
-    const data = await request(`/api/files/list?path=${encodeURIComponent(path)}`);
+    const data = await request(`/api/fs/list?root=${encodeURIComponent(FS_ROOT)}&path=${encodeURIComponent(path)}`);
     items.value = Array.isArray(data.data) ? data.data : [];
     currentPath.value = data.path ?? '';
     selectedItem.value = null;
@@ -298,7 +299,7 @@ const createDir = async () => {
   const name = await openPrompt({ title: '__T_FILES_CREATE_DIR_PROMPT__' });
   if (!name || !name.trim()) return;
   try {
-    await request('/api/files/create-dir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: buildPath(name.trim()) }) });
+    await request('/api/fs/mkdir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: FS_ROOT, path: buildPath(name.trim()) }) });
     await loadItems(currentPath.value);
   } catch (e) {
     toast.show(e.message || '创建失败', { type: 'error' });
@@ -310,7 +311,7 @@ const createFile = async () => {
   const name = await openPrompt({ title: '__T_FILES_CREATE_FILE_PROMPT__' });
   if (!name || !name.trim()) return;
   try {
-    await request('/api/files/create-file', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: buildPath(name.trim()), content: '' }) });
+    await request('/api/fs/write', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: FS_ROOT, path: buildPath(name.trim()), content: '', create: true }) });
     await loadItems(currentPath.value);
   } catch (e) {
     toast.show(e.message || '创建失败', { type: 'error' });
@@ -324,10 +325,10 @@ const handleUpload = async (event) => {
   if (!file) return;
   const reader = new FileReader();
   await new Promise((res, rej) => { reader.onload = res; reader.onerror = rej; reader.readAsDataURL(file); });
-  await request('/api/files/upload', {
+  await request('/api/fs/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: file.name, data: String(reader.result || ''), dir: currentPath.value })
+    body: JSON.stringify({ root: FS_ROOT, name: file.name, data: String(reader.result || ''), dir: currentPath.value })
   });
   event.target.value = '';
   await loadItems(currentPath.value);
@@ -335,7 +336,7 @@ const handleUpload = async (event) => {
 
 const downloadFile = (item) => {
   closeContextMenu();
-  window.open(`/api/files/download?path=${encodeURIComponent(item.path)}`, '_blank');
+  window.open(`/api/fs/download?root=${encodeURIComponent(FS_ROOT)}&path=${encodeURIComponent(item.path)}`, '_blank');
 };
 
 const deleteFile = async (item) => {
@@ -346,7 +347,7 @@ const deleteFile = async (item) => {
   });
   if (!ok) return;
   try {
-    await request('/api/files/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: item.path }) });
+    await request('/api/fs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: FS_ROOT, path: item.path }) });
     const openedViewer = windowManager.state.windows.find(w => w.windowKey === `file-view:${item.path}`);
     if (openedViewer) windowManager.close(openedViewer.id);
     await loadItems(currentPath.value);

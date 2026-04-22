@@ -39,7 +39,7 @@
     <!-- Image viewer -->
     <div v-else-if="mode === 'image'" class="flex min-h-0 flex-1 items-center justify-center p-4">
       <img
-        :src="`/api/files/download?path=${encodeURIComponent(path)}`"
+        :src="`/api/fs/download?root=${encodeURIComponent(FS_ROOT)}&path=${encodeURIComponent(props.path)}`"
         :alt="fileName"
         class="max-h-full max-w-full rounded-[10px]"
         style="object-fit:contain;box-shadow:0 2px 12px rgba(0,0,0,0.1)"
@@ -69,6 +69,7 @@ const props = defineProps({
 
 const TEXT_EXT = ['.txt', '.md', '.json', '.csv', '.log'];
 const IMAGE_EXT = ['.png', '.jpg', '.jpeg', '.webp'];
+const FS_ROOT = 'files';
 
 const loading = ref(true);
 const errorMessage = ref('');
@@ -106,7 +107,7 @@ const loadFile = async () => {
       loading.value = false;
       return;
     }
-    const data = await request(`/api/files/read?path=${encodeURIComponent(props.path)}`);
+    const data = await request(`/api/fs/read?root=${encodeURIComponent(FS_ROOT)}&path=${encodeURIComponent(props.path)}`);
     content.value = data.item?.content ?? '';
     original.value = content.value;
     dirty.value = false;
@@ -121,10 +122,10 @@ const saveFile = async () => {
   if (!dirty.value || saving.value) return;
   saving.value = true;
   try {
-    await request('/api/files/save', {
+    await request('/api/fs/write', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: props.path, content: content.value })
+      body: JSON.stringify({ root: FS_ROOT, path: props.path, content: content.value })
     });
     original.value = content.value;
     dirty.value = false;
@@ -136,7 +137,7 @@ const saveFile = async () => {
 };
 
 const downloadFile = () => {
-  window.open(`/api/files/download?path=${encodeURIComponent(props.path)}`, '_blank');
+  window.open(`/api/fs/download?root=${encodeURIComponent(FS_ROOT)}&path=${encodeURIComponent(props.path)}`, '_blank');
 };
 
 onMounted(loadFile);

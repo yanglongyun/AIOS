@@ -1,11 +1,59 @@
 import { readBody } from "../../shared/http/readBody.js";
 import { json } from "../../shared/http/json.js";
+import { mkdir, writeFile } from "fs/promises";
+import { extname, join, resolve } from "path";
+import { FILES_DIR } from "./fs.js";
 import { hasChat, createChat } from "../chat/chats.js";
 import { listChats } from "../service/chat/list.js";
 import { getChatMessagesPaged } from "../service/chat/messages.js";
 import { renameChat } from "../service/chat/rename.js";
 import { deleteChat } from "../service/chat/delete.js";
+
+const CHAT_UPLOAD_DIR = join(FILES_DIR, "uploads", "chat");
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const UPLOADABLE_EXT = new Set([
+  ".txt", ".md", ".pdf", ".doc", ".docx", ".json", ".csv",
+  ".png", ".jpg", ".jpeg", ".webp", ".log", ".pptx", ".xlsx"
+]);
+const safeName = (name = "file") => String(name).replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
+
+const uploadChatAttachment = async (body = {}) => {
+  const fileName = String(body.name || "").trim();
+  const base64 = String(body.data || "").trim();
+  if (!fileName || !base64) return { status: 400, message: "name and data are required" };
+  const ext = extname(fileName).toLowerCase();
+  if (!UPLOADABLE_EXT.has(ext)) return { status: 400, message: `file type not allowed: ${ext || "(none)"}` };
+
+  let buffer;
+  try {
+    buffer = Buffer.from(base64.replace(/^data:.*;base64,/, ""), "base64");
+  } catch {
+    return { status: 400, message: "invalid base64 data" };
+  }
+  if (!buffer.length) return { status: 400, message: "empty file data" };
+  if (buffer.length > MAX_UPLOAD_BYTES) return { status: 400, message: "file too large (max 10MB)" };
+
+  await mkdir(CHAT_UPLOAD_DIR, { recursive: true });
+  const savedName = safeName(fileName);
+  const absPath = resolve(join(CHAT_UPLOAD_DIR, savedName));
+  await writeFile(absPath, buffer);
+  return {
+    success: true,
+    file: {
+      name: savedName,
+      path: absPath,
+      size: buffer.length
+    }
+  };
+};
+
 const handleChatApi = async (req, res, path, url) => {
+  if (path === "/api/chat/attachments/upload" && req.method === "POST") {
+    const body = await readBody(req);
+    const data = await uploadChatAttachment(body);
+    if (data?.status) return json(res, { success: false, message: data.message }, data.status);
+    return json(res, data);
+  }
   if (path === "/api/chat/list" && req.method === "GET") {
     const scene = url.searchParams.get("scene") || null;
     return json(res, listChats(scene));

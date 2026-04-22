@@ -30,6 +30,13 @@ const apps = [
     defaultDesktopWindowSize: { w: 500, h: 360 }
   },
   {
+    id: 'code-viewer',
+    name: '__T_APP_SIDEBAR_CODE_VIEWER__',
+    icon: '\u{1F5A5}',
+    desktopLoad: () => import('./apps/code-viewer/index.vue'),
+    defaultDesktopWindowSize: { w: 1180, h: 760 }
+  },
+  {
     id: 'notebook',
     name: '__T_APP_SIDEBAR_NOTEBOOK__',
     icon: '\u{1F4D3}',

@@ -2,7 +2,7 @@ import { json } from "../../shared/http/json.js";
 import { handleChatApi } from "./chat.js";
 import { handleMemoryApi } from "./memory.js";
 import { handleSettingsApi } from "./settings.js";
-import { handleFilesApi } from "./files.js";
+import { handleFsApi } from "./fs.js";
 import { handleTaskApi } from "./task.js";
 import { handleSystemApi } from "./system.js";
 const handleApiRequest = async (req, res, url) => {
@@ -28,8 +28,8 @@ const handleApiRequest = async (req, res, url) => {
       await handleMemoryApi(req, res, path);
       return true;
     }
-    if (path.startsWith("/api/files/")) {
-      await handleFilesApi(req, res, path);
+    if (path.startsWith("/api/fs/")) {
+      await handleFsApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/task")) {

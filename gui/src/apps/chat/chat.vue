@@ -446,10 +446,10 @@ const toDataUrl = (file) => new Promise((resolve, reject) => {
 
 const uploadSingleFile = async (file) => {
   const dataUrl = await toDataUrl(file);
-  const res = await request('/api/files/upload', {
+  const res = await request('/api/chat/attachments/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: file.name, data: dataUrl, dir: 'uploads/chat' })
+    body: JSON.stringify({ name: file.name, data: dataUrl })
   });
   return res.file;
 };

@@ -36,7 +36,7 @@ const handleCodexApi = async (req, res, path) => {
   }
   if (path === "/apps/codex/conversations/create" && req.method === "POST") {
     const body = await readBody(req);
-    const result = createSession({ cwd: body.cwd });
+    const result = createSession({ cwd: body.cwd, permissionMode: body.permissionMode });
     if (result?.error) return json(res, { error: result.error }, 400);
     return json(res, { item: result });
   }
@@ -148,7 +148,15 @@ const handleSend = async (req, res) => {
     res.end();
   };
 
-  runCodex({ cwd: sess.cwd, registryDir: sess.registryDir, prompt: message, onEvent, onDone, onError });
+  runCodex({
+    cwd: sess.cwd,
+    registryDir: sess.registryDir,
+    prompt: message,
+    permissionMode: sess.permissionMode || ctx.permissionMode || "workspaceWrite",
+    onEvent,
+    onDone,
+    onError
+  });
 };
 
 export { handleCodexApi };

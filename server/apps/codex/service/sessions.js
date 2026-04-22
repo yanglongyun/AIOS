@@ -18,6 +18,7 @@ const WORKSPACE_ROOT = path.join(ROOT_DIR, "files", "workspaces", "codex");
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const THREAD_FILE = ".aios-codex-thread";
 const CWD_POINTER = ".aios-cwd";
+const VALID_PERMISSION_MODES = new Set(["workspaceWrite", "readOnly", "fullAuto", "neverAsk", "dangerFullAccess", "bypassPermissions"]);
 
 const expandHome = (p) => {
   if (!p) return p;
@@ -74,6 +75,7 @@ const extractText = (content) => {
 const toSessionShape = (row) => ({
   sessionId: row.sessionId,
   cwd: row.cwd,
+  permissionMode: row.permissionMode || "workspaceWrite",
   title: row.title,
   messageCount: row.messageCount,
   createdAt: row.createdAt,
@@ -91,6 +93,7 @@ const parseSessionMeta = (sessionId, cwd, registryDir) => {
     registryDir: regDir,
     threadId,
     started: Boolean(threadId),
+    permissionMode: row?.permissionMode || "workspaceWrite",
     title: row?.title || "",
     messageCount: row?.messageCount || 0,
     createdAt: row?.createdAt || "",
@@ -111,10 +114,11 @@ const listSessions = () => {
   });
 };
 
-const createSession = ({ cwd } = {}) => {
+const createSession = ({ cwd, permissionMode } = {}) => {
   const sessionId = randomUUID();
   const sessionDir = sessionRegistryDir(sessionId);
   let targetCwd;
+  const normalizedPermissionMode = VALID_PERMISSION_MODES.has(permissionMode) ? permissionMode : "workspaceWrite";
   const trimmed = typeof cwd === "string" ? expandHome(cwd.trim()) : "";
   if (trimmed) {
     if (!path.isAbsolute(trimmed)) return { error: "cwd 必须是绝对路径" };
@@ -131,7 +135,7 @@ const createSession = ({ cwd } = {}) => {
     targetCwd = sessionDir;
     fs.mkdirSync(targetCwd, { recursive: true });
   }
-  insertConversation({ sessionId, cwd: targetCwd, title: "" });
+  insertConversation({ sessionId, cwd: targetCwd, permissionMode: normalizedPermissionMode, title: "" });
   return parseSessionMeta(sessionId, targetCwd, sessionDir);
 };
 
@@ -161,6 +165,7 @@ const getConversationContext = (sessionId) => {
     id: row.id,
     sessionId: row.sessionId,
     cwd: row.cwd,
+    permissionMode: row.permissionMode || "workspaceWrite",
     started: row.messageCount > 0
   };
 };

@@ -24,6 +24,24 @@ const hasConfiguredModelSettings = () => {
   return Boolean(provider && model && apiUrl && apiKey);
 };
 
+const getModelSetupStatus = () => {
+  const obj = readSettingsMap();
+  const fields = {
+    provider: String(obj.provider || "").trim(),
+    model: String(obj.model || "").trim(),
+    apiUrl: String(obj.apiUrl || "").trim(),
+    apiKey: String(obj.apiKey || "").trim()
+  };
+  const missing = Object.entries(fields)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+  return {
+    configured: missing.length === 0,
+    missing,
+    fields
+  };
+};
+
 const getSettings = () => {
   const obj = readSettingsMap();
   const toolResultMaxChars = Math.max(1e3, Math.min(5e4, Number(obj.toolResultMaxChars) || 12e3));
@@ -45,6 +63,7 @@ const getSettings = () => {
 };
 export {
   getSettings,
+  getModelSetupStatus,
   hasConfiguredModelSettings,
   normalizeContextRounds
 };

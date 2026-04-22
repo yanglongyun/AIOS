@@ -91,7 +91,7 @@
               ref="textarea" v-model="input" rows="1"
               :disabled="busy || !installed"
               :placeholder="busy ? '__T_CODEX_CHAT_REPLYING__' : (currentId ? '__T_CODEX_CHAT_CONTINUE__' : '__T_CODEX_CHAT_START_IN__'.replace('{cwd}', cwd))"
-              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed outline-none disabled:opacity-50"
+              class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-[176px] text-sm leading-relaxed outline-none disabled:opacity-50"
               style="color:#2a1f13"
               @input="autoResize"
               @keydown.enter.exact="onEnter"
@@ -101,7 +101,6 @@
 
             <div v-if="startError" class="px-3.5 pb-2 text-[11px]" style="color:#b03a20">{{ startError }}</div>
 
-            <!-- Footer inside form: workspace chip (where paperclip would be) + send button -->
             <div class="flex items-center gap-2 px-3.5 pb-2.5">
               <template v-if="!currentId">
                 <button v-if="!editingPath" type="button"
@@ -138,6 +137,38 @@
             </div>
 
             <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
+              <div class="relative">
+                <button
+                  type="button"
+                  class="inline-flex h-[28px] items-center rounded-md border-none px-2 text-[11px] font-semibold transition-all"
+                  style="background:transparent;color:rgba(160,120,80,0.82)"
+                  @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'"
+                  @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.82)'"
+                  @click="modeMenuOpen = !modeMenuOpen"
+                >
+                  <span class="cc-mono">{{ activePermissionMode.label }}</span>
+                </button>
+
+                <div
+                  v-if="modeMenuOpen"
+                  class="absolute bottom-[calc(100%+8px)] right-0 z-20 w-[320px] overflow-hidden rounded-xl border shadow-[0_16px_40px_rgba(0,0,0,0.14)]"
+                  style="border-color:rgba(160,120,80,0.16);background:#fffaf2"
+                >
+                  <button
+                    v-for="mode in PERMISSION_MODES"
+                    :key="mode.id"
+                    type="button"
+                    class="block w-full border-none px-3 py-2.5 text-left transition-colors hover:bg-[rgba(160,120,80,0.08)]"
+                    @click="selectPermissionMode(mode.id)"
+                  >
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="cc-mono text-[11px] font-semibold" style="color:#2a1f13">{{ mode.label }}</span>
+                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">当前</span>
+                    </div>
+                    <div class="mt-1 text-[11px] leading-relaxed" style="color:#6b5a46">{{ mode.description }}</div>
+                  </button>
+                </div>
+              </div>
               <button v-if="busy" type="button"
                 class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none text-white"
                 style="background:#5c4332" @click="abortStream">
@@ -169,7 +200,18 @@ const props = defineProps({
   installed: { type: Boolean, default: false }
 });
 
+const PERMISSION_MODES = [
+  { id: 'workspaceWrite', label: 'workspace', description: '可写工作区，按需请求确认，适合大多数改代码场景。' },
+  { id: 'readOnly', label: 'readOnly', description: '只读模式，优先查看和分析，不允许直接修改文件。' },
+  { id: 'fullAuto', label: 'fullAuto', description: '自动低摩擦执行，等价于 Codex 的 --full-auto。' },
+  { id: 'neverAsk', label: 'neverAsk', description: '工作区可写，且尽量不再询问确认。' },
+  { id: 'dangerFullAccess', label: 'danger', description: '全盘可写，风险很高，只适合完全受控环境。' },
+  { id: 'bypassPermissions', label: 'bypass', description: '跳过审批和沙箱，风险最高。' }
+];
+
 const cwd = ref('~/Desktop');
+const permissionMode = ref('workspaceWrite');
+const modeMenuOpen = ref(false);
 const editingPath = ref(false);
 const pathInput = ref(null);
 const startError = ref('');
@@ -219,6 +261,8 @@ const openConversation = async (sid) => {
   if (busy.value) abortStream();
   currentId.value = sid;
   currentSession.value = convList.value.find((c) => c.sessionId === sid) || null;
+  permissionMode.value = currentSession.value?.permissionMode || permissionMode.value;
+  modeMenuOpen.value = false;
   liveEvents.value = [];
   messages.value = [];
   expandedToolKeys.value = {};
@@ -237,6 +281,7 @@ const removeConversation = async (sid) => {
 };
 
 const canSend = computed(() => !!input.value.trim() && !busy.value && props.installed && !starting.value);
+const activePermissionMode = computed(() => PERMISSION_MODES.find((item) => item.id === permissionMode.value) || PERMISSION_MODES[0]);
 
 const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'codex').map((e) => e.payload)));
 
@@ -255,6 +300,8 @@ const reset = () => {
   input.value = '';
   startError.value = '';
   editingPath.value = false;
+  permissionMode.value = 'workspaceWrite';
+  modeMenuOpen.value = false;
 };
 
 const ensureSession = async () => {
@@ -264,13 +311,15 @@ const ensureSession = async () => {
   try {
     const r = await fetch('/apps/codex/conversations/create', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: cwd.value.trim() })
+      body: JSON.stringify({ cwd: cwd.value.trim(), permissionMode: permissionMode.value })
     });
     const data = await r.json();
     if (data.error) { startError.value = data.error; return false; }
     if (data.item) {
       currentSession.value = data.item;
       currentId.value = data.item.sessionId;
+      permissionMode.value = data.item.permissionMode || permissionMode.value;
+      modeMenuOpen.value = false;
       fetchConversations();
       return true;
     }
@@ -432,6 +481,10 @@ function toggleToolExpanded(key) {
 }
 function isToolExpanded(key) {
   return !!expandedToolKeys.value[key];
+}
+function selectPermissionMode(mode) {
+  permissionMode.value = mode;
+  modeMenuOpen.value = false;
 }
 
 watch(liveEvents, () => scrollToBottom(), { deep: true });

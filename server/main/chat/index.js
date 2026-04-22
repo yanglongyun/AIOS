@@ -1,9 +1,33 @@
 import { chat } from "../agent/handler.js";
-import { getSettings } from "../service/settings/get.js";
+import { getModelSetupStatus, getSettings } from "../service/settings/get.js";
 import { buildSystemPrompt } from "../prompt/index.js";
 import { injectAttachmentsMessage } from "./attachments.js";
 import { getMessages, saveMessage } from "./messages.js";
 import { hasChat } from "./chats.js";
+
+const MODEL_FIELD_LABELS = {
+  provider: "provider",
+  model: "model",
+  apiUrl: "API URL",
+  apiKey: "API Key"
+};
+
+const buildMissingModelMessage = (status) => {
+  const missing = (status?.missing || []).map((key) => MODEL_FIELD_LABELS[key] || key);
+  const missingText = missing.length ? missing.join(" / ") : "provider / model / API URL / API Key";
+  return [
+    "还没有配置聊天模型，所以这条消息暂时不能发送给大模型。",
+    "",
+    `缺少字段：${missingText}`,
+    "",
+    "下一步可以直接做这两件事之一：",
+    "1. 打开欢迎页完成初始化：[/welcome](/welcome)",
+    "2. 或让外部 agent 阅读这个链接后帮你配置：[http://127.0.0.1:9502/welcome](http://127.0.0.1:9502/welcome)",
+    "",
+    "配好之后，回到这里重新发送即可。"
+  ].join("\n");
+};
+
 const createSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
   const handleMessage = async (data) => {
@@ -36,6 +60,29 @@ const createSession = (wsSend) => {
         });
       }
       const settings = getSettings();
+      const setupStatus = getModelSetupStatus();
+      if (!setupStatus.configured) {
+        const userMsg = { role: "user", content: data.content };
+        let userMeta = null;
+        if (Array.isArray(data.attachments) && data.attachments.length > 0) {
+          const injected = injectAttachmentsMessage([userMsg], data.attachments);
+          if (injected.attachments.length > 0) {
+            userMeta = { attachments: injected.attachments };
+          }
+        }
+        saveMessage(cid, userMsg, userMeta);
+        const assistantMsg = {
+          role: "assistant",
+          content: buildMissingModelMessage(setupStatus)
+        };
+        saveMessage(cid, assistantMsg);
+        wsSend({
+          type: "done",
+          conversationId: cid,
+          content: assistantMsg.content
+        });
+        return;
+      }
       const {
         contextRounds,
         apiUrl,

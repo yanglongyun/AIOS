@@ -65,17 +65,29 @@ const translate = (evt, capture) => {
   return [];
 };
 
-const buildArgs = ({ threadId }) => {
-  if (threadId) {
-    return ["exec", "resume", threadId, "--json", "--skip-git-repo-check"];
-  }
-  return ["exec", "--json", "--skip-git-repo-check"];
+const MODE_ARGS = {
+  workspaceWrite: ["--sandbox", "workspace-write", "--ask-for-approval", "on-request"],
+  readOnly: ["--sandbox", "read-only", "--ask-for-approval", "untrusted"],
+  fullAuto: ["--full-auto"],
+  neverAsk: ["--sandbox", "workspace-write", "--ask-for-approval", "never"],
+  dangerFullAccess: ["--sandbox", "danger-full-access", "--ask-for-approval", "on-request"],
+  bypassPermissions: ["--dangerously-bypass-approvals-and-sandbox"]
 };
 
-const runCodex = ({ cwd, registryDir, prompt, onEvent, onDone, onError }) => {
+const buildArgs = ({ threadId, permissionMode }) => {
+  const modeArgs = MODE_ARGS[permissionMode] || MODE_ARGS.workspaceWrite;
+  const args = ["exec", "--json", "--skip-git-repo-check", ...modeArgs];
+  if (threadId) {
+    args.push("resume", threadId);
+    return args;
+  }
+  return args;
+};
+
+const runCodex = ({ cwd, registryDir, prompt, permissionMode, onEvent, onDone, onError }) => {
   const threadStore = registryDir || cwd;
   const existing = readThreadId(threadStore);
-  const args = buildArgs({ threadId: existing });
+  const args = buildArgs({ threadId: existing, permissionMode });
   const child = spawn("codex", args, {
     cwd,
     env: codexEnv(),

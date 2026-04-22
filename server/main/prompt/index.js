@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { getSettings } from "../service/settings/get.js";
 import { apps as appsSection } from "./apps.js";
 import { chats as chatsSection } from "./chats.js";
+import { codingAgents as codingAgentsSection } from "./codingAgents.js";
 import { environment as environmentSection } from "./environment.js";
 import { language as languageSection } from "./language.js";
 import { memory as memorySection } from "./memory.js";
@@ -44,6 +45,7 @@ const buildSystemPrompt = (currentConversationId = "") => {
     toolMaxRounds
   });
   prompt += appsSection();
+  prompt += codingAgentsSection();
   prompt += skillsSection();
   prompt += chatsSection(currentConversationId);
   return prompt;

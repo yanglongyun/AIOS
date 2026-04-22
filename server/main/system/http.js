@@ -63,14 +63,26 @@ const proxyAppsRequest = async (req, res, url) => {
     wrapped.detail = detail;
     throw wrapped;
   }
-  const buf = Buffer.from(await upstream.arrayBuffer());
   const outHeaders = {};
   upstream.headers.forEach((v, k) => {
     if (k.toLowerCase() === "content-encoding") return;
     outHeaders[k] = v;
   });
   res.writeHead(upstream.status, outHeaders);
-  res.end(buf);
+  if (!upstream.body) {
+    res.end();
+    return;
+  }
+  const reader = upstream.body.getReader();
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) res.write(Buffer.from(value));
+    }
+  } finally {
+    res.end();
+  }
 };
 const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);

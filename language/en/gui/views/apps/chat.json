@@ -24,6 +24,8 @@
   "history_confirm_delete": "Confirm delete?",
   "history_click_confirm": "Click to confirm",
   "app_sidebar_chat": "Chat",
+  "app_sidebar_claude_code": "Claude Code",
+  "app_sidebar_codex": "Codex",
   "app_top_chat": "Chat",
   "chat_side_title": "Chat with AI in {app}",
   "chat_side_context_hint": "You are currently in {app}. Ask anything related."

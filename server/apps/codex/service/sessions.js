@@ -3,6 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import {
+  insertConversation,
+  getConversationBySessionId,
+  listConversations,
+  deleteConversationBySessionId
+} from "../repository/conversations.js";
+import { listEvents } from "../repository/events.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, "..", "..", "..", "..");
@@ -17,10 +24,6 @@ const expandHome = (p) => {
   if (p === "~") return os.homedir();
   if (p.startsWith("~/")) return path.join(os.homedir(), p.slice(2));
   return p;
-};
-
-const safeStat = (p) => {
-  try { return fs.statSync(p); } catch { return null; }
 };
 
 const resolveRealCwd = (sessionDir) => {
@@ -56,33 +59,56 @@ const writeThreadId = (sessionDirOrCwd, id) => {
   try { fs.writeFileSync(path.join(sessionDirOrCwd, THREAD_FILE), id + "\n", "utf8"); } catch {}
 };
 
+const extractText = (content) => {
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter((item) => item?.type === "text" && typeof item.text === "string")
+      .map((item) => item.text)
+      .join(" ")
+      .trim();
+  }
+  return "";
+};
+
+const toSessionShape = (row) => ({
+  sessionId: row.sessionId,
+  cwd: row.cwd,
+  title: row.title,
+  messageCount: row.messageCount,
+  createdAt: row.createdAt,
+  lastTs: row.updatedAt,
+  updatedAt: row.updatedAt
+});
+
 const parseSessionMeta = (sessionId, cwd, registryDir) => {
-  const stat = safeStat(cwd);
   const regDir = registryDir || sessionRegistryDir(sessionId);
   const threadId = readThreadId(regDir) || readThreadId(cwd);
+  const row = getConversationBySessionId(sessionId);
   return {
     sessionId,
     cwd,
     registryDir: regDir,
     threadId,
     started: Boolean(threadId),
-    createdAt: stat?.birthtime?.toISOString() || stat?.mtime?.toISOString() || "",
-    lastTs: stat?.mtime?.toISOString() || ""
+    title: row?.title || "",
+    messageCount: row?.messageCount || 0,
+    createdAt: row?.createdAt || "",
+    lastTs: row?.updatedAt || "",
+    updatedAt: row?.updatedAt || ""
   };
 };
 
 const listSessions = () => {
-  if (!fs.existsSync(WORKSPACE_ROOT)) return [];
-  const entries = fs.readdirSync(WORKSPACE_ROOT, { withFileTypes: true });
-  const items = [];
-  for (const e of entries) {
-    if (!e.isDirectory() || !UUID_RE.test(e.name)) continue;
-    const sessionDir = path.join(WORKSPACE_ROOT, e.name);
-    const cwd = resolveRealCwd(sessionDir);
-    items.push(parseSessionMeta(e.name, cwd, sessionDir));
-  }
-  items.sort((a, b) => (b.lastTs || "").localeCompare(a.lastTs || ""));
-  return items;
+  return listConversations().map((row) => {
+    const sessionDir = sessionRegistryDir(row.sessionId);
+    return {
+      ...toSessionShape(row),
+      registryDir: sessionDir,
+      threadId: readThreadId(sessionDir),
+      started: row.messageCount > 0
+    };
+  });
 };
 
 const createSession = ({ cwd } = {}) => {
@@ -105,6 +131,7 @@ const createSession = ({ cwd } = {}) => {
     targetCwd = sessionDir;
     fs.mkdirSync(targetCwd, { recursive: true });
   }
+  insertConversation({ sessionId, cwd: targetCwd, title: "" });
   return parseSessionMeta(sessionId, targetCwd, sessionDir);
 };
 
@@ -113,25 +140,106 @@ const deleteSession = (sessionId) => {
   const sessionDir = sessionRegistryDir(sessionId);
   if (!sessionDir.startsWith(WORKSPACE_ROOT + path.sep)) return { ok: false, error: "path traversal" };
   try { fs.rmSync(sessionDir, { recursive: true, force: true }); } catch {}
+  deleteConversationBySessionId(sessionId);
   return { ok: true };
 };
 
 const getSession = (sessionId) => {
   if (!UUID_RE.test(sessionId)) return null;
+  const row = getConversationBySessionId(sessionId);
+  if (!row) return null;
   const sessionDir = sessionRegistryDir(sessionId);
   if (!fs.existsSync(sessionDir)) return null;
   const cwd = resolveRealCwd(sessionDir);
   return parseSessionMeta(sessionId, cwd, sessionDir);
 };
 
-// For MVP we don't reconstruct historical messages for codex — live stream only.
-const getMessages = () => ({ items: [] });
+const getConversationContext = (sessionId) => {
+  const row = getConversationBySessionId(sessionId);
+  if (!row) return null;
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    cwd: row.cwd,
+    started: row.messageCount > 0
+  };
+};
+
+const getMessages = (sessionId) => {
+  if (!UUID_RE.test(sessionId)) return { items: [] };
+  const row = getConversationBySessionId(sessionId);
+  if (!row) return { items: [] };
+  const events = listEvents(row.id);
+  const items = [];
+  let assistantEvents = [];
+  let assistantId = 0;
+
+  const flushAssistant = () => {
+    if (!assistantEvents.length) return;
+    items.push({
+      id: `a-${sessionId}-${assistantId}`,
+      role: "assistant",
+      content: "",
+      meta: { events: assistantEvents }
+    });
+    assistantId += 1;
+    assistantEvents = [];
+  };
+
+  for (const ev of events) {
+    const payload = ev.payload;
+    if (!payload) continue;
+    if (ev.kind === "user_turn") {
+      flushAssistant();
+      const content = typeof payload.message === "string"
+        ? payload.message
+        : extractText(payload.message?.content) || "";
+      items.push({
+        id: `u-${sessionId}-${items.length}`,
+        role: "user",
+        content
+      });
+      continue;
+    }
+
+    if (ev.kind === "codex_event") {
+      if (payload.type === "user" && payload.message?.content) {
+        const blocks = payload.message.content;
+        const onlyToolResults = Array.isArray(blocks) && blocks.every((b) => b?.type === "tool_result");
+        if (onlyToolResults) {
+          assistantEvents.push(payload);
+          continue;
+        }
+        flushAssistant();
+        const text = typeof payload.message.content === "string"
+          ? payload.message.content
+          : Array.isArray(payload.message.content)
+            ? payload.message.content.find((b) => b?.type === "text")?.text || ""
+            : "";
+        items.push({
+          id: `u-${sessionId}-${items.length}`,
+          role: "user",
+          content: text
+        });
+        continue;
+      }
+
+      if (payload.type === "assistant" || payload.type === "system" || payload.type === "result") {
+        assistantEvents.push(payload);
+      }
+    }
+  }
+
+  flushAssistant();
+  return { items };
+};
 
 export {
   listSessions,
   createSession,
   deleteSession,
   getSession,
+  getConversationContext,
   getMessages,
   writeThreadId,
   readThreadId

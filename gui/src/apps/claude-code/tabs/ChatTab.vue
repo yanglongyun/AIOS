@@ -59,12 +59,27 @@
 
               <div v-else-if="m.role === 'tool_use'" class="flex items-start gap-2.5">
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl" style="border:1px solid rgba(160,120,80,0.18);background:#fff">
-                  <button type="button" class="flex w-full cursor-pointer items-center gap-2 border-none px-3 py-2 text-left transition-colors" style="background:rgba(160,120,80,0.05)" @click="m.expanded = !m.expanded">
-                    <ChevronRight class="h-3 w-3 shrink-0 transition-transform" :class="m.expanded ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">🔧 {{ m.toolName }}<span v-if="m.summary" style="color:rgba(0,0,0,0.45)">  {{ m.summary }}</span></span>
-                    <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
+                  <button
+                    type="button"
+                    class="flex w-full cursor-pointer items-start gap-2 border-none px-3 py-2 text-left transition-colors"
+                    style="background:rgba(160,120,80,0.05)"
+                    @click="toggleToolExpanded(m.key)"
+                  >
+                    <ChevronRight class="mt-0.5 h-3 w-3 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2">
+                        <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]" style="background:rgba(92,67,50,0.1);color:#5c4332">{{ m.toolLabel }}</span>
+                        <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
+                      </div>
+                      <div class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.summary || m.toolName }}</div>
+                      <div v-if="m.meta" class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap cc-mono text-[10px]" style="color:rgba(0,0,0,0.42)">{{ m.meta }}</div>
+                    </div>
                   </button>
-                  <div v-if="m.expanded" style="border-top:1px solid rgba(160,120,80,0.12)">
+                  <div v-if="isToolExpanded(m.key)" style="border-top:1px solid rgba(160,120,80,0.12)">
+                    <div v-if="m.primaryValue" class="px-3 py-2 text-[11px]" style="background:rgba(160,120,80,0.04);color:#5c4332">
+                      <span class="mr-2 font-semibold">{{ m.primaryLabel }}</span>
+                      <span class="cc-mono break-all">{{ m.primaryValue }}</span>
+                    </div>
                     <pre class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:rgba(160,120,80,0.04);color:#5c7a50;margin:0">{{ m.inputPretty }}</pre>
                     <div v-if="m.result !== undefined" class="max-h-48 overflow-auto whitespace-pre px-3 py-2.5 font-mono text-[11px]" style="border-top:1px solid rgba(160,120,80,0.1);background:rgba(160,120,80,0.03);color:rgba(0,0,0,0.45)">{{ m.result }}</div>
                   </div>
@@ -102,8 +117,41 @@
 
             <div v-if="startError" class="px-3.5 pb-2 text-[11px]" style="color:#b03a20">{{ startError }}</div>
 
-            <!-- Footer inside form: workspace chip (where paperclip would be) + send button -->
-            <div class="flex items-center gap-2 px-3.5 pb-2.5">
+            <div class="relative flex items-center gap-2 px-3.5 pb-2.5">
+              <div class="relative">
+                <button
+                  type="button"
+                  class="inline-flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold transition-all"
+                  style="color:rgba(160,120,80,0.82)"
+                  @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'"
+                  @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.82)'"
+                  @click="modeMenuOpen = !modeMenuOpen"
+                >
+                  <span class="uppercase tracking-[0.08em]">Mode</span>
+                  <span class="cc-mono">{{ activePermissionMode.label }}</span>
+                </button>
+
+                <div
+                  v-if="modeMenuOpen"
+                  class="absolute bottom-[calc(100%+8px)] left-0 z-20 w-[320px] overflow-hidden rounded-xl border shadow-[0_16px_40px_rgba(0,0,0,0.14)]"
+                  style="border-color:rgba(160,120,80,0.16);background:#fffaf2"
+                >
+                  <button
+                    v-for="mode in PERMISSION_MODES"
+                    :key="mode.id"
+                    type="button"
+                    class="block w-full border-none px-3 py-2.5 text-left transition-colors hover:bg-[rgba(160,120,80,0.08)]"
+                    @click="selectPermissionMode(mode.id)"
+                  >
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="cc-mono text-[11px] font-semibold" style="color:#2a1f13">{{ mode.label }}</span>
+                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">当前</span>
+                    </div>
+                    <div class="mt-1 text-[11px] leading-relaxed" style="color:#6b5a46">{{ mode.description }}</div>
+                  </button>
+                </div>
+              </div>
+
               <template v-if="!currentId">
                 <button v-if="!editingPath" type="button"
                   class="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-lg border-none bg-transparent px-2.5 text-xs transition-all"
@@ -129,12 +177,6 @@
                   <FolderOpen class="h-3.5 w-3.5 shrink-0" />
                   <span class="cc-mono truncate">{{ currentSession?.cwd }}</span>
                 </div>
-                <button type="button"
-                  class="inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[11px] font-semibold cursor-pointer transition-all"
-                  style="color:rgba(160,120,80,0.8)"
-                  @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'"
-                  @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.8)'"
-                  @click="reset">__T_CLAUDE_CHAT_NEW_SESSION__</button>
               </template>
             </div>
 
@@ -170,7 +212,18 @@ const props = defineProps({
   installed: { type: Boolean, default: false }
 });
 
+const PERMISSION_MODES = [
+  { id: 'default', label: 'default', description: '标准权限模式，按 Claude 默认策略请求权限。' },
+  { id: 'plan', label: 'plan', description: '优先规划与分析，适合先讨论方案再执行。' },
+  { id: 'auto', label: 'auto', description: '自动在不同权限策略间判断，减少手动干预。' },
+  { id: 'acceptEdits', label: 'acceptEdits', description: '偏向直接接受代码编辑类操作。' },
+  { id: 'dontAsk', label: 'dontAsk', description: '尽量不再询问确认，直接继续执行。' },
+  { id: 'bypassPermissions', label: 'bypassPermissions', description: '跳过权限检查，风险最高，只适合完全信任的环境。' }
+];
+
 const cwd = ref('~/Desktop');
+const permissionMode = ref('default');
+const modeMenuOpen = ref(false);
 const editingPath = ref(false);
 const pathInput = ref(null);
 const startError = ref('');
@@ -187,6 +240,7 @@ const textarea = ref(null);
 const composing = ref(false);
 const convList = ref([]);
 const homedirPrefix = ref('');
+const expandedToolKeys = ref({});
 let abortController = null;
 
 const formatTime = (iso) => {
@@ -214,8 +268,10 @@ const openConversation = async (sid) => {
   currentId.value = sid;
   const found = convList.value.find((c) => c.sessionId === sid);
   currentSession.value = found || null;
+  permissionMode.value = found?.permissionMode || permissionMode.value;
   liveEvents.value = [];
   messages.value = [];
+  expandedToolKeys.value = {};
   try {
     const r = await fetch(`/apps/claude-code/messages?conversationId=${sid}`);
     const data = await r.json();
@@ -236,6 +292,7 @@ const removeConversation = async (sid) => {
 };
 
 const canSend = computed(() => !!input.value.trim() && !busy.value && props.installed && !starting.value);
+const activePermissionMode = computed(() => PERMISSION_MODES.find((item) => item.id === permissionMode.value) || PERMISSION_MODES[0]);
 
 const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'claude').map((e) => e.payload)));
 
@@ -250,9 +307,12 @@ const reset = () => {
   currentSession.value = null;
   messages.value = [];
   liveEvents.value = [];
+  expandedToolKeys.value = {};
   input.value = '';
   startError.value = '';
   editingPath.value = false;
+  permissionMode.value = 'default';
+  modeMenuOpen.value = false;
 };
 
 const ensureSession = async () => {
@@ -262,13 +322,15 @@ const ensureSession = async () => {
   try {
     const r = await fetch('/apps/claude-code/conversations/create', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cwd: cwd.value.trim() })
+      body: JSON.stringify({ cwd: cwd.value.trim(), permissionMode: permissionMode.value })
     });
     const data = await r.json();
     if (data.error) { startError.value = data.error; return false; }
     if (data.item) {
       currentSession.value = data.item;
       currentId.value = data.item.sessionId;
+      permissionMode.value = data.item.permissionMode || permissionMode.value;
+      modeMenuOpen.value = false;
       fetchConversations();
       return true;
     }
@@ -286,6 +348,7 @@ const fetchMessages = async (id) => {
   const data = await r.json();
   messages.value = data.items || [];
   liveEvents.value = [];
+  expandedToolKeys.value = {};
   scrollToBottom(false);
 };
 
@@ -390,7 +453,19 @@ function extractBlocks(events) {
       for (const b of e.message.content) {
         if (b.type === 'text' && b.text) out.push({ role: 'assistant_text', content: b.text });
         else if (b.type === 'tool_use') {
-          const entry = { role: 'tool_use', toolName: b.name || 'tool', summary: summarize(b.name, b.input), inputPretty: safeStr(b.input), result: undefined, expanded: false, toolUseId: b.id };
+          const details = describeTool(b.name, b.input);
+          const entry = {
+            role: 'tool_use',
+            toolName: b.name || 'tool',
+            toolLabel: details.toolLabel,
+            summary: details.summary,
+            meta: details.meta,
+            primaryLabel: details.primaryLabel,
+            primaryValue: details.primaryValue,
+            inputPretty: safeStr(b.input),
+            result: undefined,
+            toolUseId: b.id
+          };
           toolCalls.set(b.id, entry); out.push(entry);
         }
       }
@@ -405,13 +480,59 @@ function extractBlocks(events) {
   }
   return out;
 }
-function summarize(name, input) {
-  if (!input || typeof input !== 'object') return '';
-  if (name === 'Bash' && input.command) return String(input.command).slice(0, 120);
-  if (input.file_path) return String(input.file_path);
-  if (input.path) return String(input.path);
-  if (input.pattern) return String(input.pattern);
-  return '';
+function describeTool(name, input) {
+  const toolName = String(name || 'tool');
+  const normalized = toolName.toLowerCase();
+  const info = {
+    toolLabel: toolName,
+    summary: '',
+    meta: '',
+    primaryLabel: 'Input',
+    primaryValue: ''
+  };
+
+  if (!input || typeof input !== 'object') return info;
+
+  if (normalized === 'bash' || normalized === 'shell') {
+    const command = String(input.command || '').trim();
+    info.toolLabel = 'Bash';
+    info.summary = input.description ? String(input.description) : (command || 'Shell command');
+    info.meta = input.description && command ? command : '';
+    info.primaryLabel = 'Command';
+    info.primaryValue = command;
+    return info;
+  }
+
+  if (input.file_path) {
+    info.summary = `${toolName} · ${String(input.file_path)}`;
+    info.primaryLabel = 'File';
+    info.primaryValue = String(input.file_path);
+    info.meta = input.limit ? `limit=${input.limit}` : '';
+    return info;
+  }
+
+  if (input.path) {
+    info.summary = `${toolName} · ${String(input.path)}`;
+    info.primaryLabel = 'Path';
+    info.primaryValue = String(input.path);
+    info.meta = input.pattern ? `pattern=${input.pattern}` : '';
+    return info;
+  }
+
+  if (input.pattern) {
+    info.summary = `${toolName} · ${String(input.pattern)}`;
+    info.primaryLabel = 'Pattern';
+    info.primaryValue = String(input.pattern);
+    return info;
+  }
+
+  const firstKey = Object.keys(input)[0] || '';
+  const firstValue = firstKey ? stringifyInline(input[firstKey]) : '';
+  info.summary = firstKey ? `${toolName} · ${firstKey}${firstValue ? `=${firstValue}` : ''}` : toolName;
+  info.primaryLabel = firstKey || 'Input';
+  info.primaryValue = firstValue;
+  info.meta = Object.keys(input).slice(1, 4).join(' · ');
+  return info;
 }
 function safeStr(o) { try { return JSON.stringify(o, null, 2); } catch { return String(o); } }
 function stringifyResult(c) {
@@ -419,6 +540,27 @@ function stringifyResult(c) {
   if (typeof c === 'string') return c;
   if (Array.isArray(c)) return c.map((x) => x?.type === 'text' ? x.text : safeStr(x)).join('\n');
   return safeStr(c);
+}
+function stringifyInline(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return `[${value.length}]`;
+  if (typeof value === 'object') return '{...}';
+  return String(value);
+}
+function toggleToolExpanded(key) {
+  expandedToolKeys.value = {
+    ...expandedToolKeys.value,
+    [key]: !expandedToolKeys.value[key]
+  };
+}
+function isToolExpanded(key) {
+  return !!expandedToolKeys.value[key];
+}
+function selectPermissionMode(mode) {
+  permissionMode.value = mode;
+  modeMenuOpen.value = false;
 }
 
 watch(liveEvents, () => scrollToBottom(), { deep: true });

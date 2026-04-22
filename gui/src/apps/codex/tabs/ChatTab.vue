@@ -1,5 +1,34 @@
 <template>
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col" style="background:#f5f3ef">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-row" style="background:#f5f3ef">
+    <aside class="flex w-56 shrink-0 flex-col border-r" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
+      <div class="border-b px-3 py-2.5" style="border-color:rgba(0,0,0,0.07)">
+        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-[9px] border px-3 py-2 text-[13px] font-semibold"
+          style="border-color:rgba(92,67,50,0.14);background:rgba(255,255,255,0.58);color:rgba(61,47,30,0.82)"
+          @click="reset">__T_CODEX_CHAT_NEW_SESSION__</button>
+      </div>
+      <div class="flex-1 overflow-y-auto [scrollbar-width:thin] px-1.5 py-1.5">
+        <div v-if="!convList.length" class="px-3 py-4 text-center text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CODEX_CHAT_NO_SESSIONS__</div>
+        <div v-for="c in convList" :key="c.sessionId"
+          class="group mb-1 cursor-pointer rounded-lg px-2.5 py-2"
+          :style="currentId === c.sessionId ? 'background:rgba(255,255,255,0.85);box-shadow:0 1px 2px rgba(0,0,0,0.05)' : ''"
+          @click="openConversation(c.sessionId)">
+          <div class="flex items-center gap-1">
+            <div class="truncate text-[12.5px] flex-1" style="color:#2a1f13">
+              {{ c.title?.trim() || ('__T_CODEX_CHAT_SESSION_PREFIX__' + c.sessionId.slice(0, 8)) }}
+            </div>
+            <button class="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 text-[11px] px-1 cc-mono"
+              title="__T_CODEX_CHAT_DELETE__" @click.stop="removeConversation(c.sessionId)">✕</button>
+          </div>
+          <div class="mt-0.5 truncate text-[10.5px] cc-mono" style="color:rgba(0,0,0,0.4)">
+            {{ displayCwd(c.cwd) }}
+          </div>
+          <div class="truncate text-[10px]" style="color:rgba(0,0,0,0.35)">
+            {{ '__T_CODEX_CHAT_EVENTS__'.replace('{n}', String(c.messageCount || 0)).replace('{time}', formatTime(c.updatedAt || c.lastTs)) }}
+          </div>
+        </div>
+      </div>
+    </aside>
+
     <div class="flex min-h-0 flex-1 flex-col">
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" style="scrollbar-color:rgba(160,120,80,0.2) transparent">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
@@ -29,12 +58,12 @@
 
               <div v-else-if="m.role === 'tool_use'" class="flex items-start gap-2.5">
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl" style="border:1px solid rgba(160,120,80,0.18);background:#fff">
-                  <button type="button" class="flex w-full cursor-pointer items-center gap-2 border-none px-3 py-2 text-left transition-colors" style="background:rgba(160,120,80,0.05)" @click="m.expanded = !m.expanded">
-                    <ChevronRight class="h-3 w-3 shrink-0 transition-transform" :class="m.expanded ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
+                  <button type="button" class="flex w-full cursor-pointer items-center gap-2 border-none px-3 py-2 text-left transition-colors" style="background:rgba(160,120,80,0.05)" @click="toggleToolExpanded(m.key)">
+                    <ChevronRight class="h-3 w-3 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
                     <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">🔧 {{ m.toolName }}<span v-if="m.summary" style="color:rgba(0,0,0,0.45)">  {{ m.summary }}</span></span>
                     <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CODEX_CHAT_TOOL_DONE__</span>
                   </button>
-                  <div v-if="m.expanded" style="border-top:1px solid rgba(160,120,80,0.12)">
+                  <div v-if="isToolExpanded(m.key)" style="border-top:1px solid rgba(160,120,80,0.12)">
                     <pre class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:rgba(160,120,80,0.04);color:#5c7a50;margin:0">{{ m.inputPretty }}</pre>
                     <div v-if="m.result !== undefined" class="max-h-48 overflow-auto whitespace-pre px-3 py-2.5 font-mono text-[11px]" style="border-top:1px solid rgba(160,120,80,0.1);background:rgba(160,120,80,0.03);color:rgba(0,0,0,0.45)">{{ m.result }}</div>
                   </div>
@@ -129,7 +158,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, FolderOpen, Square } from 'lucide-vue-next';
 
@@ -155,11 +184,61 @@ const busy = ref(false);
 const msgBox = ref(null);
 const textarea = ref(null);
 const composing = ref(false);
+const convList = ref([]);
+const expandedToolKeys = ref({});
 let abortController = null;
+
+const formatTime = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const now = Date.now();
+  const diff = (now - d.getTime()) / 1000;
+  if (diff < 60) return '__T_CODEX_TIME_JUST_NOW__';
+  if (diff < 3600) return '__T_CODEX_TIME_MINUTES_AGO__'.replace('{n}', String(Math.floor(diff / 60)));
+  if (diff < 86400) return '__T_CODEX_TIME_HOURS_AGO__'.replace('{n}', String(Math.floor(diff / 3600)));
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+};
+
+const displayCwd = (value) => {
+  if (!value) return '';
+  const home = (typeof window !== 'undefined' && window?.__ENV__?.HOME) || '';
+  if (home && value.startsWith(home)) return `~${value.slice(home.length)}`;
+  return value;
+};
+
+const fetchConversations = async () => {
+  try {
+    const r = await fetch('/apps/codex/conversations');
+    const data = await r.json();
+    convList.value = data.items || [];
+  } catch {}
+};
+
+const openConversation = async (sid) => {
+  if (busy.value) abortStream();
+  currentId.value = sid;
+  currentSession.value = convList.value.find((c) => c.sessionId === sid) || null;
+  liveEvents.value = [];
+  messages.value = [];
+  expandedToolKeys.value = {};
+  await fetchMessages(sid);
+};
+
+const removeConversation = async (sid) => {
+  if (!confirm('__T_CODEX_CHAT_DELETE_CONFIRM__')) return;
+  await fetch('/apps/codex/conversations/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: sid })
+  });
+  if (currentId.value === sid) reset();
+  await fetchConversations();
+};
 
 const canSend = computed(() => !!input.value.trim() && !busy.value && props.installed && !starting.value);
 
-const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'claude').map((e) => e.payload)));
+const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'codex').map((e) => e.payload)));
 
 const startEditPath = () => {
   editingPath.value = true;
@@ -172,6 +251,7 @@ const reset = () => {
   currentSession.value = null;
   messages.value = [];
   liveEvents.value = [];
+  expandedToolKeys.value = {};
   input.value = '';
   startError.value = '';
   editingPath.value = false;
@@ -191,6 +271,7 @@ const ensureSession = async () => {
     if (data.item) {
       currentSession.value = data.item;
       currentId.value = data.item.sessionId;
+      fetchConversations();
       return true;
     }
     return false;
@@ -207,6 +288,7 @@ const fetchMessages = async (id) => {
   const data = await r.json();
   messages.value = data.items || [];
   liveEvents.value = [];
+  expandedToolKeys.value = {};
   scrollToBottom(false);
 };
 
@@ -276,11 +358,12 @@ const handleSend = async () => {
     busy.value = false;
     abortController = null;
     if (currentId.value) await fetchMessages(currentId.value);
+    fetchConversations();
   }
 };
 
 const handleStreamEvent = (evt) => {
-  if (evt.type === 'event') liveEvents.value.push({ kind: 'claude', payload: evt.payload });
+  if (evt.type === 'event') liveEvents.value.push({ kind: 'codex', payload: evt.payload });
   else if (evt.type === 'error') liveEvents.value.push({ kind: 'error', message: evt.message });
   scrollToBottom();
 };
@@ -327,6 +410,7 @@ function extractBlocks(events) {
 }
 function summarize(name, input) {
   if (!input || typeof input !== 'object') return '';
+  if (input.description) return String(input.description);
   if (name === 'Bash' && input.command) return String(input.command).slice(0, 120);
   if (input.file_path) return String(input.file_path);
   if (input.path) return String(input.path);
@@ -340,9 +424,20 @@ function stringifyResult(c) {
   if (Array.isArray(c)) return c.map((x) => x?.type === 'text' ? x.text : safeStr(x)).join('\n');
   return safeStr(c);
 }
+function toggleToolExpanded(key) {
+  expandedToolKeys.value = {
+    ...expandedToolKeys.value,
+    [key]: !expandedToolKeys.value[key]
+  };
+}
+function isToolExpanded(key) {
+  return !!expandedToolKeys.value[key];
+}
 
 watch(liveEvents, () => scrollToBottom(), { deep: true });
 watch(() => messages.value.length, () => scrollToBottom(false));
+
+onMounted(fetchConversations);
 </script>
 
 <style scoped>

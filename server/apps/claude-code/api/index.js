@@ -41,7 +41,7 @@ const handleClaudeCodeApi = async (req, res, path) => {
   }
   if (path === "/apps/claude-code/conversations/create" && req.method === "POST") {
     const body = await readBody(req);
-    const result = createSession({ cwd: body.cwd });
+    const result = createSession({ cwd: body.cwd, permissionMode: body.permissionMode });
     if (result?.error) return json(res, { error: result.error }, 400);
     return json(res, { item: result });
   }
@@ -188,6 +188,7 @@ const handleSend = async (req, res) => {
     sessionId: sess.sessionId,
     started: Boolean(ctx.started),
     cwd: sess.cwd,
+    permissionMode: sess.permissionMode || ctx.permissionMode || "default",
     prompt: message,
     onEvent,
     onDone,

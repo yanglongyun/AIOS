@@ -33,7 +33,7 @@
         <div class="cc-chart-title">__T_CLAUDE_STATS_DAILY_ACTIVITY__</div>
         <div class="cc-chart-sub mb-3">{{ '__T_CLAUDE_STATS_DAILY_SUB__'.replace('{n}', String(Math.min(data.dailyActivity.length, 14))) }}</div>
         <div class="flex items-end gap-2" style="height:160px">
-          <div v-for="d in data.dailyActivity.slice(-14)" :key="d.date" class="flex-1 flex flex-col items-center justify-end gap-1">
+          <div v-for="d in data.dailyActivity.slice(-14)" :key="d.date" class="flex h-full flex-1 flex-col items-center justify-end gap-1 self-stretch">
             <div :title="`${d.date} · ${d.messageCount} 消息`" class="w-full rounded-t"
               :style="{ height: ((d.messageCount / maxMessages) * 100) + '%', background: 'linear-gradient(180deg,#7a5430,#5c4332)' }"></div>
             <div class="cc-mono text-[9px]" style="color:#8a7965">{{ d.date.slice(5) }}</div>

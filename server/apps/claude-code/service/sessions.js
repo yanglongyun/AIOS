@@ -39,6 +39,7 @@ const ensureWorkspace = (sessionId, realCwd) => {
 const toSessionShape = (row) => ({
   sessionId: row.sessionId,
   cwd: row.cwd,
+  permissionMode: row.permissionMode || "default",
   title: row.title,
   messageCount: row.messageCount,
   createdAt: row.createdAt,
@@ -51,9 +52,12 @@ const listSessionsFromDb = () => {
   return listConversations().map(toSessionShape);
 };
 
-const createSession = ({ cwd } = {}) => {
+const VALID_PERMISSION_MODES = new Set(["acceptEdits", "auto", "bypassPermissions", "default", "dontAsk", "plan"]);
+
+const createSession = ({ cwd, permissionMode } = {}) => {
   const sessionId = randomUUID();
   let targetCwd;
+  const normalizedPermissionMode = VALID_PERMISSION_MODES.has(permissionMode) ? permissionMode : "default";
   const trimmed = typeof cwd === "string" ? expandHome(cwd.trim()) : "";
   if (trimmed) {
     if (!path.isAbsolute(trimmed)) return { error: "cwd 必须是绝对路径" };
@@ -68,7 +72,7 @@ const createSession = ({ cwd } = {}) => {
     targetCwd = path.join(WORKSPACE_ROOT, sessionId);
   }
   ensureWorkspace(sessionId, targetCwd);
-  insertConversation({ sessionId, cwd: targetCwd, title: "" });
+  insertConversation({ sessionId, cwd: targetCwd, permissionMode: normalizedPermissionMode, title: "" });
   return toSessionShape(getConversationBySessionId(sessionId));
 };
 
@@ -93,7 +97,7 @@ const getSession = (sessionId) => {
 const getConversationContext = (sessionId) => {
   const row = getConversationBySessionId(sessionId);
   if (!row) return null;
-  return { id: row.id, sessionId: row.sessionId, cwd: row.cwd, started: row.messageCount > 0 };
+  return { id: row.id, sessionId: row.sessionId, cwd: row.cwd, permissionMode: row.permissionMode || "default", started: row.messageCount > 0 };
 };
 
 // Replay events from DB into the UI-renderable shape:

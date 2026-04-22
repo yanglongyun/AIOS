@@ -12,10 +12,6 @@
       </button>
     </div>
 
-    <pre v-if="!expanded && plan.preview"
-      class="mt-2 text-[11.5px] whitespace-pre-wrap"
-      style="color:#6b5a46;font-family:inherit;max-height:80px;overflow:hidden">{{ plan.preview }}</pre>
-
     <div v-if="expanded" class="mt-3">
       <div v-if="error" class="text-[11.5px] mb-2" style="color:#b03a20">{{ error }}</div>
       <pre v-if="full" class="cc-mono text-[11.5px] p-3 rounded-md overflow-x-auto whitespace-pre-wrap"

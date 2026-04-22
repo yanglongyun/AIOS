@@ -7,8 +7,11 @@ import {
   createSession,
   deleteSession,
   getSession,
-  getMessages
+  getMessages,
+  getConversationContext
 } from "../service/sessions.js";
+import { appendEvent } from "../repository/events.js";
+import { touchConversation, setConversationTitleIfEmpty } from "../repository/conversations.js";
 import {
   getHistory,
   getAccount,
@@ -44,7 +47,10 @@ const handleCodexApi = async (req, res, path) => {
     return json(res, r, r.ok ? 200 : 400);
   }
   if (path === "/apps/codex/messages" && req.method === "GET") {
-    return json(res, getMessages());
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const sid = String(url.searchParams.get("conversationId") || "").trim();
+    if (!sid) return json(res, { error: "conversationId required" }, 400);
+    return json(res, getMessages(sid));
   }
   if (path === "/apps/codex/send" && req.method === "POST") {
     return handleSend(req, res);
@@ -109,6 +115,8 @@ const handleSend = async (req, res) => {
   if (!sid || !message) return json(res, { error: "conversationId and message required" }, 400);
   const sess = getSession(sid);
   if (!sess) return json(res, { error: "conversation not found" }, 404);
+  const ctx = getConversationContext(sid);
+  if (!ctx) return json(res, { error: "conversation not found" }, 404);
 
   res.writeHead(200, {
     "Content-Type": "application/x-ndjson; charset=utf-8",
@@ -118,9 +126,27 @@ const handleSend = async (req, res) => {
   });
   const write = (obj) => { if (!res.writableEnded) res.write(JSON.stringify(obj) + "\n"); };
 
-  const onEvent = (evt) => write({ type: "event", payload: evt });
-  const onDone = () => { write({ type: "done" }); res.end(); };
-  const onError = (err) => { write({ type: "error", message: err?.message || String(err) }); res.end(); };
+  appendEvent(ctx.id, "user_turn", {
+    type: "user",
+    message: { role: "user", content: message }
+  });
+  setConversationTitleIfEmpty(ctx.id, message.slice(0, 80));
+  let eventCount = 1;
+  const onEvent = (evt) => {
+    appendEvent(ctx.id, "codex_event", evt);
+    eventCount += 1;
+    write({ type: "event", payload: evt });
+  };
+  const onDone = () => {
+    touchConversation(ctx.id, eventCount);
+    write({ type: "done" });
+    res.end();
+  };
+  const onError = (err) => {
+    touchConversation(ctx.id, eventCount);
+    write({ type: "error", message: err?.message || String(err) });
+    res.end();
+  };
 
   runCodex({ cwd: sess.cwd, registryDir: sess.registryDir, prompt: message, onEvent, onDone, onError });
 };

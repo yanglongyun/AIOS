@@ -1,16 +1,17 @@
 import { spawn } from "node:child_process";
 
-const buildArgs = ({ sessionId, started }) => {
+const buildArgs = ({ sessionId, started, permissionMode }) => {
   const args = [
     "-p",
     "--output-format",
     "stream-json",
     "--input-format",
     "text",
-    "--verbose",
-    "--permission-mode",
-    "acceptEdits"
+    "--verbose"
   ];
+  if (permissionMode) {
+    args.push("--permission-mode", permissionMode);
+  }
   if (started) {
     args.push("--resume", sessionId);
   } else {
@@ -22,13 +23,14 @@ const buildArgs = ({ sessionId, started }) => {
 const runClaude = ({
   sessionId,
   started,
+  permissionMode,
   cwd,
   prompt,
   onEvent,
   onDone,
   onError
 }) => {
-  const args = buildArgs({ sessionId, started });
+  const args = buildArgs({ sessionId, started, permissionMode });
   const child = spawn("claude", args, {
     cwd,
     env: { ...process.env },

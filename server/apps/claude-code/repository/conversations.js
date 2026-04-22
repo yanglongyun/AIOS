@@ -1,18 +1,18 @@
 import { db } from "./client.js";
 
-const insertConversation = ({ sessionId, cwd, title = "" }) => {
+const insertConversation = ({ sessionId, cwd, permissionMode = "default", title = "" }) => {
   const info = db
     .prepare(
-      "INSERT INTO cc_conversations (session_id, cwd, title) VALUES (?, ?, ?)"
+      "INSERT INTO cc_conversations (session_id, cwd, permission_mode, title) VALUES (?, ?, ?, ?)"
     )
-    .run(sessionId, cwd, title);
+    .run(sessionId, cwd, permissionMode, title);
   return info.lastInsertRowid;
 };
 
 const getConversationBySessionId = (sessionId) => {
   return db
     .prepare(
-      "SELECT id, session_id AS sessionId, cwd, title, message_count AS messageCount, created_at AS createdAt, updated_at AS updatedAt FROM cc_conversations WHERE session_id = ?"
+      "SELECT id, session_id AS sessionId, cwd, permission_mode AS permissionMode, title, message_count AS messageCount, created_at AS createdAt, updated_at AS updatedAt FROM cc_conversations WHERE session_id = ?"
     )
     .get(sessionId);
 };
@@ -20,7 +20,7 @@ const getConversationBySessionId = (sessionId) => {
 const listConversations = () => {
   return db
     .prepare(
-      "SELECT id, session_id AS sessionId, cwd, title, message_count AS messageCount, created_at AS createdAt, updated_at AS updatedAt FROM cc_conversations ORDER BY updated_at DESC"
+      "SELECT id, session_id AS sessionId, cwd, permission_mode AS permissionMode, title, message_count AS messageCount, created_at AS createdAt, updated_at AS updatedAt FROM cc_conversations ORDER BY updated_at DESC"
     )
     .all();
 };

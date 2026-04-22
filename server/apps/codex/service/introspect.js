@@ -53,7 +53,7 @@ const getAccount = async () => {
   let method = "";
   const m = text.match(/using\s+(.+)$/i);
   if (m) method = m[1].trim();
-  return { available: true, loggedIn, authMethod: method, raw: text };
+  return { available: true, loggedIn, authMethod: method, raw: text, command: "codex login status" };
 };
 
 // ---------- Settings (config.toml, raw text) ----------

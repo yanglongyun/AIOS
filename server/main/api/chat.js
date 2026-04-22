@@ -15,7 +15,15 @@ const UPLOADABLE_EXT = new Set([
   ".txt", ".md", ".pdf", ".doc", ".docx", ".json", ".csv",
   ".png", ".jpg", ".jpeg", ".webp", ".log", ".pptx", ".xlsx"
 ]);
-const safeName = (name = "file") => String(name).replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "file";
+const safeName = (name = "file") => {
+  const normalized = String(name || "file")
+    .normalize("NFC")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim();
+  const trimmed = normalized.replace(/^\.+/, "").slice(0, 120);
+  return trimmed || "file";
+};
 
 const uploadChatAttachment = async (body = {}) => {
   const fileName = String(body.name || "").trim();

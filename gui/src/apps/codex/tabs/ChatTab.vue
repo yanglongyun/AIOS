@@ -383,7 +383,7 @@ const handleSend = async () => {
   try {
     const resp = await fetch('/apps/codex/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversationId: currentId.value, message: text }), signal: abortController.signal
+      body: JSON.stringify({ conversationId: currentId.value, message: text, permissionMode: permissionMode.value }), signal: abortController.signal
     });
     if (!resp.body) throw new Error('no body');
     const reader = resp.body.getReader();
@@ -484,6 +484,8 @@ function isToolExpanded(key) {
 }
 function selectPermissionMode(mode) {
   permissionMode.value = mode;
+  if (currentSession.value) currentSession.value.permissionMode = mode;
+  convList.value = convList.value.map((item) => item.sessionId === currentId.value ? { ...item, permissionMode: mode } : item);
   modeMenuOpen.value = false;
 }
 

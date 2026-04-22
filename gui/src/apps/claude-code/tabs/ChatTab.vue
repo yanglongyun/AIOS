@@ -66,21 +66,16 @@
                     @click="toggleToolExpanded(m.key)"
                   >
                     <ChevronRight class="mt-0.5 h-3 w-3 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2">
-                        <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]" style="background:rgba(92,67,50,0.1);color:#5c4332">{{ m.toolLabel }}</span>
-                        <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
-                      </div>
-                      <div class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.summary || m.toolName }}</div>
-                      <div v-if="m.meta" class="mt-1 overflow-hidden text-ellipsis whitespace-nowrap cc-mono text-[10px]" style="color:rgba(0,0,0,0.42)">{{ m.meta }}</div>
+                    <div class="min-w-0 flex flex-1 items-center gap-2">
+                      <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.summary || m.toolName }}</div>
+                      <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
                     </div>
                   </button>
                   <div v-if="isToolExpanded(m.key)" style="border-top:1px solid rgba(160,120,80,0.12)">
-                    <div v-if="m.primaryValue" class="px-3 py-2 text-[11px]" style="background:rgba(160,120,80,0.04);color:#5c4332">
-                      <span class="mr-2 font-semibold">{{ m.primaryLabel }}</span>
-                      <span class="cc-mono break-all">{{ m.primaryValue }}</span>
+                    <div v-if="m.primaryValue" class="px-3 py-2 text-[11px] cc-mono break-all" style="background:rgba(160,120,80,0.04);color:#5c4332">
+                      {{ m.primaryValue }}
                     </div>
-                    <pre class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:rgba(160,120,80,0.04);color:#5c7a50;margin:0">{{ m.inputPretty }}</pre>
+                    <pre v-else class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:rgba(160,120,80,0.04);color:#5c7a50;margin:0">{{ m.inputPretty }}</pre>
                     <div v-if="m.result !== undefined" class="max-h-48 overflow-auto whitespace-pre px-3 py-2.5 font-mono text-[11px]" style="border-top:1px solid rgba(160,120,80,0.1);background:rgba(160,120,80,0.03);color:rgba(0,0,0,0.45)">{{ m.result }}</div>
                   </div>
                 </div>
@@ -393,7 +388,7 @@ const handleSend = async () => {
   try {
     const resp = await fetch('/apps/claude-code/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversationId: currentId.value, message: text }), signal: abortController.signal
+      body: JSON.stringify({ conversationId: currentId.value, message: text, permissionMode: permissionMode.value }), signal: abortController.signal
     });
     if (!resp.body) throw new Error('no body');
     const reader = resp.body.getReader();
@@ -491,11 +486,12 @@ function describeTool(name, input) {
   };
 
   if (!input || typeof input !== 'object') return info;
+  if (input.description) info.summary = String(input.description);
 
   if (normalized === 'bash' || normalized === 'shell') {
     const command = String(input.command || '').trim();
     info.toolLabel = 'Bash';
-    info.summary = input.description ? String(input.description) : (command || 'Shell command');
+    info.summary = info.summary || command || 'Shell command';
     info.meta = input.description && command ? command : '';
     info.primaryLabel = 'Command';
     info.primaryValue = command;
@@ -503,7 +499,7 @@ function describeTool(name, input) {
   }
 
   if (input.file_path) {
-    info.summary = `${toolName} · ${String(input.file_path)}`;
+    info.summary = info.summary || `${toolName} · ${String(input.file_path)}`;
     info.primaryLabel = 'File';
     info.primaryValue = String(input.file_path);
     info.meta = input.limit ? `limit=${input.limit}` : '';
@@ -511,7 +507,7 @@ function describeTool(name, input) {
   }
 
   if (input.path) {
-    info.summary = `${toolName} · ${String(input.path)}`;
+    info.summary = info.summary || `${toolName} · ${String(input.path)}`;
     info.primaryLabel = 'Path';
     info.primaryValue = String(input.path);
     info.meta = input.pattern ? `pattern=${input.pattern}` : '';
@@ -519,7 +515,7 @@ function describeTool(name, input) {
   }
 
   if (input.pattern) {
-    info.summary = `${toolName} · ${String(input.pattern)}`;
+    info.summary = info.summary || `${toolName} · ${String(input.pattern)}`;
     info.primaryLabel = 'Pattern';
     info.primaryValue = String(input.pattern);
     return info;
@@ -527,7 +523,7 @@ function describeTool(name, input) {
 
   const firstKey = Object.keys(input)[0] || '';
   const firstValue = firstKey ? stringifyInline(input[firstKey]) : '';
-  info.summary = firstKey ? `${toolName} · ${firstKey}${firstValue ? `=${firstValue}` : ''}` : toolName;
+  info.summary = info.summary || (firstKey ? `${toolName} · ${firstKey}${firstValue ? `=${firstValue}` : ''}` : toolName);
   info.primaryLabel = firstKey || 'Input';
   info.primaryValue = firstValue;
   info.meta = Object.keys(input).slice(1, 4).join(' · ');
@@ -559,6 +555,8 @@ function isToolExpanded(key) {
 }
 function selectPermissionMode(mode) {
   permissionMode.value = mode;
+  if (currentSession.value) currentSession.value.permissionMode = mode;
+  convList.value = convList.value.map((item) => item.sessionId === currentId.value ? { ...item, permissionMode: mode } : item);
   modeMenuOpen.value = false;
 }
 

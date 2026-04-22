@@ -16,15 +16,17 @@ const buildMissingModelMessage = (status) => {
   const missing = (status?.missing || []).map((key) => MODEL_FIELD_LABELS[key] || key);
   const missingText = missing.length ? missing.join(" / ") : "provider / model / API URL / API Key";
   return [
-    "还没有配置聊天模型，所以这条消息暂时不能发送给大模型。",
+    "当前还没有配置内置聊天模型，所以这条消息暂时不能由 AIOS 内置对话来处理。",
     "",
     `缺少字段：${missingText}`,
     "",
-    "下一步可以直接做这两件事之一：",
-    "1. 打开欢迎页完成初始化：[/welcome](/welcome)",
-    "2. 或让外部 agent 阅读这个链接后帮你配置：[http://127.0.0.1:9502/welcome](http://127.0.0.1:9502/welcome)",
+    "请先打开“设置”应用，在里面补全大模型配置。",
+    "配好之后，回到这里重新发送就可以继续使用 AIOS 内置聊天。",
     "",
-    "配好之后，回到这里重新发送即可。"
+    "如果你希望直接用外部 agent 作为 AIOS 的内核来驱动系统，也可以把这个 welcome API 链接交给它：",
+    "   [http://127.0.0.1:9502/welcome](http://127.0.0.1:9502/welcome)",
+    "",
+    "这个接口会返回 AIOS 的架构、可用应用、coding agents 状态和调用方式。"
   ].join("\n");
 };
 

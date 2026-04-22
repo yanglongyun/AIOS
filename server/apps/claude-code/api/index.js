@@ -11,7 +11,7 @@ import {
   getConversationContext
 } from "../service/sessions.js";
 import { appendEvent } from "../repository/events.js";
-import { touchConversation, setConversationTitleIfEmpty } from "../repository/conversations.js";
+import { touchConversation, setConversationTitleIfEmpty, updateConversationPermissionMode } from "../repository/conversations.js";
 import {
   getStats,
   getHistory,
@@ -140,6 +140,8 @@ const handleSend = async (req, res) => {
   const body = await readBody(req);
   const sid = String(body.conversationId || "").trim();
   const message = String(body.message || "").trim();
+  const requestedPermissionMode = String(body.permissionMode || "").trim();
+  const effectivePermissionMode = requestedPermissionMode || "default";
   if (!sid || !message) {
     return json(res, { error: "conversationId and message required" }, 400);
   }
@@ -147,6 +149,8 @@ const handleSend = async (req, res) => {
   if (!sess) return json(res, { error: "conversation not found" }, 404);
   const ctx = getConversationContext(sid);
   if (!ctx) return json(res, { error: "conversation not found" }, 404);
+
+  updateConversationPermissionMode(ctx.id, effectivePermissionMode);
 
   res.writeHead(200, {
     "Content-Type": "application/x-ndjson; charset=utf-8",
@@ -188,7 +192,7 @@ const handleSend = async (req, res) => {
     sessionId: sess.sessionId,
     started: Boolean(ctx.started),
     cwd: sess.cwd,
-    permissionMode: sess.permissionMode || ctx.permissionMode || "default",
+    permissionMode: effectivePermissionMode,
     prompt: message,
     onEvent,
     onDone,

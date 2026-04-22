@@ -585,6 +585,15 @@ onMounted(async () => {
         msg.content = data.content || msg.content || '';
         msg.streaming = false;
       }
+    } else if (data.content) {
+      const doneKey = `ws:${Date.now()}:assistant_done`;
+      seenKeys.value.add(doneKey);
+      messages.value.push({
+        role: 'assistant',
+        content: data.content,
+        _key: doneKey,
+        streaming: false
+      });
     }
     streamingAssistantKey.value = '';
     busy.value = false;

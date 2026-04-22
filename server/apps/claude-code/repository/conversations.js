@@ -37,6 +37,12 @@ const touchConversation = (id, deltaCount = 0) => {
   ).run(deltaCount, id);
 };
 
+const updateConversationPermissionMode = (id, permissionMode) => {
+  db.prepare(
+    "UPDATE cc_conversations SET permission_mode = ?, updated_at = datetime('now') WHERE id = ?"
+  ).run(permissionMode, id);
+};
+
 const deleteConversationBySessionId = (sessionId) => {
   const row = db
     .prepare("SELECT id FROM cc_conversations WHERE session_id = ?")
@@ -52,5 +58,6 @@ export {
   listConversations,
   setConversationTitleIfEmpty,
   touchConversation,
+  updateConversationPermissionMode,
   deleteConversationBySessionId
 };

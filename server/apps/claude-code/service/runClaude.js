@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { claudeEnv } from "./status.js";
 
 const buildArgs = ({ sessionId, started, permissionMode }) => {
   const args = [
@@ -33,7 +34,7 @@ const runClaude = ({
   const args = buildArgs({ sessionId, started, permissionMode });
   const child = spawn("claude", args, {
     cwd,
-    env: { ...process.env },
+    env: claudeEnv(),
     shell: false
   });
 

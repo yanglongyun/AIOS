@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { spawn } from "node:child_process";
+import { claudeEnv } from "./status.js";
 
 const CLAUDE_DIR = path.join(os.homedir(), ".claude");
 
@@ -9,7 +10,7 @@ const runCmd = (cmd, args, opts = {}) =>
   new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
-    const child = spawn(cmd, args, { shell: false, ...opts });
+    const child = spawn(cmd, args, { shell: false, env: claudeEnv(), ...opts });
     child.stdout?.on("data", (d) => (stdout += d.toString()));
     child.stderr?.on("data", (d) => (stderr += d.toString()));
     child.on("error", () => resolve({ ok: false, stdout, stderr, code: -1 }));

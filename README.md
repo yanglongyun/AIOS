@@ -28,7 +28,7 @@ Windows
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-windows.ps1 | iex"
 ```
 
-安装完成后默认打开：`http://localhost:9500`
+安装完成后默认打开：`http://localhost:9501`
 
 ## 手动启动
 
@@ -41,7 +41,7 @@ npm run start &
 npm run start:apps
 ```
 
-打开：`http://localhost:9500`
+打开：`http://localhost:9501`
 
 ## 交流反馈
 

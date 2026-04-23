@@ -12,22 +12,14 @@ const MODEL_FIELD_LABELS = {
   apiKey: "API Key"
 };
 
+// Token baked by scripts/start.mjs from language/<locale>/server/chat.json.
+// {missing} is filled in at runtime with the list of missing fields.
+const MISSING_MODEL_TEMPLATE = "__T_CHAT_MISSING_MODEL_MESSAGE__";
+
 const buildMissingModelMessage = (status) => {
   const missing = (status?.missing || []).map((key) => MODEL_FIELD_LABELS[key] || key);
-  const missingText = missing.length ? missing.join(" / ") : "provider / model / API URL / API Key";
-  return [
-    "当前还没有配置内置聊天模型，所以这条消息暂时不能由 AIOS 内置对话来处理。",
-    "",
-    `缺少字段：${missingText}`,
-    "",
-    "请先打开“设置”应用，在里面补全大模型配置。",
-    "配好之后，回到这里重新发送就可以继续使用 AIOS 内置聊天。",
-    "",
-    "如果你希望直接用外部 agent 作为 AIOS 的内核来驱动系统，也可以把这个 welcome API 链接交给它：",
-    "   [http://127.0.0.1:9502/welcome](http://127.0.0.1:9502/welcome)",
-    "",
-    "这个接口会返回 AIOS 的架构、可用应用、coding agents 状态和调用方式。"
-  ].join("\n");
+  const missingText = missing.length ? missing.join(" / ") : Object.values(MODEL_FIELD_LABELS).join(" / ");
+  return MISSING_MODEL_TEMPLATE.replace("{missing}", missingText);
 };
 
 const createSession = (wsSend) => {

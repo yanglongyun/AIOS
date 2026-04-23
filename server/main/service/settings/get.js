@@ -24,6 +24,11 @@ const hasConfiguredModelSettings = () => {
   return Boolean(provider && model && apiUrl && apiKey);
 };
 
+const isWelcomeSkipped = () => {
+  const obj = readSettingsMap();
+  return String(obj.welcomeSkipped || "") === "1";
+};
+
 const getModelSetupStatus = () => {
   const obj = readSettingsMap();
   const fields = {
@@ -65,5 +70,6 @@ export {
   getSettings,
   getModelSetupStatus,
   hasConfiguredModelSettings,
+  isWelcomeSkipped,
   normalizeContextRounds
 };

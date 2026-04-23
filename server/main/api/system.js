@@ -2,7 +2,8 @@ import { readBody } from "../../shared/http/readBody.js";
 import { json } from "../../shared/http/json.js";
 import { requestReload, runReload } from "../service/system/reload.js";
 import { runReloadTest } from "../service/system/test.js";
-import { hasConfiguredModelSettings } from "../service/settings/get.js";
+import { hasConfiguredModelSettings, isWelcomeSkipped } from "../service/settings/get.js";
+import { saveSetting } from "../repository/settings/save.js";
 import { shell } from "../agent/functions.js";
 
 const logReloadRequest = (req, body, stage, extra = {}) => {
@@ -30,7 +31,15 @@ const isLocalRequest = (req) => {
 
 const handleSystemApi = async (req, res, path) => {
   if (path === "/api/system/setup" && req.method === "GET") {
-    return json(res, { success: true, initialized: hasConfiguredModelSettings() });
+    return json(res, {
+      success: true,
+      initialized: hasConfiguredModelSettings(),
+      welcomeSkipped: isWelcomeSkipped()
+    });
+  }
+  if (path === "/api/system/setup/skip" && req.method === "POST") {
+    saveSetting("welcomeSkipped", "1");
+    return json(res, { success: true });
   }
   if (path === "/api/system/debug/exec" && req.method === "POST") {
     if (!isLocalRequest(req)) {

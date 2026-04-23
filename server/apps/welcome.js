@@ -86,8 +86,8 @@ const buildWelcomeData = async (req) => {
     generatedAt: new Date().toISOString(),
     root: ROOT_DIR,
     servers: {
-      main: "http://127.0.0.1:9500",
-      apps: "http://127.0.0.1:9501",
+      main: "http://127.0.0.1:9501",
+      apps: "http://127.0.0.1:9502",
       currentAppsBase: toUrlBase(req)
     },
     git: {

@@ -4,15 +4,18 @@ const getSetupStatus = async () => {
     const data = await res.json();
     return {
       reachable: true,
-      initialized: Boolean(res.ok && data?.initialized)
+      initialized: Boolean(res.ok && data?.initialized),
+      welcomeSkipped: Boolean(res.ok && data?.welcomeSkipped)
     };
   } catch {
     return {
       reachable: false,
-      initialized: null
+      initialized: null,
+      welcomeSkipped: null
     };
   }
 };
+
 export {
   getSetupStatus
 };

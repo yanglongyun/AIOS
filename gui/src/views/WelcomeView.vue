@@ -83,6 +83,14 @@
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                   </span>
                 </button>
+                <button
+                  type="button"
+                  class="self-center text-[12.5px] font-medium text-black/45 underline-offset-[3px] transition-colors hover:text-black/70 hover:underline disabled:cursor-not-allowed disabled:opacity-45"
+                  :disabled="pending"
+                  @click="skipToDesktop"
+                >
+                  {{ t.skip }}
+                </button>
               </div>
             </div>
           </div>
@@ -130,6 +138,7 @@ const texts = {
     api_key: 'API Key',
     testing: '连接中…',
     save_test: '连接大模型',
+    skip: '跳过，先进桌面',
     enter: '进入系统',
     err_key_required: '请填写 API Key',
     err_url_required: '请填写 API URL',
@@ -271,6 +280,14 @@ const entering = ref(false);
 const enterSystem = () => {
   if (entering.value) return;
   entering.value = true;
+  window.location.href = '/';
+};
+
+const skipToDesktop = async () => {
+  if (pending.value) return;
+  try {
+    await fetch('/api/system/setup/skip', { method: 'POST', credentials: 'include' });
+  } catch {}
   window.location.href = '/';
 };
 

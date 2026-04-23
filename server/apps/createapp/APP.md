@@ -15,7 +15,7 @@ database: database/apps/createapp.db
 推荐参数：
 
 ```bash
-curl -X POST http://localhost:9500/api/system/reload/request \
+curl -X POST http://localhost:9501/api/system/reload/request \
   -H "Content-Type: application/json" \
   -d '{"build": false, "restartApps": true, "restartServer": false, "message": "应用后端更新"}'
 ```
@@ -23,7 +23,7 @@ curl -X POST http://localhost:9500/api/system/reload/request \
 如果只是想验证能否启动，而不想弹窗或切换当前服务，可以调用：
 
 ```bash
-curl -X POST http://localhost:9500/api/system/reload/test \
+curl -X POST http://localhost:9501/api/system/reload/test \
   -H "Content-Type: application/json" \
   -d '{"build": false, "restartApps": true, "restartServer": false}'
 ```

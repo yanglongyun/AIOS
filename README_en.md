@@ -28,7 +28,7 @@ Windows
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-windows.ps1 | iex"
 ```
 
-After installation, open: `http://localhost:9500`
+After installation, open: `http://localhost:9501`
 
 ## Manual Start
 
@@ -41,7 +41,7 @@ npm run start &
 npm run start:apps
 ```
 
-Open: `http://localhost:9500`
+Open: `http://localhost:9501`
 
 ## Community & Feedback
 

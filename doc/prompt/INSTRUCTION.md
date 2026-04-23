@@ -114,7 +114,7 @@ AIOS 当前结构分成 6 层：
 示例：
 
 ```bash
-curl -X POST http://localhost:9500/api/system/reload/request \
+curl -X POST http://localhost:9501/api/system/reload/request \
   -H "Content-Type: application/json" \
   -d '{"build": true, "restartApps": true, "restartServer": false, "message": "更新了设置页"}'
 ```

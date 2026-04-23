@@ -1,7 +1,6 @@
 import { createServer } from "http";
 import { json } from "../shared/http/json.js";
 import { appLoaders } from "./registry.js";
-import { handleWelcome } from "./welcome.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
@@ -66,10 +65,6 @@ const appsServer = createServer(async (req, res) => {
     }
     if (path === "/apps/health") {
       json(res, { success: true });
-      return;
-    }
-    if (path === "/welcome" || path === "/welcome.json") {
-      await handleWelcome(req, res, path);
       return;
     }
     const app = appModules.find((item) => item.match(path));

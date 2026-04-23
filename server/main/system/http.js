@@ -3,6 +3,7 @@ import { readFileSync, existsSync, statSync } from "fs";
 import { join, dirname, extname } from "path";
 import { fileURLToPath } from "url";
 import { handleApiRequest } from "../api/index.js";
+import { handleWelcome } from "../welcome.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "..", "..", "..");
 const PUBLIC_DIR = join(ROOT_DIR, "gui", "dist");
@@ -18,7 +19,10 @@ const MIME = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
-  ".webp": "image/webp"
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".gif": "image/gif",
+  ".ico": "image/x-icon"
 };
 const APPS_PORT = Number(process.env.AIOS_APPS_PORT || 9502);
 const readRawBody = async (req) => {
@@ -98,6 +102,10 @@ const httpServer = createServer(async (req, res) => {
       res.end(readFileSync(filePath2));
       return;
     }
+  }
+  if (url.pathname === "/welcome" || url.pathname === "/welcome.json") {
+    await handleWelcome(req, res, url.pathname);
+    return;
   }
   if (url.pathname.startsWith("/apps/")) {
     try {

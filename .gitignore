@@ -4,8 +4,6 @@ database/
 uploads/
 /files/
 ui/dist/
-AGENTS.md
-CLAUDE.md
 .claude/
 think/
 .playwright-cli/

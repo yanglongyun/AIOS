@@ -91,7 +91,8 @@ const runCodex = ({ cwd, registryDir, prompt, permissionMode, onEvent, onDone, o
   const child = spawn("codex", args, {
     cwd,
     env: codexEnv(),
-    shell: false
+    shell: false,
+    windowsHide: true
   });
 
   const capture = { threadId: existing };

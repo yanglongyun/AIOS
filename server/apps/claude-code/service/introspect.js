@@ -10,7 +10,7 @@ const runCmd = (cmd, args, opts = {}) =>
   new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
-    const child = spawn(cmd, args, { shell: false, env: claudeEnv(), ...opts });
+    const child = spawn(cmd, args, { shell: false, windowsHide: true, env: claudeEnv(), ...opts });
     child.stdout?.on("data", (d) => (stdout += d.toString()));
     child.stderr?.on("data", (d) => (stderr += d.toString()));
     child.on("error", () => resolve({ ok: false, stdout, stderr, code: -1 }));

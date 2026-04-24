@@ -21,13 +21,15 @@ const resolveNpmCli = () => {
   return { command: "npm", args: [] };
 };
 
+const PATH_SEP = process.platform === "win32" ? ";" : ":";
+
 const withBundledNodePath = (extra = {}) => {
   const nodeDir = dirname(NODE_BIN);
   const currentPath = process.env.PATH || "";
   return {
     ...process.env,
     ...extra,
-    PATH: currentPath ? `${nodeDir}:${currentPath}` : nodeDir,
+    PATH: currentPath ? `${nodeDir}${PATH_SEP}${currentPath}` : nodeDir,
     npm_config_scripts_prepend_node_path: "true"
   };
 };
@@ -63,13 +65,15 @@ const buildFrontend = () => {
     cwd: ROOT_DIR,
     timeout: 12e4,
     stdio: "pipe",
-    env: withBundledNodePath()
+    env: withBundledNodePath(),
+    windowsHide: true
   });
 };
 const probeProcess = async (entry, probePort, healthPath) => {
   const probe = spawn(NODE_BIN, [entry, `--port=${probePort}`], {
     cwd: ROOT_DIR,
     stdio: "ignore",
+    windowsHide: true,
     env: withBundledNodePath({
       AIOS_PORT: String(probePort),
       AIOS_APPS_PORT: String(probePort)
@@ -101,6 +105,7 @@ const startDetachedNode = (entry) => {
     cwd: ROOT_DIR,
     detached: true,
     stdio: "ignore",
+    windowsHide: true,
     env: withBundledNodePath()
   });
   child.unref();
@@ -120,6 +125,7 @@ const scheduleServerRestart = async () => {
       cwd: ROOT_DIR,
       detached: true,
       stdio: "ignore",
+      windowsHide: true,
       env: withBundledNodePath()
     });
     child.unref();

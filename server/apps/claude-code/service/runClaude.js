@@ -35,7 +35,8 @@ const runClaude = ({
   const child = spawn("claude", args, {
     cwd,
     env: claudeEnv(),
-    shell: false
+    shell: false,
+    windowsHide: true
   });
 
   let stdoutBuf = "";

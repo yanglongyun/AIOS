@@ -20,7 +20,8 @@ const apps = [
     name: '__T_APP_SIDEBAR_MEMORY__',
     icon: '💭',
     desktopLoad: () => import('./apps/memory/index.vue'),
-    defaultDesktopWindowSize: { w: 600, h: 500 }
+    defaultDesktopWindowSize: { w: 760, h: 680 },
+    minDesktopWindowSize: { w: 560, h: 560 }
   },
   {
     id: 'files',
@@ -28,13 +29,6 @@ const apps = [
     icon: '\u{1F5C2}',
     desktopLoad: () => import('./apps/files/index.vue'),
     defaultDesktopWindowSize: { w: 500, h: 360 }
-  },
-  {
-    id: 'code-viewer',
-    name: '__T_APP_SIDEBAR_CODE_VIEWER__',
-    icon: '\u{1F5A5}',
-    desktopLoad: () => import('./apps/code-viewer/index.vue'),
-    defaultDesktopWindowSize: { w: 1180, h: 760 }
   },
   {
     id: 'notebook',

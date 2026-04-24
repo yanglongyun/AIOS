@@ -1,225 +1,234 @@
-# AIOS Agent Working Guide
+# AIOS 协作指南
 
-## 1. Project Overview
+## 1. 项目简介
 
-AIOS is an AI-native operating environment centered on a resident agent kernel and a set of agent-native applications.
+AIOS 是一个以常驻 Agent 内核为核心、以 Agent 原生应用为外延的 AI 操作环境。
 
-Its core goal is not merely to provide a chat interface, but to let users:
+它的目标不是单纯提供一个聊天界面，而是把 AI 作为系统级能力组织起来，让用户可以：
 
-- issue instructions to their machine or server in natural language,
-- use AI as a persistent system capability rather than a one-off API call,
-- allow applications to dispatch tasks to the underlying AI engine,
-- build, operate, and evolve their own software through the same system.
+- 用自然语言向本机或服务器下达指令；
+- 把 AI 作为持续存在的系统能力，而不是一次性的模型调用；
+- 让应用可以反向调度底层 AI 引擎执行任务；
+- 在同一套系统中生成、使用、扩展和演化自己的软件。
 
-In practical terms, AIOS is closer to an **AI operating environment** than a traditional single-purpose app:
+从产品形态上看，AIOS 更接近“AI 时代的操作系统”，而不是一个单一用途的 App：
 
-- the **agent** handles reasoning, tool use, task execution, memory, and system-level orchestration;
-- the **applications** provide domain surfaces such as chat, tasks, notebook, finance, and other vertical workflows;
-- the **system** binds model access, prompt construction, language assets, persistence, and app dispatch into one runtime.
+- **Agent** 负责推理、工具调用、任务执行、记忆和系统级编排；
+- **应用** 负责提供聊天、任务、笔记、金融等面向具体场景的能力入口；
+- **系统层** 负责把模型接入、提示词构造、语言资源、持久化存储和应用调度绑定成一个完整运行时。
 
-This repository is the **source-of-truth development repository** for AIOS.
+本仓库 `AIOS/` 是 AIOS 的**源码仓库**，是开发和修改代码的唯一真实来源。
 
-## 2. High-Level Architecture
+## 2. 架构总览
 
-AIOS is organized around a layered architecture. The most important distinction is between the **main system layer** and the **app layer**.
+AIOS 采用分层结构，最重要的边界是：
 
-### 2.1 Main system layer
+- **主系统层（main system layer）**
+- **应用层（app layer）**
 
-The main system layer lives under `server/main/`. It contains the core runtime that makes AIOS work as a system:
+### 2.1 主系统层
+
+主系统层位于 `server/main/`，承载 AIOS 作为“系统”运行所需的核心能力：
 
 - `server/main/api/`
-  HTTP entry points for core system capabilities.
+  主系统 HTTP 入口。
 - `server/main/agent/`
-  The agent layer: message loop, tool execution, orchestration, task-facing behaviors.
+  Agent 层，负责消息循环、工具执行、对话推进、任务协作等。
 - `server/main/llm/`
-  Model access layer: regular completion calls, streaming calls, provider-specific parsing.
+  模型访问层，负责普通调用、流式调用、供应方/模型兼容解析。
 - `server/main/prompt/`
-  System prompts and prompt assembly logic.
+  系统提示词与提示词装配逻辑。
 - `server/main/task/`
-  Core task creation, execution, stopping, and task-side message persistence.
+  任务创建、执行、停止、消息落库等任务内核。
 - `server/main/service/`
-  Application-independent business services such as settings and shared system state.
+  设置、状态管理等系统级服务。
 - `server/main/repository/`
-  Persistence adapters for SQLite-backed data.
+  基于 SQLite 的持久化访问层。
 - `server/main/system/`
-  Runtime infrastructure such as HTTP serving, language baking, and system wiring.
+  HTTP 服务、语言烘焙、运行时初始化等基础设施。
 
-This layer is where AIOS behaves like an operating environment rather than a single app.
+这一层决定了 AIOS 不是一个普通应用，而是一个具备统一 Agent 内核、统一任务机制和统一系统能力的运行环境。
 
-### 2.2 App layer
+### 2.2 应用层
 
-The app layer is split into frontend surfaces and backend handlers:
+应用层分成前端应用和后端应用两部分：
 
 - `gui/src/apps/<appname>/`
-  Frontend implementation for a specific app.
+  某个应用的前端实现。
 - `server/apps/<appname>/`
-  Backend implementation for regular apps.
+  某个常规应用的后端实现。
 - `language/<lang>/apps/<appname>/APP.md`
-  The app contract and documentation for that app.
+  该应用的说明文档与约束定义。
 
-Important exception:
+需要注意的例外：
 
-- `chat`, `tasks`, and `settings` are **system-level apps**.
-- Their backend logic does **not** live under `server/apps/`.
-- They are mounted directly on the main system layer because they are tightly coupled to the agent kernel and system services.
+- `chat`、`tasks`、`settings` 属于**系统级应用**；
+- 它们的后端不放在 `server/apps/`；
+- 它们直接挂载在主系统层，因为它们与 Agent 内核、任务系统和系统设置高度耦合。
 
-### 2.3 Shared and generated layers
+### 2.3 共享层与生成层
 
 - `server/shared/`
-  Shared server-side utilities and cross-cutting modules.
+  跨模块复用的共享逻辑。
 - `language/`
-  Language source assets. These are baked into runtime-facing files by `scripts/start.mjs`.
+  多语言源资产；这些内容会被 `scripts/start.mjs` 烘焙到运行态。
 - `.aios/`
-  Generated runtime artifacts produced by the language/application preparation flow.
+  由语言/应用准备流程产生的运行态中间产物。
 - `database/`
-  Local SQLite data and app-specific databases.
+  SQLite 数据库和应用相关数据。
 - `files/`
-  Runtime file outputs such as uploads, exports, and temp artifacts.
+  上传、导出、临时文件等运行时产物。
 
-## 3. Repository Layout
+## 3. 目录职责
 
-At a working level, the repository can be read as:
+从协作视角看，本仓库的关键目录职责如下：
 
 - `server/main/`
-  Core AIOS system backend.
+  AIOS 主系统后端。
 - `server/apps/`
-  Regular app backends.
+  常规应用后端。
 - `gui/src/`
-  Frontend source.
+  前端源码。
 - `language/`
-  Localization and app description sources.
+  语言与应用说明源。
 - `scripts/`
-  Development and preparation scripts.
+  运行准备、同步、开发辅助脚本。
 - `doc/`
-  architecture notes, prompt notes, product essays, and update records.
+  架构说明、提示词说明、演进记录、产品文档。
 - `skills/`
-  skill definitions and related assets.
+  技能与相关资产。
 
-If you are making a change, always determine first whether it belongs to:
+在修改代码前，必须先判断你的改动属于哪一层：
 
-- the **system kernel**,
-- a **system-level app**,
-- a **regular app**,
-- the **language source**, or
-- the **runtime/dev workflow**.
+- 主系统内核；
+- 系统级应用；
+- 常规应用；
+- 语言源；
+- 运行/开发流程。
 
-Do not treat all folders as interchangeable.
+不要把这些目录当成可以随意混放逻辑的容器。
 
-## 4. Source Repository vs Runtime Repository
+## 4. 源码仓库与运行仓库的边界
 
-This repository has a strict role separation.
+AIOS 当前采用严格的“源码仓库 / 运行仓库”分离模式：
 
-- `AIOS/` is the **development source repository**.
-- `../AIOS-dev/aios` is the **runtime/dev copy** used for actual execution and validation.
+- `AIOS/` 是**源码源头**
+- `../AIOS-dev/aios` 是**运行与验证用的副本**
 
-This is not optional workflow preference; it is an architectural constraint of the current toolchain.
+这不是偏好问题，而是当前工具链下的硬约束。
 
-### Why this separation exists
+### 为什么必须分离
 
-`package.json` contains `predev`, `prebuild`, and `prestart` hooks that execute:
+`package.json` 中的 `predev`、`prebuild`、`prestart` 都会执行：
 
 ```bash
 node scripts/start.mjs
 ```
 
-That preparation step bakes language placeholders and generated assets into the runtime tree. If you run normal npm scripts directly inside `AIOS/`, the source tree itself can be rewritten, producing noisy diffs and mixing generated artifacts with real source edits.
+这个步骤会把语言占位符、生成资源和运行态需要的内容烘焙进代码树。
 
-Therefore:
+如果直接在 `AIOS/` 里运行常规 npm 脚本，源码树本身会被批量改写，造成两个问题：
 
-- **edit source only in `AIOS/`;**
-- **run the system only from the runtime copy.**
+- diff 会被大量生成性改动污染；
+- 真正的源码修改会被运行态产物淹没。
 
-## 5. Standard Development Workflow
+因此必须遵守下面这条原则：
 
-The standard workflow is:
+> 只在 `AIOS/` 里改代码，只在 `../AIOS-dev/aios` 里运行系统。
 
-1. Edit code in `AIOS/`.
-2. From `AIOS/`, run:
+## 5. 标准开发流程
+
+标准流程如下：
+
+1. 在 `AIOS/` 中修改源码；
+2. 在 `AIOS/` 中执行：
 
 ```bash
 node scripts/dev.mjs
 ```
 
-3. The script syncs source into `../AIOS-dev/aios`.
-4. It then starts the runtime copy there.
+3. 脚本会把当前源码同步到 `../AIOS-dev/aios`；
+4. 同步完成后，在运行副本中启动系统。
 
 ### `scripts/dev.mjs`
 
-`AIOS/scripts/dev.mjs` is the approved entry point for development execution.
+`AIOS/scripts/dev.mjs` 是当前推荐且应被统一使用的开发启动入口。
 
-Supported usage:
+常见用法：
 
 - `node scripts/dev.mjs`
-  Sync source to runtime copy and start with default locale `zh`.
+  使用默认语言 `zh` 同步并启动。
 - `node scripts/dev.mjs en`
-  Sync source to runtime copy and start with locale `en`.
+  使用英文语言环境同步并启动。
 
-Behavior notes:
+当前行为：
 
-- it stops the known development ports before restart;
-- it syncs source to `../AIOS-dev/aios` using `rsync`;
-- it does **not** run `npm install`;
-- it does **not** clear database, files, or `.aios` state;
-- it assumes the runtime copy already has usable dependencies.
+- 会先停止已知开发端口上的旧进程；
+- 会用 `rsync` 将源码同步到 `../AIOS-dev/aios`；
+- 不会执行 `npm install`；
+- 不会清理数据库、文件目录或 `.aios` 状态；
+- 默认假设运行副本已经具备可用依赖。
 
-## 6. Non-Negotiable Working Rules for Agents
+## 6. 对 AI / Agent 的硬性要求
 
-Any AI agent, automation, or contributor working in this repository must follow these rules:
+所有在本仓库中工作的 AI、自动化脚本或协作者，都必须遵守下面的规则。
 
-### 6.1 Editing rules
+### 6.1 修改规则
 
-- Modify source files only in `AIOS/`.
-- Do not hand-edit code inside `../AIOS-dev/aios`.
-- Treat `../AIOS-dev/aios` as a runtime mirror, not a source repository.
+- 只修改 `AIOS/` 中的源码；
+- 不要手动修改 `../AIOS-dev/aios` 中的代码；
+- 把 `../AIOS-dev/aios` 视为运行副本，而不是开发源。
 
-### 6.2 Execution rules
+### 6.2 运行规则
 
-- Do **not** run `npm install`, `npm run dev`, `npm run build`, or `npm start` directly inside `AIOS/`.
-- Use `node scripts/dev.mjs` when you need a validated running environment.
-- If a task requires runtime verification, perform it in the synced runtime copy, not by turning the source tree into the runtime tree.
+- 不要在 `AIOS/` 中直接执行 `npm install`、`npm run dev`、`npm run build`、`npm start`；
+- 需要运行或验证时，统一使用 `node scripts/dev.mjs`；
+- 如果任务需要观察真实运行效果，应在同步后的运行副本中验证，而不是让源码仓库承担运行职责。
 
-### 6.3 Architecture rules
+### 6.3 架构规则
 
-- Before changing an app, read its corresponding `language/<lang>/apps/<appname>/APP.md`.
-- Do not place system-level logic in `server/apps/` when it belongs in `server/main/`.
-- Do not add prompt logic arbitrarily; keep prompt concerns in `server/main/prompt/`.
-- Do not add provider/model parsing logic in random locations; keep model parsing in `server/main/llm/`.
+- 修改某个应用前，先阅读其 `language/<lang>/apps/<appname>/APP.md`；
+- 属于系统级能力的逻辑，不要塞进 `server/apps/`，应放在 `server/main/`；
+- 提示词相关逻辑集中在 `server/main/prompt/`；
+- 模型接入、供应方兼容、流式解析相关逻辑集中在 `server/main/llm/`；
+- 不要把系统层、应用层、语言层的职责混写。
 
-### 6.4 Change classification rules
+### 6.4 变更分类规则
 
-When deciding whether restart/build is needed, use this model:
+判断一个改动需要重启什么时，可以按下面这套模型理解：
 
-- changes under `gui/` usually require frontend rebuild;
-- changes under `server/main/` or `server/shared/` usually require main server restart;
-- changes under `server/apps/` usually require app-service restart;
-- changes under `language/` usually require the preparation/bake pipeline to rerun.
+- 改了 `gui/`：通常需要前端重新构建或重新启动；
+- 改了 `server/main/` 或 `server/shared/`：通常需要主服务重启；
+- 改了 `server/apps/`：通常需要应用服务重启；
+- 改了 `language/`：通常需要重新执行烘焙/准备流程。
 
-## 7. Recommended Reading Order for New Contributors or Agents
+## 7. 新协作者 / 新 Agent 的推荐阅读顺序
 
-If you are new to the repository, read in this order:
+如果你第一次进入本仓库，建议按这个顺序建立理解：
 
 1. `README.md`
-   For product positioning and project intent.
+   先理解 AIOS 的产品定位与目标。
 2. `doc/update/2026-04-11-结构与语言体系重构.md`
-   For repository structure and runtime/source separation.
+   理解当前源码结构与运行结构的分离背景。
 3. `doc/prompt/INSTRUCTION.md`
-   For how AIOS itself models apps, prompts, and architecture constraints.
+   理解 AIOS 自身如何建模应用、提示词和系统约束。
 4. `language/<lang>/apps/<appname>/APP.md`
-   For any app you are about to modify.
+   在修改具体应用前再进入应用级细节。
 
-This order gives you product intent first, then structure, then implementation constraints, then app-level detail.
+这个顺序是：先产品，再结构，再约束，最后到具体应用。
 
-## 8. Summary
+## 8. 总结
 
-AIOS should be understood as:
+理解 AIOS，应该从这几个关键词出发：
 
-- an AI-native operating environment,
-- built around an agent kernel,
-- extended through agent-native and regular apps,
-- backed by a clear separation between source repository and runtime repository.
+- AI 原生操作环境；
+- 常驻 Agent 内核；
+- Agent 原生应用；
+- 系统层与应用层分离；
+- 源码仓库与运行仓库分离。
 
-This repository exists to maintain the **source architecture** cleanly.
+本仓库的职责，是保持 **AIOS 的源码架构清晰、稳定、可维护**。
 
-The most important operational principle is:
+最重要的协作原则只有一句话：
 
-> Develop in `AIOS/`, run in `../AIOS-dev/aios`, and keep generated/runtime behavior out of the source tree.
+> 在 `AIOS/` 中开发，在 `../AIOS-dev/aios` 中运行，并始终避免让运行态产物污染源码树。

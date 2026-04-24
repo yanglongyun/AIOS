@@ -2,6 +2,14 @@ import { tools } from "./tools.js";
 import { runTools } from "./runner.js";
 import { callLlmStream } from "../llm/stream/index.js";
 import { normalizeAgentMessages, normalizeChatOptions } from "./utils.js";
+
+const shouldReplayReasoning = (provider, apiUrl, model) => {
+  const providerId = String(provider || "").trim();
+  const url = String(apiUrl || "").trim();
+  const modelId = String(model || "").trim();
+  return providerId === "deepseek" || url.includes("api.deepseek.com") || modelId.startsWith("deepseek-");
+};
+
 const chat = async (messages, {
   provider,
   apiUrl,
@@ -16,6 +24,7 @@ const chat = async (messages, {
 } = {}) => {
   const opts = normalizeChatOptions({ maxRounds, enableToolResultTruncate, toolResultMaxChars });
   const workMessages = normalizeAgentMessages(messages);
+  const replayReasoning = shouldReplayReasoning(provider, apiUrl, model);
   let round = 0;
   while (round++ < opts.maxRounds) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -54,6 +63,10 @@ const chat = async (messages, {
     }
     const text = message.content ?? "";
     const replyMsg = { role: "assistant", content: text };
+    if (replayReasoning && message.reasoning_content !== undefined) {
+      replyMsg.reasoning_content = message.reasoning_content ?? "";
+    }
+    workMessages.push(replyMsg);
     send({ type: "done", message: replyMsg });
     return text;
   }

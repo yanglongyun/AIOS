@@ -1,11 +1,15 @@
 import { buildLlmHeaders } from "../common.js";
 import { parseJson } from "../../../shared/json/parse.js";
+import { deepseekParser } from "./parsers/deepseek.js";
 import { geminiParser } from "./parsers/gemini.js";
 import { kimiParser } from "./parsers/kimi.js";
 import { openaiParser } from "./parsers/openai.js";
 
 const pickParser = (provider, apiUrl) => {
   const url = String(apiUrl || "");
+  if (provider === "deepseek" || url.includes("api.deepseek.com")) {
+    return deepseekParser;
+  }
   if (provider === "kimi" || url.includes("moonshot.cn") || url.includes("kimi.com")) {
     return kimiParser;
   }

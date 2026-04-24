@@ -11,7 +11,7 @@ const PROVIDERS = [
     name: "OpenAI",
     group: "default",
     apiUrl: "https://api.openai.com/v1/chat/completions",
-    defaultModel: "gpt-5.4",
+    defaultModel: "gpt-5.5",
     keyUrl: "https://platform.openai.com/api-keys"
   },
   {
@@ -51,7 +51,7 @@ const PROVIDERS = [
     name: "DeepSeek",
     group: "default",
     apiUrl: "https://api.deepseek.com/chat/completions",
-    defaultModel: "deepseek-chat",
+    defaultModel: "deepseek-v4-flash",
     keyUrl: "https://platform.deepseek.com/api_keys"
   },
   {
@@ -83,7 +83,7 @@ const PROVIDERS = [
     name: "Kimi (月之暗面)",
     group: "default",
     apiUrl: "https://api.moonshot.cn/v1/chat/completions",
-    defaultModel: "kimi-k2.5",
+    defaultModel: "kimi-2.6",
     keyUrl: "https://platform.moonshot.cn/console/api-keys"
   },
   {

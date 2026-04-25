@@ -113,6 +113,14 @@
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </span>
               </button>
+              <button
+                type="button"
+                class="mt-2.5 inline-flex w-full items-center justify-center rounded-full border border-black/[0.12] bg-white/70 px-5 py-[10px] text-[13px] font-semibold text-black/60 transition-all hover:-translate-y-px hover:border-black/[0.22] hover:bg-white hover:text-[#222] disabled:cursor-not-allowed disabled:opacity-45 disabled:transform-none"
+                :disabled="pending"
+                @click="skipToDesktop"
+              >
+                {{ t.enter_desktop_later }}
+              </button>
             </div>
           </div>
 

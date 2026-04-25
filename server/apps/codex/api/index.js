@@ -147,8 +147,14 @@ const handleSend = async (req, res) => {
     res.end();
   };
   const onError = (err) => {
+    const message = err?.message || String(err);
+    appendEvent(ctx.id, "codex_event", {
+      type: "assistant",
+      message: { content: [{ type: "text", text: `Codex error: ${message}` }] }
+    });
+    eventCount += 1;
     touchConversation(ctx.id, eventCount);
-    write({ type: "error", message: err?.message || String(err) });
+    write({ type: "error", message });
     res.end();
   };
 

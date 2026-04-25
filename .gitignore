@@ -4,6 +4,7 @@ database/
 uploads/
 /files/
 ui/dist/
+gui/dist/
 .claude/
 think/
 .playwright-cli/

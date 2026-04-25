@@ -66,11 +66,11 @@ const translate = (evt, capture) => {
 };
 
 const MODE_ARGS = {
-  workspaceWrite: ["--sandbox", "workspace-write", "--ask-for-approval", "on-request"],
-  readOnly: ["--sandbox", "read-only", "--ask-for-approval", "untrusted"],
+  workspaceWrite: ["--sandbox", "workspace-write", "-c", "approval_policy=\"on-request\""],
+  readOnly: ["--sandbox", "read-only"],
   fullAuto: ["--full-auto"],
-  neverAsk: ["--sandbox", "workspace-write", "--ask-for-approval", "never"],
-  dangerFullAccess: ["--sandbox", "danger-full-access", "--ask-for-approval", "on-request"],
+  neverAsk: ["--sandbox", "workspace-write", "-c", "approval_policy=\"never\""],
+  dangerFullAccess: ["--sandbox", "danger-full-access", "-c", "approval_policy=\"on-request\""],
   bypassPermissions: ["--dangerously-bypass-approvals-and-sandbox"]
 };
 

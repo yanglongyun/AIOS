@@ -57,7 +57,7 @@ AIOS 采用分层结构，最重要的边界是：
   某个应用的前端实现。
 - `server/apps/<appname>/`
   某个常规应用的后端实现。
-- `language/<lang>/apps/<appname>/APP.md`
+- `apps/<lang>/<appname>/APP.md`
   该应用的说明文档与约束定义。
 
 需要注意的例外：
@@ -72,6 +72,8 @@ AIOS 采用分层结构，最重要的边界是：
   跨模块复用的共享逻辑。
 - `language/`
   多语言源资产；这些内容会被 `scripts/start.mjs` 烘焙到运行态。
+- `apps/`
+  顶级应用说明资产，按语言组织为 `apps/<lang>/<appname>/APP.md`。
 - `.aios/`
   由语言/应用准备流程产生的运行态中间产物。
 - `database/`
@@ -187,7 +189,7 @@ node scripts/dev.mjs
 
 ### 6.3 架构规则
 
-- 修改某个应用前，先阅读其 `language/<lang>/apps/<appname>/APP.md`；
+- 修改某个应用前，先阅读其 `apps/<lang>/<appname>/APP.md`；
 - 属于系统级能力的逻辑，不要塞进 `server/apps/`，应放在 `server/main/`；
 - 提示词相关逻辑集中在 `server/main/prompt/`；
 - 模型接入、供应方兼容、流式解析相关逻辑集中在 `server/main/llm/`；
@@ -212,7 +214,7 @@ node scripts/dev.mjs
    理解当前源码结构与运行结构的分离背景。
 3. `doc/prompt/INSTRUCTION.md`
    理解 AIOS 自身如何建模应用、提示词和系统约束。
-4. `language/<lang>/apps/<appname>/APP.md`
+4. `apps/<lang>/<appname>/APP.md`
    在修改具体应用前再进入应用级细节。
 
 这个顺序是：先产品，再结构，再约束，最后到具体应用。

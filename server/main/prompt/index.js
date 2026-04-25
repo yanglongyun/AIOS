@@ -44,7 +44,7 @@ const buildSystemPrompt = (currentConversationId = "") => {
     enableToolLoopLimit,
     toolMaxRounds
   });
-  prompt += appsSection();
+  prompt += appsSection(language);
   prompt += codingAgentsSection();
   prompt += skillsSection();
   prompt += chatsSection(currentConversationId);

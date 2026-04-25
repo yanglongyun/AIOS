@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { getClaudeStatus } from "../apps/claude-code/service/status.js";
 import { getCodexStatus } from "../apps/codex/service/status.js";
+import { getSettings } from "./service/settings/get.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, "..", "..");
@@ -24,8 +25,10 @@ const runGit = (args) => {
   };
 };
 
-const parseAppMeta = (appId) => {
+const parseAppMeta = (appId, locale) => {
+  const appDoc = path.join(ROOT_DIR, "apps", locale, appId, "APP.md");
   const serverDoc = path.join(ROOT_DIR, "server", "apps", appId, "APP.md");
+  const docPath = existsSync(appDoc) ? appDoc : serverDoc;
   const frontendDir = path.join(ROOT_DIR, "gui", "src", "apps", appId);
   const backendDir = path.join(ROOT_DIR, "server", "apps", appId);
   const meta = {
@@ -34,11 +37,11 @@ const parseAppMeta = (appId) => {
     description: "",
     backend: existsSync(backendDir) ? path.relative(ROOT_DIR, backendDir) : "",
     frontend: existsSync(frontendDir) ? path.relative(ROOT_DIR, frontendDir) : "",
-    doc: existsSync(serverDoc) ? path.relative(ROOT_DIR, serverDoc) : ""
+    doc: existsSync(docPath) ? path.relative(ROOT_DIR, docPath) : ""
   };
-  if (!existsSync(serverDoc)) return meta;
+  if (!existsSync(docPath)) return meta;
 
-  const text = readFileSync(serverDoc, "utf8");
+  const text = readFileSync(docPath, "utf8");
   const lines = text.split(/\r?\n/);
   if (lines[0]?.trim() !== "---") return meta;
   for (let i = 1; i < lines.length; i += 1) {
@@ -52,13 +55,12 @@ const parseAppMeta = (appId) => {
   return meta;
 };
 
-const listAppDocs = () => {
-  const appsRoot = path.join(ROOT_DIR, "server", "apps");
+const listAppDocs = (locale = "zh") => {
+  const appsRoot = path.join(ROOT_DIR, "apps", locale);
   if (!existsSync(appsRoot)) return [];
   return readdirSync(appsRoot)
-    .filter((name) => name !== "app_shared")
     .filter((name) => safeStat(path.join(appsRoot, name))?.isDirectory())
-    .map(parseAppMeta)
+    .map((name) => parseAppMeta(name, locale))
     .sort((a, b) => a.id.localeCompare(b.id));
 };
 
@@ -90,6 +92,8 @@ const API_GROUPS = [
 ];
 
 const buildWelcomeData = async (req) => {
+  const settings = getSettings();
+  const locale = settings.language || "zh";
   const gitBranch = runGit(["branch", "--show-current"]);
   const gitCommit = runGit(["rev-parse", "--short", "HEAD"]);
   const gitDirty = runGit(["status", "--porcelain"]);
@@ -129,10 +133,11 @@ const buildWelcomeData = async (req) => {
       appDatabases:    { path: "database/apps/",    note: "每个 app 各自的 SQLite" },
       files:           { path: "files/",            note: "用户文件 / 附件 / 上传" },
       skills:          { path: "skills/",           note: "可挂载的扩展能力" },
+      appDocs:         { path: `apps/${locale}/`,   note: "顶级应用说明资产,按语言组织" },
       language:        { path: "language/",         note: "zh/en 语言包,启动时烘焙进代码占位符" }
     },
     apiGroups: API_GROUPS,
-    apps: listAppDocs(),
+    apps: listAppDocs(locale),
     codingAgents: {
       claudeCode: {
         appId: "claude-code",
@@ -166,7 +171,7 @@ const buildWelcomeData = async (req) => {
     recommendedReading: [
       "server/main/prompt/INSTRUCTION.md  ← 硬规则",
       "server/main/prompt/codingAgents.js ← coding agent app 的调用约定",
-      "server/apps/<app>/APP.md           ← 各 app 的说明",
+      `apps/${locale}/<app>/APP.md          ← 各 app 的说明源`,
       "README.md / README_en.md           ← 项目理念"
     ]
   };

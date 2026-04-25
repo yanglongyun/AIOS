@@ -24,7 +24,7 @@ AIOS 当前结构分成 6 层：
 - `server/main/prompt/`：提示词层
 
 应用说明按语言存放在：
-- `language/<lang>/apps/<appname>/APP.md`
+- `apps/<lang>/<appname>/APP.md`
 
 顶层 `apps/` 不是源码目录，而是语言应用阶段生成出的运行态目录。
 不要把应用服务代码写回顶层 `apps/`。
@@ -38,7 +38,7 @@ AIOS 当前结构分成 6 层：
 ## 应用开发
 
 - 新建或修改应用前，先遵守系统提示词中的应用开发规则；如系统记忆中存在“应用开发指导”，以数据库里的该条记忆为准
-- 参考现有应用时，先读对应 `language/<lang>/apps/<appname>/APP.md`
+- 参考现有应用时，先读对应 `apps/<lang>/<appname>/APP.md`
 - 应用前端放在 `gui/src/apps/<appname>/`
 - 应用后端放在 `server/apps/<appname>/`
 - 系统级应用 `chat`、`settings`、`tasks` 的后端不在 `server/apps/`，而在主系统层

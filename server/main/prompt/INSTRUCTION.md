@@ -23,7 +23,7 @@
 - `server/apps/` — 应用后端
 - `server/shared/` — 后端共享代码
 - `server/main/agent/` / `server/main/llm/` / `server/main/prompt/` — agent / 模型 / 提示词
-- `apps/` — 应用说明文档目录（运行态；只存 markdown，不是源码，不要往里写 `.js`/`.vue`）
+- `apps/` — 顶级应用说明文档目录，按语言组织为 `apps/<lang>/<appname>/APP.md`（只存 markdown，不是源码，不要往里写 `.js`/`.vue`）
 - `database/` — SQLite 文件
 - `files/` — 工作文件
 - `skills/` — 本地技能
@@ -33,7 +33,7 @@
 新建或修改应用前：
 
 1. 先遵守本提示词里的应用开发规则；如果系统记忆里存在“应用开发指导”，按那条记忆执行。
-2. 参考现有应用时读 `apps/<appname>/APP.md` 和对应的 `server/apps/<appname>/`、`gui/src/apps/<appname>/`。
+2. 参考现有应用时读 `apps/<lang>/<appname>/APP.md` 和对应的 `server/apps/<appname>/`、`gui/src/apps/<appname>/`。
 3. 系统级应用 `chat` / `settings` / `tasks` 的后端不在 `server/apps/`，它们挂在 `server/main/` 下的 `api/`、`chat/`、`task/`、`agent/`、`llm/`、`prompt/` 里。建新 app 时不要学它们，它们是特例。
 
 ## 应用操控

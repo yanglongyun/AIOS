@@ -28,17 +28,26 @@ const parseReadme = (filePath) => {
     database: fmDatabase
   };
 };
-const apps = () => {
-  if (!existsSync(APPS_ROOT)) {
+const resolveAppsRoot = (locale = "zh") => {
+  const requested = join(APPS_ROOT, locale || "zh");
+  if (existsSync(requested)) return requested;
+  const zh = join(APPS_ROOT, "zh");
+  if (existsSync(zh)) return zh;
+  const en = join(APPS_ROOT, "en");
+  if (existsSync(en)) return en;
+  return null;
+};
+const apps = (locale = "zh") => {
+  const root = resolveAppsRoot(locale);
+  if (!root) {
     return `
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。`;
   }
   const list = [];
-  for (const name of readdirSync(APPS_ROOT)) {
-    if (name === "app_shared") continue;
-    const dir = join(APPS_ROOT, name);
+  for (const name of readdirSync(root)) {
+    const dir = join(root, name);
     let isDir = false;
     try {
       isDir = statSync(dir).isDirectory();
@@ -73,6 +82,7 @@ const apps = () => {
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。
+应用说明文档位于 \`apps/${locale}/<appname>/APP.md\`。
 ${lines.join("\n")}`;
 };
 export {

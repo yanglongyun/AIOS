@@ -10,7 +10,7 @@
  *   3. 否则把 language/<locale>/**\/*.json 的文案烘焙进源码：
  *      - 源码里 __T_<KEY_UPPER>__ 占位符被替换成真实文案
  *      - 支持双引号 / 单引号 / 反引号 / 裸文本四种上下文的正确转义
- *      - language/<locale>/apps/<app>/APP.md 覆盖到 server/apps/<app>/APP.md
+ *      - apps/<locale>/<app>/APP.md 覆盖到 server/apps/<app>/APP.md
  *   4. 在 projectRoot 下写 .aios/settings.json（locale + appliedAt）
  *
  * 本脚本自定位到 dirname($0)/..，可以跑在主仓 AIOS/ 或任何 AIOS/ 的副本里
@@ -38,6 +38,8 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const settingsDir = path.join(projectRoot, '.aios');
 const settingsFile = path.join(settingsDir, 'settings.json');
+const REPLACE_EXTS = new Set(['.js', '.mjs', '.ts', '.vue', '.json', '.md']);
+const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'apps', 'database', 'files', 'dist', 'language', 'scripts']);
 
 const readSettings = () => {
   if (!fs.existsSync(settingsFile)) return null;
@@ -59,13 +61,33 @@ const rawArgs = process.argv.slice(2);
 const force = rawArgs.includes('--force');
 const locale = rawArgs.find((a) => !a.startsWith('--')) || process.env.AIOS_LANG || 'zh';
 
+const hasUnresolvedTokens = () => {
+  const stack = [projectRoot];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        if (dir === projectRoot && EXCLUDE_DIRS.has(entry.name)) continue;
+        stack.push(path.join(dir, entry.name));
+        continue;
+      }
+      const file = path.join(dir, entry.name);
+      if (!REPLACE_EXTS.has(path.extname(file))) continue;
+      const src = fs.readFileSync(file, 'utf8');
+      if (/__T_[A-Z0-9_]+__/.test(src)) return true;
+    }
+  }
+  return false;
+};
+
 if (!force) {
   const current = readSettings()?.locale || null;
-  if (current === locale) {
+  if (current === locale && !hasUnresolvedTokens()) {
     console.log(`[start] language '${locale}' already applied, skipping`);
     process.exit(0);
-  }
-  if (current && current !== locale) {
+  } else if (current === locale) {
+    console.log(`[start] unresolved language tokens detected, re-applying '${locale}'`);
+  } else if (current && current !== locale) {
     console.log(`[start] locale change detected: '${current}' -> '${locale}', re-applying`);
   } else {
     console.log(`[start] first run, applying '${locale}'`);
@@ -79,9 +101,6 @@ if (!fs.existsSync(langDir)) {
   console.error(`[start] language pack not found: ${langDir}`);
   process.exit(1);
 }
-
-const REPLACE_EXTS = new Set(['.js', '.mjs', '.ts', '.vue', '.json', '.md']);
-const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'database', 'files', 'dist', 'language', 'scripts']);
 
 const walk = (dir, visit, { exclude = false, root = dir } = {}) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -163,7 +182,7 @@ walk(projectRoot, (file) => {
 }, { exclude: true });
 console.log(`[start] replaced ${replacedCount} tokens across ${replacedFiles} files`);
 
-const langAppsDir = path.join(langDir, 'apps');
+const langAppsDir = path.join(projectRoot, 'apps', locale);
 let mdCount = 0;
 if (fs.existsSync(langAppsDir)) {
   for (const appName of fs.readdirSync(langAppsDir)) {
@@ -175,7 +194,7 @@ if (fs.existsSync(langAppsDir)) {
     }
   }
 }
-console.log(`[start] mirrored ${mdCount} app docs from language pack`);
+console.log(`[start] mirrored ${mdCount} app docs from apps/${locale}`);
 
 let unresolvedCount = 0;
 const unresolvedFiles = new Set();

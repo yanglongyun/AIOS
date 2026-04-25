@@ -190,6 +190,13 @@
         </div>
       </div>
     </div>
+
+    <DirectoryPicker
+      :visible="directoryPickerOpen"
+      :initial-base="pickerInitialBase"
+      @close="directoryPickerOpen = false"
+      @select="selectDirectory"
+    />
   </div>
 </template>
 
@@ -197,6 +204,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, FolderOpen, Square } from 'lucide-vue-next';
+import DirectoryPicker from '../../../components/DirectoryPicker.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
@@ -219,6 +227,7 @@ const permissionMode = ref('default');
 const modeMenuOpen = ref(false);
 const editingPath = ref(false);
 const pathInput = ref(null);
+const directoryPickerOpen = ref(false);
 const startError = ref('');
 const starting = ref(false);
 
@@ -290,9 +299,34 @@ const activePermissionMode = computed(() => PERMISSION_MODES.find((item) => item
 
 const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'claude').map((e) => e.payload)));
 
+const expandCwd = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '/';
+  if (raw === '~') return homedirPrefix.value || '/';
+  if (raw.startsWith('~/')) return homedirPrefix.value ? `${homedirPrefix.value}/${raw.slice(2)}` : '/';
+  return raw.startsWith('/') ? raw : '/';
+};
+
+const pickerInitialBase = computed(() => expandCwd(cwd.value));
+
 const startEditPath = () => {
-  editingPath.value = true;
-  nextTick(() => pathInput.value?.focus());
+  directoryPickerOpen.value = true;
+  modeMenuOpen.value = false;
+};
+
+const selectDirectory = (path) => {
+  cwd.value = path;
+  directoryPickerOpen.value = false;
+  editingPath.value = false;
+};
+
+const loadFsRoots = async () => {
+  try {
+    const r = await fetch('/api/fs/roots');
+    const data = await r.json();
+    const home = (data.data || []).find((item) => item.id === 'home')?.base;
+    if (home) homedirPrefix.value = home;
+  } catch {}
 };
 
 const reset = () => {
@@ -563,7 +597,10 @@ function selectPermissionMode(mode) {
 watch(liveEvents, () => scrollToBottom(), { deep: true });
 watch(() => messages.value.length, () => scrollToBottom(false));
 
-onMounted(fetchConversations);
+onMounted(() => {
+  loadFsRoots();
+  fetchConversations();
+});
 </script>
 
 <style scoped>

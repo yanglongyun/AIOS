@@ -127,12 +127,6 @@
                   <FolderOpen class="h-3.5 w-3.5 shrink-0" />
                   <span class="cc-mono truncate">{{ currentSession?.cwd }}</span>
                 </div>
-                <button type="button"
-                  class="inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[11px] font-semibold cursor-pointer transition-all"
-                  style="color:rgba(160,120,80,0.8)"
-                  @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'"
-                  @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.8)'"
-                  @click="reset">__T_CODEX_CHAT_NEW_SESSION__</button>
               </template>
             </div>
 
@@ -185,6 +179,13 @@
         </div>
       </div>
     </div>
+
+    <DirectoryPicker
+      :visible="directoryPickerOpen"
+      :initial-base="pickerInitialBase"
+      @close="directoryPickerOpen = false"
+      @select="selectDirectory"
+    />
   </div>
 </template>
 
@@ -192,6 +193,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { marked } from 'marked';
 import { ArrowUp, ChevronRight, FolderOpen, Square } from 'lucide-vue-next';
+import DirectoryPicker from '../../../components/DirectoryPicker.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
@@ -214,6 +216,8 @@ const permissionMode = ref('workspaceWrite');
 const modeMenuOpen = ref(false);
 const editingPath = ref(false);
 const pathInput = ref(null);
+const directoryPickerOpen = ref(false);
+const homeDir = ref('');
 const startError = ref('');
 const starting = ref(false);
 
@@ -244,10 +248,20 @@ const formatTime = (iso) => {
 
 const displayCwd = (value) => {
   if (!value) return '';
-  const home = (typeof window !== 'undefined' && window?.__ENV__?.HOME) || '';
+  const home = homeDir.value || (typeof window !== 'undefined' && window?.__ENV__?.HOME) || '';
   if (home && value.startsWith(home)) return `~${value.slice(home.length)}`;
   return value;
 };
+
+const expandCwd = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '/';
+  if (raw === '~') return homeDir.value || '/';
+  if (raw.startsWith('~/')) return homeDir.value ? `${homeDir.value}/${raw.slice(2)}` : '/';
+  return raw.startsWith('/') ? raw : '/';
+};
+
+const pickerInitialBase = computed(() => expandCwd(cwd.value));
 
 const fetchConversations = async () => {
   try {
@@ -286,8 +300,23 @@ const activePermissionMode = computed(() => PERMISSION_MODES.find((item) => item
 const liveBlocks = computed(() => extractBlocks(liveEvents.value.filter((e) => e.kind === 'codex').map((e) => e.payload)));
 
 const startEditPath = () => {
-  editingPath.value = true;
-  nextTick(() => pathInput.value?.focus());
+  directoryPickerOpen.value = true;
+  modeMenuOpen.value = false;
+};
+
+const selectDirectory = (path) => {
+  cwd.value = path;
+  directoryPickerOpen.value = false;
+  editingPath.value = false;
+};
+
+const loadFsRoots = async () => {
+  try {
+    const r = await fetch('/api/fs/roots');
+    const data = await r.json();
+    const home = (data.data || []).find((item) => item.id === 'home')?.base;
+    if (home) homeDir.value = home;
+  } catch {}
 };
 
 const reset = () => {
@@ -492,7 +521,10 @@ function selectPermissionMode(mode) {
 watch(liveEvents, () => scrollToBottom(), { deep: true });
 watch(() => messages.value.length, () => scrollToBottom(false));
 
-onMounted(fetchConversations);
+onMounted(() => {
+  loadFsRoots();
+  fetchConversations();
+});
 </script>
 
 <style scoped>

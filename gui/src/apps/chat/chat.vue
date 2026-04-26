@@ -151,7 +151,20 @@ const LAST_CHAT_KEY = 'lastConversationId';
 
 const currentConversationId = ref(null);
 const messages = ref([]);
-const busy = ref(false);
+// busy 状态按 conversationId 跟踪：切走再切回时，能正确反映当前会话是否还在生成
+const busyConversations = ref(new Set());
+const isSending = ref(false); // 短期防止 handleSend 期间重复点击
+const busy = computed(() =>
+  isSending.value
+  || (!!currentConversationId.value && busyConversations.value.has(currentConversationId.value))
+);
+const setBusy = (cid, value) => {
+  if (!cid) return;
+  const next = new Set(busyConversations.value);
+  if (value) next.add(cid);
+  else next.delete(cid);
+  busyConversations.value = next;
+};
 const hasMore = ref(false);
 const loadedOffset = ref(0);
 const input = ref('');
@@ -271,7 +284,7 @@ const resetState = () => {
   hasMore.value = false;
   loadedOffset.value = 0;
   seenKeys.value = new Set();
-  busy.value = false;
+  // busy 不再在这里清：它现在按 conversationId 跟踪，新建会话本来就不在 set 里
   streamingAssistantKey.value = '';
 };
 
@@ -348,6 +361,8 @@ const openConversation = async (conversationId) => {
   hasMore.value = false;
   loadedOffset.value = 0;
   seenKeys.value = new Set();
+  // 切到新会话时丢弃旧 streaming 占位 key：让回到这个会话后的新 delta 重新建占位 message。
+  streamingAssistantKey.value = '';
   try {
     await loadChatPage(conversationId, 0, 20);
     scrollToBottom(false);
@@ -364,13 +379,13 @@ const openConversation = async (conversationId) => {
 const handleSend = async () => {
   const text = input.value.trim();
   if (!canSend.value || busy.value) return;
-  busy.value = true;
+  isSending.value = true;
 
   try {
     await ensureConnected();
   } catch {
     messages.value.push({ role: 'assistant', content: '__T_CHAT_WS_ERROR__' });
-    busy.value = false;
+    isSending.value = false;
     return;
   }
 
@@ -378,6 +393,7 @@ const handleSend = async () => {
   const outgoingAttachments = pendingFiles.value.map((f) => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
 
   ensureChatId(text).then((id) => {
+    setBusy(id, true);
     const key = `client:${Date.now()}:user`;
     seenKeys.value.add(key);
     messages.value.push({ role: 'user', content: text, attachments: outgoingAttachments, _key: key });
@@ -391,13 +407,15 @@ const handleSend = async () => {
     });
   }).catch((e) => {
     messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', e.message) });
-    busy.value = false;
+  }).finally(() => {
+    isSending.value = false;
   });
 };
 
 const stopBusy = () => {
-  send({ type: 'abort', conversationId: currentConversationId.value });
-  busy.value = false;
+  const cid = currentConversationId.value;
+  send({ type: 'abort', conversationId: cid });
+  setBusy(cid, false);
 };
 
 const newChat = () => {
@@ -577,6 +595,9 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('done', (data) => {
+    // busy 始终基于事件里的 conversationId 清理，不依赖 UI 当前选中的会话
+    setBusy(data.conversationId, false);
+    emit('history-change');
     if (data.conversationId !== currentConversationId.value) return;
     const key = streamingAssistantKey.value;
     if (key) {
@@ -596,8 +617,6 @@ onMounted(async () => {
       });
     }
     streamingAssistantKey.value = '';
-    busy.value = false;
-    emit('history-change');
   }));
 
   unsubs.push(on('tool_call', (data) => {
@@ -628,18 +647,18 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('error', (data) => {
+    setBusy(data.conversationId, false);
     if (data.conversationId !== currentConversationId.value) return;
     const key = `ws:${Date.now()}:error`;
     seenKeys.value.add(key);
     messages.value.push({ role: 'assistant', content: '__T_CHAT_SEND_ERROR__'.replace('{message}', data.content), _key: key });
     streamingAssistantKey.value = '';
-    busy.value = false;
   }));
 
   unsubs.push(on('aborted', (data) => {
+    setBusy(data.conversationId, false);
     if (data.conversationId !== currentConversationId.value) return;
     streamingAssistantKey.value = '';
-    busy.value = false;
   }));
 
 });

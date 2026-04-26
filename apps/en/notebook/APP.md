@@ -1,6 +1,6 @@
 ---
 name: notebook
-description: Lightweight note app that supports create, edit, search, and AI optimization.
+description: Lightweight note app that supports create, edit, search; the AI Assist button executes the user's instruction based on system context.
 backend: server/apps/notebook
 frontend: gui/src/apps/notebook
 database: database/apps/notebook.db
@@ -17,4 +17,4 @@ database: database/apps/notebook.db
   - `POST /apps/notebook/create`
   - `POST /apps/notebook/update`
   - `POST /apps/notebook/delete`
-  - `POST /apps/notebook/optimize`
+  - `POST /apps/notebook/assist`

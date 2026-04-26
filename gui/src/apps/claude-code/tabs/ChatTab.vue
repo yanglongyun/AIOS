@@ -168,7 +168,7 @@
                   >
                     <div class="flex items-center justify-between gap-3">
                       <span class="cc-mono text-[11px] font-semibold" style="color:#2a1f13">{{ mode.label }}</span>
-                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">当前</span>
+                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">__T_CLAUDE_PERMISSION_CURRENT__</span>
                     </div>
                     <div class="mt-1 text-[11px] leading-relaxed" style="color:#6b5a46">{{ mode.description }}</div>
                   </button>
@@ -214,12 +214,12 @@ const props = defineProps({
 });
 
 const PERMISSION_MODES = [
-  { id: 'default', label: 'default', description: '标准权限模式，按 Claude 默认策略请求权限。' },
-  { id: 'plan', label: 'plan', description: '优先规划与分析，适合先讨论方案再执行。' },
-  { id: 'auto', label: 'auto', description: '自动在不同权限策略间判断，减少手动干预。' },
-  { id: 'acceptEdits', label: 'acceptEdits', description: '偏向直接接受代码编辑类操作。' },
-  { id: 'dontAsk', label: 'dontAsk', description: '尽量不再询问确认，直接继续执行。' },
-  { id: 'bypassPermissions', label: 'bypassPermissions', description: '跳过权限检查，风险最高，只适合完全信任的环境。' }
+  { id: 'default', label: 'default', description: '__T_CLAUDE_PERMISSION_DEFAULT_DESC__' },
+  { id: 'plan', label: 'plan', description: '__T_CLAUDE_PERMISSION_PLAN_DESC__' },
+  { id: 'auto', label: 'auto', description: '__T_CLAUDE_PERMISSION_AUTO_DESC__' },
+  { id: 'acceptEdits', label: 'acceptEdits', description: '__T_CLAUDE_PERMISSION_ACCEPT_EDITS_DESC__' },
+  { id: 'dontAsk', label: 'dontAsk', description: '__T_CLAUDE_PERMISSION_DONT_ASK_DESC__' },
+  { id: 'bypassPermissions', label: 'bypassPermissions', description: '__T_CLAUDE_PERMISSION_BYPASS_DESC__' }
 ];
 
 const cwd = ref('~/Desktop');

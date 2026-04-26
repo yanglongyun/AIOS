@@ -4,7 +4,7 @@ import { listNotebook } from "../service/list.js";
 import { createNotebook } from "../service/create.js";
 import { updateNotebook } from "../service/update.js";
 import { deleteNotebook } from "../service/delete.js";
-import { optimizeNotebook } from "../service/optimize.js";
+import { assistNotebook } from "../service/assist.js";
 const handleNotebookApi = async (req, res, path) => {
   if (path === "/apps/notebook/list" && req.method === "GET") {
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -29,13 +29,11 @@ const handleNotebookApi = async (req, res, path) => {
     if (data?.error) return json(res, { error: data.error }, data.status || 400);
     return json(res, data);
   }
-  if (path === "/apps/notebook/optimize" && req.method === "POST") {
+  if (path === "/apps/notebook/assist" && req.method === "POST") {
     const body = await readBody(req);
-    const data = await optimizeNotebook({
+    const data = await assistNotebook({
       content: body.content,
-      prompt: body.prompt,
-      taskTitle: body.taskTitle,
-      req
+      taskTitle: body.taskTitle
     });
     if (data?.error) return json(res, { error: data.error }, data.status || 400);
     return json(res, data);

@@ -157,7 +157,7 @@
                   >
                     <div class="flex items-center justify-between gap-3">
                       <span class="cc-mono text-[11px] font-semibold" style="color:#2a1f13">{{ mode.label }}</span>
-                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">当前</span>
+                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">__T_CODEX_PERMISSION_CURRENT__</span>
                     </div>
                     <div class="mt-1 text-[11px] leading-relaxed" style="color:#6b5a46">{{ mode.description }}</div>
                   </button>
@@ -203,12 +203,12 @@ const props = defineProps({
 });
 
 const PERMISSION_MODES = [
-  { id: 'workspaceWrite', label: 'workspace', description: '可写工作区，按需请求确认，适合大多数改代码场景。' },
-  { id: 'readOnly', label: 'readOnly', description: '只读模式，优先查看和分析，不允许直接修改文件。' },
-  { id: 'fullAuto', label: 'fullAuto', description: '自动低摩擦执行，等价于 Codex 的 --full-auto。' },
-  { id: 'neverAsk', label: 'neverAsk', description: '工作区可写，且尽量不再询问确认。' },
-  { id: 'dangerFullAccess', label: 'danger', description: '全盘可写，风险很高，只适合完全受控环境。' },
-  { id: 'bypassPermissions', label: 'bypass', description: '跳过审批和沙箱，风险最高。' }
+  { id: 'workspaceWrite', label: 'workspace', description: '__T_CODEX_PERMISSION_WORKSPACE_DESC__' },
+  { id: 'readOnly', label: 'readOnly', description: '__T_CODEX_PERMISSION_READONLY_DESC__' },
+  { id: 'fullAuto', label: 'fullAuto', description: '__T_CODEX_PERMISSION_FULL_AUTO_DESC__' },
+  { id: 'neverAsk', label: 'neverAsk', description: '__T_CODEX_PERMISSION_NEVER_ASK_DESC__' },
+  { id: 'dangerFullAccess', label: 'danger', description: '__T_CODEX_PERMISSION_DANGER_DESC__' },
+  { id: 'bypassPermissions', label: 'bypass', description: '__T_CODEX_PERMISSION_BYPASS_DESC__' }
 ];
 
 const cwd = ref('~/Desktop');

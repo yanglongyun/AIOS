@@ -185,8 +185,37 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue';
 import { createProviderCatalog } from '../data/providers.js';
+import { LOCALE } from '../system/locale.js';
 
 const texts = {
+  en: {
+    welcome_title: 'Welcome to AIOS',
+    welcome_subline: 'Let AI become your operating system. Complete tasks, build your own apps, and create your personal digital workspace.',
+    get_key: 'Get API Key',
+    manual_panel_label: 'Model API',
+    agents_panel_label: 'Code Agent',
+    agents_intro: 'You can use external agents such as Claude Code, Codex, and Antigravity to drive AIOS.',
+    agents_message_hint: 'Message to send to the agent',
+    agents_message_template: 'Please read the content at the link below to understand the AIOS architecture, available apps, and invocation flow, then take over orchestration and help me complete the following tasks.\n\nhttp://127.0.0.1:9501/welcome',
+    enter_desktop_later: 'Set up later and enter desktop',
+    provider: 'Provider',
+    model_label: 'Model',
+    model_placeholder: 'gpt-5.4',
+    api_url: 'API URL',
+    api_key: 'API Key',
+    testing: 'Connecting...',
+    save_test: 'Connect model',
+    enter: 'Enter system',
+    err_key_required: 'Please enter an API Key',
+    err_url_required: 'Please enter an API URL',
+    err_model_required: 'Please enter a model name',
+    err_save: 'Failed to save model settings',
+    err_test: 'Model connection test failed',
+    default_intro: 'Hello, I am AIOS.\n\nNice to meet you. I am an AI-driven personal operating system that can build apps, run tasks, and manage information for you - all locally, all under your control.\n\nLet us begin.',
+    prompt_intro: 'Generate the initial welcome introduction.',
+    prompt_system: 'You are AIOS, an AI-driven personal operating system. This is the first launch after initialization. Write a short self-introduction in 3-5 natural sentences. Tell the user what you can do and what makes you different.',
+    prompt_user: 'Follow the requirements above and output only JSON: {"intro":"..."}'
+  },
   zh: {
     welcome_title: '欢迎使用 AIOS',
     welcome_subline: '让 AI 成为你的操作系统。完成各种任务，构建你的专属应用，创造你自己的数字空间。',
@@ -246,7 +275,7 @@ const model = ref({
   apiKey: ''
 });
 
-const t = computed(() => texts.zh);
+const t = computed(() => texts[LOCALE] || texts.zh);
 const currentKeyUrl = computed(() => getProvider(model.value.provider)?.keyUrl || '');
 
 const applyProviderDefault = () => {

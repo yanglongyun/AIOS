@@ -1,6 +1,6 @@
 ---
 name: notebook
-description: 轻量笔记应用，支持创建、编辑、搜索和 AI 优化。
+description: 轻量笔记应用，支持创建、编辑、搜索；AI 协助按钮基于系统上下文执行用户写下的指令。
 backend: server/apps/notebook
 frontend: gui/src/apps/notebook
 database: database/apps/notebook.db
@@ -17,4 +17,4 @@ database: database/apps/notebook.db
   - `POST /apps/notebook/create`
   - `POST /apps/notebook/update`
   - `POST /apps/notebook/delete`
-  - `POST /apps/notebook/optimize`
+  - `POST /apps/notebook/assist`

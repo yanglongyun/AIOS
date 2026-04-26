@@ -27,7 +27,7 @@
     :current-date="currentDate"
     :card-style="cardStyle"
     @back="backToList"
-    @optimize="startOptimize"
+    @assist="startAssist"
     @request-delete="showDeleteConfirm = true"
     @cancel-delete="showDeleteConfirm = false"
     @confirm-delete="confirmDelete"
@@ -165,39 +165,26 @@ const deleteNote = async (id) => {
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
 const goNextPage = async () => { if (page.value < totalPages.value && !loading.value) { page.value++; await fetchNotes(); } };
 
-const buildOptimizePrompt = (lang, content) => {
-  return [
-    '你是一位文字润色专家。',
-    '请润色以下文字，使其更通顺、更专业，同时保持原意不变。',
-    '只输出润色后的正文，不要解释、不要前缀、不要 markdown。',
-    '',
-    '原文：',
-    content
-  ].join('\n');
-};
-
-const startOptimize = async () => {
+const startAssist = async () => {
   const content = editorDraft.value.trim();
   if (!content || aiLoading.value) return;
   aiLoading.value = true;
   aiResult.value = '';
   aiDrawerOpen.value = true;
   try {
-    const lang = LOCALE;
-    const res = await fetch(`${API_BASE}/optimize`, {
+    const res = await fetch(`${API_BASE}/assist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         content,
-        taskTitle: '笔记润色',
-        prompt: buildOptimizePrompt(lang, content)
+        taskTitle: '__T_NOTEBOOK_DEFAULT_TASK_TITLE__'
       })
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
     aiResult.value = data.result || '';
   } catch (e) {
-    error.value = e.message || '__T_NOTEBOOK_OPTIMIZE_FAILED__';
+    error.value = e.message || '__T_NOTEBOOK_ASSIST_FAILED__';
     aiDrawerOpen.value = false;
   } finally {
     aiLoading.value = false;

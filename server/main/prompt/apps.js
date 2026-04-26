@@ -39,8 +39,12 @@ const resolveAppsRoot = (locale = "zh") => {
 };
 const apps = (locale = "zh") => {
   const root = resolveAppsRoot(locale);
+  const isEnglish = locale === "en";
   if (!root) {
-    return `
+    return isEnglish ? `
+
+## Apps
+You can help the user build apps, use apps, and manage apps.` : `
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。`;
@@ -67,7 +71,10 @@ const apps = (locale = "zh") => {
   }
   list.sort((a, b) => a.id.localeCompare(b.id));
   if (!Array.isArray(list) || list.length === 0) {
-    return `
+    return isEnglish ? `
+
+## Apps
+You can help the user build apps, use apps, and manage apps.` : `
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。`;
@@ -78,7 +85,12 @@ const apps = (locale = "zh") => {
     const database = app.database ? ` | database: ${app.database}` : "";
     return `${i + 1}. ${app.id} | ${app.title}${summary}${backend}${database}`;
   });
-  return `
+  return isEnglish ? `
+
+## Apps
+You can help the user build apps, use apps, and manage apps.
+App documentation is located at \`apps/${locale}/<appname>/APP.md\`.
+${lines.join("\n")}` : `
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。

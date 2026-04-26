@@ -27,7 +27,7 @@
         <div class="ai-drawer overflow-hidden" :class="{ show: aiDrawerOpen }">
           <div class="ai-well mx-3 mt-2.5 flex flex-col overflow-hidden rounded">
             <div class="flex items-center border-b border-white/5 px-2.5 py-1.5">
-              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">__T_NOTEBOOK_AI_POLISH__</div>
+              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">__T_NOTEBOOK_AI_ASSIST__</div>
               <div v-if="aiResult && !aiLoading" class="ml-auto flex items-center gap-1.5">
                 <button class="cursor-pointer rounded border-none bg-[linear-gradient(180deg,#4a7a40,#306828)] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[#d0e8c0] [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_2px_0_rgba(20,50,10,0.5),inset_0_1px_0_rgba(200,255,200,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a8a50,#407838)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('apply-ai')">__T_NOTEBOOK_APPLY_ACTION__</button>
                 <button class="cursor-pointer rounded border-none bg-white/[0.06] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[rgba(200,160,100,0.5)] shadow-[0_2px_0_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.1] hover:text-[rgba(200,160,100,0.8)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('close-ai')">__T_NOTEBOOK_CLOSE_ACTION__</button>
@@ -43,7 +43,7 @@
 
         <div class="tray-buttons flex shrink-0 items-stretch gap-2.5 px-4 py-2.5 pb-3.5">
           <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('back')">__T_NOTEBOOK_BACK__</button>
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="$emit('optimize')">__T_NOTEBOOK_OPTIMIZE_ACTION__</button>
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="$emit('assist')">__T_NOTEBOOK_ASSIST_ACTION__</button>
           <button v-if="editingNoteId" class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('request-delete')">__T_NOTEBOOK_DELETE_ACTION__</button>
           <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#604010] bg-[linear-gradient(180deg,#d0a848,#a88028,#886818)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_3px_0_rgba(80,50,10,0.6),inset_0_1px_1px_rgba(255,255,200,0.25)] transition-all hover:bg-[linear-gradient(180deg,#e0b858,#b89038,#988028)] active:top-[3px] active:shadow-[0_0_0_rgba(80,50,10,0.6),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="saving || !editorDraft.trim()" @click="$emit('save')">
             {{ saving ? '...' : '__T_NOTEBOOK_SAVE_ACTION__' }}
@@ -85,7 +85,7 @@ const props = defineProps({
 
 defineEmits([
   'back',
-  'optimize',
+  'assist',
   'request-delete',
   'cancel-delete',
   'confirm-delete',

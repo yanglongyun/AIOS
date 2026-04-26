@@ -1,7 +1,7 @@
 <template>
   <div class="cc-chart-card" :style="compact ? 'padding:12px 14px' : ''">
     <div class="flex items-center gap-2">
-      <span class="text-[14px]">🧠</span>
+      <span class="text-[14px]">🐙</span>
       <span class="text-[13px] font-bold cc-mono">{{ file.name }}</span>
       <span class="text-[10.5px]" style="color:#8a7965">{{ formatNum(file.size) }}B · {{ formatDate(file.modified) }}</span>
       <div class="ml-auto flex items-center gap-1">

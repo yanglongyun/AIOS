@@ -2,7 +2,7 @@
   <div class="h-full overflow-y-auto cc-thin-scroll">
     <div class="mx-auto max-w-[720px] px-8 py-12 space-y-8">
       <div>
-        <div class="text-[40px] mb-3">🧠</div>
+        <div class="text-[40px] mb-3">🐙</div>
         <div class="text-[24px] font-bold">__T_CLAUDE_ONBOARDING_TITLE__</div>
         <p class="mt-3 text-[13.5px] leading-[1.7]" style="color:#4a3826">
           __T_CLAUDE_ONBOARDING_DESC__

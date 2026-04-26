@@ -55,7 +55,7 @@ import Onboarding from './Onboarding.vue';
 const tabs = [
   { id: 'chat',     icon: '💬', label: '__T_CLAUDE_TAB_CHAT__' },
   { id: 'projects', icon: '🗂', label: '__T_CLAUDE_TAB_PROJECTS__' },
-  { id: 'memory',   icon: '🧠', label: 'CLAUDE.md' },
+  { id: 'memory',   icon: '🐙', label: 'CLAUDE.md' },
   { id: 'plans',    icon: '🗺', label: '__T_CLAUDE_TAB_PLANS__' },
   { id: 'history',  icon: '🕐', label: '__T_CLAUDE_TAB_HISTORY__' },
   { id: 'skills',   icon: '✨', label: '__T_CLAUDE_TAB_SKILLS__' },

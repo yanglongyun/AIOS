@@ -34,7 +34,7 @@
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" style="scrollbar-color:rgba(160,120,80,0.2) transparent">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
           <div v-if="!messages.length && !liveBlocks.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
-            <div class="mb-4 text-[40px]">🧠</div>
+            <div class="mb-4 text-[40px]">🐙</div>
             <h2 class="mb-2 text-xl font-bold" style="color:#2a1f13">Claude Code</h2>
             <p class="max-w-[320px] text-[13px] leading-relaxed" style="color:rgba(0,0,0,0.4)">
               __T_CLAUDE_CHAT_EMPTY__

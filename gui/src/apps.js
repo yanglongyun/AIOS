@@ -69,7 +69,7 @@ const apps = [
   {
     id: 'claude-code',
     name: '__T_APP_SIDEBAR_CLAUDE_CODE__',
-    icon: '\u{1F9E0}',
+    icon: '\u{1F419}',
     desktopLoad: () => import('./apps/claude-code/index.vue'),
     defaultDesktopWindowSize: { w: 1100, h: 720 }
   },

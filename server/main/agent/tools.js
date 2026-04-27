@@ -3,25 +3,25 @@ export const tools = [
     type: 'function',
     function: {
       name: 'shell',
-      description: '执行 shell 命令，可以运行任意 shell 命令并返回输出结果',
+      description: 'Execute a shell command and return its output.',
       parameters: {
         type: 'object',
         properties: {
           command: {
             type: 'string',
-            description: '要执行的 shell 命令'
+            description: 'The shell command to execute.'
           },
           reason: {
             type: 'string',
-            description: '简要说明执行此命令的原因'
+            description: 'A brief reason for running this command.'
           },
           timeout: {
             type: 'number',
-            description: '超时时间（秒），默认 30。服务端会裁剪到 [1, 300] 范围。对于耗时操作（安装依赖、构建、测试、抓网页等）应显式设置更大的值。'
+            description: 'Timeout in seconds. Defaults to 30. The server clamps this to [1, 300]. Use a larger value for long-running work such as installing dependencies, builds, tests, or web scraping.'
           },
           cwd: {
             type: 'string',
-            description: '可选工作目录，默认使用当前进程工作目录'
+            description: 'Optional working directory. Defaults to the current process working directory.'
           }
         },
         required: ['command', 'reason']

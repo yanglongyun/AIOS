@@ -5,7 +5,7 @@ const skills = () => {
   return `
 
 ## Skills
-以下是可用技能的完整指令，直接按说明使用即可。
+The following are the full instructions for available skills. Use them directly as written.
 
 ${sections.join("\n\n---\n\n")}`;
 };

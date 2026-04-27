@@ -18,7 +18,7 @@ const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
       const label = String(item.label || "").trim();
       if (label) {
         validAttachments.push({ type: "context", scene: item.scene, label });
-        contextParts.push(`[当前应用: ${label}]`);
+        contextParts.push(`[Current app: ${label}]`);
       }
       continue;
     }
@@ -36,7 +36,7 @@ const injectAttachmentsMessage = (messages = [], rawAttachments = []) => {
   const parts = [];
   if (contextParts.length) parts.push(contextParts.join("\n"));
   if (fileParts.length) {
-    parts.push(["【附件文件路径】", ...fileParts, "请先读取这些文件内容，再结合用户问题回答。"].join("\n"));
+    parts.push(["[Attachment file paths]", ...fileParts, "Read these files first, then answer the user's question with that context."].join("\n"));
   }
   if (parts.length) {
     const lastIndex = list.length - 1;

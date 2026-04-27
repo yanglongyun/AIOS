@@ -28,17 +28,13 @@ const parseReadme = (filePath) => {
     database: fmDatabase
   };
 };
-const apps = (locale = "zh") => {
+const apps = () => {
   const root = existsSync(APPS_ROOT) ? APPS_ROOT : null;
-  const isEnglish = locale === "en";
   if (!root) {
-    return isEnglish ? `
+    return `
 
 ## Apps
-You can help the user build apps, use apps, and manage apps.` : `
-
-## 应用目录
-你可以帮助用户构建应用、使用应用、管理应用。`;
+You can help the user build apps, use apps, and manage apps.`;
   }
   const list = [];
   for (const name of readdirSync(root)) {
@@ -62,13 +58,10 @@ You can help the user build apps, use apps, and manage apps.` : `
   }
   list.sort((a, b) => a.id.localeCompare(b.id));
   if (!Array.isArray(list) || list.length === 0) {
-    return isEnglish ? `
+    return `
 
 ## Apps
-You can help the user build apps, use apps, and manage apps.` : `
-
-## 应用目录
-你可以帮助用户构建应用、使用应用、管理应用。`;
+You can help the user build apps, use apps, and manage apps.`;
   }
   const lines = list.map((app, i) => {
     const summary = app.summary ? ` - ${app.summary}` : "";
@@ -76,16 +69,11 @@ You can help the user build apps, use apps, and manage apps.` : `
     const database = app.database ? ` | database: ${app.database}` : "";
     return `${i + 1}. ${app.id} | ${app.title}${summary}${backend}${database}`;
   });
-  return isEnglish ? `
+  return `
 
 ## Apps
 You can help the user build apps, use apps, and manage apps.
 Runtime app documentation is located at \`apps/<appname>/APP.md\`.
-${lines.join("\n")}` : `
-
-## 应用目录
-你可以帮助用户构建应用、使用应用、管理应用。
-运行态应用说明文档位于 \`apps/<appname>/APP.md\`。
 ${lines.join("\n")}`;
 };
 export {

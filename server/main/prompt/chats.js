@@ -15,17 +15,17 @@ const chats = (currentConversationId) => {
   const currentId = String(currentConversationId || "").trim();
   const list = recentChats();
   if (!currentId && (!Array.isArray(list) || list.length === 0)) return "";
-  const recentLines = list.slice(0, 3).map((c, i) => `${i + 1}. ${c.title || "未命名"} ｜ ${String(c.description || "").slice(0, 100)}`);
+  const recentLines = list.slice(0, 3).map((c, i) => `${i + 1}. ${c.title || "Untitled"} | ${String(c.description || "").slice(0, 100)}`);
   let block = `
 
-## 会话上下文`;
+## Conversation Context`;
   if (currentId) {
     block += `
-- 当前会话ID：${currentId}`;
+- Current conversation ID: ${currentId}`;
   }
   if (recentLines.length) {
     block += `
-- 最近 3 次会话（标题｜描述前100字）：
+- Last 3 conversations (title | first 100 chars of description):
 ${recentLines.join("\n")}`;
   }
   return block;

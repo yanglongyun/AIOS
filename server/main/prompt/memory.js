@@ -22,12 +22,12 @@ const memory = () => {
     parts.push(pinned.map((r) => `### ${r.title}\n${r.content}`).join("\n\n"));
   }
   if (enabled.length) {
-    parts.push("以下是已星标的记忆（仅展示标题与描述，需要正文请调用 `/api/memory/get?id=<id>`）：\n" + enabled.map((r) => {
+    parts.push("Pinned memories are listed below with only title and description. If full content is needed, call `/api/memory/get?id=<id>`:\n" + enabled.map((r) => {
       const desc = r.description ? ` — ${r.description}` : "";
       return `- [id=${r.id ?? "?"}] ${r.title}${desc}`;
     }).join("\n"));
   }
-  return `\n\n## 记忆\n${parts.join("\n\n")}`;
+  return `\n\n## Memory\n${parts.join("\n\n")}`;
 };
 
 export { memory };

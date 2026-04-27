@@ -38,7 +38,7 @@ const runInstantTask = async ({
         role: "user",
         content: schema ? `${prompt}
 
-输出必须是 JSON，对应 schema：${JSON.stringify(schema)}` : prompt
+Output must be JSON matching this schema: ${JSON.stringify(schema)}` : prompt
       }
     ]
   };

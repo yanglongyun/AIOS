@@ -5,18 +5,12 @@
   "type": "module",
   "main": "server/main/index.js",
   "scripts": {
-    "predev": "node scripts/start.mjs",
-    "dev": "node server/main/index.js & node server/apps/index.js & vite --config gui/vite.config.js gui",
-    "prebuild": "node scripts/start.mjs",
-    "build": "vite build --config gui/vite.config.js gui",
-    "prestart": "node scripts/start.mjs",
+    "dev": "node scripts/start.mjs en --force && node server/main/index.js & node server/apps/index.js & vite --config gui/vite.config.js gui",
+    "dev:zh": "node scripts/start.mjs zh --force && node server/main/index.js & node server/apps/index.js & vite --config gui/vite.config.js gui",
+    "build": "node scripts/start.mjs en --force && vite build --config gui/vite.config.js gui",
+    "build:zh": "node scripts/start.mjs zh --force && vite build --config gui/vite.config.js gui",
     "start": "node server/main/index.js",
-    "prestart:apps": "node scripts/start.mjs",
-    "start:apps": "node server/apps/index.js",
-    "lang:apply": "node scripts/start.mjs --force",
-    "lang:reset": "rm -rf .aios",
-    "docker": "docker compose -f doc/docker/docker-compose.yml up -d --build",
-    "docker:stop": "docker compose -f doc/docker/docker-compose.yml down"
+    "start:apps": "node server/apps/index.js"
   },
   "keywords": [],
   "author": "",

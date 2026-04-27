@@ -10,7 +10,9 @@
  *   3. 否则把 language/<locale>/**\/*.json 的文案烘焙进源码：
  *      - 源码里 __T_<KEY_UPPER>__ 占位符被替换成真实文案
  *      - 支持双引号 / 单引号 / 反引号 / 裸文本四种上下文的正确转义
- *      - apps/<locale>/<app>/APP.md 覆盖到 server/apps/<app>/APP.md
+ *      - language/<locale>/apps/<app>/APP.md 烘焙到 apps/<app>/APP.md
+ *      - apps/<app>/APP.md 覆盖到 server/apps/<app>/APP.md
+ *      - language/<locale>/AGENTS.md / CLAUDE.md 烘焙到项目根目录
  *   4. 在 projectRoot 下写 .aios/settings.json（locale + appliedAt）
  *
  * 本脚本自定位到 dirname($0)/..，可以跑在主仓 AIOS/ 或任何 AIOS/ 的副本里
@@ -39,7 +41,8 @@ const projectRoot = path.resolve(__dirname, '..');
 const settingsDir = path.join(projectRoot, '.aios');
 const settingsFile = path.join(settingsDir, 'settings.json');
 const REPLACE_EXTS = new Set(['.js', '.mjs', '.ts', '.vue', '.json', '.md']);
-const EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'apps', 'database', 'files', 'dist', 'language', 'scripts']);
+const ROOT_EXCLUDE_DIRS = new Set(['apps', 'database', 'files', 'language', 'scripts']);
+const ALWAYS_EXCLUDE_DIRS = new Set(['node_modules', '.git', '.aios', 'dist']);
 
 const readSettings = () => {
   if (!fs.existsSync(settingsFile)) return null;
@@ -67,7 +70,8 @@ const hasUnresolvedTokens = () => {
     const dir = stack.pop();
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
-        if (dir === projectRoot && EXCLUDE_DIRS.has(entry.name)) continue;
+        if (ALWAYS_EXCLUDE_DIRS.has(entry.name)) continue;
+        if (dir === projectRoot && ROOT_EXCLUDE_DIRS.has(entry.name)) continue;
         stack.push(path.join(dir, entry.name));
         continue;
       }
@@ -105,7 +109,8 @@ if (!fs.existsSync(langDir)) {
 const walk = (dir, visit, { exclude = false, root = dir } = {}) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      if (exclude && dir === root && EXCLUDE_DIRS.has(entry.name)) continue;
+      if (exclude && ALWAYS_EXCLUDE_DIRS.has(entry.name)) continue;
+      if (exclude && dir === root && ROOT_EXCLUDE_DIRS.has(entry.name)) continue;
       walk(path.join(dir, entry.name), visit, { exclude, root });
     } else {
       visit(path.join(dir, entry.name));
@@ -182,28 +187,56 @@ walk(projectRoot, (file) => {
 }, { exclude: true });
 console.log(`[start] replaced ${replacedCount} tokens across ${replacedFiles} files`);
 
-const langAppsDir = path.join(projectRoot, 'apps', locale);
+const removeDirContents = (dir) => {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir)) {
+    fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
+  }
+};
+
+const copyDir = (src, dst) => {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const dstPath = path.join(dst, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(srcPath, dstPath);
+    } else if (entry.isFile()) {
+      fs.copyFileSync(srcPath, dstPath);
+    }
+  }
+};
+
+const langAppsDir = path.join(langDir, 'apps');
+const runtimeAppsDir = path.join(projectRoot, 'apps');
 let mdCount = 0;
 if (fs.existsSync(langAppsDir)) {
+  fs.mkdirSync(runtimeAppsDir, { recursive: true });
+  removeDirContents(runtimeAppsDir);
+  copyDir(langAppsDir, runtimeAppsDir);
   for (const appName of fs.readdirSync(langAppsDir)) {
-    const srcMd = path.join(langAppsDir, appName, 'APP.md');
+    const srcMd = path.join(runtimeAppsDir, appName, 'APP.md');
     const dstMd = path.join(projectRoot, 'server', 'apps', appName, 'APP.md');
     if (fs.existsSync(srcMd) && fs.existsSync(path.dirname(dstMd))) {
       fs.copyFileSync(srcMd, dstMd);
       mdCount++;
     }
   }
-}
-console.log(`[start] mirrored ${mdCount} app docs from apps/${locale}`);
-
-// Bake the runtime AGENTS.md (system prompt) for the active locale.
-const srcAgents = path.join(projectRoot, 'language', locale, 'AGENTS.md');
-const dstAgents = path.join(projectRoot, 'AGENTS.md');
-if (fs.existsSync(srcAgents)) {
-  fs.copyFileSync(srcAgents, dstAgents);
-  console.log(`[start] mirrored AGENTS.md from language/${locale}`);
 } else {
-  console.warn(`[start] missing language/${locale}/AGENTS.md, root AGENTS.md left untouched`);
+  console.warn(`[start] missing language/${locale}/apps, root apps left untouched`);
+}
+console.log(`[start] baked apps from language/${locale}/apps and mirrored ${mdCount} server app docs`);
+
+// Bake runtime root markdown files for the active locale.
+for (const fileName of ['AGENTS.md', 'CLAUDE.md']) {
+  const srcMd = path.join(projectRoot, 'language', locale, fileName);
+  const dstMd = path.join(projectRoot, fileName);
+  if (fs.existsSync(srcMd)) {
+    fs.copyFileSync(srcMd, dstMd);
+    console.log(`[start] mirrored ${fileName} from language/${locale}`);
+  } else {
+    console.warn(`[start] missing language/${locale}/${fileName}, root ${fileName} left untouched`);
+  }
 }
 
 let unresolvedCount = 0;

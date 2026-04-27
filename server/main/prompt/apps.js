@@ -28,17 +28,8 @@ const parseReadme = (filePath) => {
     database: fmDatabase
   };
 };
-const resolveAppsRoot = (locale = "zh") => {
-  const requested = join(APPS_ROOT, locale || "zh");
-  if (existsSync(requested)) return requested;
-  const zh = join(APPS_ROOT, "zh");
-  if (existsSync(zh)) return zh;
-  const en = join(APPS_ROOT, "en");
-  if (existsSync(en)) return en;
-  return null;
-};
 const apps = (locale = "zh") => {
-  const root = resolveAppsRoot(locale);
+  const root = existsSync(APPS_ROOT) ? APPS_ROOT : null;
   const isEnglish = locale === "en";
   if (!root) {
     return isEnglish ? `
@@ -89,12 +80,12 @@ You can help the user build apps, use apps, and manage apps.` : `
 
 ## Apps
 You can help the user build apps, use apps, and manage apps.
-App documentation is located at \`apps/${locale}/<appname>/APP.md\`.
+Runtime app documentation is located at \`apps/<appname>/APP.md\`.
 ${lines.join("\n")}` : `
 
 ## 应用目录
 你可以帮助用户构建应用、使用应用、管理应用。
-应用说明文档位于 \`apps/${locale}/<appname>/APP.md\`。
+运行态应用说明文档位于 \`apps/<appname>/APP.md\`。
 ${lines.join("\n")}`;
 };
 export {

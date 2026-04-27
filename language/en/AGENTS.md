@@ -23,7 +23,8 @@ Directory layout:
 - `server/apps/` - app backend services.
 - `server/shared/` - shared backend code.
 - `server/main/agent/`, `server/main/llm/`, `server/main/prompt/` - agent, model, and prompt layers.
-- `apps/` - top-level app documentation by language: `apps/<lang>/<appname>/APP.md`. Markdown only, not runtime source code.
+- `language/<lang>/apps/` - source app documentation assets by language.
+- `apps/` - baked app documentation for the active language: `apps/<appname>/APP.md`. Markdown only, not runtime source code.
 - `language/` - localized source assets (UI strings, seed content, this AGENTS.md). Re-bake after changes.
 - `database/` - SQLite databases.
 - `files/` - working files.
@@ -34,7 +35,7 @@ Directory layout:
 Before creating or modifying an app:
 
 1. Follow these app development rules. If a system memory named "App Creation Guide" exists, follow it as well (see Memory System below for how to read its full body).
-2. Read `apps/<lang>/<appname>/APP.md` and the corresponding `server/apps/<appname>/` and `gui/src/apps/<appname>/`.
+2. Read runtime `apps/<appname>/APP.md`; edit documentation source in `language/<lang>/apps/<appname>/APP.md`; read code in the corresponding `server/apps/<appname>/` and `gui/src/apps/<appname>/`.
 3. System apps `chat`, `settings`, and `tasks` are special. Their backend is under `server/main/`, not `server/apps/`. Do not model new apps after those special cases.
 
 ## App Operations

@@ -26,7 +26,7 @@ const runGit = (args) => {
 };
 
 const parseAppMeta = (appId, locale) => {
-  const appDoc = path.join(ROOT_DIR, "apps", locale, appId, "APP.md");
+  const appDoc = path.join(ROOT_DIR, "apps", appId, "APP.md");
   const serverDoc = path.join(ROOT_DIR, "server", "apps", appId, "APP.md");
   const docPath = existsSync(appDoc) ? appDoc : serverDoc;
   const frontendDir = path.join(ROOT_DIR, "gui", "src", "apps", appId);
@@ -56,7 +56,7 @@ const parseAppMeta = (appId, locale) => {
 };
 
 const listAppDocs = (locale = "zh") => {
-  const appsRoot = path.join(ROOT_DIR, "apps", locale);
+  const appsRoot = path.join(ROOT_DIR, "apps");
   if (!existsSync(appsRoot)) return [];
   return readdirSync(appsRoot)
     .filter((name) => safeStat(path.join(appsRoot, name))?.isDirectory())
@@ -133,7 +133,7 @@ const buildWelcomeData = async (req) => {
       appDatabases:    { path: "database/apps/",    note: "每个 app 各自的 SQLite" },
       files:           { path: "files/",            note: "用户文件 / 附件 / 上传" },
       skills:          { path: "skills/",           note: "可挂载的扩展能力" },
-      appDocs:         { path: `apps/${locale}/`,   note: "顶级应用说明资产,按语言组织" },
+      appDocs:         { path: "apps/",             note: "当前语言烘焙后的应用说明资产" },
       language:        { path: "language/",         note: "zh/en 语言包,启动时烘焙进代码占位符" }
     },
     apiGroups: API_GROUPS,
@@ -171,7 +171,7 @@ const buildWelcomeData = async (req) => {
     recommendedReading: [
       "server/main/prompt/INSTRUCTION.md  ← 硬规则",
       "server/main/prompt/codingAgents.js ← coding agent app 的调用约定",
-      `apps/${locale}/<app>/APP.md          ← 各 app 的说明源`,
+      "apps/<app>/APP.md                    ← 当前语言烘焙后的 app 说明",
       "README.md / README_en.md           ← 项目理念"
     ]
   };

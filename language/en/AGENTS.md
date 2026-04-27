@@ -56,14 +56,17 @@ Use clear task titles so the task center can display them well.
 
 Memories are stored in the `memories` table and managed through `/api/memory/*`.
 
-Injection rules:
+Memories have three tiers (from highest to lowest visibility):
 
-- `pinned=1`: the **full content** is auto-injected into the system prompt (must-read).
-- `enabled=1 && pinned=0`: **only the title and description** are injected. To get the body, call `/api/memory/get?id=<id>` or `/api/memory/list`.
-- `enabled=0`: paused but not deleted.
-- `creator` marks the source: `user`, `ai`, or `system`.
+| Tier | DB representation | What you can see |
+|---|---|---|
+| **Pinned** (必读) | `pinned=1, enabled=1` | The **full content** is auto-injected into every conversation. |
+| **Starred** (星标) | `pinned=0, enabled=1` | Only the **title and description** are injected. To read the body, call `/api/memory/get?id=<id>`. |
+| **Stored** (已存) | `enabled=0` | Not injected at all, completely invisible to you. Effectively archived. |
 
-So when the system prompt shows an "enabled memories" list, that is only a title summary. If a request needs a memory's detail, call `/api/memory/get` first.
+`creator` marks the source: `user`, `ai`, or `system`.
+
+So when the system prompt shows a "starred memories" list, that is only a title summary. If a request needs a memory's detail, call `/api/memory/get?id=<id>` first.
 
 Write long-term user preferences, project conventions, architecture decisions, and explicit "remember this" requests into memory.
 

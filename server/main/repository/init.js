@@ -2,11 +2,13 @@ import { db } from "./client.js";
 
 const SYSTEM_MEMORY_SEEDS = [
   {
+    // 应用开发指导是核心系统知识，每次对话都可能需要（建/改应用必读）。
+    // 用 pinned=1 让全文自动注入到系统提示词，不依赖 agent 主动 fetch。
     title: "__T_MEMORY_SEED_APP_CREATION_GUIDE_TITLE__",
     description: "__T_MEMORY_SEED_APP_CREATION_GUIDE_DESCRIPTION__",
     content: "__T_MEMORY_SEED_APP_CREATION_GUIDE_CONTENT__",
     creator: "system",
-    pinned: 0,
+    pinned: 1,
     enabled: 1
   }
 ];

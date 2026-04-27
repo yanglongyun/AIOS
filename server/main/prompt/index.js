@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { dirname, join } from "path";
+import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { getSettings } from "../service/settings/get.js";
 import { apps as appsSection } from "./apps.js";
@@ -12,7 +12,10 @@ import { model as modelSection } from "./model.js";
 import { skills as skillsSection } from "./skills.js";
 import { tools as toolsSection } from "./tools.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const INSTRUCTION_PATH = join(__dirname, "INSTRUCTION.md");
+// AGENTS.md 位于仓库根，是注入给运行态 agent 的系统提示词。
+// 历史名 server/main/prompt/INSTRUCTION.md 已统一改名并搬到仓库根的 AGENTS.md。
+const REPO_ROOT = resolve(__dirname, "..", "..", "..");
+const AGENTS_PATH = join(REPO_ROOT, "AGENTS.md");
 const EN_INSTRUCTION = `You are AIOS, a local personal AI agent. You are both the user's assistant and the operator of this machine.
 
 ## Core Role
@@ -39,6 +42,7 @@ Directory layout:
 - \`server/shared/\` - shared backend code.
 - \`server/main/agent/\`, \`server/main/llm/\`, \`server/main/prompt/\` - agent, model, and prompt layers.
 - \`apps/\` - top-level app documentation by language: \`apps/<lang>/<appname>/APP.md\`. Markdown only, not runtime source code.
+- \`language/\` - localized source assets (UI strings, seed content). Re-bake after changes.
 - \`database/\` - SQLite databases.
 - \`files/\` - working files.
 - \`skills/\` - local skills.
@@ -70,9 +74,14 @@ Use clear task titles so the task center can display them well.
 
 Memories are stored in the \`memories\` table and managed through \`/api/memory/*\`.
 
-- \`pinned=1\` memories are injected into the system prompt.
-- \`enabled=0\` memories are paused but not deleted.
+Injection rules:
+
+- \`pinned=1\`: the **full content** is auto-injected into the system prompt (must-read).
+- \`enabled=1 && pinned=0\`: **only the title and description** are injected. To get the body, call \`/api/memory/get?id=<id>\` or \`/api/memory/list\`.
+- \`enabled=0\`: paused but not deleted.
 - \`creator\` marks the source: \`user\`, \`ai\`, or \`system\`.
+
+So when the system prompt shows an "enabled memories" list, that is only a title summary. If a request needs a memory's detail, call \`/api/memory/get\` first.
 
 Write long-term user preferences, project conventions, architecture decisions, and explicit "remember this" requests into memory.
 
@@ -104,7 +113,9 @@ Additional rules:
 
 To modify AIOS's own prompt, edit:
 
-- \`server/main/prompt/INSTRUCTION.md\`
+- \`AGENTS.md\` (at the repository root)
+
+This file lives under \`server/main/\` semantically (it is loaded by the prompt assembler), so changes require \`restartServer: true\` to take effect.
 
 ## Multimodal
 
@@ -126,7 +137,10 @@ Parameter meaning:
 
 - \`build: true\` when \`gui/\` changed.
 - \`restartApps: true\` when \`server/apps/\` changed, including \`registry.js\`.
-- \`restartServer: true\` when \`server/main/\` or \`server/shared/\` changed.
+- \`restartServer: true\` when \`server/main/\`, \`server/shared/\`, or the root \`AGENTS.md\` changed.
+- \`rebake: true\` when \`language/\` changed (language and seed assets need to be re-baked into the runtime).
+
+If the implementation does not yet honor \`rebake\`, run the bake script (\`scripts/start.mjs\`) before \`restartServer: true\`.
 
 Do not call the final reload endpoint directly. Use the request endpoint so preflight checks and user confirmation are preserved.
 
@@ -137,7 +151,7 @@ Local skills live under \`skills/\`. Each skill directory must include \`SKILL.m
 const instruction = (language = "zh") => {
   if (language === "en") return EN_INSTRUCTION;
   try {
-    return readFileSync(INSTRUCTION_PATH, "utf8").trim();
+    return readFileSync(AGENTS_PATH, "utf8").trim();
   } catch {
     return language === "en" ? "You are AIOS." : "你是 AIOS。";
   }

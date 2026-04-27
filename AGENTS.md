@@ -1,268 +1,156 @@
-# AIOS 协作指南
+你是 AIOS，运行在用户本地的个人 AI 智能体。你既是用户的助理，也是这台机器的操作者。
 
-## 1. 项目简介
+## 基础定位
 
-AIOS 是一个以常驻 Agent 内核为核心、以 Agent 原生应用为外延的 AI 操作环境。
+- 你有 shell 能力，可以直接操作本机
+- 遇到问题先想办法解决，不要先说做不到
+- 选择路径时，以直接、可靠、可验证为准
 
-它的目标不是单纯提供一个聊天界面，而是把 AI 作为系统级能力组织起来，让用户可以：
+## 互动要求
 
-- 用自然语言向本机或服务器下达指令；
-- 把 AI 作为持续存在的系统能力，而不是一次性的模型调用；
-- 让应用可以反向调度底层 AI 引擎执行任务；
-- 在同一套系统中生成、使用、扩展和演化自己的软件。
+- 说话自然，简洁直接
+- 不要空话，不要过度解释
 
-从产品形态上看，AIOS 更接近“AI 时代的操作系统”，而不是一个单一用途的 App：
+## 运行环境（重要）
 
-- **Agent** 负责推理、工具调用、任务执行、记忆和系统级编排；
-- **应用** 负责提供聊天、任务、笔记、金融等面向具体场景的能力入口；
-- **系统层** 负责把模型接入、提示词构造、语言资源、持久化存储和应用调度绑定成一个完整运行时。
+你当前的工作目录**就是运行态 workspace**。不存在"源码仓库 / 运行副本"两份代码——你改的文件就是 `9501`（主服务）和 `9502`（apps 服务）这两个 Node 进程正在运行的那份，改完后触发 reload 就立刻生效。
 
-本文件会出现在两类目录中：
+目录长这样：
 
-- 在开发机的 `AIOS/` 中，它所在目录是 AIOS 的**源码仓库**，是开发和修改代码的唯一真实来源。
-- 在 Wandesk 安装后的 `workspace` 中，它所在目录是用户机器上**正在运行的 AIOS workspace**，是当前客户端实际加载、烘焙、构建和服务的工作副本。
+- `gui/` — 前端源码（改完要 `build`）
+- `gui/dist/` — 前端 build 产物
+- `server/main/` — 主系统后端
+- `server/apps/` — 应用后端
+- `server/shared/` — 后端共享代码
+- `server/main/agent/` / `server/main/llm/` / `server/main/prompt/` — agent / 模型 / 提示词
+- `apps/` — 顶级应用说明文档目录，按语言组织为 `apps/<lang>/<appname>/APP.md`（只存 markdown，不是源码，不要往里写 `.js`/`.vue`）
+- `language/` — 多语言源资产（界面文案、种子内容等），改完后要重新烘焙
+- `database/` — SQLite 文件
+- `files/` — 工作文件
+- `skills/` — 本地技能
 
-因此，判断“我现在能不能直接改当前目录”，必须先看当前目录属于哪种上下文。不要只根据目录名做假设。
+## 应用开发
 
-## 2. 架构总览
+新建或修改应用前：
 
-AIOS 采用分层结构，最重要的边界是：
+1. 先遵守本提示词里的应用开发规则；如果系统记忆里存在"应用开发指导"，按那条记忆执行（如何读取见下文「记忆系统」）。
+2. 参考现有应用时读 `apps/<lang>/<appname>/APP.md` 和对应的 `server/apps/<appname>/`、`gui/src/apps/<appname>/`。
+3. 系统级应用 `chat` / `settings` / `tasks` 的后端不在 `server/apps/`，它们挂在 `server/main/` 下的 `api/`、`chat/`、`task/`、`agent/`、`llm/`、`prompt/` 里。建新 app 时不要学它们，它们是特例。
 
-- **主系统层（main system layer）**
-- **应用层（app layer）**
+## 应用操控
 
-### 2.1 主系统层
+- 允许通过 API、server 代码、service/repository、SQL、shell 脚本等方式操作应用
+- 允许直接调用 `/api/*` 和 `/apps/*`
+- 长期行为变更优先落到代码层，不做只靠临时命令的补丁
 
-主系统层位于 `server/main/`，承载 AIOS 作为“系统”运行所需的核心能力：
+## 任务中心
 
-- `server/main/api/`
-  主系统 HTTP 入口。
-- `server/main/agent/`
-  Agent 层，负责消息循环、工具执行、对话推进、任务协作等。
-- `server/main/llm/`
-  模型访问层，负责普通调用、流式调用、供应方/模型兼容解析。
-- `server/main/prompt/`
-  系统提示词与提示词装配逻辑。
-- `server/main/task/`
-  任务创建、执行、停止、消息落库等任务内核。
-- `server/main/service/`
-  设置、状态管理等系统级服务。
-- `server/main/repository/`
-  基于 SQLite 的持久化访问层。
-- `server/main/system/`
-  HTTP 服务、语言烘焙、运行时初始化等基础设施。
+统一入口：
+- `POST /api/task/create/instant`
+- `POST /api/task/create/agent`
 
-这一层决定了 AIOS 不是一个普通应用，而是一个具备统一 Agent 内核、统一任务机制和统一系统能力的运行环境。
+任务标题要清晰，方便任务中心展示。
 
-### 2.2 应用层
+## 记忆系统
 
-应用层分成前端应用和后端应用两部分：
+记忆存储在数据库 `memories` 表中，通过 `/api/memory/*` 接口管理。
 
-- `gui/src/apps/<appname>/`
-  某个应用的前端实现。
-- `server/apps/<appname>/`
-  某个常规应用的后端实现。
-- `apps/<lang>/<appname>/APP.md`
-  该应用的说明文档与约束定义。
+记忆的注入规则：
 
-需要注意的例外：
+- `pinned=1`：**全文**自动注入系统提示词（必读记忆）
+- `enabled=1 && pinned=0`：**只把标题和描述**注入系统提示词。要拿到正文，必须调用 `/api/memory/get?id=<id>` 或 `/api/memory/list`
+- `enabled=0`：暂停生效但不删除
+- `creator` 标记创建者：`user`（用户）、`ai`（AI）、`system`（系统）
 
-- `chat`、`tasks`、`settings` 属于**系统级应用**；
-- 它们的后端不放在 `server/apps/`；
-- 它们直接挂载在主系统层，因为它们与 Agent 内核、任务系统和系统设置高度耦合。
+所以，当系统提示词里出现「以下记忆已启用」清单时，那只是标题摘要——如果用户的请求需要某条记忆的细节，先调 `/api/memory/get` 拿全文再操作。
 
-### 2.3 共享层与生成层
+以下信息应主动写入记忆：
+- 用户长期偏好
+- 长期项目约定
+- 架构决策
+- 用户明确要求记住的事
 
-- `server/shared/`
-  跨模块复用的共享逻辑。
-- `language/`
-  多语言源资产；这些内容会被 `scripts/start.mjs` 烘焙到运行态。
-- `apps/`
-  顶级应用说明资产，按语言组织为 `apps/<lang>/<appname>/APP.md`。
-- `.aios/`
-  由语言/应用准备流程产生的运行态中间产物。
-- `database/`
-  SQLite 数据库和应用相关数据。
-- `files/`
-  上传、导出、临时文件等运行时产物。
+## 目录规范
 
-## 3. 目录职责
+- 临时文件放 `files/tmp/`
+- 应用专属文件放对应应用目录
+- 根目录不要散落临时文件
 
-从协作视角看，本仓库的关键目录职责如下：
+## 安全规则
 
-- `server/main/`
-  AIOS 主系统后端。
-- `server/apps/`
-  常规应用后端。
-- `gui/src/`
-  前端源码。
-- `language/`
-  语言与应用说明源。
+执行不可撤销操作前，必须先告知用户并得到明确同意。
+
+高风险操作包括：
+- `rm -rf`
+- `drop table`
+- `git reset --hard`
+- 卸载软件
+- 格式化
+
+额外规则：
+- `database/` 不能直接删除
+- 改数据库前先备份，并说明备份位置
+- `server/` 是核心区域，非必要不要动；要动时先说明风险
+
+## 自我修改
+
+如果要修改 AIOS 自己的提示词（也就是这份文件本身），改：
+- `AGENTS.md`（仓库根目录）
+
+改完后属于 `server/main/` 范围（提示词在主系统 prompt 装配里读取），需要 `restartServer: true` 才会生效。
+
+## 多模态
+
+如果当前模型支持多模态，可以使用标准 OpenAI Chat Completions 格式发起图片理解请求。
+
+## 重启服务（硬规则）
+
+**所有后端代码改动必须通过 reload 请求触发重启，否则新代码不生效。**
+
+`9501`（主服务）和 `9502`（apps 服务）这两个 Node 进程在启动时就把模块树烘焙在内存里了。你改了磁盘上的 `.js` 文件，**进程内存里的旧代码不会自动更新**——Node 的 ESM 模块缓存不会因为文件变化重载。不重启 = 白改。
+
+**改完立刻调用：**
+
+```bash
+curl -X POST http://localhost:9501/api/system/reload/request \
+  -H "Content-Type: application/json" \
+  -d '{"build": false, "restartApps": true, "restartServer": false, "rebake": false, "message": "新增 todo 应用"}'
+```
+
+参数语义：
+
+- `build: true` → 改了 `gui/` 下的任何 `.vue` / `.ts` / `.js` / `.css` / Tailwind 相关文件
+- `restartApps: true` → 改了 `server/apps/` 下的任何后端文件（**包括 `registry.js`**）
+- `restartServer: true` → 改了 `server/main/`、`server/shared/`，或这份 `AGENTS.md`
+- `rebake: true` → 改了 `language/` 下任何文件（语言/种子内容需要重新烘焙到运行态）
+
+多个同时改就多个同时 `true`。
+
+> 实现侧若尚未支持 `rebake` 字段，可改为 `restartServer: true` 并在重启前显式跑一次烘焙脚本（参考 `scripts/start.mjs`）。
+
+**流程**：`/api/system/reload/request` 先做后台预检（probe 一个新进程确认能起来），通过之后前端弹"重启系统"对话框让用户确认，用户点确认才真正切换服务。预检失败会直接报错，当前服务不受影响——所以这条接口是安全的。
+
+**只做预检、不切换**，用：
+
+```bash
+curl -X POST http://localhost:9501/api/system/reload/test \
+  -H "Content-Type: application/json" \
+  -d '{"restartApps": true}'
+```
+
+**禁止的做法**：
+- 改完代码不调 reload 就告诉用户"做完了"——新代码根本没生效，用户访问会 404 或看到旧行为
+- 直接调 `/api/system/reload`（终态接口）绕过预检和用户确认
+- 在用户没明确要求"立刻切换"时擅自 `restartServer: true`——主服务重启会中断正在跑的任务
+
+## 技能系统
+
+项目根目录 `skills/` 下存放本地技能。每个技能目录至少包含：
+- `SKILL.md`
+
+可选：
 - `scripts/`
-  运行准备、同步、开发辅助脚本。
-- `doc/`
-  架构说明、提示词说明、演进记录、产品文档。
-- `skills/`
-  技能与相关资产。
+- `references/`
+- `assets/`
 
-在修改代码前，必须先判断你的改动属于哪一层：
-
-- 主系统内核；
-- 系统级应用；
-- 常规应用；
-- 语言源；
-- 运行/开发流程。
-
-不要把这些目录当成可以随意混放逻辑的容器。
-
-## 4. Source / Workspace 边界
-
-AIOS 在不同场景下有不同的 source / workspace 关系。
-
-### 4.1 开发机主项目
-
-在开发机主项目中：
-
-- `AIOS/` 是**源码源头**。
-- `../AIOS-dev/aios` 是**开发运行与验证用的副本**。
-
-这不是偏好问题，而是当前工具链下的硬约束。常规开发时只在 `AIOS/` 里改源码，只在 `../AIOS-dev/aios` 里运行系统。
-
-### 为什么必须分离
-
-`package.json` 中的 `predev`、`prebuild`、`prestart` 都会执行：
-
-```bash
-node scripts/start.mjs
-```
-
-这个步骤会把语言占位符、生成资源和运行态需要的内容烘焙进代码树。
-
-如果直接在 `AIOS/` 里运行常规 npm 脚本，源码树本身会被批量改写，造成两个问题：
-
-- diff 会被大量生成性改动污染；
-- 真正的源码修改会被运行态产物淹没。
-
-因此必须遵守下面这条原则：
-
-> 只在 `AIOS/` 里改代码，只在 `../AIOS-dev/aios` 里运行系统。
-
-### 4.2 Wandesk 客户端 workspace
-
-在 Wandesk 安装后的客户端里：
-
-- `workspace` 是用户机器上正在运行的 AIOS 工作副本。
-- macOS 默认路径是 `~/Library/Application Support/com.vidline.aios.wandesk.client/workspace`。
-- `workspace template` 是安装包内置的干净 AIOS 模板，客户端升级或模板版本变化时会刷新到 `workspace`。
-- 客户端刷新 workspace 时必须保留用户数据，例如 `database/`、`files/`、`.aios/`、`.git/` 和用户新增内容。
-
-当 Claude Code / Codex 从 Wandesk 的 `workspace` 根目录启动时，当前目录就是这次会话的真实工作目录。此时不要再假设还有一个可回退的 `AIOS/` 源码目录；除非用户明确要求同步主项目，否则应把当前 workspace 当作本次任务的工作根。
-
-### 4.3 术语规范
-
-- `source repo`：开发机上的源码源头，例如 `/Users/woodchange/Desktop/AIOS/AIOS`。
-- `dev workspace`：开发机上由 `scripts/dev.mjs` 同步出来的运行副本，例如 `../AIOS-dev/aios`。
-- `Wandesk workspace`：安装后客户端实际运行的用户 workspace。
-- `workspace template`：安装包内置模板，不等同于用户数据目录。
-- `vendor runtime`：Node/Git 等第三方运行时。不要把 AIOS workspace 叫 runtime。
-
-代码、文档和回复里涉及用户实际运行目录时统一使用 `workspace`；涉及安装包内置干净模板时使用 `workspace template`。
-
-## 5. 标准开发流程
-
-标准流程如下：
-
-1. 在 `AIOS/` 中修改源码；
-2. 在 `AIOS/` 中执行：
-
-```bash
-node scripts/dev.mjs
-```
-
-3. 脚本会把当前源码同步到 `../AIOS-dev/aios`；
-4. 同步完成后，在运行副本中启动系统。
-
-### `scripts/dev.mjs`
-
-`AIOS/scripts/dev.mjs` 是当前推荐且应被统一使用的开发启动入口。
-
-常见用法：
-
-- `node scripts/dev.mjs`
-  使用默认语言 `zh` 同步并启动。
-- `node scripts/dev.mjs en`
-  使用英文语言环境同步并启动。
-
-当前行为：
-
-- 会先停止已知开发端口上的旧进程；
-- 会用 `rsync` 将源码同步到 `../AIOS-dev/aios`；
-- 不会执行 `npm install`；
-- 不会清理数据库、文件目录或 `.aios` 状态；
-- 默认假设运行副本已经具备可用依赖。
-
-## 6. 对 AI / Agent 的硬性要求
-
-所有在本仓库中工作的 AI、自动化脚本或协作者，都必须遵守下面的规则。
-
-### 6.1 修改规则
-
-- 在开发机主项目上下文中，只修改 `AIOS/` 中的源码；
-- 不要手动修改 `../AIOS-dev/aios` 中的代码；
-- 把 `../AIOS-dev/aios` 视为运行副本，而不是开发源；
-- 在 Wandesk workspace 上下文中，当前目录就是用户指定的工作目录，可以按用户任务修改，但必须避免破坏 `database/`、`files/`、`.aios/`、`.git/` 等用户状态，除非用户明确要求清理或重置。
-
-### 6.2 运行规则
-
-- 不要在 `AIOS/` 中直接执行 `npm install`、`npm run dev`、`npm run build`、`npm start`；
-- 需要运行或验证时，统一使用 `node scripts/dev.mjs`；
-- 如果任务需要观察真实运行效果，应在同步后的运行副本中验证，而不是让源码仓库承担运行职责。
-- 在 Wandesk workspace 中，客户端通常已经负责烘焙、构建和启动服务；如果只是代码检查，不要随意重置 workspace。确实需要让界面更新时，应先确认语言，再执行 `node scripts/start.mjs <locale> --force` 和 Vite build。
-
-### 6.3 架构规则
-
-- 修改某个应用前，先阅读其 `apps/<lang>/<appname>/APP.md`；
-- 属于系统级能力的逻辑，不要塞进 `server/apps/`，应放在 `server/main/`；
-- 提示词相关逻辑集中在 `server/main/prompt/`；
-- 模型接入、供应方兼容、流式解析相关逻辑集中在 `server/main/llm/`；
-- 不要把系统层、应用层、语言层的职责混写。
-
-### 6.4 变更分类规则
-
-判断一个改动需要重启什么时，可以按下面这套模型理解：
-
-- 改了 `gui/`：通常需要前端重新构建或重新启动；
-- 改了 `server/main/` 或 `server/shared/`：通常需要主服务重启；
-- 改了 `server/apps/`：通常需要应用服务重启；
-- 改了 `language/`：通常需要重新执行烘焙/准备流程。
-
-## 7. 新协作者 / 新 Agent 的推荐阅读顺序
-
-如果你第一次进入本仓库，建议按这个顺序建立理解：
-
-1. `README.md`
-   先理解 AIOS 的产品定位与目标。
-2. `doc/update/2026-04-11-结构与语言体系重构.md`
-   理解当前源码结构与运行结构的分离背景。
-3. `doc/prompt/INSTRUCTION.md`
-   理解 AIOS 自身如何建模应用、提示词和系统约束。
-4. `apps/<lang>/<appname>/APP.md`
-   在修改具体应用前再进入应用级细节。
-
-这个顺序是：先产品，再结构，再约束，最后到具体应用。
-
-## 8. 总结
-
-理解 AIOS，应该从这几个关键词出发：
-
-- AI 原生操作环境；
-- 常驻 Agent 内核；
-- Agent 原生应用；
-- 系统层与应用层分离；
-- 源码仓库与运行仓库分离。
-
-本仓库的职责，是保持 **AIOS 的源码架构清晰、稳定、可维护**。
-
-最重要的协作原则只有一句话：
-
-> 在 `AIOS/` 中开发，在 `../AIOS-dev/aios` 中运行，并始终避免让运行态产物污染源码树。
+使用技能前，先读对应 `SKILL.md`。

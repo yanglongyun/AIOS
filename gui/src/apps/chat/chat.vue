@@ -559,28 +559,11 @@ watch(() => messages.value.length, (nextLen, prevLen) => {
 onMounted(async () => {
   if (wsStatus.value === 'disconnected') connect();
 
-  // 如果挂载时已经有 intentRequest，交给 intentRequest watcher 处理，
-  // 不要再自动加载"上次的对话"——否则会和 new_and_send 的 handleSend 竞态，
-  // 导致界面显示老会话、用户的消息发到一个看不见的新会话。
-  if (props.intentRequest) return;
-
-  if (props.pendingMessage) {
-    input.value = props.pendingMessage;
-    nextTick(() => handleSend());
-  } else if (props.conversationId) {
-    await openConversation(props.conversationId);
-  } else {
-    try {
-      const list = await request('/api/chat/list');
-      const lastChatId = localStorage.getItem(LAST_CHAT_KEY);
-      const target = list.find((item) => item.conversation_id === lastChatId) || list[0];
-      if (target?.conversation_id) {
-        await openConversation(target.conversation_id);
-      }
-    } catch {}
-  }
-
+  // WS 监听器必须先注册：哪怕 props.intentRequest 把后面的初始化分支跳过了，
+  // 监听器也得在，否则 server 发的 delta/done 全部丢失，UI 永远卡在 thinking。
   unsubs.push(on('delta', (data) => {
+    // 任何流式事件到来都意味着该会话仍在跑——把 busy 设上，让切回该会话时输入框正确显示
+    setBusy(data.conversationId, true);
     if (data.conversationId !== currentConversationId.value) return;
     let key = streamingAssistantKey.value;
     if (!key) {
@@ -620,6 +603,7 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('tool_call', (data) => {
+    setBusy(data.conversationId, true);
     if (data.conversationId !== currentConversationId.value) return;
     const streamKey = streamingAssistantKey.value;
     if (streamKey) {
@@ -633,6 +617,7 @@ onMounted(async () => {
   }));
 
   unsubs.push(on('tool_result', (data) => {
+    setBusy(data.conversationId, true);
     if (data.conversationId !== currentConversationId.value) return;
     for (let i = messages.value.length - 1; i >= 0; i -= 1) {
       const msg = messages.value[i];
@@ -661,6 +646,26 @@ onMounted(async () => {
     streamingAssistantKey.value = '';
   }));
 
+  // 如果挂载时已经有 intentRequest，交给 intentRequest watcher 处理，
+  // 不要再自动加载"上次的对话"——否则会和 new_and_send 的 handleSend 竞态，
+  // 导致界面显示老会话、用户的消息发到一个看不见的新会话。
+  if (props.intentRequest) return;
+
+  if (props.pendingMessage) {
+    input.value = props.pendingMessage;
+    nextTick(() => handleSend());
+  } else if (props.conversationId) {
+    await openConversation(props.conversationId);
+  } else {
+    try {
+      const list = await request('/api/chat/list');
+      const lastChatId = localStorage.getItem(LAST_CHAT_KEY);
+      const target = list.find((item) => item.conversation_id === lastChatId) || list[0];
+      if (target?.conversation_id) {
+        await openConversation(target.conversation_id);
+      }
+    } catch {}
+  }
 });
 
 onUnmounted(() => {

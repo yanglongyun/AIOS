@@ -324,8 +324,11 @@ const loadFsRoots = async () => {
   try {
     const r = await fetch('/api/fs/roots');
     const data = await r.json();
-    const home = (data.data || []).find((item) => item.id === 'home')?.base;
+    const roots = data.data || [];
+    const home = roots.find((item) => item.id === 'home')?.base;
+    const workspace = roots.find((item) => item.id === 'workspace')?.base;
     if (home) homedirPrefix.value = home;
+    if (workspace && cwd.value === '~/Desktop') cwd.value = workspace;
   } catch {}
 };
 

@@ -196,6 +196,16 @@ if (fs.existsSync(langAppsDir)) {
 }
 console.log(`[start] mirrored ${mdCount} app docs from apps/${locale}`);
 
+// Bake the runtime AGENTS.md (system prompt) for the active locale.
+const srcAgents = path.join(projectRoot, 'language', locale, 'AGENTS.md');
+const dstAgents = path.join(projectRoot, 'AGENTS.md');
+if (fs.existsSync(srcAgents)) {
+  fs.copyFileSync(srcAgents, dstAgents);
+  console.log(`[start] mirrored AGENTS.md from language/${locale}`);
+} else {
+  console.warn(`[start] missing language/${locale}/AGENTS.md, root AGENTS.md left untouched`);
+}
+
 let unresolvedCount = 0;
 const unresolvedFiles = new Set();
 walk(projectRoot, (file) => {

@@ -14,16 +14,34 @@
         @dblclick="toggleMaximize"
       >
         <span class="min-w-0 flex-1 truncate text-xs font-semibold text-[#222]">{{ win.title }}</span>
-        <!-- 右侧红绿灯 -->
-        <div class="traffic-lights ml-3 flex items-center gap-[7px]">
-          <button @click.stop="toggleMaximize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#28c840] transition-opacity" :title="win.state === 'maximized' ? '__T_WINDOW_RESTORE__' : '__T_WINDOW_MAXIMIZE__'">
-            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 5.5L4 2l2.5 3.5" stroke="#006500" stroke-width="1.2" fill="none"/></svg>
+        <div class="window-controls ml-3 flex h-full items-center" @mousedown.stop @dblclick.stop>
+          <button
+            type="button"
+            class="window-control"
+            title="__T_WINDOW_MINIMIZE__"
+            @click.stop="doMinimize"
+          >
+            <Minus class="h-[14px] w-[14px]" :stroke-width="2" />
           </button>
-          <button @click.stop="doMinimize" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#febc2e] transition-opacity" title="__T_WINDOW_MINIMIZE__">
-            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><line x1="1" y1="4" x2="7" y2="4" stroke="#995700" stroke-width="1.2"/></svg>
+          <button
+            type="button"
+            class="window-control"
+            :title="win.state === 'maximized' ? '__T_WINDOW_RESTORE__' : '__T_WINDOW_MAXIMIZE__'"
+            @click.stop="toggleMaximize"
+          >
+            <component
+              :is="win.state === 'maximized' ? Minimize2 : Maximize2"
+              class="h-[13px] w-[13px]"
+              :stroke-width="2"
+            />
           </button>
-          <button @click.stop="doClose" class="traffic-dot flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border-none bg-[#ff5f57] transition-opacity" title="__T_WINDOW_CLOSE__">
-            <svg class="traffic-icon" viewBox="0 0 8 8" width="8" height="8"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="#4a0000" stroke-width="1.2" fill="none"/></svg>
+          <button
+            type="button"
+            class="window-control close"
+            title="__T_WINDOW_CLOSE__"
+            @click.stop="doClose"
+          >
+            <X class="h-[14px] w-[14px]" :stroke-width="2" />
           </button>
         </div>
       </div>
@@ -51,6 +69,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { Maximize2, Minimize2, Minus, X } from 'lucide-vue-next';
 import { windowManager } from '../../system/windows.js';
 
 const props = defineProps({ win: { type: Object, required: true } });
@@ -167,7 +186,31 @@ function stopResize() {
   background: #ffffff;
 }
 
-.traffic-icon {
-  display: none;
+.window-controls {
+  color: #4a4a4a;
+}
+
+.window-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.window-control:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111;
+}
+
+.window-control.close:hover {
+  background: #e81123;
+  color: #fff;
 }
 </style>

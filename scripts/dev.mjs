@@ -65,6 +65,11 @@ stopDevPorts();
 
 syncSourceToRuntime();
 
+run('node', ['scripts/start.mjs', locale, '--force'], {
+  cwd: runtimeDir,
+  env: { ...process.env, AIOS_LANG: locale }
+});
+
 run('npm', ['run', 'dev'], {
   cwd: runtimeDir,
   env: { ...process.env, AIOS_LANG: locale }

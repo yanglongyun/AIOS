@@ -15,7 +15,7 @@ const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const MAX_TEXT_BYTES = 1024 * 1024;
 const TEXT_EXT = new Set([".txt", ".md", ".json", ".csv", ".log", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".vue", ".css", ".html", ".xml", ".yml", ".yaml", ".toml"]);
 const WRITABLE_EXT = new Set([".txt", ".md", ".json", ".csv", ".log", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".vue", ".css", ".html", ".xml", ".yml", ".yaml", ".toml"]);
-const UPLOADABLE_EXT = new Set([".txt", ".md", ".pdf", ".doc", ".docx", ".json", ".csv", ".png", ".jpg", ".jpeg", ".webp", ".log", ".pptx", ".xlsx"]);
+const UPLOADABLE_EXT = new Set([".txt", ".md", ".pdf", ".doc", ".docx", ".json", ".csv", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".log", ".pptx", ".xlsx", ".html", ".htm"]);
 const MIME_MAP = {
   ".txt": "text/plain",
   ".md": "text/markdown",

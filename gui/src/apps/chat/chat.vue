@@ -98,6 +98,7 @@
               style="color:#2a1f13"
               @input="autoResize"
               @keydown.enter.exact="onEnter"
+              @paste="onPaste"
               @compositionstart="composing = true"
               @compositionend="composing = false"
             />
@@ -492,6 +493,34 @@ const onPickFiles = async (e) => {
   const files = Array.from(e.target?.files || []);
   await appendFiles(files);
   if (fileInput.value) fileInput.value.value = '';
+};
+
+const fileExtFromMime = (type = '') => {
+  if (type === 'image/jpeg') return 'jpg';
+  if (type === 'image/png') return 'png';
+  if (type === 'image/webp') return 'webp';
+  if (type === 'image/gif') return 'gif';
+  return 'png';
+};
+
+const onPaste = async (event) => {
+  if (busy.value) return;
+  const items = Array.from(event.clipboardData?.items || []);
+  const files = items
+    .filter((item) => item.kind === 'file' && String(item.type || '').startsWith('image/'))
+    .map((item, idx) => {
+      const file = item.getAsFile();
+      if (!file) return null;
+      const ext = fileExtFromMime(file.type);
+      const name = file.name && file.name !== 'image.png'
+        ? file.name
+        : `pasted-image-${Date.now()}-${idx + 1}.${ext}`;
+      return new File([file], name, { type: file.type || `image/${ext}` });
+    })
+    .filter(Boolean);
+  if (!files.length) return;
+  event.preventDefault();
+  await appendFiles(files);
 };
 
 const hasDraggedFiles = (event) => {

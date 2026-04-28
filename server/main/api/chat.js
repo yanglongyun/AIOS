@@ -13,7 +13,8 @@ const CHAT_UPLOAD_DIR = join(FILES_DIR, "uploads", "chat");
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const UPLOADABLE_EXT = new Set([
   ".txt", ".md", ".pdf", ".doc", ".docx", ".json", ".csv",
-  ".png", ".jpg", ".jpeg", ".webp", ".log", ".pptx", ".xlsx"
+  ".png", ".jpg", ".jpeg", ".webp", ".gif", ".log", ".pptx", ".xlsx",
+  ".html", ".htm"
 ]);
 const safeName = (name = "file") => {
   const normalized = String(name || "file")

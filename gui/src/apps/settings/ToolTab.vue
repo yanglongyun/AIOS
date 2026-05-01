@@ -1,66 +1,61 @@
 <template>
-  <section class="space-y-3">
+  <section>
     <!-- 截断设置 -->
-    <div class="rounded-[13px] border px-4 py-4" style="background:#fff;border-color:rgba(0,0,0,0.08)">
+    <div class="py-1">
       <label class="flex cursor-pointer items-center gap-2.5">
         <input
           type="checkbox"
           :checked="enableToolResultTruncate"
-          class="h-[15px] w-[15px] shrink-0 cursor-pointer accent-[#5c4332]"
+          class="h-[15px] w-[15px] flex-none cursor-pointer"
+          style="accent-color:var(--color-accent)"
           @change="$emit('update:enable-tool-result-truncate', $event.target.checked)"
         />
-        <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_TRUNCATE_ENABLE__</span>
+        <span class="text-[13px] font-medium text-ink">启用工具结果截断</span>
       </label>
-      <div class="mt-3.5 flex flex-wrap items-center gap-3">
-        <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_CHARS__</span>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <span class="text-[12px] text-muted">工具结果内容长度</span>
         <input
           :value="toolResultMaxChars"
           type="number"
-          min="1000"
-          max="50000"
-          step="1000"
+          min="1000" max="50000" step="1000"
           :disabled="!enableToolResultTruncate"
-          class="w-[100px] rounded-[8px] border bg-[#faf8f5] px-2.5 py-1.5 text-[13px] outline-none transition-colors focus:border-[#a07850] focus:bg-white disabled:opacity-40"
-          style="border-color:rgba(0,0,0,0.1);color:#2a1f13"
+          class="num-input"
           @input="$emit('update:tool-result-max-chars', Number($event.target.value || 0))"
         />
       </div>
-      <div class="mt-1.5 text-[11px]" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TOOL_MAX_CHARS_HINT__</div>
+      <div class="mt-1.5 text-[11px] text-faint">默认 12000,范围 1000 - 50000</div>
     </div>
 
+    <div class="my-4 h-px bg-line"></div>
+
     <!-- 循环限制 -->
-    <div class="rounded-[13px] border px-4 py-4" style="background:#fff;border-color:rgba(0,0,0,0.08)">
+    <div class="py-1">
       <label class="flex cursor-pointer items-center gap-2.5">
         <input
           type="checkbox"
           :checked="enableToolLoopLimit"
-          class="h-[15px] w-[15px] shrink-0 cursor-pointer accent-[#5c4332]"
+          class="h-[15px] w-[15px] flex-none cursor-pointer"
+          style="accent-color:var(--color-accent)"
           @change="$emit('update:enable-tool-loop-limit', $event.target.checked)"
         />
-        <span class="text-[13px] font-medium" style="color:#2a1f13">__T_SETTINGS_TOOL_LOOP_LIMIT_ENABLE__</span>
+        <span class="text-[13px] font-medium text-ink">启用工具最大循环次数限制</span>
       </label>
-      <div class="mt-3.5 flex flex-wrap items-center gap-3">
-        <span class="text-[12px]" style="color:rgba(0,0,0,0.4)">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <span class="text-[12px] text-muted">工具最大循环次数</span>
         <input
           :value="toolMaxRounds"
           type="number"
-          min="1"
-          max="500"
-          step="1"
+          min="1" max="500" step="1"
           :disabled="!enableToolLoopLimit"
-          class="w-[100px] rounded-[8px] border bg-[#faf8f5] px-2.5 py-1.5 text-[13px] outline-none transition-colors focus:border-[#a07850] focus:bg-white disabled:opacity-40"
-          style="border-color:rgba(0,0,0,0.1);color:#2a1f13"
+          class="num-input"
           @input="$emit('update:tool-max-rounds', Number($event.target.value || 0))"
         />
       </div>
-      <div class="mt-1.5 text-[11px]" style="color:rgba(0,0,0,0.3)">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</div>
+      <div class="mt-1.5 text-[11px] text-faint">默认 50,范围 1 - 500</div>
     </div>
 
-    <div class="flex justify-end pt-1">
-      <button
-        class="rounded-[9px] bg-[#5c4332] px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#3d2a1e]"
-        @click="$emit('save')"
-      >__T_COMMON_SAVE__</button>
+    <div class="flex justify-end pt-2">
+      <button class="save-btn" @click="$emit('save')">保存</button>
     </div>
   </section>
 </template>
@@ -72,7 +67,6 @@ defineProps({
   enableToolLoopLimit: { type: Boolean, default: true },
   toolMaxRounds: { type: Number, default: 50 }
 });
-
 defineEmits([
   'update:enable-tool-result-truncate',
   'update:tool-result-max-chars',
@@ -81,3 +75,19 @@ defineEmits([
   'save'
 ]);
 </script>
+
+<style scoped>
+.num-input {
+    width: 100px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-line-hi);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: 13px;
+    outline: 0;
+    transition: border-color .15s;
+}
+.num-input:focus { border-color: var(--color-accent); }
+.num-input:disabled { opacity: 0.4; }
+</style>

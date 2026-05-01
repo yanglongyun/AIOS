@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { getSetupStatus } from "./setup.js";
-import DesktopView from "../views/DesktopView.vue";
+import AppShell from "../views/AppShell.vue";
+import LoginView from "../views/LoginView.vue";
+import * as api from "../utils/api.js";
 
 const routes = [
-  { path: "/", component: DesktopView },
-  { path: "/welcome", component: () => import("../views/WelcomeView.vue") },
+  { path: "/", redirect: "/app/chat" },
+  { path: "/login", name: "login", component: LoginView, meta: { public: true } },
+  { path: "/app/:id", component: AppShell },
   { path: "/:pathMatch(.*)*", redirect: "/" }
 ];
 
@@ -13,13 +15,26 @@ const router = createRouter({
   routes
 });
 
+// === 鉴权守卫 ===
+// 每次进入需鉴权路由前查一次 /api/auth/state.SQL 单行查询很便宜,
+// 不做缓存避免登录/登出后状态滞后.
 router.beforeEach(async (to) => {
-  const setup = await getSetupStatus();
-  if (!setup.reachable) return true;
-  const welcomed = setup.initialized || setup.welcomeSkipped;
-  if (!welcomed && to.path !== "/welcome") return "/welcome";
-  if (welcomed && to.path === "/welcome") return "/";
+  if (to.meta?.public) return true;
+  let s;
+  try {
+    s = await api.get("/api/auth/state");
+  } catch {
+    s = { configured: false, authenticated: false };
+  }
+  if (!s.authenticated) return { name: "login", replace: true };
   return true;
+});
+
+// 任何 401 → 立即跳登录
+api.setOn401(() => {
+  if (router.currentRoute.value.name !== "login") {
+    router.replace({ name: "login" });
+  }
 });
 
 export {

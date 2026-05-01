@@ -1,18 +1,18 @@
----
-name: finance
-description: Ledger app for recording income, expenses, and notes.
-backend: server/apps/finance
-frontend: gui/src/apps/finance
-database: database/apps/finance.db
----
-
 # finance
 
-- Role: a lightweight bookkeeping app.
+Local ledger app for income and expense records.
+
+## Location
+
 - Frontend: `gui/src/apps/finance`
 - Backend: `server/apps/finance`
-- Data: `database/apps/finance.db`
-- Entry points:
-  - `GET /apps/finance/list`
-  - `POST /apps/finance/create`
-  - `POST /apps/finance/delete`
+- Database: `database/apps/finance.db`
+
+## API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/apps/finance/list?month=YYYY-MM` | Read monthly records and summary |
+| POST | `/apps/finance/create` | Create an income/expense record |
+| POST | `/apps/finance/update` | Update a record |
+| POST | `/apps/finance/delete` | Delete a record |

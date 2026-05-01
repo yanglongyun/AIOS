@@ -1,403 +1,307 @@
-<template>
-  <div class="flex h-full flex-col overflow-hidden bg-[#f7f4ef]" style="color:#2a1f13">
-
-    <!-- ═══ LIST VIEW ═══ -->
-    <template v-if="!detailTask">
-      <!-- Toolbar -->
-      <div class="flex shrink-0 items-center gap-1 border-b px-3 py-2" style="border-color:rgba(0,0,0,0.06);background:rgba(247,244,239,0.9)">
-        <button
-          v-for="f in filters" :key="f.key"
-          class="inline-flex items-center gap-1 rounded-full px-3 py-[3px] text-[11.5px] font-semibold transition"
-          :style="activeFilter === f.key
-            ? 'background:#5c4332;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.12)'
-            : 'background:transparent;color:rgba(42,31,19,0.55)'"
-          :class="activeFilter !== f.key && 'hover:bg-[rgba(140,100,60,0.08)] hover:text-[#2a1f13]'"
-          @click="activeFilter = f.key"
-        >
-          {{ f.label }}
-          <span
-            class="inline-block rounded-full px-[6px] text-[9px] font-bold tabular-nums"
-            :style="activeFilter === f.key
-              ? 'background:rgba(255,255,255,0.22);color:#fff'
-              : 'background:rgba(140,100,60,0.12);color:rgba(120,80,40,0.65)'"
-          >{{ f.count }}</span>
-        </button>
-        <span class="flex-1" />
-        <button
-          class="flex h-[26px] w-[26px] items-center justify-center rounded-full border transition hover:bg-[rgba(140,100,60,0.08)]"
-          style="border-color:rgba(0,0,0,0.08);color:#2a1f13;background:#fff"
-          @click="loadTasks"
-        >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 8a5.5 5.5 0 019.5-3.7M13.5 8a5.5 5.5 0 01-9.5 3.7" stroke-linecap="round"/><path d="M12 1.5v3h-3M4 15.5v-3h3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-
-      <!-- Column header -->
-      <div class="grid shrink-0 grid-cols-[1fr_64px_78px_88px] gap-1 border-b px-4 py-[7px] text-[9px] font-bold uppercase tracking-[0.08em]"
-        style="border-color:rgba(0,0,0,0.05);background:rgba(238,232,222,0.5);color:rgba(120,80,40,0.5)">
-        <span>__T_TASKS_COLUMN_TITLE__</span>
-        <span>__T_TASKS_COLUMN_MODE__</span>
-        <span>__T_TASKS_COLUMN_STATUS__</span>
-        <span>__T_TASKS_COLUMN_TIME__</span>
-      </div>
-
-      <!-- Error -->
-      <div v-if="error" class="mx-3 mt-2 rounded-[10px] border px-3 py-2 text-[12px]" style="border-color:rgba(176,58,32,0.25);background:rgba(176,58,32,0.06);color:#b03a20">{{ error }}</div>
-
-      <!-- Rows -->
-      <div class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
-        <div v-if="filteredTasks.length === 0" class="flex h-full flex-col items-center justify-center" style="color:rgba(0,0,0,0.35)">
-          <div class="mb-1.5 text-[32px] opacity-35">📭</div>
-          <div class="text-[12px]">__T_TASKS_EMPTY__</div>
-        </div>
-
-        <button
-          v-for="task in filteredTasks" :key="task.id"
-          class="grid w-full grid-cols-[1fr_64px_78px_88px] items-center gap-1 border-b px-4 py-[9px] text-left transition-colors hover:bg-[rgba(140,100,60,0.06)]"
-          style="border-color:rgba(160,120,80,0.08)"
-          @click="openDetail(task)"
-        >
-          <div class="flex min-w-0 items-center gap-[8px]">
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="dotStyle(task.status)" />
-            <div class="min-w-0">
-              <div class="truncate text-[12.5px] font-semibold" style="color:#2a1f13">{{ task.title || '__T_TASKS_UNNAMED__' }}</div>
-              <div class="mt-px text-[10px]" style="color:rgba(120,80,40,0.5)">#{{ task.id }} · {{ task.app || '-' }}</div>
-            </div>
-          </div>
-          <div class="text-[10.5px]" style="color:rgba(0,0,0,0.45)">{{ modeLabel(task.mode) }}</div>
-          <div>
-            <span class="inline-block rounded-full px-2 py-[2px] text-[9.5px] font-semibold" :style="tagStyle(task.status)">{{ statusLabel(task.status) }}</span>
-          </div>
-          <div class="text-[10px] tabular-nums" style="color:rgba(0,0,0,0.35)">{{ formatCompactDateTime(task.finished_at || task.created_at) }}</div>
-        </button>
-      </div>
-    </template>
-
-    <!-- ═══ DETAIL VIEW ═══ -->
-    <template v-else>
-      <!-- Detail toolbar -->
-      <div class="flex shrink-0 items-center gap-2 border-b px-3 py-2" style="border-color:rgba(0,0,0,0.06);background:rgba(247,244,239,0.9)">
-        <button
-          class="flex items-center gap-1 rounded-full px-3 py-[3px] text-[11.5px] font-semibold transition hover:bg-[rgba(140,100,60,0.1)]"
-          style="color:#5c4332"
-          @click="closeDetail"
-        >
-          <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
-          __T_TASKDETAIL_BACK__
-        </button>
-        <div class="min-w-0 flex-1 truncate text-[11.5px] font-semibold" style="color:#2a1f13">{{ detailTask.title || '__T_TASKS_UNNAMED__' }}</div>
-        <button
-          v-if="detailTask.status === 'pending'"
-          class="rounded-full px-3 py-[3px] text-[10.5px] font-semibold transition disabled:opacity-50"
-          style="background:rgba(176,58,32,0.1);color:#b03a20"
-          :disabled="stopping"
-          @click="stopTask"
-        >
-          {{ stopping ? '__T_TASKDETAIL_STOPPING__' : '__T_TASKDETAIL_STOP_BUTTON__' }}
-        </button>
-        <button
-          class="flex h-[26px] w-[26px] items-center justify-center rounded-full border transition hover:bg-[rgba(140,100,60,0.08)]"
-          style="border-color:rgba(0,0,0,0.08);color:#2a1f13;background:#fff"
-          @click="loadDetail"
-        >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 8a5.5 5.5 0 019.5-3.7M13.5 8a5.5 5.5 0 01-9.5 3.7" stroke-linecap="round"/><path d="M12 1.5v3h-3M4 15.5v-3h3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-
-      <!-- Detail error -->
-      <div v-if="detailError" class="mx-3 mt-2 rounded-[10px] border px-3 py-2 text-[12px]" style="border-color:rgba(176,58,32,0.25);background:rgba(176,58,32,0.06);color:#b03a20">{{ detailError }}</div>
-
-      <!-- Detail content -->
-      <div class="min-h-0 flex-1 overflow-y-auto px-4 py-3 [scrollbar-width:thin]">
-        <!-- Facts -->
-        <div class="mb-3 grid grid-cols-4 gap-2">
-          <div v-for="fact in detailFacts" :key="fact.key" class="rounded-[10px] border px-2.5 py-2"
-            style="border-color:rgba(160,120,80,0.12);background:rgba(255,255,255,0.7)">
-            <div class="text-[9px] uppercase tracking-[0.06em]" style="color:rgba(120,80,40,0.5)">{{ fact.label }}</div>
-            <div class="mt-0.5 text-[11px] font-semibold" style="color:#2a1f13">{{ fact.value }}</div>
-          </div>
-        </div>
-
-        <!-- Prompt -->
-        <template v-if="detailTask.prompt">
-          <div class="mb-1 text-[9px] font-bold uppercase tracking-[0.08em]" style="color:rgba(120,80,40,0.5)">__T_TASKDETAIL_PROMPT_LABEL__</div>
-          <div class="mb-3 whitespace-pre-wrap break-words rounded-[10px] border px-3 py-2 text-[11.5px] leading-[1.65]"
-            style="border-color:rgba(160,120,80,0.12);background:rgba(255,255,255,0.7);color:#3d2f1e">{{ detailTask.prompt }}</div>
-        </template>
-
-        <!-- Error -->
-        <template v-if="detailTask.error">
-          <div class="mb-1 text-[9px] font-bold uppercase tracking-[0.08em]" style="color:rgba(120,80,40,0.5)">__T_TASKDETAIL_ERROR_LABEL__</div>
-          <div class="mb-3 whitespace-pre-wrap break-words rounded-[10px] border px-3 py-2 text-[11.5px] leading-[1.65]"
-            style="border-color:rgba(176,58,32,0.25);background:rgba(176,58,32,0.05);color:#b03a20">{{ detailTask.error }}</div>
-        </template>
-
-        <!-- Messages -->
-        <div class="mb-1 text-[9px] font-bold uppercase tracking-[0.08em]" style="color:rgba(120,80,40,0.5)">
-          __T_TASKDETAIL_MESSAGES_TITLE__ · {{ messages.length }}
-        </div>
-
-        <div v-if="messages.length === 0" class="rounded-[10px] border border-dashed py-10 text-center text-[12px]"
-          style="border-color:rgba(160,120,80,0.2);background:rgba(255,255,255,0.5);color:rgba(0,0,0,0.35)">
-          __T_TASKDETAIL_NO_MESSAGES__
-        </div>
-
-        <div v-else class="space-y-1.5">
-          <div
-            v-for="item in displayMessages" :key="item.id"
-            class="rounded-[10px] border px-3 py-[9px]"
-            style="border-color:rgba(160,120,80,0.12);background:rgba(255,255,255,0.78)"
-          >
-            <div class="mb-1.5 flex items-center gap-1.5">
-              <span class="rounded-full px-2 py-[1px] text-[9px] font-bold uppercase tracking-[0.05em]" :style="roleStyle(item)">
-                {{ roleLabel(item) }}
-              </span>
-              <span v-if="msgToolName(item)" class="text-[9px]" style="color:rgba(120,80,40,0.5)">{{ msgToolName(item) }}</span>
-            </div>
-
-            <template v-if="isToolCall(item)">
-              <div
-                v-for="(tc, i) in item.message.tool_calls" :key="i"
-                class="break-all rounded-[8px] px-2.5 py-1.5 text-[10.5px] leading-[1.6]"
-                style="background:rgba(140,100,60,0.08);color:rgba(80,55,30,0.85);font-family:'SF Mono','Fira Code',monospace"
-              >{{ formatArgs(tc.function?.arguments) }}</div>
-            </template>
-            <div v-else class="whitespace-pre-wrap break-words text-[11.5px] leading-[1.65]" style="color:#3d2f1e">
-              {{ renderContent(item) }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
-  </div>
-</template>
-
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { on } from '../../system/ws.js';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useTasksStore } from '@/stores/tasks';
+import * as api from '@/utils/api';
 
-const tasks = ref([]);
-const error = ref('');
-const activeFilter = ref('all');
-const detailTask = ref(null);
-const messages = ref([]);
+const tasks = useTasksStore();
+
+const STATUS_META = {
+    running:   { label: '__T_TASKS_STATUS_RUNNING__', color: 'var(--color-accent)' },
+    pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__', color: 'var(--color-accent)' },
+    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__', color: 'var(--color-good)' },
+    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__', color: 'var(--color-good)' },
+    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
+    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
+    error:     { label: '__T_TASKS_STATUS_ERROR__', color: 'var(--color-bad)' },
+};
+const statusMeta = (s) => STATUS_META[s] || { label: s || '__T_TASKDETAIL_ROLE_UNKNOWN__', color: 'var(--color-muted)' };
+const isActive = (t) => t.status === 'running' || t.status === 'pending';
+
+function fmtTime(s) {
+    if (!s) return '';
+    const d = new Date(String(s).replace(' ', 'T') + 'Z');
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60)    return '__T_TASKS_JUST_NOW__';
+    if (diff < 3600)  return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
+}
+function fmtFullTime(s) {
+    if (!s) return '';
+    const d = new Date(String(s).replace(' ', 'T') + 'Z');
+    if (Number.isNaN(d.getTime())) return s;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+}
+
+const selectedId = ref(null);
+const detail = ref(null);
+const detailMessages = ref([]);
+const detailLoading = ref(false);
 const detailError = ref('');
-const stopping = ref(false);
+let detailPoller = null;
 
-const parseSqlDate = (value) => {
-  const raw = String(value || '').trim();
-  if (!raw) return null;
-  const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+const selected = computed(() => detail.value);
 
-const formatDateTime = (value) => {
-  const date = value instanceof Date ? value : parseSqlDate(value);
-  if (!date) return '-';
-  return date.toLocaleString();
-};
+async function openDetail(id) {
+    if (detailPoller) { clearInterval(detailPoller); detailPoller = null; }
+    selectedId.value = id;
+    detailError.value = '';
+    detail.value = null;
+    detailMessages.value = [];
+    await refreshDetail();
+    // Keep polling while the task is still active.
+    detailPoller = setInterval(() => {
+        if (!detail.value || isActive(detail.value)) refreshDetail();
+        else { clearInterval(detailPoller); detailPoller = null; }
+    }, 2000);
+}
+async function refreshDetail() {
+    if (!selectedId.value) return;
+    detailLoading.value = true;
+    try {
+        const [data, msgData] = await Promise.all([
+            api.get('/api/task/detail', { query: { id: selectedId.value } }),
+            api.get('/api/task/messages', { query: { id: selectedId.value } }),
+        ]);
+        detail.value = data?.task || null;
+        detailMessages.value = Array.isArray(msgData?.messages) ? msgData.messages : [];
+    } catch (err) {
+        detailError.value = err?.body?.message || err.message || '__T_TASKS_LOAD_FAIL__';
+    } finally {
+        detailLoading.value = false;
+    }
+}
+function backToList() {
+    selectedId.value = null;
+    detail.value = null;
+    detailMessages.value = [];
+    detailError.value = '';
+    if (detailPoller) { clearInterval(detailPoller); detailPoller = null; }
+}
 
-const formatCompactDateTime = (value) => {
-  const date = value instanceof Date ? value : parseSqlDate(value);
-  if (!date) return '-';
-  return date.toLocaleString([], {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
+async function stopFromDetail() {
+    if (!detail.value) return;
+    try {
+        await tasks.stop(detail.value.id);
+        await refreshDetail();
+    } catch {}
+}
 
-/* ── filters ── */
-const countBy = (s) => {
-  if (s === 'error') return tasks.value.filter((t) => t.status === 'error' || t.status === 'aborted').length;
-  return tasks.value.filter((t) => t.status === s).length;
-};
-
-const filters = computed(() => [
-  { key: 'all', label: '__T_TASKS_TAB_ALL__', count: tasks.value.length },
-  { key: 'pending', label: '__T_TASKS_STATUS_PENDING__', count: countBy('pending') },
-  { key: 'done', label: '__T_TASKS_STATUS_DONE__', count: countBy('done') },
-  { key: 'error', label: '__T_TASKS_STATUS_ERROR__', count: countBy('error') }
-]);
-
-const filteredTasks = computed(() => {
-  if (activeFilter.value === 'all') return tasks.value;
-  if (activeFilter.value === 'error') return tasks.value.filter((t) => t.status === 'error' || t.status === 'aborted');
-  return tasks.value.filter((t) => t.status === activeFilter.value);
-});
-
-/* ── status helpers ── */
-const modeLabel = (mode) => {
-  if (mode === 'instant') return '__T_TASKS_MODE_LABEL_INSTANT__';
-  if (mode === 'agent') return '__T_TASKS_MODE_LABEL_AGENT__';
-  return mode || '-';
-};
-
-const statusLabel = (status) => ({
-  pending: '__T_TASKS_STATUS_PENDING__',
-  done: '__T_TASKS_STATUS_DONE__',
-  error: '__T_TASKS_STATUS_ERROR__',
-  aborted: '__T_TASKS_STATUS_ABORTED__'
-}[status] || status || '-');
-
-const dotStyle = (status) => {
-  if (status === 'pending') return 'background:#c9a56e';
-  if (status === 'done') return 'background:#7e8d5a';
-  if (status === 'error') return 'background:#b03a20';
-  if (status === 'aborted') return 'background:rgba(140,100,60,0.35)';
-  return 'background:rgba(140,100,60,0.35)';
-};
-
-const tagStyle = (status) => {
-  if (status === 'pending') return 'background:rgba(201,165,110,0.18);color:#7a5220';
-  if (status === 'done') return 'background:rgba(126,141,90,0.18);color:#4a5a28';
-  if (status === 'error') return 'background:rgba(176,58,32,0.12);color:#b03a20';
-  if (status === 'aborted') return 'background:rgba(140,100,60,0.1);color:rgba(120,80,40,0.55)';
-  return 'background:rgba(140,100,60,0.1);color:rgba(120,80,40,0.55)';
-};
-
-/* ── API ── */
-const request = async (url, options = {}) => {
-  const res = await fetch(url, options);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.success === false) throw new Error(data.message || data.error || `HTTP ${res.status}`);
-  return data;
-};
-
-const loadTasks = async () => {
-  error.value = '';
-  try {
-    const data = await request('/api/task?limit=200');
-    tasks.value = Array.isArray(data) ? data : [];
-  } catch (e) {
-    error.value = e.message || '__T_TASKS_LOAD_FAIL__';
-  }
-};
-
-/* ── detail ── */
-const openDetail = async (task) => {
-  detailTask.value = task;
-  messages.value = [];
-  detailError.value = '';
-  stopping.value = false;
-  await loadDetail();
-};
-
-const loadDetail = async () => {
-  if (!detailTask.value) return;
-  detailError.value = '';
-  try {
-    const [td, tm] = await Promise.all([
-      request(`/api/task/detail?id=${detailTask.value.id}`),
-      request(`/api/task/messages?id=${detailTask.value.id}`)
-    ]);
-    detailTask.value = td.task || detailTask.value;
-    messages.value = Array.isArray(tm.messages) ? tm.messages : [];
-  } catch (e) {
-    detailError.value = e.message || '__T_TASKDETAIL_LOAD_FAILED__';
-  }
-};
-
-const closeDetail = () => {
-  detailTask.value = null;
-  messages.value = [];
-};
-
-const stopTask = async () => {
-  if (stopping.value || !detailTask.value || detailTask.value.status !== 'pending') return;
-  stopping.value = true;
-  detailError.value = '';
-  try {
-    await request('/api/task/stop', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: detailTask.value.id })
-    });
-    await loadDetail();
-  } catch (e) {
-    detailError.value = e.message || '__T_TASKDETAIL_STOP_FAILED__';
-  } finally {
-    stopping.value = false;
-  }
-};
-
-/* ── detail computed ── */
-const detailFacts = computed(() => {
-  if (!detailTask.value) return [];
-  return [
-    { key: 'created', label: '__T_TASKDETAIL_CREATED_AT__', value: formatDateTime(detailTask.value.created_at) },
-    { key: 'finished', label: '__T_TASKDETAIL_FINISHED_AT__', value: formatDateTime(detailTask.value.finished_at) },
-    { key: 'app', label: '__T_TASKDETAIL_APP_LABEL__', value: detailTask.value.app || '-' },
-    { key: 'mode', label: '__T_TASKS_COLUMN_MODE__', value: modeLabel(detailTask.value.mode) }
-  ];
-});
-
-const displayMessages = computed(() => [...messages.value].reverse());
-
-/* ── message helpers ── */
-const isToolCall = (item) => Array.isArray(item?.message?.tool_calls) && item.message.tool_calls.length > 0;
-
-const roleLabel = (item) => {
-  const role = item?.message?.role;
-  if (role === 'user') return '__T_TASKDETAIL_ROLE_USER__';
-  if (role === 'assistant' && isToolCall(item)) return '__T_TASKDETAIL_ROLE_TOOL_CALL__';
-  if (role === 'assistant') return '__T_TASKDETAIL_ROLE_AI__';
-  if (role === 'tool') return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
-  return '__T_TASKDETAIL_ROLE_UNKNOWN__';
-};
-
-const roleStyle = (item) => {
-  const role = item?.message?.role;
-  if (role === 'user') return 'background:rgba(201,165,110,0.2);color:#7a5220';
-  if (role === 'assistant' && isToolCall(item)) return 'background:rgba(126,90,140,0.15);color:#5a3a7a';
-  if (role === 'assistant') return 'background:rgba(92,67,50,0.12);color:#5c4332';
-  if (role === 'tool') return 'background:rgba(126,141,90,0.18);color:#4a5a28';
-  return 'background:rgba(140,100,60,0.1);color:rgba(120,80,40,0.6)';
-};
-
-const msgToolName = (item) => {
-  const msg = item?.message || {};
-  if (msg.name) return msg.name;
-  if (Array.isArray(msg.tool_calls) && msg.tool_calls.length) return msg.tool_calls[0]?.function?.name || '';
-  return '';
-};
-
-const renderContent = (item) => {
-  const msg = item?.message || {};
-  if (typeof msg.content === 'string' && msg.content.trim()) {
-    const text = msg.content;
-    if (text.length <= 800) return text;
-    return `${text.slice(0, 560)}\n\n__T_TASKDETAIL_TRUNCATED_RESULT__`.replace('{count}', String(text.length - 800)) + `\n\n${text.slice(-240)}`;
-  }
-  return JSON.stringify(msg, null, 2);
-};
-
-const formatArgs = (args) => {
-  if (!args) return '';
-  try {
-    const parsed = typeof args === 'string' ? JSON.parse(args) : args;
-    if (parsed.command) return parsed.command;
-    return JSON.stringify(parsed, null, 2);
-  } catch {
-    return String(args);
-  }
-};
-
-/* ── lifecycle ── */
-const unsubs = [];
-onMounted(async () => {
-  await loadTasks();
-  unsubs.push(on('tasks_changed', () => {
-    loadTasks();
-    if (detailTask.value) loadDetail();
-  }));
+let listPoller = null;
+onMounted(() => {
+    tasks.fetch();
+    listPoller = setInterval(() => { if (!selectedId.value) tasks.fetch(); }, 4000);
 });
 onUnmounted(() => {
-  while (unsubs.length) {
-    const off = unsubs.pop();
-    if (typeof off === 'function') off();
-  }
+    if (listPoller) clearInterval(listPoller);
+    if (detailPoller) clearInterval(detailPoller);
 });
+
+function toolCallName(msg) {
+    return msg?.tool_calls?.[0]?.function?.name || 'tool';
+}
+function toolCallArgs(msg) {
+    return msg?.tool_calls?.[0]?.function?.arguments || '';
+}
+function messageText(msg) {
+    return msg?.content == null ? '' : String(msg.content);
+}
+function messageRoleLabel(role) {
+    if (role === 'assistant') return '__T_TASKS_ROLE_MODEL__';
+    if (role === 'tool') return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
+    if (role === 'user') return '__T_TASKDETAIL_ROLE_USER__';
+    if (role === 'system') return '__T_TASKS_ROLE_SYSTEM__';
+    return role || '__T_TASKS_ROLE_MESSAGE__';
+}
 </script>
+
+<template>
+    <!-- detail view -->
+    <div v-if="selectedId" class="flex h-full flex-col bg-bg">
+        <header class="flex flex-none items-center gap-2 px-4 pt-4 max-md:px-3 max-md:pt-3">
+            <button
+                class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+                @click="backToList"
+                title="__T_TASKDETAIL_BACK__">
+                <span class="msi sm">arrow_back</span>
+            </button>
+            <span class="text-[12px] text-muted">__T_TASKDETAIL_BACK__</span>
+            <button
+                v-if="selected && isActive(selected)"
+                class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-line-hi bg-transparent px-3 py-1 text-[12.5px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
+                @click="stopFromDetail">
+                <span class="msi sm">stop_circle</span>
+                <span>__T_TASKS_STOP__</span>
+            </button>
+        </header>
+
+        <div v-if="detailError" class="mx-8 mt-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-4"
+             style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
+            {{ detailError }}
+        </div>
+
+        <div v-if="!selected && !detailError" class="flex flex-1 flex-col items-center gap-2 py-15 text-muted">
+            <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
+            <div class="text-[14px]">__T_TASKS_LOADING__</div>
+        </div>
+
+        <div v-else-if="selected" class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-4 max-md:px-4 max-md:pb-10">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+                <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium uppercase tracking-[0.04em] text-ink">
+                    {{ selected.app || 'unknown' }}
+                </span>
+                <span class="text-[12px] text-faint">·</span>
+                <span class="text-[12px] text-muted">{{ selected.mode || '—' }}</span>
+                <span class="text-[12px] text-faint">·</span>
+                <span class="inline-flex items-center gap-1.5 text-[12px] font-medium"
+                      :style="{ color: statusMeta(selected.status).color }">
+                    <span class="h-1.5 w-1.5 rounded-full"
+                          :class="{ 'animate-status-pulse': isActive(selected) }"
+                          :style="{ background: statusMeta(selected.status).color }"></span>
+                    {{ statusMeta(selected.status).label }}
+                </span>
+                <span class="text-[12px] text-faint">·</span>
+                <span class="text-[12px] text-faint">#{{ selected.id }}</span>
+            </div>
+
+            <h2 class="m-0 break-words text-[24px] font-semibold leading-[1.25] tracking-[-0.01em] text-ink max-md:text-[19px]">
+                {{ selected.title || `__T_TASKS_TASK_NUMBER__ #${selected.id}` }}
+            </h2>
+
+            <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-faint">
+                <span v-if="selected.created_at">__T_TASKS_CREATED__ {{ fmtFullTime(selected.created_at) }}</span>
+                <span v-if="selected.finished_at">__T_TASKS_FINISHED__ {{ fmtFullTime(selected.finished_at) }}</span>
+                <span v-if="selected.conversation_id" class="font-mono">{{ selected.conversation_id }}</span>
+            </div>
+
+            <div v-if="selected.error" class="mt-4 rounded-lg px-3 py-2 text-[12.5px] text-bad"
+                 style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
+                <div class="text-[10.5px] font-medium uppercase tracking-wider opacity-80">__T_TASKDETAIL_ERROR_LABEL__</div>
+                <div class="mt-1 whitespace-pre-wrap leading-[1.55]">{{ selected.error }}</div>
+            </div>
+
+            <template v-if="selected.prompt">
+                <div class="mt-5 mb-1.5 text-[11.5px] font-medium uppercase tracking-wider text-faint">__T_TASKDETAIL_PROMPT_LABEL__</div>
+                <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-line bg-bg-elev px-3 py-2.5 font-mono text-[12.5px] leading-[1.6] text-ink">{{ selected.prompt }}</pre>
+            </template>
+
+            <template v-if="selected.response">
+                <div class="mt-5 mb-1.5 text-[11.5px] font-medium uppercase tracking-wider text-faint">__T_TASKS_RESPONSE__</div>
+                <div class="whitespace-pre-wrap break-words rounded-lg border border-line bg-bg-elev px-3 py-2.5 text-[13.5px] leading-[1.65] text-ink">{{ selected.response }}</div>
+            </template>
+
+            <template v-if="selected.schema">
+                <div class="mt-5 mb-1.5 text-[11.5px] font-medium uppercase tracking-wider text-faint">Schema</div>
+                <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-line bg-bg-elev px-3 py-2.5 font-mono text-[11.5px] leading-[1.55] text-muted">{{ selected.schema }}</pre>
+            </template>
+
+            <template v-if="selected.meta">
+                <div class="mt-5 mb-1.5 text-[11.5px] font-medium uppercase tracking-wider text-faint">Meta</div>
+                <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-line bg-bg-elev px-3 py-2.5 font-mono text-[11.5px] leading-[1.55] text-muted">{{ typeof selected.meta === 'string' ? selected.meta : JSON.stringify(selected.meta, null, 2) }}</pre>
+            </template>
+
+            <template v-if="detailMessages.length">
+                <div class="mt-5 mb-1.5 flex items-center justify-between gap-3">
+                    <div class="text-[11.5px] font-medium uppercase tracking-wider text-faint">__T_TASKDETAIL_MESSAGES_TITLE__</div>
+                    <div class="text-[11.5px] text-faint">{{ '__T_TASKDETAIL_MESSAGES_COUNT__'.replace('{count}', detailMessages.length) }}</div>
+                </div>
+                <ol class="m-0 flex list-none flex-col gap-2 p-0">
+                    <li v-for="row in detailMessages" :key="row.id"
+                        class="rounded-lg border border-line bg-bg-elev px-3 py-2.5">
+                        <div class="mb-1.5 flex flex-wrap items-center gap-2 text-[11.5px]">
+                            <span class="font-medium text-ink">{{ messageRoleLabel(row.message?.role) }}</span>
+                            <span class="text-faint">#{{ row.id }}</span>
+                            <span v-if="row.createdAt" class="text-faint">{{ fmtFullTime(row.createdAt) }}</span>
+                            <span v-if="row.message?.tool_call_id" class="font-mono text-faint">{{ row.message.tool_call_id }}</span>
+                        </div>
+                        <template v-if="row.message?.tool_calls?.length">
+                            <div class="mb-1.5 text-[12.5px] text-muted">
+                                __T_TASKS_TOOL_CALL__ <span class="font-mono text-ink">{{ toolCallName(row.message) }}</span>
+                            </div>
+                            <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11.5px] leading-[1.55] text-muted">{{ toolCallArgs(row.message) }}</pre>
+                        </template>
+                        <div v-if="messageText(row.message)"
+                             class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.6] text-muted">
+                            {{ messageText(row.message) }}
+                        </div>
+                    </li>
+                </ol>
+            </template>
+        </div>
+    </div>
+
+    <!-- list -->
+    <div v-else class="flex h-full flex-col bg-bg">
+        <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
+            <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TASKS_TITLE__</h1>
+            <button
+                class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:enabled:bg-line-hi hover:enabled:text-ink disabled:cursor-default disabled:opacity-60"
+                :disabled="tasks.loading"
+                @click="tasks.fetch"
+                title="__T_TASKS_REFRESH__">
+                <span class="msi sm" :class="{ spin: tasks.loading }">refresh</span>
+                <span>__T_TASKS_REFRESH__</span>
+            </button>
+        </header>
+
+        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+            <div v-if="tasks.tasks.length === 0" class="flex flex-col items-center gap-2 py-20 text-muted">
+                <span class="msi" style="font-size:32px;color:var(--color-faint)">inbox</span>
+                <div class="text-[14px]">{{ tasks.loading ? '__T_TASKS_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
+                <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
+            </div>
+
+            <ul v-else class="m-0 flex list-none flex-col gap-1.5 p-0">
+                <li v-for="t in tasks.tasks" :key="t.id"
+                    class="flex cursor-pointer items-start gap-3.5 rounded-[14px] bg-card px-4.5 py-3.5 transition-colors hover:bg-card-hi max-md:gap-2.5 max-md:rounded-xl max-md:px-3.5 max-md:py-3"
+                    @click="openDetail(t.id)">
+                    <span class="mt-[7px] h-2 w-2 flex-none rounded-full"
+                          :class="{ 'animate-status-pulse': isActive(t) }"
+                          :style="{ background: statusMeta(t.status).color }"></span>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-baseline gap-3 max-md:flex-wrap">
+                            <span class="flex-1 truncate text-[14px] font-medium text-ink">
+                                {{ t.title || t.prompt?.slice(0, 60) || `#${t.id}` }}
+                            </span>
+                            <span class="flex-none text-[12px] text-faint">{{ fmtTime(t.created_at) }}</span>
+                        </div>
+                        <div class="mt-1 flex items-center gap-2 text-[12px] text-muted">
+                            <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium uppercase tracking-[0.04em] text-ink">
+                                {{ t.app || 'unknown' }}
+                            </span>
+                            <span class="text-faint">·</span>
+                            <span>{{ t.mode || '—' }}</span>
+                            <span class="text-faint">·</span>
+                            <span class="font-medium" :style="{ color: statusMeta(t.status).color }">
+                                {{ statusMeta(t.status).label }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button v-if="isActive(t)"
+                        class="stop-btn inline-flex flex-none cursor-pointer items-center gap-1 rounded-full border border-line-hi bg-transparent px-2.5 py-1 text-[12px] text-muted transition-colors"
+                        title="__T_TASKS_STOP__"
+                        @click.stop="tasks.stop(t.id)">
+                        <span class="msi sm">stop_circle</span>
+                        __T_TASKS_STOP__
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
+@keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+.stop-btn:hover {
+    color: var(--color-bad);
+    border-color: var(--color-bad);
+    background: var(--color-bg-hi);
+}
+</style>

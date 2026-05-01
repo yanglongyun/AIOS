@@ -1,11 +1,15 @@
 import { parseJsonObject } from "../../shared/ai/json.js";
-const AIOS_SERVER_PORT = Number(process.env.AIOS_SERVER_PORT || 9501);
+import { getApiToken } from "./apiToken.js";
+
 const requestTask = async (body = {}) => {
   let resp;
   try {
-    resp = await fetch(`http://localhost:${AIOS_SERVER_PORT}/api/task/create/agent`, {
+    const token = getApiToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    resp = await fetch(`http://localhost:${process.env.IIMOS_MAIN_PORT || 9501}/api/task/create/agent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body)
     });
   } catch (err) {

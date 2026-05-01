@@ -1,205 +1,401 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0');
+
 @import "tailwindcss";
-@variant dark (&:where(.dark, .dark *));
+@import "@xterm/xterm/css/xterm.css";
 
-/* 全局滚动条 */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
-}
-.dark * {
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
-}
-:root:not(.dark) * {
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
-}
-*::-webkit-scrollbar { width: 4px; height: 4px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 4px; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
-.dark *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
-.dark *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+/* ================================================================
+   iimos theme — Google / Material 3 inspired.
+   Light = clean paper white with soft blue-gray cards.
+   Dark  = ink-on-graphite with the same blue accent.
+   Toggle by adding `.light` or `.dark` class on <html>.
+   Default is light.
+   ================================================================ */
 
-textarea { field-sizing: content; }
+:root, :root.light {
+    --color-bg:        #ffffff;       /* page (main content area) */
+    --color-bg-elev:   #fafbfd;       /* surface (rail / topbar / popup cards) */
+    --color-bg-hi:     #f1f3f6;       /* hover / subtle fill */
+    --color-line:      #eff1f5;
+    --color-line-hi:   #e6e8ec;
+    --color-ink:       #1f1f1f;
+    --color-muted:     #5f6368;
+    --color-faint:     #80868b;
+    --color-accent:    #0b57d0;       /* google blue 700 */
+    --color-accent-hi: #0842a0;
+    --color-good:      #1e8e3e;
+    --color-bad:       #d93025;
+    --color-shadow:    rgba(31, 31, 31, 0.12);
 
-/* ── Wallpapers ─────────────────────────────────────────────────────────── */
-.wp-sea-mist-blue-bay {
-  background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
-}
+    /* Soft card tones (matches D-google-1 demo) */
+    --color-card:      #eef2f9;
+    --color-card-hi:   #e6ecf6;
+    --color-card-sub:  #f4f6fa;
 
-.wp-morning-sandbar {
-  background-color: #000408;
-  background-image:
-    /* 星点 — 最亮 */
-    radial-gradient(circle 2.5px at 8% 14%, rgba(255,248,220,0.96) 0%, transparent 100%),
-    radial-gradient(circle 2.2px at 52% 4%, rgba(255,255,255,0.92) 0%, transparent 100%),
-    radial-gradient(circle 2px at 84% 9%, rgba(200,220,255,0.90) 0%, transparent 100%),
-    radial-gradient(circle 2.3px at 91% 42%, rgba(255,255,255,0.93) 0%, transparent 100%),
-    radial-gradient(circle 2px at 22% 52%, rgba(255,235,180,0.88) 0%, transparent 100%),
-    /* 星点 — 亮 */
-    radial-gradient(circle 1.6px at 15% 28%, rgba(255,255,255,0.80) 0%, transparent 100%),
-    radial-gradient(circle 1.7px at 72% 22%, rgba(255,255,255,0.82) 0%, transparent 100%),
-    radial-gradient(circle 1.5px at 45% 35%, rgba(255,240,200,0.76) 0%, transparent 100%),
-    radial-gradient(circle 1.6px at 62% 48%, rgba(255,255,255,0.78) 0%, transparent 100%),
-    radial-gradient(circle 1.4px at 38% 18%, rgba(200,215,255,0.75) 0%, transparent 100%),
-    radial-gradient(circle 1.4px at 78% 58%, rgba(180,200,255,0.74) 0%, transparent 100%),
-    radial-gradient(circle 1.6px at 30% 65%, rgba(255,255,255,0.76) 0%, transparent 100%),
-    radial-gradient(circle 1.5px at 88% 72%, rgba(255,248,210,0.78) 0%, transparent 100%),
-    /* 星点 — 中等 */
-    radial-gradient(circle 1px at 5% 38%, rgba(255,255,255,0.65) 0%, transparent 100%),
-    radial-gradient(circle 1.1px at 25% 72%, rgba(200,210,255,0.62) 0%, transparent 100%),
-    radial-gradient(circle 1px at 48% 55%, rgba(255,255,255,0.68) 0%, transparent 100%),
-    radial-gradient(circle 1.2px at 58% 68%, rgba(180,220,255,0.64) 0%, transparent 100%),
-    radial-gradient(circle 1px at 65% 28%, rgba(255,255,255,0.60) 0%, transparent 100%),
-    radial-gradient(circle 1px at 82% 30%, rgba(255,255,255,0.62) 0%, transparent 100%),
-    radial-gradient(circle 1.1px at 12% 82%, rgba(255,255,255,0.58) 0%, transparent 100%),
-    radial-gradient(circle 1px at 70% 12%, rgba(255,230,180,0.62) 0%, transparent 100%),
-    radial-gradient(circle 0.9px at 95% 62%, rgba(255,255,255,0.58) 0%, transparent 100%),
-    /* 银河带 */
-    radial-gradient(ellipse 88% 22% at 52% 50%, rgba(158,178,242,0.20) 0%, rgba(128,152,232,0.10) 45%, transparent 68%),
-    radial-gradient(ellipse 115% 40% at 55% 52%, rgba(98,118,212,0.12) 0%, transparent 62%),
-    /* 星云色块 */
-    radial-gradient(ellipse 22% 16% at 35% 38%, rgba(78,128,242,0.18) 0%, transparent 62%),
-    radial-gradient(ellipse 18% 12% at 68% 55%, rgba(222,148,88,0.12) 0%, transparent 58%),
-    radial-gradient(ellipse 15% 10% at 82% 35%, rgba(58,198,192,0.10) 0%, transparent 58%),
-    radial-gradient(ellipse 20% 14% at 18% 42%, rgba(158,78,232,0.12) 0%, transparent 62%),
-    /* 亮星光晕 */
-    radial-gradient(circle 100px at 88% 14%, rgba(255,252,235,0.22) 0%, rgba(240,240,210,0.06) 30%, transparent 60%),
-    /* 地平线大气散射 */
-    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(14,24,72,0.68) 0%, transparent 50%),
-    linear-gradient(180deg, #000205 0%, #010408 30%, #020610 60%, #010508 88%, #000204 100%);
+    /* Blue accent system */
+    --color-blue-bg:   #eaf1fc;       /* active pill bg */
+    --color-blue-soft: #d3e3fd;       /* hover for active */
+    --color-blue-fg:   #0842a0;       /* darker blue text */
+
+    /* Brand sparkle gradient stops */
+    --gem-1: #1c7eff;
+    --gem-2: #ad7bff;
+    --gem-3: #fa6c1f;
+    --gem-4: #4ad295;
+
+    /* Elevation (Material-ish soft shadows) */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow:    0 1px 2px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.12);
 }
 
-.wp-forest-mist {
-  background-color: #020c14;
-  background-image:
-    /* 极光帷幕 1 — 翠绿 */
-    radial-gradient(ellipse 20% 80% at 28% 42%, rgba(28,218,128,0.62) 0%, rgba(20,200,112,0.22) 52%, transparent 80%),
-    /* 极光帷幕 2 — 青绿 */
-    radial-gradient(ellipse 15% 72% at 42% 38%, rgba(18,208,175,0.52) 0%, rgba(12,188,162,0.18) 52%, transparent 78%),
-    /* 极光帷幕 3 — 湛蓝 */
-    radial-gradient(ellipse 17% 75% at 57% 35%, rgba(38,178,222,0.48) 0%, rgba(28,158,210,0.16) 52%, transparent 80%),
-    /* 极光帷幕 4 — 深紫 */
-    radial-gradient(ellipse 13% 68% at 70% 40%, rgba(128,55,235,0.45) 0%, rgba(108,38,215,0.15) 52%, transparent 78%),
-    /* 极光帷幕 5 — 洋红尾焰 */
-    radial-gradient(ellipse 10% 58% at 83% 45%, rgba(225,55,188,0.32) 0%, transparent 74%),
-    /* 极光天空底色辉光 */
-    radial-gradient(ellipse 150% 52% at 50% 42%, rgba(12,78,78,0.38) 0%, transparent 64%),
-    /* 地面反光 */
-    radial-gradient(ellipse 100% 22% at 50% 100%, rgba(8,58,45,0.58) 0%, transparent 52%),
-    /* 极光中稀疏星点 */
-    radial-gradient(circle 1.5px at 12% 12%, rgba(255,255,255,0.55) 0%, transparent 100%),
-    radial-gradient(circle 1px at 35% 8%, rgba(255,255,255,0.45) 0%, transparent 100%),
-    radial-gradient(circle 1.2px at 88% 10%, rgba(255,255,255,0.50) 0%, transparent 100%),
-    radial-gradient(circle 0.8px at 62% 6%, rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(circle 1px at 92% 22%, rgba(255,255,255,0.42) 0%, transparent 100%),
-    linear-gradient(180deg, #010608 0%, #020b14 28%, #030e1c 58%, #020c16 82%, #010609 100%);
+:root.dark {
+    --color-bg:        #131418;
+    --color-bg-elev:   #1c1d22;
+    --color-bg-hi:     #25272d;
+    --color-line:      #25272d;
+    --color-line-hi:   #2f3137;
+    --color-ink:       #e8eaed;
+    --color-muted:     #9aa0a6;
+    --color-faint:     #6e7177;
+    --color-accent:    #8ab4f8;       /* google blue 200 in dark */
+    --color-accent-hi: #aecbfa;
+    --color-good:      #81c995;
+    --color-bad:       #f28b82;
+    --color-shadow:    rgba(0, 0, 0, 0.50);
+
+    --color-card:      #1f2229;
+    --color-card-hi:   #252830;
+    --color-card-sub:  #1a1c22;
+
+    --color-blue-bg:   #1f3556;
+    --color-blue-soft: #2a4778;
+    --color-blue-fg:   #aecbfa;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.30);
+    --shadow:    0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.45);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.50), 0 16px 48px rgba(0,0,0,0.60);
 }
 
-.wp-silver-cyan-lake {
-  background-color: #c07085;
-  background-image:
-    /* 地平线暖阳光晕 */
-    radial-gradient(ellipse 75% 38% at 50% 105%, rgba(255,185,100,0.72) 0%, rgba(255,140,90,0.38) 38%, transparent 60%),
-    /* 珊瑚晨带 */
-    radial-gradient(ellipse 100% 28% at 50% 88%, rgba(255,138,118,0.48) 0%, rgba(242,108,128,0.22) 48%, transparent 65%),
-    /* 左云霞 */
-    radial-gradient(ellipse 38% 18% at 18% 68%, rgba(255,175,190,0.38) 0%, transparent 58%),
-    /* 右云霞 */
-    radial-gradient(ellipse 32% 15% at 82% 65%, rgba(255,168,185,0.32) 0%, transparent 55%),
-    /* 中心暖晕 */
-    radial-gradient(ellipse 55% 28% at 50% 75%, rgba(255,200,155,0.28) 0%, transparent 52%),
-    /* 顶部深紫夜空 */
-    radial-gradient(ellipse 85% 52% at 50% 0%, rgba(72,32,118,0.52) 0%, rgba(55,24,95,0.24) 52%, transparent 78%),
-    /* 深紫→玫红→珊瑚→金橙→暖杏 */
-    linear-gradient(180deg, #221038 0%, #581840 22%, #a84868 42%, #d87868 62%, #f0a870 80%, #ffd898 100%);
+@theme {
+    --color-bg:        var(--color-bg);
+    --color-bg-elev:   var(--color-bg-elev);
+    --color-bg-hi:     var(--color-bg-hi);
+    --color-line:      var(--color-line);
+    --color-line-hi:   var(--color-line-hi);
+    --color-ink:       var(--color-ink);
+    --color-muted:     var(--color-muted);
+    --color-faint:     var(--color-faint);
+    --color-accent:    var(--color-accent);
+    --color-accent-hi: var(--color-accent-hi);
+    --color-good:      var(--color-good);
+    --color-bad:       var(--color-bad);
+    --color-card:      var(--color-card);
+    --color-card-hi:   var(--color-card-hi);
+    --color-card-sub:  var(--color-card-sub);
+    --color-blue-bg:   var(--color-blue-bg);
+    --color-blue-soft: var(--color-blue-soft);
+    --color-blue-fg:   var(--color-blue-fg);
+
+    --font-sans:  'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-.wp-dusk-rock-shore {
-  background-color: #505d6e;
-  background-image:
-    repeating-linear-gradient(38deg, transparent 0px, transparent 5px, rgba(255,255,255,0.055) 5px, rgba(255,255,255,0.055) 6px),
-    repeating-linear-gradient(-38deg, transparent 0px, transparent 5px, rgba(0,0,0,0.08) 5px, rgba(0,0,0,0.08) 6px),
-    repeating-linear-gradient(180deg, transparent 0px, transparent 20px, rgba(0,0,0,0.045) 20px, rgba(0,0,0,0.045) 21px, transparent 21px, transparent 42px, rgba(255,255,255,0.03) 42px, rgba(255,255,255,0.03) 43px),
-    radial-gradient(ellipse at 50% 8%, rgba(198,212,235,0.24) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(18,22,32,0.45) 0%, transparent 50%),
-    linear-gradient(180deg, #8c99ac 0%, #637282 40%, #4a5668 72%, #2c3440 100%);
+/* Legacy aliases */
+:root {
+    --c-bg:         var(--color-bg);
+    --c-surface:    var(--color-bg-elev);
+    --c-elevated:   var(--color-bg-hi);
+    --c-border:     var(--color-line-hi);
+    --c-border-soft:var(--color-line);
+    --c-text:       var(--color-ink);
+    --c-text-muted: var(--color-muted);
+    --c-text-dim:   var(--color-faint);
+    --c-accent:     var(--color-accent);
+    --c-accent-hov: var(--color-accent-hi);
+    --c-accent-soft:color-mix(in srgb, var(--color-accent) 20%, transparent);
+    --c-accent-fg:  var(--color-bg);
+    --c-danger:     var(--color-bad);
+    --c-scroll:     var(--color-line-hi);
+    --c-scroll-hov: var(--color-line-hi);
+    --c-terminal-bg:var(--color-bg);
 }
 
-.wp-linen-warm-paper {
-  background-color: #d5c8ac;
-  background-image:
-    repeating-linear-gradient(90deg, rgba(75,55,30,0.09) 0px, rgba(75,55,30,0.09) 1px, transparent 1px, transparent 2px, rgba(75,55,30,0.055) 2px, rgba(75,55,30,0.055) 3px, transparent 3px, transparent 5px),
-    repeating-linear-gradient(0deg, rgba(75,55,30,0.08) 0px, rgba(75,55,30,0.08) 1px, transparent 1px, transparent 2px, rgba(75,55,30,0.045) 2px, rgba(75,55,30,0.045) 3px, transparent 3px, transparent 5px),
-    repeating-linear-gradient(45deg, rgba(255,242,215,0.07) 0px, rgba(255,242,215,0.07) 1px, transparent 1px, transparent 5px),
-    radial-gradient(ellipse at 50% 15%, rgba(255,250,238,0.32) 0%, transparent 55%),
-    linear-gradient(165deg, #f6ede0 0%, #e2d1bc 48%, #cdbfa5 100%);
+html, body {
+    height: 100%;
+    overscroll-behavior: none;
+    overflow: hidden;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+}
+body {
+    margin: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+#app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.shadow-card    { box-shadow: var(--shadow); }
+.shadow-card-sm { box-shadow: var(--shadow-sm); }
+.shadow-card-lg { box-shadow: var(--shadow-lg); }
+
+/* Reusable "soft pill" primary button — Material 3 style. Use class="save-btn". */
+.save-btn {
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: 0;
+    background: var(--color-blue-bg);
+    color: var(--color-blue-fg);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.save-btn:hover:not(:disabled) { background: var(--color-blue-soft); }
+.save-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Reusable text input — same border/focus/placeholder pattern across forms. */
+.text-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-line-hi);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: 13px;
+    outline: 0;
+    transition: border-color .15s;
+}
+.text-input::placeholder { color: var(--color-faint); }
+.text-input:focus { border-color: var(--color-accent); }
+
+/* Material Symbols helper — used by AppDrawer rail and any icon row */
+.msi {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: normal;
+    font-variation-settings: 'wght' 200, 'FILL' 0, 'opsz' 24;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+.msi.filled { font-variation-settings: 'wght' 300, 'FILL' 1, 'opsz' 24; }
+.msi.sm     { font-size: 18px; }
+.msi.xs     { font-size: 16px; }
+input, textarea, button, select { font: inherit; }
+input, textarea { font-size: 14px; }
+header, footer, section, button, [role="tab"] {
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.wp-amber-clouds {
-  background-color: #f0c8e0;
-  background-image:
-    /* 波点层 1 — 粉 */
-    radial-gradient(circle 1.8px at 15px 15px, rgba(255,130,190,0.32) 0%, transparent 100%),
-    /* 波点层 2 — 紫，错位半格 */
-    radial-gradient(circle 1.4px at 30px 30px, rgba(175,135,255,0.26) 0%, transparent 100%),
-    /* 左上粉白光晕 */
-    radial-gradient(ellipse 55% 42% at 20% 22%, rgba(255,228,242,0.70) 0%, rgba(255,198,230,0.28) 44%, transparent 68%),
-    /* 右下丁香光晕 */
-    radial-gradient(ellipse 48% 38% at 84% 80%, rgba(215,185,255,0.55) 0%, rgba(195,158,250,0.20) 44%, transparent 65%),
-    /* 中心薄荷柔光 */
-    radial-gradient(ellipse 42% 32% at 55% 52%, rgba(180,248,228,0.28) 0%, transparent 55%),
-    /* 粉→丁香→薄荷三色渐变 */
-    linear-gradient(135deg, #ffd8ec 0%, #f5c5e8 22%, #e8bef5 46%, #d2cbff 68%, #bef0ea 100%);
-  background-size: 30px 30px, 30px 30px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+.xterm { padding: 8px; }
+.xterm-viewport { overflow-y: auto !important; background: transparent !important; }
+
+/* Animations */
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+.pulse { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+@keyframes dot-bounce {
+    0%, 100% { opacity: .3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-2px); }
 }
 
-.wp-snowlight-peak {
-  background-color: #000810;
-  background-image:
-    /* 水面焦散光纹 */
-    repeating-linear-gradient(
-      65deg,
-      transparent 0px, transparent 9px,
-      rgba(0,210,200,0.055) 9px, rgba(0,210,200,0.055) 10px
-    ),
-    repeating-linear-gradient(
-      -25deg,
-      transparent 0px, transparent 12px,
-      rgba(0,190,220,0.045) 12px, rgba(0,190,220,0.045) 13px
-    ),
-    /* 生物荧光 1 — 青绿大光团 */
-    radial-gradient(ellipse 28% 20% at 38% 48%, rgba(0,228,195,0.30) 0%, rgba(0,205,178,0.12) 45%, transparent 72%),
-    /* 生物荧光 2 — 水蓝中等光团 */
-    radial-gradient(ellipse 20% 14% at 70% 60%, rgba(0,205,232,0.24) 0%, rgba(0,182,215,0.08) 45%, transparent 68%),
-    /* 生物荧光 3 — 小亮点 */
-    radial-gradient(circle 70px at 55% 35%, rgba(0,245,210,0.20) 0%, rgba(0,215,185,0.06) 45%, transparent 62%),
-    /* 深蓝幽光 */
-    radial-gradient(ellipse 15% 10% at 22% 65%, rgba(30,100,200,0.18) 0%, transparent 62%),
-    /* 深海底压光晕 */
-    radial-gradient(ellipse 100% 45% at 50% 100%, rgba(0,35,75,0.65) 0%, transparent 55%),
-    /* 深渊顶部 */
-    radial-gradient(ellipse 80% 38% at 50% 0%, rgba(0,5,15,0.55) 0%, transparent 60%),
-    linear-gradient(180deg, #000305 0%, #000810 32%, #000c18 62%, #000a14 86%, #000508 100%);
+@keyframes toast-in {
+    from { transform: translate(-50%, 8px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
 }
+.toast-enter { animation: toast-in 0.18s ease-out; }
 
-.loading-dots::after {
-  content: '';
-  animation: dots 1.2s steps(1) infinite;
+@keyframes sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }
-@keyframes dots {
-  0%   { content: ''; }
-  33%  { content: '.'; }
-  66%  { content: '..'; }
-  100% { content: '...'; }
-}
+.sheet-enter { animation: sheet-in 0.2s ease-out; }
 
-.typing-cursor::after {
-  content: '▋';
-  animation: blink 1s steps(1) infinite;
-  margin-left: 1px;
-  font-size: 0.9em;
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.fade-enter { animation: fade-in 0.15s ease-out; }
+
+@keyframes slide-in-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
 }
+.drawer-enter { animation: slide-in-left 0.2s ease-out; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-line-hi); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+
+.safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+
+/* Markdown prose — font-size inherits from parent so callers can size it via wrapper */
+.md { color: var(--color-ink); line-height: 1.65; }
+.md p { margin: 0 0 .6em; }
+.md p:last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: .25em 0 .55em; padding-left: 1.4em; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md li { margin: .15em 0; }
+.md li > p { margin: 0; }
+.md code {
+    background: var(--color-bg-hi);
+    color: var(--color-accent-hi);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: .86em;
+}
+.md pre {
+    background: var(--color-bg-elev);
+    padding: 11px 13px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: .5em 0;
+    font-size: .85em;
+    border: 1px solid var(--color-line);
+    line-height: 1.5;
+    font-family: var(--font-mono);
+}
+.md pre code { background: transparent; color: var(--color-ink); padding: 0; font-size: inherit; }
+.md a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.md a:hover { color: var(--color-accent-hi); }
+.md strong { font-weight: 600; color: var(--color-ink); }
+.md em { font-style: italic; }
+.md h1, .md h2, .md h3, .md h4 {
+    font-weight: 600;
+    margin: .9em 0 .4em;
+    line-height: 1.3;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+}
+.md h1 { font-size: 1.25em; }
+.md h2 { font-size: 1.12em; }
+.md h3 { font-size: 1.03em; }
+.md blockquote { border-left: 2px solid var(--color-line-hi); padding-left: 1em; color: var(--color-muted); margin: .5em 0; }
+.md hr { border: 0; border-top: 1px solid var(--color-line); margin: .8em 0; }
+.md table { border-collapse: collapse; font-size: .9em; margin: .5em 0; }
+.md th, .md td { border: 1px solid var(--color-line); padding: .3em .6em; }
+.md th { background: var(--color-bg-elev); }
+
+/* ================================================================
+   Compat layer — zinc/emerald/red/amber → semantic tokens
+   ================================================================ */
+
+.bg-zinc-950 { background-color: var(--color-bg) !important; }
+.bg-zinc-900 { background-color: var(--color-bg-elev) !important; }
+.bg-zinc-900\/80 { background-color: color-mix(in srgb, var(--color-bg-elev) 88%, transparent) !important; }
+.bg-zinc-900\/70 { background-color: color-mix(in srgb, var(--color-bg-elev) 80%, transparent) !important; }
+.bg-zinc-900\/50 { background-color: color-mix(in srgb, var(--color-bg-elev) 60%, transparent) !important; }
+.bg-zinc-800 { background-color: var(--color-bg-hi) !important; }
+.bg-zinc-700 { background-color: var(--color-bg-hi) !important; }
+
+.hover\:bg-zinc-800:hover { background-color: var(--color-bg-hi) !important; }
+.hover\:bg-zinc-700:hover { background-color: color-mix(in srgb, var(--color-bg-hi) 85%, var(--color-line-hi)) !important; }
+.active\:bg-zinc-600:active { background-color: color-mix(in srgb, var(--color-bg-hi) 70%, var(--color-line-hi)) !important; }
+.active\:bg-zinc-700:active { background-color: color-mix(in srgb, var(--color-bg-hi) 80%, var(--color-line-hi)) !important; }
+
+.text-zinc-100 { color: var(--color-ink) !important; }
+.text-zinc-200 { color: var(--color-ink) !important; }
+.text-zinc-300 { color: var(--color-ink) !important; }
+.text-zinc-400 { color: var(--color-muted) !important; }
+.text-zinc-500 { color: var(--color-muted) !important; }
+.text-zinc-600 { color: var(--color-faint) !important; }
+
+.hover\:text-zinc-100:hover { color: var(--color-ink) !important; }
+.hover\:text-zinc-200:hover { color: var(--color-ink) !important; }
+.hover\:text-zinc-300:hover { color: var(--color-ink) !important; }
+
+.placeholder\:text-zinc-500::placeholder { color: var(--color-faint) !important; }
+
+.border-zinc-800 { border-color: var(--color-line) !important; }
+.border-zinc-800\/70 { border-color: color-mix(in srgb, var(--color-line) 70%, transparent) !important; }
+.border-zinc-700 { border-color: var(--color-line-hi) !important; }
+.border-zinc-700\/60 { border-color: color-mix(in srgb, var(--color-line-hi) 60%, transparent) !important; }
+.border-zinc-600 { border-color: var(--color-line-hi) !important; }
+.border-zinc-900\/50 { border-color: color-mix(in srgb, var(--color-line) 50%, transparent) !important; }
+
+.bg-emerald-500 { background-color: var(--color-accent) !important; }
+.bg-emerald-600 { background-color: var(--color-accent) !important; }
+.bg-emerald-700 { background-color: var(--color-accent-hi) !important; }
+.hover\:bg-emerald-500:hover { background-color: var(--color-accent-hi) !important; }
+.hover\:bg-emerald-600:hover { background-color: var(--color-accent-hi) !important; }
+.active\:bg-emerald-700:active { background-color: var(--color-accent-hi) !important; }
+
+.bg-emerald-900\/30 { background-color: color-mix(in srgb, var(--color-accent) 18%, transparent) !important; }
+.bg-emerald-900\/50 { background-color: color-mix(in srgb, var(--color-accent) 26%, transparent) !important; }
+.bg-emerald-950\/30 { background-color: color-mix(in srgb, var(--color-accent) 14%, transparent) !important; }
+.hover\:bg-emerald-900\/50:hover { background-color: color-mix(in srgb, var(--color-accent) 26%, transparent) !important; }
+.active\:bg-emerald-900\/70:active { background-color: color-mix(in srgb, var(--color-accent) 34%, transparent) !important; }
+
+.text-emerald-200 { color: var(--color-accent-hi) !important; }
+.text-emerald-300 { color: var(--color-accent-hi) !important; }
+.text-emerald-400 { color: var(--color-accent) !important; }
+.hover\:text-emerald-300:hover { color: var(--color-accent-hi) !important; }
+
+.border-emerald-700 { border-color: color-mix(in srgb, var(--color-accent) 60%, transparent) !important; }
+.border-emerald-800\/40 { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.border-emerald-800\/50 { border-color: color-mix(in srgb, var(--color-accent) 40%, transparent) !important; }
+
+.focus\:border-emerald-500:focus { border-color: var(--color-accent) !important; }
+.focus\:ring-emerald-500\/30:focus { --tw-ring-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.accent-emerald-500 { accent-color: var(--color-accent); }
+
+.shadow-\[0_0_8px_rgba\(16\,185\,129\,0\.6\)\] { box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent) !important; }
+
+.disabled\:bg-zinc-700:disabled { background-color: var(--color-bg-hi) !important; }
+.disabled\:text-zinc-500:disabled { color: var(--color-faint) !important; }
+
+.bg-black { background-color: var(--color-bg) !important; }
+.bg-black\/60 { background-color: color-mix(in srgb, var(--color-bg) 55%, transparent) !important; }
+.bg-black\/70 { background-color: color-mix(in srgb, var(--color-bg) 65%, transparent) !important; }
+
+.bg-red-900\/40 { background-color: color-mix(in srgb, var(--color-bad) 18%, transparent) !important; }
+.bg-red-900\/30 { background-color: color-mix(in srgb, var(--color-bad) 14%, transparent) !important; }
+.bg-red-950\/30 { background-color: color-mix(in srgb, var(--color-bad) 14%, transparent) !important; }
+.bg-red-950\/40 { background-color: color-mix(in srgb, var(--color-bad) 18%, transparent) !important; }
+.bg-red-950\/70 { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.hover\:bg-red-900\/50:hover { background-color: color-mix(in srgb, var(--color-bad) 28%, transparent) !important; }
+.hover\:bg-red-900\/60:hover { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.hover\:bg-red-950\/70:hover { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.active\:bg-red-900\/70:active { background-color: color-mix(in srgb, var(--color-bad) 40%, transparent) !important; }
+.active\:bg-red-900\/80:active { background-color: color-mix(in srgb, var(--color-bad) 50%, transparent) !important; }
+.text-red-200 { color: var(--color-bad) !important; }
+.text-red-300 { color: var(--color-bad) !important; }
+.text-red-400 { color: var(--color-bad) !important; }
+.border-red-800 { border-color: color-mix(in srgb, var(--color-bad) 45%, transparent) !important; }
+.border-red-900\/40 { border-color: color-mix(in srgb, var(--color-bad) 30%, transparent) !important; }
+.border-red-900\/50 { border-color: color-mix(in srgb, var(--color-bad) 40%, transparent) !important; }
+.border-red-900\/60 { border-color: color-mix(in srgb, var(--color-bad) 50%, transparent) !important; }
+.text-red-300\/70 { color: color-mix(in srgb, var(--color-bad) 70%, transparent) !important; }
+
+.bg-amber-900\/20 { background-color: color-mix(in srgb, var(--color-accent) 12%, transparent) !important; }
+.bg-amber-900\/60 { background-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.bg-amber-950\/20 { background-color: color-mix(in srgb, var(--color-accent) 10%, transparent) !important; }
+.bg-amber-950\/30 { background-color: color-mix(in srgb, var(--color-accent) 14%, transparent) !important; }
+.hover\:bg-amber-900\/40:hover { background-color: color-mix(in srgb, var(--color-accent) 24%, transparent) !important; }
+.active\:bg-amber-900\/60:active { background-color: color-mix(in srgb, var(--color-accent) 36%, transparent) !important; }
+.text-amber-200 { color: var(--color-accent-hi) !important; }
+.text-amber-300\/70 { color: color-mix(in srgb, var(--color-accent) 70%, transparent) !important; }
+.border-amber-900\/40 { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.border-amber-900\/60 { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent) !important; }
+.bg-amber-400 { background-color: var(--color-accent) !important; }

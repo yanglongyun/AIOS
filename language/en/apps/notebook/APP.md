@@ -1,20 +1,25 @@
----
-name: notebook
-description: Lightweight note app that supports create, edit, search; the AI Assist button executes the user's instruction based on system context.
-backend: server/apps/notebook
-frontend: gui/src/apps/notebook
-database: database/apps/notebook.db
----
-
 # notebook
 
-- Role: a lightweight note-taking and content organization app.
-- Frontend: `gui/src/apps/notebook`
-- Backend: `server/apps/notebook`
-- Data: `database/apps/notebook.db`
-- Entry points:
-  - `GET /apps/notebook/list`
-  - `POST /apps/notebook/create`
-  - `POST /apps/notebook/update`
-  - `POST /apps/notebook/delete`
-  - `POST /apps/notebook/assist`
+Local notebook app for lightweight text notes.
+
+## Data Model
+
+The `notes` table in `database/apps/notebook.db`:
+
+```
+id          INTEGER  auto-increment primary key
+title       TEXT     title
+content     TEXT     body
+pinned      0 / 1    pinned flag
+created_at  TEXT     created time
+updated_at  TEXT     updated time
+```
+
+## API
+
+| Method | Path | Body |
+|--------|------|------|
+| GET | `/apps/notebook/list` | - |
+| POST | `/apps/notebook/create` | `{ title, content? }` |
+| POST | `/apps/notebook/update` | `{ id, title?, content?, pinned? }` |
+| POST | `/apps/notebook/delete` | `{ id }` |

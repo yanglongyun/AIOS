@@ -1,20 +1,22 @@
-import { httpServer } from "./system/http.js";
-import { setupWebSocket } from "./system/ws.js";
-import { initSystemDirs } from "./system/dir.js";
+import { httpServer } from "./service/runtime/http.js";
+import { setupWebSocket } from "./service/runtime/ws.js";
+import { initSystemDirs } from "./service/runtime/dir.js";
 import { initDatabase } from "./repository/init.js";
+import { exposeTokenToEnv } from "./api/auth/index.js";
+
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
 }
-const DEFAULT_SERVER_PORT = Number(process.env.AIOS_SERVER_PORT || 9501);
-const PORT = portArg ? Number(portArg.slice("--port=".length)) : DEFAULT_SERVER_PORT;
+const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9501;
+process.env.IIMOS_MAIN_PORT = String(PORT);
+
 initSystemDirs();
 initDatabase();
+exposeTokenToEnv();   // 启动时把 api_token 推到 process.env.IIMOS_API_TOKEN
 setupWebSocket(httpServer);
+
 httpServer.listen(PORT, () => {
-  console.log("");
-  console.log("  AIOS is running");
-  console.log("");
-  console.log(`  > 本地: http://localhost:${PORT}`);
-  console.log("");
+  console.log(`🌱  iimos is growing`);
+  console.log(`🌐  http://localhost:${PORT}`);
 });

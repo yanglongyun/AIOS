@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-0.5">
 
-    <div v-if="!chats.length" class="py-12 text-center text-sm" :style="emptyStyle">__T_HISTORY_EMPTY__</div>
+    <div v-if="!chats.length" class="py-12 text-center text-sm" :style="emptyStyle">暂无历史对话</div>
 
     <div
       v-for="c in chats"
@@ -35,17 +35,17 @@
           <button
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
-            title="__T_HISTORY_RENAME__"
+            title="重命名"
             class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none bg-transparent transition-all"
             :style="iconButtonStyle"
             @mouseover="$event.currentTarget.style.background=actionHoverBackground;$event.currentTarget.style.color=actionHoverColor"
             @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color=actionColor">
             <Pencil class="h-3 w-3" />
           </button>
-          <span v-if="deletingId === c.conversation_id" class="px-1 text-[10px] text-red-500">__T_HISTORY_CONFIRM_DELETE__</span>
+          <span v-if="deletingId === c.conversation_id" class="px-1 text-[10px] text-red-500">确认删除?</span>
           <button
             @click.stop="confirmDelete(c.conversation_id)"
-            :title="deletingId === c.conversation_id ? '__T_HISTORY_CLICK_CONFIRM__' : '__T_COMMON_DELETE__'"
+            :title="deletingId === c.conversation_id ? '点击确认' : '删除'"
             class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none transition-all"
             :style="deletingId === c.conversation_id ? 'background:#dc2626;color:#fff' : iconButtonStyle"
             @mouseover="deletingId !== c.conversation_id && ($event.currentTarget.style.background='rgba(220,38,38,0.1)') && ($event.currentTarget.style.color='#dc2626')"

@@ -1,22 +1,26 @@
 <template>
-  <div class="flex h-full min-w-0 overflow-hidden" style="background:#f5f3ef">
-    <div class="flex w-[160px] shrink-0 flex-col border-r py-4" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
-      <div class="mb-3 px-4 text-[11px] font-semibold uppercase tracking-widest" style="color:rgba(0,0,0,0.3)">__T_APP_SIDEBAR_SETTINGS__</div>
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="mx-2 mb-0.5 flex items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[13px] font-medium transition-all"
-        :class="activeTab === tab.key ? 'shadow-[0_1px_3px_rgba(0,0,0,0.1)]' : 'hover:bg-black/[0.05]'"
-        :style="activeTab === tab.key ? 'background:#fff;color:#3d2f1e' : 'color:rgba(0,0,0,0.5)'"
-        @click="activeTab = tab.key"
-      >
-        <span class="text-[14px]">{{ tab.icon }}</span>
-        {{ tab.label }}
-      </button>
-    </div>
-    <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:thin]">
-      <div class="mx-auto max-w-[520px]">
-        <h2 class="mb-4 text-[16px] font-bold" style="color:#2a1f13">{{ currentTabLabel }}</h2>
+  <div class="flex h-full flex-col bg-bg">
+    <header class="flex-none border-b border-line pt-7 max-md:pt-5">
+      <div class="mx-auto flex max-w-[720px] flex-col gap-4.5 px-8 max-md:px-4">
+        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">设置</h1>
+        <nav class="tabs flex items-stretch gap-1 -mx-8 overflow-x-auto px-8 max-md:-mx-4 max-md:px-4" role="tablist">
+          <button
+            v-for="tab in tabs"
+            :key="tab.key"
+            role="tab"
+            :aria-selected="activeTab === tab.key"
+            class="tab relative inline-flex cursor-pointer items-center gap-2 whitespace-nowrap border-0 bg-transparent px-3.5 pb-3.5 pt-3 text-[14px] font-medium transition-colors max-md:px-3 max-md:pb-3 max-md:pt-2.5 max-md:text-[13.5px]"
+            :class="activeTab === tab.key ? 'text-accent is-active' : 'text-muted hover:text-ink'"
+            @click="activeTab = tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-[720px] px-8 pb-15 pt-7 max-md:px-4 max-md:pb-10 max-md:pt-5">
         <TabContent v-bind="tabContentProps" />
       </div>
     </div>
@@ -25,22 +29,23 @@
 
 <script setup>
 import { computed, defineComponent, h, onMounted, ref } from 'vue';
+import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
 import ToolTab from './ToolTab.vue';
 import AboutTab from './AboutTab.vue';
-import SkillTab from './SkillTab.vue';
-import { createProviderCatalog } from '../../data/providers.js';
+import PromptTab from './PromptTab.vue';
 
 const tabs = [
-  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
-  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__', icon: '🔧' },
-  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__', icon: '💬' },
-  { key: 'skills', label: '__T_SETTINGS_TAB_SKILLS__', icon: '⚡' },
-  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
+  { key: 'account', label: '账户', icon: '👤' },
+  { key: 'model', label: '模型', icon: '🤖' },
+  { key: 'prompt', label: '指令', icon: '📜' },
+  { key: 'messages', label: '消息', icon: '💬' },
+  { key: 'tools', label: '工具', icon: '🔧' },
+  { key: 'about', label: '关于', icon: 'ℹ️' }
 ];
 
-const activeTab = ref('model');
+const activeTab = ref('account');
 const currentTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '');
 const saveNotice = ref({ type: '', message: '' });
 
@@ -58,12 +63,6 @@ const tabContentProps = computed(() => ({
   enableToolLoopLimit: enableToolLoopLimit.value,
   toolMaxRounds: toolMaxRounds.value,
   contextRounds: editRounds.value,
-  skillItems: skillItems.value,
-  skillsLoading: skillsLoading.value,
-  skillsError: skillsError.value,
-  items: skillItems.value,
-  loading: skillsLoading.value,
-  error: skillsError.value,
   saveNotice: saveNotice.value,
   onSave: save,
   'onUpdate:provider': onProviderChange,
@@ -83,10 +82,11 @@ const TabContent = defineComponent({
   setup(props, { attrs }) {
     return () => {
       const map = {
+        account: AccountTab,
         model: ModelTab,
         tools: ToolTab,
         messages: ContextTab,
-        skills: SkillTab,
+        prompt: PromptTab,
       };
       const C = map[props.activeTab] || AboutTab;
       return h(C, attrs);
@@ -105,11 +105,8 @@ const editApiUrl = ref('');
 const editApiKey = ref('');
 const editModel = ref('');
 const providerConfigs = ref({});
-const providerGroups = ref(createProviderCatalog().groups);
-const providers = ref(createProviderCatalog().providers);
-const skillItems = ref([]);
-const skillsLoading = ref(false);
-const skillsError = ref('');
+const providerGroups = ref([]);
+const providers = ref([]);
 
 const getProvider = (id) => providers.value.find((item) => item.id === id);
 
@@ -120,6 +117,12 @@ const request = async (url, options = {}) => {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || data.error || `${res.status} ${res.statusText}`);
   return data;
+};
+
+const fetchProviders = async () => {
+  const data = await request('/api/llm/providers');
+  providerGroups.value = Array.isArray(data.groups) ? data.groups : [];
+  providers.value = Array.isArray(data.providers) ? data.providers : [];
 };
 
 const loadProviderConfigs = () => {
@@ -180,19 +183,6 @@ const fetchSettings = async () => {
   saveProviderConfigs();
 };
 
-const fetchSkills = async () => {
-  skillsLoading.value = true;
-  skillsError.value = '';
-  try {
-    const data = await request('/api/settings/skills');
-    skillItems.value = Array.isArray(data.items) ? data.items : [];
-  } catch (e) {
-    skillsError.value = '__T_SETTINGS_SKILLS_LOAD_FAILED__'.replace('{message}', e.message);
-  } finally {
-    skillsLoading.value = false;
-  }
-};
-
 const save = async () => {
   try {
     saveNotice.value = { type: '', message: '' };
@@ -223,17 +213,35 @@ const save = async () => {
       model: editModel.value
     };
     saveProviderConfigs();
-    saveNotice.value = { type: 'success', message: '__T_SETTINGS_SAVED__' };
+    saveNotice.value = { type: 'success', message: '配置已保存' };
   } catch (e) {
     saveNotice.value = {
       type: 'error',
-      message: '__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message)
+      message: '保存失败：{message}'.replace('{message}', e.message)
     };
   }
 };
 
 onMounted(async () => {
   loadProviderConfigs();
-  await Promise.all([fetchSettings(), fetchSkills()]);
+  await fetchProviders();
+  await fetchSettings();
 });
 </script>
+
+<style scoped>
+/* 隐藏 tabs 的横滚条 + active tab 底部 2px 蓝条:这两个用 Tailwind 写都太长 */
+.tabs { scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab::after {
+    content: "";
+    position: absolute;
+    left: 8px; right: 8px; bottom: 0;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: transparent;
+    transition: background .18s ease;
+}
+.tab.is-active::after { background: var(--color-accent); }
+</style>

@@ -1,92 +1,60 @@
 const apps = [
   {
     id: 'chat',
-    name: '__T_APP_SIDEBAR_CHAT__',
-    icon: '\u{1F4AC}',
-    desktopLoad: () => import('./apps/chat/index.vue'),
-    intent: () => import('./apps/chat/intent.js'),
-    defaultDesktopWindowSize: { w: 900, h: 640 }
+    name: '对话',
+    icon: 'forum',
+    group: 'top',
+    load: () => import('./apps/chat/index.vue'),
+    intent: () => import('./apps/chat/intent.js')
   },
   {
     id: 'tasks',
-    name: '__T_APP_SIDEBAR_TASKS__',
-    icon: '⚡',
-    desktopLoad: () => import('./apps/tasks/index.vue'),
-    intent: () => import('./apps/tasks/intent.js'),
-    defaultDesktopWindowSize: { w: 700, h: 500 }
+    name: '任务',
+    icon: 'progress_activity',
+    group: 'top',
+    load: () => import('./apps/tasks/index.vue')
   },
   {
-    id: 'memory',
-    name: '__T_APP_SIDEBAR_MEMORY__',
-    icon: '💭',
-    desktopLoad: () => import('./apps/memory/index.vue'),
-    defaultDesktopWindowSize: { w: 760, h: 680 },
-    minDesktopWindowSize: { w: 560, h: 560 }
-  },
-  {
-    id: 'files',
-    name: '__T_APP_SIDEBAR_FILES__',
-    icon: '\u{1F5C2}',
-    desktopLoad: () => import('./apps/files/index.vue'),
-    defaultDesktopWindowSize: { w: 500, h: 360 }
+    id: 'todo',
+    name: '待办',
+    icon: 'checklist',
+    group: 'apps',
+    load: () => import('./apps/todo/index.vue')
   },
   {
     id: 'notebook',
-    name: '__T_APP_SIDEBAR_NOTEBOOK__',
-    icon: '\u{1F4D3}',
-    desktopLoad: () => import('./apps/notebook/index.vue'),
-    defaultDesktopWindowSize: { w: 850, h: 600 }
+    name: '记事本',
+    icon: 'edit_note',
+    group: 'apps',
+    load: () => import('./apps/notebook/index.vue')
   },
   {
     id: 'finance',
-    name: '__T_APP_SIDEBAR_FINANCE__',
-    icon: '💰',
-    desktopLoad: () => import('./apps/finance/index.vue'),
-    defaultDesktopWindowSize: { w: 980, h: 720 }
+    name: '记账本',
+    icon: 'payments',
+    group: 'apps',
+    load: () => import('./apps/finance/index.vue')
   },
   {
     id: 'cryptobot',
-    name: '__T_APP_SIDEBAR_CRYPTOBOT__',
-    icon: '\u{1F916}',
-    desktopLoad: () => import('./apps/cryptobot/index.vue'),
-    defaultDesktopWindowSize: { w: 980, h: 720 }
+    name: '炒币机',
+    icon: 'currency_bitcoin',
+    group: 'apps',
+    load: () => import('./apps/cryptobot/index.vue')
   },
   {
-    id: 'ghtrending',
-    name: '__T_APP_SIDEBAR_GHTRENDING__',
-    icon: '\u{1F4A1}',
-    desktopLoad: () => import('./apps/ghtrending/index.vue'),
-    defaultDesktopWindowSize: { w: 960, h: 720 }
-  },
-  {
-    id: 'createapp',
-    name: '__T_APP_SIDEBAR_CREATE_APP__',
-    icon: '\u{1FA84}',
-    desktopLoad: () => import('./apps/createapp/index.vue'),
-    intent: () => import('./apps/createapp/intent.js'),
-    defaultDesktopWindowSize: { w: 720, h: 640 }
-  },
-  {
-    id: 'claude-code',
-    name: '__T_APP_SIDEBAR_CLAUDE_CODE__',
-    icon: '\u{1F419}',
-    desktopLoad: () => import('./apps/claude-code/index.vue'),
-    defaultDesktopWindowSize: { w: 1100, h: 720 }
-  },
-  {
-    id: 'codex',
-    name: '__T_APP_SIDEBAR_CODEX__',
-    icon: '\u{1F4BB}',
-    desktopLoad: () => import('./apps/codex/index.vue'),
-    defaultDesktopWindowSize: { w: 1100, h: 720 }
+    id: 'store',
+    name: '应用工坊',
+    icon: 'storefront',
+    group: 'apps',
+    load: () => import('./apps/store/index.vue')
   },
   {
     id: 'settings',
-    name: '__T_APP_SIDEBAR_SETTINGS__',
-    icon: '⚙️',
-    desktopLoad: () => import('./apps/settings/index.vue'),
-    intent: () => import('./apps/settings/intent.js'),
-    defaultDesktopWindowSize: { w: 750, h: 520 }
+    name: '设置',
+    icon: 'settings',
+    group: 'bottom',
+    load: () => import('./apps/settings/index.vue')
   }
 ];
 

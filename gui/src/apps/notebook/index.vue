@@ -1,585 +1,216 @@
-<template>
-  <NotebookListView
-    :view="view"
-    :notes="notes"
-    :page="page"
-    :total-pages="totalPages"
-    :loading="loading"
-    :card-style="cardStyle"
-    :format-time="formatTime"
-    :rotations="ROTATIONS"
-    :pin-colors="PIN_COLORS"
-    @open-editor="openEditor"
-    @delete-note="deleteNote"
-    @prev-page="goPrevPage"
-    @next-page="goNextPage"
-  />
-  <NotebookEditorView
-    :view="view"
-    v-model:editorDraft="editorDraft"
-    :editing-note-id="editingNoteId"
-    :editor-style="editorStyle"
-    :saving="saving"
-    :ai-drawer-open="aiDrawerOpen"
-    :ai-loading="aiLoading"
-    :ai-result="aiResult"
-    :show-delete-confirm="showDeleteConfirm"
-    :current-date="currentDate"
-    :card-style="cardStyle"
-    @back="backToList"
-    @assist="startAssist"
-    @request-delete="showDeleteConfirm = true"
-    @cancel-delete="showDeleteConfirm = false"
-    @confirm-delete="confirmDelete"
-    @save="saveEditor"
-    @apply-ai="applyAI"
-    @close-ai="closeAI"
-  />
-</template>
-
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { LOCALE, LOCALE_FULL } from '../../system/locale.js';
-import NotebookEditorView from './NotebookEditorView.vue';
-import NotebookListView from './NotebookListView.vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 
-const API_BASE = '/apps/notebook';
-const PAGE_SIZE = 12;
-
-const view = ref('list');
 const notes = ref([]);
 const loading = ref(false);
-const error = ref('');
-const page = ref(1);
-const total = ref(0);
-const totalPages = ref(1);
-
-const editorDraft = ref('');
-const editingNoteId = ref(null);
-const editorStyle = ref(0);
 const saving = ref(false);
-const aiDrawerOpen = ref(false);
-const aiLoading = ref(false);
-const aiResult = ref('');
-const showDeleteConfirm = ref(false);
+const error = ref('');
+const selectedId = ref(null);
+const draft = reactive({ title: '', content: '' });
+const titleRef = ref(null);
 
-// 8种卡片样式：Tailwind类 + 需要原生CSS的用class名
-// 8种卡片：每种都有独特纹理（CSS class），不再有纯色
-const CARD_STYLES = [
-  { cardCls: 'card-yellow-lined min-h-[200px] w-[220px] pt-[30px] px-[15px] pb-[15px]', textCls: 'text-[#1c3d5a]', padCls: 'pad-yellow-lined', inkCls: 'text-[#1c3d5a]' },
-  { cardCls: 'card-pink-grid min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#a00]', padCls: 'pad-pink-grid', inkCls: 'text-[#a00]' },
-  { cardCls: 'card-white-grid min-h-[200px] w-[220px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#204020]', padCls: 'pad-white-grid', inkCls: 'text-[#204020]' },
-  { cardCls: 'card-green-lined min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#006600]', padCls: 'pad-green-lined', inkCls: 'text-[#006600]' },
-  { cardCls: 'card-blue-dot min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#003366]', padCls: 'pad-blue-dot', inkCls: 'text-[#003366]' },
-  { cardCls: 'card-orange-ruled min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#6a3000]', padCls: 'pad-orange-ruled', inkCls: 'text-[#6a3000]' },
-  { cardCls: 'card-kraft min-h-[200px] w-[220px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#3a2a1a]', padCls: 'pad-kraft', inkCls: 'text-[#3a2a1a]' },
-  { cardCls: 'card-pink-lined min-h-[200px] w-[220px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#5a2040]', padCls: 'pad-pink-lined', inkCls: 'text-[#5a2040]' },
-  { cardCls: 'card-lavender-diag min-h-[200px] w-[200px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#4a2080]', padCls: 'pad-lavender-diag', inkCls: 'text-[#4a2080]' },
-  { cardCls: 'card-mint-check min-h-[200px] w-[210px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#1a5a4a]', padCls: 'pad-mint-check', inkCls: 'text-[#1a5a4a]' },
-  { cardCls: 'card-cream-cross min-h-[200px] w-[210px] pt-[25px] px-[15px] pb-[15px]', textCls: 'text-[#6a4a00]', padCls: 'pad-cream-cross', inkCls: 'text-[#6a4a00]' },
-  { cardCls: 'card-sky-ruled min-h-[200px] w-[220px] pt-[30px] px-[15px] pb-[15px]', textCls: 'text-[#1a3a6a]', padCls: 'pad-sky-ruled', inkCls: 'text-[#1a3a6a]' },
-];
-const PIN_COLORS = ['pin-red', 'pin-blue', 'pin-yellow', 'pin-metal'];
-const ROTATIONS = [3, -1, -4, 1, -3, 2, 6, -2];
+const selected = computed(() => notes.value.find((item) => item.id === selectedId.value) || null);
+const wordCount = computed(() => draft.content.trim() ? draft.content.trim().length : 0);
 
-const TOTAL_STYLES = CARD_STYLES.length;
-const cardStyle = (s) => CARD_STYLES[(Number(s) || 0) % TOTAL_STYLES];
-
-// 避免连续新建出相同样式
-let lastStyle = -1;
-const randomStyle = () => {
-  let s;
-  do { s = Math.floor(Math.random() * TOTAL_STYLES); } while (s === lastStyle);
-  lastStyle = s;
-  return s;
+const request = async (path, options = {}) => {
+  const res = await fetch(`/apps/notebook${path}`, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.success === false) throw new Error(data.message || data.error || `${res.status} ${res.statusText}`);
+  return data;
 };
 
-const currentDate = computed(() =>
-  new Date().toLocaleDateString(LOCALE_FULL, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).replace(/\//g, '/')
-);
-
-const fetchNotes = async () => {
-  try {
-    loading.value = true;
-    const params = new URLSearchParams({ page: String(page.value), pageSize: String(PAGE_SIZE) });
-    const res = await fetch(`${API_BASE}/list?${params.toString()}`);
-    const data = await res.json();
-    notes.value = data.items || [];
-    total.value = Number(data.total || 0);
-    totalPages.value = Number(data.totalPages || 1);
-    if (page.value > totalPages.value) { page.value = totalPages.value; return fetchNotes(); }
-  } catch (e) { error.value = e.message || '__T_NOTEBOOK_LOAD_FAILED__'; }
-  finally { loading.value = false; }
+const applySelected = (note) => {
+  selectedId.value = note?.id || null;
+  draft.title = note?.title || '';
+  draft.content = note?.content || '';
 };
 
-const openEditor = (note) => {
-  editingNoteId.value = note?.id || null;
-  editorDraft.value = note?.content || '';
-  editorStyle.value = note ? (Number(note.style) || 0) : randomStyle();
-  aiDrawerOpen.value = false;
-  aiLoading.value = false;
-  aiResult.value = '';
-  view.value = 'editor';
-};
-
-const backToList = () => { view.value = 'list'; editingNoteId.value = null; editorDraft.value = ''; aiDrawerOpen.value = false; aiResult.value = ''; };
-
-const saveEditor = async () => {
-  const content = editorDraft.value.trim();
-  if (!content || saving.value) return;
-  saving.value = true;
+const fetchAll = async () => {
+  loading.value = true;
   error.value = '';
   try {
-    const url = editingNoteId.value ? `${API_BASE}/update` : `${API_BASE}/create`;
-    const body = editingNoteId.value
-      ? { id: editingNoteId.value, content }
-      : { content, style: editorStyle.value };
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    page.value = 1;
-    await fetchNotes();
-    backToList();
-  } catch (e) { error.value = e.message || '__T_NOTEBOOK_CREATE_FAILED__'; }
-  finally { saving.value = false; }
-};
-
-const confirmDelete = async () => {
-  showDeleteConfirm.value = false;
-  if (!editingNoteId.value) return;
-  await deleteNote(editingNoteId.value);
-  backToList();
-};
-
-const deleteNote = async (id) => {
-  try {
-    const res = await fetch(`${API_BASE}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    await fetchNotes();
-  } catch (e) { error.value = e.message || '__T_NOTEBOOK_DELETE_FAILED__'; }
-};
-
-const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
-const goNextPage = async () => { if (page.value < totalPages.value && !loading.value) { page.value++; await fetchNotes(); } };
-
-const startAssist = async () => {
-  const content = editorDraft.value.trim();
-  if (!content || aiLoading.value) return;
-  aiLoading.value = true;
-  aiResult.value = '';
-  aiDrawerOpen.value = true;
-  try {
-    const res = await fetch(`${API_BASE}/assist`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content,
-        taskTitle: '__T_NOTEBOOK_DEFAULT_TASK_TITLE__'
-      })
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-    aiResult.value = data.result || '';
+    const data = await request('/list');
+    notes.value = data.items || [];
+    if (!selectedId.value && notes.value.length) applySelected(notes.value[0]);
+    if (selectedId.value && !notes.value.some((item) => item.id === selectedId.value)) {
+      applySelected(notes.value[0] || null);
+    }
   } catch (e) {
-    error.value = e.message || '__T_NOTEBOOK_ASSIST_FAILED__';
-    aiDrawerOpen.value = false;
+    error.value = e.message;
   } finally {
-    aiLoading.value = false;
+    loading.value = false;
   }
 };
 
-const applyAI = () => {
-  if (aiResult.value) editorDraft.value = aiResult.value;
-  closeAI();
+const createNote = async () => {
+  saving.value = true;
+  error.value = '';
+  try {
+    const data = await request('/create', {
+      method: 'POST',
+      body: JSON.stringify({ title: '未命名', content: '' }),
+    });
+    notes.value.unshift(data.item);
+    applySelected(data.item);
+    await nextTick();
+    titleRef.value?.focus();
+    titleRef.value?.select();
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    saving.value = false;
+  }
 };
 
-const closeAI = () => {
-  aiDrawerOpen.value = false;
-  aiResult.value = '';
+const saveNote = async () => {
+  if (!selected.value || saving.value) return;
+  saving.value = true;
+  error.value = '';
+  try {
+    const data = await request('/update', {
+      method: 'POST',
+      body: JSON.stringify({
+        id: selected.value.id,
+        title: draft.title,
+        content: draft.content,
+      }),
+    });
+    const index = notes.value.findIndex((item) => item.id === data.item.id);
+    if (index !== -1) notes.value[index] = data.item;
+    applySelected(data.item);
+    notes.value = [...notes.value].sort((a, b) => (b.pinned - a.pinned) || String(b.updatedAt).localeCompare(String(a.updatedAt)) || b.id - a.id);
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    saving.value = false;
+  }
 };
 
-const formatTime = (v) => {
-  if (!v) return '';
-  const d = new Date(v.replace(' ', 'T'));
-  if (isNaN(d)) return v;
-  const diff = Date.now() - d;
-  if (diff < 60000) return '__T_NOTEBOOK_JUST_NOW__';
-  if (diff < 3600000) return '__T_NOTEBOOK_MINUTES_AGO__'.replace('{n}', Math.floor(diff / 60000));
-  if (diff < 86400000) return '__T_NOTEBOOK_HOURS_AGO__'.replace('{n}', Math.floor(diff / 3600000));
-  if (diff < 604800000) return '__T_NOTEBOOK_DAYS_AGO__'.replace('{n}', Math.floor(diff / 86400000));
-  return d.toLocaleDateString(LOCALE_FULL, { month: 'short', day: 'numeric' });
+const togglePinned = async (note) => {
+  try {
+    const data = await request('/update', {
+      method: 'POST',
+      body: JSON.stringify({ id: note.id, pinned: !note.pinned }),
+    });
+    const index = notes.value.findIndex((item) => item.id === note.id);
+    if (index !== -1) notes.value[index] = data.item;
+    notes.value = [...notes.value].sort((a, b) => (b.pinned - a.pinned) || String(b.updatedAt).localeCompare(String(a.updatedAt)) || b.id - a.id);
+    if (selectedId.value === note.id) applySelected(data.item);
+  } catch (e) {
+    error.value = e.message;
+  }
 };
 
-onMounted(() => {
-  fetchNotes();
-});
+const removeNote = async (note) => {
+  if (!window.confirm(`删除「${note.title || '未命名'}」？`)) return;
+  try {
+    await request('/delete', {
+      method: 'POST',
+      body: JSON.stringify({ id: note.id }),
+    });
+    notes.value = notes.value.filter((item) => item.id !== note.id);
+    if (selectedId.value === note.id) applySelected(notes.value[0] || null);
+  } catch (e) {
+    error.value = e.message;
+  }
+};
+
+const formatTime = (value) => {
+  if (!value) return '';
+  const date = new Date(String(value).replace(' ', 'T') + 'Z');
+  if (Number.isNaN(date.getTime())) return value;
+  return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+};
+
+onMounted(fetchAll);
 </script>
 
-<style>
-/* ── 软木板纹理（SVG噪声+暗角，Tailwind无法实现） ── */
-.cork-surface {
-  background-color: #b5835a;
-  background-image:
-    radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
-}
+<template>
+  <div class="flex h-full min-h-0 flex-col bg-bg">
+      <header class="flex flex-none items-center gap-3 border-b border-line px-6 py-4 max-md:px-4">
+        <h1 class="m-0 text-[22px] font-semibold leading-none text-ink max-md:text-[19px]">记事本</h1>
+        <button
+          class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3 text-[12.5px] font-medium text-blue-fg transition-colors hover:bg-line-hi disabled:opacity-50"
+          :disabled="saving"
+          @click="createNote">
+          <span class="msi sm">add</span>
+          <span>新建</span>
+        </button>
+        <div class="min-w-0 flex-1 text-[12px] text-faint">
+          <span v-if="selected">更新于 {{ formatTime(selected.updatedAt) }} · {{ wordCount }} 字</span>
+          <span v-else>选择或新建一条笔记</span>
+        </div>
+        <button
+          v-if="selected"
+          class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-accent"
+          :title="selected.pinned ? '取消置顶' : '置顶'"
+          @click="togglePinned(selected)">
+          <span class="msi sm" :class="{ filled: selected.pinned }">push_pin</span>
+        </button>
+        <button
+          v-if="selected"
+          class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-bad"
+          title="删除"
+          @click="removeNote(selected)">
+          <span class="msi sm">delete</span>
+        </button>
+        <button
+          v-if="selected"
+          class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3 text-[12.5px] font-semibold text-blue-fg transition-colors hover:bg-line-hi disabled:opacity-50"
+          :disabled="saving"
+          @click="saveNote">
+          <span class="msi sm">save</span>
+          <span>{{ saving ? '保存中...' : '保存' }}</span>
+        </button>
+      </header>
 
-/* ── 图钉颜色（radial-gradient） ── */
-.pin-red { background: radial-gradient(circle at 30% 30%, #ff5252, #b71c1c); }
-.pin-blue { background: radial-gradient(circle at 30% 30%, #448aff, #0d47a1); }
-.pin-yellow { background: radial-gradient(circle at 30% 30%, #ffd740, #ff6f00); }
-.pin-metal { background: radial-gradient(circle at 30% 30%, #eceff1, #78909c); }
+      <section class="flex-none border-b border-line bg-bg-elev px-5 py-3 max-md:px-3">
+        <div v-if="loading && !notes.length" class="py-3 text-center text-[13px] text-muted">加载中...</div>
+        <div v-else class="flex gap-2 overflow-x-auto pb-1">
+          <button
+            v-for="note in notes"
+            :key="note.id"
+            class="flex h-[74px] w-[220px] flex-none cursor-pointer items-start gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors"
+            :class="selectedId === note.id ? 'border-transparent bg-blue-bg text-blue-fg' : 'border-line bg-bg text-muted hover:bg-bg-hi hover:text-ink'"
+            @click="applySelected(note)">
+            <span class="msi sm mt-0.5 flex-none" :class="{ filled: note.pinned }">{{ note.pinned ? 'push_pin' : 'article' }}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-[13.5px] font-medium">{{ note.title || '未命名' }}</span>
+              <span class="mt-1 line-clamp-2 block text-[11.5px] opacity-70">{{ note.content || '空白笔记' }}</span>
+            </span>
+          </button>
+        </div>
+      </section>
 
-/* ── 8种卡片纹理（每种都有线条/纹理，不再有纯色） ── */
+      <div v-if="error" class="mx-5 mt-3 rounded-lg px-3 py-2 text-[13px] text-bad max-md:mx-4"
+        style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
+        {{ error }}
+      </div>
 
-/* 0: 黄色信笺 - 蓝横线 + 红边距 + 撕裂顶边 */
-.card-yellow-lined {
-  background-color: #fdf5d3;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 24px, #a4c8e1 24px, #a4c8e1 25px);
-  box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
-  border-radius: 2px 2px 4px 6px;
-}
-.card-yellow-lined::before {
-  content: ''; position: absolute; top: -4px; left: 0; right: 0; height: 8px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Cpath d='M0 8 L4 2 L8 6 L12 0 L16 8 Z' fill='%23fdf5d3'/%3E%3C/svg%3E") repeat-x;
-}
-.card-yellow-lined::after {
-  content: ''; position: absolute; top: 4px; bottom: 0; left: 30px; width: 1px;
-  background: rgba(220,100,100,0.4); z-index: -1;
-}
+      <section v-if="selected" class="flex min-h-0 flex-1 flex-col px-8 py-6 max-md:px-4 max-md:py-4">
+        <input
+          ref="titleRef"
+          v-model="draft.title"
+          class="mb-4 w-full border-0 bg-transparent text-[30px] font-semibold leading-[1.15] text-ink outline-none placeholder:text-faint max-md:text-[24px]"
+          placeholder="标题" />
+        <textarea
+          v-model="draft.content"
+          class="min-h-0 flex-1 resize-none border-0 bg-transparent text-[15px] leading-[1.8] text-ink outline-none placeholder:text-faint"
+          placeholder="开始记录..." />
+      </section>
 
-/* 1: 粉色方格纸 */
-.card-pink-grid {
-  background-color: #ffcdd2;
-  background-image:
-    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 18px 18px;
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-.card-pink-grid::after {
-  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
-  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
-}
-
-/* 2: 白色方格纸 - 工程网格 */
-.card-white-grid {
-  background-color: #fafafa;
-  background-image:
-    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-  background-size: 15px 15px;
-  box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-  border-radius: 1px;
-}
-
-/* 3: 绿色横线纸 */
-.card-green-lined {
-  background-color: #c8e6c9;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 22px, rgba(0,80,0,0.12) 22px, rgba(0,80,0,0.12) 23px);
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-.card-green-lined::after {
-  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
-  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
-}
-
-/* 4: 蓝色点阵纸 */
-.card-blue-dot {
-  background-color: #b3e5fc;
-  background-image: radial-gradient(circle, rgba(0,50,100,0.12) 1px, transparent 1px);
-  background-size: 12px 12px;
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-.card-blue-dot::after {
-  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
-  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
-}
-
-/* 5: 橙色竖线纸 */
-.card-orange-ruled {
-  background-color: #ffe0b2;
-  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 20px, rgba(180,100,0,0.1) 20px, rgba(180,100,0,0.1) 21px);
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-.card-orange-ruled::after {
-  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
-  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
-}
-
-/* 6: 牛皮纸 - 噪声纹理 */
-.card-kraft {
-  background-color: #c9a96e;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
-  box-shadow: 2px 4px 8px rgba(0,0,0,0.35);
-  border-radius: 2px;
-}
-
-/* 7: 粉色信笺 - 横线 + 左边距 */
-.card-pink-lined {
-  background-color: #fce4ec;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 24px, #e8a0b0 24px, #e8a0b0 25px);
-  box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-  border-radius: 2px;
-}
-.card-pink-lined::after {
-  content: ''; position: absolute; top: 4px; bottom: 0; left: 30px; width: 1px;
-  background: rgba(200,80,120,0.3); z-index: -1;
-}
-
-/* 8: 薰衣草斜线纸 */
-.card-lavender-diag {
-  background-color: #e8daef;
-  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 10px, rgba(100,50,150,0.08) 10px, rgba(100,50,150,0.08) 11px);
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-.card-lavender-diag::after {
-  content: ''; position: absolute; z-index: -1; bottom: 5px; right: 5px;
-  width: 50%; height: 20px; box-shadow: 4px 10px 10px rgba(0,0,0,0.3); transform: rotate(4deg);
-}
-
-/* 9: 薄荷棋盘格纸 */
-.card-mint-check {
-  background-color: #c8f7e1;
-  background-image:
-    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%),
-    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-  box-shadow: 2px 4px 6px rgba(0,0,0,0.25);
-  border-radius: 2px;
-}
-
-/* 10: 奶油十字纹纸 */
-.card-cream-cross {
-  background-color: #faf0d8;
-  background-image:
-    radial-gradient(circle, rgba(160,120,40,0.12) 1px, transparent 1px),
-    linear-gradient(rgba(160,120,40,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(160,120,40,0.06) 1px, transparent 1px);
-  background-size: 16px 16px;
-  box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-  border-radius: 2px;
-}
-
-/* 11: 天蓝横线信笺 - 类似黄色信笺但天蓝底 + 深蓝横线 + 撕裂顶边 */
-.card-sky-ruled {
-  background-color: #dceefb;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 24px, #90b8d8 24px, #90b8d8 25px);
-  box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
-  border-radius: 2px 2px 4px 6px;
-}
-.card-sky-ruled::before {
-  content: ''; position: absolute; top: -4px; left: 0; right: 0; height: 8px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Cpath d='M0 8 L4 2 L8 6 L12 0 L16 8 Z' fill='%23dceefb'/%3E%3C/svg%3E") repeat-x;
-}
-.card-sky-ruled::after {
-  content: ''; position: absolute; top: 4px; bottom: 0; left: 30px; width: 1px;
-  background: rgba(80,120,180,0.35); z-index: -1;
-}
-
-/* ── 夹板编辑器（多层阴影+渐变，Tailwind写不了或太长） ── */
-.clipboard-board {
-  background: linear-gradient(135deg, #5c412a, #3a2515);
-  box-shadow: inset 0 2px 5px rgba(255,255,255,0.1), inset 0 -4px 10px rgba(0,0,0,0.4), 10px 20px 30px rgba(0,0,0,0.8);
-}
-.clip-base {
-  background: linear-gradient(180deg, #d4d4d4, #a3a3a3 40%, #888);
-  box-shadow: inset 0 2px 2px rgba(255,255,255,0.8), 0 4px 6px rgba(0,0,0,0.4);
-}
-.clip-jaw {
-  background: linear-gradient(180deg, #f0f0f0, #b3b3b3 50%, #999);
-  box-shadow: inset 0 2px 3px rgba(255,255,255,0.9), 0 8px 10px rgba(0,0,0,0.5);
-}
-.rivet {
-  background: radial-gradient(circle at 35% 35%, #fff, #999);
-  box-shadow: inset 0 -1px 2px rgba(0,0,0,0.5), 0 2px 3px rgba(0,0,0,0.5);
-}
-
-/* 编辑器纸张基础 */
-.legal-pad {
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.08);
-}
-
-/* 0: 黄色信笺 */
-.pad-yellow-lined {
-  background-color: #fdf5d3;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 29px, #a4c8e1 29px, #a4c8e1 30px);
-  background-position: 0 50px;
-}
-.pad-yellow-lined::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: 45px; width: 2px;
-  background: rgba(220,100,100,0.5); box-shadow: 4px 0 0 rgba(220,100,100,0.15); pointer-events: none;
-}
-
-/* 1: 粉色方格 */
-.pad-pink-grid {
-  background-color: #ffcdd2;
-  background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 30px 30px; background-position: 0 50px;
-}
-
-/* 2: 白色网格 */
-.pad-white-grid {
-  background-color: #fafafa;
-  background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-  background-size: 30px 30px; background-position: 0 50px;
-}
-
-/* 3: 绿色横线 */
-.pad-green-lined {
-  background-color: #c8e6c9;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 29px, rgba(0,80,0,0.12) 29px, rgba(0,80,0,0.12) 30px);
-  background-position: 0 50px;
-}
-
-/* 4: 蓝色点阵 */
-.pad-blue-dot {
-  background-color: #b3e5fc;
-  background-image: radial-gradient(circle, rgba(0,50,100,0.12) 1px, transparent 1px);
-  background-size: 20px 20px; background-position: 0 50px;
-}
-
-/* 5: 橙色竖线 */
-.pad-orange-ruled {
-  background-color: #ffe0b2;
-  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(180,100,0,0.1) 28px, rgba(180,100,0,0.1) 29px);
-}
-
-/* 6: 牛皮纸 */
-.pad-kraft {
-  background-color: #c9a96e;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
-}
-
-/* 7: 粉色横线 */
-.pad-pink-lined {
-  background-color: #fce4ec;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 29px, #e8a0b0 29px, #e8a0b0 30px);
-  background-position: 0 50px;
-}
-.pad-pink-lined::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: 45px; width: 1px;
-  background: rgba(200,80,120,0.3); pointer-events: none;
-}
-
-/* 8: 薰衣草斜线 */
-.pad-lavender-diag {
-  background-color: #e8daef;
-  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 14px, rgba(100,50,150,0.08) 14px, rgba(100,50,150,0.08) 15px);
-}
-
-/* 9: 薄荷棋盘格 */
-.pad-mint-check {
-  background-color: #c8f7e1;
-  background-image:
-    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%),
-    linear-gradient(45deg, rgba(0,80,60,0.06) 25%, transparent 25%, transparent 75%, rgba(0,80,60,0.06) 75%);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
-}
-
-/* 10: 奶油十字纹 */
-.pad-cream-cross {
-  background-color: #faf0d8;
-  background-image:
-    radial-gradient(circle, rgba(160,120,40,0.12) 1px, transparent 1px),
-    linear-gradient(rgba(160,120,40,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(160,120,40,0.06) 1px, transparent 1px);
-  background-size: 24px 24px;
-  background-position: 0 50px;
-}
-
-/* 11: 天蓝横线 */
-.pad-sky-ruled {
-  background-color: #dceefb;
-  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 29px, #90b8d8 29px, #90b8d8 30px);
-  background-position: 0 50px;
-}
-.pad-sky-ruled::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: 45px; width: 2px;
-  background: rgba(80,120,180,0.4); box-shadow: 4px 0 0 rgba(80,120,180,0.12); pointer-events: none;
-}
-
-.pad-binding {
-  background: linear-gradient(180deg, #111, #333, #111);
-}
-
-/* ── 底部绒面区域 ── */
-.bottom-zone {
-  background: linear-gradient(180deg, #3a1818, #2a0e0e);
-  border-top: 3px solid #5a3020;
-  box-shadow: inset 0 4px 12px rgba(0,0,0,0.6);
-  background-image:
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 3px);
-}
-
-/* AI 抽屉 */
-.ai-drawer {
-  max-height: 0;
-  transition: max-height 0.4s ease;
-}
-.ai-drawer.show { max-height: 50vh; }
-
-.ai-well {
-  background: rgba(0,0,0,0.25);
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.03);
-}
-
-/* 删除确认弹窗 */
-.ai-modal-backdrop {
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-}
-.ai-modal-card {
-  background: linear-gradient(180deg, #3a1818, #2a0e0e);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
-  background-image:
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.005) 0px, rgba(255,255,255,0.005) 1px, transparent 1px, transparent 3px);
-}
-.ai-modal-enter-active { transition: all 0.25s ease-out; }
-.ai-modal-leave-active { transition: all 0.2s ease-in; }
-.ai-modal-enter-from { opacity: 0; }
-.ai-modal-enter-from .ai-modal-card { transform: scale(0.9); }
-.ai-modal-leave-to { opacity: 0; }
-.ai-modal-leave-to .ai-modal-card { transform: scale(0.9); }
-
-.ai-tag::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #e8c060, #a08030);
-  box-shadow: 0 0 4px rgba(200,160,60,0.4);
-}
-
-.ai-body {
-  color: rgba(220,200,160,0.75);
-  max-height: 28vh;
-}
-.ai-body::-webkit-scrollbar { width: 3px; }
-.ai-body::-webkit-scrollbar-thumb { background: rgba(200,160,80,0.15); border-radius: 2px; }
-
-.quill-anim::before {
-  content: '\270D'; font-size: 14px; position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  animation: quillWrite 1.2s ease-in-out infinite;
-  filter: grayscale(0.3) brightness(0.8);
-}
-@keyframes quillWrite {
-  0%,100% { transform: rotate(-5deg) translateY(0); }
-  25% { transform: rotate(3deg) translateY(-2px); }
-  50% { transform: rotate(-3deg) translateY(1px); }
-  75% { transform: rotate(2deg) translateY(-1px); }
-}
-</style>
+      <section v-else class="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-muted">
+        <span class="msi" style="font-size:42px;color:var(--color-faint)">edit_note</span>
+        <div class="text-[14px]">还没有笔记</div>
+        <button
+          class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 py-2 text-[13px] font-semibold text-blue-fg"
+          @click="createNote">
+          <span class="msi sm">add</span>
+          <span>新建笔记</span>
+        </button>
+      </section>
+  </div>
+</template>

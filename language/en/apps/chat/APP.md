@@ -1,7 +1,7 @@
 ---
 name: chat
-description: Chat app with multi-session support, streaming replies, tool calls, and attachment upload.
-backend: server/main/api/chat.js, server/main/chat, server/main/agent, server/main/llm, server/main/prompt
+description: Chat app with multi-session support, WebSocket streaming replies, tool calls, and attachment upload.
+backend: server/main/api/chat, server/main/service/chat, server/main/ai, server/main/llm, server/main/service/prompt
 frontend: gui/src/apps/chat
 database: database/aios.db (chats, messages)
 ---
@@ -10,10 +10,10 @@ database: database/aios.db (chats, messages)
 
 - Role: the system's core chat app. It does not go through `server/apps/`; it is mounted directly on the main service.
 - Frontend: `gui/src/apps/chat`
-- Backend: `server/main/api/chat.js`, `server/main/chat/`, `server/main/agent/`, `server/main/llm/`, `server/main/prompt/`
+- Backend: `server/main/api/chat/`, `server/main/service/chat/`, `server/main/ai/`, `server/main/llm/`, `server/main/service/prompt/`
 - Data: `chats` and `messages` in `database/aios.db`
 - Entry points:
   - HTTP: `/api/chat/*`
   - WebSocket: streaming chat session
   - Protocol: `gui/src/apps/chat/protocol.js`
-- Attachments: `/api/files/upload`, stored under `files/uploads/chat`
+- Attachments: `/api/fs/upload`, stored under `files/uploads/chat`

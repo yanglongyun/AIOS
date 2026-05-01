@@ -1,10 +1,12 @@
 import { json } from "../../shared/http/json.js";
-import { handleChatApi } from "./chat.js";
-import { handleMemoryApi } from "./memory.js";
-import { handleSettingsApi } from "./settings.js";
-import { handleFsApi } from "./fs.js";
-import { handleTaskApi } from "./task.js";
-import { handleSystemApi } from "./system.js";
+import { handleChatApi } from "./chat/index.js";
+import { handleSettingsApi } from "./settings/index.js";
+import { handleFsApi } from "./runtime/fs.js";
+import { handleLlmApi } from "./llm/index.js";
+import { handleTaskApi } from "./task/index.js";
+import { handleRuntimeApi } from "./runtime/index.js";
+import { handleAuthApi } from "./auth/index.js";
+
 const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
   try {
@@ -12,8 +14,12 @@ const handleApiRequest = async (req, res, url) => {
       json(res, { success: true });
       return true;
     }
-    if (path.startsWith("/api/system/")) {
-      await handleSystemApi(req, res, path);
+    if (path.startsWith("/api/auth/")) {
+      await handleAuthApi(req, res, path);
+      return true;
+    }
+    if (path.startsWith("/api/runtime/")) {
+      await handleRuntimeApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/chat/")) {
@@ -24,12 +30,12 @@ const handleApiRequest = async (req, res, url) => {
       await handleSettingsApi(req, res, path);
       return true;
     }
-    if (path.startsWith("/api/memory/")) {
-      await handleMemoryApi(req, res, path);
+    if (path.startsWith("/api/llm/")) {
+      await handleLlmApi(req, res, path);
       return true;
     }
-    if (path.startsWith("/api/fs/")) {
-      await handleFsApi(req, res, path);
+    if (path === "/api/fs" || path.startsWith("/api/fs/")) {
+      await handleFsApi(req, res, path, url);
       return true;
     }
     if (path.startsWith("/api/task")) {

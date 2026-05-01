@@ -2,8 +2,26 @@ import { nowIso } from "../repository/client.js";
 import { getConfig, saveConfig } from "../repository/config.js";
 import { getState, saveState } from "../repository/state.js";
 import { runTradingCycle } from "./cycle/run.js";
+import { getApiToken } from "../../app_shared/apiToken.js";
 let timer = null;
 let executing = false;
+
+// Wait for the main process on 9501. The apps process is usually spawned at
+// the same time, so the first tick can otherwise hit ECONNREFUSED.
+const waitForMain = async (timeoutMs = 30000) => {
+  const port = process.env.IIMOS_MAIN_PORT || 9501;
+  const token = getApiToken();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const r = await fetch(`http://localhost:${port}/api/health`, { headers });
+      if (r.ok) return true;
+    } catch {}
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  return false;
+};
 const runBotOnce = async () => {
   if (!getState().running) return;
   executing = true;
@@ -15,7 +33,7 @@ const runBotOnce = async () => {
     saveState({ ...state, last_run_at: nowIso() });
   }
 };
-const startBot = (intervalSec) => {
+const startBot = (intervalSec, { runImmediately = true } = {}) => {
   const cfg = getConfig();
   if (!cfg.api_key || !cfg.api_secret || !cfg.passphrase) {
     throw new Error("Configure OKX API Key/Secret/Passphrase first");
@@ -53,9 +71,13 @@ const startBot = (intervalSec) => {
       }
     }, sec * 1e3);
   };
-  runBotOnce().catch((e) => onError(e)).finally(() => {
-    if (getState().running) scheduleNext();
-  });
+  if (runImmediately) {
+    runBotOnce().catch((e) => onError(e)).finally(() => {
+      if (getState().running) scheduleNext();
+    });
+  } else {
+    scheduleNext();
+  }
   return getState();
 };
 const stopBot = () => {
@@ -65,16 +87,25 @@ const stopBot = () => {
   }
   return saveState({ ...getState(), running: 0 });
 };
-const initRuntime = () => {
+const initRuntime = async () => {
   const state = getState();
-  if (state.running) {
-    const cfg = getConfig();
-    if (cfg.api_key && cfg.api_secret && cfg.passphrase && cfg.goal) {
-      startBot(cfg.interval_sec);
-    } else {
-      saveState({ ...state, running: 0 });
-    }
+  if (!state.running) return;
+  const cfg = getConfig();
+  if (!(cfg.api_key && cfg.api_secret && cfg.passphrase && cfg.goal)) {
+    saveState({ ...state, running: 0 });
+    return;
   }
+  // Clear previous startup errors so the UI does not keep showing stale state.
+  saveState({ ...state, last_error: "", last_error_at: "" });
+  // Wait for main health in the background before scheduling ticks.
+  waitForMain().then((ok) => {
+    if (!ok) {
+      saveState({ ...getState(), last_error: "main service did not come up in time", last_error_at: nowIso() });
+      return;
+    }
+    if (!getState().running) return;
+    startBot(cfg.interval_sec, { runImmediately: false });
+  });
 };
 const isBotExecuting = () => executing;
 export {

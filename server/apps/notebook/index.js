@@ -1,11 +1,9 @@
-import { handleNotebookApi } from "./api/index.js";
-import { initNotebookDatabase } from "./repository/init.js";
-var stdin_default = {
+import { handleNotebookApi } from "./api.js";
+import { initNotebookDatabase } from "./repository.js";
+
+export default {
   name: "notebook",
   match: (path) => path.startsWith("/apps/notebook/"),
   initDb: initNotebookDatabase,
-  handleApi: handleNotebookApi
-};
-export {
-  stdin_default as default
+  handleApi: handleNotebookApi,
 };

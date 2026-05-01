@@ -1,48 +1,54 @@
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
-import { getStatus } from "../service/status.js";
-import { start } from "../service/start.js";
-import { stop } from "../service/stop.js";
-import { listDecisions } from "../service/decisions.js";
+import { getAgent, saveAgent, startAgent, stopAgent, testAgentExchange } from "../service/agent.js";
+import { listDecisionRecords } from "../service/decision.js";
 import { listEquity } from "../service/equity.js";
-import { saveGoal } from "../service/goal.js";
-import { saveExchange } from "../service/exchange.js";
-import { testExchange } from "../service/exchangeTest.js";
+import { getPositions } from "../service/positions.js";
+import { listOrders } from "../service/trade.js";
+import { getMarket } from "../service/market.js";
+
 const handleCryptobotApi = async (req, res, path) => {
-  if (path === "/apps/cryptobot/status" && req.method === "GET") {
-    return json(res, await getStatus());
+  if (path === "/apps/cryptobot/agent" && req.method === "GET") {
+    return json(res, await getAgent());
   }
-  if (path === "/apps/cryptobot/exchange" && req.method === "POST") {
+  if (path === "/apps/cryptobot/agent" && req.method === "POST") {
     const body = await readBody(req);
-    return json(res, saveExchange(body));
+    return json(res, saveAgent(body));
   }
-  if (path === "/apps/cryptobot/exchange/test" && req.method === "POST") {
+  if (path === "/apps/cryptobot/agent/exchange/test" && req.method === "POST") {
     const body = await readBody(req);
-    return json(res, await testExchange(body));
+    return json(res, await testAgentExchange(body));
   }
-  if (path === "/apps/cryptobot/goal" && req.method === "POST") {
+  if (path === "/apps/cryptobot/agent/start" && req.method === "POST") {
     const body = await readBody(req);
-    return json(res, saveGoal(body));
+    return json(res, await startAgent(body));
   }
-  if (path === "/apps/cryptobot/start" && req.method === "POST") {
-    const body = await readBody(req);
-    return json(res, await start(body));
+  if (path === "/apps/cryptobot/agent/stop" && req.method === "POST") {
+    return json(res, stopAgent());
   }
-  if (path === "/apps/cryptobot/stop" && req.method === "POST") {
-    return json(res, stop());
-  }
-  if (path === "/apps/cryptobot/decisions" && req.method === "GET") {
+  if (path === "/apps/cryptobot/decision/records" && req.method === "GET") {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const limit = Number(url.searchParams.get("limit") || 50);
-    return json(res, listDecisions({ limit }));
+    return json(res, listDecisionRecords({ limit }));
   }
   if (path === "/apps/cryptobot/equity" && req.method === "GET") {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const limit = Number(url.searchParams.get("limit") || 300);
     return json(res, listEquity({ limit }));
   }
+  if (path === "/apps/cryptobot/positions" && req.method === "GET") {
+    return json(res, await getPositions());
+  }
+  if (path === "/apps/cryptobot/trade/orders" && req.method === "GET") {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const instType = url.searchParams.get("instType") || "ANY";
+    const limit = Number(url.searchParams.get("limit") || 50);
+    return json(res, await listOrders({ instType, limit }));
+  }
+  if (path === "/apps/cryptobot/market" && req.method === "GET") {
+    return json(res, await getMarket());
+  }
   return false;
 };
-export {
-  handleCryptobotApi
-};
+
+export { handleCryptobotApi };

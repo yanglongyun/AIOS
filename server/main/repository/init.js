@@ -1,17 +1,8 @@
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import { db } from "./client.js";
 
-const SYSTEM_MEMORY_SEEDS = [
-  {
-    // 应用开发指导是核心系统知识，每次对话都可能需要（建/改应用必读）。
-    // 用 pinned=1 让全文自动注入到系统提示词，不依赖 agent 主动 fetch。
-    title: "__T_MEMORY_SEED_APP_CREATION_GUIDE_TITLE__",
-    description: "__T_MEMORY_SEED_APP_CREATION_GUIDE_DESCRIPTION__",
-    content: "__T_MEMORY_SEED_APP_CREATION_GUIDE_CONTENT__",
-    creator: "system",
-    pinned: 1,
-    enabled: 1
-  }
-];
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const createTables = () => {
   db.exec(`
@@ -54,44 +45,25 @@ const createTables = () => {
       finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS memories (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL DEFAULT '',
-      content TEXT NOT NULL,
-      creator TEXT NOT NULL DEFAULT 'user',
-      pinned INTEGER NOT NULL DEFAULT 0,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+    CREATE TABLE IF NOT EXISTS auth (
+      id            INTEGER PRIMARY KEY CHECK (id = 1),
+      password_hash TEXT NOT NULL,
+      password_salt TEXT NOT NULL,
+      api_token     TEXT NOT NULL,
+      created_at    TEXT DEFAULT (datetime('now')),
+      updated_at    TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      id         TEXT PRIMARY KEY,
+      created_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL
     );
   `);
 };
 
-const seedMemoriesIfEmpty = () => {
-  const count = db.prepare("SELECT COUNT(*) as c FROM memories").get().c;
-  if (count !== 0) return;
-  try {
-    for (const item of SYSTEM_MEMORY_SEEDS) {
-      db.prepare(
-        "INSERT INTO memories (title, description, content, creator, pinned, enabled) VALUES (?, ?, ?, ?, ?, ?)"
-      ).run(
-        item.title,
-        item.description,
-        item.content,
-        item.creator || "system",
-        item.pinned ? 1 : 0,
-        item.enabled === 0 ? 0 : 1
-      );
-    }
-  } catch (error) {
-    console.error("[memory-seeds] failed to seed system memories:", error);
-  }
-};
-
 const initDatabase = () => {
   createTables();
-  seedMemoriesIfEmpty();
 };
 
 export {

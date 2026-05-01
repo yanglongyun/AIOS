@@ -11,10 +11,13 @@ database: database/apps/cryptobot.db
 Decision Log 只记录每轮任务总结，不记录固定 action/amount 字段。
 
 API:
-- GET `/apps/cryptobot/status`
-- POST `/apps/cryptobot/exchange`
-- POST `/apps/cryptobot/goal`
-- POST `/apps/cryptobot/start`
-- POST `/apps/cryptobot/stop`
+- GET `/apps/cryptobot/agent`
+- POST `/apps/cryptobot/agent`
+- POST `/apps/cryptobot/agent/exchange/test`
+- POST `/apps/cryptobot/agent/start`
+- POST `/apps/cryptobot/agent/stop`
+- GET `/apps/cryptobot/decision/records?limit=50`
+- GET `/apps/cryptobot/trade/orders?instType=ANY&limit=50`
+- GET `/apps/cryptobot/positions`
+- GET `/apps/cryptobot/market`
 - GET `/apps/cryptobot/equity?limit=300`
-- GET `/apps/cryptobot/decisions?limit=50`

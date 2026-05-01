@@ -1,48 +1,9 @@
-<template>
-  <div class="passbook-bg flex h-full w-full items-center justify-center overflow-hidden px-5 py-8 font-['PingFang_SC','Microsoft_YaHei',sans-serif]">
-    <div class="passbook-container flex h-full w-full max-h-[900px] max-w-[1400px] rounded-xl shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
-      <div class="passbook-cover relative flex w-[25px] shrink-0 items-center justify-center rounded-l-xl">
-        <div class="cover-stripe absolute bottom-0 left-[5px] top-0 w-[10px] opacity-80"></div>
-      </div>
-
-      <div class="passbook-pages relative flex flex-1 flex-col rounded-r-xl">
-        <div class="spine-crease pointer-events-none absolute bottom-0 left-0 top-0 z-50 w-10"></div>
-
-        <FinanceHeader
-          :display-month="displayMonth"
-          :is-current-month="isCurrentMonth"
-          :total-income="totalIncome"
-          :total-expense="totalExpense"
-          :ending-balance="endingBalance"
-          :fmt-amt="fmtAmt"
-          @prev-month="prevMonth"
-          @next-month="nextMonth"
-        />
-
-        <FinanceLedgerTable
-          :rows="rows"
-          :editing="editing"
-          :form="form"
-          :today-str="todayStr"
-          :saving="saving"
-          :fmt-date="fmtDate"
-          :fmt-amt="fmtAmt"
-          :start-edit="startEdit"
-          :save-edit="saveEdit"
-          :cancel-edit="cancelEdit"
-          :remove="remove"
-          :save="save"
-        />
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { LOCALE_FULL } from '../../system/locale.js';
-import FinanceHeader from './FinanceHeader.vue';
-import FinanceLedgerTable from './FinanceLedgerTable.vue';
+import FinanceEntryForm from './FinanceEntryForm.vue';
+import FinanceSummaryBar from './FinanceSummaryBar.vue';
+import FinanceTransactionsTable from './FinanceTransactionsTable.vue';
 
 const API_BASE = '/apps/finance';
 
@@ -51,7 +12,9 @@ const month = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,
 const items = ref([]);
 const totalIncome = ref(0);
 const totalExpense = ref(0);
+const loading = ref(false);
 const saving = ref(false);
+const error = ref('');
 
 const form = reactive({
   newDate: '',
@@ -92,14 +55,19 @@ const fmtDate = (dateStr) => {
 };
 
 const fetchData = async () => {
+  loading.value = true;
+  error.value = '';
   try {
     const res = await fetch(`${API_BASE}/list?month=${month.value}`);
     const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
     items.value = data.items || [];
     totalIncome.value = Number(data.totalIncome || 0);
     totalExpense.value = Number(data.totalExpense || 0);
   } catch (e) {
-    console.error(e);
+    error.value = e.message || '__T_FINANCE_LOAD_FAILED__';
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -125,6 +93,7 @@ const save = async () => {
   if (saving.value) return;
 
   saving.value = true;
+  error.value = '';
   try {
     const type = deposit > 0 ? 'income' : 'expense';
     const amount = deposit > 0 ? deposit : withdraw;
@@ -133,11 +102,13 @@ const save = async () => {
     const dayPart = dateInput.includes('-') ? dateInput.split('-').pop() : dateInput;
     const fullDate = `${month.value}-${dayPart.padStart(2, '0')}T12:00:00`;
 
-    await fetch(`${API_BASE}/create`, {
+    const res = await fetch(`${API_BASE}/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, amount, note, date: fullDate })
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || '__T_FINANCE_CREATE_FAILED__');
 
     form.newDate = '';
     form.newNote = '';
@@ -145,7 +116,7 @@ const save = async () => {
     form.newDeposit = '';
     await fetchData();
   } catch (e) {
-    console.error(e);
+    error.value = e.message || '__T_FINANCE_CREATE_FAILED__';
   } finally {
     saving.value = false;
   }
@@ -195,76 +166,93 @@ const saveEdit = async () => {
   }
 
   cancelEdit();
+  error.value = '';
   try {
-    await fetch(`${API_BASE}/update`, {
+    const res = await fetch(`${API_BASE}/update`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || '__T_FINANCE_UPDATE_FAILED__');
     await fetchData();
   } catch (e) {
-    console.error(e);
+    error.value = e.message || '__T_FINANCE_UPDATE_FAILED__';
   }
 };
 
 const remove = async (id) => {
+  error.value = '';
   try {
-    await fetch(`${API_BASE}/delete`, {
+    const res = await fetch(`${API_BASE}/delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) throw new Error(data.message || '__T_FINANCE_DELETE_FAILED__');
     await fetchData();
   } catch (e) {
-    console.error(e);
+    error.value = e.message || '__T_FINANCE_DELETE_FAILED__';
   }
 };
 
-onMounted(() => {
-  fetchData();
-});
+onMounted(fetchData);
 </script>
 
+<template>
+  <div class="flex h-full flex-col bg-bg">
+    <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
+      <div>
+        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_FINANCE_TITLE__</h1>
+        <div class="mt-1 text-[12px] text-faint">__T_FINANCE_SUBTITLE__</div>
+      </div>
+      <button
+        class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:opacity-60"
+        :disabled="loading"
+        @click="fetchData">
+        <span class="msi sm" :class="{ spin: loading }">refresh</span>
+        <span>__T_COMMON_REFRESH__</span>
+      </button>
+    </header>
+
+    <div class="min-h-0 flex-1 overflow-auto px-8 pb-12 max-md:px-3">
+      <FinanceSummaryBar
+        :display-month="displayMonth"
+        :is-current-month="isCurrentMonth"
+        :total-income="totalIncome"
+        :total-expense="totalExpense"
+        :ending-balance="endingBalance"
+        :fmt-amt="fmtAmt"
+        @prev-month="prevMonth"
+        @next-month="nextMonth" />
+
+      <FinanceEntryForm
+        :form="form"
+        :today-str="todayStr"
+        :saving="saving"
+        @save="save" />
+
+      <div v-if="error" class="mb-3 rounded-lg px-3.5 py-2 text-[13px] text-bad"
+        style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
+        {{ error }}
+      </div>
+
+      <FinanceTransactionsTable
+        :rows="rows"
+        :editing="editing"
+        :loading="loading"
+        :fmt-date="fmtDate"
+        :fmt-amt="fmtAmt"
+        :start-edit="startEdit"
+        :save-edit="saveEdit"
+        :cancel-edit="cancelEdit"
+        :remove="remove" />
+    </div>
+  </div>
+</template>
+
 <style scoped>
-.passbook-bg {
-  background-color: #1a1a1a;
-  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, transparent 1px, transparent 10px);
-}
-
-.passbook-cover {
-  background: linear-gradient(135deg, #a41b1b, #7d1010);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.2'/%3E%3C/svg%3E");
-  box-shadow: inset 4px 0 10px rgba(0,0,0,0.5), inset -2px 0 8px rgba(0,0,0,0.8);
-}
-
-.cover-stripe {
-  background: linear-gradient(90deg, #111, #333, #111);
-  box-shadow: inset 0 0 3px rgba(0,0,0,0.8);
-}
-
-.passbook-pages {
-  background-color: #f0f4f8;
-  background-image:
-    repeating-linear-gradient(45deg, rgba(82,113,255,0.03) 0, rgba(82,113,255,0.03) 1px, transparent 1px, transparent 12px),
-    repeating-linear-gradient(-45deg, rgba(82,113,255,0.03) 0, rgba(82,113,255,0.03) 1px, transparent 1px, transparent 12px);
-  box-shadow: inset 15px 0 25px rgba(0,0,0,0.15);
-}
-
-.spine-crease {
-  background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 40%, transparent 100%);
-}
-
-.dot-matrix {
-  font-family: 'Courier New', Courier, monospace;
-  color: #0b1c67;
-  text-shadow: 0 0 1px rgba(11,28,103,0.4);
-  letter-spacing: 0.5px;
-}
-
-@media (max-width: 640px) {
-  .passbook-container { margin: 0 !important; border-radius: 0 !important; max-height: none !important; }
-  .passbook-cover { width: 12px !important; border-radius: 0 !important; }
-  .passbook-pages { border-radius: 0 !important; }
-  .spine-crease { width: 20px !important; }
-}
+.spin { animation: finance-spin 1s linear infinite; }
+@keyframes finance-spin { to { transform: rotate(360deg); } }
 </style>

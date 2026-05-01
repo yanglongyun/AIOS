@@ -7,7 +7,7 @@ const requestTask = async (body = {}) => {
     const token = getApiToken();
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    resp = await fetch(`http://localhost:${process.env.IIMOS_MAIN_PORT || 9501}/api/task/create/agent`, {
+    resp = await fetch(`http://localhost:${process.env.AIOS_MAIN_PORT || 9501}/api/task/create/agent`, {
       method: "POST",
       headers,
       body: JSON.stringify(body)
@@ -34,11 +34,21 @@ const agentTask = async ({ app, title, prompt, meta = null }) => {
     meta
   });
 };
+const agentTaskStart = async ({ app, title, prompt, meta = null }) => {
+  return await requestTask({
+    app,
+    title,
+    prompt,
+    meta,
+    wait: false
+  });
+};
 const agentTaskJson = async (args = {}) => {
   const data = await agentTask(args);
   return parseJsonObject(data.response || "");
 };
 export {
   agentTask,
+  agentTaskStart,
   agentTaskJson
 };

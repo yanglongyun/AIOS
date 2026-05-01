@@ -46,7 +46,8 @@ const createAgentTask = async ({
   app,
   title = "",
   prompt,
-  meta = null
+  meta = null,
+  wait = true
 }) => {
   const {
     apiUrl,
@@ -88,36 +89,45 @@ const createAgentTask = async ({
   };
   const abortController = new AbortController();
   registerTaskExecution(taskId, abortController);
-  try {
-    const response = await runAgentTask({
-      app,
-      prompt,
-      provider,
-      apiUrl,
-      apiKey,
-      model,
-      send,
-      signal: abortController.signal,
-      enableToolResultTruncate,
-      toolResultMaxChars,
-      enableToolLoopLimit,
-      toolMaxRounds
-    });
-    saveTaskMessage(conversationId, { role: "assistant", content: response }, null);
-    updateTaskDone({ taskId, response });
-    broadcast({ type: "tasks_changed" });
-    return { id: taskId, conversationId, response };
-  } catch (error) {
-    if (error?.name === "AbortError") {
-      updateTaskAborted({ taskId });
-    } else {
-      updateTaskError({ taskId, message: error?.message || "任务执行失败" });
+  const exec = async () => {
+    try {
+      const response = await runAgentTask({
+        app,
+        prompt,
+        provider,
+        apiUrl,
+        apiKey,
+        model,
+        send,
+        signal: abortController.signal,
+        enableToolResultTruncate,
+        toolResultMaxChars,
+        enableToolLoopLimit,
+        toolMaxRounds
+      });
+      saveTaskMessage(conversationId, { role: "assistant", content: response }, null);
+      updateTaskDone({ taskId, response });
+      broadcast({ type: "tasks_changed" });
+      return response;
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        updateTaskAborted({ taskId });
+      } else {
+        updateTaskError({ taskId, message: error?.message || "任务执行失败" });
+      }
+      broadcast({ type: "tasks_changed" });
+      if (wait) throw error;
+      return null;
+    } finally {
+      unregisterTaskExecution(taskId);
     }
-    broadcast({ type: "tasks_changed" });
-    throw error;
-  } finally {
-    unregisterTaskExecution(taskId);
+  };
+  if (!wait) {
+    exec().catch(() => {});
+    return { id: taskId, conversationId, response: null };
   }
+  const response = await exec();
+  return { id: taskId, conversationId, response };
 };
 export {
   createAgentTask,

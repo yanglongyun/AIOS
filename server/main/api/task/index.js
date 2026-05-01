@@ -43,14 +43,15 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
 const handleTaskCreateAgentApi = async (req, res, path) => {
   if (path !== "/api/task/create/agent" || req.method !== "POST") return false;
   try {
-    const { app, title = "", prompt, meta = null } = await readBody(req);
+    const { app, title = "", prompt, meta = null, wait = true } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
     if (!String(prompt || "").trim()) return json(res, { success: false, message: "prompt is required" }, 400);
     const result = await createAgentTask({
       app: String(app || "").trim(),
       title: String(title || "").trim(),
       prompt: String(prompt || "").trim(),
-      meta
+      meta,
+      wait: Boolean(wait)
     });
     return json(res, result);
   } catch (e) {

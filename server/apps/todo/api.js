@@ -20,6 +20,15 @@ const handleTodoApi = async (req, res, path) => {
     if (path === "/apps/todo/delete" && req.method === "POST") {
         return respond(res, svc.remove(await readBody(req)));
     }
+    if (path === "/apps/todo/run" && req.method === "POST") {
+        return respond(res, await svc.run(await readBody(req)));
+    }
+    if (path === "/apps/todo/decompose" && req.method === "POST") {
+        return respond(res, await svc.decompose(await readBody(req)));
+    }
+    if (path === "/apps/todo/update-task-status" && req.method === "POST") {
+        return respond(res, svc.updateTaskStatus(await readBody(req)));
+    }
     return false;
 };
 

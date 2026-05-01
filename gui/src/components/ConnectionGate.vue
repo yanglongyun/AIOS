@@ -12,10 +12,10 @@ const show = computed(() => {
 });
 
 const status = computed(() => {
-    if (ws.state === 'offline')return { id: 'offline',    label: '连接已断开,重连中…' };
+    if (ws.state === 'offline')return { id: 'offline',    label: '__T_CONNECTION_OFFLINE__' };
     if (!ws.authenticated && ws.requiresPassword)
-                               return { id: 'pending',    label: '等待认证…' };
-    return                           { id: 'pending',    label: '连接中…' };
+                               return { id: 'pending',    label: '__T_CONNECTION_WAIT_AUTH__' };
+    return                           { id: 'pending',    label: '__T_CONNECTION_CONNECTING__' };
 });
 </script>
 
@@ -26,17 +26,17 @@ const status = computed(() => {
                 <div class="gem">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <defs>
-                            <linearGradient id="iimosGateGem" x1="0" y1="0" x2="1" y2="1">
+                            <linearGradient id="AIOSGateGem" x1="0" y1="0" x2="1" y2="1">
                                 <stop offset="0"  stop-color="var(--gem-3)"/>
                                 <stop offset=".5" stop-color="var(--gem-2)"/>
                                 <stop offset="1"  stop-color="var(--gem-1)"/>
                             </linearGradient>
                         </defs>
                         <path d="M12 2c.6 4 3 6.4 7 7-4 .6-6.4 3-7 7-.6-4-3-6.4-7-7 4-.6 6.4-3 7-7z"
-                              fill="url(#iimosGateGem)"/>
+                              fill="url(#AIOSGateGem)"/>
                     </svg>
                 </div>
-                <div class="brand">iimos<span class="dot">.</span></div>
+                <div class="brand">AIOS<span class="dot">.</span></div>
                 <div class="status">
                     <span class="gate-dot" :data-state="status.id"></span>
                     <span class="t">{{ status.label }}</span>

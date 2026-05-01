@@ -22,7 +22,7 @@ defineEmits(['refresh']);
         </div>
         <div class="flex-1"></div>
         <button class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-bg-hi text-muted hover:bg-line-hi hover:text-ink"
-            @click="$emit('refresh')" title="__T_CRYPTOBOT_REFRESH__">
+            @click="$emit('refresh')" title="__T_COMMON_REFRESH__">
             <span class="msi sm" :class="{ spin: loading }">refresh</span>
         </button>
     </div>

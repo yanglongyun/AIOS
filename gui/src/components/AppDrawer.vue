@@ -36,7 +36,7 @@ onBeforeUnmount(() => {
     <aside class="rail" :class="{ expanded: view.drawerOpen }">
 
         <!-- Menu toggle (desktop only; mobile uses AppTopbar instead) -->
-        <button class="ricon menu-row" @click="view.toggleDrawer" title="展开 / 收起">
+        <button class="ricon menu-row" @click="view.toggleDrawer" title="__T_NAV_TOGGLE__">
             <span class="ico"><span class="msi">menu</span></span>
         </button>
 
@@ -45,10 +45,10 @@ onBeforeUnmount(() => {
             <button v-for="item in view.navGroups.top" :key="item.path"
                 @click="navigateTo(item.path)"
                 class="ricon"
-                :class="{ active: route.path === item.path }"
+                :class="{ active: route.params.id === item.kind }"
                 :title="item.label">
                 <span class="ico">
-                    <span class="msi" :class="{ filled: route.path === item.path }">{{ item.msi }}</span>
+                    <span class="msi" :class="{ filled: route.params.id === item.kind }">{{ item.msi }}</span>
                 </span>
                 <span class="label">{{ item.label }}</span>
             </button>
@@ -56,15 +56,15 @@ onBeforeUnmount(() => {
 
         <!-- Group 2: apps (scrollable middle) — labelled -->
         <div class="apps-group">
-            <div class="group-label">应用</div>
+            <div class="group-label">__T_NAV_APPS__</div>
             <nav class="nav apps-list">
                 <button v-for="item in view.navGroups.apps" :key="item.path"
                     @click="navigateTo(item.path)"
                     class="ricon"
-                    :class="{ active: route.path === item.path }"
+                    :class="{ active: route.params.id === item.kind }"
                     :title="item.label">
                     <span class="ico">
-                        <span class="msi" :class="{ filled: route.path === item.path }">{{ item.msi }}</span>
+                        <span class="msi" :class="{ filled: route.params.id === item.kind }">{{ item.msi }}</span>
                     </span>
                     <span class="label">{{ item.label }}</span>
                 </button>
@@ -73,19 +73,19 @@ onBeforeUnmount(() => {
 
         <!-- Group 3: bottom — theme toggle on top, then system entries -->
         <div class="bottom-group">
-            <button class="ricon" @click="theme.toggle" :title="isLight ? '切到夜色' : '切到日间'">
+            <button class="ricon" @click="theme.toggle" :title="isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__'">
                 <span class="ico"><span class="msi">{{ isLight ? 'dark_mode' : 'light_mode' }}</span></span>
-                <span class="label">{{ isLight ? '夜色' : '日间' }}</span>
+                <span class="label">{{ isLight ? '__T_THEME_DARK__' : '__T_THEME_LIGHT__' }}</span>
             </button>
 
             <button v-for="item in view.navGroups.bottom" :key="item.path"
                 @click="navigateTo(item.path)"
                 class="ricon"
-                :class="{ active: route.path === item.path }"
+                :class="{ active: route.params.id === item.kind }"
                 :title="item.label">
                 <span class="ico">
                     <span class="msi" :class="{
-                        filled: route.path === item.path,
+                        filled: route.params.id === item.kind,
                         spin: item.kind === 'tasks' && tasks.runningCount > 0,
                     }">{{ item.msi }}</span>
                 </span>

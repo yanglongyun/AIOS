@@ -2,7 +2,6 @@ import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { getAgent, saveAgent, startAgent, stopAgent, testAgentExchange } from "../service/agent.js";
 import { listDecisionRecords } from "../service/decision.js";
-import { listEquity } from "../service/equity.js";
 import { getPositions } from "../service/positions.js";
 import { listOrders } from "../service/trade.js";
 import { getMarket } from "../service/market.js";
@@ -30,11 +29,6 @@ const handleCryptobotApi = async (req, res, path) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const limit = Number(url.searchParams.get("limit") || 50);
     return json(res, listDecisionRecords({ limit }));
-  }
-  if (path === "/apps/cryptobot/equity" && req.method === "GET") {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const limit = Number(url.searchParams.get("limit") || 300);
-    return json(res, listEquity({ limit }));
   }
   if (path === "/apps/cryptobot/positions" && req.method === "GET") {
     return json(res, await getPositions());

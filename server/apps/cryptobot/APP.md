@@ -20,4 +20,3 @@ API:
 - GET `/apps/cryptobot/trade/orders?instType=ANY&limit=50`
 - GET `/apps/cryptobot/positions`
 - GET `/apps/cryptobot/market`
-- GET `/apps/cryptobot/equity?limit=300`

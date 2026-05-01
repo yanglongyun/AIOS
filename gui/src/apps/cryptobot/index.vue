@@ -1,20 +1,22 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { fmtTime } from './formatters';
-import DecisionTab from './tabs/DecisionTab.vue';
+import AgentTab from './tabs/AgentTab.vue';
+import DecisionsTab from './tabs/DecisionsTab.vue';
 import EquityPanel from './tabs/EquityPanel.vue';
-import ExchangePanel from './tabs/ExchangePanel.vue';
-import RuntimePanel from './tabs/RuntimePanel.vue';
-import TradingDirectivePanel from './tabs/TradingDirectivePanel.vue';
+import MarketTab from './tabs/MarketTab.vue';
+import PositionsTab from './tabs/PositionsTab.vue';
+import TradingTab from './tabs/TradingTab.vue';
 
 const API = '/apps/cryptobot';
 const INTERVALS = [1, 2, 5, 10, 15, 30, 60];
 
 const TABS = [
-    { key: 'equity',     label: '__T_CRYPTOBOT_TAB_EQUITY__', icon: 'account_balance_wallet' },
-    { key: 'exchange',   label: '__T_CRYPTOBOT_TAB_EXCHANGE__', icon: 'account_balance' },
-    { key: 'directive',  label: '__T_CRYPTOBOT_TAB_DIRECTIVE__', icon: 'rule' },
-    { key: 'runtime',    label: '__T_CRYPTOBOT_TAB_RUNTIME__', icon: 'smart_toy' },
+    { key: 'agent',     label: '__T_CRYPTOBOT_TAB_AGENT__', icon: 'smart_toy' },
+    { key: 'decisions', label: '__T_CRYPTOBOT_TAB_DECISIONS__', icon: 'receipt_long' },
+    { key: 'trading',   label: '__T_CRYPTOBOT_TAB_TRADING__', icon: 'swap_horiz' },
+    { key: 'positions', label: '__T_CRYPTOBOT_TAB_POSITIONS__', icon: 'account_balance_wallet' },
+    { key: 'market',    label: '__T_CRYPTOBOT_TAB_MARKET__', icon: 'candlestick_chart' },
 ];
 
 const GOAL_PRESETS = [
@@ -27,7 +29,7 @@ const GOAL_PRESETS = [
     { key: 'custom', label: '__T_CRYPTOBOT_GOAL_CUSTOM__', icon: 'tune', text: '' },
 ];
 
-const activeTab = ref('equity');
+const activeTab = ref('agent');
 const error = ref('');
 let poller = null;
 let ticker = null;
@@ -234,12 +236,16 @@ const minToSliderIdx = (min) => {
 watch(activeTab, (tab) => {
     if (posPoller) { clearInterval(posPoller); posPoller = null; }
     if (marketPoller) { clearInterval(marketPoller); marketPoller = null; }
-    if (tab === 'exchange') {
+    if (tab === 'positions') {
         loadPositions();
+        posPoller = setInterval(() => { if (activeTab.value === 'positions') loadPositions(); }, 8000);
+    }
+    if (tab === 'trading') {
         loadTradeOrders();
+    }
+    if (tab === 'market') {
         loadMarket();
-        posPoller = setInterval(() => { if (activeTab.value === 'exchange') loadPositions(); }, 8000);
-        marketPoller = setInterval(() => { if (activeTab.value === 'exchange') loadMarket(); }, 10000);
+        marketPoller = setInterval(() => { if (activeTab.value === 'market') loadMarket(); }, 10000);
     }
 });
 
@@ -250,7 +256,7 @@ onMounted(async () => {
         goalPreset.value = matchPreset(goal.value);
         sliderIdx.value = minToSliderIdx(Math.round((status.config.interval_sec || 300) / 60));
         syncExFormFromAgent();
-        if (!status.config.has_keys) activeTab.value = 'exchange';
+        if (!status.config.has_keys) activeTab.value = 'agent';
 
         ticker = setInterval(() => {
             nowTs.value = Date.now();
@@ -291,7 +297,7 @@ onUnmounted(() => {
                 </span>
                 <span class="text-[12px] text-faint">#{{ selectedDecision.id }}</span>
                 <span class="text-[12px] text-faint">·</span>
-                <span class="text-[12px] text-faint">task {{ selectedDecision.task_id || '—' }}</span>
+                <span class="text-[12px] text-faint">__T_CRYPTOBOT_TASK__ {{ selectedDecision.task_id || '—' }}</span>
             </div>
             <div class="text-[12px] text-faint">{{ fmtTime(selectedDecision.created_at) }}</div>
             <p class="mt-4 whitespace-pre-wrap text-[14px] leading-[1.7] text-ink">{{ selectedDecision.summary || '—' }}</p>
@@ -311,6 +317,10 @@ onUnmounted(() => {
             </div>
         </header>
 
+        <div class="flex-none px-8 pb-4 max-md:px-3">
+            <EquityPanel :status="status" />
+        </div>
+
         <nav class="flex flex-none flex-wrap gap-1.5 px-8 pb-3 max-md:px-4">
             <button v-for="t in TABS" :key="t.key"
                 class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-[12.5px] transition-colors"
@@ -327,59 +337,56 @@ onUnmounted(() => {
         </div>
 
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
-            <EquityPanel v-if="activeTab === 'equity'"
-                :status="status" />
-
-            <ExchangePanel v-else-if="activeTab === 'exchange'"
-                :ex-form="exForm"
-                :testing-ex="testingEx"
-                :test-result="testResult"
-                :positions-data="positionsData"
-                :positions-loading="positionsLoading"
-                :positions-error="positionsError"
-                :order-inst-type="orderInstType"
-                :orders="orders"
-                :orders-loading="ordersLoading"
-                :orders-error="ordersError"
-                :market-items="marketItems"
-                :market-updated-at="marketUpdatedAt"
-                :market-loading="marketLoading"
-                :market-error="marketError"
-                @dirty="() => {}"
-                @test="doTestExchange"
-                @save="doSaveAll"
-                @refresh-positions="loadPositions"
-                @update:order-inst-type="orderInstType = $event"
-                @refresh-orders="loadTradeOrders"
-                @refresh-market="loadMarket" />
-
-            <TradingDirectivePanel v-else-if="activeTab === 'directive'"
-                :presets="GOAL_PRESETS"
-                :goal-preset="goalPreset"
-                :goal="goal"
-                @preset="selectPreset"
-                @update:goal="goal = $event"
-                @save="doSaveAll" />
-
-            <div v-else-if="activeTab === 'runtime'" class="space-y-5">
-                <RuntimePanel
+            <div class="space-y-5">
+                <AgentTab v-if="activeTab === 'agent'"
+                    :ex-form="exForm"
+                    :testing-ex="testingEx"
+                    :test-result="testResult"
+                    :presets="GOAL_PRESETS"
+                    :goal-preset="goalPreset"
+                    :goal="goal"
                     :status="status"
                     :can-start="canStart"
                     :countdown-label="countdownLabel"
                     :countdown-progress="countdownProgress"
                     :intervals="INTERVALS"
                     :slider-idx="sliderIdx"
+                    @dirty="() => {}"
+                    @test-exchange="doTestExchange"
+                    @save="doSaveAll"
+                    @preset="selectPreset"
+                    @update:goal="goal = $event"
                     @start="doStartAgent"
                     @stop="doStopAgent"
                     @slider="onSliderInput" />
 
-                <DecisionTab
+                <DecisionsTab v-else-if="activeTab === 'decisions'"
                     :decisions="decisions"
                     :has-more="hasMore"
                     @more="loadMoreDecisions"
                     @select="selectedDecision = $event" />
-            </div>
 
+                <TradingTab v-else-if="activeTab === 'trading'"
+                    :inst-type="orderInstType"
+                    :orders="orders"
+                    :loading="ordersLoading"
+                    :error="ordersError"
+                    @update:inst-type="orderInstType = $event"
+                    @refresh="loadTradeOrders" />
+
+                <PositionsTab v-else-if="activeTab === 'positions'"
+                    :data="positionsData"
+                    :loading="positionsLoading"
+                    :error="positionsError"
+                    @refresh="loadPositions" />
+
+                <MarketTab v-else-if="activeTab === 'market'"
+                    :items="marketItems"
+                    :updated-at="marketUpdatedAt"
+                    :loading="marketLoading"
+                    :error="marketError"
+                    @refresh="loadMarket" />
+            </div>
         </div>
     </div>
 </template>

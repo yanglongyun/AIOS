@@ -1,7 +1,7 @@
 <template>
   <section class="space-y-5">
     <div>
-      <div class="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">上下文轮数</div>
+      <div class="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">__T_SETTINGS_CONTEXT_ROUNDS__</div>
       <div class="flex gap-2">
         <button
           v-for="n in [30, 100, 500]"
@@ -16,7 +16,7 @@
     </div>
 
     <div class="flex justify-end">
-      <button class="save-btn" @click="$emit('save')">保存</button>
+      <button class="save-btn" @click="$emit('save')">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>

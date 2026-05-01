@@ -5,12 +5,12 @@
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
           <div v-if="!messages.length" class="flex flex-1 flex-col items-center justify-center py-20 text-center">
             <div class="mb-4 text-[40px]">💬</div>
-            <h2 class="mb-2 text-xl font-bold" style="color:var(--color-ink)">有什么可以帮你？</h2>
-            <p class="max-w-[320px] text-[13px] leading-relaxed" style="color:var(--color-muted)">输入任意内容开始对话，支持自动执行命令或手动确认模式。</p>
+            <h2 class="mb-2 text-xl font-bold" style="color:var(--color-ink)">__T_CHAT_EMPTY_TITLE__</h2>
+            <p class="max-w-[320px] text-[13px] leading-relaxed" style="color:var(--color-muted)">__T_CHAT_EMPTY_SUBTITLE__</p>
           </div>
 
           <template v-else>
-            <div v-if="hasMore" class="py-2 text-center text-xs" style="color:var(--color-faint)">加载更多...</div>
+            <div v-if="hasMore" class="py-2 text-center text-xs" style="color:var(--color-faint)">__T_CHAT_LOAD_MORE__</div>
 
             <div v-for="(m, i) in messages" :key="m._key || i" class="mb-6" :data-message-key="m._key || ''">
               <!-- USER: small pill, right-aligned -->
@@ -39,8 +39,8 @@
                 <div class="min-w-0 flex-1 overflow-hidden rounded-xl" style="border:1px solid var(--color-line);background:var(--color-bg-elev)">
                   <button type="button" class="flex w-full cursor-pointer items-center gap-2 border-none px-3 py-2 text-left transition-colors" style="background:color-mix(in srgb, var(--color-accent) 8%, transparent)" @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.09)'" @mouseleave="$event.currentTarget.style.background='rgba(160,120,80,0.05)'" @click="m.expanded = !m.expanded">
                     <ChevronRight class="h-3 w-3 shrink-0 transition-transform" :class="m.expanded ? 'rotate-90' : ''" style="color:var(--color-faint)" />
-                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:var(--color-ink)">{{ m.title || '工具调用' }}</span>
-                    <span v-if="m.result" class="shrink-0 text-[11px]" style="color:var(--color-faint)">完成</span>
+                    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:var(--color-ink)">{{ m.title || '__T_CHAT_TOOL_CALL__' }}</span>
+                    <span v-if="m.result" class="shrink-0 text-[11px]" style="color:var(--color-faint)">__T_COMMON_DONE__</span>
                   </button>
                   <div v-if="m.expanded" style="border-top:1px solid var(--color-line)">
                     <div v-if="m.shell && m.command" class="overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-xs" style="background:color-mix(in srgb, var(--color-accent) 6%, transparent);color:var(--color-good)"><span class="select-none" style="color:var(--color-faint)">$ </span>{{ m.command }}</div>
@@ -57,7 +57,7 @@
             </div>
 
             <div v-if="busy" class="flex items-start">
-              <div class="py-2 text-sm" style="color:var(--color-muted)">思考中<span class="animate-pulse">...</span></div>
+              <div class="py-2 text-sm" style="color:var(--color-muted)">__T_CHAT_THINKING__<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
@@ -77,7 +77,7 @@
           >
             <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
             <div v-if="dragActive" class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed px-6 text-center text-sm font-semibold" style="border-color:var(--color-accent);background:color-mix(in srgb, var(--color-accent) 8%, transparent);color:var(--color-accent-hi)">
-              {{ uploading ? '上传中...' : '拖拽文件到这里即可添加附件' }}
+              {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_DROP_FILES__' }}
             </div>
             <div v-if="pendingFiles.length" class="flex flex-wrap gap-1.5 px-3.5 pb-0 pt-2.5">
               <div v-for="(f, idx) in pendingFiles" :key="`${f.path}-${idx}`" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px]" style="border:1px solid var(--color-line);background:color-mix(in srgb, var(--color-accent) 8%, transparent);color:var(--color-ink)">
@@ -92,7 +92,7 @@
               v-model="input"
               rows="1"
               :disabled="busy"
-              :placeholder="busy ? '进行中...' : '输入消息...'"
+              :placeholder="busy ? '__T_CHAT_BUSY_PLACEHOLDER__' : '__T_CHAT_INPUT_PLACEHOLDER__'"
               class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-12 text-sm leading-relaxed outline-none disabled:opacity-50"
               style="color:var(--color-ink)"
               @input="autoResize"
@@ -104,7 +104,7 @@
             <div class="flex items-center px-3.5 pb-2.5">
               <button type="button" :disabled="busy || uploading" class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-none bg-transparent px-2.5 text-xs transition-all disabled:cursor-not-allowed disabled:opacity-50" style="color:var(--color-muted)" @mouseover="$event.currentTarget.style.background='color-mix(in srgb, var(--color-accent) 10%, transparent)';$event.currentTarget.style.color='var(--color-ink)'" @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='var(--color-muted)'" @click="openFilePicker">
                 <Paperclip class="h-3.5 w-3.5" />
-                {{ uploading ? '上传中...' : '上传文件' }}
+                {{ uploading ? '__T_CHAT_UPLOADING__' : '__T_CHAT_UPLOAD_FILE__' }}
               </button>
             </div>
 
@@ -120,7 +120,7 @@
         </div>
       <div class="flex items-center justify-center gap-1.5 pt-1 text-[11px]" style="color:var(--color-faint)">
           <span class="h-1.5 w-1.5 rounded-full" :class="wsStatus === 'connected' ? 'bg-emerald-500' : wsStatus === 'connecting' ? 'animate-pulse bg-amber-400' : 'bg-red-400'"></span>
-          <span>{{ wsStatus === 'connected' ? '已连接' : wsStatus === 'connecting' ? '连接中...' : '未连接' }}</span>
+          <span>{{ wsStatus === 'connected' ? '__T_CONNECTION_CONNECTED__' : wsStatus === 'connecting' ? '__T_CONNECTION_CONNECTING_PLAIN__' : '__T_CONNECTION_DISCONNECTED__' }}</span>
         </div>
       </div>
     </div>
@@ -199,7 +199,7 @@ const mapToolCallMessage = (toolCall, key) => {
   if (name === 'shell' && args) {
     return { type: 'tool_call', shell: true, toolCall, title: args.reason || 'shell', command: args.command || '', _key: key };
   }
-  return { type: 'tool_call', toolCall, title: name || '工具调用', detail: args ? JSON.stringify(args, null, 2) : '', _key: key };
+  return { type: 'tool_call', toolCall, title: name || '__T_CHAT_TOOL_CALL__', detail: args ? JSON.stringify(args, null, 2) : '', _key: key };
 };
 
 const addUniqueMessages = (items, { prepend = false } = {}) => {
@@ -275,9 +275,9 @@ const resetState = () => {
   streamingAssistantKey.value = '';
 };
 
-const buildChatTitleFromFirstMessage = (text = '') => String(text).replace(/\s+/g, ' ').trim().slice(0, 20) || '新对话';
+const buildChatTitleFromFirstMessage = (text = '') => String(text).replace(/\s+/g, ' ').trim().slice(0, 20) || '__T_CHAT_NEW_CONVERSATION__';
 
-const createNewChat = async (title = '新对话') => {
+const createNewChat = async (title = '__T_CHAT_NEW_CONVERSATION__') => {
   const data = await request('/api/chat/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -357,7 +357,7 @@ const openConversation = async (conversationId) => {
       emit('conversation-change', null);
       return;
     }
-    messages.value.push({ role: 'assistant', content: '错误: {message}'.replace('{message}', e.message) });
+    messages.value.push({ role: 'assistant', content: '__T_COMMON_ERROR_MESSAGE__'.replace('{message}', e.message) });
   }
 };
 
@@ -369,12 +369,12 @@ const handleSend = async () => {
   try {
     await ensureConnected();
   } catch {
-    messages.value.push({ role: 'assistant', content: '错误: WebSocket 未连接，请检查服务是否启动' });
+    messages.value.push({ role: 'assistant', content: '__T_CHAT_WS_NOT_CONNECTED__' });
     busy.value = false;
     return;
   }
 
-  const content = text || '请先阅读附件并总结关键信息';
+  const content = text || '__T_CHAT_ATTACHMENT_SUMMARY_PROMPT__';
   const outgoingAttachments = pendingFiles.value.map((f) => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
 
   ensureChatId(text).then((id) => {
@@ -390,7 +390,7 @@ const handleSend = async () => {
       emit('history-change');
     });
   }).catch((e) => {
-    messages.value.push({ role: 'assistant', content: '错误: {message}'.replace('{message}', e.message) });
+    messages.value.push({ role: 'assistant', content: '__T_COMMON_ERROR_MESSAGE__'.replace('{message}', e.message) });
     busy.value = false;
   });
 };
@@ -438,17 +438,17 @@ const handleIntentRequest = (req) => {
 };
 
 // 上传走统一的 /api/fs/upload (multipart) —— 旧的 /api/files/upload 已下线.
-// dir 是相对路径,服务器按 cwd 解析为 <iimos>/files/uploads/chat,响应里
+// dir 是相对路径,服务器按 cwd 解析为 <AIOS>/files/uploads/chat,响应里
 // path 是绝对路径,attachments.js 用前缀校验做安全过滤.
 const uploadSingleFile = async (file) => {
   const fd = new FormData();
   fd.append('file', file, file.name);
   const url = '/api/fs/upload?' + new URLSearchParams({ dir: 'files/uploads/chat' }).toString();
   const res = await fetch(url, { method: 'POST', body: fd });
-  if (!res.ok) throw new Error(`上传失败 ${res.status}`);
+  if (!res.ok) throw new Error(`__T_CHAT_UPLOAD_FAILED__ ${res.status}`);
   const data = await res.json();
   const out = (data.files || [])[0];
-  if (!out) throw new Error('上传未返回文件');
+  if (!out) throw new Error('__T_CHAT_UPLOAD_EMPTY__');
   return { name: out.name, path: out.path, size: out.size };
 };
 
@@ -462,7 +462,7 @@ const appendFiles = async (files = []) => {
       if (uploaded?.path) pendingFiles.value.push(uploaded);
     }
   } catch (err) {
-    uploadError.value = err.message || '上传失败';
+    uploadError.value = err.message || '__T_CHAT_UPLOAD_FAILED__';
   } finally {
     uploading.value = false;
   }
@@ -620,7 +620,7 @@ onMounted(async () => {
     if (data.conversationId !== currentConversationId.value) return;
     const key = `ws:${Date.now()}:error`;
     seenKeys.value.add(key);
-    messages.value.push({ role: 'assistant', content: '错误: {message}'.replace('{message}', data.content), _key: key });
+    messages.value.push({ role: 'assistant', content: '__T_COMMON_ERROR_MESSAGE__'.replace('{message}', data.content), _key: key });
     streamingAssistantKey.value = '';
     busy.value = false;
   }));

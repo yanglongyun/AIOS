@@ -10,10 +10,10 @@
           style="accent-color:var(--color-accent)"
           @change="$emit('update:enable-tool-result-truncate', $event.target.checked)"
         />
-        <span class="text-[13px] font-medium text-ink">启用工具结果截断</span>
+        <span class="text-[13px] font-medium text-ink">__T_SETTINGS_ENABLE_TOOL_TRUNCATE__</span>
       </label>
       <div class="mt-3 flex flex-wrap items-center gap-3">
-        <span class="text-[12px] text-muted">工具结果内容长度</span>
+        <span class="text-[12px] text-muted">__T_SETTINGS_TOOL_RESULT_MAX__</span>
         <input
           :value="toolResultMaxChars"
           type="number"
@@ -23,7 +23,7 @@
           @input="$emit('update:tool-result-max-chars', Number($event.target.value || 0))"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-faint">默认 12000,范围 1000 - 50000</div>
+      <div class="mt-1.5 text-[11px] text-faint">__T_SETTINGS_TOOL_RESULT_HINT__</div>
     </div>
 
     <div class="my-4 h-px bg-line"></div>
@@ -38,10 +38,10 @@
           style="accent-color:var(--color-accent)"
           @change="$emit('update:enable-tool-loop-limit', $event.target.checked)"
         />
-        <span class="text-[13px] font-medium text-ink">启用工具最大循环次数限制</span>
+        <span class="text-[13px] font-medium text-ink">__T_SETTINGS_ENABLE_TOOL_LOOP_LIMIT__</span>
       </label>
       <div class="mt-3 flex flex-wrap items-center gap-3">
-        <span class="text-[12px] text-muted">工具最大循环次数</span>
+        <span class="text-[12px] text-muted">__T_SETTINGS_TOOL_MAX_ROUNDS__</span>
         <input
           :value="toolMaxRounds"
           type="number"
@@ -51,11 +51,11 @@
           @input="$emit('update:tool-max-rounds', Number($event.target.value || 0))"
         />
       </div>
-      <div class="mt-1.5 text-[11px] text-faint">默认 50,范围 1 - 500</div>
+      <div class="mt-1.5 text-[11px] text-faint">__T_SETTINGS_TOOL_ROUNDS_HINT__</div>
     </div>
 
     <div class="flex justify-end pt-2">
-      <button class="save-btn" @click="$emit('save')">保存</button>
+      <button class="save-btn" @click="$emit('save')">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>

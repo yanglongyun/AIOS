@@ -2,7 +2,7 @@
   <div class="flex h-full flex-col bg-bg">
     <header class="flex-none border-b border-line pt-7 max-md:pt-5">
       <div class="mx-auto flex max-w-[720px] flex-col gap-4.5 px-8 max-md:px-4">
-        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">设置</h1>
+        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_SETTINGS_TITLE__</h1>
         <nav class="tabs flex items-stretch gap-1 -mx-8 overflow-x-auto px-8 max-md:-mx-4 max-md:px-4" role="tablist">
           <button
             v-for="tab in tabs"
@@ -37,12 +37,12 @@ import AboutTab from './AboutTab.vue';
 import PromptTab from './PromptTab.vue';
 
 const tabs = [
-  { key: 'account', label: '账户', icon: '👤' },
-  { key: 'model', label: '模型', icon: '🤖' },
-  { key: 'prompt', label: '指令', icon: '📜' },
-  { key: 'messages', label: '消息', icon: '💬' },
-  { key: 'tools', label: '工具', icon: '🔧' },
-  { key: 'about', label: '关于', icon: 'ℹ️' }
+  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__', icon: '👤' },
+  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
+  { key: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__', icon: '📜' },
+  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__', icon: '💬' },
+  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__', icon: '🔧' },
+  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
 ];
 
 const activeTab = ref('account');
@@ -213,11 +213,11 @@ const save = async () => {
       model: editModel.value
     };
     saveProviderConfigs();
-    saveNotice.value = { type: 'success', message: '配置已保存' };
+    saveNotice.value = { type: 'success', message: '__T_SETTINGS_SAVE_SUCCESS__' };
   } catch (e) {
     saveNotice.value = {
       type: 'error',
-      message: '保存失败：{message}'.replace('{message}', e.message)
+      message: '__T_SETTINGS_SAVE_FAILED__'.replace('{message}', e.message)
     };
   }
 };

@@ -37,7 +37,7 @@ defineEmits(['preset', 'update:goal', 'save']);
             <button class="inline-flex items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 py-1.5 text-[12.5px] font-semibold text-blue-fg transition-colors hover:bg-line-hi"
                 @click="$emit('save')">
                 <span class="msi" style="font-size:14px">check</span>
-                <span>__T_CRYPTOBOT_SAVE__</span>
+                <span>__T_COMMON_SAVE__</span>
             </button>
         </div>
     </section>

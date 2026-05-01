@@ -6,10 +6,10 @@ import * as api from '@/utils/api';
 const tasks = useTasksStore();
 
 const STATUS_META = {
-    running:   { label: '__T_TASKS_STATUS_RUNNING__', color: 'var(--color-accent)' },
+    running:   { label: '__T_CRYPTOBOT_RUNNING__', color: 'var(--color-accent)' },
     pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__', color: 'var(--color-accent)' },
-    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__', color: 'var(--color-good)' },
-    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__', color: 'var(--color-good)' },
+    done:      { label: '__T_CRYPTOBOT_TASK_OK__', color: 'var(--color-good)' },
+    completed: { label: '__T_CRYPTOBOT_TASK_OK__', color: 'var(--color-good)' },
     aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
     stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
     error:     { label: '__T_TASKS_STATUS_ERROR__', color: 'var(--color-bad)' },
@@ -67,7 +67,7 @@ async function refreshDetail() {
         detail.value = data?.task || null;
         detailMessages.value = Array.isArray(msgData?.messages) ? msgData.messages : [];
     } catch (err) {
-        detailError.value = err?.body?.message || err.message || '__T_TASKS_LOAD_FAIL__';
+        detailError.value = err?.body?.message || err.message || '__T_FINANCE_LOAD_FAILED__';
     } finally {
         detailLoading.value = false;
     }
@@ -111,7 +111,7 @@ function messageRoleLabel(role) {
     if (role === 'assistant') return '__T_TASKS_ROLE_MODEL__';
     if (role === 'tool') return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
     if (role === 'user') return '__T_TASKDETAIL_ROLE_USER__';
-    if (role === 'system') return '__T_TASKS_ROLE_SYSTEM__';
+    if (role === 'system') return '__T_STORE_CATEGORY_SYSTEM__';
     return role || '__T_TASKS_ROLE_MESSAGE__';
 }
 </script>
@@ -123,16 +123,16 @@ function messageRoleLabel(role) {
             <button
                 class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 @click="backToList"
-                title="__T_TASKDETAIL_BACK__">
+                title="__T_CRYPTOBOT_BACK__">
                 <span class="msi sm">arrow_back</span>
             </button>
-            <span class="text-[12px] text-muted">__T_TASKDETAIL_BACK__</span>
+            <span class="text-[12px] text-muted">__T_CRYPTOBOT_BACK__</span>
             <button
                 v-if="selected && isActive(selected)"
                 class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-line-hi bg-transparent px-3 py-1 text-[12.5px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
                 @click="stopFromDetail">
                 <span class="msi sm">stop_circle</span>
-                <span>__T_TASKS_STOP__</span>
+                <span>__T_CRYPTOBOT_STOP__</span>
             </button>
         </header>
 
@@ -143,7 +143,7 @@ function messageRoleLabel(role) {
 
         <div v-if="!selected && !detailError" class="flex flex-1 flex-col items-center gap-2 py-15 text-muted">
             <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
-            <div class="text-[14px]">__T_TASKS_LOADING__</div>
+            <div class="text-[14px]">__T_CRYPTOBOT_LOADING__</div>
         </div>
 
         <div v-else-if="selected" class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-4 max-md:px-4 max-md:pb-10">
@@ -166,12 +166,12 @@ function messageRoleLabel(role) {
             </div>
 
             <h2 class="m-0 break-words text-[24px] font-semibold leading-[1.25] tracking-[-0.01em] text-ink max-md:text-[19px]">
-                {{ selected.title || `__T_TASKS_TASK_NUMBER__ #${selected.id}` }}
+                {{ selected.title || `__T_TASKS_TITLE__ #${selected.id}` }}
             </h2>
 
             <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-faint">
-                <span v-if="selected.created_at">__T_TASKS_CREATED__ {{ fmtFullTime(selected.created_at) }}</span>
-                <span v-if="selected.finished_at">__T_TASKS_FINISHED__ {{ fmtFullTime(selected.finished_at) }}</span>
+                <span v-if="selected.created_at">__T_STORE_CATEGORY_CREATION__ {{ fmtFullTime(selected.created_at) }}</span>
+                <span v-if="selected.finished_at">__T_CRYPTOBOT_TASK_OK__ {{ fmtFullTime(selected.finished_at) }}</span>
                 <span v-if="selected.conversation_id" class="font-mono">{{ selected.conversation_id }}</span>
             </div>
 
@@ -239,16 +239,16 @@ function messageRoleLabel(role) {
                 class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:enabled:bg-line-hi hover:enabled:text-ink disabled:cursor-default disabled:opacity-60"
                 :disabled="tasks.loading"
                 @click="tasks.fetch"
-                title="__T_TASKS_REFRESH__">
+                title="__T_COMMON_REFRESH__">
                 <span class="msi sm" :class="{ spin: tasks.loading }">refresh</span>
-                <span>__T_TASKS_REFRESH__</span>
+                <span>__T_COMMON_REFRESH__</span>
             </button>
         </header>
 
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
             <div v-if="tasks.tasks.length === 0" class="flex flex-col items-center gap-2 py-20 text-muted">
                 <span class="msi" style="font-size:32px;color:var(--color-faint)">inbox</span>
-                <div class="text-[14px]">{{ tasks.loading ? '__T_TASKS_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
+                <div class="text-[14px]">{{ tasks.loading ? '__T_CRYPTOBOT_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
                 <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
             </div>
 
@@ -282,10 +282,10 @@ function messageRoleLabel(role) {
 
                     <button v-if="isActive(t)"
                         class="stop-btn inline-flex flex-none cursor-pointer items-center gap-1 rounded-full border border-line-hi bg-transparent px-2.5 py-1 text-[12px] text-muted transition-colors"
-                        title="__T_TASKS_STOP__"
+                        title="__T_CRYPTOBOT_STOP__"
                         @click.stop="tasks.stop(t.id)">
                         <span class="msi sm">stop_circle</span>
-                        __T_TASKS_STOP__
+                        __T_CRYPTOBOT_STOP__
                     </button>
                 </li>
             </ul>

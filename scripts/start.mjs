@@ -26,6 +26,8 @@
  *   node scripts/start.mjs --force          # 忽略缓存标记，强制重烘
  *   node scripts/start.mjs en --force       # 组合
  *   AIOS_LANG=en node scripts/start.mjs     # 通过环境变量指定 locale
+ *   AIOS_ALLOW_SOURCE_BAKE=1 node scripts/start.mjs
+ *                                           # 明确允许在 git 源仓烘焙（高风险）
  *
  * npm 生命周期:
  *   predev / prebuild / prestart / prestart:apps 都挂这个脚本
@@ -42,6 +44,14 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const settingsDir = path.join(projectRoot, '.aios');
 const settingsFile = path.join(settingsDir, 'settings.json');
+const sourceBakeAllowed = process.env.AIOS_ALLOW_SOURCE_BAKE === '1';
+
+if (!sourceBakeAllowed && fs.existsSync(path.join(projectRoot, '.git'))) {
+  console.error('[start] Refusing to bake language into a git source checkout.');
+  console.error('[start] Use AIOS-dev/scripts/r1.mjs, r2.mjs, or r3.mjs to run a baked runtime copy.');
+  console.error('[start] If you really need this in the source checkout, set AIOS_ALLOW_SOURCE_BAKE=1 explicitly.');
+  process.exit(1);
+}
 
 const readSettings = () => {
   if (!fs.existsSync(settingsFile)) return null;

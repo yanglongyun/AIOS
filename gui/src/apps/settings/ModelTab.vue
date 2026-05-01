@@ -2,7 +2,7 @@
   <section class="space-y-4">
     <!-- 供应商 -->
     <div>
-      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">供应方</label>
+      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">__T_SETTINGS_PROVIDER__</label>
       <select
         :value="provider"
         class="text-input cursor-pointer pr-9 select-arrow"
@@ -16,7 +16,7 @@
 
     <!-- API URL -->
     <div>
-      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">请求地址</label>
+      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">__T_SETTINGS_API_URL__</label>
       <input
         :value="apiUrl"
         placeholder="https://api.example.com/v1/chat/completions"
@@ -27,7 +27,7 @@
 
     <!-- API Key -->
     <div>
-      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">模型 Key</label>
+      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">__T_SETTINGS_API_KEY__</label>
       <input
         :value="apiKey"
         type="password"
@@ -39,10 +39,10 @@
 
     <!-- 模型 -->
     <div>
-      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">模型</label>
+      <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-muted">__T_SETTINGS_MODEL__</label>
       <input
         :value="model"
-        placeholder="输入模型名称,如 gpt-4o"
+        placeholder="__T_SETTINGS_MODEL_PLACEHOLDER__"
         class="text-input"
         @input="$emit('update:model', $event.target.value)"
       />
@@ -56,7 +56,7 @@
       >
         {{ saveNotice.message }}
       </p>
-      <button class="save-btn" @click="$emit('save')">保存</button>
+      <button class="save-btn" @click="$emit('save')">__T_COMMON_SAVE__</button>
     </div>
   </section>
 </template>

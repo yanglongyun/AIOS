@@ -2,7 +2,7 @@
 // 鉴权状态 + 连接健康度.整体走 cookie session,不再做 HMAC 挑战应答.
 //
 // 浏览器 cookie 自动随同域请求发送 (HttpOnly + SameSite=Lax),
-// AI / curl 用 Authorization: Bearer $IIMOS_API_TOKEN.
+// AI / curl 用 Authorization: Bearer $AIOS_API_TOKEN.
 
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -11,7 +11,7 @@ import * as api from '@/utils/api';
 export const useWsStore = defineStore('ws', () => {
     // 'pending' | 'ready' | 'offline'
     const state = ref('pending');
-    const statusText = ref('连接中...');
+    const statusText = ref('__T_CONNECTION_CONNECTING_PLAIN__');
 
     const configured = ref(false);
     const authenticated = ref(false);
@@ -27,18 +27,18 @@ export const useWsStore = defineStore('ws', () => {
             configured.value = Boolean(s.configured);
             authenticated.value = Boolean(s.authenticated);
             state.value = 'ready';
-            statusText.value = authenticated.value ? '已连接' : '需要认证';
+            statusText.value = authenticated.value ? '__T_CONNECTION_CONNECTED__' : '__T_CONNECTION_NEED_AUTH__';
             return s;
         } catch (err) {
             state.value = 'offline';
-            statusText.value = '连接失败';
+            statusText.value = '__T_CONNECTION_FAILED__';
             throw err;
         }
     }
 
     async function init() {
         state.value = 'pending';
-        statusText.value = '连接中...';
+        statusText.value = '__T_CONNECTION_CONNECTING_PLAIN__';
         try {
             await refreshState();
         } catch {
@@ -54,7 +54,7 @@ export const useWsStore = defineStore('ws', () => {
             await refreshState();
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '设置失败';
+            authError.value = err?.body?.message || err.message || '__T_COMMON_SETUP_FAILED__';
             return false;
         }
     }
@@ -66,7 +66,7 @@ export const useWsStore = defineStore('ws', () => {
             await refreshState();
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '登录失败';
+            authError.value = err?.body?.message || err.message || '__T_COMMON_LOGIN_FAILED__';
             return false;
         }
     }
@@ -75,7 +75,7 @@ export const useWsStore = defineStore('ws', () => {
         try { await api.post('/api/auth/logout'); } catch {}
         authenticated.value = false;
         state.value = 'ready';
-        statusText.value = '需要认证';
+        statusText.value = '__T_CONNECTION_NEED_AUTH__';
     }
 
     async function changePassword(oldPassword, newPassword) {
@@ -84,7 +84,7 @@ export const useWsStore = defineStore('ws', () => {
             await api.post('/api/auth/change-password', { oldPassword, newPassword });
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '修改失败';
+            authError.value = err?.body?.message || err.message || '__T_COMMON_UPDATE_FAILED__';
             return false;
         }
     }

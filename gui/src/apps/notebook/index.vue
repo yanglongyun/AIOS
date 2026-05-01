@@ -51,7 +51,7 @@ const createNote = async () => {
   try {
     const data = await request('/create', {
       method: 'POST',
-      body: JSON.stringify({ title: '未命名', content: '' }),
+      body: JSON.stringify({ title: '__T_NOTEBOOK_UNTITLED__', content: '' }),
     });
     notes.value.unshift(data.item);
     applySelected(data.item);
@@ -105,7 +105,7 @@ const togglePinned = async (note) => {
 };
 
 const removeNote = async (note) => {
-  if (!window.confirm(`删除「${note.title || '未命名'}」？`)) return;
+  if (!window.confirm('__T_NOTEBOOK_DELETE_CONFIRM__'.replace('{title}', note.title || '__T_NOTEBOOK_UNTITLED__'))) return;
   try {
     await request('/delete', {
       method: 'POST',
@@ -131,29 +131,29 @@ onMounted(fetchAll);
 <template>
   <div class="flex h-full min-h-0 flex-col bg-bg">
       <header class="flex flex-none items-center gap-3 border-b border-line px-6 py-4 max-md:px-4">
-        <h1 class="m-0 text-[22px] font-semibold leading-none text-ink max-md:text-[19px]">记事本</h1>
+        <h1 class="m-0 text-[22px] font-semibold leading-none text-ink max-md:text-[19px]">__T_NOTEBOOK_TITLE__</h1>
         <button
           class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3 text-[12.5px] font-medium text-blue-fg transition-colors hover:bg-line-hi disabled:opacity-50"
           :disabled="saving"
           @click="createNote">
           <span class="msi sm">add</span>
-          <span>新建</span>
+          <span>__T_NOTEBOOK_NEW__</span>
         </button>
         <div class="min-w-0 flex-1 text-[12px] text-faint">
-          <span v-if="selected">更新于 {{ formatTime(selected.updatedAt) }} · {{ wordCount }} 字</span>
-          <span v-else>选择或新建一条笔记</span>
+          <span v-if="selected">__T_NOTEBOOK_UPDATED_AT__ {{ formatTime(selected.updatedAt) }} · {{ wordCount }} __T_NOTEBOOK_WORD_UNIT__</span>
+          <span v-else>__T_NOTEBOOK_SELECT_OR_CREATE__</span>
         </div>
         <button
           v-if="selected"
           class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-accent"
-          :title="selected.pinned ? '取消置顶' : '置顶'"
+          :title="selected.pinned ? '__T_NOTEBOOK_UNPIN__' : '__T_NOTEBOOK_PIN__'"
           @click="togglePinned(selected)">
           <span class="msi sm" :class="{ filled: selected.pinned }">push_pin</span>
         </button>
         <button
           v-if="selected"
           class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-bad"
-          title="删除"
+          title="__T_COMMON_DELETE__"
           @click="removeNote(selected)">
           <span class="msi sm">delete</span>
         </button>
@@ -163,12 +163,12 @@ onMounted(fetchAll);
           :disabled="saving"
           @click="saveNote">
           <span class="msi sm">save</span>
-          <span>{{ saving ? '保存中...' : '保存' }}</span>
+          <span>{{ saving ? '__T_COMMON_SAVING__' : '__T_COMMON_SAVE__' }}</span>
         </button>
       </header>
 
       <section class="flex-none border-b border-line bg-bg-elev px-5 py-3 max-md:px-3">
-        <div v-if="loading && !notes.length" class="py-3 text-center text-[13px] text-muted">加载中...</div>
+        <div v-if="loading && !notes.length" class="py-3 text-center text-[13px] text-muted">__T_COMMON_LOADING__</div>
         <div v-else class="flex gap-2 overflow-x-auto pb-1">
           <button
             v-for="note in notes"
@@ -178,8 +178,8 @@ onMounted(fetchAll);
             @click="applySelected(note)">
             <span class="msi sm mt-0.5 flex-none" :class="{ filled: note.pinned }">{{ note.pinned ? 'push_pin' : 'article' }}</span>
             <span class="min-w-0 flex-1">
-              <span class="block truncate text-[13.5px] font-medium">{{ note.title || '未命名' }}</span>
-              <span class="mt-1 line-clamp-2 block text-[11.5px] opacity-70">{{ note.content || '空白笔记' }}</span>
+              <span class="block truncate text-[13.5px] font-medium">{{ note.title || '__T_NOTEBOOK_UNTITLED__' }}</span>
+              <span class="mt-1 line-clamp-2 block text-[11.5px] opacity-70">{{ note.content || '__T_NOTEBOOK_EMPTY_NOTE__' }}</span>
             </span>
           </button>
         </div>
@@ -195,21 +195,21 @@ onMounted(fetchAll);
           ref="titleRef"
           v-model="draft.title"
           class="mb-4 w-full border-0 bg-transparent text-[30px] font-semibold leading-[1.15] text-ink outline-none placeholder:text-faint max-md:text-[24px]"
-          placeholder="标题" />
+          placeholder="__T_NOTEBOOK_TITLE_PLACEHOLDER__" />
         <textarea
           v-model="draft.content"
           class="min-h-0 flex-1 resize-none border-0 bg-transparent text-[15px] leading-[1.8] text-ink outline-none placeholder:text-faint"
-          placeholder="开始记录..." />
+          placeholder="__T_NOTEBOOK_CONTENT_PLACEHOLDER__" />
       </section>
 
       <section v-else class="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-muted">
         <span class="msi" style="font-size:42px;color:var(--color-faint)">edit_note</span>
-        <div class="text-[14px]">还没有笔记</div>
+        <div class="text-[14px]">__T_NOTEBOOK_EMPTY__</div>
         <button
           class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 py-2 text-[13px] font-semibold text-blue-fg"
           @click="createNote">
           <span class="msi sm">add</span>
-          <span>新建笔记</span>
+          <span>__T_NOTEBOOK_NEW_NOTE__</span>
         </button>
       </section>
   </div>

@@ -16,7 +16,7 @@ export const useTasksStore = defineStore('tasks', () => {
         try {
             loading.value = true;
             error.value = '';
-            const data = await api.get('/api/task', { query: { limit: 30 } });
+            const data = await api.get('/api/task', { query: { limit: 50 } });
             tasks.value = Array.isArray(data) ? data : [];
         } catch (err) {
             error.value = err?.body?.message || err.message || '';
@@ -34,6 +34,27 @@ export const useTasksStore = defineStore('tasks', () => {
         }
     }
 
+    async function create({ prompt, app = 'tasks', title = '', meta = null }) {
+        const text = String(prompt || '').trim();
+        if (!text) throw new Error('empty prompt');
+        const finalTitle = String(title || '').trim() || text.slice(0, 80);
+        const data = await api.post('/api/task/create/agent', {
+            app, title: finalTitle, prompt: text, meta, wait: false,
+        });
+        await fetch();
+        return data;
+    }
+
+    async function rerun(task) {
+        if (!task?.prompt) throw new Error('no prompt to rerun');
+        return create({
+            prompt: task.prompt,
+            app: task.app || 'tasks',
+            title: task.title || '',
+            meta: { rerunOf: task.id },
+        });
+    }
+
     function startPolling(intervalMs = 4000) {
         stopPolling();
         fetch();
@@ -47,5 +68,5 @@ export const useTasksStore = defineStore('tasks', () => {
         }
     }
 
-    return { tasks, loading, error, runningCount, fetch, stop, startPolling, stopPolling };
+    return { tasks, loading, error, runningCount, fetch, stop, create, rerun, startPolling, stopPolling };
 });

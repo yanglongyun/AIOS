@@ -15,13 +15,6 @@ const apps = [
     load: () => import('./apps/tasks/index.vue')
   },
   {
-    id: 'todo',
-    name: '__T_APP_TODO__',
-    icon: 'checklist',
-    group: 'apps',
-    load: () => import('./apps/todo/index.vue')
-  },
-  {
     id: 'notebook',
     name: '__T_APP_NOTEBOOK__',
     icon: 'edit_note',

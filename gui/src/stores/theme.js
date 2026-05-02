@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
-const STORAGE_KEY = 'iimos.theme';
+const STORAGE_KEY = 'AIOS.theme';
 const VALID = new Set(['dark', 'light', 'system']);
 
 function readStored() {

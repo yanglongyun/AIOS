@@ -5,7 +5,7 @@ $RepoUrl = if ($env:AIOS_REPO_URL) { $env:AIOS_REPO_URL } else { "https://github
 $RepoRef = if ($env:AIOS_REPO_REF) { $env:AIOS_REPO_REF } else { "main" }
 $InstallRoot = if ($env:AIOS_INSTALL_ROOT) { $env:AIOS_INSTALL_ROOT } else { Join-Path $HOME ".aios" }
 $RepoDir = Join-Path $InstallRoot "repo"
-$AppDir = Join-Path $RepoDir "AIOS"
+$AppDir = Join-Path $InstallRoot "app"
 $LogDir = Join-Path $InstallRoot "logs"
 $RunDir = Join-Path $InstallRoot "run"
 $ServerLog = Join-Path $LogDir "server.log"
@@ -26,6 +26,13 @@ function Fail([string]$Message) {
 function Require-Command([string]$Name) {
   if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
     Fail "Missing required command: $Name"
+  }
+}
+
+function Invoke-External([string]$FilePath, [string[]]$Arguments) {
+  & $FilePath @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    Fail "$FilePath failed with exit code $LASTEXITCODE"
   }
 }
 
@@ -57,15 +64,28 @@ function Ensure-Dirs {
 function Update-Repo {
   if (Test-Path (Join-Path $RepoDir ".git")) {
     Write-Info "Updating repository in $RepoDir"
-    & git -C $RepoDir fetch origin $RepoRef
-    & git -C $RepoDir checkout $RepoRef
-    & git -C $RepoDir pull --ff-only origin $RepoRef
+    Invoke-External "git" @("-C", $RepoDir, "fetch", "origin", $RepoRef)
+    Invoke-External "git" @("-C", $RepoDir, "checkout", $RepoRef)
+    Invoke-External "git" @("-C", $RepoDir, "pull", "--ff-only", "origin", $RepoRef)
   } else {
     Write-Info "Cloning repository into $RepoDir"
-    & git clone --branch $RepoRef --depth 1 $RepoUrl $RepoDir
+    Invoke-External "git" @("clone", "--branch", $RepoRef, "--depth", "1", $RepoUrl, $RepoDir)
   }
+  if (-not (Test-Path (Join-Path $RepoDir "package.json"))) {
+    Fail "AIOS source package.json not found: $(Join-Path $RepoDir "package.json")"
+  }
+}
+
+function Sync-App {
+  Write-Info "Syncing runtime copy to $AppDir"
+  New-Item -ItemType Directory -Force -Path $AppDir | Out-Null
+  & robocopy $RepoDir $AppDir /MIR /XD ".git" "node_modules" "database" "files" ".aios" /XF ".DS_Store" /NFL /NDL /NJH /NJS /NP | Out-Null
+  if ($LASTEXITCODE -ge 8) {
+    Fail "robocopy failed with exit code $LASTEXITCODE"
+  }
+  $global:LASTEXITCODE = 0
   if (-not (Test-Path (Join-Path $AppDir "package.json"))) {
-    Fail "AIOS app directory not found: $AppDir"
+    Fail "AIOS runtime package.json not found: $(Join-Path $AppDir "package.json")"
   }
 }
 
@@ -103,7 +123,7 @@ function Install-Dependencies {
   Write-Info "Installing npm dependencies"
   Push-Location $AppDir
   try {
-    & npm install
+    Invoke-External "npm" @("install")
   } finally {
     Pop-Location
   }
@@ -113,7 +133,7 @@ function Build-App {
   Write-Info "Building UI"
   Push-Location $AppDir
   try {
-    & npm run build
+    Invoke-External "npm" @("run", "build")
   } finally {
     Pop-Location
   }
@@ -156,16 +176,18 @@ try {
   Require-Command "git"
   Require-Command "node"
   Require-Command "npm"
+  Require-Command "robocopy"
   Assert-NodeVersion
   Ensure-Dirs
   Update-Repo
+  Sync-App
   Install-Dependencies
   Build-App
   Stop-PreviousProcess -PidFile $ServerPidFile -Name "server"
   Stop-PreviousProcess -PidFile $AppsPidFile -Name "apps"
   Assert-PortsFree
-  Start-ServiceProcess -Command "npm run start" -LogFile $ServerLog -PidFile $ServerPidFile -Name "AIOS server"
-  Start-ServiceProcess -Command "npm run start:apps" -LogFile $AppsLog -PidFile $AppsPidFile -Name "AIOS apps service"
+  Start-ServiceProcess -Command "set AIOS_APPS_PORT=$AppsPort&& node server/main/index.js --port=$ServerPort" -LogFile $ServerLog -PidFile $ServerPidFile -Name "AIOS server"
+  Start-ServiceProcess -Command "set AIOS_MAIN_PORT=$ServerPort&& node server/apps/index.js --port=$AppsPort" -LogFile $AppsLog -PidFile $AppsPidFile -Name "AIOS apps service"
   Wait-ForHttp -Url "http://127.0.0.1:$ServerPort/api/health" -Name "AIOS server"
   Wait-ForHttp -Url "http://127.0.0.1:$AppsPort/apps/health" -Name "AIOS apps service"
   Write-Info ""

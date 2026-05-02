@@ -49,7 +49,7 @@ const categories = computed(() => {
         counts.set(key, (counts.get(key) || 0) + 1);
     }
     return [
-        { key: 'all', label: '__T_STORE_CATEGORY_ALL__', count: items.value.length },
+        { key: 'all', label: '__T_CRYPTOBOT_ORDER_TYPE_ALL__', count: items.value.length },
         ...Array.from(counts.entries())
             .sort((a, b) => a[0].localeCompare(b[0]))
             .map(([key, count]) => ({ key, label: CATEGORY_LABELS[key] || key, count }))
@@ -194,7 +194,7 @@ onMounted(loadCatalog);
                     <p class="mt-4 whitespace-pre-wrap text-[13px] leading-[1.65] text-muted">{{ selected.description || selected.summary || selected.id }}</p>
 
                     <dl class="mt-4 grid grid-cols-[96px_minmax(0,1fr)] gap-x-3 gap-y-2 text-[12px]">
-                        <dt class="text-faint">__T_STORE_CATEGORY__</dt>
+                        <dt class="text-faint">__T_STORE_CATEGORIES__</dt>
                         <dd class="m-0 text-ink">{{ categoryLabel(selected.category) }}</dd>
                         <dt class="text-faint">__T_STORE_VERSION__</dt>
                         <dd class="m-0 text-ink">{{ selected.latestVersion || '0.1.0' }}</dd>

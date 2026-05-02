@@ -12,8 +12,8 @@ const getMessages = (conversationId, messageLimit = 100) => {
   }));
 };
 const saveMessage = (conversationId, msg, meta = null) => {
-  // 写库前过 redact —— AI 工具结果若回显了 IIMOS_API_TOKEN 真值,
-  // 在持久化之前替换为字面量 $IIMOS_API_TOKEN,避免长存于数据库.
+  // 写库前过 redact —— AI 工具结果若回显了 AIOS_API_TOKEN 真值,
+  // 在持久化之前替换为字面量 $AIOS_API_TOKEN,避免长存于数据库.
   const safeMsg  = redactDeep(msg);
   const safeMeta = meta ? redactDeep(meta) : null;
   const result = db.prepare("INSERT INTO messages (conversation_id, message, meta) VALUES (?, ?, ?)").run(

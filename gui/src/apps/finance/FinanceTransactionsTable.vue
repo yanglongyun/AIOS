@@ -27,7 +27,7 @@ const groups = computed(() => {
 });
 
 const noteText = (row) => {
-  return row.note || (row.type === 'income' ? '__T_FINANCE_DEFAULT_INCOME_NOTE__' : '__T_FINANCE_DEFAULT_EXPENSE_NOTE__');
+  return row.note || (row.type === 'income' ? '__T_FINANCE_DEPOSIT__' : '__T_FINANCE_EXPENSE__');
 };
 
 const amountText = (row) => {

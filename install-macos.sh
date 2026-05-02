@@ -6,7 +6,7 @@ REPO_URL="${AIOS_REPO_URL:-https://github.com/valueriver/aios.git}"
 REPO_REF="${AIOS_REPO_REF:-main}"
 INSTALL_ROOT="${AIOS_INSTALL_ROOT:-$HOME/.aios}"
 REPO_DIR="$INSTALL_ROOT/repo"
-APP_DIR="$REPO_DIR/AIOS"
+APP_DIR="$INSTALL_ROOT/app"
 LOG_DIR="$INSTALL_ROOT/logs"
 RUN_DIR="$INSTALL_ROOT/run"
 SERVER_LOG="$LOG_DIR/server.log"
@@ -64,7 +64,21 @@ update_repo() {
     log "Cloning repository into $REPO_DIR"
     git clone --branch "$REPO_REF" --depth 1 "$REPO_URL" "$REPO_DIR"
   fi
-  [ -f "$APP_DIR/package.json" ] || fail "AIOS app directory not found: $APP_DIR"
+  [ -f "$REPO_DIR/package.json" ] || fail "AIOS source package.json not found: $REPO_DIR/package.json"
+}
+
+sync_app() {
+  log "Syncing runtime copy to $APP_DIR"
+  mkdir -p "$APP_DIR"
+  rsync -a --delete \
+    --exclude '/.git' \
+    --exclude '/node_modules' \
+    --exclude '/database' \
+    --exclude '/files' \
+    --exclude '/.aios' \
+    --exclude '.DS_Store' \
+    "$REPO_DIR/" "$APP_DIR/"
+  [ -f "$APP_DIR/package.json" ] || fail "AIOS runtime package.json not found: $APP_DIR/package.json"
 }
 
 port_in_use() {
@@ -124,14 +138,14 @@ start_services() {
   log "Starting AIOS server"
   (
     cd "$APP_DIR"
-    nohup npm run start >"$SERVER_LOG" 2>&1 &
+    AIOS_APPS_PORT="$APPS_PORT" nohup node server/main/index.js --port="$SERVER_PORT" >"$SERVER_LOG" 2>&1 &
     printf '%s' "$!" >"$SERVER_PID_FILE"
   )
 
   log "Starting AIOS apps service"
   (
     cd "$APP_DIR"
-    nohup npm run start:apps >"$APPS_LOG" 2>&1 &
+    AIOS_MAIN_PORT="$SERVER_PORT" nohup node server/apps/index.js --port="$APPS_PORT" >"$APPS_LOG" 2>&1 &
     printf '%s' "$!" >"$APPS_PID_FILE"
   )
 }
@@ -169,9 +183,11 @@ main() {
   require_command git
   require_command node
   require_command npm
+  require_command rsync
   check_node
   ensure_dirs
   update_repo
+  sync_app
   install_dependencies
   build_app
   stop_pid_file "$SERVER_PID_FILE" "server"

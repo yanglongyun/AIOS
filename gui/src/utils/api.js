@@ -1,5 +1,5 @@
 // 最小 HTTP 客户端 —— 浏览器走 cookie session (credentials: 'same-origin' 默认就带).
-// AI / curl 走 Authorization: Bearer $IIMOS_API_TOKEN,不通过这里.
+// AI / curl 走 Authorization: Bearer $AIOS_API_TOKEN,不通过这里.
 // 401 统一拦截,跳转 /login.
 
 // 401 处理钩子,由 router 注册;避免环依赖.

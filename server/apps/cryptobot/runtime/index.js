@@ -9,7 +9,7 @@ let executing = false;
 // Wait for the main process on 9501. The apps process is usually spawned at
 // the same time, so the first tick can otherwise hit ECONNREFUSED.
 const waitForMain = async (timeoutMs = 30000) => {
-  const port = process.env.IIMOS_MAIN_PORT || 9501;
+  const port = process.env.AIOS_MAIN_PORT || 9501;
   const token = getApiToken();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const start = Date.now();

@@ -10,4 +10,4 @@
 
 ## 数据来源
 
-前端读取 `https://iimos.ai/apps/catalog.json`。
+前端读取 `https://aios.ai/apps/catalog.json`。

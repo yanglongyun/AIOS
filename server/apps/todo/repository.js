@@ -2,13 +2,6 @@ import { createAppDb } from "../app_shared/db/createAppDb.js";
 
 const db = createAppDb("todo.db");
 
-const ensureColumn = (table, column, def) => {
-    const cols = db.prepare(`PRAGMA table_info(${table})`).all();
-    if (!cols.find((c) => c.name === column)) {
-        db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
-    }
-};
-
 const initTodoDatabase = () => {
     db.exec(`
         CREATE TABLE IF NOT EXISTS todos (
@@ -16,21 +9,18 @@ const initTodoDatabase = () => {
             title       TEXT    NOT NULL,
             done        INTEGER NOT NULL DEFAULT 0,
             pinned      INTEGER NOT NULL DEFAULT 0,
+            parent_id   INTEGER,
+            task_id     INTEGER,
+            task_status TEXT    NOT NULL DEFAULT '',
+            note        TEXT    NOT NULL DEFAULT '',
             created_at  TEXT    DEFAULT (datetime('now')),
             updated_at  TEXT    DEFAULT (datetime('now'))
         );
 
         CREATE INDEX IF NOT EXISTS idx_todos_done    ON todos(done);
         CREATE INDEX IF NOT EXISTS idx_todos_pinned  ON todos(pinned);
+        CREATE INDEX IF NOT EXISTS idx_todos_parent  ON todos(parent_id);
     `);
-
-    // Migrations: add agent-task / subtask / note columns if missing.
-    ensureColumn("todos", "parent_id",   "INTEGER");
-    ensureColumn("todos", "task_id",     "INTEGER");
-    ensureColumn("todos", "task_status", "TEXT NOT NULL DEFAULT ''");
-    ensureColumn("todos", "note",        "TEXT NOT NULL DEFAULT ''");
-
-    db.exec(`CREATE INDEX IF NOT EXISTS idx_todos_parent ON todos(parent_id);`);
 };
 
 const rowToTodo = (row) => row && {
@@ -80,6 +70,14 @@ const listTodos = () => {
 const getTodo = (id) => rowToTodo(
     db.prepare("SELECT * FROM todos WHERE id = ?").get(id)
 );
+
+// Subtasks of a parent, in creation order (the natural execution order).
+const listChildren = (parentId) => {
+    const rows = db.prepare(
+        "SELECT * FROM todos WHERE parent_id = ? ORDER BY id ASC"
+    ).all(parentId);
+    return rows.map(rowToTodo);
+};
 
 const createTodo = ({ title, parentId = null, note = "" }) => {
     const info = db.prepare(
@@ -133,6 +131,7 @@ const deleteTodo = ({ id }) => {
 export {
     initTodoDatabase,
     listTodos,
+    listChildren,
     getTodo,
     createTodo,
     updateTodo,

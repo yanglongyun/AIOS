@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 import { apps } from '../apps.js';
 
-const SIDEBAR_KEY = 'iimos.sidebar.expanded';
+const SIDEBAR_KEY = 'AIOS.sidebar.expanded';
 
 function readStoredExpanded() {
     if (typeof window === 'undefined') return false;

@@ -23,6 +23,9 @@ const handleTodoApi = async (req, res, path) => {
     if (path === "/apps/todo/run" && req.method === "POST") {
         return respond(res, await svc.run(await readBody(req)));
     }
+    if (path === "/apps/todo/run-plan" && req.method === "POST") {
+        return respond(res, svc.runPlan(await readBody(req)));
+    }
     if (path === "/apps/todo/decompose" && req.method === "POST") {
         return respond(res, await svc.decompose(await readBody(req)));
     }

@@ -40,8 +40,8 @@ process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
 
 start("main", [join(ROOT, "server/main/index.js"), "--port=9501"], {
-  IIMOS_APPS_PORT: "9502"
+  AIOS_APPS_PORT: "9502"
 });
 start("apps", [join(ROOT, "server/apps/index.js"), "--port=9502"], {
-  IIMOS_MAIN_PORT: "9501"
+  AIOS_MAIN_PORT: "9501"
 });

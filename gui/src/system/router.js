@@ -6,7 +6,7 @@ import * as api from "../utils/api.js";
 const routes = [
   { path: "/", redirect: "/app/chat" },
   { path: "/login", name: "login", component: LoginView, meta: { public: true } },
-  { path: "/app/:id", component: AppShell },
+  { path: "/app/:id/:p1?/:p2?", component: AppShell },
   { path: "/:pathMatch(.*)*", redirect: "/" }
 ];
 

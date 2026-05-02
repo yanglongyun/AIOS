@@ -6,7 +6,7 @@ import { redact } from "./redact.js";
 const clients = new Set();
 
 // WS 推送统一过 redact —— AI 工具调用偶尔会回显环境变量值,
-// 在落到前端之前替换成 $IIMOS_API_TOKEN 字面量.
+// 在落到前端之前替换成 $AIOS_API_TOKEN 字面量.
 const safeStringify = (msg) => redact(JSON.stringify(msg));
 
 export const broadcast = (msg) => {

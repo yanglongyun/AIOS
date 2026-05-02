@@ -14,9 +14,9 @@ const inputRef = ref(null);
 
 const isSetup = computed(() => !ws.configured);
 
-const heading = computed(() => isSetup.value ? '欢迎使用 iimos' : '请输入密码');
+const heading = computed(() => isSetup.value ? '欢迎使用 AIOS' : '请输入密码');
 const subhead = computed(() => isSetup.value
-    ? '首次使用,请为 iimos 设置一个密码'
+    ? '首次使用,请为 AIOS 设置一个密码'
     : '');
 const submitLabel = computed(() => {
     if (loading.value) return isSetup.value ? '设置中…' : '登录中…';
@@ -78,7 +78,7 @@ onMounted(async () => {
                     <span class="msi text-[32px] text-accent">grass</span>
                 </div>
                 <div class="text-[20px] font-semibold tracking-tight text-ink">
-                    iimos<span class="text-accent">.</span>
+                    AIOS<span class="text-accent">.</span>
                 </div>
             </div>
 

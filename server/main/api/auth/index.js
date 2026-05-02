@@ -47,10 +47,10 @@ const noteFailure = (ip) => {
 
 const clearFailure = (ip) => failedAttempts.delete(ip);
 
-// 启动时把 token 推到环境变量,agent runtime 通过 $IIMOS_API_TOKEN 使用.
+// 启动时把 token 推到环境变量,agent runtime 通过 $AIOS_API_TOKEN 使用.
 const exposeTokenToEnv = () => {
   const t = getApiToken();
-  if (t) process.env.IIMOS_API_TOKEN = t;
+  if (t) process.env.AIOS_API_TOKEN = t;
 };
 
 // === Endpoints ===
@@ -106,7 +106,7 @@ const handleAuthApi = async (req, res, path) => {
 
   if (path === "/api/auth/logout" && req.method === "POST") {
     const cookies = String(req.headers.cookie || "");
-    const m = /(?:^|;\s*)iimos_sess=([^;]+)/.exec(cookies);
+    const m = /(?:^|;\s*)AIOS_sess=([^;]+)/.exec(cookies);
     if (m) deleteSession(decodeURIComponent(m[1]));
     res.setHeader("Set-Cookie", buildClearCookie());
     return json(res, { success: true });

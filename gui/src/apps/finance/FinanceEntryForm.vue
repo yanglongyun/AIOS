@@ -33,7 +33,7 @@ defineEmits(['save']);
           @keyup.enter="$emit('save')" />
       </label>
       <label class="block">
-        <span class="mb-1 block text-[11px] font-medium text-faint">__T_FINANCE_WITHDRAWAL__</span>
+        <span class="mb-1 block text-[11px] font-medium text-faint">__T_FINANCE_EXPENSE__</span>
         <input
           v-model="form.newWithdraw"
           type="text"

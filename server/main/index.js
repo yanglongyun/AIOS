@@ -9,14 +9,14 @@ if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
 }
 const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9501;
-process.env.IIMOS_MAIN_PORT = String(PORT);
+process.env.AIOS_MAIN_PORT = String(PORT);
 
 initSystemDirs();
 initDatabase();
-exposeTokenToEnv();   // 启动时把 api_token 推到 process.env.IIMOS_API_TOKEN
+exposeTokenToEnv();   // 启动时把 api_token 推到 process.env.AIOS_API_TOKEN
 setupWebSocket(httpServer);
 
 httpServer.listen(PORT, () => {
-  console.log(`🌱  iimos is growing`);
+  console.log(`🌱  AIOS is growing`);
   console.log(`🌐  http://localhost:${PORT}`);
 });

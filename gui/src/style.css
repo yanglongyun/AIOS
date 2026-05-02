@@ -5,7 +5,7 @@
 @import "@xterm/xterm/css/xterm.css";
 
 /* ================================================================
-   iimos theme — Google / Material 3 inspired.
+   AIOS theme — Google / Material 3 inspired.
    Light = clean paper white with soft blue-gray cards.
    Dark  = ink-on-graphite with the same blue accent.
    Toggle by adding `.light` or `.dark` class on <html>.
@@ -194,7 +194,12 @@ body {
 .msi.sm     { font-size: 18px; }
 .msi.xs     { font-size: 16px; }
 input, textarea, button, select { font: inherit; }
-input, textarea { font-size: 14px; }
+/* Soft 14px default for inputs. :where() forces 0 specificity so any Tailwind
+   utility class (text-[30px] / text-base / 等) can override it. Tailwind v4 emits
+   utilities into @layer utilities, which lose to unlayered rules regardless of
+   selector specificity, so a plain `input, textarea { ... }` here would win and
+   pin every input to 14px. */
+:where(input, textarea) { font-size: 14px; }
 header, footer, section, button, [role="tab"] {
     -webkit-user-select: none;
     user-select: none;

@@ -22,7 +22,7 @@ const MIME = {
   ".jpeg": "image/jpeg",
   ".webp": "image/webp"
 };
-const APPS_PORT = Number(process.env.IIMOS_APPS_PORT || process.env.AIOS_APPS_PORT || 9502);
+const APPS_PORT = Number(process.env.AIOS_APPS_PORT || 9502);
 const readRawBody = async (req) => {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);

@@ -1,10 +1,10 @@
 import { verifySession, verifyApiToken, isConfigured } from "../../repository/auth.js";
 import { parseCookieHeader, serializeCookie } from "../../../shared/http/cookie.js";
 
-const SESSION_COOKIE = "iimos_sess";
+const SESSION_COOKIE = "AIOS_sess";
 
 const buildSessionCookie = (sid, { maxAgeSeconds = 30 * 24 * 60 * 60 } = {}) => {
-  // SameSite=Lax 比 Strict 宽松一档,允许跨站点导航 (例如从外部链接回到 iimos).
+  // SameSite=Lax 比 Strict 宽松一档,允许跨站点导航 (例如从外部链接回到 AIOS).
   // Strict 会导致刷新页面后第一次请求丢 cookie;Lax 是 Google/GitHub 默认.
   // Secure 不强制 —— 本地 http://localhost 也要能用,ngrok 走 HTTPS 自动安全.
   return serializeCookie(SESSION_COOKIE, sid, {

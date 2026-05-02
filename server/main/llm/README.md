@@ -125,7 +125,7 @@ Claude 请求构建器。
 
 输出处理层。
 
-只负责把模型返回结果解析成 iimos 内部使用的 assistant message，不负责输入整理，也不负责选择 provider。
+只负责把模型返回结果解析成 AIOS 内部使用的 assistant message，不负责输入整理，也不负责选择 provider。
 
 ### `output/regular.js`
 

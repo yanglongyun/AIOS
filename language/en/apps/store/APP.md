@@ -10,4 +10,4 @@ App Workshop. A frontend-only app for inspecting the remote app catalog and pack
 
 ## Data Source
 
-The frontend reads `https://iimos.ai/apps/catalog.json`.
+The frontend reads `https://aios.ai/apps/catalog.json`.

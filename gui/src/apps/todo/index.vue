@@ -306,7 +306,6 @@ const messageRoleLabel = (r) => ({
         <div v-if="view === 'list'" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col">
             <header class="flex flex-none items-baseline gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
                 <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TODO_TITLE__</h1>
-                <span class="text-[12.5px] text-faint">__T_TODO_SUBTITLE__</span>
                 <AppLauncher class="ml-auto self-center" />
             </header>
 

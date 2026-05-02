@@ -50,6 +50,13 @@ const apps = [
     load: () => import('./apps/store/index.vue')
   },
   {
+    id: 'demo',
+    name: '__T_APP_DEMO__',
+    icon: 'deployed_code',
+    group: 'apps',
+    load: () => import('./apps/demo/index.vue')
+  },
+  {
     id: 'settings',
     name: '__T_APP_SETTINGS__',
     icon: 'settings',

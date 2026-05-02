@@ -53,6 +53,7 @@ onBeforeUnmount(() => {
         <div class="relative inline-flex items-center gap-1">
             <!-- chat app 内不显示"问 AI"按钮 —— 套娃没意义 -->
             <button v-if="route.params.id !== 'chat'"
+                data-qc-trigger
                 class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 :class="{ '!bg-blue-bg !text-blue-fg': qc.open }"
                 @click="onChat" :title="'__T_QC_TITLE__'" :aria-label="'__T_QC_TITLE__'">

@@ -49,19 +49,11 @@ function fmtFullTime(s) {
 
 // ---- Filtering & grouping ---------------------------------------------
 const filter = ref('all');           // 'all' | 'active' | 'failed'
-const search = ref('');
 
 const filteredAll = computed(() => {
     let list = tasks.tasks || [];
     if (filter.value === 'active') list = list.filter(isActive);
     else if (filter.value === 'failed') list = list.filter(isFailed);
-    const q = search.value.trim().toLowerCase();
-    if (q) {
-        list = list.filter(t => {
-            const blob = `${t.title || ''}|${t.app || ''}|${t.prompt || ''}|${t.response || ''}`.toLowerCase();
-            return blob.includes(q);
-        });
-    }
     return list;
 });
 
@@ -303,7 +295,6 @@ function messageRoleLabel(role) {
     <div v-else class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col bg-bg">
         <header class="flex flex-none items-baseline gap-3 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TASKS_TITLE__</h1>
-            <span class="text-[12.5px] text-faint">__T_TASKS_SUBTITLE__</span>
             <div class="ml-auto flex items-center gap-2">
                 <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-default disabled:opacity-60"
                     :disabled="tasks.loading"
@@ -315,17 +306,8 @@ function messageRoleLabel(role) {
             </div>
         </header>
 
-        <!-- Search + filter chips -->
-        <div class="mx-8 mb-3 flex flex-none flex-wrap items-center gap-2 max-md:mx-3">
-            <div class="search-box flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-3.5 py-1.5 transition-colors focus-within:bg-card-hi">
-                <span class="msi text-faint" style="font-size:18px">search</span>
-                <input v-model="search" placeholder="__T_TASKS_SEARCH_PLACEHOLDER__"
-                    class="search-input min-w-0 flex-1 border-0 bg-transparent text-[13.5px] text-ink outline-none" />
-                <button v-if="search" @click="search = ''" :title="'__T_TASKS_CLEAR_SEARCH__'"
-                    class="grid h-5 w-5 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:text-ink">
-                    <span class="msi" style="font-size:14px">close</span>
-                </button>
-            </div>
+        <!-- Filter chips -->
+        <div class="mx-8 mb-3 flex flex-none items-center gap-2 max-md:mx-3">
             <div class="flex flex-none items-center gap-1 rounded-full bg-card-sub p-0.5">
                 <button v-for="opt in [
                     { v: 'all',    k: '__T_TASKS_FILTER_ALL__' },
@@ -346,9 +328,9 @@ function messageRoleLabel(role) {
                 <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
             </div>
 
-            <!-- No match -->
+            <!-- No match for filter -->
             <div v-else-if="!filteredAll.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                <span class="msi text-faint" style="font-size:28px">search_off</span>
+                <span class="msi text-faint" style="font-size:28px">filter_alt_off</span>
                 <div class="text-[13px]">__T_TASKS_SEARCH_NO_MATCH__</div>
             </div>
 
@@ -427,8 +409,6 @@ function messageRoleLabel(role) {
 </template>
 
 <style scoped>
-.search-input::placeholder { color: var(--color-faint); }
-
 .animate-spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

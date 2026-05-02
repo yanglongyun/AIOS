@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>记账本 · D 极简日记风</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper:    #fafaf7;
+    --paper-2:  #f3f3ee;
+    --line:     #e6e4dd;
+    --line-h:   #d6d3ca;
+    --ink:      #14140f;
+    --ink-2:    #2a2a22;
+    --muted:    #6b6a60;
+    --faint:    #9a988d;
+    --accent:   #1e3a8a;   /* 墨蓝：标记收入 / 强调 */
+    --bad:      #9a2222;   /* 印章红：标记支出 */
+    --tag:      #efece4;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    font-size: 14px;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 22px 80px; }
+
+  /* === 顶栏 === */
+  .topbar {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .brand .dot { width: 7px; height: 7px; background: var(--ink); border-radius: 50%; transform: translateY(-1px); }
+  .brand .name { font-weight: 700; font-size: 15px; letter-spacing: 0.02em; }
+  .brand .sub { color: var(--faint); font-size: 12px; margin-left: 4px; }
+  .month-nav { display: flex; align-items: baseline; gap: 10px; }
+  .month-nav button {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    color: var(--muted); font-size: 14px; padding: 4px 6px;
+    font-family: inherit;
+  }
+  .month-nav button:hover { color: var(--ink); }
+  .month-nav .label { font-weight: 600; min-width: 86px; text-align: center; }
+
+  /* === Hero 数字区 === */
+  .hero {
+    display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: end;
+    padding: 8px 2px 22px;
+  }
+  .hero .label {
+    font-size: 11.5px; color: var(--faint);
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .hero .total {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 44px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .hero .total .sym { color: var(--muted); font-weight: 400; margin-right: 4px; }
+  .hero .meta {
+    margin-top: 10px;
+    display: flex; gap: 18px;
+    font-size: 12.5px;
+  }
+  .hero .meta .k { color: var(--faint); margin-right: 4px; }
+  .hero .meta .vin { color: var(--accent); }
+  .hero .meta .vex { color: var(--bad); }
+
+  /* sparkline */
+  .spark {
+    width: 200px; height: 56px;
+    border-left: 1px solid var(--line);
+    padding-left: 10px;
+  }
+  .spark svg { display: block; width: 100%; height: 100%; }
+
+  /* === 录入区 === */
+  .entry {
+    margin: 6px 0 26px;
+    padding: 10px 12px;
+    border: 1px dashed var(--line-h);
+    border-radius: 4px;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--paper-2);
+  }
+  .entry .prompt { color: var(--faint); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .entry input {
+    flex: 1; border: 0; outline: none; background: transparent;
+    font-family: inherit; font-size: 14px; color: var(--ink);
+    padding: 4px 0;
+  }
+  .entry input::placeholder { color: var(--faint); }
+  .entry .hint {
+    font-size: 11px; color: var(--faint);
+    border-left: 1px solid var(--line-h); padding-left: 10px; margin-left: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === Section header === */
+  .section-h {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 22px 0 6px; padding: 0 2px;
+  }
+  .section-h .t {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--faint); font-weight: 700;
+  }
+  .section-h .a {
+    font-size: 11.5px; color: var(--faint); font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === 分类 top（横向条） === */
+  .cats { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 6px; }
+  .cat-row {
+    display: grid; grid-template-columns: 100px 1fr 80px;
+    align-items: center; gap: 12px;
+    font-size: 13px;
+  }
+  .cat-row .name { color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+  .cat-row .name .em { font-size: 14px; }
+  .cat-row .bar { height: 8px; background: var(--paper-2); border-radius: 0; overflow: hidden; }
+  .cat-row .bar > i {
+    display: block; height: 100%; background: var(--ink);
+  }
+  .cat-row .amt { text-align: right; font-family: 'JetBrains Mono', monospace; color: var(--ink); font-size: 13px; }
+
+  /* === 日列表 === */
+  .day-group { margin-top: 14px; border-top: 1px solid var(--line); }
+  .day-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 12px 4px 6px;
+  }
+  .day-head .d {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .day-head .date {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--ink); font-weight: 600;
+  }
+  .day-head .weekday { font-size: 11.5px; color: var(--faint); letter-spacing: 0.06em; }
+  .day-head .today {
+    font-size: 10px; color: var(--accent); border: 1px solid var(--accent);
+    padding: 1px 6px; border-radius: 999px; letter-spacing: 0.06em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .day-head .sum { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--muted); }
+
+  .tx {
+    display: grid; grid-template-columns: 18px 1fr 90px 18px;
+    align-items: center;
+    padding: 7px 4px;
+    border-top: 1px dotted var(--line);
+    cursor: pointer;
+    font-size: 13.5px;
+  }
+  .tx:hover { background: var(--paper-2); }
+  .tx .em { font-size: 15px; opacity: 0.85; }
+  .tx .meta { display: flex; flex-direction: column; min-width: 0; }
+  .tx .note { color: var(--ink); font-weight: 500; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
+  .tx .cat { color: var(--faint); font-size: 11.5px; margin-top: 1px; letter-spacing: 0.04em; }
+  .tx .amt {
+    font-family: 'JetBrains Mono', monospace; text-align: right;
+    font-weight: 500; font-size: 13.5px;
+  }
+  .tx .amt.ex { color: var(--bad); }
+  .tx .amt.in { color: var(--accent); }
+  .tx .more { text-align: right; color: var(--faint); font-size: 14px; opacity: 0; transition: opacity 0.12s; }
+  .tx:hover .more { opacity: 1; }
+
+  /* footer */
+  .foot {
+    margin-top: 36px; padding-top: 12px;
+    border-top: 1px solid var(--line);
+    text-align: center; color: var(--faint); font-size: 11.5px;
+    letter-spacing: 0.08em;
+  }
+
+  /* responsive */
+  @media (max-width: 560px) {
+    .hero { grid-template-columns: 1fr; }
+    .spark { width: 100%; border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 10px; }
+    .cat-row { grid-template-columns: 90px 1fr 70px; }
+    .tx { grid-template-columns: 18px 1fr 80px 0; }
+    .tx .more { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="name">记账本</span>
+      <span class="sub">/ Ledger</span>
+    </div>
+    <div class="month-nav">
+      <button>‹</button>
+      <span class="label mono">2026 · 05</span>
+      <button>›</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <div class="label">本月支出</div>
+      <div class="total"><span class="sym">¥</span>4,283.<span style="color:var(--muted);font-size:30px">50</span></div>
+      <div class="meta">
+        <span><span class="k">收入</span><span class="vin mono">+¥18,000.00</span></span>
+        <span><span class="k">结余</span><span class="mono" style="color:var(--ink-2);">¥13,716.50</span></span>
+      </div>
+    </div>
+    <div class="spark">
+      <svg viewBox="0 0 200 56" preserveAspectRatio="none">
+        <!-- 30 天竖线条形图 -->
+        <g fill="#14140f">
+          <rect x="2"  y="40" width="3" height="16"/>
+          <rect x="8"  y="46" width="3" height="10"/>
+          <rect x="14" y="32" width="3" height="24"/>
+          <rect x="20" y="38" width="3" height="18"/>
+          <rect x="26" y="50" width="3" height="6"/>
+          <rect x="32" y="42" width="3" height="14"/>
+          <rect x="38" y="36" width="3" height="20"/>
+          <rect x="44" y="44" width="3" height="12"/>
+          <rect x="50" y="28" width="3" height="28"/>
+          <rect x="56" y="40" width="3" height="16"/>
+          <rect x="62" y="34" width="3" height="22"/>
+          <rect x="68" y="48" width="3" height="8"/>
+          <rect x="74" y="38" width="3" height="18"/>
+          <rect x="80" y="30" width="3" height="26"/>
+          <rect x="86" y="42" width="3" height="14"/>
+          <rect x="92" y="46" width="3" height="10"/>
+          <rect x="98" y="22" width="3" height="34"/>
+          <rect x="104" y="38" width="3" height="18"/>
+          <rect x="110" y="44" width="3" height="12"/>
+          <rect x="116" y="32" width="3" height="24"/>
+          <rect x="122" y="40" width="3" height="16"/>
+          <rect x="128" y="50" width="3" height="6"/>
+          <rect x="134" y="36" width="3" height="20"/>
+          <rect x="140" y="42" width="3" height="14"/>
+          <rect x="146" y="26" width="3" height="30"/>
+          <rect x="152" y="38" width="3" height="18"/>
+          <rect x="158" y="44" width="3" height="12"/>
+          <rect x="164" y="34" width="3" height="22"/>
+          <rect x="170" y="40" width="3" height="16"/>
+          <!-- 今日突出 -->
+          <rect x="176" y="20" width="3" height="36" fill="#9a2222"/>
+        </g>
+        <!-- 基线 -->
+        <line x1="0" y1="56" x2="200" y2="56" stroke="#d6d3ca" stroke-width="1"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 录入 -->
+  <div class="entry">
+    <span class="prompt">›</span>
+    <input type="text" placeholder="咖啡 22 / 午饭 30 / 工资 +5000" />
+    <span class="hint">Enter 提交</span>
+  </div>
+
+  <!-- 本月分类 top -->
+  <div class="section-h">
+    <span class="t">本月分类 · Top 5</span>
+    <span class="a">5 / 10</span>
+  </div>
+  <div class="cats">
+    <div class="cat-row">
+      <div class="name"><span class="em">🍲</span><span>餐饮</span></div>
+      <div class="bar"><i style="width:78%"></i></div>
+      <div class="amt">¥1,420</div>
+    </div>
+    <div class="cat-row">
+      <div class="name"><span class="em">🛒</span><span>食材</span></div>
+      <div class="bar"><i style="width:54%"></i></div>
+      <div class="amt">¥980</div>
+    </div>
+    <div class="cat-row">
+      <div class="name"><span class="em">🚕</span><span>交通</span></div>
+      <div class="bar"><i style="width:42%"></i></div>
+      <div class="amt">¥760</div>
+    </div>
+    <div class="cat-row">
+      <div class="name"><span class="em">📱</span><span>数字</span></div>
+      <div class="bar"><i style="width:28%"></i></div>
+      <div class="amt">¥503</div>
+    </div>
+    <div class="cat-row">
+      <div class="name"><span class="em">🎬</span><span>娱乐</span></div>
+      <div class="bar"><i style="width:18%"></i></div>
+      <div class="amt">¥320</div>
+    </div>
+  </div>
+
+  <!-- 列表（按日分组） -->
+  <div class="section-h" style="margin-top:30px;">
+    <span class="t">本月流水</span>
+    <span class="a">28 笔</span>
+  </div>
+
+  <div class="day-group">
+    <div class="day-head">
+      <div class="d">
+        <span class="date mono">05 · 02</span>
+        <span class="weekday">Sat</span>
+        <span class="today">today</span>
+      </div>
+      <div class="sum">−¥152</div>
+    </div>
+    <div class="tx">
+      <span class="em">🍲</span>
+      <div class="meta"><span class="note">朝食 · 包子豆浆</span><span class="cat">餐饮</span></div>
+      <span class="amt ex">−¥18</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">🚕</span>
+      <div class="meta"><span class="note">打车去公司</span><span class="cat">交通</span></div>
+      <span class="amt ex">−¥34</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">🍲</span>
+      <div class="meta"><span class="note">午饭 · 兰州拉面</span><span class="cat">餐饮</span></div>
+      <span class="amt ex">−¥28</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">📱</span>
+      <div class="meta"><span class="note">Spotify · 月度</span><span class="cat">数字</span></div>
+      <span class="amt ex">−¥72</span>
+      <span class="more">›</span>
+    </div>
+  </div>
+
+  <div class="day-group">
+    <div class="day-head">
+      <div class="d">
+        <span class="date mono">05 · 01</span>
+        <span class="weekday">Fri · 劳动节</span>
+      </div>
+      <div class="sum">+¥17,808</div>
+    </div>
+    <div class="tx">
+      <span class="em">💼</span>
+      <div class="meta"><span class="note">工资 · 4 月</span><span class="cat">收入</span></div>
+      <span class="amt in">+¥18,000</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">🛒</span>
+      <div class="meta"><span class="note">超市采购</span><span class="cat">食材</span></div>
+      <span class="amt ex">−¥192</span>
+      <span class="more">›</span>
+    </div>
+  </div>
+
+  <div class="day-group">
+    <div class="day-head">
+      <div class="d">
+        <span class="date mono">04 · 30</span>
+        <span class="weekday">Thu</span>
+      </div>
+      <div class="sum">−¥208</div>
+    </div>
+    <div class="tx">
+      <span class="em">🎬</span>
+      <div class="meta"><span class="note">电影 · 哥斯拉</span><span class="cat">娱乐</span></div>
+      <span class="amt ex">−¥80</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">🍲</span>
+      <div class="meta"><span class="note">外卖 · 麦当劳</span><span class="cat">餐饮</span></div>
+      <span class="amt ex">−¥48</span>
+      <span class="more">›</span>
+    </div>
+    <div class="tx">
+      <span class="em">🛍️</span>
+      <div class="meta"><span class="note">优衣库 T 恤</span><span class="cat">购物</span></div>
+      <span class="amt ex">−¥80</span>
+      <span class="more">›</span>
+    </div>
+  </div>
+
+  <div class="day-group">
+    <div class="day-head">
+      <div class="d">
+        <span class="date mono">04 · 29</span>
+        <span class="weekday">Wed</span>
+      </div>
+      <div class="sum">−¥56</div>
+    </div>
+    <div class="tx">
+      <span class="em">🍲</span>
+      <div class="meta"><span class="note">早午餐 · cafe</span><span class="cat">餐饮</span></div>
+      <span class="amt ex">−¥56</span>
+      <span class="more">›</span>
+    </div>
+  </div>
+
+  <div class="foot">— END OF MAY 02 —</div>
+
+</div>
+</body>
+</html>

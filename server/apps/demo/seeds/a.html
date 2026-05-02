@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>记账本 · A 老账本风</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Ma+Shan+Zheng&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper:    #f6efe1;
+    --paper-2:  #efe5d0;
+    --line:     rgba(120, 90, 40, 0.22);
+    --line-h:   rgba(120, 90, 40, 0.35);
+    --ink:      #3a2a1a;
+    --ink-soft: #6a5236;
+    --faint:    #998161;
+    --red:      #b53929;
+    --blue:     #1f3a6e;
+    --gold:     #a07939;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'STKaiti', 'KaiTi', serif;
+    color: var(--ink);
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,235,180,0.4), transparent 30%),
+      radial-gradient(circle at 80% 90%, rgba(180,140,80,0.15), transparent 35%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  .back { position: fixed; top: 16px; left: 16px; padding: 6px 12px; background: rgba(255,255,255,0.5); border: 1px solid var(--line); border-radius: 4px; color: var(--ink-soft); text-decoration: none; font-size: 13px; }
+  .back:hover { background: #fff; }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 32px 64px;
+    background: var(--paper);
+    background-image:
+      linear-gradient(transparent 31px, var(--line) 31px, var(--line) 32px, transparent 32px);
+    background-size: 100% 32px;
+    background-position: 0 88px;
+    box-shadow: 0 4px 30px rgba(60,40,20,0.12);
+    border-left: 1px dashed var(--line-h);
+    border-right: 1px dashed var(--line-h);
+  }
+  @media (max-width: 600px) { .page { padding: 32px 18px; } }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 36px; position: relative; }
+  header h1 { font-family: 'Ma Shan Zheng', 'STKaiti', serif; font-size: 44px; font-weight: 400; letter-spacing: 0.08em; color: var(--ink); }
+  header .month {
+    margin-top: 4px; font-size: 14px; color: var(--ink-soft); letter-spacing: 0.2em;
+  }
+  header .stamp {
+    position: absolute; right: 0; top: 4px;
+    border: 2.5px double var(--red); color: var(--red);
+    padding: 6px 12px; font-size: 13px; letter-spacing: 0.2em;
+    transform: rotate(-6deg);
+    font-family: 'Ma Shan Zheng', serif;
+    box-shadow: inset 0 0 0 4px var(--paper);
+  }
+
+  /* Summary block — looks like a stamped receipt */
+  .summary {
+    border: 2px double var(--ink-soft);
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    background: rgba(255, 250, 235, 0.6);
+    position: relative;
+  }
+  .summary::before {
+    content: '';
+    position: absolute; inset: 4px; border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; position: relative; }
+  @media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; } }
+  .stat .label { font-size: 12px; color: var(--ink-soft); letter-spacing: 0.2em; margin-bottom: 6px; }
+  .stat .num   { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500; }
+  .stat.income .num   { color: var(--blue); }
+  .stat.expense .num  { color: var(--red); }
+  .stat.balance .num  { color: var(--ink); }
+
+  /* Entry form — looks like a paper tag */
+  .entry {
+    margin-bottom: 28px;
+    padding: 14px 18px;
+    background:
+      linear-gradient(135deg, rgba(255,250,235,0.7) 0%, rgba(245,235,210,0.4) 100%);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .entry-title { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.2em; margin-bottom: 10px; }
+  .entry-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+  .entry input {
+    background: transparent; border: 0; border-bottom: 1px solid var(--line-h);
+    padding: 6px 4px; font-family: inherit; color: var(--ink); font-size: 14px;
+    outline: none;
+  }
+  .entry input:focus { border-bottom-color: var(--ink); }
+  .entry input.amt { font-family: 'JetBrains Mono', monospace; text-align: right; width: 110px; }
+  .entry input.note { flex: 1; min-width: 140px; }
+  .entry input.date { width: 80px; }
+  .entry button {
+    margin-left: auto; padding: 6px 18px; cursor: pointer;
+    border: 2px solid var(--red); background: transparent; color: var(--red);
+    font-family: 'Ma Shan Zheng', serif; font-size: 16px; letter-spacing: 0.15em;
+    transition: background .12s, color .12s;
+  }
+  .entry button:hover { background: var(--red); color: var(--paper); }
+
+  /* Ledger */
+  .day-section { margin-bottom: 22px; }
+  .day-head {
+    display: flex; align-items: baseline; gap: 12px;
+    border-bottom: 2px solid var(--ink-soft);
+    padding-bottom: 4px; margin-bottom: 8px;
+  }
+  .day-head .day-num { font-family: 'Ma Shan Zheng', serif; font-size: 22px; color: var(--ink); }
+  .day-head .day-sub { font-size: 12px; color: var(--ink-soft); letter-spacing: 0.15em; }
+  .day-head .day-sum { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .day-head .day-sum .neg { color: var(--red); }
+  .day-head .day-sum .pos { color: var(--blue); }
+
+  .row {
+    display: grid; grid-template-columns: 50px 1fr auto;
+    gap: 12px; padding: 6px 4px 6px 8px; align-items: baseline;
+  }
+  .row + .row { border-top: 1px dashed var(--line); }
+  .row .day-mark { color: var(--gold); font-size: 14px; }
+  .row .note { color: var(--ink); font-size: 14.5px; }
+  .row .note .cat { color: var(--ink-soft); font-size: 12px; margin-left: 6px; }
+  .row .amt { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 500; min-width: 110px; text-align: right; }
+  .row .amt.income  { color: var(--blue); }
+  .row .amt.expense { color: var(--red); }
+
+  /* Footer chop */
+  .footer-chop {
+    margin-top: 40px; text-align: center;
+    color: var(--gold); font-size: 13px; letter-spacing: 0.4em;
+  }
+  .footer-chop::before, .footer-chop::after {
+    content: '〇〇〇'; opacity: 0.5; margin: 0 12px;
+  }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← 返回</a>
+
+<div class="page">
+  <header>
+    <h1>家用账本</h1>
+    <div class="month">贰零贰陆年 · 五月</div>
+    <div class="stamp">立 帐</div>
+  </header>
+
+  <section class="summary">
+    <div class="summary-grid">
+      <div class="stat income">
+        <div class="label">本月入</div>
+        <div class="num">+12,500.00</div>
+      </div>
+      <div class="stat expense">
+        <div class="label">本月出</div>
+        <div class="num">-4,820.50</div>
+      </div>
+      <div class="stat balance">
+        <div class="label">本月结</div>
+        <div class="num">7,679.50</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry">
+    <div class="entry-title">添 笔</div>
+    <div class="entry-row">
+      <input class="date" placeholder="日期 25" />
+      <input class="note" placeholder="备注 — 在哪里、买了什么、给谁" />
+      <input class="amt" placeholder="支出 0.00" />
+      <input class="amt" placeholder="收入 0.00" />
+      <button>记 上</button>
+    </div>
+  </section>
+
+  <section class="ledger">
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">初一</span>
+        <span class="day-sub">五月一日 · 周五</span>
+        <span class="day-sum"><span class="pos">+12,500.00</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">五月薪资<span class="cat">— 收入</span></span>
+        <span class="amt income">+12,500.00</span>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">初三</span>
+        <span class="day-sub">五月三日 · 周日</span>
+        <span class="day-sum"><span class="neg">-3,200.00</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">五月房租<span class="cat">— 房屋</span></span>
+        <span class="amt expense">-3,200.00</span>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">初八</span>
+        <span class="day-sub">五月八日 · 周五</span>
+        <span class="day-sum"><span class="neg">-380.50</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">永辉超市<span class="cat">— 食材日用</span></span>
+        <span class="amt expense">-380.50</span>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">初十</span>
+        <span class="day-sub">五月十日 · 周日</span>
+        <span class="day-sum"><span class="neg">-468.00</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">海底捞 · 朋友聚餐<span class="cat">— 应酬</span></span>
+        <span class="amt expense">-468.00</span>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">十二</span>
+        <span class="day-sub">五月十二日 · 周二</span>
+        <span class="day-sum"><span class="neg">-55.00</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">出租车 · 通勤<span class="cat">— 交通</span></span>
+        <span class="amt expense">-55.00</span>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="day-head">
+        <span class="day-num">十五</span>
+        <span class="day-sub">五月十五日 · 周五</span>
+        <span class="day-sum"><span class="neg">-717.00</span></span>
+      </div>
+      <div class="row">
+        <span class="day-mark">·</span>
+        <span class="note">京东 · 数码配件<span class="cat">— 电子</span></span>
+        <span class="amt expense">-717.00</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-chop">如 实 记 录</div>
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { json } from "../shared/http/json.js";
 import { appLoaders } from "./registry.js";
+import { initDatabase } from "../main/repository/init.js";
 const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
@@ -86,6 +87,7 @@ const appsServer = createServer(async (req, res) => {
     console.error("[apps]", error);
   }
 });
+initDatabase();
 await loadRegisteredApps();
 await bootAppRuntimes();
 appsServer.listen(APPS_PORT, APPS_HOST);

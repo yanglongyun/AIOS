@@ -201,14 +201,14 @@ onMounted(fetchData);
 </script>
 
 <template>
-  <div class="flex h-full flex-col bg-bg">
+  <div class="finance-page flex h-full flex-col">
     <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
       <div>
         <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_FINANCE_TITLE__</h1>
         <div class="mt-1 text-[12px] text-faint">__T_FINANCE_SUBTITLE__</div>
       </div>
       <button
-        class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:opacity-60"
+        class="finance-refresh inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:text-ink disabled:opacity-60"
         :disabled="loading"
         @click="fetchData">
         <span class="msi sm" :class="{ spin: loading }">refresh</span>
@@ -253,6 +253,22 @@ onMounted(fetchData);
 </template>
 
 <style scoped>
+.finance-page {
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-good) 13%, transparent), transparent 30%),
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 72%, var(--color-bg)), var(--color-bg) 46%);
+}
+.finance-refresh {
+  background: linear-gradient(145deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 88%, white));
+  box-shadow:
+    0 10px 22px color-mix(in srgb, var(--color-ink) 8%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
+}
+.finance-refresh:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 7px color-mix(in srgb, var(--color-ink) 10%, transparent);
+}
 .spin { animation: finance-spin 1s linear infinite; }
 @keyframes finance-spin { to { transform: rotate(360deg); } }
 </style>

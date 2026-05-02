@@ -13,6 +13,7 @@ const createTables = () => {
       description TEXT DEFAULT '',
       scene TEXT NOT NULL DEFAULT 'chat',
       meta TEXT,
+      state TEXT NOT NULL DEFAULT 'idle',
       created_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -27,6 +28,18 @@ const createTables = () => {
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS contexts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      summary TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
+      access TEXT NOT NULL DEFAULT 'none',
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(source, source_id)
     );
 
     CREATE TABLE IF NOT EXISTS tasks (

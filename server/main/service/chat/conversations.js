@@ -10,7 +10,15 @@ const hasChat = (conversationId) => {
   if (!id) return false;
   return !!db.prepare("SELECT 1 FROM chats WHERE conversation_id = ? LIMIT 1").get(id);
 };
+const setChatState = (conversationId, state = "idle") => {
+  const id = String(conversationId || "").trim();
+  const next = state === "running" ? "running" : "idle";
+  if (!id) return { success: false };
+  db.prepare("UPDATE chats SET state = ? WHERE conversation_id = ?").run(next, id);
+  return { success: true, state: next };
+};
 export {
   createChat,
-  hasChat
+  hasChat,
+  setChatState
 };

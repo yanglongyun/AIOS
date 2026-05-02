@@ -142,7 +142,8 @@ const props = defineProps({
   intentRequest: { type: Object, default: null },
   contextLabel: { type: String, default: '' },
   contextScene: { type: String, default: 'chat' },
-  quickMessages: { type: Array, default: () => [] }
+  quickMessages: { type: Array, default: () => [] },
+  autoOpenLast: { type: Boolean, default: true }
 });
 
 marked.setOptions({ breaks: true, gfm: true });
@@ -260,6 +261,8 @@ const loadChatPage = async (id, offset = 0, limit = 20) => {
   if (offset <= 0) {
     seenKeys.value = new Set();
     addUniqueMessages(parsed, { prepend: false });
+    busy.value = data.state === 'running';
+    if (data.state !== 'running') streamingAssistantKey.value = '';
   } else {
     addUniqueMessages(parsed, { prepend: true });
   }
@@ -437,7 +440,7 @@ const handleIntentRequest = (req) => {
   }
 };
 
-// 上传走统一的 /api/fs/upload (multipart) —— 旧的 /api/files/upload 已下线.
+// 上传走统一的 /api/fs/upload (multipart).
 // dir 是相对路径,服务器按 cwd 解析为 <AIOS>/files/uploads/chat,响应里
 // path 是绝对路径,attachments.js 用前缀校验做安全过滤.
 const uploadSingleFile = async (file) => {
@@ -549,7 +552,7 @@ onMounted(async () => {
     nextTick(() => handleSend());
   } else if (props.conversationId) {
     await openConversation(props.conversationId);
-  } else {
+  } else if (props.autoOpenLast) {
     try {
       const list = await request('/api/chat/list');
       const lastChatId = localStorage.getItem(LAST_CHAT_KEY);
@@ -562,6 +565,7 @@ onMounted(async () => {
 
   unsubs.push(on('delta', (data) => {
     if (data.conversationId !== currentConversationId.value) return;
+    busy.value = true;
     let key = streamingAssistantKey.value;
     if (!key) {
       key = `ws:${Date.now()}:assistant_stream`;

@@ -8,7 +8,12 @@ const listChatMessageRowsPaged = (conversationId, limit, offset) => {
     "SELECT id, message, meta FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT ? OFFSET ?"
   ).all(conversationId, limit, offset);
 };
+const getChatState = (conversationId) => {
+  const row = db.prepare("SELECT state FROM chats WHERE conversation_id = ? LIMIT 1").get(conversationId);
+  return row?.state || "idle";
+};
 export {
   countChatMessages,
+  getChatState,
   listChatMessageRowsPaged
 };

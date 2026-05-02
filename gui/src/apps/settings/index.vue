@@ -32,6 +32,7 @@ import { computed, defineComponent, h, onMounted, ref } from 'vue';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
+import ContextsTab from './ContextsTab.vue';
 import ToolTab from './ToolTab.vue';
 import AboutTab from './AboutTab.vue';
 import PromptTab from './PromptTab.vue';
@@ -41,6 +42,7 @@ const tabs = [
   { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
   { key: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__', icon: '📜' },
   { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__', icon: '💬' },
+  { key: 'contexts', label: '__T_SETTINGS_TAB_CONTEXTS__', icon: '📚' },
   { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__', icon: '🔧' },
   { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
 ];
@@ -86,6 +88,7 @@ const TabContent = defineComponent({
         model: ModelTab,
         tools: ToolTab,
         messages: ContextTab,
+        contexts: ContextsTab,
         prompt: PromptTab,
       };
       const C = map[props.activeTab] || AboutTab;

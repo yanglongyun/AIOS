@@ -202,7 +202,7 @@ const onSliderInput = (idx) => {
     if (status.state.running) doStartAgent();
 };
 
-const canStart = computed(() => status.config.has_keys && (status.config.goal || goal.value));
+const canStart = computed(() => Boolean(status.config.has_keys && String(status.config.goal || goal.value || '').trim()));
 const countdownSec = computed(() => {
     if (!status.state.running) return null;
     if (status.state.executing) return 0;

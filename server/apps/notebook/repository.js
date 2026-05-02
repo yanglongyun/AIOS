@@ -1,74 +1,148 @@
 import { createAppDb } from "../app_shared/db/createAppDb.js";
+import { deleteContext, normalizeAccess, upsertContext } from "../../main/repository/context.js";
 
 const db = createAppDb("notebook.db");
 
 const initNotebookDatabase = () => {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS notes (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      title       TEXT NOT NULL,
-      content     TEXT NOT NULL DEFAULT '',
-      pinned      INTEGER NOT NULL DEFAULT 0,
-      created_at  TEXT DEFAULT (datetime('now')),
-      updated_at  TEXT DEFAULT (datetime('now'))
+    CREATE TABLE IF NOT EXISTS folders (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT    NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT    DEFAULT (datetime('now')),
+      updated_at TEXT    DEFAULT (datetime('now'))
     );
 
-    CREATE INDEX IF NOT EXISTS idx_notes_pinned ON notes(pinned);
-    CREATE INDEX IF NOT EXISTS idx_notes_updated ON notes(updated_at);
+    CREATE TABLE IF NOT EXISTS notes (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      folder_id  INTEGER,
+      title      TEXT    NOT NULL,
+      summary    TEXT    NOT NULL DEFAULT '',
+      content    TEXT    NOT NULL DEFAULT '',
+      access     TEXT    NOT NULL DEFAULT 'none',
+      pinned     INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT    DEFAULT (datetime('now')),
+      updated_at TEXT    DEFAULT (datetime('now')),
+      FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_notes_pinned    ON notes(pinned);
+    CREATE INDEX IF NOT EXISTS idx_notes_updated   ON notes(updated_at);
+    CREATE INDEX IF NOT EXISTS idx_notes_folder    ON notes(folder_id);
   `);
 };
 
+const syncNoteContext = (note) => {
+  if (!note) return;
+  upsertContext({
+    source: "notebook",
+    sourceId: note.id,
+    title: note.title,
+    summary: note.summary,
+    content: note.content,
+    access: note.access
+  });
+};
+
+// ---- Folders -----------------------------------------------------------
+
+const rowToFolder = (row) => row && ({
+  id: row.id,
+  name: row.name,
+  sortOrder: row.sort_order,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
+
+const listFolders = () =>
+  db.prepare("SELECT * FROM folders ORDER BY sort_order ASC, id ASC").all().map(rowToFolder);
+
+const getFolder = (id) => rowToFolder(
+  db.prepare("SELECT * FROM folders WHERE id = ?").get(id)
+);
+
+const createFolder = ({ name }) => {
+  const info = db.prepare("INSERT INTO folders (name) VALUES (?)").run(name);
+  return getFolder(info.lastInsertRowid);
+};
+
+const updateFolder = ({ id, name }) => {
+  db.prepare("UPDATE folders SET name = ?, updated_at = datetime('now') WHERE id = ?").run(name, id);
+  return getFolder(id);
+};
+
+const deleteFolder = ({ id }) => {
+  const tx = db.transaction(() => {
+    db.prepare("UPDATE notes SET folder_id = NULL, updated_at = datetime('now') WHERE folder_id = ?").run(id);
+    return db.prepare("DELETE FROM folders WHERE id = ?").run(id).changes;
+  });
+  return { deleted: tx() };
+};
+
+// ---- Notes -------------------------------------------------------------
+
 const rowToNote = (row) => row && ({
   id: row.id,
+  folderId: row.folder_id ?? null,
   title: row.title,
+  summary: row.summary || "",
   content: row.content,
+  access: row.access || "none",
   pinned: Boolean(row.pinned),
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
 
-const listNotes = () => {
-  const rows = db.prepare(`
-    SELECT * FROM notes
-    ORDER BY pinned DESC, updated_at DESC, id DESC
-  `).all();
-  return rows.map(rowToNote);
+const listNotes = ({ folderId } = {}) => {
+  if (folderId !== undefined && folderId !== null) {
+    return db.prepare(
+      "SELECT * FROM notes WHERE folder_id = ? ORDER BY pinned DESC, updated_at DESC, id DESC"
+    ).all(folderId).map(rowToNote);
+  }
+  return db.prepare(
+    "SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC, id DESC"
+  ).all().map(rowToNote);
 };
 
 const getNote = (id) => rowToNote(
   db.prepare("SELECT * FROM notes WHERE id = ?").get(id)
 );
 
-const createNote = ({ title, content = "" }) => {
+const createNote = ({ title, summary = "", content = "", access = "none", folderId = null }) => {
   const info = db.prepare(
-    "INSERT INTO notes (title, content) VALUES (?, ?)"
-  ).run(title, content);
-  return getNote(info.lastInsertRowid);
+    "INSERT INTO notes (title, summary, content, access, folder_id) VALUES (?, ?, ?, ?, ?)"
+  ).run(title, summary, content, normalizeAccess(access), folderId);
+  const note = getNote(info.lastInsertRowid);
+  syncNoteContext(note);
+  return note;
 };
 
-const updateNote = ({ id, title, content, pinned }) => {
+const updateNote = ({ id, title, summary, content, access, pinned, folderId }) => {
   const fields = [];
   const values = [];
   if (title !== undefined) { fields.push("title = ?"); values.push(title); }
+  if (summary !== undefined) { fields.push("summary = ?"); values.push(summary); }
   if (content !== undefined) { fields.push("content = ?"); values.push(content); }
+  if (access !== undefined) { fields.push("access = ?"); values.push(normalizeAccess(access)); }
   if (pinned !== undefined) { fields.push("pinned = ?"); values.push(pinned ? 1 : 0); }
+  if (folderId !== undefined) { fields.push("folder_id = ?"); values.push(folderId); }
   if (!fields.length) return getNote(id);
   fields.push("updated_at = datetime('now')");
   values.push(id);
   db.prepare(`UPDATE notes SET ${fields.join(", ")} WHERE id = ?`).run(...values);
-  return getNote(id);
+  const note = getNote(id);
+  syncNoteContext(note);
+  return note;
 };
 
 const deleteNote = ({ id }) => {
   const info = db.prepare("DELETE FROM notes WHERE id = ?").run(id);
+  deleteContext({ source: "notebook", sourceId: id });
   return { deleted: info.changes };
 };
 
 export {
   initNotebookDatabase,
-  listNotes,
-  getNote,
-  createNote,
-  updateNote,
-  deleteNote,
+  listFolders, getFolder, createFolder, updateFolder, deleteFolder,
+  listNotes, getNote, createNote, updateNote, deleteNote,
 };

@@ -24,10 +24,10 @@ import ConnectionGate from '../components/ConnectionGate.vue';
 import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
 import { apps, getApp } from '../apps.js';
-import { useWsStore } from '@/stores/ws';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
-const ws = useWsStore();
+const auth = useAuthStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
 
@@ -49,7 +49,7 @@ watch(
 );
 
 onMounted(() => {
-  ws.init();
+  auth.init();
 });
 </script>
 

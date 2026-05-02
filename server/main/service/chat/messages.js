@@ -1,4 +1,4 @@
-import { countChatMessages, listChatMessageRowsPaged } from "../../repository/chat/messages.js";
+import { countChatMessages, getChatState, listChatMessageRowsPaged } from "../../repository/chat/messages.js";
 const getChatMessagesPaged = (conversationId, limit = 20, offset = 0) => {
   const total = countChatMessages(conversationId);
   const rows = listChatMessageRowsPaged(conversationId, limit, offset);
@@ -10,7 +10,8 @@ const getChatMessagesPaged = (conversationId, limit = 20, offset = 0) => {
     })),
     total,
     hasMore: offset + limit < total,
-    offset
+    offset,
+    state: getChatState(conversationId)
   };
 };
 export {

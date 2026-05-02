@@ -1,4 +1,3 @@
-// "ws" store —— 历史名 (一开始放过 WebSocket 客户端代码),现在职责是
 // 鉴权状态 + 连接健康度.整体走 cookie session,不再做 HMAC 挑战应答.
 //
 // 浏览器 cookie 自动随同域请求发送 (HttpOnly + SameSite=Lax),
@@ -8,7 +7,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import * as api from '@/utils/api';
 
-export const useWsStore = defineStore('ws', () => {
+export const useAuthStore = defineStore('auth', () => {
     // 'pending' | 'ready' | 'offline'
     const state = ref('pending');
     const statusText = ref('__T_CONNECTION_CONNECTING_PLAIN__');
@@ -18,8 +17,6 @@ export const useWsStore = defineStore('ws', () => {
     const authError = ref('');
 
     const showActions = computed(() => authenticated.value);
-    // 兼容旧组件
-    const requiresPassword = computed(() => !authenticated.value);
 
     async function refreshState() {
         try {
@@ -89,16 +86,11 @@ export const useWsStore = defineStore('ws', () => {
         }
     }
 
-    // 兼容旧调用
-    function sendMsg() {}
-    function onMessage() { return () => {}; }
-
     return {
         state, statusText,
         configured, authenticated, authError,
-        showActions, requiresPassword,
+        showActions,
         init, refreshState,
         setupPassword, login, logout, changePassword,
-        sendMsg, onMessage,
     };
 });

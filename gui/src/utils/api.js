@@ -18,11 +18,6 @@ async function handle(res) {
     throw err;
 }
 
-// 兼容旧代码 (登录页历史上把 token 写过 localStorage,现在不再使用).
-// 留空实现,避免引用爆错.
-export function readToken() { return ''; }
-export function writeToken() {}
-
 export async function get(url, { query } = {}) {
     const q = query ? '?' + new URLSearchParams(
         Object.entries(query)

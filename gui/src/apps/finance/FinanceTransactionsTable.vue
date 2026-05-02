@@ -36,8 +36,8 @@ const amountText = (row) => {
 </script>
 
 <template>
-  <section class="rounded-lg border border-line bg-bg-elev">
-    <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+  <section class="finance-ledger">
+    <div class="finance-ledger-head flex items-center justify-between gap-3 px-4 py-3">
       <div>
         <h2 class="m-0 text-[15px] font-semibold text-ink">__T_FINANCE_LEDGER__</h2>
         <div class="mt-0.5 text-[11.5px] text-faint">__T_FINANCE_EDIT_HINT__</div>
@@ -55,9 +55,9 @@ const amountText = (row) => {
       <div class="text-[13px]">__T_FINANCE_EMPTY__</div>
     </div>
 
-    <div v-else class="divide-y divide-line">
-      <section v-for="group in groups" :key="group.key" class="bg-bg-elev">
-        <div class="flex items-center justify-between gap-3 bg-bg px-4 py-2.5">
+    <div v-else class="finance-ledger-body">
+      <section v-for="group in groups" :key="group.key" class="finance-day">
+        <div class="finance-day-head flex items-center justify-between gap-3 px-4 py-2.5">
           <div class="font-mono text-[12px] font-semibold text-muted">{{ group.key }}</div>
           <div class="flex min-w-0 items-center gap-3 text-[11px] text-faint">
             <span v-if="group.expense" class="font-mono text-bad">-{{ fmtAmt(group.expense) }}</span>
@@ -65,13 +65,13 @@ const amountText = (row) => {
           </div>
         </div>
 
-        <div class="divide-y divide-line/70">
+        <div class="divide-y divide-line/50">
           <article
             v-for="row in group.rows"
             :key="row.id"
-            class="group grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-bg-hi max-md:px-3">
+            class="finance-row group grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 transition-colors max-md:px-3">
             <button
-              class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-bg text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+              class="finance-row-icon grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 text-muted transition-colors hover:text-ink"
               title="__T_FINANCE_DATE__"
               @click="startEdit(row, 'date')">
               <span class="msi sm">{{ row.type === 'income' ? 'south_west' : 'north_east' }}</span>
@@ -81,7 +81,7 @@ const amountText = (row) => {
               <input
                 v-if="editing.active && editing.id === row.id && editing.field === 'date'"
                 v-model="editing.value"
-                class="mb-2 h-9 w-28 rounded-md border border-line-hi bg-bg px-2 font-mono text-[13px] text-ink outline-none focus:border-accent"
+                class="finance-edit mb-2 h-9 w-28 border-0 px-2 font-mono text-[13px] text-ink outline-none focus:ring-2 focus:ring-accent/30"
                 autofocus
                 @blur="saveEdit"
                 @keyup.enter="saveEdit"
@@ -89,7 +89,7 @@ const amountText = (row) => {
               <input
                 v-else-if="editing.active && editing.id === row.id && editing.field === 'note'"
                 v-model="editing.value"
-                class="h-9 w-full rounded-md border border-line-hi bg-bg px-2 text-[14px] text-ink outline-none focus:border-accent"
+                class="finance-edit h-9 w-full border-0 px-2 text-[14px] text-ink outline-none focus:ring-2 focus:ring-accent/30"
                 autofocus
                 @blur="saveEdit"
                 @keyup.enter="saveEdit"
@@ -110,7 +110,7 @@ const amountText = (row) => {
               <input
                 v-if="editing.active && editing.id === row.id && editing.field === 'amount'"
                 v-model="editing.value"
-                class="h-9 w-24 rounded-md border border-line-hi bg-bg px-2 text-right font-mono text-[13px] outline-none focus:border-accent"
+                class="finance-edit h-9 w-24 border-0 px-2 text-right font-mono text-[13px] outline-none focus:ring-2 focus:ring-accent/30"
                 :class="row.type === 'income' ? 'text-good' : 'text-bad'"
                 autofocus
                 @blur="saveEdit"
@@ -136,3 +136,60 @@ const amountText = (row) => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.finance-ledger {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-line) 86%, white);
+  border-radius: 18px;
+  background:
+    linear-gradient(150deg, color-mix(in srgb, white 34%, transparent), transparent 42%),
+    var(--color-bg-elev);
+  box-shadow:
+    0 16px 38px color-mix(in srgb, var(--color-ink) 8%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 52%, transparent);
+}
+.finance-ledger-head {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-line) 72%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 76%, transparent), transparent);
+}
+.finance-ledger-body {
+  padding: 8px;
+}
+.finance-day {
+  overflow: hidden;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 42%, transparent),
+    0 8px 18px color-mix(in srgb, var(--color-ink) 5%, transparent);
+}
+.finance-day + .finance-day {
+  margin-top: 8px;
+}
+.finance-day-head {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 72%, transparent), color-mix(in srgb, var(--color-bg) 88%, transparent));
+}
+.finance-row {
+  background: color-mix(in srgb, var(--color-bg-elev) 70%, transparent);
+}
+.finance-row:hover {
+  background: color-mix(in srgb, var(--color-bg-hi) 72%, transparent);
+}
+.finance-row-icon {
+  background: linear-gradient(145deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 86%, white));
+  box-shadow:
+    0 7px 14px color-mix(in srgb, var(--color-ink) 7%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 52%, transparent);
+}
+.finance-row-icon:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 6px color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+.finance-edit {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-bg) 90%, var(--color-bg-hi));
+  box-shadow: inset 0 2px 7px color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+</style>

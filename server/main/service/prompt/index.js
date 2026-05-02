@@ -1,6 +1,7 @@
 import { getSettings } from "../settings/get.js";
 import { apps as appsSection } from "./apps.js";
 import { chats as chatsSection } from "./chats.js";
+import { contexts as contextsSection } from "./contexts.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./default.js";
 import { environment as environmentSection } from "./environment.js";
 import { model as modelSection } from "./model.js";
@@ -31,6 +32,7 @@ const buildSystemPrompt = (currentConversationId = "") => {
   });
   prompt += appsSection();
   prompt += chatsSection(currentConversationId);
+  prompt += contextsSection();
   return prompt;
 };
 export {

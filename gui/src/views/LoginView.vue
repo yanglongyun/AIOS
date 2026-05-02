@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { useWsStore } from '@/stores/ws';
+import { useAuthStore } from '@/stores/auth';
 
-const ws = useWsStore();
+const auth = useAuthStore();
 const router = useRouter();
 
 const password = ref('');
@@ -12,7 +12,7 @@ const loading = ref(false);
 const showPassword = ref(false);
 const inputRef = ref(null);
 
-const isSetup = computed(() => !ws.configured);
+const isSetup = computed(() => !auth.configured);
 
 const heading = computed(() => isSetup.value ? '欢迎使用 AIOS' : '请输入密码');
 const subhead = computed(() => isSetup.value
@@ -24,7 +24,7 @@ const submitLabel = computed(() => {
 });
 
 const localError = ref('');
-const error = computed(() => localError.value || ws.authError || '');
+const error = computed(() => localError.value || auth.authError || '');
 
 const canSubmit = computed(() => {
     if (loading.value) return false;
@@ -46,8 +46,8 @@ async function submit() {
     loading.value = true;
     try {
         const ok = isSetup.value
-            ? await ws.setupPassword(password.value)
-            : await ws.login(password.value);
+            ? await auth.setupPassword(password.value)
+            : await auth.login(password.value);
         if (ok) {
             password.value = '';
             passwordConfirm.value = '';
@@ -59,8 +59,8 @@ async function submit() {
 }
 
 onMounted(async () => {
-    await ws.refreshState().catch(() => {});
-    if (ws.authenticated) {
+    await auth.refreshState().catch(() => {});
+    if (auth.authenticated) {
         router.replace('/');
         return;
     }

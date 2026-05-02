@@ -1,83 +1,82 @@
 <template>
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col bg-bg text-ink">
-    <!-- Top bar -->
-    <header class="flex shrink-0 items-center gap-1 bg-transparent px-3 py-2">
-      <!-- 标题(显示当前对话标题,新会话占位)-->
-      <div class="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
-        {{ currentTitle || (currentConversationId ? '未命名对话' : '新会话') }}
+  <div v-if="detailOpen" class="flex min-h-0 min-w-0 flex-1 flex-col bg-bg text-ink">
+    <header class="flex shrink-0 items-center gap-2 px-4 py-3">
+      <button class="icon-btn" title="__T_CRYPTOBOT_BACK__" @click="backToList">
+        <span class="msi sm">arrow_back</span>
+      </button>
+
+      <div class="min-w-0 flex-1">
+        <div class="truncate text-[13px] font-medium text-ink">
+          {{ currentTitle || (currentConversationId ? '__T_CHAT_UNTITLED__' : '__T_CHAT_NEW_SHORT__') }}
+        </div>
+        <div v-if="currentConversationId" class="mt-0.5 truncate font-mono text-[10px] text-faint">
+          {{ currentConversationId }}
+        </div>
       </div>
 
-      <!-- 新建 -->
-      <button class="icon-btn" title="新建会话" @click="newChat">
+      <button class="icon-btn" title="__T_CHAT_NEW_CONVERSATION__" @click="newChat">
         <span class="msi sm">edit_square</span>
       </button>
 
-      <!-- 历史 -->
-      <button class="icon-btn" title="历史会话" @click="showHistory = true">
-        <span class="msi sm">history</span>
-      </button>
-
-      <!-- 更多(三点)-->
       <div class="relative" ref="moreRef">
         <button class="icon-btn"
           :class="{ '!bg-bg-hi !text-ink': showMore }"
           :disabled="!currentConversationId"
-          title="更多"
+          title="__T_COMMON_MORE__"
           @click="showMore = !showMore">
           <span class="msi sm">more_vert</span>
         </button>
         <div v-if="showMore" class="more-menu">
           <button class="menu-item" @click="renameCurrent">
-            <span class="msi sm">edit</span>修改标题
+            <span class="msi sm">edit</span>__T_CHAT_RENAME_TITLE__
           </button>
           <button class="menu-item danger" @click="deleteCurrent">
-            <span class="msi sm">delete</span>删除对话
+            <span class="msi sm">delete</span>__T_CHAT_DELETE_TITLE__
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Chat body -->
     <ChatCore
       ref="chatRef"
       variant="desktop"
       :conversation-id="currentConversationId"
       :pending-message="pendingMessage"
       :intent-request="intentRequest"
+      :auto-open-last="false"
       @conversation-change="onConversationChange"
-      @history-change="refreshHistory"
+      @history-change="markHistoryDirty"
     />
+  </div>
 
-    <!-- History modal -->
-    <div v-if="showHistory"
-      class="fixed inset-0 z-40 flex items-center justify-center p-4"
-      @click.self="showHistory = false">
-      <div class="fade-enter absolute inset-0 bg-ink/40 backdrop-blur-[2px]"></div>
-      <div class="relative z-10 flex max-h-[80vh] w-full max-w-md flex-col rounded-2xl border border-line bg-bg-elev shadow-card-lg">
-        <div class="flex shrink-0 items-center justify-between border-b border-line px-4 py-3">
-          <div class="text-[14px] font-semibold text-ink">历史会话</div>
-          <button
-            class="flex h-7 w-7 items-center justify-center rounded-md text-faint hover:bg-bg-hi hover:text-ink"
-            @click="showHistory = false">
-            <span class="msi sm">close</span>
-          </button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-2">
-          <HistoryPanel ref="historyRef"
-            :active-id="currentConversationId"
-            @open-chat="openChatFromHistory" />
-        </div>
+  <div v-else class="flex h-full flex-col bg-bg">
+    <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
+      <div>
+        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_APP_CHAT__</h1>
       </div>
+      <button
+        class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink"
+        @click="newChat">
+        <span class="msi sm">edit_square</span>
+        <span>__T_CHAT_NEW_CONVERSATION__</span>
+      </button>
+    </header>
+
+    <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+      <HistoryPanel
+        ref="historyRef"
+        :active-id="currentConversationId"
+        @open-chat="openChatFromHistory" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import HistoryPanel from './History.vue';
 import ChatCore from './chat.vue';
 
-defineProps({
+const props = defineProps({
   pendingMessage: { type: String, default: null },
   intentRequest: { type: Object, default: null }
 });
@@ -85,10 +84,11 @@ defineProps({
 const chatRef = ref(null);
 const historyRef = ref(null);
 const moreRef = ref(null);
+const detailOpen = ref(false);
 const currentConversationId = ref(null);
 const currentTitle = ref('');
-const showHistory = ref(false);
 const showMore = ref(false);
+const historyDirty = ref(false);
 
 const request = async (path, options = {}) => {
   const res = await fetch(path, {
@@ -102,17 +102,17 @@ const request = async (path, options = {}) => {
   return data;
 };
 
-// 切换会话时,从 chat 列表里同步标题(因为后端创建新会话默认 title="新对话")
 async function syncTitle(conversationId) {
   if (!conversationId) { currentTitle.value = ''; return; }
   try {
     const list = await request('/api/chat/list');
     const found = (list || []).find(c => c.conversation_id === conversationId);
     currentTitle.value = found?.title || '';
-  } catch { /* keep current */ }
+  } catch {}
 }
 
-function refreshHistory() {
+function markHistoryDirty() {
+  historyDirty.value = true;
   historyRef.value?.fetchChats();
 }
 
@@ -120,12 +120,13 @@ function onConversationChange(conversationId) {
   const next = conversationId || null;
   currentConversationId.value = next;
   syncTitle(next);
+  markHistoryDirty();
 }
 
 function openChatFromHistory(chat) {
   currentConversationId.value = chat.conversation_id;
   currentTitle.value = chat.title || '';
-  showHistory.value = false;
+  detailOpen.value = true;
   showMore.value = false;
 }
 
@@ -133,13 +134,25 @@ function newChat() {
   currentConversationId.value = null;
   currentTitle.value = '';
   showMore.value = false;
-  chatRef.value?.newChat();
+  detailOpen.value = true;
+  nextTick(() => chatRef.value?.newChat());
+}
+
+function backToList() {
+  detailOpen.value = false;
+  showMore.value = false;
+  if (historyDirty.value) {
+    nextTick(() => {
+      historyRef.value?.fetchChats();
+      historyDirty.value = false;
+    });
+  }
 }
 
 async function renameCurrent() {
   showMore.value = false;
   if (!currentConversationId.value) return;
-  const next = window.prompt('修改对话标题', currentTitle.value || '');
+  const next = window.prompt('__T_CHAT_RENAME_PROMPT__', currentTitle.value || '');
   if (next === null) return;
   const title = next.trim();
   if (!title) return;
@@ -149,16 +162,16 @@ async function renameCurrent() {
       body: JSON.stringify({ conversationId: currentConversationId.value, title }),
     });
     currentTitle.value = title;
-    refreshHistory();
+    markHistoryDirty();
   } catch (e) {
-    window.alert('修改失败:' + e.message);
+    window.alert(`__T_COMMON_UPDATE_FAILED__: ${e.message}`);
   }
 }
 
 async function deleteCurrent() {
   showMore.value = false;
   if (!currentConversationId.value) return;
-  const ok = window.confirm(`删除对话"${currentTitle.value || '未命名'}"?此操作不可撤销。`);
+  const ok = window.confirm('__T_CHAT_DELETE_CONFIRM__'.replace('{title}', currentTitle.value || '__T_CHAT_UNTITLED__'));
   if (!ok) return;
   try {
     await request('/api/chat/delete', {
@@ -167,14 +180,13 @@ async function deleteCurrent() {
     });
     currentConversationId.value = null;
     currentTitle.value = '';
-    chatRef.value?.newChat();
-    refreshHistory();
+    detailOpen.value = false;
+    markHistoryDirty();
   } catch (e) {
-    window.alert('删除失败:' + e.message);
+    window.alert('__T_CHAT_DELETE_FAILED__'.replace('{message}', e.message));
   }
 }
 
-// 点击菜单外部关闭
 function onDocPointerDown(e) {
   if (!showMore.value) return;
   if (moreRef.value && !moreRef.value.contains(e.target)) {
@@ -182,22 +194,21 @@ function onDocPointerDown(e) {
   }
 }
 function onEscape(e) {
-  if (e.key === 'Escape') {
-    showMore.value = false;
-    showHistory.value = false;
-  }
+  if (e.key === 'Escape') showMore.value = false;
 }
 
 onMounted(() => {
   document.addEventListener('pointerdown', onDocPointerDown);
   document.addEventListener('keydown', onEscape);
+  if (props.pendingMessage || props.intentRequest) {
+    detailOpen.value = true;
+  }
 });
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', onDocPointerDown);
   document.removeEventListener('keydown', onEscape);
 });
 
-// 当 conversationId 由 chat.vue 推过来时,如果还没标题就再 sync 一次(WS 创建会话有微小延迟)
 watch(currentConversationId, (id) => {
   if (id && !currentTitle.value) syncTitle(id);
 });
@@ -220,7 +231,6 @@ watch(currentConversationId, (id) => {
 .icon-btn:hover:not(:disabled) { background: var(--color-bg-hi); color: var(--color-ink); }
 .icon-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* 三点菜单弹层 */
 .more-menu {
   position: absolute;
   right: 0;

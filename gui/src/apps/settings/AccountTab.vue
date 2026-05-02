@@ -72,9 +72,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useWsStore } from '@/stores/ws';
+import { useAuthStore } from '@/stores/auth';
 
-const ws = useWsStore();
+const auth = useAuthStore();
 const router = useRouter();
 
 const oldPassword = ref('');
@@ -99,7 +99,7 @@ async function submit() {
   loading.value = true;
   message.value = '';
   try {
-    const ok = await ws.changePassword(oldPassword.value, newPassword.value);
+    const ok = await auth.changePassword(oldPassword.value, newPassword.value);
     if (ok) {
       messageKind.value = 'success';
       message.value = '__T_SETTINGS_PASSWORD_UPDATED__';
@@ -108,7 +108,7 @@ async function submit() {
       newPasswordConfirm.value = '';
     } else {
       messageKind.value = 'error';
-      message.value = ws.authError || '__T_COMMON_UPDATE_FAILED__';
+      message.value = auth.authError || '__T_COMMON_UPDATE_FAILED__';
     }
   } finally {
     loading.value = false;
@@ -116,7 +116,7 @@ async function submit() {
 }
 
 async function onLogout() {
-  await ws.logout();
+  await auth.logout();
   router.replace({ name: 'login' });
 }
 </script>

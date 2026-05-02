@@ -1,19 +1,19 @@
 <script setup>
 import { computed } from 'vue';
-import { useWsStore } from '@/stores/ws';
+import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router';
 
-const ws = useWsStore();
+const auth = useAuthStore();
 const route = useRoute();
 
 const show = computed(() => {
     if (route.name === 'guard') return false;
-    return !ws.showActions;
+    return !auth.showActions;
 });
 
 const status = computed(() => {
-    if (ws.state === 'offline')return { id: 'offline',    label: '__T_CONNECTION_OFFLINE__' };
-    if (!ws.authenticated && ws.requiresPassword)
+    if (auth.state === 'offline')return { id: 'offline',    label: '__T_CONNECTION_OFFLINE__' };
+    if (!auth.authenticated)
                                return { id: 'pending',    label: '__T_CONNECTION_WAIT_AUTH__' };
     return                           { id: 'pending',    label: '__T_CONNECTION_CONNECTING__' };
 });

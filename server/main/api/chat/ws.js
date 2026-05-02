@@ -3,7 +3,7 @@ import { getSettings } from "../../service/settings/get.js";
 import { buildSystemPrompt } from "../../service/prompt/index.js";
 import { injectAttachmentsMessage } from "../../service/chat/attachments.js";
 import { getMessages, saveMessage } from "../../service/chat/store.js";
-import { hasChat } from "../../service/chat/conversations.js";
+import { hasChat, setChatState } from "../../service/chat/conversations.js";
 const createSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
   const handleMessage = async (data) => {
@@ -15,6 +15,8 @@ const createSession = (wsSend) => {
       const cid = data.conversationId;
       if (cid && conversations.has(cid)) {
         conversations.get(cid).abortController.abort();
+      } else if (cid) {
+        setChatState(cid, "idle");
       }
       return;
     }
@@ -74,6 +76,7 @@ const createSession = (wsSend) => {
       saveMessage(cid, userMsg, userMeta);
       const abortController = new AbortController();
       conversations.set(cid, { abortController });
+      setChatState(cid, "running");
       const send = (msg) => {
         if (msg.type === "delta") {
           wsSend({ type: "delta", conversationId: cid, delta: msg.delta || "" });
@@ -132,6 +135,7 @@ const createSession = (wsSend) => {
         }
       } finally {
         conversations.delete(cid);
+        setChatState(cid, "idle");
       }
     }
   };

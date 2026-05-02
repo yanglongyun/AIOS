@@ -6,20 +6,29 @@ import { useQuickChatStore } from '@/stores/quickChat';
 import * as api from '@/utils/api';
 
 const qc = useQuickChatStore();
-
 const tasks = useTasksStore();
 
 const STATUS_META = {
-    running:   { label: '__T_CRYPTOBOT_RUNNING__', color: 'var(--color-accent)' },
-    pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__', color: 'var(--color-accent)' },
-    done:      { label: '__T_CRYPTOBOT_TASK_OK__', color: 'var(--color-good)' },
-    completed: { label: '__T_CRYPTOBOT_TASK_OK__', color: 'var(--color-good)' },
-    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
-    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__', color: 'var(--color-muted)' },
-    error:     { label: '__T_TASKS_STATUS_ERROR__', color: 'var(--color-bad)' },
+    running:   { label: '__T_TASKS_STATUS_RUNNING__',         tone: 'accent', dot: true  },
+    pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__',   tone: 'accent', dot: true  },
+    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: 'check_circle' },
+    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: 'check_circle' },
+    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: 'cancel' },
+    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: 'cancel' },
+    error:     { label: '__T_TASKS_STATUS_ERROR__',           tone: 'bad',    icon: 'error' },
 };
-const statusMeta = (s) => STATUS_META[s] || { label: s || '__T_TASKDETAIL_ROLE_UNKNOWN__', color: 'var(--color-muted)' };
-const isActive = (t) => t.status === 'running' || t.status === 'pending';
+const statusMeta = (s) => STATUS_META[s] || { label: s || '__T_TASKDETAIL_ROLE_UNKNOWN__', tone: 'muted' };
+const isActive = (t) => t && (t.status === 'running' || t.status === 'pending');
+const isFailed = (t) => t && t.status === 'error';
+
+const TONE_TEXT = { accent: 'text-accent', good: 'text-good', bad: 'text-bad', muted: 'text-muted' };
+const TONE_BG   = { accent: 'bg-accent',   good: 'bg-good',   bad: 'bg-bad',   muted: 'bg-muted' };
+const TONE_SOFT = {
+    accent: 'bg-blue-bg',
+    good:   'bg-[color-mix(in_srgb,var(--color-good)_14%,transparent)]',
+    bad:    'bg-[color-mix(in_srgb,var(--color-bad)_14%,transparent)]',
+    muted:  'bg-bg-hi',
+};
 
 function fmtTime(s) {
     if (!s) return '';
@@ -38,6 +47,33 @@ function fmtFullTime(s) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
 }
 
+// ---- Filtering & grouping ---------------------------------------------
+const filter = ref('all');           // 'all' | 'active' | 'failed'
+const search = ref('');
+
+const filteredAll = computed(() => {
+    let list = tasks.tasks || [];
+    if (filter.value === 'active') list = list.filter(isActive);
+    else if (filter.value === 'failed') list = list.filter(isFailed);
+    const q = search.value.trim().toLowerCase();
+    if (q) {
+        list = list.filter(t => {
+            const blob = `${t.title || ''}|${t.app || ''}|${t.prompt || ''}|${t.response || ''}`.toLowerCase();
+            return blob.includes(q);
+        });
+    }
+    return list;
+});
+
+const grouped = computed(() => {
+    const list = filteredAll.value;
+    return {
+        active: list.filter(isActive),
+        recent: list.filter(t => !isActive(t)),
+    };
+});
+
+// ---- Detail -----------------------------------------------------------
 const selectedId = ref(null);
 const detail = ref(null);
 const detailMessages = ref([]);
@@ -54,7 +90,6 @@ async function openDetail(id) {
     detail.value = null;
     detailMessages.value = [];
     await refreshDetail();
-    // Keep polling while the task is still active.
     detailPoller = setInterval(() => {
         if (!detail.value || isActive(detail.value)) refreshDetail();
         else { clearInterval(detailPoller); detailPoller = null; }
@@ -71,7 +106,7 @@ async function refreshDetail() {
         detail.value = data?.task || null;
         detailMessages.value = Array.isArray(msgData?.messages) ? msgData.messages : [];
     } catch (err) {
-        detailError.value = err?.body?.message || err.message || '__T_FINANCE_LOAD_FAILED__';
+        detailError.value = err?.body?.message || err.message || '__T_TASKS_LOAD_FAIL__';
     } finally {
         detailLoading.value = false;
     }
@@ -136,42 +171,32 @@ watchEffect(() => {
     }
 });
 
-function toolCallName(msg) {
-    return msg?.tool_calls?.[0]?.function?.name || 'tool';
-}
-function toolCallArgs(msg) {
-    return msg?.tool_calls?.[0]?.function?.arguments || '';
-}
-function messageText(msg) {
-    return msg?.content == null ? '' : String(msg.content);
-}
+function toolCallName(msg) { return msg?.tool_calls?.[0]?.function?.name || 'tool'; }
+function toolCallArgs(msg) { return msg?.tool_calls?.[0]?.function?.arguments || ''; }
+function messageText(msg) { return msg?.content == null ? '' : String(msg.content); }
 function messageRoleLabel(role) {
     if (role === 'assistant') return '__T_TASKS_ROLE_MODEL__';
     if (role === 'tool') return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
     if (role === 'user') return '__T_TASKDETAIL_ROLE_USER__';
-    if (role === 'system') return '__T_STORE_CATEGORY_SYSTEM__';
+    if (role === 'system') return '__T_TASKS_ROLE_SYSTEM__';
     return role || '__T_TASKS_ROLE_MESSAGE__';
 }
 </script>
 
 <template>
     <!-- detail view -->
-    <div v-if="selectedId" class="flex h-full flex-col bg-bg">
-        <header class="flex flex-none items-center gap-2 px-4 pt-4 max-md:px-3 max-md:pt-3">
-            <button
-                class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                @click="backToList"
-                title="__T_CRYPTOBOT_BACK__">
-                <span class="msi sm">arrow_back</span>
+    <div v-if="selectedId" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col bg-bg">
+        <header class="flex flex-none items-center gap-2 px-8 pb-2 pt-7 max-md:px-4 max-md:pt-5">
+            <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+                @click="backToList" :title="'__T_TASKDETAIL_BACK__'">
+                <span class="msi" style="font-size:20px">arrow_back</span>
             </button>
-            <span class="text-[12px] text-muted">__T_CRYPTOBOT_BACK__</span>
             <div class="ml-auto flex items-center gap-2">
-                <button
-                    v-if="selected && isActive(selected)"
+                <button v-if="selected && isActive(selected)"
                     class="inline-flex items-center gap-1.5 rounded-full border border-line-hi bg-transparent px-3 py-1 text-[12.5px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
                     @click="stopFromDetail">
-                    <span class="msi sm">stop_circle</span>
-                    <span>__T_CRYPTOBOT_STOP__</span>
+                    <span class="msi" style="font-size:15px">stop_circle</span>
+                    <span>__T_TASKS_STOP__</span>
                 </button>
                 <AppLauncher />
             </div>
@@ -183,40 +208,40 @@ function messageRoleLabel(role) {
         </div>
 
         <div v-if="!selected && !detailError" class="flex flex-1 flex-col items-center gap-2 py-15 text-muted">
-            <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
-            <div class="text-[14px]">__T_CRYPTOBOT_LOADING__</div>
+            <span class="msi text-faint" style="font-size:30px">hourglass_empty</span>
+            <div class="text-[14px]">__T_TASKS_LOADING__</div>
         </div>
 
-        <div v-else-if="selected" class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-4 max-md:px-4 max-md:pb-10">
-            <div class="mb-3 flex flex-wrap items-center gap-2">
+        <div v-else-if="selected" class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
+            <!-- Hero: title + status pill -->
+            <h2 class="m-0 break-words text-[24px] font-semibold leading-[1.25] tracking-[-0.01em] text-ink max-md:text-[19px]">
+                {{ selected.title || '__T_TASKS_NO_TITLE__' }}
+            </h2>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium"
+                    :class="[ TONE_TEXT[statusMeta(selected.status).tone], TONE_SOFT[statusMeta(selected.status).tone] ]">
+                    <span v-if="statusMeta(selected.status).dot"
+                        class="h-1.5 w-1.5 rounded-full animate-status-pulse"
+                        :class="TONE_BG[statusMeta(selected.status).tone]"></span>
+                    <span v-else class="msi" style="font-size:14px">{{ statusMeta(selected.status).icon }}</span>
+                    {{ statusMeta(selected.status).label }}
+                </span>
                 <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium uppercase tracking-[0.04em] text-ink">
                     {{ selected.app || 'unknown' }}
                 </span>
-                <span class="text-[12px] text-faint">·</span>
                 <span class="text-[12px] text-muted">{{ selected.mode || '—' }}</span>
-                <span class="text-[12px] text-faint">·</span>
-                <span class="inline-flex items-center gap-1.5 text-[12px] font-medium"
-                      :style="{ color: statusMeta(selected.status).color }">
-                    <span class="h-1.5 w-1.5 rounded-full"
-                          :class="{ 'animate-status-pulse': isActive(selected) }"
-                          :style="{ background: statusMeta(selected.status).color }"></span>
-                    {{ statusMeta(selected.status).label }}
-                </span>
                 <span class="text-[12px] text-faint">·</span>
                 <span class="text-[12px] text-faint">#{{ selected.id }}</span>
             </div>
 
-            <h2 class="m-0 break-words text-[24px] font-semibold leading-[1.25] tracking-[-0.01em] text-ink max-md:text-[19px]">
-                {{ selected.title || `__T_TASKS_TITLE__ #${selected.id}` }}
-            </h2>
-
             <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-faint">
-                <span v-if="selected.created_at">__T_STORE_CATEGORY_CREATION__ {{ fmtFullTime(selected.created_at) }}</span>
-                <span v-if="selected.finished_at">__T_CRYPTOBOT_TASK_OK__ {{ fmtFullTime(selected.finished_at) }}</span>
+                <span v-if="selected.created_at">__T_TASKS_CREATED__ ·  {{ fmtFullTime(selected.created_at) }}</span>
+                <span v-if="selected.finished_at">__T_TASKS_FINISHED__ ·  {{ fmtFullTime(selected.finished_at) }}</span>
                 <span v-if="selected.conversation_id" class="font-mono">{{ selected.conversation_id }}</span>
             </div>
 
-            <div v-if="selected.error" class="mt-4 rounded-lg px-3 py-2 text-[12.5px] text-bad"
+            <div v-if="selected.error" class="mt-5 rounded-lg px-3 py-2 text-[12.5px] text-bad"
                  style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
                 <div class="text-[10.5px] font-medium uppercase tracking-wider opacity-80">__T_TASKDETAIL_ERROR_LABEL__</div>
                 <div class="mt-1 whitespace-pre-wrap leading-[1.55]">{{ selected.error }}</div>
@@ -243,109 +268,170 @@ function messageRoleLabel(role) {
             </template>
 
             <template v-if="detailMessages.length">
-                <div class="mt-5 mb-1.5 flex items-center justify-between gap-3">
-                    <div class="text-[11.5px] font-medium uppercase tracking-wider text-faint">__T_TASKDETAIL_MESSAGES_TITLE__</div>
-                    <div class="text-[11.5px] text-faint">{{ '__T_TASKDETAIL_MESSAGES_COUNT__'.replace('{count}', detailMessages.length) }}</div>
-                </div>
-                <ol class="m-0 flex list-none flex-col gap-2 p-0">
-                    <li v-for="row in detailMessages" :key="row.id"
-                        class="rounded-lg border border-line bg-bg-elev px-3 py-2.5">
-                        <div class="mb-1.5 flex flex-wrap items-center gap-2 text-[11.5px]">
-                            <span class="font-medium text-ink">{{ messageRoleLabel(row.message?.role) }}</span>
-                            <span class="text-faint">#{{ row.id }}</span>
-                            <span v-if="row.createdAt" class="text-faint">{{ fmtFullTime(row.createdAt) }}</span>
-                            <span v-if="row.message?.tool_call_id" class="font-mono text-faint">{{ row.message.tool_call_id }}</span>
-                        </div>
-                        <template v-if="row.message?.tool_calls?.length">
-                            <div class="mb-1.5 text-[12.5px] text-muted">
-                                __T_TASKS_TOOL_CALL__ <span class="font-mono text-ink">{{ toolCallName(row.message) }}</span>
+                <details class="mt-6 rounded-[12px] border border-line bg-bg-elev">
+                    <summary class="cursor-pointer select-none list-none px-3.5 py-2.5 text-[12px] text-muted hover:text-ink">
+                        <span class="msi align-[-2px]" style="font-size:14px">unfold_more</span>
+                        __T_TASKDETAIL_MESSAGES_TITLE__
+                        <span class="text-faint">·  {{ '__T_TASKDETAIL_MESSAGES_COUNT__'.replace('{count}', detailMessages.length) }}</span>
+                    </summary>
+                    <ol class="m-0 flex list-none flex-col gap-2 px-3 pb-3 pt-1">
+                        <li v-for="row in detailMessages" :key="row.id" class="rounded-lg border border-line bg-bg px-3 py-2.5">
+                            <div class="mb-1.5 flex flex-wrap items-center gap-2 text-[11.5px]">
+                                <span class="font-medium text-ink">{{ messageRoleLabel(row.message?.role) }}</span>
+                                <span class="text-faint">#{{ row.id }}</span>
+                                <span v-if="row.createdAt" class="text-faint">{{ fmtFullTime(row.createdAt) }}</span>
+                                <span v-if="row.message?.tool_call_id" class="font-mono text-faint">{{ row.message.tool_call_id }}</span>
                             </div>
-                            <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11.5px] leading-[1.55] text-muted">{{ toolCallArgs(row.message) }}</pre>
-                        </template>
-                        <div v-if="messageText(row.message)"
-                             class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.6] text-muted">
-                            {{ messageText(row.message) }}
-                        </div>
-                    </li>
-                </ol>
+                            <template v-if="row.message?.tool_calls?.length">
+                                <div class="mb-1.5 text-[12.5px] text-muted">
+                                    __T_TASKS_TOOL_CALL__ <span class="font-mono text-ink">{{ toolCallName(row.message) }}</span>
+                                </div>
+                                <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11.5px] leading-[1.55] text-muted">{{ toolCallArgs(row.message) }}</pre>
+                            </template>
+                            <div v-if="messageText(row.message)"
+                                 class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.6] text-muted">
+                                {{ messageText(row.message) }}
+                            </div>
+                        </li>
+                    </ol>
+                </details>
             </template>
         </div>
     </div>
 
     <!-- list -->
-    <div v-else class="flex h-full flex-col bg-bg">
-        <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
+    <div v-else class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col bg-bg">
+        <header class="flex flex-none items-baseline gap-3 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TASKS_TITLE__</h1>
-            <div class="flex items-center gap-2">
-                <button
-                    class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:enabled:bg-line-hi hover:enabled:text-ink disabled:cursor-default disabled:opacity-60"
+            <span class="text-[12.5px] text-faint">__T_TASKS_SUBTITLE__</span>
+            <div class="ml-auto flex items-center gap-2">
+                <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-default disabled:opacity-60"
                     :disabled="tasks.loading"
                     @click="tasks.fetch"
-                    title="__T_COMMON_REFRESH__">
-                    <span class="msi sm" :class="{ spin: tasks.loading }">refresh</span>
-                    <span>__T_COMMON_REFRESH__</span>
+                    :title="'__T_TASKS_REFRESH__'">
+                    <span class="msi" :class="{ 'animate-spin': tasks.loading }" style="font-size:18px">refresh</span>
                 </button>
                 <AppLauncher />
             </div>
         </header>
 
-        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
-            <div v-if="tasks.tasks.length === 0" class="flex flex-col items-center gap-2 py-20 text-muted">
-                <span class="msi" style="font-size:32px;color:var(--color-faint)">inbox</span>
-                <div class="text-[14px]">{{ tasks.loading ? '__T_CRYPTOBOT_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
+        <!-- Search + filter chips -->
+        <div class="mx-8 mb-3 flex flex-none flex-wrap items-center gap-2 max-md:mx-3">
+            <div class="search-box flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-3.5 py-1.5 transition-colors focus-within:bg-card-hi">
+                <span class="msi text-faint" style="font-size:18px">search</span>
+                <input v-model="search" placeholder="__T_TASKS_SEARCH_PLACEHOLDER__"
+                    class="search-input min-w-0 flex-1 border-0 bg-transparent text-[13.5px] text-ink outline-none" />
+                <button v-if="search" @click="search = ''" :title="'__T_TASKS_CLEAR_SEARCH__'"
+                    class="grid h-5 w-5 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:text-ink">
+                    <span class="msi" style="font-size:14px">close</span>
+                </button>
+            </div>
+            <div class="flex flex-none items-center gap-1 rounded-full bg-card-sub p-0.5">
+                <button v-for="opt in [
+                    { v: 'all',    k: '__T_TASKS_FILTER_ALL__' },
+                    { v: 'active', k: '__T_TASKS_FILTER_ACTIVE__' },
+                    { v: 'failed', k: '__T_TASKS_FILTER_FAILED__' }
+                ]" :key="opt.v"
+                    class="cursor-pointer rounded-full border-0 bg-transparent px-3 py-1 text-[12.5px] font-medium text-muted transition-colors"
+                    :class="filter === opt.v ? '!bg-bg !text-ink shadow-[0_1px_2px_var(--color-shadow)]' : 'hover:text-ink'"
+                    @click="filter = opt.v">{{ opt.k }}</button>
+            </div>
+        </div>
+
+        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-3 max-md:pb-10">
+            <!-- Empty -->
+            <div v-if="!tasks.tasks.length" class="flex flex-col items-center gap-2 py-20 text-muted">
+                <span class="msi text-faint" style="font-size:32px">inbox</span>
+                <div class="text-[14px]">{{ tasks.loading ? '__T_TASKS_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
                 <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
             </div>
 
-            <ul v-else class="m-0 flex list-none flex-col gap-1.5 p-0">
-                <li v-for="t in tasks.tasks" :key="t.id"
-                    class="flex cursor-pointer items-start gap-3.5 rounded-[14px] bg-card px-4.5 py-3.5 transition-colors hover:bg-card-hi max-md:gap-2.5 max-md:rounded-xl max-md:px-3.5 max-md:py-3"
-                    @click="openDetail(t.id)">
-                    <span class="mt-[7px] h-2 w-2 flex-none rounded-full"
-                          :class="{ 'animate-status-pulse': isActive(t) }"
-                          :style="{ background: statusMeta(t.status).color }"></span>
+            <!-- No match -->
+            <div v-else-if="!filteredAll.length" class="flex flex-col items-center gap-2 py-15 text-muted">
+                <span class="msi text-faint" style="font-size:28px">search_off</span>
+                <div class="text-[13px]">__T_TASKS_SEARCH_NO_MATCH__</div>
+            </div>
 
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-baseline gap-3 max-md:flex-wrap">
-                            <span class="flex-1 truncate text-[14px] font-medium text-ink">
-                                {{ t.title || t.prompt?.slice(0, 60) || `#${t.id}` }}
-                            </span>
-                            <span class="flex-none text-[12px] text-faint">{{ fmtTime(t.created_at) }}</span>
-                        </div>
-                        <div class="mt-1 flex items-center gap-2 text-[12px] text-muted">
-                            <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium uppercase tracking-[0.04em] text-ink">
-                                {{ t.app || 'unknown' }}
-                            </span>
-                            <span class="text-faint">·</span>
-                            <span>{{ t.mode || '—' }}</span>
-                            <span class="text-faint">·</span>
-                            <span class="font-medium" :style="{ color: statusMeta(t.status).color }">
-                                {{ statusMeta(t.status).label }}
-                            </span>
-                        </div>
+            <template v-else>
+                <!-- Active group -->
+                <section v-if="grouped.active.length" class="mb-5">
+                    <div class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
+                        <span class="h-1.5 w-1.5 rounded-full bg-accent animate-status-pulse"></span>
+                        __T_TASKS_SECTION_ACTIVE__
+                        <span class="font-normal text-faint">·  {{ grouped.active.length }}</span>
                     </div>
+                    <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                        <li v-for="t in grouped.active" :key="t.id"
+                            class="group flex cursor-pointer items-start gap-3 rounded-[14px] bg-card px-4 py-3 transition-colors hover:bg-card-hi shadow-[inset_3px_0_0_0_var(--color-accent)] max-md:gap-2.5 max-md:rounded-xl max-md:px-3 max-md:py-2.5"
+                            @click="openDetail(t.id)">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-baseline gap-3 max-md:flex-wrap">
+                                    <span class="flex-1 truncate text-[14px] font-medium text-ink">
+                                        {{ t.title || t.prompt?.slice(0, 60) || `__T_TASKS_TASK_NUMBER__ #${t.id}` }}
+                                    </span>
+                                    <span class="flex-none text-[12px] text-faint">{{ fmtTime(t.created_at) }}</span>
+                                </div>
+                                <div class="mt-1 flex items-center gap-2 text-[12px]">
+                                    <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium uppercase tracking-[0.04em] text-ink">
+                                        {{ t.app || 'unknown' }}
+                                    </span>
+                                    <span class="text-faint">{{ t.mode || '—' }}</span>
+                                    <span class="text-faint">·</span>
+                                    <span class="inline-flex items-center gap-1 font-medium" :class="TONE_TEXT[statusMeta(t.status).tone]">
+                                        <span class="h-1.5 w-1.5 rounded-full animate-status-pulse" :class="TONE_BG[statusMeta(t.status).tone]"></span>
+                                        {{ statusMeta(t.status).label }}
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="inline-flex flex-none cursor-pointer items-center gap-1 rounded-full border border-line-hi bg-transparent px-2.5 py-1 text-[12px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
+                                :title="'__T_TASKS_STOP__'"
+                                @click.stop="tasks.stop(t.id)">
+                                <span class="msi" style="font-size:15px">stop_circle</span>
+                                __T_TASKS_STOP__
+                            </button>
+                        </li>
+                    </ul>
+                </section>
 
-                    <button v-if="isActive(t)"
-                        class="stop-btn inline-flex flex-none cursor-pointer items-center gap-1 rounded-full border border-line-hi bg-transparent px-2.5 py-1 text-[12px] text-muted transition-colors"
-                        title="__T_CRYPTOBOT_STOP__"
-                        @click.stop="tasks.stop(t.id)">
-                        <span class="msi sm">stop_circle</span>
-                        __T_CRYPTOBOT_STOP__
-                    </button>
-                </li>
-            </ul>
+                <!-- Recent group -->
+                <section v-if="grouped.recent.length">
+                    <div v-if="grouped.active.length" class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
+                        __T_TASKS_SECTION_RECENT__
+                        <span class="font-normal">·  {{ grouped.recent.length }}</span>
+                    </div>
+                    <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                        <li v-for="t in grouped.recent" :key="t.id"
+                            class="flex cursor-pointer items-center gap-3 rounded-[14px] px-4 py-2.5 transition-colors hover:bg-bg-hi max-md:gap-2.5 max-md:px-3 max-md:py-2.5"
+                            @click="openDetail(t.id)">
+                            <span class="msi flex-none" style="font-size:16px"
+                                :class="TONE_TEXT[statusMeta(t.status).tone]">{{ statusMeta(t.status).icon || 'circle' }}</span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-baseline gap-3 max-md:flex-wrap">
+                                    <span class="flex-1 truncate text-[13.5px] text-ink">
+                                        {{ t.title || t.prompt?.slice(0, 60) || `__T_TASKS_TASK_NUMBER__ #${t.id}` }}
+                                    </span>
+                                    <span class="flex-none text-[12px] text-faint">{{ fmtTime(t.created_at) }}</span>
+                                </div>
+                                <div class="mt-0.5 flex items-center gap-2 text-[12px] text-faint">
+                                    <span class="font-medium uppercase tracking-[0.04em] text-muted">{{ t.app || 'unknown' }}</span>
+                                    <span>·</span>
+                                    <span class="font-medium" :class="TONE_TEXT[statusMeta(t.status).tone]">{{ statusMeta(t.status).label }}</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </template>
         </div>
     </div>
 </template>
 
 <style scoped>
-.spin { animation: spin 1s linear infinite; }
+.search-input::placeholder { color: var(--color-faint); }
+
+.animate-spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
 .animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
 @keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-
-.stop-btn:hover {
-    color: var(--color-bad);
-    border-color: var(--color-bad);
-    background: var(--color-bg-hi);
-}
 </style>

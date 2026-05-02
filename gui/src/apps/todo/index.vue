@@ -1,15 +1,15 @@
 <script setup>
 import AppLauncher from '@/components/AppLauncher.vue';
+import TodoRow from './components/TodoRow.vue';
 import { ref, computed, onMounted, onUnmounted, nextTick, watch, watchEffect } from 'vue';
 import { useQuickChatStore } from '@/stores/quickChat';
-
-const qc = useQuickChatStore();
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
+const qc = useQuickChatStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -20,22 +20,34 @@ const goList   = () => router.push('/app/todo');
 const goDetail = (id) => router.push(`/app/todo/${id}`);
 
 // ---- Data --------------------------------------------------------------
-
 const todos        = ref([]);
 const loading      = ref(false);
 const error        = ref('');
 const newTitle     = ref('');
 const inputRef     = ref(null);
+const showDone     = ref(false);
 
 const TERMINAL = new Set(['done', 'aborted', 'error']);
+const ACTIVE   = new Set(['pending', 'running']);
+
+// status meta keyed by status code; tone maps to one of accent/good/bad/muted
 const STATUS_META = {
-    pending: { label: '排队中',    color: 'var(--color-accent)', dot: true },
-    running: { label: 'AI 工作中', color: 'var(--color-accent)', dot: true },
-    done:    { label: 'AI 已完成', color: 'var(--color-good)' },
-    aborted: { label: '已停止',    color: 'var(--color-muted)' },
-    error:   { label: '失败',      color: 'var(--color-bad)' },
+    pending: { tone: 'accent', dot: true,  labelKey: '__T_TODO_STATUS_PENDING__' },
+    running: { tone: 'accent', dot: true,  labelKey: '__T_TODO_STATUS_RUNNING__' },
+    done:    { tone: 'good',   icon: 'check_circle',  labelKey: '__T_TODO_STATUS_DONE__'    },
+    aborted: { tone: 'muted',  icon: 'cancel',         labelKey: '__T_TODO_STATUS_ABORTED__' },
+    error:   { tone: 'bad',    icon: 'error',          labelKey: '__T_TODO_STATUS_ERROR__'   },
 };
 const statusMeta = (s) => STATUS_META[s] || null;
+
+const TONE_TEXT = { accent: 'text-accent', good: 'text-good', bad: 'text-bad', muted: 'text-muted' };
+const TONE_BG   = { accent: 'bg-accent',   good: 'bg-good',   bad: 'bg-bad',   muted: 'bg-muted'  };
+const TONE_SOFT = {
+    accent: 'bg-blue-bg',
+    good:   'bg-[color-mix(in_srgb,var(--color-good)_14%,transparent)]',
+    bad:    'bg-[color-mix(in_srgb,var(--color-bad)_14%,transparent)]',
+    muted:  'bg-bg-hi',
+};
 
 const todoApi = async (path, options = {}) => {
     const res = await fetch(`/apps/todo${path}`, {
@@ -102,9 +114,8 @@ const pollActiveTasks = async () => {
 };
 
 // ---- Mutations ---------------------------------------------------------
-
-const addTodo = async () => {
-    const title = newTitle.value.trim();
+const addTodo = async (titleOverride) => {
+    const title = (titleOverride ?? newTitle.value).trim();
     if (!title) return;
     try {
         const data = await todoApi('/create', { method: 'POST', body: JSON.stringify({ title }) });
@@ -114,6 +125,15 @@ const addTodo = async () => {
         inputRef.value?.focus();
     } catch (e) { error.value = e.message; }
 };
+
+const composerKeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        addTodo();
+    }
+};
+
+const useExample = (text) => { newTitle.value = text; nextTick(() => inputRef.value?.focus()); };
 
 const patchLocal = (item) => {
     const idx = todos.value.findIndex((t) => t.id === item.id);
@@ -147,6 +167,14 @@ const updateNote = async (todo, value) => {
         patchLocal(data.item);
     } catch (e) { error.value = e.message; }
 };
+const updateTitle = async (todo, value) => {
+    const trimmed = (value || '').trim();
+    if (!trimmed || todo.title === trimmed) return;
+    try {
+        const data = await todoApi('/update', { method: 'POST', body: JSON.stringify({ id: todo.id, title: trimmed }) });
+        patchLocal(data.item);
+    } catch (e) { error.value = e.message; }
+};
 
 const runTodo = async (todo) => {
     try {
@@ -171,6 +199,17 @@ const stopTask = async (todo) => {
         await pollActiveTasks();
     } catch (e) { error.value = e.message; }
 };
+
+// ---- Grouping ----------------------------------------------------------
+const grouped = computed(() => {
+    const running = [], pending = [], done = [];
+    for (const t of todos.value) {
+        if (t.done) done.push(t);
+        else if (ACTIVE.has(liveStatusFor(t))) running.push(t);
+        else pending.push(t);
+    }
+    return { running, pending, done };
+});
 
 // ---- Detail: AI run result ---------------------------------------------
 const detailMessages = ref([]);
@@ -227,7 +266,7 @@ watchEffect(() => {
                 '__T_QC_FIELD_STATUS__'.replace('{value}', t.done ? '__T_QC_DONE__' : (liveStatusFor(t) || '__T_QC_PENDING__')),
                 t.title ? '__T_QC_FIELD_TITLE__'.replace('{value}', t.title) : null,
                 t.taskId ? '__T_QC_FIELD_RELATED_TASK__'.replace('{id}', t.taskId) : null,
-                t.detail ? '__T_QC_FIELD_REMARK__'.replace('{value}', String(t.detail).slice(0, 300)) : null,
+                t.note ? '__T_QC_FIELD_REMARK__'.replace('{value}', String(t.note).slice(0, 300)) : null,
             ].filter(Boolean).join('\n'),
         });
     } else {
@@ -252,92 +291,122 @@ watchEffect(() => {
 const messageText = (msg) => msg?.content == null ? '' : String(msg.content);
 const toolCallName = (msg) => msg?.tool_calls?.[0]?.function?.name || 'tool';
 const toolCallArgs = (msg) => msg?.tool_calls?.[0]?.function?.arguments || '';
-const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: '指令', system: '系统' }[r] || r);
+const messageRoleLabel = (r) => ({
+    assistant: '__T_TODO_ROLE_ASSISTANT__',
+    tool: '__T_TODO_ROLE_TOOL__',
+    user: '__T_TODO_ROLE_USER__',
+    system: '__T_TODO_ROLE_SYSTEM__',
+})[r] || r;
 </script>
 
 <template>
-    <div class="todo-root flex h-full bg-bg">
+    <div class="flex h-full bg-bg">
 
         <!-- ============== LIST ============== -->
         <div v-if="view === 'list'" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col">
             <header class="flex flex-none items-baseline gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
-                <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">待办</h1>
-                <span class="text-[12.5px] text-faint">·  让 AI 帮你做完</span>
+                <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TODO_TITLE__</h1>
+                <span class="text-[12.5px] text-faint">__T_TODO_SUBTITLE__</span>
                 <AppLauncher class="ml-auto self-center" />
             </header>
 
-            <div class="composer mx-8 mb-2 flex flex-none items-center gap-2 rounded-[14px] bg-card px-3 py-2 transition-colors max-md:mx-3">
-                <span class="msi text-muted" style="font-size:20px">add</span>
-                <input ref="inputRef" v-model="newTitle" @keydown.enter="addTodo"
-                    placeholder="加一条待办,回车确认"
-                    class="composer-input min-w-0 flex-1 border-0 bg-transparent py-1.5 text-[14.5px] text-ink outline-none" />
+            <!-- Composer -->
+            <div class="mx-8 mb-3 flex flex-none items-end gap-2 rounded-[16px] bg-card px-3.5 py-2.5 transition-colors focus-within:bg-card-hi max-md:mx-3">
+                <span class="msi mt-1.5 text-faint" style="font-size:18px">auto_awesome</span>
+                <textarea ref="inputRef" v-model="newTitle" @keydown="composerKeydown"
+                    rows="1"
+                    placeholder="__T_TODO_COMPOSER_PLACEHOLDER__"
+                    class="composer-input min-w-0 flex-1 resize-none border-0 bg-transparent py-1.5 text-[14.5px] leading-[1.55] text-ink outline-none"></textarea>
                 <button class="cursor-pointer rounded-full border-0 bg-blue-bg px-4 py-1.5 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft disabled:cursor-default disabled:opacity-50"
-                    :disabled="!newTitle.trim()" @click="addTodo">添加</button>
+                    :disabled="!newTitle.trim()" @click="addTodo()">__T_TODO_COMPOSER_SUBMIT__</button>
             </div>
 
             <div v-if="error" class="mx-8 mb-2 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-3"
                  style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">{{ error }}</div>
 
             <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-3 max-md:pb-10">
+                <!-- Loading skeleton -->
                 <div v-if="loading && !todos.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                    <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
-                    <div class="text-[14px]">加载中…</div>
-                </div>
-                <div v-else-if="!todos.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                    <span class="msi" style="font-size:34px;color:var(--color-faint)">checklist</span>
-                    <div class="text-[14px]">还没有待办</div>
+                    <span class="msi text-faint" style="font-size:30px">hourglass_empty</span>
+                    <div class="text-[14px]">__T_TODO_LOADING__</div>
                 </div>
 
-                <ul v-else class="m-0 flex list-none flex-col gap-1.5 p-0">
-                    <li v-for="t in todos" :key="t.id"
-                        class="todo-row group/item relative flex items-center gap-3 rounded-[14px] px-3.5 py-3 transition-colors hover:bg-bg-hi cursor-pointer max-md:gap-2.5 max-md:px-3 max-md:py-2.5"
-                        :class="{ 'is-pinned': t.pinned, 'has-active-task': liveStatusFor(t) === 'running' || liveStatusFor(t) === 'pending' }"
-                        @click="goDetail(t.id)">
-
-                        <button class="grid h-[22px] w-[22px] flex-none cursor-pointer place-items-center rounded-full border-[1.5px] border-line-hi bg-transparent text-white transition-colors hover:border-accent"
-                            :class="{ '!border-accent !bg-accent': t.done }"
-                            @click.stop="toggleDone(t)">
-                            <span class="msi xs" v-if="t.done">check</span>
+                <!-- Empty state with examples -->
+                <div v-else-if="!todos.length" class="mx-auto mt-6 max-w-[520px]">
+                    <div class="flex flex-col items-center gap-2 pt-6 pb-4 text-muted">
+                        <span class="msi text-faint" style="font-size:34px">checklist</span>
+                        <div class="text-[15px] text-ink">__T_TODO_EMPTY_TITLE__</div>
+                        <div class="text-[12.5px] text-faint">__T_TODO_EMPTY_HINT__</div>
+                    </div>
+                    <div class="mt-2 flex flex-col gap-2">
+                        <button v-for="ex in ['__T_TODO_EMPTY_EXAMPLE_1__', '__T_TODO_EMPTY_EXAMPLE_2__', '__T_TODO_EMPTY_EXAMPLE_3__']"
+                            :key="ex"
+                            class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-line bg-card-sub px-3.5 py-2.5 text-left text-[13.5px] text-ink transition-colors hover:border-line-hi hover:bg-card"
+                            @click="useExample(ex)">
+                            <span class="msi text-faint group-hover:text-accent" style="font-size:18px">north_east</span>
+                            <span class="flex-1">{{ ex }}</span>
                         </button>
+                    </div>
+                </div>
 
-                        <div class="min-w-0 flex-1">
-                            <div class="break-words text-[14.5px] text-ink"
-                                 :class="{ 'text-faint line-through': t.done }">{{ t.title }}</div>
-                            <div v-if="statusMeta(liveStatusFor(t))" class="mt-0.5">
-                                <span class="inline-flex items-center gap-1.5 text-[12px]"
-                                    :style="{ color: statusMeta(liveStatusFor(t)).color }">
-                                    <span v-if="statusMeta(liveStatusFor(t)).dot" class="animate-status-pulse h-1.5 w-1.5 rounded-full"
-                                        :style="{ background: statusMeta(liveStatusFor(t)).color }"></span>
-                                    {{ statusMeta(liveStatusFor(t)).label }}
-                                </span>
-                            </div>
+                <!-- Grouped lists -->
+                <template v-else>
+                    <!-- Running group -->
+                    <section v-if="grouped.running.length" class="mb-5">
+                        <div class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
+                            <span class="h-1.5 w-1.5 rounded-full bg-accent animate-status-pulse"></span>
+                            __T_TODO_GROUP_RUNNING__
+                            <span class="font-normal text-faint">·  {{ grouped.running.length }}</span>
                         </div>
+                        <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                            <TodoRow v-for="t in grouped.running" :key="t.id"
+                                :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
+                                :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
+                                :is-active="ACTIVE.has(liveStatusFor(t))"
+                                @open="goDetail(t.id)" @toggle-done="toggleDone($event)"
+                                @run="runTodo($event)" @stop="stopTask($event)"
+                                @toggle-pinned="togglePinned($event)" @remove="removeTodo($event)" />
+                        </ul>
+                    </section>
 
-                        <div class="flex flex-none items-center gap-1.5">
-                            <button v-if="liveStatusFor(t) === 'running' || liveStatusFor(t) === 'pending'"
-                                class="row-chip is-stop" @click.stop="stopTask(t)">
-                                <span class="msi sm">stop_circle</span> 停止
-                            </button>
-                            <button v-else
-                                class="row-chip is-primary"
-                                :disabled="t.done"
-                                @click.stop="runTodo(t)">
-                                <span class="msi sm">play_arrow</span>
-                                {{ t.taskId ? '再次执行' : '执行' }}
-                            </button>
-
-                            <button class="grid h-[30px] w-[30px] cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:!text-accent"
-                                :class="{ '!text-accent': t.pinned }"
-                                @click.stop="togglePinned(t)" :title="t.pinned ? '取消置顶' : '置顶'">
-                                <span class="msi sm" :class="{ filled: t.pinned }">push_pin</span>
-                            </button>
-                            <button class="grid h-[30px] w-[30px] cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:!text-bad"
-                                @click.stop="removeTodo(t)" title="移除">
-                                <span class="msi sm">close</span>
-                            </button>
+                    <!-- Pending group -->
+                    <section v-if="grouped.pending.length" class="mb-5">
+                        <div v-if="grouped.running.length || grouped.done.length"
+                            class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
+                            __T_TODO_GROUP_PENDING__
+                            <span class="font-normal">·  {{ grouped.pending.length }}</span>
                         </div>
-                    </li>
-                </ul>
+                        <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                            <TodoRow v-for="t in grouped.pending" :key="t.id"
+                                :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
+                                :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
+                                :is-active="false"
+                                @open="goDetail(t.id)" @toggle-done="toggleDone($event)"
+                                @run="runTodo($event)" @stop="stopTask($event)"
+                                @toggle-pinned="togglePinned($event)" @remove="removeTodo($event)" />
+                        </ul>
+                    </section>
+
+                    <!-- Done group (collapsible) -->
+                    <section v-if="grouped.done.length">
+                        <button class="mb-1.5 flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-1 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint transition-colors hover:text-muted"
+                            @click="showDone = !showDone">
+                            <span class="msi" style="font-size:15px">{{ showDone ? 'expand_more' : 'chevron_right' }}</span>
+                            <span>{{ showDone
+                                ? '__T_TODO_GROUP_HIDE_DONE__'
+                                : '__T_TODO_GROUP_SHOW_DONE__'.replace('{count}', grouped.done.length) }}</span>
+                        </button>
+                        <ul v-if="showDone" class="m-0 flex list-none flex-col gap-1.5 p-0">
+                            <TodoRow v-for="t in grouped.done" :key="t.id"
+                                :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
+                                :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
+                                :is-active="false"
+                                @open="goDetail(t.id)" @toggle-done="toggleDone($event)"
+                                @run="runTodo($event)" @stop="stopTask($event)"
+                                @toggle-pinned="togglePinned($event)" @remove="removeTodo($event)" />
+                        </ul>
+                    </section>
+                </template>
             </div>
         </div>
 
@@ -345,89 +414,118 @@ const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: 
         <div v-else-if="view === 'detail' && currentTodo" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col">
             <header class="flex flex-none items-center gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
                 <button class="grid h-9 w-9 flex-none cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                    @click="goList" title="返回">
-                    <span class="msi sm">arrow_back</span>
+                    @click="goList" :title="'__T_TODO_BACK__'">
+                    <span class="msi" style="font-size:20px">arrow_back</span>
                 </button>
-                <input v-model="currentTodo.title"
-                    @blur="todoApi('/update', { method: 'POST', body: JSON.stringify({ id: currentTodo.id, title: currentTodo.title }) }).catch(() => {})"
-                    class="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink outline-none max-md:text-[24px]"
+                <input :value="currentTodo.title"
+                    @blur="(e) => updateTitle(currentTodo, e.target.value)"
+                    class="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 text-[26px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink outline-none max-md:text-[20px]"
                     :class="{ 'text-faint line-through': currentTodo.done }" />
-                <span v-if="statusMeta(liveStatusFor(currentTodo))"
-                    class="inline-flex flex-none items-center gap-1.5 rounded-full px-2 py-0.5 text-[11.5px] font-medium"
-                    :style="{ color: statusMeta(liveStatusFor(currentTodo)).color, background: 'color-mix(in srgb, ' + statusMeta(liveStatusFor(currentTodo)).color + ' 12%, transparent)' }">
-                    <span v-if="statusMeta(liveStatusFor(currentTodo)).dot" class="animate-status-pulse h-1.5 w-1.5 rounded-full"
-                        :style="{ background: statusMeta(liveStatusFor(currentTodo)).color }"></span>
-                    <span v-else class="msi" style="font-size:13px">{{ liveStatusFor(currentTodo) === 'done' ? 'check_circle' : (liveStatusFor(currentTodo) === 'error' ? 'error' : 'cancel') }}</span>
-                    {{ statusMeta(liveStatusFor(currentTodo)).label }}
-                </span>
-                <AppLauncher />
+                <AppLauncher class="flex-none" />
             </header>
 
-            <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-4 max-md:pb-10">
+            <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
 
-                <div class="flex flex-wrap items-center gap-1.5 max-md:gap-1">
-                    <button v-if="liveStatusFor(currentTodo) === 'running' || liveStatusFor(currentTodo) === 'pending'"
-                        class="action-chip is-stop" @click="stopTask(currentTodo)">
-                        <span class="msi sm">stop_circle</span> 停止
+                <!-- Status pill -->
+                <div v-if="statusMeta(liveStatusFor(currentTodo))"
+                    class="mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium"
+                    :class="[
+                        TONE_TEXT[statusMeta(liveStatusFor(currentTodo)).tone],
+                        TONE_SOFT[statusMeta(liveStatusFor(currentTodo)).tone]
+                    ]">
+                    <span v-if="statusMeta(liveStatusFor(currentTodo)).dot"
+                        class="h-1.5 w-1.5 rounded-full animate-status-pulse"
+                        :class="TONE_BG[statusMeta(liveStatusFor(currentTodo)).tone]"></span>
+                    <span v-else class="msi" style="font-size:14px">{{ statusMeta(liveStatusFor(currentTodo)).icon }}</span>
+                    {{ statusMeta(liveStatusFor(currentTodo)).labelKey }}
+                </div>
+
+                <!-- Action bar -->
+                <div class="mb-7 flex flex-wrap items-center gap-2 max-md:gap-1.5">
+                    <!-- Primary: run / stop -->
+                    <button v-if="ACTIVE.has(liveStatusFor(currentTodo))"
+                        class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border-0 px-4 text-[13px] font-medium text-bad transition-colors hover:opacity-90"
+                        style="background:color-mix(in srgb,var(--color-bad) 14%,transparent)"
+                        @click="stopTask(currentTodo)">
+                        <span class="msi" style="font-size:18px">stop_circle</span>
+                        __T_TODO_ACTION_STOP__
                     </button>
-                    <button v-else class="action-chip is-primary" @click="runTodo(currentTodo)">
-                        <span class="msi sm">auto_awesome</span>
-                        {{ currentTodo.taskId ? '再次执行' : '执行' }}
+                    <button v-else
+                        class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft disabled:cursor-default disabled:opacity-50"
+                        :disabled="currentTodo.done"
+                        @click="runTodo(currentTodo)">
+                        <span class="msi" style="font-size:18px">auto_awesome</span>
+                        {{ currentTodo.taskId ? '__T_TODO_ACTION_RUN_AGAIN__' : '__T_TODO_ACTION_RUN__' }}
                     </button>
-                    <button class="action-chip" :class="currentTodo.done ? 'is-done' : ''"
+
+                    <!-- Secondary chips -->
+                    <button class="action-chip"
+                        :class="{ 'is-on': currentTodo.done }"
                         @click="toggleDone(currentTodo)">
-                        <span class="msi sm">{{ currentTodo.done ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                        {{ currentTodo.done ? '已完成' : '完成' }}
+                        <span class="msi" style="font-size:16px">{{ currentTodo.done ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                        {{ currentTodo.done ? '__T_TODO_ACTION_COMPLETED__' : '__T_TODO_ACTION_COMPLETE__' }}
                     </button>
                     <button class="action-chip"
-                        :class="{ 'is-active': currentTodo.pinned }"
+                        :class="{ 'is-on': currentTodo.pinned }"
                         @click="togglePinned(currentTodo)">
-                        <span class="msi sm" :class="{ filled: currentTodo.pinned }">push_pin</span>
-                        {{ currentTodo.pinned ? '已置顶' : '置顶' }}
+                        <span class="msi" :class="{ filled: currentTodo.pinned }" style="font-size:16px">push_pin</span>
+                        {{ currentTodo.pinned ? '__T_TODO_ACTION_PINNED__' : '__T_TODO_ACTION_PIN__' }}
                     </button>
-                    <button class="action-chip hover:!text-bad" @click="removeTodo(currentTodo)">
-                        <span class="msi sm">delete</span> 删除
+                    <button class="action-chip ml-auto hover:!text-bad" @click="removeTodo(currentTodo)">
+                        <span class="msi" style="font-size:16px">delete_outline</span>
+                        __T_TODO_ACTION_DELETE__
                     </button>
                 </div>
 
-                <section class="mt-7">
-                    <div class="section-label">备注</div>
+                <!-- Note -->
+                <section class="mb-7">
+                    <div class="section-label">__T_TODO_SECTION_NOTE__</div>
                     <textarea
                         :value="currentTodo.note"
                         @change="(e) => updateNote(currentTodo, e.target.value)"
-                        placeholder="可以写背景、目标、约束、想要的产出格式…"
+                        placeholder="__T_TODO_NOTE_PLACEHOLDER__"
                         class="w-full resize-y rounded-[12px] border-0 bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink outline-none transition-colors focus:bg-card-hi"
                         style="min-height: 92px;"></textarea>
                 </section>
 
-                <section class="mt-7">
-                    <div class="section-label">结果</div>
+                <!-- Result -->
+                <section>
+                    <div class="section-label">__T_TODO_SECTION_RESULT__</div>
 
                     <div v-if="!currentTodo.taskId"
                         class="rounded-[12px] border border-dashed border-line px-4 py-10 text-center text-[12.5px] text-faint">
-                        还没让 AI 跑过。点上面的「执行」试试。
+                        __T_TODO_RESULT_EMPTY__
                     </div>
 
                     <div v-else class="flex flex-col gap-3">
                         <div v-if="detailTaskRow?.error" class="rounded-[10px] px-3 py-2 text-[13px] text-bad"
                             style="background: color-mix(in srgb, var(--color-bad) 12%, transparent)">{{ detailTaskRow.error }}</div>
 
-                        <div v-if="detailTaskRow?.response" class="md rounded-[12px] border border-line bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink break-words" v-html="renderMd(detailTaskRow.response)"></div>
-                        <div v-else-if="!TERMINAL.has(detailTaskRow?.status)" class="text-[12.5px] text-faint">AI 还在工作,稍后这里会出现产物。</div>
+                        <div v-if="detailTaskRow?.response"
+                            class="md rounded-[12px] border border-line bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink break-words"
+                            v-html="renderMd(detailTaskRow.response)"></div>
+                        <div v-else-if="!TERMINAL.has(detailTaskRow?.status)"
+                            class="flex items-center gap-2 rounded-[12px] border border-dashed border-line px-4 py-6 text-[12.5px] text-faint">
+                            <span class="h-1.5 w-1.5 rounded-full bg-accent animate-status-pulse"></span>
+                            __T_TODO_RESULT_RUNNING__
+                        </div>
 
                         <details v-if="detailMessages.length" class="rounded-[12px] border border-line bg-bg-elev">
                             <summary class="cursor-pointer select-none list-none px-3.5 py-2 text-[12px] text-muted hover:text-ink">
-                                <span class="msi" style="font-size:14px;vertical-align:-2px">unfold_more</span>
-                                工作日志 ·  {{ detailMessages.length }} 条消息
+                                <span class="msi align-[-2px]" style="font-size:14px">unfold_more</span>
+                                __T_TODO_RESULT_LOG__
+                                <span class="text-faint">·  {{ '__T_TODO_RESULT_LOG_COUNT__'.replace('{count}', detailMessages.length) }}</span>
                             </summary>
                             <div class="flex flex-col gap-2 px-3 pb-3 pt-1">
                                 <div v-for="row in detailMessages" :key="row.id" class="rounded-lg border border-line bg-bg px-3 py-2">
                                     <div class="mb-1 flex items-center gap-2 text-[11px] text-faint">
                                         <span class="font-medium text-ink">{{ messageRoleLabel(row.message?.role) }}</span>
-                                        <span v-if="row.message?.tool_calls?.length">·  调用 <span class="font-mono text-ink">{{ toolCallName(row.message) }}</span></span>
+                                        <span v-if="row.message?.tool_calls?.length">·  {{ '__T_TODO_ROLE_TOOL_CALL__'.replace('{name}', toolCallName(row.message)) }}</span>
                                     </div>
-                                    <pre v-if="row.message?.tool_calls?.length" class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-[1.5] text-muted">{{ toolCallArgs(row.message) }}</pre>
-                                    <div v-if="messageText(row.message)" class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.55] text-muted">{{ messageText(row.message) }}</div>
+                                    <pre v-if="row.message?.tool_calls?.length"
+                                        class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-[1.5] text-muted">{{ toolCallArgs(row.message) }}</pre>
+                                    <div v-if="messageText(row.message)"
+                                        class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.55] text-muted">{{ messageText(row.message) }}</div>
                                 </div>
                             </div>
                         </details>
@@ -437,25 +535,31 @@ const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: 
         </div>
 
         <div v-else class="flex h-full w-full items-center justify-center text-muted">
-            <span class="msi mr-2" style="font-size:20px">hourglass_empty</span>加载中…
+            <span class="msi mr-2" style="font-size:20px">hourglass_empty</span>__T_TODO_LOADING__
         </div>
     </div>
 </template>
 
 <style scoped>
-.composer:focus-within { background: var(--color-card-hi); }
 .composer-input::placeholder { color: var(--color-faint); }
-
-.todo-row.is-pinned { background: color-mix(in srgb, var(--color-accent) 6%, transparent); }
-.todo-row.is-pinned:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-.todo-row.has-active-task { box-shadow: inset 3px 0 0 0 var(--color-accent); }
 
 .animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
 @keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-/* Action chip (detail action bar) */
+.section-label {
+    margin-bottom: 8px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+}
+
+/* Secondary chip used in detail action bar */
 .action-chip {
-    display: inline-flex; align-items: center; gap: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     height: 32px;
     padding: 0 12px;
     border: 1px solid var(--color-line);
@@ -474,66 +578,9 @@ const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: 
     border-color: var(--color-line-hi);
 }
 .action-chip:disabled { opacity: 0.55; cursor: default; }
-.action-chip .msi { font-size: 17px; }
-.action-chip.is-primary {
-    background: var(--color-blue-bg);
-    color: var(--color-blue-fg);
-    border-color: transparent;
-}
-.action-chip.is-primary:hover:not(:disabled) { background: var(--color-blue-soft); color: var(--color-blue-fg); }
-.action-chip.is-stop {
-    color: var(--color-bad);
-    border-color: color-mix(in srgb, var(--color-bad) 45%, transparent);
-}
-.action-chip.is-stop:hover { background: color-mix(in srgb, var(--color-bad) 12%, transparent); color: var(--color-bad); border-color: var(--color-bad); }
-.action-chip.is-done {
-    background: var(--color-green-bg);
-    color: var(--color-green-fg);
-    border-color: transparent;
-}
-.action-chip.is-done:hover { background: var(--color-green-soft); color: var(--color-green-fg); }
-.action-chip.is-active {
-    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+.action-chip.is-on {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
     color: var(--color-accent);
     border-color: transparent;
-}
-
-/* Row chip (compact, used in list rows) */
-.row-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    height: 28px;
-    padding: 0 10px;
-    border: 1px solid var(--color-line);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-muted);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .12s, color .12s, border-color .12s;
-    white-space: nowrap;
-}
-.row-chip:hover:not(:disabled) { background: var(--color-bg-hi); color: var(--color-ink); border-color: var(--color-line-hi); }
-.row-chip:disabled { opacity: 0.55; cursor: default; }
-.row-chip .msi { font-size: 15px; }
-.row-chip.is-primary {
-    background: var(--color-blue-bg);
-    color: var(--color-blue-fg);
-    border-color: transparent;
-}
-.row-chip.is-primary:hover { background: var(--color-blue-soft); }
-.row-chip.is-stop {
-    color: var(--color-bad);
-    border-color: color-mix(in srgb, var(--color-bad) 45%, transparent);
-}
-.row-chip.is-stop:hover { background: color-mix(in srgb, var(--color-bad) 12%, transparent); border-color: var(--color-bad); }
-
-.section-label {
-    margin-bottom: 8px;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-faint);
 }
 </style>

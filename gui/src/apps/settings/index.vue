@@ -2,9 +2,9 @@
   <div class="flex h-full flex-col bg-bg">
     <header class="flex-none border-b border-line pt-7 max-md:pt-5">
       <div class="mx-auto flex max-w-[720px] flex-col gap-4.5 px-8 max-md:px-4">
-        <div class="flex items-center justify-between gap-3">
-          <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_SETTINGS_TITLE__</h1>
-          <AppLauncher />
+        <div class="flex items-baseline justify-between gap-3">
+          <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_SETTINGS_TITLE__</h1>
+          <AppLauncher class="self-center" />
         </div>
         <nav class="tabs flex items-stretch gap-1 -mx-8 overflow-x-auto px-8 max-md:-mx-4 max-md:px-4" role="tablist">
           <button
@@ -12,11 +12,12 @@
             :key="tab.key"
             role="tab"
             :aria-selected="activeTab === tab.key"
-            class="tab relative inline-flex cursor-pointer items-center gap-2 whitespace-nowrap border-0 bg-transparent px-3.5 pb-3.5 pt-3 text-[14px] font-medium transition-colors max-md:px-3 max-md:pb-3 max-md:pt-2.5 max-md:text-[13.5px]"
+            class="tab relative inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap border-0 bg-transparent px-3 pb-3 pt-2.5 text-[13.5px] font-medium transition-colors max-md:px-2.5 max-md:pb-2.5 max-md:pt-2 max-md:text-[13px]"
             :class="activeTab === tab.key ? 'text-accent is-active' : 'text-muted hover:text-ink'"
             @click="activeTab = tab.key"
           >
-            {{ tab.label }}
+            <span aria-hidden="true">{{ tab.icon }}</span>
+            <span>{{ tab.label }}</span>
           </button>
         </nav>
       </div>

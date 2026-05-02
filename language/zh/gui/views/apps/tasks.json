@@ -7,14 +7,18 @@
   "taskdetail_role_user": "用户",
   "taskdetail_role_tool_result": "工具结果",
   "taskdetail_role_unknown": "未知",
+
   "tasks_title": "任务",
+  "tasks_subtitle": "Agent 与 App 发起的所有任务",
   "tasks_refresh": "刷新",
   "tasks_load_fail": "加载失败",
+
   "tasks_status_pending_short": "等待",
   "tasks_status_running": "运行中",
   "tasks_status_done_short": "完成",
   "tasks_status_error": "错误",
   "tasks_status_stopped_short": "已停",
+
   "tasks_loading": "加载中…",
   "tasks_empty_plain": "还没有任务",
   "tasks_empty_hint": "Agent 和 App 发起的任务会在这里显示",
@@ -27,5 +31,16 @@
   "tasks_tool_call": "调用工具",
   "tasks_role_model": "模型",
   "tasks_role_system": "系统",
-  "tasks_role_message": "消息"
+  "tasks_role_message": "消息",
+
+  "tasks_section_active": "进行中",
+  "tasks_section_recent": "最近",
+  "tasks_filter_all": "全部",
+  "tasks_filter_active": "进行中",
+  "tasks_filter_failed": "失败",
+  "tasks_search_placeholder": "搜索任务 / 应用 / 提示词…",
+  "tasks_search_no_match": "没有匹配的任务",
+  "tasks_clear_search": "清空",
+  "tasks_no_title": "(无标题)",
+  "tasks_count_suffix": "·  共 {count}"
 }

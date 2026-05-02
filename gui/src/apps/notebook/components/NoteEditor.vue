@@ -82,8 +82,14 @@ function setIcon(emoji) {
       <div class="mt-2 flex items-center gap-1 text-faint">
         <button v-if="!note.icon" class="meta-btn" @click="setIcon('📝')">😀 __T_NOTEBOOK_ADD_ICON__</button>
         <button v-if="!note.cover" class="meta-btn" @click="coverInput?.click()">🏞️ __T_NOTEBOOK_ADD_COVER__</button>
-        <button class="meta-btn" @click="emit('remove', note)">__T_COMMON_DELETE__</button>
+        <button class="meta-btn"
+          :disabled="polishing || !note.content?.trim()"
+          @click="emit('polish', note)">
+          ✨ {{ polishing ? '__T_NOTEBOOK_POLISHING__' : '__T_NOTEBOOK_POLISH__' }}
+        </button>
         <span v-if="saving" class="ml-2 text-xs text-faint">__T_COMMON_SAVING__</span>
+        <div class="flex-1"></div>
+        <button class="meta-btn hover:!text-bad" @click="emit('remove', note)">__T_COMMON_DELETE__</button>
       </div>
       <input ref="coverInput" type="file" accept="image/*" class="hidden" @change="onCoverFile" />
 
@@ -92,16 +98,18 @@ function setIcon(emoji) {
         @input="emit('save', note.id, { title: $event.target.value, _local: true })"
         @blur="(e) => emit('save', note.id, { title: e.target.value })"
         placeholder="__T_NOTEBOOK_TITLE_PLACEHOLDER__"
-        class="mt-2 w-full border-0 bg-transparent py-1 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink outline-none placeholder:text-hint max-md:text-[24px]" />
+        class="mt-2 w-full border-0 bg-transparent py-1 text-[24px] font-semibold leading-[1.25] tracking-[-0.015em] text-ink outline-none placeholder:text-hint max-md:text-[20px]" />
 
-      <!-- Access -->
-      <div class="mt-3 flex items-center gap-2 pb-2">
-        <span class="text-xs text-faint">__T_NOTEBOOK_AI_VISIBILITY__</span>
-        <button v-for="opt in accessOptions" :key="opt.key"
-          class="access-opt" :class="{ active: (note.access || 'none') === opt.key }"
-          @click="emit('save', note.id, { access: opt.key })">
-          {{ opt.label }}<span class="access-desc">{{ opt.desc }}</span>
-        </button>
+      <!-- Access (segmented control) -->
+      <div class="mt-3 flex flex-wrap items-center gap-2 pb-2">
+        <span class="text-[11px] uppercase tracking-[0.06em] text-faint">__T_NOTEBOOK_AI_VISIBILITY__</span>
+        <div class="inline-flex items-center gap-0.5 rounded-full bg-card-sub p-0.5">
+          <button v-for="opt in accessOptions" :key="opt.key"
+            class="cursor-pointer rounded-full border-0 bg-transparent px-3 py-1 text-[12px] font-medium text-muted transition-colors"
+            :class="(note.access || 'none') === opt.key ? '!bg-bg !text-ink shadow-[0_1px_2px_var(--color-shadow)]' : 'hover:text-ink'"
+            :title="opt.desc"
+            @click="emit('save', note.id, { access: opt.key })">{{ opt.label }}</button>
+        </div>
       </div>
 
       <!-- Summary -->
@@ -129,14 +137,6 @@ function setIcon(emoji) {
         <div class="polish-result" v-html="polishResult"></div>
       </div>
 
-      <!-- Polish trigger -->
-      <div class="mt-6 border-t border-line pt-4">
-        <button class="meta-btn"
-          :disabled="polishing || !note.content?.trim()"
-          @click="emit('polish', note)">
-          {{ polishing ? '__T_NOTEBOOK_POLISHING__' : '__T_NOTEBOOK_POLISH__' }}
-        </button>
-      </div>
     </div>
 
     <!-- Bottom toolbar -->
@@ -169,23 +169,6 @@ function setIcon(emoji) {
 }
 .meta-btn:hover { background: var(--color-bg-hi); color: var(--color-muted); }
 .meta-btn:disabled { opacity: 0.4; cursor: default; }
-
-.access-opt {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 3px 8px; border-radius: 4px;
-  border: 0; background: transparent;
-  font-size: 12px; color: var(--color-faint);
-  cursor: pointer; transition: background .1s;
-}
-.access-opt:hover { background: var(--color-bg-hi); }
-.access-opt.active {
-  background: var(--color-bg-hi);
-  color: var(--color-ink);
-  font-weight: 500;
-}
-.access-desc {
-  font-size: 10px; color: var(--color-faint); margin-left: 2px;
-}
 
 .summary-area {
   width: 100%; min-height: 40px; border: 0;

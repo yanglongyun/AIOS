@@ -50,11 +50,11 @@ function fmtTime(s) {
 
     <input v-if="editing"
       v-model="nameInput"
-      class="folder-title-input mt-2 w-full border-0 bg-transparent py-1 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink outline-none placeholder:text-hint max-md:text-[24px]"
+      class="folder-title-input mt-2 w-full border-0 bg-transparent py-1 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink outline-none placeholder:text-hint max-md:text-[19px]"
       @blur="saveName"
       @keydown.enter.prevent="saveName" />
     <h1 v-else
-      class="mt-2 cursor-text py-1 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]"
+      class="mt-2 cursor-text py-1 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]"
       @click="startEdit">
       {{ folder?.name || '__T_NOTEBOOK_UNTITLED__' }}
     </h1>

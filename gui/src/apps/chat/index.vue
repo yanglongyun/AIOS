@@ -1,7 +1,7 @@
 <template>
   <div v-if="detailOpen" class="flex min-h-0 min-w-0 flex-1 flex-col bg-bg text-ink">
     <header class="flex shrink-0 items-center gap-2 px-4 py-3">
-      <button class="icon-btn" title="__T_CRYPTOBOT_BACK__" @click="backToList">
+      <button class="icon-btn" title="__T_COMMON_BACK__" @click="backToList">
         <span class="msi sm">arrow_back</span>
       </button>
 
@@ -52,22 +52,20 @@
   </div>
 
   <div v-else class="flex h-full flex-col bg-bg">
-    <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
-      <div>
-        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_APP_CHAT__</h1>
-      </div>
-      <div class="flex items-center gap-2">
+    <header class="mx-auto flex w-full max-w-[820px] flex-none items-baseline gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+      <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_APP_CHAT__</h1>
+      <div class="ml-auto flex items-center gap-2">
         <button
-          class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink"
+          class="inline-flex items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3.5 py-1.5 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft"
           @click="newChat">
-          <span class="msi sm">edit_square</span>
+          <span class="msi" style="font-size:16px">edit_square</span>
           <span>__T_CHAT_NEW_CONVERSATION__</span>
         </button>
         <AppLauncher />
       </div>
     </header>
 
-    <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+    <div class="mx-auto w-full max-w-[820px] min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
       <HistoryPanel
         ref="historyRef"
         :active-id="currentConversationId"

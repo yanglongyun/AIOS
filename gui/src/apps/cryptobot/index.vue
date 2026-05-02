@@ -311,16 +311,16 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div v-if="selectedDecision" class="flex h-full flex-col bg-bg">
-        <header class="flex flex-none items-center gap-2 px-4 pt-4 max-md:px-3 max-md:pt-3">
+    <div v-if="selectedDecision" class="mx-auto flex h-full w-full max-w-[820px] flex-col bg-bg">
+        <header class="flex flex-none items-center gap-2 px-8 pt-7 max-md:px-4 max-md:pt-5">
             <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                @click="selectedDecision = null">
-                <span class="msi sm">arrow_back</span>
+                @click="selectedDecision = null"
+                :title="'__T_CRYPTOBOT_BACK__'">
+                <span class="msi" style="font-size:20px">arrow_back</span>
             </button>
-            <span class="text-[12px] text-muted">__T_CRYPTOBOT_BACK__</span>
             <AppLauncher class="ml-auto" />
         </header>
-        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-4 max-md:px-4 max-md:pb-10">
+        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
             <div class="mb-3 flex items-center gap-2">
                 <span class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium"
                     :class="selectedDecision.ok ? 'text-good' : 'text-bad'">
@@ -339,38 +339,42 @@ watchEffect(() => {
         </div>
     </div>
 
-    <div v-else class="flex h-full flex-col bg-bg">
-        <header class="flex flex-none items-end justify-between gap-4 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-            <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_CRYPTOBOT_TITLE__</h1>
-            <div class="flex items-center gap-3 text-[11.5px]">
-                <div class="flex items-center gap-2">
-                    <span class="h-1.5 w-1.5 rounded-full" :class="status.state.running ? 'animate-status-pulse bg-good' : 'bg-faint'"></span>
-                    <span class="text-muted">{{ status.state.running ? '__T_CRYPTOBOT_RUNNING__' : '__T_CRYPTOBOT_STOPPED__' }}</span>
-                </div>
-                <AppLauncher />
-            </div>
+    <div v-else class="crypto-shell flex h-full flex-col bg-bg">
+        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+            <span class="grid h-7 w-7 place-items-center rounded-md font-mono text-[12px] font-bold text-bg"
+                style="background:linear-gradient(135deg,#fcd535,#f0b90b)">₿</span>
+            <h1 class="m-0 text-[20px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[18px]">__T_CRYPTOBOT_TITLE__</h1>
+            <span class="status-pill inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em]"
+                :class="status.state.running ? 'is-on' : 'is-off'">
+                <span class="h-1.5 w-1.5 rounded-full"
+                    :class="status.state.running ? 'animate-status-pulse bg-good' : 'bg-faint'"></span>
+                {{ status.state.running ? '__T_CRYPTOBOT_RUNNING__' : '__T_CRYPTOBOT_STOPPED__' }}
+            </span>
+            <AppLauncher class="ml-auto" />
         </header>
 
-        <div class="flex-none px-8 pb-4 max-md:px-3">
+        <div class="mx-auto w-full max-w-[1100px] flex-none px-8 pb-3 max-md:px-3">
             <EquityPanel :status="status" />
         </div>
 
-        <nav class="flex flex-none flex-wrap gap-1.5 px-8 pb-3 max-md:px-4">
+        <nav class="mx-auto w-full max-w-[1100px] flex flex-none items-stretch gap-0 border-b border-line px-8 max-md:px-4 overflow-x-auto">
             <button v-for="t in TABS" :key="t.key"
-                class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-[12.5px] transition-colors"
-                :class="activeTab === t.key ? 'border-transparent bg-blue-bg text-blue-fg' : 'border-line-hi bg-transparent text-muted hover:bg-bg-hi hover:text-ink'"
+                class="cb-tab relative inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap border-0 bg-transparent px-3.5 pb-2.5 pt-2 text-[12.5px] font-medium transition-colors"
+                :class="activeTab === t.key ? 'is-active text-accent' : 'text-muted hover:text-ink'"
                 @click="activeTab = t.key">
                 <span class="msi" style="font-size:14px">{{ t.icon }}</span>
                 <span>{{ t.label }}</span>
             </button>
         </nav>
 
-        <div v-if="error" class="mx-8 mb-2 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-4"
-            style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-            {{ error }}
+        <div v-if="error" class="mx-auto w-full max-w-[1100px] mb-2 px-8 max-md:px-4">
+            <div class="rounded-[10px] px-3.5 py-2 text-[13px] text-bad"
+                style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
+                {{ error }}
+            </div>
         </div>
 
-        <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
             <div class="space-y-5">
                 <AgentTab v-if="activeTab === 'agent'"
                     :ex-form="exForm"
@@ -426,6 +430,58 @@ watchEffect(() => {
 </template>
 
 <style scoped>
+/* Crypto exchange terminal palette — overrides system theme tokens locally so all
+   children Tailwind utilities (bg-bg, text-ink, border-line, …) inherit it.
+   Forces a dark "trading desk" feel regardless of the user's light/dark choice. */
+.crypto-shell {
+    --color-bg:        #0c0d12;
+    --color-bg-elev:   #14161e;
+    --color-bg-hi:     #1d1f29;
+    --color-line:      #21232c;
+    --color-line-hi:   #2a2d38;
+    --color-ink:       #e8eaed;
+    --color-muted:     #9298a3;
+    --color-faint:     #5b606b;
+    --color-accent:    #fcd535;          /* Binance gold */
+    --color-accent-hi: #f0b90b;
+    --color-good:      #03a66d;          /* up green */
+    --color-bad:       #cf304a;          /* down red */
+    --color-card:      #14161e;
+    --color-card-hi:   #1d1f29;
+    --color-card-sub:  #0f1118;
+    --color-blue-bg:   color-mix(in srgb, #fcd535 14%, transparent);
+    --color-blue-soft: color-mix(in srgb, #fcd535 22%, transparent);
+    --color-blue-fg:   #fcd535;
+    color: var(--color-ink);
+}
+.crypto-shell {
+    background:
+        radial-gradient(1200px 400px at 100% -100px, color-mix(in srgb, #fcd535 5%, transparent), transparent 60%),
+        var(--color-bg);
+}
+
+/* Status pill */
+.status-pill.is-on {
+    color: #03a66d;
+    background: color-mix(in srgb, #03a66d 14%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, #03a66d 35%, transparent);
+}
+.status-pill.is-off {
+    color: var(--color-faint);
+    background: var(--color-bg-hi);
+}
+
+/* Tab underline */
+.cb-tab::after {
+    content: "";
+    position: absolute;
+    left: 12px; right: 12px; bottom: -1px;
+    height: 2px; border-radius: 2px 2px 0 0;
+    background: transparent;
+    transition: background .15s ease;
+}
+.cb-tab.is-active::after { background: var(--color-accent); }
+
 .animate-status-pulse { animation: cb-pulse 1.4s ease-in-out infinite; }
 @keyframes cb-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 </style>

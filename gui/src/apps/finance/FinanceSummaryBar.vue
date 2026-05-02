@@ -12,37 +12,37 @@ defineEmits(['prev-month', 'next-month']);
 </script>
 
 <template>
-  <section class="finance-summary mb-3 px-4 py-4">
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="inline-flex items-center gap-2">
-        <button
-          class="finance-round-btn grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 text-muted transition-colors hover:text-ink"
+  <section class="mb-3">
+    <!-- Month nav -->
+    <div class="mb-3 flex flex-wrap items-center gap-3">
+      <div class="inline-flex items-center gap-1 rounded-full bg-card-sub p-1">
+        <button class="grid h-7 w-7 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg hover:text-ink"
           @click="$emit('prev-month')">
-          <span class="msi sm">chevron_left</span>
+          <span class="msi" style="font-size:16px">chevron_left</span>
         </button>
-        <div class="finance-month min-w-[128px] text-center font-mono text-[15px] font-semibold text-ink">{{ displayMonth }}</div>
-        <button
-          class="finance-round-btn grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 text-muted transition-colors hover:text-ink disabled:cursor-default disabled:opacity-35"
+        <div class="min-w-[100px] text-center font-mono text-[13px] font-semibold text-ink">{{ displayMonth }}</div>
+        <button class="grid h-7 w-7 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg hover:text-ink disabled:cursor-default disabled:opacity-35"
           :disabled="isCurrentMonth"
           @click="$emit('next-month')">
-          <span class="msi sm">chevron_right</span>
+          <span class="msi" style="font-size:16px">chevron_right</span>
         </button>
       </div>
       <div class="text-[12px] text-faint">__T_FINANCE_MONTH_HINT__</div>
     </div>
 
+    <!-- Stats: 3 cards with left accent bar -->
     <div class="grid grid-cols-3 gap-2 max-md:grid-cols-1">
-      <div class="finance-stat finance-stat-income px-4 py-3">
-        <div class="text-[11px] font-medium uppercase tracking-wider text-faint">__T_FINANCE_INCOME__</div>
-        <div class="mt-1 font-mono text-[22px] font-semibold text-good">+ {{ fmtAmt(totalIncome) }}</div>
+      <div class="stat stat-income rounded-[14px] bg-card px-4 py-3">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint">__T_FINANCE_INCOME__</div>
+        <div class="mt-1 font-mono text-[22px] font-semibold leading-tight text-good">+ {{ fmtAmt(totalIncome) }}</div>
       </div>
-      <div class="finance-stat finance-stat-expense px-4 py-3">
-        <div class="text-[11px] font-medium uppercase tracking-wider text-faint">__T_FINANCE_EXPENSE__</div>
-        <div class="mt-1 font-mono text-[22px] font-semibold text-bad">- {{ fmtAmt(totalExpense) }}</div>
+      <div class="stat stat-expense rounded-[14px] bg-card px-4 py-3">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint">__T_FINANCE_EXPENSE__</div>
+        <div class="mt-1 font-mono text-[22px] font-semibold leading-tight text-bad">- {{ fmtAmt(totalExpense) }}</div>
       </div>
-      <div class="finance-stat finance-stat-balance px-4 py-3">
-        <div class="text-[11px] font-medium uppercase tracking-wider text-faint">__T_FINANCE_BALANCE__</div>
-        <div class="mt-1 font-mono text-[22px] font-semibold" :class="endingBalance >= 0 ? 'text-ink' : 'text-bad'">
+      <div class="stat stat-balance rounded-[14px] bg-card px-4 py-3">
+        <div class="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint">__T_FINANCE_BALANCE__</div>
+        <div class="mt-1 font-mono text-[22px] font-semibold leading-tight" :class="endingBalance >= 0 ? 'text-ink' : 'text-bad'">
           {{ fmtAmt(endingBalance) }}
         </div>
       </div>
@@ -51,64 +51,17 @@ defineEmits(['prev-month', 'next-month']);
 </template>
 
 <style scoped>
-.finance-summary {
+.stat {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-line) 82%, white);
-  border-radius: 18px;
-  background:
-    linear-gradient(140deg, color-mix(in srgb, white 46%, transparent), transparent 38%),
-    linear-gradient(180deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 72%, var(--color-bg)));
-  box-shadow:
-    0 18px 45px color-mix(in srgb, var(--color-ink) 9%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 60%, transparent);
 }
-.finance-summary::after {
+.stat::before {
   content: "";
   position: absolute;
-  inset: 10px;
-  pointer-events: none;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, white 38%, transparent);
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
 }
-.finance-round-btn,
-.finance-month,
-.finance-stat {
-  position: relative;
-  z-index: 1;
-}
-.finance-round-btn {
-  background: linear-gradient(145deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 88%, white));
-  box-shadow:
-    0 7px 14px color-mix(in srgb, var(--color-ink) 8%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 58%, transparent);
-}
-.finance-round-btn:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 6px color-mix(in srgb, var(--color-ink) 12%, transparent);
-}
-.finance-month {
-  border-radius: 999px;
-  padding: 7px 14px;
-  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
-  box-shadow: inset 0 2px 8px color-mix(in srgb, var(--color-ink) 7%, transparent);
-}
-.finance-stat {
-  border-radius: 16px;
-  background:
-    linear-gradient(150deg, color-mix(in srgb, white 45%, transparent), transparent 48%),
-    var(--color-bg);
-  box-shadow:
-    0 12px 24px color-mix(in srgb, var(--color-ink) 7%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 54%, transparent);
-}
-.finance-stat-income {
-  border: 1px solid color-mix(in srgb, var(--color-good) 24%, var(--color-line));
-}
-.finance-stat-expense {
-  border: 1px solid color-mix(in srgb, var(--color-bad) 22%, var(--color-line));
-}
-.finance-stat-balance {
-  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-line));
-}
+.stat-income::before  { background: var(--color-good); }
+.stat-expense::before { background: var(--color-bad); }
+.stat-balance::before { background: var(--color-accent); }
 </style>

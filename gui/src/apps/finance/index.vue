@@ -220,25 +220,23 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="finance-page flex h-full flex-col">
-    <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
-      <div>
-        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_FINANCE_TITLE__</h1>
-        <div class="mt-1 text-[12px] text-faint">__T_FINANCE_SUBTITLE__</div>
-      </div>
-      <div class="flex items-center gap-2">
+  <div class="flex h-full flex-col bg-bg">
+    <header class="mx-auto flex w-full max-w-[860px] flex-none items-baseline gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+      <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_FINANCE_TITLE__</h1>
+      <span class="text-[12.5px] text-faint">__T_FINANCE_SUBTITLE__</span>
+      <div class="ml-auto flex items-center gap-2">
         <button
-          class="finance-refresh inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:text-ink disabled:opacity-60"
+          class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-default disabled:opacity-60"
           :disabled="loading"
-          @click="fetchData">
-          <span class="msi sm" :class="{ spin: loading }">refresh</span>
-          <span>__T_COMMON_REFRESH__</span>
+          @click="fetchData"
+          :title="'__T_COMMON_REFRESH__'">
+          <span class="msi" :class="{ 'animate-spin': loading }" style="font-size:18px">refresh</span>
         </button>
         <AppLauncher />
       </div>
     </header>
 
-    <div class="min-h-0 flex-1 overflow-auto px-8 pb-12 max-md:px-3">
+    <div class="mx-auto w-full max-w-[860px] min-h-0 flex-1 overflow-auto px-8 pb-12 max-md:px-3">
       <FinanceSummaryBar
         :display-month="displayMonth"
         :is-current-month="isCurrentMonth"
@@ -275,22 +273,6 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-.finance-page {
-  background:
-    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--color-good) 13%, transparent), transparent 30%),
-    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 34%),
-    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 72%, var(--color-bg)), var(--color-bg) 46%);
-}
-.finance-refresh {
-  background: linear-gradient(145deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 88%, white));
-  box-shadow:
-    0 10px 22px color-mix(in srgb, var(--color-ink) 8%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
-}
-.finance-refresh:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 7px color-mix(in srgb, var(--color-ink) 10%, transparent);
-}
-.spin { animation: finance-spin 1s linear infinite; }
+.animate-spin { animation: finance-spin 1s linear infinite; }
 @keyframes finance-spin { to { transform: rotate(360deg); } }
 </style>

@@ -7,14 +7,18 @@
   "taskdetail_role_user": "User",
   "taskdetail_role_tool_result": "Tool Result",
   "taskdetail_role_unknown": "Unknown",
+
   "tasks_title": "Tasks",
+  "tasks_subtitle": "All tasks started by agents and apps",
   "tasks_refresh": "Refresh",
   "tasks_load_fail": "Failed to load",
+
   "tasks_status_pending_short": "Pending",
   "tasks_status_running": "Running",
   "tasks_status_done_short": "Done",
   "tasks_status_error": "Error",
   "tasks_status_stopped_short": "Stopped",
+
   "tasks_loading": "Loading...",
   "tasks_empty_plain": "No tasks yet",
   "tasks_empty_hint": "Tasks started by Agent and apps will appear here",
@@ -27,5 +31,16 @@
   "tasks_tool_call": "Call tool",
   "tasks_role_model": "Model",
   "tasks_role_system": "System",
-  "tasks_role_message": "Message"
+  "tasks_role_message": "Message",
+
+  "tasks_section_active": "Running",
+  "tasks_section_recent": "Recent",
+  "tasks_filter_all": "All",
+  "tasks_filter_active": "Active",
+  "tasks_filter_failed": "Failed",
+  "tasks_search_placeholder": "Search task / app / prompt…",
+  "tasks_search_no_match": "No tasks match",
+  "tasks_clear_search": "Clear",
+  "tasks_no_title": "(untitled)",
+  "tasks_count_suffix": "·  {count} total"
 }

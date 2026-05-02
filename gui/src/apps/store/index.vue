@@ -53,7 +53,7 @@ const categories = computed(() => {
         counts.set(key, (counts.get(key) || 0) + 1);
     }
     return [
-        { key: 'all', label: '__T_CRYPTOBOT_ORDER_TYPE_ALL__', count: items.value.length },
+        { key: 'all', label: '__T_STORE_CATEGORY_ALL__', count: items.value.length },
         ...Array.from(counts.entries())
             .sort((a, b) => a[0].localeCompare(b[0]))
             .map(([key, count]) => ({ key, label: CATEGORY_LABELS[key] || key, count }))
@@ -103,40 +103,24 @@ watchEffect(() => {
 
 <template>
     <div class="flex h-full flex-col bg-bg">
-        <header class="flex flex-none items-end justify-between gap-4 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
-            <div>
-                <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_STORE_TITLE__</h1>
-                <div class="mt-1 text-[12px] text-faint">__T_STORE_SUBTITLE__</div>
-            </div>
-            <div class="flex items-center gap-2">
+        <header class="mx-auto flex w-full max-w-[1200px] flex-none items-baseline gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+            <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_STORE_TITLE__</h1>
+            <span class="text-[12.5px] text-faint">__T_STORE_SUBTITLE__</span>
+            <span class="text-[12.5px] text-faint">·  {{ stats.total }}</span>
+            <div class="ml-auto flex items-center gap-2">
                 <button
-                    class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:opacity-60"
+                    class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-default disabled:opacity-60"
                     :disabled="loading"
-                    @click="loadCatalog">
-                    <span class="msi sm" :class="{ spin: loading }">refresh</span>
-                    <span>__T_COMMON_REFRESH__</span>
+                    @click="loadCatalog"
+                    :title="'__T_COMMON_REFRESH__'">
+                    <span class="msi" :class="{ spin: loading }" style="font-size:18px">refresh</span>
                 </button>
                 <AppLauncher />
             </div>
         </header>
 
-        <div class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-4 px-8 pb-10 max-lg:grid-cols-1 max-md:px-3">
+        <div class="mx-auto w-full max-w-[1200px] grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-4 px-8 pb-10 max-lg:grid-cols-1 max-md:px-3">
             <main class="min-h-0 overflow-auto">
-                <section class="mb-4 grid grid-cols-3 gap-2 max-sm:grid-cols-1">
-                    <div class="rounded-lg border border-line bg-bg-elev px-4 py-3">
-                        <div class="text-[11px] font-medium uppercase text-faint">__T_STORE_TOTAL__</div>
-                        <div class="mt-1 text-[24px] font-semibold text-ink">{{ stats.total }}</div>
-                    </div>
-                    <div class="rounded-lg border border-line bg-bg-elev px-4 py-3">
-                        <div class="text-[11px] font-medium uppercase text-faint">__T_STORE_CATEGORIES__</div>
-                        <div class="mt-1 text-[24px] font-semibold text-ink">{{ stats.categories }}</div>
-                    </div>
-                    <div class="rounded-lg border border-line bg-bg-elev px-4 py-3">
-                        <div class="text-[11px] font-medium uppercase text-faint">__T_STORE_PACKAGES__</div>
-                        <div class="mt-1 text-[24px] font-semibold text-ink">{{ stats.packaged }}</div>
-                    </div>
-                </section>
-
                 <section class="mb-3 flex flex-wrap items-center gap-2">
                     <label class="relative min-w-[220px] flex-1">
                         <span class="msi sm absolute left-3 top-1/2 -translate-y-1/2 text-faint">search</span>
@@ -200,7 +184,8 @@ watchEffect(() => {
                 </ul>
             </main>
 
-            <aside class="min-h-0 overflow-auto rounded-lg border border-line bg-bg-elev px-4 py-4 max-lg:hidden">
+            <aside class="min-h-0 overflow-auto rounded-lg border border-line bg-bg-elev px-4 py-4"
+                :class="{ 'max-lg:hidden': !selected }">
                 <div v-if="!selected" class="flex h-full min-h-[260px] flex-col items-center justify-center gap-2 text-center text-muted">
                     <span class="msi" style="font-size:34px;color:var(--color-faint)">apps</span>
                     <div class="text-[13px]">__T_STORE_SELECT_HINT__</div>
@@ -210,10 +195,14 @@ watchEffect(() => {
                         <span class="grid h-11 w-11 flex-none place-items-center rounded-lg bg-bg-hi text-ink">
                             <span class="msi">{{ iconFor(selected) }}</span>
                         </span>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <h2 class="m-0 truncate text-[18px] font-semibold text-ink">{{ selected.title || selected.name || selected.id }}</h2>
                             <div class="mt-1 font-mono text-[11px] text-faint">{{ selected.id }}</div>
                         </div>
+                        <button class="grid h-7 w-7 flex-none cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:text-ink lg:hidden"
+                            @click="selected = null">
+                            <span class="msi" style="font-size:16px">close</span>
+                        </button>
                     </div>
 
                     <p class="mt-4 whitespace-pre-wrap text-[13px] leading-[1.65] text-muted">{{ selected.description || selected.summary || selected.id }}</p>

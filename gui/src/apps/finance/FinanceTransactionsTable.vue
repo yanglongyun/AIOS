@@ -140,56 +140,40 @@ const amountText = (row) => {
 <style scoped>
 .finance-ledger {
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-line) 86%, white);
-  border-radius: 18px;
-  background:
-    linear-gradient(150deg, color-mix(in srgb, white 34%, transparent), transparent 42%),
-    var(--color-bg-elev);
-  box-shadow:
-    0 16px 38px color-mix(in srgb, var(--color-ink) 8%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 52%, transparent);
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-bg);
 }
 .finance-ledger-head {
-  border-bottom: 1px solid color-mix(in srgb, var(--color-line) 72%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 76%, transparent), transparent);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-card-sub);
 }
 .finance-ledger-body {
-  padding: 8px;
-}
-.finance-day {
-  overflow: hidden;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, white 42%, transparent),
-    0 8px 18px color-mix(in srgb, var(--color-ink) 5%, transparent);
+  padding: 4px;
 }
 .finance-day + .finance-day {
-  margin-top: 8px;
+  border-top: 1px solid var(--color-line);
+  margin-top: 4px;
+  padding-top: 4px;
 }
 .finance-day-head {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--color-bg-hi) 72%, transparent), color-mix(in srgb, var(--color-bg) 88%, transparent));
+  border-radius: 8px;
+  background: transparent;
 }
 .finance-row {
-  background: color-mix(in srgb, var(--color-bg-elev) 70%, transparent);
+  border-radius: 10px;
 }
 .finance-row:hover {
-  background: color-mix(in srgb, var(--color-bg-hi) 72%, transparent);
+  background: var(--color-bg-hi);
 }
 .finance-row-icon {
-  background: linear-gradient(145deg, var(--color-bg-elev), color-mix(in srgb, var(--color-bg-hi) 86%, white));
-  box-shadow:
-    0 7px 14px color-mix(in srgb, var(--color-ink) 7%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 52%, transparent);
+  background: transparent;
 }
-.finance-row-icon:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 6px color-mix(in srgb, var(--color-ink) 12%, transparent);
+.finance-row-icon:hover {
+  background: var(--color-bg);
 }
 .finance-edit {
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--color-bg) 90%, var(--color-bg-hi));
-  box-shadow: inset 0 2px 7px color-mix(in srgb, var(--color-ink) 8%, transparent);
+  border-radius: 8px;
+  background: var(--color-bg-hi);
 }
 </style>

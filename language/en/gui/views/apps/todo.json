@@ -1,0 +1,54 @@
+{
+  "todo_title": "Todos",
+  "todo_subtitle": "let AI finish them for you",
+
+  "todo_composer_placeholder": "Write something to get done — press Enter to hand it to AI",
+  "todo_composer_submit": "Add",
+  "todo_composer_hint": "Shift+Enter for newline",
+
+  "todo_loading": "Loading…",
+  "todo_empty_title": "No todos yet",
+  "todo_empty_hint": "Try one of these — press Enter and AI takes over:",
+  "todo_empty_example_1": "Sort this week's email, mark the ones I need to reply to",
+  "todo_empty_example_2": "Summarize these meeting notes into 5 bullet points",
+  "todo_empty_example_3": "Pull invoice amounts out of this PDF",
+
+  "todo_group_running": "In progress",
+  "todo_group_pending": "Todo",
+  "todo_group_done": "Done",
+  "todo_group_show_done": "Show done ({count})",
+  "todo_group_hide_done": "Hide done",
+
+  "todo_status_pending": "Queued",
+  "todo_status_running": "AI working",
+  "todo_status_done": "AI done",
+  "todo_status_aborted": "Stopped",
+  "todo_status_error": "Failed",
+
+  "todo_action_run": "Run",
+  "todo_action_run_again": "Run again",
+  "todo_action_stop": "Stop",
+  "todo_action_pin": "Pin",
+  "todo_action_unpin": "Unpin",
+  "todo_action_remove": "Remove",
+  "todo_action_complete": "Complete",
+  "todo_action_completed": "Completed",
+  "todo_action_pinned": "Pinned",
+  "todo_action_delete": "Delete",
+
+  "todo_back": "Back",
+  "todo_section_note": "Notes",
+  "todo_note_placeholder": "Context, goals, constraints, desired output format…",
+
+  "todo_section_result": "AI output",
+  "todo_result_empty": "No AI run yet. Tap \"Run\" above.",
+  "todo_result_running": "AI is working — output will appear here.",
+  "todo_result_log": "Work log",
+  "todo_result_log_count": "{count} messages",
+
+  "todo_role_assistant": "AI",
+  "todo_role_tool": "Tool result",
+  "todo_role_user": "Prompt",
+  "todo_role_system": "System",
+  "todo_role_tool_call": "calling {name}"
+}

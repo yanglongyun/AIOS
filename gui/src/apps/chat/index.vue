@@ -35,6 +35,8 @@
           </button>
         </div>
       </div>
+
+      <AppLauncher />
     </header>
 
     <ChatCore
@@ -54,12 +56,15 @@
       <div>
         <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_APP_CHAT__</h1>
       </div>
-      <button
-        class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink"
-        @click="newChat">
-        <span class="msi sm">edit_square</span>
-        <span>__T_CHAT_NEW_CONVERSATION__</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink"
+          @click="newChat">
+          <span class="msi sm">edit_square</span>
+          <span>__T_CHAT_NEW_CONVERSATION__</span>
+        </button>
+        <AppLauncher />
+      </div>
     </header>
 
     <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
@@ -72,6 +77,7 @@
 </template>
 
 <script setup>
+import AppLauncher from '@/components/AppLauncher.vue';
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import HistoryPanel from './History.vue';
 import ChatCore from './chat.vue';

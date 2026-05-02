@@ -92,7 +92,7 @@ function setIcon(emoji) {
         @input="emit('save', note.id, { title: $event.target.value, _local: true })"
         @blur="(e) => emit('save', note.id, { title: e.target.value })"
         placeholder="__T_NOTEBOOK_TITLE_PLACEHOLDER__"
-        class="mt-2 w-full border-0 bg-transparent py-1 text-[40px] font-bold leading-tight tracking-tight text-ink outline-none placeholder:text-hint" />
+        class="mt-2 w-full border-0 bg-transparent py-1 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink outline-none placeholder:text-hint max-md:text-[24px]" />
 
       <!-- Access -->
       <div class="mt-3 flex items-center gap-2 pb-2">

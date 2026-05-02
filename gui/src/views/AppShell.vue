@@ -1,39 +1,40 @@
 <template>
   <div class="stage">
-    <AppTopbar />
-    <div class="body">
-      <AppDrawer />
-      <main class="main">
-        <Suspense>
-          <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" />
-        </Suspense>
-      </main>
-    </div>
+    <main class="main">
+      <Suspense>
+        <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" />
+      </Suspense>
+    </main>
     <ConnectionGate />
     <ToastHost />
     <ReloadDialog />
+    <QuickChat />
   </div>
 </template>
 
 <script setup>
 import { ref, shallowRef, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import AppTopbar from '../components/AppTopbar.vue';
-import AppDrawer from '../components/AppDrawer.vue';
 import ConnectionGate from '../components/ConnectionGate.vue';
 import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
+import QuickChat from '../components/QuickChat.vue';
 import { apps, getApp } from '../apps.js';
 import { useAuthStore } from '@/stores/auth';
+import { useQuickChatStore } from '@/stores/quickChat';
 
 const route = useRoute();
 const auth = useAuthStore();
+const qc = useQuickChatStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
 
 async function loadApp(id) {
   const app = getApp(id);
   if (!app) return;
+  // 切到新 app 时先清掉上一个 app 注入的 quick-chat 上下文,新 app 的
+  // setContext 会在挂载/视图变化时重新填。
+  qc.setContext(null);
   const mod = await app.load();
   currentComponent.value = mod?.default || mod;
   activeAppId.value = id;
@@ -63,31 +64,12 @@ onMounted(() => {
   background: var(--color-bg);
   color: var(--color-ink);
 }
-.body {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-areas: "rail main";
-  grid-template-columns: auto 1fr;
-}
 .main {
-  grid-area: main;
+  flex: 1;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-/* ===== Mobile: topbar is fixed; reserve top space for main ===== */
-@media (max-width: 768px) {
-  .stage {
-    /* topbar is position:fixed on mobile, so push body down */
-    padding-top: calc(52px + env(safe-area-inset-top));
-  }
-  .body {
-    /* rail is position:fixed and slides over main; main fills viewport */
-    grid-template-columns: 0 1fr;
-  }
 }
 </style>

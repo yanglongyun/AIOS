@@ -16,7 +16,7 @@ const folderNoteCount = (fid) => props.notes.filter((n) => n.folderId === fid).l
 
 <template>
   <div class="mx-auto w-full min-w-0 max-w-[820px] px-12 pt-10 pb-20 max-md:px-5 max-md:pt-6 max-md:pb-10">
-    <h1 class="text-[40px] font-bold leading-tight tracking-tight text-ink">__T_NOTEBOOK_TITLE__</h1>
+    <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_NOTEBOOK_TITLE__</h1>
 
     <div v-if="error" class="mt-4 text-sm text-bad">{{ error }}</div>
 

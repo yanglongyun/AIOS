@@ -1,6 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { ref, computed, onMounted, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 import ItemList from './components/ItemList.vue';
 import FolderView from './components/FolderView.vue';
 import NoteEditor from './components/NoteEditor.vue';
@@ -157,10 +161,42 @@ watch(routeNoteId, () => {
 });
 
 onMounted(fetchAll);
+
+watchEffect(() => {
+  if (view.value === 'edit' && currentNote.value) {
+    const n = currentNote.value;
+    qc.setContext({
+      scope: `notebook:edit:${n.id}`,
+      label: '__T_QC_LABEL_NOTEBOOK_NOTE__'.replace('{title}', n.title || '__T_QC_UNTITLED__'),
+      snapshot: [
+        n.title ? '__T_QC_FIELD_TITLE__'.replace('{value}', n.title) : null,
+        n.content ? '__T_QC_FIELD_NOTE_EXCERPT__'.replace('{value}', String(n.content).slice(0, 500)) : null,
+      ].filter(Boolean).join('\n') || '__T_QC_EMPTY_NOTE__',
+    });
+  } else if (view.value === 'folder' && currentFolder.value) {
+    const f = currentFolder.value;
+    qc.setContext({
+      scope: `notebook:folder:${f.id}`,
+      label: '__T_QC_LABEL_NOTEBOOK_FOLDER__'.replace('{name}', f.name || '__T_QC_UNNAMED__'),
+      snapshot: (f.name || '__T_QC_UNNAMED__')
+        + '\n'
+        + '__T_QC_FIELD_NOTE_COUNT__'.replace('{count}', folderNotes.value.length),
+    });
+  } else {
+    qc.setContext({
+      scope: 'notebook:list',
+      label: '__T_QC_LABEL_NOTEBOOK_ROOT__',
+      snapshot: '__T_QC_FIELD_FOLDER_SUMMARY__'
+        .replace('{folders}', folders.value.length)
+        .replace('{notes}', notes.value.length),
+    });
+  }
+});
 </script>
 
 <template>
-  <div class="flex h-full bg-bg">
+  <div class="relative flex h-full bg-bg">
+    <AppLauncher class="absolute right-3 top-3 z-30" />
     <ItemList v-if="view === 'list'"
       :folders="folders" :notes="notes" :loading="loading" :error="error"
       @create-note="createNote(null)"

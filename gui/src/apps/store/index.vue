@@ -1,5 +1,9 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { computed, onMounted, ref, watchEffect } from 'vue';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 
 const CATALOG_URL = 'https://iimos.ai/apps/catalog.json';
 
@@ -77,6 +81,24 @@ const categoryLabel = (key) => CATEGORY_LABELS[key] || key || 'tools';
 const packageState = (item) => item.packageUrl || item.packageKey ? '__T_STORE_PACKAGE_READY__' : '__T_STORE_PACKAGE_PENDING__';
 
 onMounted(loadCatalog);
+
+watchEffect(() => {
+    const sel = selected.value;
+    const lines = [
+        '__T_QC_FIELD_TOTAL_APPS__'.replace('{count}', items.value.length),
+        category.value !== 'all' ? '__T_QC_FIELD_CATEGORY_FILTER__'.replace('{value}', categoryLabel(category.value)) : null,
+        query.value ? '__T_QC_FIELD_SEARCH__'.replace('{value}', query.value) : null,
+        sel ? '__T_QC_FIELD_SELECTED__'.replace('{name}', sel.title || sel.id) : null,
+        sel?.description ? '__T_QC_FIELD_INTRO__'.replace('{value}', String(sel.description).slice(0, 200)) : null,
+    ].filter(Boolean);
+    qc.setContext({
+        scope: `store:${sel?.id || category.value || 'list'}`,
+        label: sel
+            ? '__T_QC_LABEL_STORE_APP__'.replace('{name}', sel.title || sel.id)
+            : '__T_QC_LABEL_STORE_ROOT__',
+        snapshot: lines.join('\n'),
+    });
+});
 </script>
 
 <template>
@@ -86,13 +108,16 @@ onMounted(loadCatalog);
                 <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_STORE_TITLE__</h1>
                 <div class="mt-1 text-[12px] text-faint">__T_STORE_SUBTITLE__</div>
             </div>
-            <button
-                class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:opacity-60"
-                :disabled="loading"
-                @click="loadCatalog">
-                <span class="msi sm" :class="{ spin: loading }">refresh</span>
-                <span>__T_COMMON_REFRESH__</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button
+                    class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:opacity-60"
+                    :disabled="loading"
+                    @click="loadCatalog">
+                    <span class="msi sm" :class="{ spin: loading }">refresh</span>
+                    <span>__T_COMMON_REFRESH__</span>
+                </button>
+                <AppLauncher />
+            </div>
         </header>
 
         <div class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_320px] gap-4 px-8 pb-10 max-lg:grid-cols-1 max-md:px-3">

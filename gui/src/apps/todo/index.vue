@@ -1,5 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch, watchEffect } from 'vue';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 import { useRoute, useRouter } from 'vue-router';
 import { marked } from 'marked';
 
@@ -213,6 +217,37 @@ watch(routeId, () => {
 
 const currentTodo = computed(() => routeId.value ? getTodo(routeId.value) : null);
 
+watchEffect(() => {
+    if (view.value === 'detail' && currentTodo.value) {
+        const t = currentTodo.value;
+        qc.setContext({
+            scope: `todo:detail:${t.id}`,
+            label: '__T_QC_LABEL_TODO_ITEM__'.replace('{title}', t.title || '__T_QC_UNTITLED__'),
+            snapshot: [
+                '__T_QC_FIELD_STATUS__'.replace('{value}', t.done ? '__T_QC_DONE__' : (liveStatusFor(t) || '__T_QC_PENDING__')),
+                t.title ? '__T_QC_FIELD_TITLE__'.replace('{value}', t.title) : null,
+                t.taskId ? '__T_QC_FIELD_RELATED_TASK__'.replace('{id}', t.taskId) : null,
+                t.detail ? '__T_QC_FIELD_REMARK__'.replace('{value}', String(t.detail).slice(0, 300)) : null,
+            ].filter(Boolean).join('\n'),
+        });
+    } else {
+        const undone = todos.value.filter(t => !t.done);
+        qc.setContext({
+            scope: 'todo:list',
+            label: '__T_QC_LABEL_TODO_ROOT__',
+            snapshot: [
+                '__T_QC_FIELD_COUNT_WITH_UNDONE__'
+                    .replace('{count}', todos.value.length)
+                    .replace('{undone}', undone.length),
+                undone.length
+                    ? '__T_QC_FIELD_UNDONE_LIST__'
+                        .replace('{list}', undone.slice(0, 10).map(t => '- ' + (t.title || '__T_QC_UNTITLED__')).join('\n'))
+                    : null,
+            ].filter(Boolean).join('\n'),
+        });
+    }
+});
+
 // ---- Helpers -----------------------------------------------------------
 const messageText = (msg) => msg?.content == null ? '' : String(msg.content);
 const toolCallName = (msg) => msg?.tool_calls?.[0]?.function?.name || 'tool';
@@ -228,6 +263,7 @@ const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: 
             <header class="flex flex-none items-baseline gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
                 <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">待办</h1>
                 <span class="text-[12.5px] text-faint">·  让 AI 帮你做完</span>
+                <AppLauncher class="ml-auto self-center" />
             </header>
 
             <div class="composer mx-8 mb-2 flex flex-none items-center gap-2 rounded-[14px] bg-card px-3 py-2 transition-colors max-md:mx-3">
@@ -324,6 +360,7 @@ const messageRoleLabel = (r) => ({ assistant: 'AI', tool: '工具结果', user: 
                     <span v-else class="msi" style="font-size:13px">{{ liveStatusFor(currentTodo) === 'done' ? 'check_circle' : (liveStatusFor(currentTodo) === 'error' ? 'error' : 'cancel') }}</span>
                     {{ statusMeta(liveStatusFor(currentTodo)).label }}
                 </span>
+                <AppLauncher />
             </header>
 
             <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-4 max-md:pb-10">

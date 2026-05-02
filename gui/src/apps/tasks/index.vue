@@ -1,7 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue';
 import { useTasksStore } from '@/stores/tasks';
+import { useQuickChatStore } from '@/stores/quickChat';
 import * as api from '@/utils/api';
+
+const qc = useQuickChatStore();
 
 const tasks = useTasksStore();
 
@@ -98,6 +102,40 @@ onUnmounted(() => {
     if (detailPoller) clearInterval(detailPoller);
 });
 
+watchEffect(() => {
+    if (selectedId.value && selected.value) {
+        const t = selected.value;
+        qc.setContext({
+            scope: `tasks:detail:${t.id}`,
+            label: '__T_QC_LABEL_TASKS_ITEM__'.replace('{title}', t.title || ('#' + t.id)),
+            snapshot: [
+                '__T_QC_FIELD_STATUS__'.replace('{value}', t.status || '?'),
+                t.app ? '__T_QC_FIELD_APP__'.replace('{value}', t.app) : null,
+                t.mode ? '__T_QC_FIELD_MODE__'.replace('{value}', t.mode) : null,
+                t.prompt ? '__T_QC_FIELD_PROMPT__'.replace('{value}', String(t.prompt).slice(0, 400)) : null,
+                t.error ? '__T_QC_FIELD_ERROR__'.replace('{value}', String(t.error).slice(0, 300)) : null,
+                t.response ? '__T_QC_FIELD_RESPONSE__'.replace('{value}', String(t.response).slice(0, 400)) : null,
+            ].filter(Boolean).join('\n'),
+        });
+    } else {
+        const list = tasks.tasks || [];
+        const running = list.filter(x => x.status === 'running' || x.status === 'pending');
+        qc.setContext({
+            scope: 'tasks:list',
+            label: '__T_QC_LABEL_TASKS_ROOT__',
+            snapshot: [
+                '__T_QC_FIELD_COUNT_WITH_RUNNING__'
+                    .replace('{count}', list.length)
+                    .replace('{running}', running.length),
+                running.length
+                    ? '__T_QC_FIELD_RUNNING_LIST__'
+                        .replace('{list}', running.slice(0, 5).map(t => '#' + t.id + ' ' + (t.title || '')).join(', '))
+                    : null,
+            ].filter(Boolean).join('\n'),
+        });
+    }
+});
+
 function toolCallName(msg) {
     return msg?.tool_calls?.[0]?.function?.name || 'tool';
 }
@@ -127,13 +165,16 @@ function messageRoleLabel(role) {
                 <span class="msi sm">arrow_back</span>
             </button>
             <span class="text-[12px] text-muted">__T_CRYPTOBOT_BACK__</span>
-            <button
-                v-if="selected && isActive(selected)"
-                class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-line-hi bg-transparent px-3 py-1 text-[12.5px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
-                @click="stopFromDetail">
-                <span class="msi sm">stop_circle</span>
-                <span>__T_CRYPTOBOT_STOP__</span>
-            </button>
+            <div class="ml-auto flex items-center gap-2">
+                <button
+                    v-if="selected && isActive(selected)"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-line-hi bg-transparent px-3 py-1 text-[12.5px] text-muted transition-colors hover:border-bad hover:bg-bg-hi hover:text-bad"
+                    @click="stopFromDetail">
+                    <span class="msi sm">stop_circle</span>
+                    <span>__T_CRYPTOBOT_STOP__</span>
+                </button>
+                <AppLauncher />
+            </div>
         </header>
 
         <div v-if="detailError" class="mx-8 mt-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-4"
@@ -235,14 +276,17 @@ function messageRoleLabel(role) {
     <div v-else class="flex h-full flex-col bg-bg">
         <header class="flex flex-none items-end justify-between gap-4 px-8 pb-5 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
             <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TASKS_TITLE__</h1>
-            <button
-                class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:enabled:bg-line-hi hover:enabled:text-ink disabled:cursor-default disabled:opacity-60"
-                :disabled="tasks.loading"
-                @click="tasks.fetch"
-                title="__T_COMMON_REFRESH__">
-                <span class="msi sm" :class="{ spin: tasks.loading }">refresh</span>
-                <span>__T_COMMON_REFRESH__</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button
+                    class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi py-2 pl-3 pr-3.5 text-[13px] font-medium text-muted transition-colors hover:enabled:bg-line-hi hover:enabled:text-ink disabled:cursor-default disabled:opacity-60"
+                    :disabled="tasks.loading"
+                    @click="tasks.fetch"
+                    title="__T_COMMON_REFRESH__">
+                    <span class="msi sm" :class="{ spin: tasks.loading }">refresh</span>
+                    <span>__T_COMMON_REFRESH__</span>
+                </button>
+                <AppLauncher />
+            </div>
         </header>
 
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">

@@ -2,7 +2,10 @@
   <div class="flex h-full flex-col bg-bg">
     <header class="flex-none border-b border-line pt-7 max-md:pt-5">
       <div class="mx-auto flex max-w-[720px] flex-col gap-4.5 px-8 max-md:px-4">
-        <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_SETTINGS_TITLE__</h1>
+        <div class="flex items-center justify-between gap-3">
+          <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_SETTINGS_TITLE__</h1>
+          <AppLauncher />
+        </div>
         <nav class="tabs flex items-stretch gap-1 -mx-8 overflow-x-auto px-8 max-md:-mx-4 max-md:px-4" role="tablist">
           <button
             v-for="tab in tabs"
@@ -28,7 +31,11 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, ref } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { computed, defineComponent, h, onMounted, ref, watchEffect } from 'vue';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
@@ -229,6 +236,14 @@ onMounted(async () => {
   loadProviderConfigs();
   await fetchProviders();
   await fetchSettings();
+});
+
+watchEffect(() => {
+  qc.setContext({
+    scope: `settings:${activeTab.value}`,
+    label: '__T_QC_LABEL_SETTINGS__'.replace('{tab}', currentTabLabel.value),
+    snapshot: '__T_QC_FIELD_ACTIVE_TAB__'.replace('{tab}', currentTabLabel.value),
+  });
 });
 </script>
 

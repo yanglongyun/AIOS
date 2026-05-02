@@ -13,6 +13,7 @@ export default defineConfig({
     alias: { "@": path.resolve(__dirname, "./src") }
   },
   server: {
+    host: true,
     // dev 模式允许任意 Host (ngrok / 局域网 IP / 自定义域名等都能直连),
     // 生产环境的鉴权由后端 9501 的 cookie/token 中间件兜底.
     allowedHosts: true,

@@ -142,6 +142,8 @@ const props = defineProps({
   intentRequest: { type: Object, default: null },
   contextLabel: { type: String, default: '' },
   contextScene: { type: String, default: 'chat' },
+  // 可选：每条 outgoing 消息前自动拼上的上下文文本(显示给用户的气泡仍只显示本人输入)
+  contextSnapshot: { type: String, default: '' },
   quickMessages: { type: Array, default: () => [] },
   autoOpenLast: { type: Boolean, default: true }
 });
@@ -377,7 +379,11 @@ const handleSend = async () => {
     return;
   }
 
-  const content = text || '__T_CHAT_ATTACHMENT_SUMMARY_PROMPT__';
+  const baseContent = text || '__T_CHAT_ATTACHMENT_SUMMARY_PROMPT__';
+  // 把当前应用上下文 (如果有) 作为引用块拼到发送给后端的内容前面;
+  // UI 上的用户气泡仍然只显示本人输入,避免噪音。
+  const preface = props.contextSnapshot ? `${props.contextSnapshot}\n\n---\n\n` : '';
+  const content = preface + baseContent;
   const outgoingAttachments = pendingFiles.value.map((f) => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
 
   ensureChatId(text).then((id) => {

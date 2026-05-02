@@ -1,5 +1,9 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 import { fmtTime } from './formatters';
 import AgentTab from './tabs/AgentTab.vue';
 import DecisionsTab from './tabs/DecisionsTab.vue';
@@ -278,6 +282,32 @@ onUnmounted(() => {
     if (posPoller) clearInterval(posPoller);
     if (marketPoller) clearInterval(marketPoller);
 });
+
+watchEffect(() => {
+    const sel = selectedDecision.value;
+    if (sel) {
+        qc.setContext({
+            scope: `cryptobot:decision:${sel.id}`,
+            label: '__T_QC_LABEL_CRYPTOBOT_DECISION__'.replace('{id}', sel.id),
+            snapshot: [
+                '__T_QC_FIELD_RESULT__'.replace('{value}', sel.ok ? '__T_QC_RESULT_OK__' : '__T_QC_RESULT_FAIL__'),
+                sel.task_id ? '__T_QC_FIELD_TASK_REF__'.replace('{id}', sel.task_id) : null,
+                sel.summary ? '__T_QC_FIELD_SUMMARY__'.replace('{value}', String(sel.summary).slice(0, 400)) : null,
+                sel.error ? '__T_QC_FIELD_ERROR__'.replace('{value}', String(sel.error).slice(0, 200)) : null,
+            ].filter(Boolean).join('\n'),
+        });
+        return;
+    }
+    qc.setContext({
+        scope: 'cryptobot:overview',
+        label: '__T_QC_LABEL_CRYPTOBOT_ROOT__',
+        snapshot: [
+            '__T_QC_FIELD_RUNNING__'.replace('{value}', status.state.running ? '__T_QC_YES__' : '__T_QC_NO__'),
+            '__T_QC_FIELD_DECISIONS__'.replace('{count}', decisions.value.length),
+            status.config?.goal ? '__T_QC_FIELD_GOAL__'.replace('{value}', status.config.goal) : null,
+        ].filter(Boolean).join('\n'),
+    });
+});
 </script>
 
 <template>
@@ -288,6 +318,7 @@ onUnmounted(() => {
                 <span class="msi sm">arrow_back</span>
             </button>
             <span class="text-[12px] text-muted">__T_CRYPTOBOT_BACK__</span>
+            <AppLauncher class="ml-auto" />
         </header>
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-4 max-md:px-4 max-md:pb-10">
             <div class="mb-3 flex items-center gap-2">
@@ -311,9 +342,12 @@ onUnmounted(() => {
     <div v-else class="flex h-full flex-col bg-bg">
         <header class="flex flex-none items-end justify-between gap-4 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_CRYPTOBOT_TITLE__</h1>
-            <div class="flex items-center gap-2 text-[11.5px]">
-                <span class="h-1.5 w-1.5 rounded-full" :class="status.state.running ? 'animate-status-pulse bg-good' : 'bg-faint'"></span>
-                <span class="text-muted">{{ status.state.running ? '__T_CRYPTOBOT_RUNNING__' : '__T_CRYPTOBOT_STOPPED__' }}</span>
+            <div class="flex items-center gap-3 text-[11.5px]">
+                <div class="flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full" :class="status.state.running ? 'animate-status-pulse bg-good' : 'bg-faint'"></span>
+                    <span class="text-muted">{{ status.state.running ? '__T_CRYPTOBOT_RUNNING__' : '__T_CRYPTOBOT_STOPPED__' }}</span>
+                </div>
+                <AppLauncher />
             </div>
         </header>
 

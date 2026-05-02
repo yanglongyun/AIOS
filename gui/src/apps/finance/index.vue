@@ -1,6 +1,10 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import AppLauncher from '@/components/AppLauncher.vue';
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue';
 import { LOCALE_FULL } from '../../system/locale.js';
+import { useQuickChatStore } from '@/stores/quickChat';
+
+const qc = useQuickChatStore();
 import FinanceEntryForm from './FinanceEntryForm.vue';
 import FinanceSummaryBar from './FinanceSummaryBar.vue';
 import FinanceTransactionsTable from './FinanceTransactionsTable.vue';
@@ -198,6 +202,21 @@ const remove = async (id) => {
 };
 
 onMounted(fetchData);
+
+watchEffect(() => {
+  const lines = [
+    '__T_QC_FIELD_MONTH__'.replace('{value}', displayMonth.value),
+    '__T_QC_FIELD_INCOME__'.replace('{value}', fmtAmt(totalIncome.value)),
+    '__T_QC_FIELD_EXPENSE__'.replace('{value}', fmtAmt(totalExpense.value)),
+    '__T_QC_FIELD_BALANCE__'.replace('{value}', fmtAmt(endingBalance.value)),
+    '__T_QC_FIELD_ENTRIES__'.replace('{count}', items.value.length),
+  ];
+  qc.setContext({
+    scope: `finance:${month.value}`,
+    label: '__T_QC_LABEL_FINANCE__'.replace('{month}', displayMonth.value),
+    snapshot: lines.join('\n'),
+  });
+});
 </script>
 
 <template>
@@ -207,13 +226,16 @@ onMounted(fetchData);
         <h1 class="m-0 text-[30px] font-semibold leading-[1.15] text-ink max-md:text-[24px]">__T_FINANCE_TITLE__</h1>
         <div class="mt-1 text-[12px] text-faint">__T_FINANCE_SUBTITLE__</div>
       </div>
-      <button
-        class="finance-refresh inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:text-ink disabled:opacity-60"
-        :disabled="loading"
-        @click="fetchData">
-        <span class="msi sm" :class="{ spin: loading }">refresh</span>
-        <span>__T_COMMON_REFRESH__</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="finance-refresh inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-2 text-[13px] font-medium text-muted transition-colors hover:text-ink disabled:opacity-60"
+          :disabled="loading"
+          @click="fetchData">
+          <span class="msi sm" :class="{ spin: loading }">refresh</span>
+          <span>__T_COMMON_REFRESH__</span>
+        </button>
+        <AppLauncher />
+      </div>
     </header>
 
     <div class="min-h-0 flex-1 overflow-auto px-8 pb-12 max-md:px-3">

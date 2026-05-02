@@ -8,6 +8,8 @@ const initNotebookDatabase = () => {
     CREATE TABLE IF NOT EXISTS folders (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       name       TEXT    NOT NULL,
+      icon       TEXT,
+      cover      TEXT,
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT    DEFAULT (datetime('now')),
       updated_at TEXT    DEFAULT (datetime('now'))
@@ -17,10 +19,13 @@ const initNotebookDatabase = () => {
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       folder_id  INTEGER,
       title      TEXT    NOT NULL,
+      icon       TEXT,
+      cover      TEXT,
       summary    TEXT    NOT NULL DEFAULT '',
       content    TEXT    NOT NULL DEFAULT '',
       access     TEXT    NOT NULL DEFAULT 'none',
       pinned     INTEGER NOT NULL DEFAULT 0,
+      sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT    DEFAULT (datetime('now')),
       updated_at TEXT    DEFAULT (datetime('now')),
       FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL
@@ -49,6 +54,8 @@ const syncNoteContext = (note) => {
 const rowToFolder = (row) => row && ({
   id: row.id,
   name: row.name,
+  icon: row.icon || null,
+  cover: row.cover || null,
   sortOrder: row.sort_order,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -61,13 +68,22 @@ const getFolder = (id) => rowToFolder(
   db.prepare("SELECT * FROM folders WHERE id = ?").get(id)
 );
 
-const createFolder = ({ name }) => {
-  const info = db.prepare("INSERT INTO folders (name) VALUES (?)").run(name);
+const createFolder = ({ name, icon = null, cover = null }) => {
+  const info = db.prepare("INSERT INTO folders (name, icon, cover) VALUES (?, ?, ?)").run(name, icon, cover);
   return getFolder(info.lastInsertRowid);
 };
 
-const updateFolder = ({ id, name }) => {
-  db.prepare("UPDATE folders SET name = ?, updated_at = datetime('now') WHERE id = ?").run(name, id);
+const updateFolder = (patch) => {
+  const { id, ...rest } = patch;
+  const fields = [];
+  const values = [];
+  if (rest.name !== undefined) { fields.push("name = ?"); values.push(rest.name); }
+  if (rest.icon !== undefined) { fields.push("icon = ?"); values.push(rest.icon); }
+  if (rest.cover !== undefined) { fields.push("cover = ?"); values.push(rest.cover); }
+  if (!fields.length) return getFolder(id);
+  fields.push("updated_at = datetime('now')");
+  values.push(id);
+  db.prepare(`UPDATE folders SET ${fields.join(", ")} WHERE id = ?`).run(...values);
   return getFolder(id);
 };
 
@@ -85,10 +101,13 @@ const rowToNote = (row) => row && ({
   id: row.id,
   folderId: row.folder_id ?? null,
   title: row.title,
+  icon: row.icon || null,
+  cover: row.cover || null,
   summary: row.summary || "",
   content: row.content,
   access: row.access || "none",
   pinned: Boolean(row.pinned),
+  sortOrder: row.sort_order,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -96,11 +115,11 @@ const rowToNote = (row) => row && ({
 const listNotes = ({ folderId } = {}) => {
   if (folderId !== undefined && folderId !== null) {
     return db.prepare(
-      "SELECT * FROM notes WHERE folder_id = ? ORDER BY pinned DESC, updated_at DESC, id DESC"
+      "SELECT * FROM notes WHERE folder_id = ? ORDER BY pinned DESC, sort_order ASC, updated_at DESC, id DESC"
     ).all(folderId).map(rowToNote);
   }
   return db.prepare(
-    "SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC, id DESC"
+    "SELECT * FROM notes ORDER BY pinned DESC, sort_order ASC, updated_at DESC, id DESC"
   ).all().map(rowToNote);
 };
 
@@ -108,24 +127,27 @@ const getNote = (id) => rowToNote(
   db.prepare("SELECT * FROM notes WHERE id = ?").get(id)
 );
 
-const createNote = ({ title, summary = "", content = "", access = "none", folderId = null }) => {
+const createNote = ({ title, icon = null, cover = null, summary = "", content = "", access = "none", folderId = null }) => {
   const info = db.prepare(
-    "INSERT INTO notes (title, summary, content, access, folder_id) VALUES (?, ?, ?, ?, ?)"
-  ).run(title, summary, content, normalizeAccess(access), folderId);
+    "INSERT INTO notes (title, icon, cover, summary, content, access, folder_id) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(title, icon, cover, summary, content, normalizeAccess(access), folderId);
   const note = getNote(info.lastInsertRowid);
   syncNoteContext(note);
   return note;
 };
 
-const updateNote = ({ id, title, summary, content, access, pinned, folderId }) => {
+const updateNote = ({ id, title, icon, cover, summary, content, access, pinned, folderId, sortOrder }) => {
   const fields = [];
   const values = [];
   if (title !== undefined) { fields.push("title = ?"); values.push(title); }
+  if (icon !== undefined) { fields.push("icon = ?"); values.push(icon); }
+  if (cover !== undefined) { fields.push("cover = ?"); values.push(cover); }
   if (summary !== undefined) { fields.push("summary = ?"); values.push(summary); }
   if (content !== undefined) { fields.push("content = ?"); values.push(content); }
   if (access !== undefined) { fields.push("access = ?"); values.push(normalizeAccess(access)); }
   if (pinned !== undefined) { fields.push("pinned = ?"); values.push(pinned ? 1 : 0); }
   if (folderId !== undefined) { fields.push("folder_id = ?"); values.push(folderId); }
+  if (sortOrder !== undefined) { fields.push("sort_order = ?"); values.push(sortOrder); }
   if (!fields.length) return getNote(id);
   fields.push("updated_at = datetime('now')");
   values.push(id);

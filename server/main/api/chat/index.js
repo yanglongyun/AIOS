@@ -1,6 +1,6 @@
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
-import { hasChat, createChat } from "../../service/chat/conversations.js";
+import { hasChat, createChat, setChatPinned } from "../../service/chat/conversations.js";
 import { listChats } from "../../service/chat/list.js";
 import { getChatMessagesPaged } from "../../service/chat/messages.js";
 import { renameChat } from "../../service/chat/rename.js";
@@ -32,6 +32,11 @@ const handleChatApi = async (req, res, path, url) => {
     const body = await readBody(req);
     if (!body.conversationId) return json(res, { error: "Missing conversationId" }, 400);
     return json(res, deleteChat(body.conversationId));
+  }
+  if (path === "/api/chat/pin" && req.method === "POST") {
+    const body = await readBody(req);
+    if (!body.conversationId) return json(res, { error: "Missing conversationId" }, 400);
+    return json(res, setChatPinned(body.conversationId, body.pinned));
   }
   return json(res, { error: "API endpoint not found" }, 404);
 };

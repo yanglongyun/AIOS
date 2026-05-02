@@ -128,6 +128,8 @@
   "chat_rename_title": "Rename",
   "chat_rename_prompt": "Rename chat",
   "chat_delete_title": "Delete chat",
+  "chat_pin": "Pin",
+  "chat_unpin": "Unpin",
   "chat_empty_history": "No chat history",
   "chat_delete_confirm_short": "Confirm?",
   "chat_delete_confirm_click": "Click to confirm",

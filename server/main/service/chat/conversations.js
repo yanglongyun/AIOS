@@ -17,8 +17,16 @@ const setChatState = (conversationId, state = "idle") => {
   db.prepare("UPDATE chats SET state = ? WHERE conversation_id = ?").run(next, id);
   return { success: true, state: next };
 };
+const setChatPinned = (conversationId, pinned) => {
+  const id = String(conversationId || "").trim();
+  const next = pinned ? 1 : 0;
+  if (!id) return { success: false };
+  db.prepare("UPDATE chats SET pinned = ? WHERE conversation_id = ?").run(next, id);
+  return { success: true, pinned: Boolean(next) };
+};
 export {
   createChat,
   hasChat,
+  setChatPinned,
   setChatState
 };

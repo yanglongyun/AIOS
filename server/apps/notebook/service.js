@@ -8,6 +8,8 @@ const cleanAccess = (v) => {
   const access = String(v || "none").trim();
   return access === "summary" || access === "full" ? access : "none";
 };
+const cleanIcon = (v) => v === null ? null : String(v || "").slice(0, 8) || null;
+const cleanCover = (v) => v === null ? null : String(v || "").slice(0, 500) || null;
 
 // ---- Folders -----------------------------------------------------------
 
@@ -15,16 +17,20 @@ const listFolders = () => ({ items: repo.listFolders() });
 
 const createFolder = (body = {}) => {
   const name = cleanTitle(body.name) || "未命名";
-  return { item: repo.createFolder({ name }) };
+  const icon = cleanIcon(body.icon);
+  const cover = cleanCover(body.cover);
+  return { item: repo.createFolder({ name, icon, cover }) };
 };
 
 const updateFolder = (body = {}) => {
   const id = Number(body.id);
   if (!Number.isInteger(id) || id <= 0) return { error: "缺少合法 id", status: 400 };
   if (!repo.getFolder(id)) return { error: "笔记本不存在", status: 404 };
-  const name = cleanTitle(body.name);
-  if (!name) return { error: "名称不能为空", status: 400 };
-  return { item: repo.updateFolder({ id, name }) };
+  const patch = { id };
+  if (body.name !== undefined) patch.name = cleanTitle(body.name) || "未命名";
+  if (body.icon !== undefined) patch.icon = cleanIcon(body.icon);
+  if (body.cover !== undefined) patch.cover = cleanCover(body.cover);
+  return { item: repo.updateFolder(patch) };
 };
 
 const removeFolder = (body = {}) => {
@@ -42,11 +48,13 @@ const listNotes = (query = {}) => {
 
 const createNote = (body = {}) => {
   const title = cleanTitle(body.title) || "未命名";
+  const icon = cleanIcon(body.icon);
+  const cover = cleanCover(body.cover);
   const summary = cleanSummary(body.summary);
   const content = clean(body.content);
   const access = cleanAccess(body.access);
   const folderId = body.folderId != null ? Number(body.folderId) : null;
-  return { item: repo.createNote({ title, summary, content, access, folderId }) };
+  return { item: repo.createNote({ title, icon, cover, summary, content, access, folderId }) };
 };
 
 const updateNote = (body = {}) => {
@@ -55,6 +63,8 @@ const updateNote = (body = {}) => {
   if (!repo.getNote(id)) return { error: "笔记不存在", status: 404 };
   const patch = {};
   if (body.title !== undefined) patch.title = cleanTitle(body.title) || "未命名";
+  if (body.icon !== undefined) patch.icon = cleanIcon(body.icon);
+  if (body.cover !== undefined) patch.cover = cleanCover(body.cover);
   if (body.summary !== undefined) patch.summary = cleanSummary(body.summary);
   if (body.content !== undefined) patch.content = clean(body.content);
   if (body.access !== undefined) patch.access = cleanAccess(body.access);

@@ -1,15 +1,13 @@
 <template>
-  <div class="flex flex-col gap-0.5">
+  <div class="flex flex-col gap-1.5">
 
     <div v-if="!chats.length" class="py-12 text-center text-sm" :style="emptyStyle">__T_CHAT_EMPTY_HISTORY__</div>
 
     <div
       v-for="c in chats"
       :key="c.conversation_id"
-      class="group flex items-center gap-2 rounded-[9px] px-0 py-2.5 transition-colors"
-      :style="activeId === c.conversation_id ? activeRowStyle : ''"
-      @mouseover="activeId !== c.conversation_id && ($event.currentTarget.style.background = hoverBackground)"
-      @mouseleave="activeId !== c.conversation_id && ($event.currentTarget.style.background='transparent')"
+      class="chat-row group flex cursor-pointer items-start gap-3.5 rounded-[14px] bg-card px-4.5 py-3.5 transition-colors hover:bg-card-hi max-md:gap-2.5 max-md:rounded-xl max-md:px-3.5 max-md:py-3"
+      :class="{ active: activeId === c.conversation_id, pinned: c.pinned, running: c.state === 'running' }"
     >
       <template v-if="editingId === c.conversation_id">
         <input
@@ -24,19 +22,37 @@
       </template>
 
       <template v-else>
+        <span class="mt-[7px] h-2 w-2 flex-none rounded-full"
+          :class="{ 'animate-status-pulse': c.state === 'running' }"
+          :style="{ background: c.state === 'running' ? 'var(--color-good)' : (c.pinned ? 'var(--color-accent)' : 'var(--color-faint)') }"></span>
+
         <button @click="$emit('open-chat', c)" class="min-w-0 flex-1 cursor-pointer border-none bg-transparent p-0 text-left">
-          <div class="flex min-w-0 items-center gap-1.5">
-            <span v-if="c.state === 'running'" class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500"></span>
-            <div class="truncate text-[15px] font-medium" :style="activeId === c.conversation_id ? activeTitleStyle : titleStyle">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+          <div class="flex min-w-0 items-baseline gap-3 max-md:flex-wrap">
+            <div class="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">{{ c.title || c.conversation_id.slice(0, 8) }}</div>
+            <span class="flex-none text-[12px] text-faint">{{ fmtTime(c.created_at) }}</span>
+          </div>
+          <div class="mt-1 flex items-center gap-2 text-[12px] text-muted">
+            <span v-if="c.pinned" class="rounded-md border border-line bg-bg-elev px-1.5 py-px text-[11px] font-medium text-ink">
+              __T_CHAT_PIN__
+            </span>
+            <span v-if="c.state === 'running'" class="font-medium text-good">__T_CHAT_BUSY_PLACEHOLDER__</span>
           </div>
         </button>
 
         <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             v-if="deletingId !== c.conversation_id"
+            @click.stop="togglePinned(c)"
+            :title="c.pinned ? '__T_CHAT_UNPIN__' : '__T_CHAT_PIN__'"
+            class="flex h-7 w-7 items-center justify-center rounded-full border-none bg-transparent transition-all"
+            :class="{ 'text-accent': c.pinned }">
+            <span class="msi sm" :class="{ filled: c.pinned }">push_pin</span>
+          </button>
+          <button
+            v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
             title="__T_NOTEBOOK_RENAME__"
-            class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none bg-transparent transition-all"
+            class="flex h-7 w-7 items-center justify-center rounded-full border-none bg-transparent transition-all"
             :style="iconButtonStyle"
             @mouseover="$event.currentTarget.style.background=actionHoverBackground;$event.currentTarget.style.color=actionHoverColor"
             @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color=actionColor">
@@ -46,7 +62,7 @@
           <button
             @click.stop="confirmDelete(c.conversation_id)"
             :title="deletingId === c.conversation_id ? '__T_CHAT_DELETE_CONFIRM_CLICK__' : '__T_COMMON_DELETE__'"
-            class="flex h-6 w-6 items-center justify-center rounded-[6px] border-none transition-all"
+            class="flex h-7 w-7 items-center justify-center rounded-full border-none transition-all"
             :style="deletingId === c.conversation_id ? 'background:#dc2626;color:#fff' : iconButtonStyle"
             @mouseover="deletingId !== c.conversation_id && ($event.currentTarget.style.background='rgba(220,38,38,0.1)') && ($event.currentTarget.style.color='#dc2626')"
             @mouseleave="deletingId !== c.conversation_id && ($event.currentTarget.style.background='transparent') && ($event.currentTarget.style.color=actionColor)">
@@ -74,15 +90,18 @@ const editInput = ref(null);
 const deletingId = ref(null);
 let deleteTimer = null;
 const emptyStyle = 'color:rgba(0,0,0,0.35)';
-const activeRowStyle = 'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08)';
-const hoverBackground = 'rgba(0,0,0,0.04)';
 const inputStyle = 'border-color:rgba(160,120,80,0.3);background:#fff;color:#2a1f13';
-const titleStyle = 'color:var(--color-ink)';
-const activeTitleStyle = 'color:var(--color-ink)';
 const actionColor = 'rgba(0,0,0,0.3)';
 const actionHoverBackground = 'rgba(160,120,80,0.1)';
 const actionHoverColor = '#5c4332';
 const iconButtonStyle = `background:transparent;color:${actionColor}`;
+
+const fmtTime = (v) => {
+  if (!v) return '';
+  const d = new Date(String(v).replace(' ', 'T'));
+  if (Number.isNaN(d.getTime())) return String(v);
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
@@ -116,6 +135,14 @@ const confirmRename = (conversationId) => {
   editingId.value = null;
 };
 
+const togglePinned = (chat) => {
+  request('/api/chat/pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ conversationId: chat.conversation_id, pinned: !chat.pinned })
+  }).then(fetchChats).catch(() => {});
+};
+
 const confirmDelete = (conversationId) => {
   if (deletingId.value === conversationId) {
     clearTimeout(deleteTimer);
@@ -135,3 +162,24 @@ defineExpose({ fetchChats });
 
 onMounted(fetchChats);
 </script>
+
+<style scoped>
+.chat-row.active {
+  background: var(--color-card-hi);
+  box-shadow: inset 3px 0 0 0 var(--color-accent);
+}
+.chat-row.pinned {
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-card));
+}
+.chat-row.pinned:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-card));
+}
+.chat-row.running {
+  box-shadow: inset 3px 0 0 0 var(--color-good);
+}
+.chat-row.active.running {
+  box-shadow: inset 3px 0 0 0 var(--color-accent);
+}
+.animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
+@keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+</style>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import NoteList from './components/NoteList.vue';
+import ItemList from './components/ItemList.vue';
 import FolderView from './components/FolderView.vue';
 import NoteEditor from './components/NoteEditor.vue';
 
@@ -61,17 +61,19 @@ const folderNotes   = computed(() => routeFolderId.value ? notes.value.filter((n
 
 // ---- Folder actions ----------------------------------------------------
 
-const createFolder = async (name) => {
+const createFolder = async () => {
+  const name = prompt('__T_NOTEBOOK_FOLDER_PLACEHOLDER__');
+  if (!name?.trim()) return;
   try {
-    const data = await api('/folders/create', { method: 'POST', body: JSON.stringify({ name }) });
+    const data = await api('/folders/create', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
     folders.value.push(data.item);
   } catch (e) { error.value = e.message; }
 };
 
-const renameFolder = async (folder, name) => {
+const updateFolder = async (patch) => {
   try {
-    const data = await api('/folders/update', { method: 'POST', body: JSON.stringify({ id: folder.id, name }) });
-    const idx = folders.value.findIndex((x) => x.id === folder.id);
+    const data = await api('/folders/update', { method: 'POST', body: JSON.stringify(patch) });
+    const idx = folders.value.findIndex((x) => x.id === patch.id);
     if (idx >= 0) folders.value[idx] = data.item;
   } catch (e) { error.value = e.message; }
 };
@@ -93,18 +95,10 @@ const createNote = async (folderId) => {
   try {
     const data = await api('/create', {
       method: 'POST',
-      body: JSON.stringify({ title: '__T_NOTEBOOK_UNTITLED__', folderId }),
+      body: JSON.stringify({ title: '', folderId }),
     });
     notes.value.unshift(data.item);
     goEdit(data.item.id);
-  } catch (e) { error.value = e.message; }
-};
-
-const togglePinned = async (note) => {
-  try {
-    const data = await api('/update', { method: 'POST', body: JSON.stringify({ id: note.id, pinned: !note.pinned }) });
-    const idx = notes.value.findIndex((n) => n.id === note.id);
-    if (idx >= 0) notes.value[idx] = data.item;
   } catch (e) { error.value = e.message; }
 };
 
@@ -119,7 +113,12 @@ const removeNote = async (note) => {
 const saveField = async (id, patch) => {
   if (patch._local) {
     const idx = notes.value.findIndex((n) => n.id === id);
-    if (idx >= 0) notes.value[idx] = { ...notes.value[idx], content: patch.content };
+    if (idx >= 0) {
+      const updates = {};
+      if ('content' in patch) updates.content = patch.content;
+      if ('title' in patch) updates.title = patch.title;
+      notes.value[idx] = { ...notes.value[idx], ...updates };
+    }
     return;
   }
   saving.value = true;
@@ -162,30 +161,25 @@ onMounted(fetchAll);
 
 <template>
   <div class="flex h-full bg-bg">
-    <NoteList v-if="view === 'list'"
+    <ItemList v-if="view === 'list'"
       :folders="folders" :notes="notes" :loading="loading" :error="error"
-      @create-note="createNote"
-      @pin-note="togglePinned"
-      @remove-note="removeNote"
+      @create-note="createNote(null)"
       @open-note="(n) => goEdit(n.id)"
       @create-folder="createFolder"
-      @rename-folder="renameFolder"
-      @remove-folder="removeFolder"
       @open-folder="(f) => goFolder(f.id)" />
 
     <FolderView v-else-if="view === 'folder'"
       :folder="currentFolder" :notes="folderNotes"
       @back="goRoot"
       @create-note="createNote(routeFolderId)"
-      @pin-note="togglePinned"
-      @remove-note="removeNote"
-      @open-note="(n) => goEdit(n.id)" />
+      @open-note="(n) => goEdit(n.id)"
+      @update-folder="updateFolder"
+      @remove-folder="removeFolder" />
 
     <NoteEditor v-else-if="view === 'edit' && currentNote"
       :note="currentNote" :saving="saving" :polishing="polishing" :polish-result="polishResult"
       @back="currentNote.folderId ? goFolder(currentNote.folderId) : goRoot()"
       @save="saveField"
-      @pin="togglePinned"
       @remove="removeNote"
       @polish="doPolish"
       @apply-polish="applyPolish"

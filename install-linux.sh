@@ -81,6 +81,10 @@ sync_app() {
   [ -f "$APP_DIR/package.json" ] || fail "AIOS runtime package.json not found: $APP_DIR/package.json"
 }
 
+clear_language_bake_marker() {
+  rm -f "$APP_DIR/.aios/settings.json"
+}
+
 port_in_use() {
   port="$1"
   if command -v lsof >/dev/null 2>&1; then
@@ -138,6 +142,10 @@ build_app() {
   )
 }
 
+remove_runtime_language_sources() {
+  rm -rf "$APP_DIR/language"
+}
+
 start_services() {
   log "Starting AIOS server"
   (
@@ -192,8 +200,10 @@ main() {
   ensure_dirs
   update_repo
   sync_app
+  clear_language_bake_marker
   install_dependencies
   build_app
+  remove_runtime_language_sources
   stop_pid_file "$SERVER_PID_FILE" "server"
   stop_pid_file "$APPS_PID_FILE" "apps"
   verify_ports_free

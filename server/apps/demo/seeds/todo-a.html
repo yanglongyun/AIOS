@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>待办 · A Linear 风</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0a0a0b;
+    --bg-2:      #131316;
+    --bg-3:      #1c1c20;
+    --line:      #26262b;
+    --line-h:    #36363c;
+    --ink:       #e8e8ea;
+    --ink-2:     #c8c8cc;
+    --muted:     #84848c;
+    --faint:     #5b5b62;
+    --accent:    #5e6ad2;     /* Linear blue-purple */
+    --accent-h:  #7c87dc;
+    --good:      #4cb782;
+    --warn:      #d49a3c;
+    --bad:       #d94f50;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    font-size: 13.5px;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 22px 24px 60px; }
+
+  /* === topbar === */
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+  }
+  .topbar h1 {
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .topbar .meta { color: var(--faint); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .topbar .actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .kbd {
+    display: inline-flex; align-items: center; gap: 2px;
+    border: 1px solid var(--line-h);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    background: var(--bg-2);
+  }
+
+  /* === composer === */
+  .composer {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 18px;
+  }
+  .composer .plus {
+    width: 18px; height: 18px;
+    border: 1px dashed var(--line-h);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--muted); font-size: 12px;
+    margin-top: 1px;
+  }
+  .composer textarea {
+    flex: 1;
+    border: 0; outline: none; background: transparent;
+    color: var(--ink); font-family: inherit; font-size: 13.5px;
+    resize: none;
+    line-height: 1.5;
+    min-height: 22px;
+  }
+  .composer textarea::placeholder { color: var(--faint); }
+  .composer .btn {
+    appearance: none; border: 0;
+    background: var(--accent); color: #fff;
+    padding: 5px 12px; border-radius: 5px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+  }
+  .composer .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* === filters === */
+  .filters { display: flex; gap: 4px; margin-bottom: 8px; }
+  .filter {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .filter:hover { color: var(--ink-2); background: var(--bg-2); }
+  .filter.is-on { color: var(--ink); background: var(--bg-3); }
+  .filter .ct { color: var(--faint); margin-left: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  /* === group === */
+  .group { margin-top: 18px; }
+  .group-h {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 4px;
+    color: var(--muted);
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+  }
+  .group-h .ct { color: var(--faint); font-family: 'JetBrains Mono', monospace; }
+  .group-h .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--good);
+    box-shadow: 0 0 8px var(--good);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+
+  /* === task row === */
+  .row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .row:hover { background: var(--bg-2); }
+  .row.is-running { background: rgba(94,106,210,0.06); }
+  .row.is-running:hover { background: rgba(94,106,210,0.1); }
+
+  .status {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-h);
+    display: grid; place-items: center;
+    flex: none;
+  }
+  .status.s-pending { border-color: var(--muted); }
+  .status.s-running {
+    border: 0;
+    background: conic-gradient(from 0deg, var(--accent) 0%, var(--accent) 65%, transparent 65%);
+    animation: spin 1.4s linear infinite;
+  }
+  .status.s-running::after {
+    content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--bg);
+  }
+  .status.s-done { border-color: var(--good); background: var(--good); }
+  .status.s-done::after {
+    content: '✓'; color: var(--bg); font-size: 9px; font-weight: 700; line-height: 1;
+  }
+  .status.s-failed { border-color: var(--bad); background: var(--bad); }
+  .status.s-failed::after { content: '×'; color: var(--bg); font-size: 11px; line-height: 0.85; font-weight: 700; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .row .title {
+    font-size: 13.5px; font-weight: 500; color: var(--ink);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .row.is-done .title { color: var(--muted); }
+  .row.is-running .title { color: var(--ink); font-weight: 600; }
+  .row .meta {
+    color: var(--faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .row .id {
+    color: var(--faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* footer */
+  .foot { margin-top: 30px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: var(--faint); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>待办</h1>
+    <span class="meta">8 tasks · 1 running</span>
+    <div class="actions">
+      <span class="kbd">⌘</span><span class="kbd">K</span>
+      <span style="color:var(--faint);font-size:11.5px">to add</span>
+    </div>
+  </div>
+
+  <div class="composer">
+    <span class="plus">+</span>
+    <textarea rows="1" placeholder="新建任务... 描述你想 AI 帮你做什么"></textarea>
+    <button class="btn">运行</button>
+  </div>
+
+  <div class="filters">
+    <span class="filter is-on">全部 <span class="ct">8</span></span>
+    <span class="filter">活跃 <span class="ct">4</span></span>
+    <span class="filter">已完成 <span class="ct">3</span></span>
+    <span class="filter">失败 <span class="ct">1</span></span>
+  </div>
+
+  <!-- Running -->
+  <section class="group">
+    <div class="group-h">
+      <span class="pulse"></span>
+      <span>运行中</span>
+      <span class="ct">1</span>
+    </div>
+    <div class="row is-running">
+      <span class="status s-running"></span>
+      <span class="title">爬取过去一周 BTC / ETH 价格做对比图</span>
+      <span class="meta">cryptobot</span>
+      <span class="id">TASK-204</span>
+    </div>
+  </section>
+
+  <!-- Pending -->
+  <section class="group">
+    <div class="group-h">
+      <span>待处理</span>
+      <span class="ct">3</span>
+    </div>
+    <div class="row">
+      <span class="status s-pending"></span>
+      <span class="title">把记账本本月所有外卖记录导出 CSV</span>
+      <span class="meta">finance</span>
+      <span class="id">TASK-208</span>
+    </div>
+    <div class="row">
+      <span class="status s-pending"></span>
+      <span class="title">整理本周笔记 → 周报 markdown</span>
+      <span class="meta">notebook</span>
+      <span class="id">TASK-207</span>
+    </div>
+    <div class="row">
+      <span class="status s-pending"></span>
+      <span class="title">查 Tailwind 4 的 @theme 用法并贴到 chat</span>
+      <span class="meta">chat</span>
+      <span class="id">TASK-206</span>
+    </div>
+  </section>
+
+  <!-- Done -->
+  <section class="group">
+    <div class="group-h">
+      <span>已完成</span>
+      <span class="ct">3</span>
+    </div>
+    <div class="row is-done">
+      <span class="status s-done"></span>
+      <span class="title">把 quickchat 改成右上浮层面板</span>
+      <span class="meta">12m</span>
+      <span class="id">TASK-203</span>
+    </div>
+    <div class="row is-done">
+      <span class="status s-done"></span>
+      <span class="title">finance app 删掉饼图和 FAB</span>
+      <span class="meta">5m</span>
+      <span class="id">TASK-202</span>
+    </div>
+    <div class="row is-done">
+      <span class="status s-done"></span>
+      <span class="title">cryptobot tabs 换成下划线样式</span>
+      <span class="meta">3m</span>
+      <span class="id">TASK-198</span>
+    </div>
+  </section>
+
+  <!-- Failed -->
+  <section class="group">
+    <div class="group-h">
+      <span style="color:var(--bad)">失败</span>
+      <span class="ct">1</span>
+    </div>
+    <div class="row">
+      <span class="status s-failed"></span>
+      <span class="title">连接 Kraken WebSocket 拉实时盘口</span>
+      <span class="meta">network err</span>
+      <span class="id">TASK-195</span>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span>updated 19:31</span>
+    <span class="mono">8 / 8</span>
+  </div>
+
+</div>
+</body>
+</html>

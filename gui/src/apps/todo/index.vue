@@ -300,23 +300,26 @@ const messageRoleLabel = (r) => ({
 </script>
 
 <template>
-    <div class="flex h-full bg-bg">
+    <div class="todo-shell flex h-full bg-bg">
 
         <!-- ============== LIST ============== -->
-        <div v-if="view === 'list'" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col">
+        <div v-if="view === 'list'" class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
             <header class="flex flex-none items-baseline gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
                 <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TODO_TITLE__</h1>
+                <span class="font-mono text-[10px] text-faint tracking-wide">v.things-4</span>
                 <AppLauncher class="ml-auto self-center" />
             </header>
 
             <!-- Composer -->
-            <div class="mx-8 mb-3 flex flex-none items-end gap-2 rounded-[16px] bg-card px-3.5 py-2.5 transition-colors focus-within:bg-card-hi max-md:mx-3">
-                <span class="msi mt-1.5 text-faint" style="font-size:18px">auto_awesome</span>
+            <div class="composer-card mx-8 mb-4 flex flex-none items-end gap-2.5 px-4 py-3 max-md:mx-3 max-md:px-3.5">
+                <span class="composer-glyph mt-1 grid h-6 w-6 flex-none place-items-center rounded-full">
+                    <span class="msi" style="font-size:14px">add</span>
+                </span>
                 <textarea ref="inputRef" v-model="newTitle" @keydown="composerKeydown"
                     rows="1"
                     placeholder="__T_TODO_COMPOSER_PLACEHOLDER__"
-                    class="composer-input min-w-0 flex-1 resize-none border-0 bg-transparent py-1.5 text-[14.5px] leading-[1.55] text-ink outline-none"></textarea>
-                <button class="cursor-pointer rounded-full border-0 bg-blue-bg px-4 py-1.5 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft disabled:cursor-default disabled:opacity-50"
+                    class="composer-input min-w-0 flex-1 resize-none border-0 bg-transparent py-1 text-[15px] leading-[1.55] text-ink outline-none"></textarea>
+                <button class="composer-btn cursor-pointer rounded-full border-0 px-4 py-1.5 text-[13px] font-semibold text-white transition-shadow disabled:cursor-default disabled:opacity-45"
                     :disabled="!newTitle.trim()" @click="addTodo()">__T_TODO_COMPOSER_SUBMIT__</button>
             </div>
 
@@ -352,12 +355,12 @@ const messageRoleLabel = (r) => ({
                 <template v-else>
                     <!-- Running group -->
                     <section v-if="grouped.running.length" class="mb-5">
-                        <div class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
+                        <div class="section-h text-accent">
                             <span class="h-1.5 w-1.5 rounded-full bg-accent animate-status-pulse"></span>
                             __T_TODO_GROUP_RUNNING__
-                            <span class="font-normal text-faint">·  {{ grouped.running.length }}</span>
+                            <span class="ct">{{ grouped.running.length }}</span>
                         </div>
-                        <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                        <ul class="todo-card m-0 flex list-none flex-col p-0">
                             <TodoRow v-for="t in grouped.running" :key="t.id"
                                 :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
                                 :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
@@ -370,12 +373,12 @@ const messageRoleLabel = (r) => ({
 
                     <!-- Pending group -->
                     <section v-if="grouped.pending.length" class="mb-5">
-                        <div v-if="grouped.running.length || grouped.done.length"
-                            class="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
+                        <div v-if="grouped.running.length || grouped.done.length" class="section-h">
+                            <span class="msi text-faint" style="font-size:14px">radio_button_unchecked</span>
                             __T_TODO_GROUP_PENDING__
-                            <span class="font-normal">·  {{ grouped.pending.length }}</span>
+                            <span class="ct">{{ grouped.pending.length }}</span>
                         </div>
-                        <ul class="m-0 flex list-none flex-col gap-1.5 p-0">
+                        <ul class="todo-card m-0 flex list-none flex-col p-0">
                             <TodoRow v-for="t in grouped.pending" :key="t.id"
                                 :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
                                 :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
@@ -388,14 +391,14 @@ const messageRoleLabel = (r) => ({
 
                     <!-- Done group (collapsible) -->
                     <section v-if="grouped.done.length">
-                        <button class="mb-1.5 flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-1 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint transition-colors hover:text-muted"
+                        <button class="section-h section-h-btn"
                             @click="showDone = !showDone">
                             <span class="msi" style="font-size:15px">{{ showDone ? 'expand_more' : 'chevron_right' }}</span>
                             <span>{{ showDone
                                 ? '__T_TODO_GROUP_HIDE_DONE__'
                                 : '__T_TODO_GROUP_SHOW_DONE__'.replace('{count}', grouped.done.length) }}</span>
                         </button>
-                        <ul v-if="showDone" class="m-0 flex list-none flex-col gap-1.5 p-0">
+                        <ul v-if="showDone" class="todo-card m-0 flex list-none flex-col p-0">
                             <TodoRow v-for="t in grouped.done" :key="t.id"
                                 :t="t" :live="liveStatusFor(t)" :meta="statusMeta(liveStatusFor(t))"
                                 :tone-text="TONE_TEXT" :tone-bg="TONE_BG"
@@ -405,74 +408,92 @@ const messageRoleLabel = (r) => ({
                                 @toggle-pinned="togglePinned($event)" @remove="removeTodo($event)" />
                         </ul>
                     </section>
+
+                    <!-- Bottom tip -->
+                    <div class="tip-card">
+                        <span class="ic">💡</span>
+                        <span>给重要的事点亮 ⭐ 自动置顶。点开任意一条，可以补充说明、查看运行记录、再让 AI 处理一次。</span>
+                    </div>
                 </template>
             </div>
         </div>
 
         <!-- ============== DETAIL ============== -->
-        <div v-else-if="view === 'detail' && currentTodo" class="mx-auto flex h-full w-full min-w-0 max-w-[820px] flex-col">
-            <header class="flex flex-none items-center gap-3 px-8 pb-4 pt-7 max-md:px-4 max-md:pb-3 max-md:pt-5">
+        <div v-else-if="view === 'detail' && currentTodo" class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
+            <header class="flex flex-none items-center gap-1 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
                 <button class="grid h-9 w-9 flex-none cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                     @click="goList" :title="'__T_TODO_BACK__'">
                     <span class="msi" style="font-size:20px">arrow_back</span>
                 </button>
-                <input :value="currentTodo.title"
-                    @blur="(e) => updateTitle(currentTodo, e.target.value)"
-                    class="m-0 min-w-0 flex-1 border-0 bg-transparent p-0 text-[26px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink outline-none max-md:text-[20px]"
-                    :class="{ 'text-faint line-through': currentTodo.done }" />
+                <div class="ml-auto flex items-center gap-1">
+                    <button class="header-icon"
+                        :class="{ 'is-on': currentTodo.pinned }"
+                        @click="togglePinned(currentTodo)"
+                        :title="currentTodo.pinned ? '__T_TODO_ACTION_UNPIN__' : '__T_TODO_ACTION_PIN__'">
+                        <span class="msi" :class="{ filled: currentTodo.pinned }" style="font-size:18px">{{ currentTodo.pinned ? 'star' : 'star_outline' }}</span>
+                    </button>
+                    <button class="header-icon hover-bad" @click="removeTodo(currentTodo)" :title="'__T_TODO_ACTION_DELETE__'">
+                        <span class="msi" style="font-size:18px">delete_outline</span>
+                    </button>
+                </div>
                 <AppLauncher class="flex-none" />
             </header>
 
             <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
 
-                <!-- Status pill -->
-                <div v-if="statusMeta(liveStatusFor(currentTodo))"
-                    class="mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium"
-                    :class="[
-                        TONE_TEXT[statusMeta(liveStatusFor(currentTodo)).tone],
-                        TONE_SOFT[statusMeta(liveStatusFor(currentTodo)).tone]
-                    ]">
+                <!-- Title (the brief) -->
+                <input :value="currentTodo.title"
+                    @blur="(e) => updateTitle(currentTodo, e.target.value)"
+                    class="detail-title m-0 mb-2 block w-full border-0 bg-transparent p-0 text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-ink outline-none max-md:text-[22px]"
+                    :class="{ 'text-muted line-through': currentTodo.done }" />
+
+                <!-- Status meta line -->
+                <div v-if="statusMeta(liveStatusFor(currentTodo))" class="mb-4 inline-flex items-center gap-1.5 status-pill"
+                    :class="['tone-' + statusMeta(liveStatusFor(currentTodo)).tone]">
                     <span v-if="statusMeta(liveStatusFor(currentTodo)).dot"
                         class="h-1.5 w-1.5 rounded-full animate-status-pulse"
                         :class="TONE_BG[statusMeta(liveStatusFor(currentTodo)).tone]"></span>
-                    <span v-else class="msi" style="font-size:14px">{{ statusMeta(liveStatusFor(currentTodo)).icon }}</span>
+                    <span v-else class="msi" style="font-size:13px">{{ statusMeta(liveStatusFor(currentTodo)).icon }}</span>
                     {{ statusMeta(liveStatusFor(currentTodo)).labelKey }}
                 </div>
 
-                <!-- Action bar -->
-                <div class="mb-7 flex flex-wrap items-center gap-2 max-md:gap-1.5">
-                    <!-- Primary: run / stop -->
+                <!-- Hero run card: 把"会被 AI 处理"这件事讲清楚 -->
+                <div class="run-card mb-7" :class="{ 'is-active': ACTIVE.has(liveStatusFor(currentTodo)) }">
+                    <div class="run-card-body">
+                        <div class="run-card-title">
+                            <span v-if="ACTIVE.has(liveStatusFor(currentTodo))">__T_TODO_RESULT_RUNNING__</span>
+                            <span v-else-if="currentTodo.taskId">这条之前 AI 已经处理过</span>
+                            <span v-else>这条会交给 AI 来做</span>
+                        </div>
+                        <div class="run-card-sub">
+                            <span v-if="ACTIVE.has(liveStatusFor(currentTodo))">下方会实时显示进展</span>
+                            <span v-else-if="currentTodo.done">已标记完成</span>
+                            <span v-else-if="currentTodo.taskId">想让它再做一次,或者改改说明再来一次</span>
+                            <span v-else>点右边按钮,AI 会基于标题和说明开始处理</span>
+                        </div>
+                    </div>
                     <button v-if="ACTIVE.has(liveStatusFor(currentTodo))"
-                        class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border-0 px-4 text-[13px] font-medium text-bad transition-colors hover:opacity-90"
-                        style="background:color-mix(in srgb,var(--color-bad) 14%,transparent)"
+                        class="run-btn is-stop"
                         @click="stopTask(currentTodo)">
-                        <span class="msi" style="font-size:18px">stop_circle</span>
-                        __T_TODO_ACTION_STOP__
+                        <span class="msi" style="font-size:22px">stop_circle</span>
+                        <span>__T_TODO_ACTION_STOP__</span>
                     </button>
                     <button v-else
-                        class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft disabled:cursor-default disabled:opacity-50"
+                        class="run-btn is-go"
                         :disabled="currentTodo.done"
                         @click="runTodo(currentTodo)">
-                        <span class="msi" style="font-size:18px">auto_awesome</span>
-                        {{ currentTodo.taskId ? '__T_TODO_ACTION_RUN_AGAIN__' : '__T_TODO_ACTION_RUN__' }}
+                        <span class="msi" style="font-size:22px">play_circle</span>
+                        <span>{{ currentTodo.taskId ? '__T_TODO_ACTION_RUN_AGAIN__' : '__T_TODO_ACTION_RUN__' }}</span>
                     </button>
+                </div>
 
-                    <!-- Secondary chips -->
+                <!-- Mark complete toggle (smaller, below hero) -->
+                <div class="mb-7">
                     <button class="action-chip"
                         :class="{ 'is-on': currentTodo.done }"
                         @click="toggleDone(currentTodo)">
                         <span class="msi" style="font-size:16px">{{ currentTodo.done ? 'check_circle' : 'radio_button_unchecked' }}</span>
                         {{ currentTodo.done ? '__T_TODO_ACTION_COMPLETED__' : '__T_TODO_ACTION_COMPLETE__' }}
-                    </button>
-                    <button class="action-chip"
-                        :class="{ 'is-on': currentTodo.pinned }"
-                        @click="togglePinned(currentTodo)">
-                        <span class="msi" :class="{ filled: currentTodo.pinned }" style="font-size:16px">push_pin</span>
-                        {{ currentTodo.pinned ? '__T_TODO_ACTION_PINNED__' : '__T_TODO_ACTION_PIN__' }}
-                    </button>
-                    <button class="action-chip ml-auto hover:!text-bad" @click="removeTodo(currentTodo)">
-                        <span class="msi" style="font-size:16px">delete_outline</span>
-                        __T_TODO_ACTION_DELETE__
                     </button>
                 </div>
 
@@ -483,7 +504,7 @@ const messageRoleLabel = (r) => ({
                         :value="currentTodo.note"
                         @change="(e) => updateNote(currentTodo, e.target.value)"
                         placeholder="__T_TODO_NOTE_PLACEHOLDER__"
-                        class="w-full resize-y rounded-[12px] border-0 bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink outline-none transition-colors focus:bg-card-hi"
+                        class="note-textarea w-full resize-y rounded-[12px] border border-line bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink outline-none transition-colors focus:border-accent focus:bg-card-hi"
                         style="min-height: 92px;"></textarea>
                 </section>
 
@@ -501,7 +522,7 @@ const messageRoleLabel = (r) => ({
                             style="background: color-mix(in srgb, var(--color-bad) 12%, transparent)">{{ detailTaskRow.error }}</div>
 
                         <div v-if="detailTaskRow?.response"
-                            class="md rounded-[12px] border border-line bg-card px-3.5 py-3 text-[13.5px] leading-[1.65] text-ink break-words"
+                            class="md rounded-[12px] border border-line bg-card px-4 py-3.5 text-[13.5px] leading-[1.65] text-ink break-words"
                             v-html="renderMd(detailTaskRow.response)"></div>
                         <div v-else-if="!TERMINAL.has(detailTaskRow?.status)"
                             class="flex items-center gap-2 rounded-[12px] border border-dashed border-line px-4 py-6 text-[12.5px] text-faint">
@@ -540,10 +561,119 @@ const messageRoleLabel = (r) => ({
 </template>
 
 <style scoped>
+/* Things-3-ish palette: 暖白底 + 温和蓝 accent + 软阴影。
+   仅作用于 todo app，借此达成「友好的桌面文具」气质。 */
+.todo-shell {
+    --color-bg:        #fbfbfa;
+    --color-bg-elev:   #ffffff;
+    --color-bg-hi:     #f3f3f0;
+    --color-card:      #ffffff;
+    --color-card-hi:   #fbfbfa;
+    --color-card-sub:  #fbfbf6;
+    --color-line:      #ebebe6;
+    --color-line-hi:   #d8d8d2;
+    --color-ink:       #1c1c1a;
+    --color-muted:     #7a7a72;
+    --color-faint:     #b0b0a8;
+    --color-accent:    #2563eb;
+    --color-accent-hi: #1d4ed8;
+    --color-blue-bg:   #dbeafe;
+    --color-blue-soft: #bfdbfe;
+    --color-blue-fg:   #1e40af;
+    --color-good:      #1a8a4a;
+    --color-bad:       #b91c1c;
+    --color-warm:      #fef9ec;
+    color: var(--color-ink);
+    background: var(--color-bg);
+}
+
 .composer-input::placeholder { color: var(--color-faint); }
 
 .animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
 @keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* Composer: 像浮在桌面上的便签条 */
+.composer-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.025);
+    transition: box-shadow .15s, border-color .15s;
+}
+.composer-card:focus-within {
+    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03),
+                0 4px 14px rgba(0,0,0,0.04),
+                0 0 0 4px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.composer-glyph {
+    background: var(--color-bg-hi);
+    color: var(--color-faint);
+    transition: background .15s, color .15s;
+}
+.composer-card:focus-within .composer-glyph {
+    background: var(--color-blue-bg);
+    color: var(--color-accent);
+}
+.composer-btn {
+    background: var(--color-accent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+.composer-btn:hover:not(:disabled) {
+    background: var(--color-accent-hi);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+/* Section header — 友好型小字标签，不再大写堆 letter-spacing */
+.section-h {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 14px 4px 8px;
+    color: var(--color-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+.section-h .ct {
+    color: var(--color-faint);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+.section-h-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: color .12s, background .12s;
+}
+.section-h-btn:hover { color: var(--color-ink); background: var(--color-bg-hi); }
+
+/* List card — 一组 row 共享一张卡片，分隔线在 TodoRow 内自带 */
+.todo-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+/* 底部提示卡 —— 暖纸黄，营造"小贴士"气质 */
+.tip-card {
+    margin-top: 26px;
+    padding: 14px 16px;
+    background: var(--color-warm);
+    border: 1px dashed color-mix(in srgb, #d4a72c 35%, transparent);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-muted);
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+.tip-card .ic { font-size: 18px; flex: none; }
 
 .section-label {
     margin-bottom: 8px;
@@ -552,6 +682,98 @@ const messageRoleLabel = (r) => ({
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-faint);
+}
+
+/* Detail page status pill (reuse Things-y pill from row) */
+.status-pill {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.status-pill.tone-accent { background: var(--color-blue-bg); color: var(--color-blue-fg); }
+.status-pill.tone-good   { background: color-mix(in srgb, var(--color-good) 14%, transparent); color: var(--color-good); }
+.status-pill.tone-bad    { background: color-mix(in srgb, var(--color-bad) 12%, transparent); color: var(--color-bad); }
+.status-pill.tone-muted  { background: var(--color-bg-hi); color: var(--color-muted); }
+
+/* Header small icon buttons */
+.header-icon {
+    display: grid; place-items: center;
+    height: 36px; width: 36px;
+    border: 0; border-radius: 999px;
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+}
+.header-icon:hover { background: var(--color-bg-hi); color: var(--color-ink); }
+.header-icon.hover-bad:hover { color: var(--color-bad); }
+.header-icon.is-on { color: #d4a72c; }
+.header-icon.is-on:hover { color: #b8780a; background: color-mix(in srgb, #d4a72c 14%, transparent); }
+
+/* Detail title input */
+.detail-title::placeholder { color: var(--color-faint); }
+
+/* Hero run card —— 把"会被运行"这事讲出来 */
+.run-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04);
+}
+.run-card.is-active {
+    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+    background: color-mix(in srgb, var(--color-blue-bg) 30%, var(--color-card));
+}
+.run-card-body { flex: 1; min-width: 0; }
+.run-card-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--color-ink);
+    line-height: 1.4;
+}
+.run-card-sub {
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--color-muted);
+    line-height: 1.45;
+}
+.run-btn {
+    appearance: none; border: 0;
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: none;
+    transition: background .14s, box-shadow .14s, transform .14s;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+.run-btn.is-go { background: var(--color-accent); }
+.run-btn.is-go:hover:not(:disabled) {
+    background: var(--color-accent-hi);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+.run-btn.is-go:disabled {
+    background: var(--color-bg-hi);
+    color: var(--color-faint);
+    box-shadow: none;
+    cursor: default;
+}
+.run-btn.is-stop {
+    background: var(--color-bad);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-bad) 30%, transparent);
+}
+.run-btn.is-stop:hover {
+    background: #991b1b;
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--color-bad) 45%, transparent);
 }
 
 /* Secondary chip used in detail action bar */

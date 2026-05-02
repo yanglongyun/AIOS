@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>待办 · B 流水线 / Pipeline 风</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #f6f7f9;
+    --bg-2:      #ffffff;
+    --bg-3:      #eef0f3;
+    --line:      #e1e4e8;
+    --line-h:    #d0d4d9;
+    --ink:       #1f2328;
+    --ink-2:     #424952;
+    --muted:     #6b7280;
+    --faint:     #9ba1a8;
+    --accent:    #1f883d;     /* GH green */
+    --warn:      #d4a72c;
+    --bad:       #cf222e;
+    --info:      #0969da;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    font-size: 13.5px;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 22px 22px 60px; }
+
+  /* === topbar === */
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .topbar h1 { font-size: 17px; font-weight: 600; }
+  .topbar .repo {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .topbar .actions { margin-left: auto; }
+  .topbar .actions .btn {
+    appearance: none; border: 1px solid var(--line-h); background: var(--bg-2); color: var(--ink);
+    padding: 5px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .topbar .actions .btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  /* === stat strip === */
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stat .ico {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 14px;
+    flex: none;
+  }
+  .stat .ico.running { background: rgba(31,136,61,0.12); color: var(--accent); }
+  .stat .ico.pending { background: rgba(212,167,44,0.16); color: var(--warn); }
+  .stat .ico.done    { background: rgba(9,105,218,0.12); color: var(--info); }
+  .stat .ico.failed  { background: rgba(207,34,46,0.12); color: var(--bad); }
+  .stat .label { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+  .stat .num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; line-height: 1; margin-top: 2px; }
+
+  /* === composer === */
+  .composer {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 14px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .composer textarea {
+    flex: 1; border: 0; outline: none; background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--ink);
+    resize: none; min-height: 22px; line-height: 1.5;
+  }
+  .composer textarea::placeholder { color: var(--faint); }
+  .composer .btn {
+    appearance: none; border: 0;
+    background: var(--accent); color: #fff;
+    padding: 5px 14px; border-radius: 6px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    display: inline-flex; gap: 5px; align-items: center;
+  }
+
+  /* === run row === */
+  .runs { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .runs-h {
+    display: grid; grid-template-columns: 22px 1fr 110px 80px 70px;
+    align-items: center; gap: 10px;
+    padding: 8px 14px;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--line);
+    font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+  }
+  .run {
+    display: grid; grid-template-columns: 22px 1fr 110px 80px 70px;
+    align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .run:first-of-type { border-top: 0; }
+  .run:hover { background: var(--bg-3); }
+
+  /* status dot */
+  .sdot {
+    width: 12px; height: 12px; border-radius: 50%; flex: none;
+    display: grid; place-items: center;
+  }
+  .sdot.running {
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(31,136,61,0.6);
+    animation: ring 1.6s ease-out infinite;
+  }
+  @keyframes ring {
+    0% { box-shadow: 0 0 0 0 rgba(31,136,61,0.6); }
+    100% { box-shadow: 0 0 0 8px rgba(31,136,61,0); }
+  }
+  .sdot.pending { background: var(--warn); }
+  .sdot.done {
+    background: var(--info); position: relative;
+  }
+  .sdot.done::after { content: '✓'; color: #fff; font-size: 8px; font-weight: 700; line-height: 1; }
+  .sdot.failed { background: var(--bad); position: relative; }
+  .sdot.failed::after { content: '×'; color: #fff; font-size: 11px; line-height: 0.7; }
+
+  .run .title { font-size: 13.5px; font-weight: 500; min-width: 0; }
+  .run .title .name { color: var(--ink); }
+  .run .title .log {
+    margin-top: 4px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .run .title .log .tag { color: var(--info); }
+  .run .title .log.ok { color: var(--accent); }
+  .run .title .log.err { color: var(--bad); }
+
+  .run .branch {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .run .branch .ico { color: var(--faint); }
+  .run .dur { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); text-align: right; }
+  .run .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--faint);
+    text-align: right;
+  }
+
+  .run.is-running { background: rgba(31,136,61,0.04); }
+  .run.is-running:hover { background: rgba(31,136,61,0.08); }
+
+  /* footer */
+  .foot { margin-top: 18px; color: var(--faint); font-size: 11px; text-align: center; font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>待办</h1>
+    <span class="repo">~/aios/runs</span>
+    <div class="actions">
+      <button class="btn"><span class="dot"></span> 运行中 1</button>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat">
+      <div class="ico running">▶</div>
+      <div><div class="label">running</div><div class="num">1</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico pending">●</div>
+      <div><div class="label">pending</div><div class="num">3</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico done">✓</div>
+      <div><div class="label">done</div><div class="num">3</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico failed">✕</div>
+      <div><div class="label">failed</div><div class="num">1</div></div>
+    </div>
+  </div>
+
+  <div class="composer">
+    <textarea rows="1" placeholder="$ 新建任务  ..描述你想跑的事..."></textarea>
+    <button class="btn">▶ 运行</button>
+  </div>
+
+  <div class="runs">
+    <div class="runs-h">
+      <span></span>
+      <span>任务 / log</span>
+      <span>app</span>
+      <span>耗时</span>
+      <span>#</span>
+    </div>
+
+    <!-- running -->
+    <div class="run is-running">
+      <span class="sdot running"></span>
+      <div class="title">
+        <div class="name">爬取过去一周 BTC / ETH 价格做对比图</div>
+        <div class="log"><span class="tag">[15:42:08]</span> fetched 7d candles · rendering chart...</div>
+      </div>
+      <span class="branch">cryptobot</span>
+      <span class="dur">2m 14s</span>
+      <span class="num">#204</span>
+    </div>
+
+    <!-- pending -->
+    <div class="run">
+      <span class="sdot pending"></span>
+      <div class="title">
+        <div class="name">把记账本本月所有外卖记录导出 CSV</div>
+        <div class="log">queued · waiting for previous to finish</div>
+      </div>
+      <span class="branch">finance</span>
+      <span class="dur">—</span>
+      <span class="num">#208</span>
+    </div>
+    <div class="run">
+      <span class="sdot pending"></span>
+      <div class="title">
+        <div class="name">整理本周笔记 → 周报 markdown</div>
+        <div class="log">queued</div>
+      </div>
+      <span class="branch">notebook</span>
+      <span class="dur">—</span>
+      <span class="num">#207</span>
+    </div>
+    <div class="run">
+      <span class="sdot pending"></span>
+      <div class="title">
+        <div class="name">查 Tailwind 4 的 @theme 用法并贴到 chat</div>
+        <div class="log">queued</div>
+      </div>
+      <span class="branch">chat</span>
+      <span class="dur">—</span>
+      <span class="num">#206</span>
+    </div>
+
+    <!-- done -->
+    <div class="run">
+      <span class="sdot done"></span>
+      <div class="title">
+        <div class="name">把 quickchat 改成右上浮层面板</div>
+        <div class="log ok">✓ 编辑 2 文件 · vite HMR ok</div>
+      </div>
+      <span class="branch">chat</span>
+      <span class="dur">12m 04s</span>
+      <span class="num">#203</span>
+    </div>
+    <div class="run">
+      <span class="sdot done"></span>
+      <div class="title">
+        <div class="name">finance app 删掉饼图和 FAB</div>
+        <div class="log ok">✓ 编辑 4 文件 · 通过</div>
+      </div>
+      <span class="branch">finance</span>
+      <span class="dur">5m 38s</span>
+      <span class="num">#202</span>
+    </div>
+    <div class="run">
+      <span class="sdot done"></span>
+      <div class="title">
+        <div class="name">cryptobot tabs 换成下划线样式</div>
+        <div class="log ok">✓ 编辑 1 文件</div>
+      </div>
+      <span class="branch">cryptobot</span>
+      <span class="dur">3m 02s</span>
+      <span class="num">#198</span>
+    </div>
+
+    <!-- failed -->
+    <div class="run">
+      <span class="sdot failed"></span>
+      <div class="title">
+        <div class="name">连接 Kraken WebSocket 拉实时盘口</div>
+        <div class="log err">✕ ECONNREFUSED ws.kraken.com:443</div>
+      </div>
+      <span class="branch">cryptobot</span>
+      <span class="dur">42s</span>
+      <span class="num">#195</span>
+    </div>
+  </div>
+
+  <div class="foot">last sync · 19:31:42 · auto-refresh 30s</div>
+
+</div>
+</body>
+</html>

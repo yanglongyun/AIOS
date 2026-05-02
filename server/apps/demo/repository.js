@@ -21,6 +21,15 @@ const SEEDS = [
     { slug: "finance-d", title: "记账本 · 极简日记",
       description: "暖白纸基底 + 单色辅助 + 单行自然语言录入 + 按日紧凑列表。无饼图、无卡片堆叠，专注录入与看清。",
       file: "d.html" },
+    { slug: "todo-a", title: "待办 · Linear 风",
+      description: "暗黑生产力工具感 + 紫蓝单色 accent + 状态环图标 + mono 编号 ID。像 Linear 的 issue 列表，密集而克制。",
+      file: "todo-a.html" },
+    { slug: "todo-b", title: "待办 · 流水线 / Pipeline",
+      description: "GitHub Actions / CI 风。顶部 4 格状态计数 + 任务行带 log 摘要 + 耗时 + #编号。强调「这是真在跑的任务」。",
+      file: "todo-b.html" },
+    { slug: "todo-c", title: "待办 · Things 风",
+      description: "干净温暖的传统极简清单。圆角卡片 + 圆形 checkbox + 应用色标签 + 星标置顶。友好、放松、不像工具。",
+      file: "todo-c.html" },
 ];
 
 const initDemoDatabase = () => {

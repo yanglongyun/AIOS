@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>待办 · C Things 风</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #fbfbfa;
+    --bg-2:      #ffffff;
+    --bg-3:      #f3f3f0;
+    --line:      #ebebe6;
+    --line-h:    #d8d8d2;
+    --ink:       #1c1c1a;
+    --ink-2:     #3f3f3a;
+    --muted:     #7a7a72;
+    --faint:     #b0b0a8;
+    --accent:    #2563eb;     /* Things 蓝 */
+    --accent-h:  #1d4ed8;
+    --good:      #1a8a4a;
+    --warn:      #b8780a;
+    --bad:       #b91c1c;
+    --paper-tint: #fef9ec;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 36px 28px 80px; }
+
+  /* === topbar === */
+  .topbar {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 26px;
+  }
+  .topbar h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .topbar .meta { color: var(--muted); font-size: 13px; }
+  .topbar .meta b { color: var(--ink); font-weight: 600; }
+
+  /* === composer === */
+  .composer {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 26px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .composer .star {
+    width: 22px; height: 22px;
+    border: 2px solid var(--line-h);
+    border-radius: 50%;
+    flex: none;
+  }
+  .composer textarea {
+    flex: 1;
+    border: 0; outline: none; background: transparent;
+    color: var(--ink); font-family: inherit; font-size: 15px;
+    resize: none;
+    line-height: 1.5;
+    min-height: 22px;
+  }
+  .composer textarea::placeholder { color: var(--faint); }
+  .composer .btn {
+    appearance: none; border: 0;
+    background: var(--accent); color: #fff;
+    padding: 7px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+
+  /* === section === */
+  .section { margin-bottom: 26px; }
+  .section-h {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+    color: var(--ink-2);
+    font-size: 13px; font-weight: 600;
+  }
+  .section-h .ic {
+    width: 18px; height: 18px;
+    display: grid; place-items: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .section-h .ct { color: var(--faint); font-weight: 500; margin-left: 2px; }
+
+  /* === task list === */
+  .list {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .task:first-child { border-top: 0; }
+  .task:hover { background: rgba(0,0,0,0.015); }
+
+  /* checkbox */
+  .ck {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--line-h);
+    border-radius: 6px;
+    display: grid; place-items: center;
+    flex: none;
+    transition: all .14s;
+  }
+  .task:hover .ck { border-color: var(--muted); }
+  .ck.is-running {
+    border-color: var(--accent);
+    background: var(--bg-2);
+    position: relative;
+  }
+  .ck.is-running::after {
+    content: '';
+    position: absolute; inset: 3px;
+    border: 1.5px solid var(--accent);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ck.is-done {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .ck.is-done::after {
+    content: ''; width: 10px; height: 6px;
+    border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .ck.is-failed {
+    background: var(--bad);
+    border-color: var(--bad);
+    color: #fff;
+    font-size: 13px; font-weight: 700; line-height: 0.85;
+  }
+  .ck.is-failed::after { content: '×'; color: #fff; font-size: 16px; line-height: 0.7; font-weight: 700; }
+
+  .task .body { min-width: 0; }
+  .task .name {
+    font-size: 14.5px; color: var(--ink); font-weight: 500;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .task.is-done .name { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line-h); }
+  .task .sub {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .task .sub .tag {
+    display: inline-block;
+    padding: 1px 7px; border-radius: 999px;
+    background: var(--bg-3);
+    color: var(--ink-2);
+    font-size: 11px;
+    margin-right: 6px;
+  }
+  .task .sub .tag.app-finance { background: #d1fae5; color: #047857; }
+  .task .sub .tag.app-cryptobot { background: #fef3c7; color: #92400e; }
+  .task .sub .tag.app-notebook { background: #dbeafe; color: #1e40af; }
+  .task .sub .tag.app-chat { background: #ede9fe; color: #6d28d9; }
+
+  .task .star {
+    color: var(--faint);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity .12s;
+  }
+  .task:hover .star { opacity: 1; }
+  .task .star.on { opacity: 1; color: var(--warn); }
+
+  .task.is-running {
+    background: linear-gradient(to right, rgba(37,99,235,0.04), transparent 50%);
+  }
+
+  /* footer */
+  .foot {
+    margin-top: 30px;
+    padding: 14px;
+    background: var(--paper-tint);
+    border: 1px dashed var(--line-h);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 12.5px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .foot .ic { font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>待办</h1>
+    <span class="meta">今天 · <b>4</b> 件未完成</span>
+  </div>
+
+  <div class="composer">
+    <span class="star"></span>
+    <textarea rows="1" placeholder="想做什么？描述给 AI 听..."></textarea>
+    <button class="btn">添加</button>
+  </div>
+
+  <!-- 进行中 -->
+  <section class="section">
+    <div class="section-h">
+      <span class="ic">●</span>
+      <span>进行中</span>
+      <span class="ct">1</span>
+    </div>
+    <div class="list">
+      <div class="task is-running">
+        <span class="ck is-running"></span>
+        <div class="body">
+          <div class="name">爬取过去一周 BTC / ETH 价格做对比图</div>
+          <div class="sub"><span class="tag app-cryptobot">cryptobot</span>已运行 2m 14s</div>
+        </div>
+        <span class="star">☆</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 待处理 -->
+  <section class="section">
+    <div class="section-h">
+      <span class="ic">○</span>
+      <span>待处理</span>
+      <span class="ct">3</span>
+    </div>
+    <div class="list">
+      <div class="task">
+        <span class="ck"></span>
+        <div class="body">
+          <div class="name">把记账本本月所有外卖记录导出 CSV</div>
+          <div class="sub"><span class="tag app-finance">finance</span>排队中</div>
+        </div>
+        <span class="star on">★</span>
+      </div>
+      <div class="task">
+        <span class="ck"></span>
+        <div class="body">
+          <div class="name">整理本周笔记 → 周报 markdown</div>
+          <div class="sub"><span class="tag app-notebook">notebook</span>排队中</div>
+        </div>
+        <span class="star">☆</span>
+      </div>
+      <div class="task">
+        <span class="ck"></span>
+        <div class="body">
+          <div class="name">查 Tailwind 4 的 @theme 用法并贴到 chat</div>
+          <div class="sub"><span class="tag app-chat">chat</span>排队中</div>
+        </div>
+        <span class="star">☆</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 失败 -->
+  <section class="section">
+    <div class="section-h">
+      <span class="ic" style="color:var(--bad)">✕</span>
+      <span style="color:var(--bad)">失败</span>
+      <span class="ct">1</span>
+    </div>
+    <div class="list">
+      <div class="task">
+        <span class="ck is-failed"></span>
+        <div class="body">
+          <div class="name">连接 Kraken WebSocket 拉实时盘口</div>
+          <div class="sub"><span class="tag app-cryptobot">cryptobot</span>网络错误 · 8m 前</div>
+        </div>
+        <span class="star">↻</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 已完成 -->
+  <section class="section">
+    <div class="section-h">
+      <span class="ic">✓</span>
+      <span>今天已完成</span>
+      <span class="ct">3</span>
+    </div>
+    <div class="list">
+      <div class="task is-done">
+        <span class="ck is-done"></span>
+        <div class="body">
+          <div class="name">把 quickchat 改成右上浮层面板</div>
+          <div class="sub"><span class="tag app-chat">chat</span>12 分钟</div>
+        </div>
+        <span class="star"></span>
+      </div>
+      <div class="task is-done">
+        <span class="ck is-done"></span>
+        <div class="body">
+          <div class="name">finance app 删掉饼图和 FAB</div>
+          <div class="sub"><span class="tag app-finance">finance</span>5 分钟</div>
+        </div>
+        <span class="star"></span>
+      </div>
+      <div class="task is-done">
+        <span class="ck is-done"></span>
+        <div class="body">
+          <div class="name">cryptobot tabs 换成下划线样式</div>
+          <div class="sub"><span class="tag app-cryptobot">cryptobot</span>3 分钟</div>
+        </div>
+        <span class="star"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span class="ic">💡</span>
+    <span>把更重要的标星，会自动置顶。完成 3 件以上时，已完成区会折叠。</span>
+  </div>
+
+</div>
+</body>
+</html>

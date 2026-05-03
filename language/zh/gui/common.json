@@ -153,6 +153,8 @@
   "chat_delete_confirm_click": "点击确认",
   "chat_delete_confirm": "删除对话\"{title}\"?此操作不可撤销。",
   "chat_delete_failed": "删除失败:{message}",
+  "chat_remarks": "对话要点",
+  "chat_remarks_empty": "暂未留下要点",
   "settings_tab_contexts": "上下文",
   "settings_contexts_title": "AI 上下文",
   "settings_contexts_desc": "各应用写入的 AI 可读上下文。默认不读,星标读摘要,必读读正文。",

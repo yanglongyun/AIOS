@@ -48,7 +48,7 @@ watch(visible, (v) => {
 <template>
     <Transition name="qc-fade">
         <aside v-if="visible" ref="root" role="dialog" :aria-label="'__T_QC_TITLE__'"
-            class="qc-panel fixed right-4 top-[64px] z-[95] flex w-[440px] min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev max-md:right-2 max-md:top-[56px] max-md:w-[min(94vw,420px)]">
+            class="qc-panel fixed top-[64px] right-4 z-[95] flex w-[440px] min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev max-md:left-3 max-md:right-3 max-md:top-[58px] max-md:w-auto">
             <header class="flex flex-none items-center justify-between gap-3 border-b border-line px-3.5 py-3">
                 <div class="flex min-w-0 items-center gap-2">
                     <span class="msi" style="font-size:20px">smart_toy</span>

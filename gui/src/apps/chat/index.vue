@@ -14,9 +14,34 @@
         </div>
       </div>
 
-      <button class="icon-btn" title="__T_CHAT_NEW_CONVERSATION__" @click="newChat">
-        <span class="msi sm">edit_square</span>
-      </button>
+      <div class="relative" ref="remarksRef">
+        <button class="icon-btn"
+          :class="{ '!bg-bg-hi !text-ink': showRemarks }"
+          :disabled="!currentConversationId"
+          title="__T_CHAT_REMARKS__"
+          @click="toggleRemarks">
+          <span class="msi sm">summarize</span>
+        </button>
+        <div v-if="showRemarks"
+          class="fixed z-50 overflow-hidden rounded-2xl border border-line bg-bg-elev shadow-xl flex flex-col
+                 top-[58px] right-3 w-80 max-h-[min(420px,calc(100vh-72px))]
+                 max-md:left-3 max-md:w-auto max-md:max-h-[calc(100vh-72px)]">
+          <div class="flex items-center justify-between px-3.5 py-2.5 border-b border-line">
+            <span class="text-[12px] font-semibold uppercase tracking-[0.05em] text-muted">__T_CHAT_REMARKS__</span>
+            <span v-if="remarksList.length" class="text-[11px] text-faint">{{ remarksList.length }}</span>
+          </div>
+          <div class="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+            <div v-if="remarksLoading" class="px-2 py-3 text-[12px] text-faint">…</div>
+            <div v-else-if="!remarksList.length" class="px-2 py-6 text-center text-[12px] text-faint">__T_CHAT_REMARKS_EMPTY__</div>
+            <div v-else class="space-y-1.5">
+              <div v-for="r in remarksList" :key="r.id"
+                class="rounded-lg px-2.5 py-2 text-[13px] leading-[1.5] text-ink hover:bg-bg-hi transition-colors">
+                {{ r.remark }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="relative" ref="moreRef">
         <button class="icon-btn"
@@ -26,7 +51,10 @@
           @click="showMore = !showMore">
           <span class="msi sm">more_vert</span>
         </button>
-        <div v-if="showMore" class="more-menu">
+        <div v-if="showMore"
+          class="fixed z-50 overflow-hidden rounded-2xl border border-line bg-bg-elev shadow-xl
+                 top-[58px] right-3 w-44 p-1
+                 max-md:left-auto max-md:right-3 max-md:w-48">
           <button class="menu-item" @click="renameCurrent">
             <span class="msi sm">edit</span>__T_CHAT_RENAME_TITLE__
           </button>
@@ -88,10 +116,14 @@ const props = defineProps({
 const chatRef = ref(null);
 const historyRef = ref(null);
 const moreRef = ref(null);
+const remarksRef = ref(null);
 const detailOpen = ref(false);
 const currentConversationId = ref(null);
 const currentTitle = ref('');
 const showMore = ref(false);
+const showRemarks = ref(false);
+const remarksList = ref([]);
+const remarksLoading = ref(false);
 const historyDirty = ref(false);
 
 const request = async (path, options = {}) => {
@@ -125,6 +157,8 @@ function onConversationChange(conversationId) {
   currentConversationId.value = next;
   syncTitle(next);
   markHistoryDirty();
+  showRemarks.value = false;
+  remarksList.value = [];
 }
 
 function openChatFromHistory(chat) {
@@ -132,12 +166,15 @@ function openChatFromHistory(chat) {
   currentTitle.value = chat.title || '';
   detailOpen.value = true;
   showMore.value = false;
+  showRemarks.value = false;
+  remarksList.value = [];
 }
 
 function newChat() {
   currentConversationId.value = null;
   currentTitle.value = '';
   showMore.value = false;
+  showRemarks.value = false;
   detailOpen.value = true;
   nextTick(() => chatRef.value?.newChat());
 }
@@ -145,11 +182,28 @@ function newChat() {
 function backToList() {
   detailOpen.value = false;
   showMore.value = false;
+  showRemarks.value = false;
   if (historyDirty.value) {
     nextTick(() => {
       historyRef.value?.fetchChats();
       historyDirty.value = false;
     });
+  }
+}
+
+async function toggleRemarks() {
+  if (!currentConversationId.value) return;
+  if (showRemarks.value) { showRemarks.value = false; return; }
+  showMore.value = false;
+  showRemarks.value = true;
+  remarksLoading.value = true;
+  try {
+    const data = await request(`/api/chat/remarks?conversationId=${encodeURIComponent(currentConversationId.value)}`);
+    remarksList.value = data?.items || [];
+  } catch {
+    remarksList.value = [];
+  } finally {
+    remarksLoading.value = false;
   }
 }
 
@@ -192,13 +246,18 @@ async function deleteCurrent() {
 }
 
 function onDocPointerDown(e) {
-  if (!showMore.value) return;
-  if (moreRef.value && !moreRef.value.contains(e.target)) {
+  if (showMore.value && moreRef.value && !moreRef.value.contains(e.target)) {
     showMore.value = false;
+  }
+  if (showRemarks.value && remarksRef.value && !remarksRef.value.contains(e.target)) {
+    showRemarks.value = false;
   }
 }
 function onEscape(e) {
-  if (e.key === 'Escape') showMore.value = false;
+  if (e.key === 'Escape') {
+    showMore.value = false;
+    showRemarks.value = false;
+  }
 }
 
 onMounted(() => {
@@ -235,18 +294,6 @@ watch(currentConversationId, (id) => {
 .icon-btn:hover:not(:disabled) { background: var(--color-bg-hi); color: var(--color-ink); }
 .icon-btn:disabled { opacity: 0.4; cursor: default; }
 
-.more-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  z-index: 50;
-  min-width: 140px;
-  padding: 4px;
-  background: var(--color-bg-elev);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-}
 .menu-item {
   width: 100%;
   display: inline-flex;

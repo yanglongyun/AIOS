@@ -4,6 +4,7 @@ import { buildSystemPrompt } from "../../service/prompt/index.js";
 import { injectAttachmentsMessage } from "../../service/chat/attachments.js";
 import { getMessages, saveMessage } from "../../service/chat/store.js";
 import { hasChat, setChatState } from "../../service/chat/conversations.js";
+import { extractRemark, createRemarkStreamFilter } from "../../service/chat/remarks.js";
 const createSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
   const handleMessage = async (data) => {
@@ -77,9 +78,12 @@ const createSession = (wsSend) => {
       const abortController = new AbortController();
       conversations.set(cid, { abortController });
       setChatState(cid, "running");
+      const remarkFilter = createRemarkStreamFilter((delta) => {
+        wsSend({ type: "delta", conversationId: cid, delta });
+      });
       const send = (msg) => {
         if (msg.type === "delta") {
-          wsSend({ type: "delta", conversationId: cid, delta: msg.delta || "" });
+          remarkFilter.push(msg.delta || "");
           return;
         }
         if (msg.type === "assistant_tool_calls") {
@@ -101,13 +105,17 @@ const createSession = (wsSend) => {
           return;
         }
         if (msg.type === "done") {
+          remarkFilter.flush();
           if (msg.message) {
-            const rawContent = String(msg.message.content || "");
-            saveMessage(cid, msg.message);
+            const raw = String(msg.message.content || "");
+            const { content, remark } = extractRemark(raw);
+            const cleanMsg = { ...msg.message, content };
+            saveMessage(cid, cleanMsg, null, remark);
             wsSend({
               type: "done",
               conversationId: cid,
-              content: rawContent
+              content,
+              remark
             });
             return;
           }

@@ -23,8 +23,12 @@ const createTables = () => {
       conversation_id TEXT NOT NULL,
       message TEXT NOT NULL,
       meta TEXT,
+      remark TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE INDEX IF NOT EXISTS idx_messages_conv_remark
+      ON messages(conversation_id, id DESC) WHERE remark IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,

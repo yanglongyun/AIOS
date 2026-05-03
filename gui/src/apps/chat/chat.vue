@@ -32,7 +32,14 @@
               <!-- ASSISTANT: no bubble, AI avatar + flowing text -->
               <div v-else-if="m.role === 'assistant'" class="flex items-start gap-3">
                 <img class="assistant-avatar" :src="aiAvatarUrl" alt="AI" />
-                <div class="min-w-0 flex-1 md text-[14px]" v-html="renderMd(m.content)" />
+                <div class="min-w-0 flex-1">
+                  <div class="md text-[14px]" v-html="renderMd(m.content)" />
+                  <div v-if="m.remark"
+                    class="mt-2 flex items-start gap-1.5 text-[12px] leading-[1.5] text-faint">
+                    <span class="msi shrink-0 mt-px" style="font-size:14px">summarize</span>
+                    <span>{{ m.remark }}</span>
+                  </div>
+                </div>
               </div>
 
               <div v-else-if="m.type === 'tool_call'" class="flex items-start gap-2.5">
@@ -243,6 +250,7 @@ const parseMessages = (raw) => {
       list.push({
         role: 'assistant',
         content: message.content,
+        remark: message._remark || null,
         _key: base ? `${base}:assistant` : undefined
       });
       continue;
@@ -592,6 +600,7 @@ onMounted(async () => {
       const msg = messages.value.find((m) => m._key === key);
       if (msg) {
         msg.content = data.content || msg.content || '';
+        msg.remark = data.remark || null;
         msg.streaming = false;
       }
     }

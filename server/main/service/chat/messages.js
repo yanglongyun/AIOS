@@ -6,7 +6,8 @@ const getChatMessagesPaged = (conversationId, limit = 20, offset = 0) => {
     messages: rows.reverse().map((r) => ({
       ...JSON.parse(r.message),
       _id: r.id,
-      _meta: r.meta ? JSON.parse(r.meta) : null
+      _meta: r.meta ? JSON.parse(r.meta) : null,
+      _remark: r.remark || null
     })),
     total,
     hasMore: offset + limit < total,

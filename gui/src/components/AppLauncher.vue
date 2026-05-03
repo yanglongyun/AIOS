@@ -67,27 +67,34 @@ onBeforeUnmount(() => {
             </button>
 
             <div v-if="appsOpen" role="menu"
-                class="shadow-card-lg absolute right-0 top-[calc(100%+8px)] z-[80] w-80 rounded-2xl border border-line bg-bg-elev p-3 max-md:w-[min(86vw,320px)]">
-                <div class="grid grid-cols-3 gap-1">
-                    <button v-for="app in apps" :key="app.id"
-                        class="flex min-h-[84px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-0 bg-transparent px-2 py-3.5 text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                        :class="{ '!bg-blue-bg !text-blue-fg': route.params.id === app.id }"
-                        @click="goApp(app.id)">
-                        <span class="grid h-9 w-9 place-items-center">
-                            <span class="msi" style="font-size:26px"
-                                :class="{ filled: route.params.id === app.id }">{{ app.icon }}</span>
-                        </span>
-                        <span class="line-clamp-2 break-all text-center text-[11px] font-medium leading-tight">{{ app.name }}</span>
+                class="shadow-card-lg fixed z-[80] overflow-hidden rounded-2xl border border-line bg-bg-elev
+                       top-[58px] right-3 w-[384px] max-h-[calc(100vh-72px)]
+                       max-md:left-3 max-md:w-auto max-md:max-h-[calc(100vh-72px)]
+                       flex flex-col">
+                <div class="flex-1 min-h-0 overflow-y-auto p-4">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button v-for="app in apps" :key="app.id"
+                            class="group flex min-h-[104px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-0 bg-transparent px-2 py-4 text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+                            :class="{ '!bg-blue-bg !text-blue-fg': route.params.id === app.id }"
+                            @click="goApp(app.id)">
+                            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-bg transition-colors group-hover:bg-bg-elev"
+                                :class="{ '!bg-bg-elev': route.params.id === app.id }">
+                                <span class="msi" style="font-size:28px"
+                                    :class="{ filled: route.params.id === app.id }">{{ app.icon }}</span>
+                            </span>
+                            <span class="line-clamp-2 break-all text-center text-[12px] font-medium leading-tight">{{ app.name }}</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="border-t border-line p-2">
+                    <button
+                        class="flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left text-[13px] text-ink transition-colors hover:bg-bg-hi"
+                        @click="theme.toggle"
+                        :title="isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__'">
+                        <span class="msi text-muted" style="font-size:20px">{{ isLight ? 'dark_mode' : 'light_mode' }}</span>
+                        <span>{{ isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__' }}</span>
                     </button>
                 </div>
-                <div class="-mx-1 mb-1.5 mt-2 h-px bg-line"></div>
-                <button
-                    class="flex w-full cursor-pointer items-center gap-3 rounded-[10px] border-0 bg-transparent px-3 py-2.5 text-left text-[13px] text-ink transition-colors hover:bg-bg-hi"
-                    @click="theme.toggle"
-                    :title="isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__'">
-                    <span class="msi text-muted" style="font-size:20px">{{ isLight ? 'dark_mode' : 'light_mode' }}</span>
-                    <span>{{ isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__' }}</span>
-                </button>
             </div>
         </div>
     </div>

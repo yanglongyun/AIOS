@@ -5,6 +5,7 @@ import { contexts as contextsSection } from "./contexts.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./default.js";
 import { environment as environmentSection } from "./environment.js";
 import { model as modelSection } from "./model.js";
+import { remarks as remarksSection } from "./remarks.js";
 import { tools as toolsSection } from "./tools.js";
 
 const instruction = (settings) => String(settings.systemPrompt || "").trim() || DEFAULT_SYSTEM_PROMPT;
@@ -32,6 +33,7 @@ const buildSystemPrompt = (currentConversationId = "") => {
   });
   prompt += appsSection();
   prompt += chatsSection(currentConversationId);
+  prompt += remarksSection(currentConversationId);
   prompt += contextsSection();
   return prompt;
 };

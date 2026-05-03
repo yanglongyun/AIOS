@@ -5,6 +5,7 @@ import { listChats } from "../../service/chat/list.js";
 import { getChatMessagesPaged } from "../../service/chat/messages.js";
 import { renameChat } from "../../service/chat/rename.js";
 import { deleteChat } from "../../service/chat/delete.js";
+import { listAllRemarks } from "../../service/chat/remarks.js";
 const handleChatApi = async (req, res, path, url) => {
   if (path === "/api/chat/list" && req.method === "GET") {
     const scene = url.searchParams.get("scene") || null;
@@ -21,6 +22,12 @@ const handleChatApi = async (req, res, path, url) => {
     const limit = Number(url.searchParams.get("limit") || 20);
     const offset = Number(url.searchParams.get("offset") || 0);
     return json(res, getChatMessagesPaged(conversationId, limit, offset));
+  }
+  if (path === "/api/chat/remarks" && req.method === "GET") {
+    const conversationId = url.searchParams.get("conversationId");
+    if (!conversationId) return json(res, { error: "Missing conversationId" }, 400);
+    if (!hasChat(conversationId)) return json(res, { error: "Conversation not found" }, 404);
+    return json(res, { items: listAllRemarks(conversationId) });
   }
   if (path === "/api/chat/rename" && req.method === "POST") {
     const body = await readBody(req);

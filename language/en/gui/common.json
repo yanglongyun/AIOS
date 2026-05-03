@@ -140,6 +140,8 @@
   "chat_delete_confirm_click": "Click to confirm",
   "chat_delete_confirm": "Delete \"{title}\"? This cannot be undone.",
   "chat_delete_failed": "Delete failed: {message}",
+  "chat_remarks": "Key points",
+  "chat_remarks_empty": "No key points yet",
   "settings_tab_contexts": "Contexts",
   "settings_contexts_title": "AI Contexts",
   "settings_contexts_desc": "AI-readable context written by apps. Default is hidden, starred exposes summary, required exposes full content.",

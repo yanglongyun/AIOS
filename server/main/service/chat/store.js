@@ -11,15 +11,16 @@ const getMessages = (conversationId, messageLimit = 100) => {
     _meta: r.meta ? JSON.parse(r.meta) : null
   }));
 };
-const saveMessage = (conversationId, msg, meta = null) => {
+const saveMessage = (conversationId, msg, meta = null, remark = null) => {
   // 写库前过 redact —— AI 工具结果若回显了 AIOS_API_TOKEN 真值,
   // 在持久化之前替换为字面量 $AIOS_API_TOKEN,避免长存于数据库.
   const safeMsg  = redactDeep(msg);
   const safeMeta = meta ? redactDeep(meta) : null;
-  const result = db.prepare("INSERT INTO messages (conversation_id, message, meta) VALUES (?, ?, ?)").run(
+  const result = db.prepare("INSERT INTO messages (conversation_id, message, meta, remark) VALUES (?, ?, ?, ?)").run(
     conversationId,
     JSON.stringify(safeMsg),
-    safeMeta ? JSON.stringify(safeMeta) : null
+    safeMeta ? JSON.stringify(safeMeta) : null,
+    remark
   );
   return { id: Number(result.lastInsertRowid) };
 };

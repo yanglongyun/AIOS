@@ -16,7 +16,6 @@
             :class="activeTab === tab.key ? 'text-accent is-active' : 'text-muted hover:text-ink'"
             @click="activeTab = tab.key"
           >
-            <span aria-hidden="true">{{ tab.icon }}</span>
             <span>{{ tab.label }}</span>
           </button>
         </nav>
@@ -46,13 +45,13 @@ import AboutTab from './AboutTab.vue';
 import PromptTab from './PromptTab.vue';
 
 const tabs = [
-  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__', icon: '👤' },
-  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__', icon: '🤖' },
-  { key: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__', icon: '📜' },
-  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__', icon: '💬' },
-  { key: 'contexts', label: '__T_SETTINGS_TAB_CONTEXTS__', icon: '📚' },
-  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__', icon: '🔧' },
-  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__', icon: 'ℹ️' }
+  { key: 'account', label: '__T_SETTINGS_TAB_ACCOUNT__' },
+  { key: 'model', label: '__T_SETTINGS_TAB_MODEL__' },
+  { key: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__' },
+  { key: 'messages', label: '__T_SETTINGS_TAB_MESSAGES__' },
+  { key: 'contexts', label: '__T_SETTINGS_TAB_CONTEXTS__' },
+  { key: 'tools', label: '__T_SETTINGS_TAB_TOOLS__' },
+  { key: 'about', label: '__T_SETTINGS_TAB_ABOUT__' }
 ];
 
 const activeTab = ref('account');

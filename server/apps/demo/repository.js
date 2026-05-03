@@ -1,79 +1,140 @@
 import { createAppDb } from "../app_shared/db/createAppDb.js";
-import { readFileSync, readdirSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 
 const db = createAppDb("demo.db");
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// Static seed catalogue: which slugs to seed and their metadata.
-// HTML body is loaded from ./seeds/<slug>.html so we don't bloat this file.
-const SEEDS = [
-    { slug: "finance-a", title: "记账本 · 老账本",
-      description: "米黄牛皮纸 + 横线纸格 + 楷体 + 印章红和墨水蓝。私人、温暖、慢节奏。",
-      file: "a.html" },
-    { slug: "finance-b", title: "记账本 · 银行流水单",
-      description: "纯黑白等宽字体 + 点状分割线 + 借/贷两栏。冷峻、专业、信息密度高。",
-      file: "b.html" },
-    { slug: "finance-c", title: "记账本 · 现代理财",
-      description: "薄荷绿主调 + 圆环饼图 + 类别 emoji + 圆角卡片。清爽、可视化。",
-      file: "c.html" },
-    { slug: "finance-d", title: "记账本 · 极简日记",
-      description: "暖白纸基底 + 单色辅助 + 单行自然语言录入 + 按日紧凑列表。无饼图、无卡片堆叠，专注录入与看清。",
-      file: "d.html" },
-    { slug: "todo-a", title: "待办 · Linear 风",
-      description: "暗黑生产力工具感 + 紫蓝单色 accent + 状态环图标 + mono 编号 ID。像 Linear 的 issue 列表，密集而克制。",
-      file: "todo-a.html" },
-    { slug: "todo-b", title: "待办 · 流水线 / Pipeline",
-      description: "GitHub Actions / CI 风。顶部 4 格状态计数 + 任务行带 log 摘要 + 耗时 + #编号。强调「这是真在跑的任务」。",
-      file: "todo-b.html" },
-    { slug: "todo-c", title: "待办 · Things 风",
-      description: "干净温暖的传统极简清单。圆角卡片 + 圆形 checkbox + 应用色标签 + 星标置顶。友好、放松、不像工具。",
-      file: "todo-c.html" },
-];
 
 const initDemoDatabase = () => {
     db.exec(`
-        CREATE TABLE IF NOT EXISTS demos (
+        CREATE TABLE IF NOT EXISTS projects (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            slug        TEXT    NOT NULL UNIQUE,
-            title       TEXT    NOT NULL,
-            description TEXT    NOT NULL DEFAULT '',
-            html        TEXT    NOT NULL,
+            topic       TEXT    NOT NULL,
             created_at  TEXT    DEFAULT (datetime('now')),
             updated_at  TEXT    DEFAULT (datetime('now'))
         );
+
+        CREATE TABLE IF NOT EXISTS plans (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id  INTEGER NOT NULL,
+            slug        TEXT    NOT NULL,
+            title       TEXT    NOT NULL,
+            description TEXT    NOT NULL DEFAULT '',
+            sort_order  INTEGER NOT NULL DEFAULT 0,
+            created_at  TEXT    DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS tasks (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            plan_id     INTEGER NOT NULL,
+            status      TEXT    NOT NULL DEFAULT 'pending',
+            attempt     INTEGER NOT NULL DEFAULT 1,
+            error       TEXT,
+            started_at  TEXT,
+            finished_at TEXT,
+            created_at  TEXT    DEFAULT (datetime('now')),
+            FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS results (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id     INTEGER NOT NULL,
+            html        TEXT    NOT NULL,
+            created_at  TEXT    DEFAULT (datetime('now')),
+            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_plans_project ON plans(project_id);
+        CREATE INDEX IF NOT EXISTS idx_tasks_plan    ON tasks(plan_id);
+        CREATE INDEX IF NOT EXISTS idx_tasks_status  ON tasks(status);
+        CREATE INDEX IF NOT EXISTS idx_results_task  ON results(task_id);
     `);
-    seed();
+    db.pragma("foreign_keys = ON");
 };
 
-// Insert-only: once a demo row exists, treat it as user data. To re-seed a row,
-// delete it manually (e.g. `DELETE FROM demos WHERE slug='finance-a';`).
-const seed = () => {
-    const insert = db.prepare(`
-        INSERT OR IGNORE INTO demos (slug, title, description, html)
-        VALUES (@slug, @title, @description, @html)
-    `);
-    for (const item of SEEDS) {
-        const html = readFileSync(join(__dirname, "seeds", item.file), "utf8");
-        insert.run({ ...item, html });
-    }
+const rowToProject = (r) => r && {
+    id: r.id, topic: r.topic, createdAt: r.created_at, updatedAt: r.updated_at,
+};
+const rowToPlan = (r) => r && {
+    id: r.id, projectId: r.project_id, slug: r.slug, title: r.title, description: r.description || "",
+    sortOrder: r.sort_order, createdAt: r.created_at,
+};
+const rowToTask = (r) => r && {
+    id: r.id, planId: r.plan_id, status: r.status, attempt: r.attempt,
+    error: r.error || "", startedAt: r.started_at, finishedAt: r.finished_at, createdAt: r.created_at,
+};
+const rowToResult = (r) => r && {
+    id: r.id, taskId: r.task_id, html: r.html, createdAt: r.created_at,
 };
 
-const rowToMeta = (row) => row && {
-    id:          row.id,
-    slug:        row.slug,
-    title:       row.title,
-    description: row.description || "",
-    createdAt:   row.created_at,
-    updatedAt:   row.updated_at,
+// projects
+const insertProject = ({ topic }) => {
+    const info = db.prepare("INSERT INTO projects (topic) VALUES (?)").run(topic);
+    return rowToProject(db.prepare("SELECT * FROM projects WHERE id = ?").get(info.lastInsertRowid));
 };
+const listProjects = () =>
+    db.prepare("SELECT * FROM projects ORDER BY id DESC").all().map(rowToProject);
+const getProject = (id) =>
+    rowToProject(db.prepare("SELECT * FROM projects WHERE id = ?").get(id));
+const deleteProject = (id) =>
+    db.prepare("DELETE FROM projects WHERE id = ?").run(id).changes > 0;
 
-const listDemos = () =>
-    db.prepare("SELECT id, slug, title, description, created_at, updated_at FROM demos ORDER BY id ASC")
-        .all().map(rowToMeta);
+// plans
+const insertPlan = ({ projectId, slug, title, description = "", sortOrder = 0 }) => {
+    const info = db.prepare(
+        "INSERT INTO plans (project_id, slug, title, description, sort_order) VALUES (?, ?, ?, ?, ?)"
+    ).run(projectId, slug, title, description, sortOrder);
+    return rowToPlan(db.prepare("SELECT * FROM plans WHERE id = ?").get(info.lastInsertRowid));
+};
+const listPlansForProject = (projectId) =>
+    db.prepare("SELECT * FROM plans WHERE project_id = ? ORDER BY sort_order, id").all(projectId).map(rowToPlan);
+const getPlan = (id) =>
+    rowToPlan(db.prepare("SELECT * FROM plans WHERE id = ?").get(id));
 
-const getDemoBySlug = (slug) =>
-    db.prepare("SELECT * FROM demos WHERE slug = ?").get(slug);
+// tasks
+const insertTask = ({ planId, attempt = 1 }) => {
+    const info = db.prepare(
+        "INSERT INTO tasks (plan_id, attempt) VALUES (?, ?)"
+    ).run(planId, attempt);
+    return rowToTask(db.prepare("SELECT * FROM tasks WHERE id = ?").get(info.lastInsertRowid));
+};
+const updateTaskStatus = (id, status, opts = {}) => {
+    const fields = ["status = ?"];
+    const values = [status];
+    if (status === "running") fields.push("started_at = datetime('now')");
+    if (status === "done" || status === "failed") fields.push("finished_at = datetime('now')");
+    if (opts.error !== undefined) { fields.push("error = ?"); values.push(opts.error || ""); }
+    values.push(id);
+    db.prepare(`UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`).run(...values);
+    return rowToTask(db.prepare("SELECT * FROM tasks WHERE id = ?").get(id));
+};
+const listTasksForProject = (projectId) =>
+    db.prepare(
+        "SELECT t.* FROM tasks t JOIN plans p ON t.plan_id = p.id WHERE p.project_id = ? ORDER BY t.id"
+    ).all(projectId).map(rowToTask);
+const getLatestTaskForPlan = (planId) =>
+    rowToTask(db.prepare("SELECT * FROM tasks WHERE plan_id = ? ORDER BY id DESC LIMIT 1").get(planId));
+const getTask = (id) => rowToTask(db.prepare("SELECT * FROM tasks WHERE id = ?").get(id));
 
-export { initDemoDatabase, listDemos, getDemoBySlug };
+// results
+const insertResult = ({ taskId, html }) => {
+    const info = db.prepare(
+        "INSERT INTO results (task_id, html) VALUES (?, ?)"
+    ).run(taskId, html);
+    return rowToResult(db.prepare("SELECT * FROM results WHERE id = ?").get(info.lastInsertRowid));
+};
+const getLatestResultForPlan = (planId) =>
+    rowToResult(db.prepare(`
+        SELECT r.* FROM results r
+        JOIN tasks t ON r.task_id = t.id
+        WHERE t.plan_id = ? AND t.status = 'done'
+        ORDER BY r.id DESC LIMIT 1
+    `).get(planId));
+const getResultByTaskId = (taskId) =>
+    rowToResult(db.prepare("SELECT * FROM results WHERE task_id = ? ORDER BY id DESC LIMIT 1").get(taskId));
+
+export {
+    initDemoDatabase,
+    insertProject, listProjects, getProject, deleteProject,
+    insertPlan, listPlansForProject, getPlan,
+    insertTask, updateTaskStatus, listTasksForProject, getLatestTaskForPlan, getTask,
+    insertResult, getLatestResultForPlan, getResultByTaskId,
+};

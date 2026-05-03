@@ -11,10 +11,6 @@ defineEmits(['more', 'select']);
 
 <template>
     <section>
-        <div class="mb-2 flex items-baseline justify-between px-1">
-            <h2 class="text-[16px] font-semibold text-ink">__T_CRYPTOBOT_DECISION_LOG__</h2>
-            <span class="text-[11.5px] text-faint">__T_CRYPTOBOT_TOTAL__ {{ decisions.length }}</span>
-        </div>
         <div v-if="!decisions.length" class="flex flex-col items-center gap-2 rounded-2xl border border-line bg-bg-elev py-10 text-muted">
             <span class="msi" style="font-size:32px;color:var(--color-faint)">history</span>
             <div class="text-[13px]">__T_CRYPTOBOT_LOGS_EMPTY__</div>

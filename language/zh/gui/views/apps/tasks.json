@@ -12,7 +12,7 @@
   "tasks_refresh": "刷新",
   "tasks_load_fail": "加载失败",
 
-  "tasks_composer_placeholder": "想让 AI 做什么?描述一下,回车开始处理",
+  "tasks_composer_placeholder": "想让 AI 做什么?",
   "tasks_composer_submit": "运行",
   "tasks_composer_hint": "Shift+Enter 换行",
 

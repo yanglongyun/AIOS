@@ -52,7 +52,7 @@
   </div>
 
   <div v-else class="flex h-full flex-col bg-bg">
-    <header class="mx-auto flex w-full max-w-[820px] flex-none items-baseline gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+    <header class="mx-auto flex w-full max-w-[820px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
       <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_APP_CHAT__</h1>
       <div class="ml-auto flex items-center gap-2">
         <button

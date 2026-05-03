@@ -13,7 +13,6 @@ defineEmits(['refresh', 'update:instType']);
 
 <template>
     <section>
-        <div class="mb-2 px-1 text-[15px] font-semibold text-ink">__T_CRYPTOBOT_ORDERS__</div>
         <TradeOrdersPanel
             :inst-type="instType"
             :orders="orders"

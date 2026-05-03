@@ -12,7 +12,7 @@
           <template v-else>
             <div v-if="hasMore" class="py-2 text-center text-xs" style="color:var(--color-faint)">__T_CHAT_LOAD_MORE__</div>
 
-            <div v-for="(m, i) in messages" :key="m._key || i" class="mb-6" :data-message-key="m._key || ''">
+            <div v-for="(m, i) in messages" :key="m._key || i" :class="isToolMsg(m) && isToolMsg(messages[i + 1]) ? 'mb-3' : 'mb-6'" :data-message-key="m._key || ''">
               <!-- USER: small pill, right-aligned -->
               <div v-if="m.role === 'user'" class="flex justify-end">
                 <div class="user-bubble">
@@ -150,6 +150,7 @@ const props = defineProps({
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
+const isToolMsg = (m) => !!m && (m.type === 'tool_call' || m.type === 'tool_result' || m.role === 'tool');
 const LAST_CHAT_KEY = 'lastConversationId';
 
 const currentConversationId = ref(null);

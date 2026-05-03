@@ -1,228 +1,62 @@
 <script setup>
-import AppLauncher from '@/components/AppLauncher.vue';
-import { ref, computed, onMounted, watch, watchEffect } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useQuickChatStore } from '@/stores/quickChat';
-
-const qc = useQuickChatStore();
-import ItemList from './components/ItemList.vue';
-import FolderView from './components/FolderView.vue';
-import NoteEditor from './components/NoteEditor.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import NotebookList from './components/NotebookList.vue';
+import NotebookEdit from './components/NotebookEdit.vue';
 
 const route = useRoute();
-const router = useRouter();
 
+// /app/notebook              → list
+// /app/notebook/new          → new note
+// /app/notebook/:id (number) → edit existing
 const view = computed(() => {
   const p1 = route.params.p1;
-  const p2 = route.params.p2;
   if (!p1) return 'list';
-  if (p1 === 'f' && p2) return 'folder';
-  return 'edit';
+  if (p1 === 'new') return 'edit';
+  if (/^\d+$/.test(p1)) return 'edit';
+  return 'list';
 });
-const routeNoteId   = computed(() => view.value === 'edit' ? Number(route.params.p1) || null : null);
-const routeFolderId = computed(() => view.value === 'folder' ? Number(route.params.p2) || null : null);
-
-const goRoot   = () => router.push('/app/notebook');
-const goFolder = (id) => router.push(`/app/notebook/f/${id}`);
-const goEdit   = (id) => router.push(`/app/notebook/${id}`);
-
-// ---- Data --------------------------------------------------------------
-
-const folders = ref([]);
-const notes   = ref([]);
-const loading = ref(false);
-const error   = ref('');
-const saving  = ref(false);
-const polishing = ref(false);
-const polishResult = ref('');
-
-const api = async (path, options = {}) => {
-  const res = await fetch(`/apps/notebook${path}`, {
-    ...options,
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
-  return data;
-};
-
-const fetchAll = async () => {
-  loading.value = true;
-  error.value = '';
-  try {
-    const [f, n] = await Promise.all([api('/folders/list'), api('/list')]);
-    folders.value = f.items || [];
-    notes.value = n.items || [];
-  } catch (e) { error.value = e.message; }
-  finally { loading.value = false; }
-};
-
-const getNote = (id) => notes.value.find((n) => n.id === id) || null;
-const currentNote   = computed(() => routeNoteId.value ? getNote(routeNoteId.value) : null);
-const currentFolder = computed(() => routeFolderId.value ? folders.value.find((f) => f.id === routeFolderId.value) : null);
-const folderNotes   = computed(() => routeFolderId.value ? notes.value.filter((n) => n.folderId === routeFolderId.value) : []);
-
-// ---- Folder actions ----------------------------------------------------
-
-const createFolder = async () => {
-  const name = prompt('__T_NOTEBOOK_FOLDER_PLACEHOLDER__');
-  if (!name?.trim()) return;
-  try {
-    const data = await api('/folders/create', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
-    folders.value.push(data.item);
-  } catch (e) { error.value = e.message; }
-};
-
-const updateFolder = async (patch) => {
-  try {
-    const data = await api('/folders/update', { method: 'POST', body: JSON.stringify(patch) });
-    const idx = folders.value.findIndex((x) => x.id === patch.id);
-    if (idx >= 0) folders.value[idx] = data.item;
-  } catch (e) { error.value = e.message; }
-};
-
-const removeFolder = async (folder) => {
-  try {
-    await api('/folders/delete', { method: 'POST', body: JSON.stringify({ id: folder.id }) });
-    folders.value = folders.value.filter((x) => x.id !== folder.id);
-    for (const n of notes.value) {
-      if (n.folderId === folder.id) n.folderId = null;
-    }
-    if (routeFolderId.value === folder.id) goRoot();
-  } catch (e) { error.value = e.message; }
-};
-
-// ---- Note actions ------------------------------------------------------
-
-const createNote = async (folderId) => {
-  try {
-    const data = await api('/create', {
-      method: 'POST',
-      body: JSON.stringify({ title: '', folderId }),
-    });
-    notes.value.unshift(data.item);
-    goEdit(data.item.id);
-  } catch (e) { error.value = e.message; }
-};
-
-const removeNote = async (note) => {
-  try {
-    await api('/delete', { method: 'POST', body: JSON.stringify({ id: note.id }) });
-    notes.value = notes.value.filter((n) => n.id !== note.id);
-    if (routeNoteId.value === note.id) goRoot();
-  } catch (e) { error.value = e.message; }
-};
-
-const saveField = async (id, patch) => {
-  if (patch._local) {
-    const idx = notes.value.findIndex((n) => n.id === id);
-    if (idx >= 0) {
-      const updates = {};
-      if ('content' in patch) updates.content = patch.content;
-      if ('title' in patch) updates.title = patch.title;
-      notes.value[idx] = { ...notes.value[idx], ...updates };
-    }
-    return;
-  }
-  saving.value = true;
-  try {
-    const data = await api('/update', { method: 'POST', body: JSON.stringify({ id, ...patch }) });
-    const idx = notes.value.findIndex((n) => n.id === id);
-    if (idx >= 0) notes.value[idx] = data.item;
-  } catch (e) { error.value = e.message; }
-  finally { saving.value = false; }
-};
-
-// ---- Polish ------------------------------------------------------------
-
-const doPolish = async (note) => {
-  if (polishing.value) return;
-  polishing.value = true;
-  polishResult.value = '';
-  try {
-    const data = await api('/polish', { method: 'POST', body: JSON.stringify({ id: note.id }) });
-    polishResult.value = data.polished || '';
-  } catch (e) { error.value = e.message; }
-  finally { polishing.value = false; }
-};
-
-const applyPolish = async (note) => {
-  if (!polishResult.value) return;
-  await saveField(note.id, { content: polishResult.value });
-  polishResult.value = '';
-};
-
-const dismissPolish = () => { polishResult.value = ''; };
-
-watch(routeNoteId, () => {
-  polishResult.value = '';
-  polishing.value = false;
-});
-
-onMounted(fetchAll);
-
-watchEffect(() => {
-  if (view.value === 'edit' && currentNote.value) {
-    const n = currentNote.value;
-    qc.setContext({
-      scope: `notebook:edit:${n.id}`,
-      label: '__T_QC_LABEL_NOTEBOOK_NOTE__'.replace('{title}', n.title || '__T_QC_UNTITLED__'),
-      snapshot: [
-        n.title ? '__T_QC_FIELD_TITLE__'.replace('{value}', n.title) : null,
-        n.content ? '__T_QC_FIELD_NOTE_EXCERPT__'.replace('{value}', String(n.content).slice(0, 500)) : null,
-      ].filter(Boolean).join('\n') || '__T_QC_EMPTY_NOTE__',
-    });
-  } else if (view.value === 'folder' && currentFolder.value) {
-    const f = currentFolder.value;
-    qc.setContext({
-      scope: `notebook:folder:${f.id}`,
-      label: '__T_QC_LABEL_NOTEBOOK_FOLDER__'.replace('{name}', f.name || '__T_QC_UNNAMED__'),
-      snapshot: (f.name || '__T_QC_UNNAMED__')
-        + '\n'
-        + '__T_QC_FIELD_NOTE_COUNT__'.replace('{count}', folderNotes.value.length),
-    });
-  } else {
-    qc.setContext({
-      scope: 'notebook:list',
-      label: '__T_QC_LABEL_NOTEBOOK_ROOT__',
-      snapshot: '__T_QC_FIELD_FOLDER_SUMMARY__'
-        .replace('{folders}', folders.value.length)
-        .replace('{notes}', notes.value.length),
-    });
-  }
+const editId = computed(() => {
+  const p1 = route.params.p1;
+  if (p1 === 'new' || !p1) return null;
+  return /^\d+$/.test(p1) ? Number(p1) : null;
 });
 </script>
 
 <template>
-  <div class="relative flex h-full bg-bg">
-    <AppLauncher class="absolute right-3 top-3 z-30" />
-    <ItemList v-if="view === 'list'"
-      :folders="folders" :notes="notes" :loading="loading" :error="error"
-      @create-note="createNote(null)"
-      @open-note="(n) => goEdit(n.id)"
-      @create-folder="createFolder"
-      @open-folder="(f) => goFolder(f.id)" />
-
-    <FolderView v-else-if="view === 'folder'"
-      :folder="currentFolder" :notes="folderNotes"
-      @back="goRoot"
-      @create-note="createNote(routeFolderId)"
-      @open-note="(n) => goEdit(n.id)"
-      @update-folder="updateFolder"
-      @remove-folder="removeFolder" />
-
-    <NoteEditor v-else-if="view === 'edit' && currentNote"
-      :note="currentNote" :saving="saving" :polishing="polishing" :polish-result="polishResult"
-      @back="currentNote.folderId ? goFolder(currentNote.folderId) : goRoot()"
-      @save="saveField"
-      @remove="removeNote"
-      @polish="doPolish"
-      @apply-polish="applyPolish"
-      @dismiss-polish="dismissPolish" />
-
-    <div v-else class="flex h-full w-full items-center justify-center text-muted">
-      <span class="msi mr-2" style="font-size:20px">hourglass_empty</span>__T_COMMON_LOADING__
+    <div class="notebook-shell flex h-full flex-col">
+        <NotebookList v-if="view === 'list'" />
+        <NotebookEdit v-else :note-id="editId" :key="route.fullPath" />
     </div>
-  </div>
 </template>
+
+<style scoped>
+/* 软薄荷应用色 —— light 模式专属;dark 模式落回全局 dark 主题 */
+.notebook-shell {
+    color: var(--color-ink);
+    background: var(--color-bg);
+}
+:root.light .notebook-shell {
+    --color-bg:        #fbfaf6;
+    --color-bg-elev:   #ffffff;
+    --color-bg-hi:     #f3f3f0;
+    --color-card:      #ffffff;
+    --color-card-hi:   #fbfbfa;
+    --color-card-sub:  #f6f5ee;
+    --color-line:      #ebebe6;
+    --color-line-hi:   #d8d8d2;
+    --color-ink:       #1c1c1a;
+    --color-muted:     #6f6a5e;
+    --color-faint:     #a8a294;
+    --color-accent:    #4c9d8a;       /* 软薄荷绿 */
+    --color-accent-hi: #3a8475;
+    --color-accent-bg: #e2efea;
+    --color-good:      #1a8a4a;
+    --color-bad:       #b91c1c;
+}
+:root.dark .notebook-shell {
+    --color-accent:    #6fc5b1;
+    --color-accent-hi: #8ad5c3;
+    --color-accent-bg: color-mix(in srgb, #6fc5b1 18%, transparent);
+}
+</style>

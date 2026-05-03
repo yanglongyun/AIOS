@@ -249,8 +249,8 @@ watchEffect(() => {
 
 <template>
     <div class="finance-shell flex h-full flex-col">
-        <header class="mx-auto flex w-full max-w-[860px] flex-none items-center gap-3 px-6 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-            <h1 class="m-0 text-[24px] font-semibold leading-[1.2] tracking-[-0.02em] text-ink max-md:text-[20px]">__T_FINANCE_TITLE__</h1>
+        <header class="mx-auto flex w-full max-w-[860px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+            <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_FINANCE_TITLE__</h1>
 
             <!-- Month nav (pill) -->
             <div class="ml-auto flex items-center gap-2">
@@ -303,9 +303,12 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-/* Mint trust palette — overrides system tokens locally so children get the
-   garden-y feel. Other apps unaffected. */
+/* Mint trust palette — light 模式专属;dark 模式落回全局 dark 主题 */
 .finance-shell {
+    color: var(--color-ink);
+    background: var(--color-bg);
+}
+:root.light .finance-shell {
     --color-bg:        #f0fdf4;
     --color-bg-elev:   #ffffff;
     --color-bg-hi:     #ecfdf5;
@@ -324,11 +327,5 @@ watchEffect(() => {
     --color-blue-bg:   #d1fae5;
     --color-blue-soft: #a7f3d0;
     --color-blue-fg:   #047857;
-    color: var(--color-ink);
-
-    background:
-        radial-gradient(circle at 0% 0%, #d1fae5 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, #fef3c7 0%, transparent 55%),
-        var(--color-bg);
 }
 </style>

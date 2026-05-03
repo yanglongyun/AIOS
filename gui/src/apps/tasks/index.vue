@@ -50,6 +50,20 @@ const newPrompt = ref('');
 const composerRef = ref(null);
 const submitting = ref(false);
 const composerError = ref('');
+// 中文输入法状态:Enter 选词时绝不提交
+const composerComposing = ref(false);
+const COMPOSER_MAX_H = 240; // 自动增高上限,超出滚动
+
+function autosizeComposer() {
+    nextTick(() => {
+        const el = composerRef.value;
+        if (!el) return;
+        el.style.height = 'auto';
+        const next = Math.min(el.scrollHeight, COMPOSER_MAX_H);
+        el.style.height = next + 'px';
+        el.style.overflowY = el.scrollHeight > COMPOSER_MAX_H ? 'auto' : 'hidden';
+    });
+}
 
 async function submitCompose() {
     const text = newPrompt.value.trim();
@@ -60,6 +74,7 @@ async function submitCompose() {
         await tasks.create({ prompt: text });
         newPrompt.value = '';
         await nextTick();
+        autosizeComposer();
         composerRef.value?.focus();
     } catch (e) {
         composerError.value = e?.body?.message || e.message || '__T_TASKS_LOAD_FAIL__';
@@ -67,8 +82,11 @@ async function submitCompose() {
         submitting.value = false;
     }
 }
+
 function composerKeydown(e) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    // IME 输入中(中文/日文/韩文输入法选词):Enter 仅用于选词,不提交
+    if (composerComposing.value || e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         submitCompose();
     }
@@ -156,7 +174,10 @@ async function rerunFromDetail() {
 let listPoller = null;
 onMounted(() => {
     tasks.fetch();
-    nextTick(() => composerRef.value?.focus());
+    nextTick(() => {
+        composerRef.value?.focus();
+        autosizeComposer();
+    });
     listPoller = setInterval(() => { if (!selectedId.value) tasks.fetch(); }, 4000);
 });
 onUnmounted(() => {
@@ -214,7 +235,7 @@ function messageRoleLabel(role) {
 
         <!-- ============== DETAIL ============== -->
         <div v-if="selectedId" class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
-            <header class="flex flex-none items-center gap-1 px-8 pb-2 pt-7 max-md:px-4 max-md:pt-5">
+            <header class="flex flex-none items-center gap-2 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
                 <button class="header-icon" @click="backToList" :title="'__T_TASKDETAIL_BACK__'">
                     <span class="msi" style="font-size:20px">arrow_back</span>
                 </button>
@@ -321,9 +342,8 @@ function messageRoleLabel(role) {
 
         <!-- ============== LIST ============== -->
         <div v-else class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
-            <header class="flex flex-none items-baseline gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-                <h1 class="m-0 text-[30px] font-semibold leading-[1.15] tracking-[-0.015em] text-ink max-md:text-[24px]">__T_TASKS_TITLE__</h1>
-                <span class="font-mono text-[10px] text-faint tracking-wide">v.things-1</span>
+            <header class="flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+                <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_TASKS_TITLE__</h1>
                 <div class="ml-auto flex items-center gap-2">
                     <button class="header-icon"
                         :disabled="tasks.loading"
@@ -337,10 +357,11 @@ function messageRoleLabel(role) {
 
             <!-- Composer -->
             <div class="composer-card mx-8 mb-3 flex flex-none items-end gap-2.5 px-4 py-3 max-md:mx-3 max-md:px-3.5">
-                <span class="composer-glyph mt-1 grid h-6 w-6 flex-none place-items-center rounded-full">
-                    <span class="msi" style="font-size:14px">add</span>
-                </span>
-                <textarea ref="composerRef" v-model="newPrompt" @keydown="composerKeydown"
+                <textarea ref="composerRef" v-model="newPrompt"
+                    @keydown="composerKeydown"
+                    @input="autosizeComposer"
+                    @compositionstart="composerComposing = true"
+                    @compositionend="composerComposing = false; autosizeComposer()"
                     rows="1"
                     placeholder="__T_TASKS_COMPOSER_PLACEHOLDER__"
                     class="composer-input min-w-0 flex-1 resize-none border-0 bg-transparent py-1 text-[15px] leading-[1.55] text-ink outline-none"></textarea>
@@ -464,8 +485,12 @@ function messageRoleLabel(role) {
 </template>
 
 <style scoped>
-/* Things 3 风 palette —— 仅作用于 tasks app */
+/* Things 3 风 palette —— 仅 light 模式下作用于 tasks app;dark 模式落回全局 dark 主题 */
 .tasks-shell {
+    color: var(--color-ink);
+    background: var(--color-bg);
+}
+:root.light .tasks-shell {
     --color-bg:        #fbfbfa;
     --color-bg-elev:   #ffffff;
     --color-bg-hi:     #f3f3f0;
@@ -485,8 +510,6 @@ function messageRoleLabel(role) {
     --color-good:      #1a8a4a;
     --color-bad:       #b91c1c;
     --color-warm:      #fef9ec;
-    color: var(--color-ink);
-    background: var(--color-bg);
 }
 
 .composer-input::placeholder { color: var(--color-faint); }
@@ -510,15 +533,6 @@ function messageRoleLabel(role) {
     box-shadow: 0 1px 3px rgba(0,0,0,0.03),
                 0 4px 14px rgba(0,0,0,0.04),
                 0 0 0 4px color-mix(in srgb, var(--color-accent) 12%, transparent);
-}
-.composer-glyph {
-    background: var(--color-bg-hi);
-    color: var(--color-faint);
-    transition: background .15s, color .15s;
-}
-.composer-card:focus-within .composer-glyph {
-    background: var(--color-blue-bg);
-    color: var(--color-accent);
 }
 .composer-btn {
     background: var(--color-accent);

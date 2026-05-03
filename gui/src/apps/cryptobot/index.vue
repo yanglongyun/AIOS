@@ -312,7 +312,7 @@ watchEffect(() => {
 
 <template>
     <div v-if="selectedDecision" class="mx-auto flex h-full w-full max-w-[820px] flex-col bg-bg">
-        <header class="flex flex-none items-center gap-2 px-8 pt-7 max-md:px-4 max-md:pt-5">
+        <header class="flex flex-none items-center gap-2 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 @click="selectedDecision = null"
                 :title="'__T_CRYPTOBOT_BACK__'">
@@ -340,10 +340,10 @@ watchEffect(() => {
     </div>
 
     <div v-else class="crypto-shell flex h-full flex-col bg-bg">
-        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-2 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <span class="grid h-7 w-7 place-items-center rounded-md font-mono text-[12px] font-bold text-bg"
                 style="background:linear-gradient(135deg,#fcd535,#f0b90b)">₿</span>
-            <h1 class="m-0 text-[20px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[18px]">__T_CRYPTOBOT_TITLE__</h1>
+            <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_CRYPTOBOT_TITLE__</h1>
             <span class="status-pill inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em]"
                 :class="status.state.running ? 'is-on' : 'is-off'">
                 <span class="h-1.5 w-1.5 rounded-full"
@@ -357,7 +357,7 @@ watchEffect(() => {
             <EquityPanel :status="status" />
         </div>
 
-        <nav class="mx-auto w-full max-w-[1100px] flex flex-none items-stretch gap-0 border-b border-line px-8 max-md:px-4 overflow-x-auto">
+        <nav class="cb-tabs mx-auto w-full max-w-[1100px] flex flex-none items-stretch gap-0 border-b border-line px-8 max-md:px-4 overflow-x-auto">
             <button v-for="t in TABS" :key="t.key"
                 class="cb-tab relative inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap border-0 bg-transparent px-3.5 pb-2.5 pt-2 text-[12.5px] font-medium transition-colors"
                 :class="activeTab === t.key ? 'is-active text-accent' : 'text-muted hover:text-ink'"
@@ -374,7 +374,7 @@ watchEffect(() => {
             </div>
         </div>
 
-        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-5 max-md:px-3 max-md:pb-10 max-md:pt-4">
             <div class="space-y-5">
                 <AgentTab v-if="activeTab === 'agent'"
                     :ex-form="exForm"
@@ -470,6 +470,10 @@ watchEffect(() => {
     color: var(--color-faint);
     background: var(--color-bg-hi);
 }
+
+/* Hide horizontal scrollbar on tabs while keeping scroll */
+.cb-tabs { scrollbar-width: none; }
+.cb-tabs::-webkit-scrollbar { display: none; }
 
 /* Tab underline */
 .cb-tab::after {

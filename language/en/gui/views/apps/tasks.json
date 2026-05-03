@@ -12,7 +12,7 @@
   "tasks_refresh": "Refresh",
   "tasks_load_fail": "Failed to load",
 
-  "tasks_composer_placeholder": "What would you like AI to do? Press Enter to start.",
+  "tasks_composer_placeholder": "What do you want AI to do?",
   "tasks_composer_submit": "Run",
   "tasks_composer_hint": "Shift+Enter for newline",
 

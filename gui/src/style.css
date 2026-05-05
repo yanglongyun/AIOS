@@ -1,108 +1,99 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0,0');
-
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "@xterm/xterm/css/xterm.css";
 
 /* ================================================================
-   AIOS theme — Google / Material 3 inspired.
-   Light = clean paper white with soft blue-gray cards.
-   Dark  = ink-on-graphite with the same blue accent.
-   Toggle by adding `.light` or `.dark` class on <html>.
-   Default is light.
+   AIOS theme — semantic tokens. Tailwind utilities reference these
+   variables, while html.light / html.dark switch their runtime values.
    ================================================================ */
 
-:root, :root.light {
-    --color-bg:        #ffffff;       /* page (main content area) */
-    --color-bg-elev:   #fafbfd;       /* surface (rail / topbar / popup cards) */
-    --color-bg-hi:     #f1f3f6;       /* hover / subtle fill */
-    --color-line:      #eff1f5;
-    --color-line-hi:   #e6e8ec;
-    --color-ink:       #1f1f1f;
-    --color-muted:     #5f6368;
-    --color-faint:     #80868b;
-    --color-accent:    #0b57d0;       /* google blue 700 */
-    --color-accent-hi: #0842a0;
-    --color-good:      #1e8e3e;
-    --color-bad:       #d93025;
-    --color-shadow:    rgba(31, 31, 31, 0.12);
+@theme {
+    --color-bg:        #0d0c0a;
+    --color-bg-elev:   #161310;
+    --color-bg-hi:     #1e1a14;
+    --color-line:      #2a241c;
+    --color-line-hi:   #3a3226;
+    --color-ink:       #ede7d8;
+    --color-muted:     #9a9180;
+    --color-faint:     #6a6355;
+    --color-accent:    #e6946b;
+    --color-accent-hi: #f1a57d;
+    --color-good:      #7bcc8b;
+    --color-bad:       #ff6a4a;
 
-    /* Soft card tones (matches D-google-1 demo) */
-    --color-card:      #eef2f9;
-    --color-card-hi:   #e6ecf6;
-    --color-card-sub:  #f4f6fa;
+    /* AIOS 衍生 token (chat / store / settings 等沿用) */
+    --color-card:      #1a1612;
+    --color-card-hi:   #221c16;
+    --color-card-sub:  #14110d;
+    --color-blue-bg:   color-mix(in srgb, #e6946b 14%, transparent);
+    --color-blue-soft: color-mix(in srgb, #e6946b 22%, transparent);
+    --color-blue-fg:   #f1a57d;
 
-    /* Blue accent system */
-    --color-blue-bg:   #eaf1fc;       /* active pill bg */
-    --color-blue-soft: #d3e3fd;       /* hover for active */
-    --color-blue-fg:   #0842a0;       /* darker blue text */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.30);
+    --shadow:    0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.45);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.50), 0 16px 48px rgba(0,0,0,0.60);
 
-    /* Brand sparkle gradient stops */
-    --gem-1: #1c7eff;
-    --gem-2: #ad7bff;
-    --gem-3: #fa6c1f;
-    --gem-4: #4ad295;
-
-    /* Elevation (Material-ish soft shadows) */
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.04);
-    --shadow:    0 1px 2px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.12);
+    --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    --font-serif: 'Fraunces', Georgia, 'Songti SC', 'STSong', serif;
+    --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-:root.dark {
-    --color-bg:        #131418;
-    --color-bg-elev:   #1c1d22;
-    --color-bg-hi:     #25272d;
-    --color-line:      #25272d;
-    --color-line-hi:   #2f3137;
-    --color-ink:       #e8eaed;
-    --color-muted:     #9aa0a6;
-    --color-faint:     #6e7177;
-    --color-accent:    #8ab4f8;       /* google blue 200 in dark */
-    --color-accent-hi: #aecbfa;
-    --color-good:      #81c995;
-    --color-bad:       #f28b82;
-    --color-shadow:    rgba(0, 0, 0, 0.50);
+html.light {
+    --color-bg:        #f8f5ee;
+    --color-bg-elev:   #fffaf2;
+    --color-bg-hi:     #eee5d8;
+    --color-line:      #e0d3c0;
+    --color-line-hi:   #cab9a4;
+    --color-ink:       #241b13;
+    --color-muted:     #726657;
+    --color-faint:     #9a8b79;
+    --color-accent:    #b8643f;
+    --color-accent-hi: #8f472b;
+    --color-good:      #287a48;
+    --color-bad:       #c0392b;
 
-    --color-card:      #1f2229;
-    --color-card-hi:   #252830;
-    --color-card-sub:  #1a1c22;
+    --color-card:      #fffaf2;
+    --color-card-hi:   #f2eadf;
+    --color-card-sub:  #fbf1e4;
+    --color-blue-bg:   color-mix(in srgb, #b8643f 12%, transparent);
+    --color-blue-soft: color-mix(in srgb, #b8643f 18%, transparent);
+    --color-blue-fg:   #8f472b;
 
-    --color-blue-bg:   #1f3556;
-    --color-blue-soft: #2a4778;
-    --color-blue-fg:   #aecbfa;
+    --shadow-sm: 0 1px 2px rgba(45,32,20,0.08), 0 1px 3px rgba(45,32,20,0.08);
+    --shadow:    0 1px 2px rgba(45,32,20,0.10), 0 8px 24px rgba(45,32,20,0.10);
+    --shadow-lg: 0 4px 12px rgba(45,32,20,0.12), 0 18px 54px rgba(45,32,20,0.14);
+}
+
+html.dark {
+    --color-bg:        #0d0c0a;
+    --color-bg-elev:   #161310;
+    --color-bg-hi:     #1e1a14;
+    --color-line:      #2a241c;
+    --color-line-hi:   #3a3226;
+    --color-ink:       #ede7d8;
+    --color-muted:     #9a9180;
+    --color-faint:     #6a6355;
+    --color-accent:    #e6946b;
+    --color-accent-hi: #f1a57d;
+    --color-good:      #7bcc8b;
+    --color-bad:       #ff6a4a;
+
+    --color-card:      #1a1612;
+    --color-card-hi:   #221c16;
+    --color-card-sub:  #14110d;
+    --color-blue-bg:   color-mix(in srgb, #e6946b 14%, transparent);
+    --color-blue-soft: color-mix(in srgb, #e6946b 22%, transparent);
+    --color-blue-fg:   #f1a57d;
 
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.30);
     --shadow:    0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.45);
     --shadow-lg: 0 4px 12px rgba(0,0,0,0.50), 0 16px 48px rgba(0,0,0,0.60);
 }
 
-@theme {
-    --color-bg:        var(--color-bg);
-    --color-bg-elev:   var(--color-bg-elev);
-    --color-bg-hi:     var(--color-bg-hi);
-    --color-line:      var(--color-line);
-    --color-line-hi:   var(--color-line-hi);
-    --color-ink:       var(--color-ink);
-    --color-muted:     var(--color-muted);
-    --color-faint:     var(--color-faint);
-    --color-accent:    var(--color-accent);
-    --color-accent-hi: var(--color-accent-hi);
-    --color-good:      var(--color-good);
-    --color-bad:       var(--color-bad);
-    --color-card:      var(--color-card);
-    --color-card-hi:   var(--color-card-hi);
-    --color-card-sub:  var(--color-card-sub);
-    --color-blue-bg:   var(--color-blue-bg);
-    --color-blue-soft: var(--color-blue-soft);
-    --color-blue-fg:   var(--color-blue-fg);
-
-    --font-sans:  'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
-    --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
 /* Legacy aliases */
-:root {
+:root,
+html.light,
+html.dark {
     --c-bg:         var(--color-bg);
     --c-surface:    var(--color-bg-elev);
     --c-elevated:   var(--color-bg-hi);
@@ -178,21 +169,9 @@ body {
 .text-input::placeholder { color: var(--color-faint); }
 .text-input:focus { border-color: var(--color-accent); }
 
-/* Material Symbols helper — used by AppDrawer rail and any icon row */
-.msi {
-    font-family: 'Material Symbols Outlined';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 22px;
-    line-height: 1;
-    letter-spacing: normal;
-    font-variation-settings: 'wght' 200, 'FILL' 0, 'opsz' 24;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-}
-.msi.filled { font-variation-settings: 'wght' 300, 'FILL' 1, 'opsz' 24; }
-.msi.sm     { font-size: 18px; }
-.msi.xs     { font-size: 16px; }
+/* 内容型 app 的统一宽度容器. 工作区型 app(终端 / 文件 / Claude Code)铺满,不用. */
+.app-content { width: 100%; max-width: 1080px; margin-inline: auto; }
+
 input, textarea, button, select { font: inherit; }
 /* Soft 14px default for inputs. :where() forces 0 specificity so any Tailwind
    utility class (text-[30px] / text-base / 等) can override it. Tailwind v4 emits

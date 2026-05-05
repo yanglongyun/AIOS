@@ -20,8 +20,8 @@
   "qc_result_fail": "FAIL",
 
   "qc_label_finance": "记账: {month}",
-  "qc_label_store_root": "应用工坊",
-  "qc_label_store_app": "应用工坊: {name}",
+  "qc_label_base_root": "基地",
+  "qc_label_base_app": "基地: {name}",
   "qc_label_cryptobot_root": "炒币机",
   "qc_label_cryptobot_decision": "炒币机决策 #{id}",
   "qc_label_settings": "设置: {tab}",

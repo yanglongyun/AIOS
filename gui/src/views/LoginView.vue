@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import { Sprout, Eye, EyeOff } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
 
 const auth = useAuthStore();
@@ -75,7 +76,7 @@ onMounted(async () => {
             <!-- 品牌 -->
             <div class="mb-8 flex flex-col items-center gap-2">
                 <div class="grid h-14 w-14 place-items-center rounded-2xl bg-bg-elev">
-                    <span class="msi text-[32px] text-accent">grass</span>
+                    <Sprout :size="30" :stroke-width="1.6" class="text-accent" />
                 </div>
                 <div class="text-[20px] font-semibold tracking-tight text-ink">
                     AIOS<span class="text-accent">.</span>
@@ -105,7 +106,7 @@ onMounted(async () => {
                         class="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                         @click="showPassword = !showPassword"
                         :title="showPassword ? '隐藏' : '显示'">
-                        <span class="msi sm">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+                        <component :is="showPassword ? EyeOff : Eye" :size="16" :stroke-width="1.8" />
                     </button>
                 </label>
 

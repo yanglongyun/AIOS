@@ -2,7 +2,7 @@
   <div v-if="detailOpen" class="flex min-h-0 min-w-0 flex-1 flex-col bg-bg text-ink">
     <header class="flex shrink-0 items-center gap-2 px-4 py-3">
       <button class="icon-btn" title="__T_COMMON_BACK__" @click="backToList">
-        <span class="msi sm">arrow_back</span>
+        <ArrowLeft :size="16" :stroke-width="1.8" />
       </button>
 
       <div class="min-w-0 flex-1">
@@ -20,7 +20,7 @@
           :disabled="!currentConversationId"
           title="__T_CHAT_REMARKS__"
           @click="toggleRemarks">
-          <span class="msi sm">summarize</span>
+          <FileText :size="16" :stroke-width="1.8" />
         </button>
         <div v-if="showRemarks"
           class="fixed z-50 overflow-hidden rounded-2xl border border-line bg-bg-elev shadow-xl flex flex-col
@@ -49,22 +49,21 @@
           :disabled="!currentConversationId"
           title="__T_COMMON_MORE__"
           @click="showMore = !showMore">
-          <span class="msi sm">more_vert</span>
+          <MoreVertical :size="16" :stroke-width="1.8" />
         </button>
         <div v-if="showMore"
           class="fixed z-50 overflow-hidden rounded-2xl border border-line bg-bg-elev shadow-xl
                  top-[58px] right-3 w-44 p-1
                  max-md:left-auto max-md:right-3 max-md:w-48">
           <button class="menu-item" @click="renameCurrent">
-            <span class="msi sm">edit</span>__T_CHAT_RENAME_TITLE__
+            <Pencil :size="16" :stroke-width="1.8" class="text-muted" />__T_CHAT_RENAME_TITLE__
           </button>
           <button class="menu-item danger" @click="deleteCurrent">
-            <span class="msi sm">delete</span>__T_CHAT_DELETE_TITLE__
+            <Trash2 :size="16" :stroke-width="1.8" />__T_CHAT_DELETE_TITLE__
           </button>
         </div>
       </div>
 
-      <AppLauncher />
     </header>
 
     <ChatCore
@@ -80,20 +79,19 @@
   </div>
 
   <div v-else class="flex h-full flex-col bg-bg">
-    <header class="mx-auto flex w-full max-w-[820px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+    <header class="app-content flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
       <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_APP_CHAT__</h1>
       <div class="ml-auto flex items-center gap-2">
         <button
           class="inline-flex items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3.5 py-1.5 text-[13px] font-medium text-blue-fg transition-colors hover:bg-blue-soft"
           @click="newChat">
-          <span class="msi" style="font-size:16px">edit_square</span>
+          <FilePlus2 :size="16" :stroke-width="1.8" />
           <span>__T_CHAT_NEW_CONVERSATION__</span>
         </button>
-        <AppLauncher />
       </div>
     </header>
 
-    <div class="mx-auto w-full max-w-[820px] min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
+    <div class="app-content min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-3 max-md:pb-10">
       <HistoryPanel
         ref="historyRef"
         :active-id="currentConversationId"
@@ -103,8 +101,8 @@
 </template>
 
 <script setup>
-import AppLauncher from '@/components/AppLauncher.vue';
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { ArrowLeft, FileText, MoreVertical, Pencil, Trash2, FilePlus2 } from 'lucide-vue-next';
 import HistoryPanel from './History.vue';
 import ChatCore from './chat.vue';
 
@@ -310,8 +308,6 @@ watch(currentConversationId, (id) => {
   transition: background .12s;
 }
 .menu-item:hover { background: var(--color-bg-hi); }
-.menu-item .msi.sm { font-size: 16px; color: var(--color-muted); }
 .menu-item.danger { color: var(--color-bad); }
-.menu-item.danger .msi.sm { color: var(--color-bad); }
 .menu-item.danger:hover { background: color-mix(in srgb, var(--color-bad) 8%, transparent); }
 </style>

@@ -1,4 +1,6 @@
 <script setup>
+import { Play, Square } from 'lucide-vue-next';
+
 defineProps({
     status: { type: Object, required: true },
     canStart: { type: Boolean, default: false },
@@ -23,14 +25,14 @@ defineEmits(['start', 'stop', 'slider']);
             <button v-if="status.state.running"
                 class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-1.5 text-[12.5px] font-medium text-bad transition-colors hover:bg-line-hi"
                 @click="$emit('stop')">
-                <span class="msi" style="font-size:14px">stop</span>
+                <Square :size="14" :stroke-width="1.8" />
                 <span>__T_CRYPTOBOT_STOP__</span>
             </button>
             <button v-else :disabled="!canStart"
                 class="inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-1.5 text-[12.5px] font-medium transition-colors disabled:cursor-default disabled:opacity-50"
                 :class="canStart ? 'bg-blue-bg text-blue-fg hover:bg-line-hi' : 'bg-bg-hi text-muted'"
                 @click="$emit('start')">
-                <span class="msi" style="font-size:14px">play_arrow</span>
+                <Play :size="14" :stroke-width="1.8" />
                 <span>__T_CRYPTOBOT_START__</span>
             </button>
         </div>

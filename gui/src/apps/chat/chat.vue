@@ -36,7 +36,7 @@
                   <div class="md text-[14px]" v-html="renderMd(m.content)" />
                   <div v-if="m.remark"
                     class="mt-2 flex items-start gap-1.5 text-[12px] leading-[1.5] text-faint">
-                    <span class="msi shrink-0 mt-px" style="font-size:14px">summarize</span>
+                    <FileText :size="13" :stroke-width="1.8" class="shrink-0 mt-[3px]" />
                     <span>{{ m.remark }}</span>
                   </div>
                 </div>
@@ -138,7 +138,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { marked } from 'marked';
-import { ArrowUp, ChevronRight, Paperclip, Square } from 'lucide-vue-next';
+import { ArrowUp, ChevronRight, Paperclip, Square, FileText } from 'lucide-vue-next';
 import { connect, ensureConnected, on, send, wsStatus } from '../../system/ws.js';
 import aiAvatarUrl from './ai.png';
 const emit = defineEmits(['conversation-change', 'history-change']);

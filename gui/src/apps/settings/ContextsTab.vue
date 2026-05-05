@@ -8,7 +8,7 @@
       <button class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-2 text-[12.5px] text-muted hover:bg-line-hi hover:text-ink"
         :disabled="loading"
         @click="fetchItems">
-        <span class="msi sm" :class="{ spin: loading }">refresh</span>
+        <RotateCw :size="16" :stroke-width="1.8" :class="{ 'animate-spin': loading }" />
         <span>__T_COMMON_REFRESH__</span>
       </button>
     </div>

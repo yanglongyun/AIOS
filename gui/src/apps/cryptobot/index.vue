@@ -1,6 +1,6 @@
 <script setup>
-import AppLauncher from '@/components/AppLauncher.vue';
 import { computed, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue';
+import { ArrowLeft, ArrowLeftRight, Bot, CandlestickChart, ReceiptText, Wallet } from 'lucide-vue-next';
 import { useQuickChatStore } from '@/stores/quickChat';
 
 const qc = useQuickChatStore();
@@ -16,11 +16,11 @@ const API = '/apps/cryptobot';
 const INTERVALS = [1, 2, 5, 10, 15, 30, 60];
 
 const TABS = [
-    { key: 'agent',     label: '__T_CRYPTOBOT_TAB_AGENT__', icon: 'smart_toy' },
-    { key: 'decisions', label: '__T_CRYPTOBOT_TAB_DECISIONS__', icon: 'receipt_long' },
-    { key: 'trading',   label: '__T_CRYPTOBOT_TAB_TRADING__', icon: 'swap_horiz' },
-    { key: 'positions', label: '__T_CRYPTOBOT_TAB_POSITIONS__', icon: 'account_balance_wallet' },
-    { key: 'market',    label: '__T_CRYPTOBOT_TAB_MARKET__', icon: 'candlestick_chart' },
+    { key: 'agent',     label: '__T_CRYPTOBOT_TAB_AGENT__', icon: Bot },
+    { key: 'decisions', label: '__T_CRYPTOBOT_TAB_DECISIONS__', icon: ReceiptText },
+    { key: 'trading',   label: '__T_CRYPTOBOT_TAB_TRADING__', icon: ArrowLeftRight },
+    { key: 'positions', label: '__T_CRYPTOBOT_TAB_POSITIONS__', icon: Wallet },
+    { key: 'market',    label: '__T_CRYPTOBOT_TAB_MARKET__', icon: CandlestickChart },
 ];
 
 const GOAL_PRESETS = [
@@ -311,14 +311,13 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div v-if="selectedDecision" class="mx-auto flex h-full w-full max-w-[820px] flex-col bg-bg">
+    <div v-if="selectedDecision" class="app-content flex h-full flex-col bg-bg">
         <header class="flex flex-none items-center gap-2 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 @click="selectedDecision = null"
                 :title="'__T_CRYPTOBOT_BACK__'">
-                <span class="msi" style="font-size:20px">arrow_back</span>
+                <ArrowLeft :size="20" :stroke-width="1.8" />
             </button>
-            <AppLauncher class="ml-auto" />
         </header>
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
             <div class="mb-3 flex items-center gap-2">
@@ -340,7 +339,7 @@ watchEffect(() => {
     </div>
 
     <div v-else class="crypto-shell flex h-full flex-col bg-bg">
-        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
+        <header class="app-content flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <span class="grid h-7 w-7 place-items-center rounded-md font-mono text-[12px] font-bold text-bg"
                 style="background:linear-gradient(135deg,#fcd535,#f0b90b)">₿</span>
             <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_CRYPTOBOT_TITLE__</h1>
@@ -350,31 +349,30 @@ watchEffect(() => {
                     :class="status.state.running ? 'animate-status-pulse bg-good' : 'bg-faint'"></span>
                 {{ status.state.running ? '__T_CRYPTOBOT_RUNNING__' : '__T_CRYPTOBOT_STOPPED__' }}
             </span>
-            <AppLauncher class="ml-auto" />
         </header>
 
-        <div class="mx-auto w-full max-w-[1100px] flex-none px-8 pb-3 max-md:px-3">
+        <div class="app-content flex-none px-8 pb-3 max-md:px-3">
             <EquityPanel :status="status" />
         </div>
 
-        <nav class="cb-tabs mx-auto w-full max-w-[1100px] flex flex-none items-stretch gap-0 border-b border-line px-8 max-md:px-4 overflow-x-auto">
+        <nav class="cb-tabs app-content flex flex-none items-stretch gap-0 border-b border-line px-8 max-md:px-4 overflow-x-auto">
             <button v-for="t in TABS" :key="t.key"
                 class="cb-tab relative inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap border-0 bg-transparent px-3.5 pb-2.5 pt-2 text-[12.5px] font-medium transition-colors"
                 :class="activeTab === t.key ? 'is-active text-accent' : 'text-muted hover:text-ink'"
                 @click="activeTab = t.key">
-                <span class="msi" style="font-size:14px">{{ t.icon }}</span>
+                <component :is="t.icon" :size="14" :stroke-width="1.8" class="shrink-0" />
                 <span>{{ t.label }}</span>
             </button>
         </nav>
 
-        <div v-if="error" class="mx-auto w-full max-w-[1100px] mb-2 px-8 max-md:px-4">
+        <div v-if="error" class="app-content mb-2 px-8 max-md:px-4">
             <div class="rounded-[10px] px-3.5 py-2 text-[13px] text-bad"
                 style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
                 {{ error }}
             </div>
         </div>
 
-        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-5 max-md:px-3 max-md:pb-10 max-md:pt-4">
+        <div class="app-content min-h-0 flex-1 overflow-auto px-8 pb-15 pt-5 max-md:px-3 max-md:pb-10 max-md:pt-4">
             <div class="space-y-5">
                 <AgentTab v-if="activeTab === 'agent'"
                     :ex-form="exForm"

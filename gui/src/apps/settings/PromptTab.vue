@@ -54,14 +54,14 @@ const save = async () => {
                 class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-blue-bg px-3 text-[12.5px] font-semibold text-blue-fg transition-colors hover:bg-line-hi disabled:opacity-50"
                 :disabled="saving || loading"
                 @click="save">
-                <span class="msi sm">save</span>
+                <Save :size="16" :stroke-width="1.8" />
                 <span>{{ saving ? '__T_COMMON_SAVING__' : '__T_COMMON_SAVE__' }}</span>
             </button>
         </header>
 
         <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 max-md:px-4 max-md:pb-10">
             <div v-if="loading" class="flex flex-col items-center gap-2 py-15 text-muted">
-                <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
+                <Hourglass :size="28" :stroke-width="1.6" style="color:var(--color-faint)" />
                 <div class="text-[14px]">__T_COMMON_LOADING__</div>
             </div>
             <div v-else-if="error" class="rounded-[10px] px-3.5 py-2 text-[13px] text-bad"

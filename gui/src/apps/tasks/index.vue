@@ -1,6 +1,6 @@
 <script setup>
-import AppLauncher from '@/components/AppLauncher.vue';
-import { ref, computed, nextTick, onMounted, onUnmounted, watchEffect } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted, watchEffect, markRaw } from 'vue';
+import { ArrowLeft, Hourglass, StopCircle, RotateCcw, ChevronsUpDown, RotateCw, Inbox, FilterX, History, CheckCircle2, XCircle, AlertCircle } from 'lucide-vue-next';
 import { useTasksStore } from '@/stores/tasks';
 import { useQuickChatStore } from '@/stores/quickChat';
 import * as api from '@/utils/api';
@@ -15,11 +15,11 @@ const tasks = useTasksStore();
 const STATUS_META = {
     running:   { label: '__T_TASKS_STATUS_RUNNING__',         tone: 'accent', dot: true  },
     pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__',   tone: 'accent', dot: true  },
-    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: 'check_circle' },
-    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: 'check_circle' },
-    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: 'cancel' },
-    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: 'cancel' },
-    error:     { label: '__T_TASKS_STATUS_ERROR__',           tone: 'bad',    icon: 'error' },
+    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: markRaw(CheckCircle2) },
+    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: markRaw(CheckCircle2) },
+    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: markRaw(XCircle) },
+    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: markRaw(XCircle) },
+    error:     { label: '__T_TASKS_STATUS_ERROR__',           tone: 'bad',    icon: markRaw(AlertCircle) },
 };
 const statusMeta = (s) => STATUS_META[s] || { label: s || '__T_TASKDETAIL_ROLE_UNKNOWN__', tone: 'muted' };
 const TERMINAL = new Set(['done', 'completed', 'aborted', 'stopped', 'error']);
@@ -234,12 +234,11 @@ function messageRoleLabel(role) {
     <div class="tasks-shell flex h-full flex-col">
 
         <!-- ============== DETAIL ============== -->
-        <div v-if="selectedId" class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
+        <div v-if="selectedId" class="app-content flex h-full min-w-0 flex-col">
             <header class="flex flex-none items-center gap-2 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
                 <button class="header-icon" @click="backToList" :title="'__T_TASKDETAIL_BACK__'">
-                    <span class="msi" style="font-size:20px">arrow_back</span>
+                    <ArrowLeft :size="18" :stroke-width="1.8" />
                 </button>
-                <AppLauncher class="ml-auto flex-none" />
             </header>
 
             <div v-if="detailError" class="mx-8 mt-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-4"
@@ -248,7 +247,7 @@ function messageRoleLabel(role) {
             </div>
 
             <div v-if="!selected && !detailError" class="flex flex-1 flex-col items-center gap-2 py-15 text-muted">
-                <span class="msi text-faint" style="font-size:30px">hourglass_empty</span>
+                <Hourglass :size="28" :stroke-width="1.6" class="text-faint" />
                 <div class="text-[14px]">__T_TASKS_LOADING__</div>
             </div>
 
@@ -265,7 +264,7 @@ function messageRoleLabel(role) {
                         <span v-if="statusMeta(selected.status).dot"
                             class="h-1.5 w-1.5 rounded-full animate-status-pulse"
                             :class="TONE_BG[statusMeta(selected.status).tone]"></span>
-                        <span v-else class="msi" style="font-size:13px">{{ statusMeta(selected.status).icon }}</span>
+                        <component v-else-if="statusMeta(selected.status).icon" :is="statusMeta(selected.status).icon" :size="13" :stroke-width="1.8" />
                         {{ statusMeta(selected.status).label }}
                     </span>
                     <span v-if="selected.app && selected.app !== 'tasks'" class="app-tag">{{ selected.app }}</span>
@@ -288,11 +287,11 @@ function messageRoleLabel(role) {
                         </div>
                     </div>
                     <button v-if="isActive(selected)" class="run-btn is-stop" @click="stopFromDetail">
-                        <span class="msi" style="font-size:22px">stop_circle</span>
+                        <StopCircle :size="20" :stroke-width="1.8" />
                         <span>__T_TASKS_STOP__</span>
                     </button>
                     <button v-else class="run-btn is-go" @click="rerunFromDetail">
-                        <span class="msi" style="font-size:22px">replay</span>
+                        <RotateCcw :size="20" :stroke-width="1.8" />
                         <span>__T_TASKS_RUN_AGAIN__</span>
                     </button>
                 </div>
@@ -310,17 +309,10 @@ function messageRoleLabel(role) {
                     <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-[12px] border border-line bg-card px-4 py-3 text-[13px] leading-[1.6] text-ink">{{ selected.prompt }}</pre>
                 </section>
 
-                <!-- Result -->
-                <section v-if="selected.response" class="mb-7">
-                    <div class="section-label">__T_TASKS_RESPONSE__</div>
-                    <div class="md rounded-[12px] border border-line bg-card px-4 py-3.5 text-[13.5px] leading-[1.65] text-ink break-words"
-                         v-html="renderMd(selected.response)"></div>
-                </section>
-
                 <!-- Run history -->
-                <details v-if="detailMessages.length" class="mt-2 rounded-[12px] border border-line bg-bg-elev">
+                <details v-if="detailMessages.length" class="mb-7 rounded-[12px] border border-line bg-bg-elev">
                     <summary class="cursor-pointer select-none list-none px-3.5 py-2.5 text-[12px] text-muted hover:text-ink">
-                        <span class="msi align-[-2px]" style="font-size:14px">unfold_more</span>
+                        <ChevronsUpDown :size="14" :stroke-width="1.8" class="inline-block align-[-2px]" />
                         __T_TASKDETAIL_MESSAGES_TITLE__
                         <span class="text-faint">·  {{ '__T_TASKDETAIL_MESSAGES_COUNT__'.replace('{count}', detailMessages.length) }}</span>
                     </summary>
@@ -337,11 +329,18 @@ function messageRoleLabel(role) {
                         </li>
                     </ol>
                 </details>
+
+                <!-- Result -->
+                <section v-if="selected.response" class="mb-7">
+                    <div class="section-label">__T_TASKS_RESPONSE__</div>
+                    <div class="md rounded-[12px] border border-line bg-card px-4 py-3.5 text-[13.5px] leading-[1.65] text-ink break-words"
+                         v-html="renderMd(selected.response)"></div>
+                </section>
             </div>
         </div>
 
         <!-- ============== LIST ============== -->
-        <div v-else class="mx-auto flex h-full w-full min-w-0 max-w-[720px] flex-col">
+        <div v-else class="app-content flex h-full min-w-0 flex-col">
             <header class="flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
                 <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_TASKS_TITLE__</h1>
                 <div class="ml-auto flex items-center gap-2">
@@ -349,9 +348,8 @@ function messageRoleLabel(role) {
                         :disabled="tasks.loading"
                         @click="tasks.fetch"
                         :title="'__T_TASKS_REFRESH__'">
-                        <span class="msi" :class="{ 'animate-spin': tasks.loading }" style="font-size:18px">refresh</span>
+                        <RotateCw :size="18" :stroke-width="1.8" :class="{ 'animate-spin': tasks.loading }" />
                     </button>
-                    <AppLauncher />
                 </div>
             </header>
 
@@ -393,14 +391,14 @@ function messageRoleLabel(role) {
             <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-3 max-md:pb-10">
                 <!-- Empty -->
                 <div v-if="!tasks.tasks.length" class="flex flex-col items-center gap-2 py-20 text-muted">
-                    <span class="msi text-faint" style="font-size:32px">inbox</span>
+                    <Inbox :size="30" :stroke-width="1.6" class="text-faint" />
                     <div class="text-[14px]">{{ tasks.loading ? '__T_TASKS_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
                     <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
                 </div>
 
                 <!-- No match for filter -->
                 <div v-else-if="!filteredAll.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                    <span class="msi text-faint" style="font-size:28px">filter_alt_off</span>
+                    <FilterX :size="26" :stroke-width="1.6" class="text-faint" />
                     <div class="text-[13px]">__T_TASKS_FILTER_NO_MATCH__</div>
                 </div>
 
@@ -434,7 +432,7 @@ function messageRoleLabel(role) {
                                 <button class="row-stop"
                                     :title="'__T_TASKS_STOP__'"
                                     @click.stop="tasks.stop(t.id)">
-                                    <span class="msi" style="font-size:15px">stop_circle</span>
+                                    <StopCircle :size="14" :stroke-width="1.8" class="inline-block" />
                                     __T_TASKS_STOP__
                                 </button>
                             </li>
@@ -444,7 +442,7 @@ function messageRoleLabel(role) {
                     <!-- Recent group -->
                     <section v-if="grouped.recent.length" class="mb-5">
                         <div v-if="grouped.active.length" class="section-h">
-                            <span class="msi text-faint" style="font-size:14px">history</span>
+                            <History :size="14" :stroke-width="1.8" class="text-faint" />
                             __T_TASKS_SECTION_RECENT__
                             <span class="ct">{{ grouped.recent.length }}</span>
                         </div>
@@ -454,7 +452,7 @@ function messageRoleLabel(role) {
                                 @click="openDetail(t.id)">
                                 <span class="task-status-dot flex-none"
                                     :class="['tone-' + statusMeta(t.status).tone]">
-                                    <span v-if="statusMeta(t.status).icon" class="msi" style="font-size:14px">{{ statusMeta(t.status).icon }}</span>
+                                    <component v-if="statusMeta(t.status).icon" :is="statusMeta(t.status).icon" :size="13" :stroke-width="1.8" />
                                 </span>
                                 <div class="min-w-0 flex-1">
                                     <div class="break-words text-[14px] text-ink truncate">
@@ -472,11 +470,6 @@ function messageRoleLabel(role) {
                         </ul>
                     </section>
 
-                    <!-- Bottom tip -->
-                    <div class="tip-card">
-                        <span class="ic">💡</span>
-                        <span>__T_TASKS_TIP_FOOTER__</span>
-                    </div>
                 </template>
             </div>
         </div>
@@ -485,31 +478,9 @@ function messageRoleLabel(role) {
 </template>
 
 <style scoped>
-/* Things 3 风 palette —— 仅 light 模式下作用于 tasks app;dark 模式落回全局 dark 主题 */
 .tasks-shell {
     color: var(--color-ink);
     background: var(--color-bg);
-}
-:root.light .tasks-shell {
-    --color-bg:        #fbfbfa;
-    --color-bg-elev:   #ffffff;
-    --color-bg-hi:     #f3f3f0;
-    --color-card:      #ffffff;
-    --color-card-hi:   #fbfbfa;
-    --color-card-sub:  #fbfbf6;
-    --color-line:      #ebebe6;
-    --color-line-hi:   #d8d8d2;
-    --color-ink:       #1c1c1a;
-    --color-muted:     #7a7a72;
-    --color-faint:     #b0b0a8;
-    --color-accent:    #2563eb;
-    --color-accent-hi: #1d4ed8;
-    --color-blue-bg:   #dbeafe;
-    --color-blue-soft: #bfdbfe;
-    --color-blue-fg:   #1e40af;
-    --color-good:      #1a8a4a;
-    --color-bad:       #b91c1c;
-    --color-warm:      #fef9ec;
 }
 
 .composer-input::placeholder { color: var(--color-faint); }
@@ -517,31 +488,19 @@ function messageRoleLabel(role) {
 .animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
 @keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-.animate-spin { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Composer card */
+/* Composer card —— 与 chat / store / cryptobot 一致:边框 + 微 focus 高亮,无重阴影 */
 .composer-card {
-    background: var(--color-card);
+    background: var(--color-bg-elev);
     border: 1px solid var(--color-line);
     border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.025);
-    transition: box-shadow .15s, border-color .15s;
+    transition: border-color .15s;
 }
-.composer-card:focus-within {
-    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03),
-                0 4px 14px rgba(0,0,0,0.04),
-                0 0 0 4px color-mix(in srgb, var(--color-accent) 12%, transparent);
-}
+.composer-card:focus-within { border-color: var(--color-accent); }
 .composer-btn {
-    background: var(--color-accent);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background: var(--color-blue-bg);
+    color: var(--color-blue-fg);
 }
-.composer-btn:hover:not(:disabled) {
-    background: var(--color-accent-hi);
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 45%, transparent);
-}
+.composer-btn:hover:not(:disabled) { background: var(--color-blue-soft); }
 
 /* Section header */
 .section-h {
@@ -561,17 +520,16 @@ function messageRoleLabel(role) {
 
 /* List card */
 .task-card {
-    background: var(--color-card);
+    background: var(--color-bg-elev);
     border: 1px solid var(--color-line);
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04);
+    border-radius: 14px;
     overflow: hidden;
 }
 
 .task-row + .task-row { border-top: 1px solid var(--color-line); }
-.task-row:hover { background: color-mix(in srgb, var(--color-bg) 60%, var(--color-card)); }
-.task-row.is-active { box-shadow: inset 3px 0 0 0 var(--color-accent); background: color-mix(in srgb, var(--color-blue-bg) 30%, transparent); }
-.task-row.is-active:hover { background: color-mix(in srgb, var(--color-blue-bg) 50%, transparent); }
+.task-row:hover { background: var(--color-bg-hi); }
+.task-row.is-active { box-shadow: inset 3px 0 0 0 var(--color-accent); background: var(--color-blue-bg); }
+.task-row.is-active:hover { background: var(--color-blue-soft); }
 
 /* Spinner ring for active row */
 .task-spinner {
@@ -587,7 +545,7 @@ function messageRoleLabel(role) {
     content: '';
     width: 14px; height: 14px;
     border-radius: 50%;
-    background: var(--color-card);
+    background: var(--color-bg-elev);
 }
 
 /* Status dot for recent rows */
@@ -691,14 +649,13 @@ function messageRoleLabel(role) {
     align-items: center;
     gap: 16px;
     padding: 16px 18px;
-    background: var(--color-card);
+    background: var(--color-bg-elev);
     border: 1px solid var(--color-line);
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04);
+    border-radius: 14px;
 }
 .run-card.is-active {
-    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
-    background: color-mix(in srgb, var(--color-blue-bg) 30%, var(--color-card));
+    border-color: var(--color-accent);
+    background: var(--color-blue-bg);
 }
 .run-card-body { flex: 1; min-width: 0; }
 .run-card-title {
@@ -716,37 +673,20 @@ function messageRoleLabel(role) {
 .run-btn {
     appearance: none; border: 0;
     display: inline-flex; align-items: center; gap: 8px;
-    height: 44px;
+    height: 40px;
     padding: 0 18px;
     border-radius: 999px;
-    color: #fff;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     flex: none;
-    transition: background .14s, box-shadow .14s;
+    transition: background .14s;
 }
-.run-btn.is-go { background: var(--color-accent); box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 30%, transparent); }
-.run-btn.is-go:hover {
-    background: var(--color-accent-hi);
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 45%, transparent);
+.run-btn.is-go { background: var(--color-blue-bg); color: var(--color-blue-fg); }
+.run-btn.is-go:hover { background: var(--color-blue-soft); }
+.run-btn.is-stop {
+    background: color-mix(in srgb, var(--color-bad) 14%, transparent);
+    color: var(--color-bad);
 }
-.run-btn.is-stop { background: var(--color-bad); box-shadow: 0 4px 12px color-mix(in srgb, var(--color-bad) 30%, transparent); }
-.run-btn.is-stop:hover { background: #991b1b; box-shadow: 0 6px 16px color-mix(in srgb, var(--color-bad) 45%, transparent); }
-
-/* Tip card */
-.tip-card {
-    margin-top: 26px;
-    padding: 14px 16px;
-    background: var(--color-warm);
-    border: 1px dashed color-mix(in srgb, #d4a72c 35%, transparent);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--color-muted);
-    font-size: 12.5px;
-    line-height: 1.55;
-}
-.tip-card .ic { font-size: 18px; flex: none; }
+.run-btn.is-stop:hover { background: color-mix(in srgb, var(--color-bad) 22%, transparent); }
 </style>

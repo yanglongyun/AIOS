@@ -1,8 +1,8 @@
 const appLoaders = [
-    () => import("./notebook/index.js"),
-    () => import("./finance/index.js"),
+    () => import("./sysinfo/index.js"),
+    () => import("./workshop/index.js"),
+    () => import("./claude-code/index.js"),
     () => import("./cryptobot/index.js"),
-    () => import("./demo/index.js"),
 ];
 
 export {

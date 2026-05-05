@@ -1,4 +1,5 @@
 <script setup>
+import { ChevronDown, ChevronRight, History } from 'lucide-vue-next';
 import { fmtTime } from '../formatters';
 
 defineProps({
@@ -12,7 +13,7 @@ defineEmits(['more', 'select']);
 <template>
     <section>
         <div v-if="!decisions.length" class="flex flex-col items-center gap-2 rounded-2xl border border-line bg-bg-elev py-10 text-muted">
-            <span class="msi" style="font-size:32px;color:var(--color-faint)">history</span>
+            <History :size="32" :stroke-width="1.6" class="text-faint" />
             <div class="text-[13px]">__T_CRYPTOBOT_LOGS_EMPTY__</div>
         </div>
         <ul v-else class="m-0 flex list-none flex-col gap-1 p-0">
@@ -30,14 +31,14 @@ defineEmits(['more', 'select']);
                             <span>__T_CRYPTOBOT_TASK__ {{ d.task_id || '—' }}</span>
                         </div>
                     </div>
-                    <span class="msi sm mt-[3px] flex-none text-faint">chevron_right</span>
+                    <ChevronRight :size="16" :stroke-width="1.8" class="mt-[3px] flex-none text-faint" />
                 </button>
             </li>
         </ul>
         <button v-if="hasMore"
             class="mt-3 flex w-full cursor-pointer items-center justify-center gap-1 rounded-xl border-0 bg-bg-hi px-3 py-2 text-[12.5px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink"
             @click="$emit('more')">
-            <span class="msi" style="font-size:14px">expand_more</span>
+            <ChevronDown :size="14" :stroke-width="1.8" />
             <span>__T_CRYPTOBOT_LOAD_MORE__</span>
         </button>
     </section>

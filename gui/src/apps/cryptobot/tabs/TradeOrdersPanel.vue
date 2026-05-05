@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
+import { Hourglass, RefreshCw } from 'lucide-vue-next';
 import { fmtMs, fmtSmart } from '../formatters';
 
 const props = defineProps({
@@ -56,7 +57,7 @@ const orderStateLabel = (s) => {
         <div class="flex-1"></div>
         <button class="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-bg-hi text-muted hover:bg-line-hi hover:text-ink"
             @click="$emit('refresh')" title="__T_COMMON_REFRESH__">
-            <span class="msi sm" :class="{ spin: loading }">refresh</span>
+            <RefreshCw :size="18" :stroke-width="1.8" :class="{ spin: loading }" />
         </button>
     </div>
 
@@ -65,7 +66,7 @@ const orderStateLabel = (s) => {
         {{ error }}
     </div>
     <div v-else-if="loading && !orders.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-        <span class="msi" style="font-size:30px;color:var(--color-faint)">hourglass_empty</span>
+        <Hourglass :size="30" :stroke-width="1.6" class="text-faint" />
         <div class="text-[14px]">__T_CRYPTOBOT_LOADING__</div>
     </div>
     <div v-else-if="!orders.length" class="rounded-2xl border border-line bg-bg-elev py-12 text-center text-[12.5px] text-faint">

@@ -6,8 +6,6 @@ import * as api from "../utils/api.js";
 const routes = [
   { path: "/", redirect: "/app/chat" },
   { path: "/login", name: "login", component: LoginView, meta: { public: true } },
-  // todo 已并入 tasks,旧链接 / 书签自动重定向
-  { path: "/app/todo/:p1?/:p2?", redirect: "/app/tasks" },
   { path: "/app/:id/:p1?/:p2?", component: AppShell },
   { path: "/:pathMatch(.*)*", redirect: "/" }
 ];

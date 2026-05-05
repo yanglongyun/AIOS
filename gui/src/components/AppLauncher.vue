@@ -3,6 +3,7 @@
 // 由各 app 自行 import 并放置(在 header 内 / 浮在角上 / 自定义皆可)。
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { MessageCircle, LayoutGrid, Moon, Sun } from 'lucide-vue-next';
 import { apps } from '../apps.js';
 import { useQuickChatStore } from '@/stores/quickChat';
 import { useThemeStore } from '@/stores/theme';
@@ -57,13 +58,13 @@ onBeforeUnmount(() => {
                 class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 :class="{ '!bg-blue-bg !text-blue-fg': qc.open }"
                 @click="onChat" :title="'__T_QC_TITLE__'" :aria-label="'__T_QC_TITLE__'">
-                <span class="msi" style="font-size:20px">chat_bubble</span>
+                <MessageCircle :size="20" :stroke-width="1.8" />
             </button>
             <button
                 class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
                 :class="{ '!bg-blue-bg !text-blue-fg': appsOpen }"
                 @click="toggleApps" :title="'__T_NAV_APPS__'" :aria-label="'__T_NAV_APPS__'">
-                <span class="msi" style="font-size:22px">apps</span>
+                <LayoutGrid :size="22" :stroke-width="1.8" />
             </button>
 
             <div v-if="appsOpen" role="menu"
@@ -79,8 +80,7 @@ onBeforeUnmount(() => {
                             @click="goApp(app.id)">
                             <span class="grid h-12 w-12 place-items-center rounded-2xl bg-bg transition-colors group-hover:bg-bg-elev"
                                 :class="{ '!bg-bg-elev': route.params.id === app.id }">
-                                <span class="msi" style="font-size:28px"
-                                    :class="{ filled: route.params.id === app.id }">{{ app.icon }}</span>
+                                <component :is="app.icon" :size="26" :stroke-width="1.6" />
                             </span>
                             <span class="line-clamp-2 break-all text-center text-[12px] font-medium leading-tight">{{ app.name }}</span>
                         </button>
@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
                         class="flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left text-[13px] text-ink transition-colors hover:bg-bg-hi"
                         @click="theme.toggle"
                         :title="isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__'">
-                        <span class="msi text-muted" style="font-size:20px">{{ isLight ? 'dark_mode' : 'light_mode' }}</span>
+                        <component :is="isLight ? Moon : Sun" :size="18" :stroke-width="1.8" class="text-muted" />
                         <span>{{ isLight ? '__T_THEME_TO_DARK__' : '__T_THEME_TO_LIGHT__' }}</span>
                     </button>
                 </div>

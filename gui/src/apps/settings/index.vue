@@ -1,10 +1,9 @@
 <template>
   <div class="flex h-full flex-col bg-bg">
     <header class="flex-none border-b border-line pt-7 max-md:pt-5">
-      <div class="mx-auto flex max-w-[720px] flex-col gap-4.5 px-8 max-md:px-4">
+      <div class="app-content flex flex-col gap-4.5 px-8 max-md:px-4">
         <div class="flex items-baseline justify-between gap-3">
           <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_SETTINGS_TITLE__</h1>
-          <AppLauncher class="self-center" />
         </div>
         <nav class="tabs flex items-stretch gap-1 -mx-8 overflow-x-auto px-8 max-md:-mx-4 max-md:px-4" role="tablist">
           <button
@@ -23,7 +22,7 @@
     </header>
 
     <div class="min-h-0 flex-1 overflow-y-auto">
-      <div class="mx-auto max-w-[720px] px-8 pb-15 pt-7 max-md:px-4 max-md:pb-10 max-md:pt-5">
+      <div class="app-content px-8 pb-15 pt-7 max-md:px-4 max-md:pb-10 max-md:pt-5">
         <TabContent v-bind="tabContentProps" />
       </div>
     </div>
@@ -31,7 +30,6 @@
 </template>
 
 <script setup>
-import AppLauncher from '@/components/AppLauncher.vue';
 import { computed, defineComponent, h, onMounted, ref, watchEffect } from 'vue';
 import { useQuickChatStore } from '@/stores/quickChat';
 

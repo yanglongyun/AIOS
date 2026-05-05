@@ -52,7 +52,5 @@
   "tasks_filter_failed": "Failed",
   "tasks_filter_no_match": "No tasks match",
   "tasks_no_title": "Untitled",
-  "tasks_count_suffix": "·  {count} total",
-
-  "tasks_tip_footer": "Write something above to hand it to AI. Tap any task for run history or to run it again."
+  "tasks_count_suffix": "·  {count} total"
 }

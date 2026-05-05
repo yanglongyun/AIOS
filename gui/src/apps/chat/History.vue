@@ -44,14 +44,14 @@
             :title="c.pinned ? '__T_CHAT_UNPIN__' : '__T_CHAT_PIN__'"
             class="grid h-7 w-7 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg hover:text-accent"
             :class="{ '!text-accent': c.pinned }">
-            <span class="msi" :class="{ filled: c.pinned }" style="font-size:15px">push_pin</span>
+            <Pin :size="15" :stroke-width="1.8" :fill="c.pinned ? 'currentColor' : 'none'" />
           </button>
           <button
             v-if="deletingId !== c.conversation_id"
             @click.stop="startRename(c)"
             :title="'__T_NOTEBOOK_RENAME__'"
             class="grid h-7 w-7 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-faint transition-colors hover:bg-bg hover:text-ink">
-            <span class="msi" style="font-size:15px">edit</span>
+            <Pencil :size="15" :stroke-width="1.8" />
           </button>
           <span v-if="deletingId === c.conversation_id" class="px-1.5 text-[11px] font-medium text-bad">__T_CHAT_DELETE_CONFIRM_SHORT__</span>
           <button
@@ -61,7 +61,7 @@
             :class="deletingId === c.conversation_id
                 ? 'bg-bad text-white'
                 : 'bg-transparent text-faint hover:bg-bg hover:text-bad'">
-            <span class="msi" style="font-size:15px">delete</span>
+            <Trash2 :size="15" :stroke-width="1.8" />
           </button>
         </div>
       </template>
@@ -72,6 +72,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue';
+import { Pin, Pencil, Trash2 } from 'lucide-vue-next';
 
 defineProps({
   activeId: { type: String, default: null }

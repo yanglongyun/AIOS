@@ -2,6 +2,7 @@
 // 应用内浮层"问 AI" — 顶栏右下方挂出的面板，类似 AppLauncher 的下拉。
 // 点击触发按钮（标了 [data-qc-trigger]）或面板内不会关闭；点其它地方或 Esc 关闭。
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Bot, X, Link, Link2 } from 'lucide-vue-next';
 import ChatCore from '@/apps/chat/chat.vue';
 import { useQuickChatStore } from '@/stores/quickChat';
 
@@ -51,26 +52,26 @@ watch(visible, (v) => {
             class="qc-panel fixed top-[64px] right-4 z-[95] flex w-[440px] min-h-0 flex-col overflow-hidden rounded-2xl border border-line bg-bg-elev max-md:left-3 max-md:right-3 max-md:top-[58px] max-md:w-auto">
             <header class="flex flex-none items-center justify-between gap-3 border-b border-line px-3.5 py-3">
                 <div class="flex min-w-0 items-center gap-2">
-                    <span class="msi" style="font-size:20px">smart_toy</span>
+                    <Bot :size="20" :stroke-width="1.8" />
                     <span class="truncate text-[13px] font-medium text-ink">__T_QC_TITLE__</span>
                 </div>
                 <button @click="close" :aria-label="'__T_QC_CLOSE__'"
                     class="grid h-[30px] w-[30px] cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink">
-                    <span class="msi" style="font-size:18px">close</span>
+                    <X :size="18" :stroke-width="1.8" />
                 </button>
             </header>
 
             <div v-if="ctx" class="flex flex-none items-center gap-2 border-b border-line bg-bg px-3.5 py-2 text-[12px] text-muted">
-                <span class="msi text-faint" style="font-size:14px">link</span>
+                <Link :size="14" :stroke-width="1.8" class="text-faint" />
                 <span class="flex-1 min-w-0 truncate"
                     :class="attached ? 'text-ink' : 'text-faint line-through'">{{ ctx.label || '__T_QC_CONTEXT_DEFAULT__' }}</span>
                 <button v-if="attached" @click="qc.includeContext = false" :title="'__T_QC_CONTEXT_DROP__'"
                     class="grid h-[22px] w-[22px] cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink">
-                    <span class="msi" style="font-size:14px">close</span>
+                    <X :size="14" :stroke-width="1.8" />
                 </button>
                 <button v-else @click="qc.includeContext = true" :title="'__T_QC_CONTEXT_REATTACH__'"
                     class="grid h-[22px] w-[22px] cursor-pointer place-items-center rounded-full border-0 bg-transparent text-accent transition-colors hover:bg-bg-hi">
-                    <span class="msi" style="font-size:14px">add_link</span>
+                    <Link2 :size="14" :stroke-width="1.8" />
                 </button>
             </div>
 

@@ -1,4 +1,5 @@
 <script setup>
+import { Hourglass, RefreshCw } from 'lucide-vue-next';
 import { fmtNum, fmtSmart } from '../formatters';
 
 defineProps({
@@ -12,7 +13,7 @@ defineEmits(['refresh']);
 
 <template>
     <div v-if="loading && !data" class="flex flex-col items-center gap-2 py-15 text-muted">
-        <span class="msi text-faint" style="font-size:30px">hourglass_empty</span>
+        <Hourglass :size="30" :stroke-width="1.6" class="text-faint" />
         <div class="text-[14px]">__T_CRYPTOBOT_LOADING__</div>
     </div>
     <div v-else-if="error" class="rounded-md px-3 py-2 text-[13px] text-bad"
@@ -32,7 +33,7 @@ defineEmits(['refresh']);
                 </div>
                 <button class="grid h-7 w-7 cursor-pointer place-items-center rounded-md border-0 bg-bg-hi text-muted hover:bg-line-hi hover:text-ink"
                     @click="$emit('refresh')" :title="'__T_COMMON_REFRESH__'">
-                    <span class="msi" :class="{ spin: loading }" style="font-size:14px">refresh</span>
+                    <RefreshCw :size="14" :stroke-width="1.8" :class="{ spin: loading }" />
                 </button>
             </div>
         </section>

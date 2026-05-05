@@ -1,4 +1,6 @@
 <script setup>
+import { Cable, Check } from 'lucide-vue-next';
+
 defineProps({
     exForm: { type: Object, required: true },
     testingEx: { type: Boolean, default: false },
@@ -43,7 +45,7 @@ defineEmits([
             <button :disabled="testingEx"
                 class="inline-flex items-center gap-1.5 rounded-full border-0 bg-bg-hi px-3 py-1.5 text-[12.5px] font-medium text-muted transition-colors hover:bg-line-hi hover:text-ink disabled:cursor-default disabled:opacity-50"
                 @click="$emit('test')">
-                <span class="msi" style="font-size:14px">cable</span>
+                <Cable :size="14" :stroke-width="1.8" />
                 <span>{{ testingEx ? '__T_CRYPTOBOT_TESTING__' : '__T_CRYPTOBOT_TEST_CONNECTION__' }}</span>
             </button>
             <span v-if="testResult" class="text-[12px] font-medium" :class="testResult.ok ? 'text-good' : 'text-bad'">
@@ -52,7 +54,7 @@ defineEmits([
             <div class="flex-1"></div>
             <button class="inline-flex items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 py-1.5 text-[12.5px] font-semibold text-blue-fg transition-colors hover:bg-line-hi"
                 @click="$emit('save')">
-                <span class="msi" style="font-size:14px">check</span>
+                <Check :size="14" :stroke-width="1.8" />
                 <span>__T_COMMON_SAVE__</span>
             </button>
         </div>

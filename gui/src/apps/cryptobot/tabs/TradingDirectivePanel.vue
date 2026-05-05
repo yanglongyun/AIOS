@@ -1,4 +1,13 @@
 <script setup>
+import { AlertTriangle, Check, Flame, Scale, Shield, SlidersHorizontal } from 'lucide-vue-next';
+
+const presetIcon = (key) => ({
+    conservative: Shield,
+    balanced: Scale,
+    aggressive: Flame,
+    custom: SlidersHorizontal,
+}[key] || SlidersHorizontal);
+
 defineProps({
     presets: { type: Array, default: () => [] },
     goalPreset: { type: String, default: 'custom' },
@@ -11,7 +20,7 @@ defineEmits(['preset', 'update:goal', 'save']);
 <template>
     <div class="mb-3 flex items-start gap-2 rounded-xl px-3.5 py-2 text-[12px] leading-[1.5]"
         style="background:color-mix(in srgb, var(--color-warn) 10%, transparent); color:var(--color-warn)">
-        <span class="msi mt-px shrink-0" style="font-size:14px">warning</span>
+        <AlertTriangle :size="14" :stroke-width="1.8" class="mt-px shrink-0" />
         <span>__T_CRYPTOBOT_RISK_WARNING_SHORT__</span>
     </div>
 
@@ -22,7 +31,7 @@ defineEmits(['preset', 'update:goal', 'save']);
                 class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] transition-colors"
                 :class="goalPreset === p.key ? 'border-transparent bg-blue-bg text-blue-fg' : 'border-line-hi bg-transparent text-muted hover:bg-bg-hi hover:text-ink'"
                 @click="$emit('preset', p.key)">
-                <span class="msi" style="font-size:14px">{{ p.icon }}</span>
+                <component :is="presetIcon(p.key)" :size="14" :stroke-width="1.8" />
                 <span>{{ p.label }}</span>
             </button>
         </div>
@@ -36,7 +45,7 @@ defineEmits(['preset', 'update:goal', 'save']);
         <div class="mt-4 flex items-center justify-end">
             <button class="inline-flex items-center gap-1.5 rounded-full border-0 bg-blue-bg px-4 py-1.5 text-[12.5px] font-semibold text-blue-fg transition-colors hover:bg-line-hi"
                 @click="$emit('save')">
-                <span class="msi" style="font-size:14px">check</span>
+                <Check :size="14" :stroke-width="1.8" />
                 <span>__T_COMMON_SAVE__</span>
             </button>
         </div>

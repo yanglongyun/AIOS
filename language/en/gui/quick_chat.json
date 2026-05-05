@@ -20,8 +20,8 @@
   "qc_result_fail": "FAIL",
 
   "qc_label_finance": "Finance: {month}",
-  "qc_label_store_root": "App Store",
-  "qc_label_store_app": "App Store: {name}",
+  "qc_label_base_root": "Base",
+  "qc_label_base_app": "Base: {name}",
   "qc_label_cryptobot_root": "Cryptobot",
   "qc_label_cryptobot_decision": "Cryptobot decision #{id}",
   "qc_label_settings": "Settings: {tab}",

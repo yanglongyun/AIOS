@@ -1,58 +1,85 @@
+import {
+  MessageSquare,
+  Terminal,
+  Folder,
+  Code,
+  Loader,
+  Activity,
+  Store,
+  Settings,
+  Bitcoin,
+  Hammer
+} from 'lucide-vue-next';
+
 const apps = [
   {
     id: 'chat',
     name: '__T_APP_CHAT__',
-    icon: 'forum',
+    icon: MessageSquare,
     group: 'top',
     load: () => import('./apps/chat/index.vue'),
     intent: () => import('./apps/chat/intent.js')
   },
   {
+    id: 'terminal',
+    name: '终端',
+    icon: Terminal,
+    group: 'apps',
+    load: () => import('./apps/terminal/index.vue')
+  },
+  {
+    id: 'files',
+    name: '文件',
+    icon: Folder,
+    group: 'apps',
+    load: () => import('./apps/files/index.vue')
+  },
+  {
+    id: 'claude-code',
+    name: 'Claude Code',
+    icon: Code,
+    group: 'apps',
+    load: () => import('./apps/claude-code/index.vue')
+  },
+  {
     id: 'tasks',
     name: '__T_APP_TASKS__',
-    icon: 'progress_activity',
+    icon: Loader,
     group: 'top',
     load: () => import('./apps/tasks/index.vue')
   },
   {
-    id: 'notebook',
-    name: '__T_APP_NOTEBOOK__',
-    icon: 'edit_note',
+    id: 'sysinfo',
+    name: '系统状态',
+    icon: Activity,
     group: 'apps',
-    load: () => import('./apps/notebook/index.vue')
-  },
-  {
-    id: 'finance',
-    name: '__T_APP_FINANCE__',
-    icon: 'payments',
-    group: 'apps',
-    load: () => import('./apps/finance/index.vue')
+    load: () => import('./apps/sysinfo/index.vue')
   },
   {
     id: 'cryptobot',
     name: '__T_APP_CRYPTOBOT__',
-    icon: 'currency_bitcoin',
+    icon: Bitcoin,
     group: 'apps',
     load: () => import('./apps/cryptobot/index.vue')
   },
   {
-    id: 'store',
-    name: '__T_APP_STORE__',
-    icon: 'storefront',
+    id: 'workshop',
+    name: '__T_APP_WORKSHOP__',
+    icon: Hammer,
     group: 'apps',
-    load: () => import('./apps/store/index.vue')
+    load: () => import('./apps/workshop/index.vue')
   },
   {
-    id: 'demo',
-    name: '__T_APP_DEMO__',
-    icon: 'deployed_code',
+    id: 'base',
+    name: '__T_APP_BASE__',
+    icon: Store,
     group: 'apps',
-    load: () => import('./apps/demo/index.vue')
+    load: () => import('./apps/base/index.vue')
   },
   {
     id: 'settings',
     name: '__T_APP_SETTINGS__',
-    icon: 'settings',
+    icon: Settings,
     group: 'bottom',
     load: () => import('./apps/settings/index.vue')
   }

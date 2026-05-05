@@ -1,4 +1,5 @@
 <script setup>
+import { TrendingDown, TrendingUp } from 'lucide-vue-next';
 import { fmtNum } from '../formatters';
 
 defineProps({
@@ -23,7 +24,7 @@ defineProps({
                     :class="status.equity.pnl >= 0
                         ? 'text-good bg-[color-mix(in_srgb,var(--color-good)_14%,transparent)]'
                         : 'text-bad bg-[color-mix(in_srgb,var(--color-bad)_14%,transparent)]'">
-                    <span class="msi" style="font-size:12px">{{ status.equity.pnl >= 0 ? 'arrow_drop_up' : 'arrow_drop_down' }}</span>
+                    <component :is="status.equity.pnl >= 0 ? TrendingUp : TrendingDown" :size="12" :stroke-width="2" />
                     {{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl, 2) }}
                     <span class="opacity-70">({{ status.equity.pnl >= 0 ? '+' : '' }}{{ fmtNum(status.equity.pnl_ratio * 100, 2) }}%)</span>
                 </div>

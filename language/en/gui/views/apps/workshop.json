@@ -1,0 +1,13 @@
+{
+  "workshop_title": "Workshop",
+  "workshop_load_failed": "Failed to load workshop",
+  "workshop_search_placeholder": "Search ideas, categories, or prompts",
+  "workshop_empty": "No matching ideas",
+  "workshop_select_hint": "Select an idea to generate a demo",
+  "workshop_generate": "Generate demo",
+  "workshop_send_to_chat": "Send to chat",
+  "workshop_prompt_label": "Generation prompt",
+  "qc_label_workshop_root": "Workshop",
+  "qc_label_workshop_idea": "Workshop: {name}",
+  "qc_field_workshop_total": "Ideas: {count}"
+}

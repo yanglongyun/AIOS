@@ -1,5 +1,6 @@
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, markRaw } from 'vue';
+import { Hammer, LayoutGrid, AlertTriangle, Loader2 } from 'lucide-vue-next';
 import { on } from '../system/ws.js';
 
 const visible = ref(false);
@@ -70,9 +71,9 @@ const cancel = () => {
 };
 
 const items = [
-    { key: 'build', label: '重新构建前端', desc: '构建 gui/ 下的改动，生成 dist/', icon: 'build' },
-    { key: 'restartApps', label: '重启应用服务', desc: '重启 9502 端口，应用后端代码生效', icon: 'apps' },
-    { key: 'restartServer', label: '重启主服务', desc: '重启 9501 端口，主系统和 API 生效（中断当前任务）', icon: 'warning' },
+    { key: 'build', label: '重新构建前端', desc: '构建 gui/ 下的改动，生成 dist/', icon: markRaw(Hammer) },
+    { key: 'restartApps', label: '重启应用服务', desc: '重启 9502 端口，应用后端代码生效', icon: markRaw(LayoutGrid) },
+    { key: 'restartServer', label: '重启主服务', desc: '重启 9501 端口，主系统和 API 生效（中断当前任务）', icon: markRaw(AlertTriangle) },
 ];
 </script>
 
@@ -85,7 +86,7 @@ const items = [
                 <!-- 等待重启 -->
                 <template v-if="done">
                     <div class="flex flex-col items-center gap-3 py-4">
-                        <span class="msi" style="font-size:36px;color:var(--color-accent)">progress_activity</span>
+                        <Loader2 :size="36" :stroke-width="1.6" class="animate-spin" style="color:var(--color-accent)" />
                         <p class="m-0 text-[15px] font-medium text-ink">服务重启中，即将自动刷新…</p>
                     </div>
                 </template>
@@ -105,7 +106,7 @@ const items = [
                                 class="mt-0.5 h-4 w-4 rounded accent-[var(--color-accent)]" />
                             <div class="flex-1">
                                 <div class="flex items-center gap-1.5 text-[14px] font-medium text-ink">
-                                    <span class="msi sm" style="color:var(--color-accent)">{{ item.icon }}</span>
+                                    <component :is="item.icon" :size="16" :stroke-width="1.8" style="color:var(--color-accent)" />
                                     {{ item.label }}
                                 </div>
                                 <div class="mt-0.5 text-[12px] text-muted">{{ item.desc }}</div>

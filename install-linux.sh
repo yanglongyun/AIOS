@@ -110,12 +110,12 @@ ensure_node() {
   case "$PKG_MGR" in
     apt)
       ensure_command curl
-      curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO -E bash - >/dev/null
+      curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO bash - >/dev/null
       pkg_install nodejs
       ;;
     dnf|yum)
       ensure_command curl
-      curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO -E bash - >/dev/null
+      curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO bash - >/dev/null
       pkg_install nodejs
       ;;
     apk)

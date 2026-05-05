@@ -6,38 +6,35 @@
 
 ## Install
 
-Requirements:
-- Node.js 20+
-- `git`
-- `npm`
+One-line install. The script auto-checks and installs Node.js 20+, git, rsync, then clones, builds, and starts.
 
-One-line install:
-
-macOS
+macOS (auto-installs Homebrew + Node@20)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
 ```
 
-Linux
+Linux (auto-uses apt / dnf / yum / apk / pacman + NodeSource)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
 ```
 
-Windows
+Windows (requires winget; bundled with Win10 1809+ / Win11)
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
 ```
 
-After installation, open: `http://localhost:9501`
+After installation, open: `http://localhost:9501`. On first visit you'll be guided through setting an access password.
 
 ## Manual Start
 
+If you'd rather control the flow yourself, skip the installer:
+
 ```bash
-git clone https://github.com/valueriver/aios.git
-cd aios/AIOS
+git clone https://github.com/valueriver/AIOS.git
+cd AIOS
 npm install
 npm run build
-npm run start &
+npm run start:main &
 npm run start:apps
 ```
 

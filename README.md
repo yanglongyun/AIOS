@@ -6,38 +6,35 @@
 
 ## 安装
 
-要求：
-- Node.js 20+
-- `git`
-- `npm`
+一键安装。脚本会自动检查并安装 Node.js 20+、git、rsync 等依赖,然后克隆、构建、启动。
 
-一键安装：
-
-macOS
+macOS（自动装 Homebrew + Node@20）
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
 ```
 
-Linux
+Linux（自动用 apt / dnf / yum / apk / pacman + NodeSource 装依赖）
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
 ```
 
-Windows
+Windows（需要 winget；Win10 1809+ / Win11 自带）
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
 ```
 
-安装完成后默认打开：`http://localhost:9501`
+安装完成后打开：`http://localhost:9501`,首次访问会引导你设置访问密码。
 
 ## 手动启动
 
+如果你想自己控制流程,跳过一键脚本:
+
 ```bash
-git clone https://github.com/valueriver/aios.git
-cd aios/AIOS
+git clone https://github.com/valueriver/AIOS.git
+cd AIOS
 npm install
 npm run build
-npm run start &
+npm run start:main &
 npm run start:apps
 ```
 

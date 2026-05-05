@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$RepoUrl = if ($env:AIOS_REPO_URL) { $env:AIOS_REPO_URL } else { "https://github.com/valueriver/aios.git" }
+$RepoUrl = if ($env:AIOS_REPO_URL) { $env:AIOS_REPO_URL } else { "https://github.com/valueriver/AIOS.git" }
 $RepoRef = if ($env:AIOS_REPO_REF) { $env:AIOS_REPO_REF } else { "main" }
 $InstallRoot = if ($env:AIOS_INSTALL_ROOT) { $env:AIOS_INSTALL_ROOT } else { Join-Path $HOME ".aios" }
 $RepoDir = Join-Path $InstallRoot "repo"
@@ -14,6 +14,7 @@ $ServerPidFile = Join-Path $RunDir "server.pid"
 $AppsPidFile = Join-Path $RunDir "apps.pid"
 $ServerPort = if ($env:AIOS_SERVER_PORT) { [int]$env:AIOS_SERVER_PORT } else { 9501 }
 $AppsPort = if ($env:AIOS_APPS_PORT) { [int]$env:AIOS_APPS_PORT } else { 9502 }
+$NodeMajorRequired = 20
 
 function Write-Info([string]$Message) {
   Write-Host $Message
@@ -23,10 +24,8 @@ function Fail([string]$Message) {
   throw $Message
 }
 
-function Require-Command([string]$Name) {
-  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-    Fail "Missing required command: $Name"
-  }
+function Have-Command([string]$Name) {
+  return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
 function Invoke-External([string]$FilePath, [string[]]$Arguments) {
@@ -36,24 +35,79 @@ function Invoke-External([string]$FilePath, [string[]]$Arguments) {
   }
 }
 
+function Refresh-Path {
+  $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
+  $user = [Environment]::GetEnvironmentVariable("Path", "User")
+  $env:Path = "$machine;$user"
+}
+
 function Assert-Windows {
   if (-not ($env:OS -eq "Windows_NT")) {
     Fail "This installer is for Windows only."
   }
 }
 
-function Assert-NodeVersion {
-  $nodeVersion = (& node -v).Trim()
-  if (-not $nodeVersion) {
-    Fail "Failed to read Node.js version."
+# === winget ===
+# Win10 1809+ / Win11 自带,旧机器没有就提示用户去 Microsoft Store 装 "App Installer"
+function Ensure-Winget {
+  if (Have-Command "winget") { return }
+  Fail @"
+winget not found. AIOS installer needs winget to auto-install Node.js / git.
+- Windows 11: should be pre-installed; try 'winget' in a new terminal
+- Windows 10: install 'App Installer' from Microsoft Store, then re-run this script
+- Or install Node 20+ and Git manually, then re-run.
+"@
+}
+
+function Ensure-WingetPackage([string]$Id, [string]$DisplayName) {
+  Write-Info "Installing $DisplayName via winget"
+  & winget install -e --id $Id --silent --accept-package-agreements --accept-source-agreements --scope machine 2>&1 | Out-Host
+  $code = $LASTEXITCODE
+  # winget 在已安装时返回非 0,排除几个良性码
+  # -1978335189 (No applicable update / already installed) is fine
+  if ($code -ne 0 -and $code -ne -1978335189) {
+    Write-Info "winget install $Id returned $code (non-fatal if package already present)"
   }
-  $majorPart = ($nodeVersion -replace "^v", "").Split(".")[0]
-  $majorVersion = 0
-  if (-not [int]::TryParse($majorPart, [ref]$majorVersion)) {
-    Fail "Unable to parse Node.js version: $nodeVersion"
+  Refresh-Path
+}
+
+function Get-NodeMajor {
+  if (-not (Have-Command "node")) { return 0 }
+  $v = (& node -v 2>$null)
+  if (-not $v) { return 0 }
+  $part = ($v -replace "^v", "").Split(".")[0]
+  $n = 0
+  if ([int]::TryParse($part, [ref]$n)) { return $n }
+  return 0
+}
+
+function Ensure-Node {
+  $current = Get-NodeMajor
+  if ($current -ge $NodeMajorRequired) { return }
+  if ($current -gt 0) {
+    Write-Info "Node.js v$current too old, need >= $NodeMajorRequired"
   }
-  if ($majorVersion -lt 20) {
-    Fail "Node.js 20 or newer is required. Current version: $nodeVersion"
+  Ensure-WingetPackage -Id "OpenJS.NodeJS.LTS" -DisplayName "Node.js LTS"
+  if ((Get-NodeMajor) -lt $NodeMajorRequired) {
+    Fail "Node.js install completed but version check failed."
+  }
+  Write-Info "Node.js: $(& node -v)"
+}
+
+function Ensure-Git {
+  if (Have-Command "git") { return }
+  Ensure-WingetPackage -Id "Git.Git" -DisplayName "Git"
+  if (-not (Have-Command "git")) {
+    Fail "Git install completed but 'git' not on PATH. Open a new terminal and re-run."
+  }
+}
+
+function Bootstrap-Prereqs {
+  Ensure-Winget
+  Ensure-Git
+  Ensure-Node
+  if (-not (Have-Command "robocopy")) {
+    Fail "robocopy not found (ships with Windows; this should not happen)."
   }
 }
 
@@ -181,11 +235,7 @@ function Print-FailureLogs {
 
 try {
   Assert-Windows
-  Require-Command "git"
-  Require-Command "node"
-  Require-Command "npm"
-  Require-Command "robocopy"
-  Assert-NodeVersion
+  Bootstrap-Prereqs
   Ensure-Dirs
   Update-Repo
   Sync-App

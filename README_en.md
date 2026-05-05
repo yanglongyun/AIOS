@@ -15,17 +15,17 @@ One-line install:
 
 macOS
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-macos.sh | sh
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
 ```
 
 Linux
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-linux.sh | sh
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
 ```
 
 Windows
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/aios/main/AIOS/install-windows.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
 ```
 
 After installation, open: `http://localhost:9501`

@@ -2,7 +2,7 @@
 
 set -eu
 
-REPO_URL="${AIOS_REPO_URL:-https://github.com/valueriver/aios.git}"
+REPO_URL="${AIOS_REPO_URL:-https://github.com/valueriver/AIOS.git}"
 REPO_REF="${AIOS_REPO_REF:-main}"
 INSTALL_ROOT="${AIOS_INSTALL_ROOT:-$HOME/.aios}"
 REPO_DIR="$INSTALL_ROOT/repo"
@@ -15,6 +15,7 @@ SERVER_PID_FILE="$RUN_DIR/server.pid"
 APPS_PID_FILE="$RUN_DIR/apps.pid"
 SERVER_PORT="${AIOS_SERVER_PORT:-9501}"
 APPS_PORT="${AIOS_APPS_PORT:-9502}"
+NODE_MAJOR_REQUIRED=20
 
 log() {
   printf '%s\n' "$*"
@@ -25,10 +26,8 @@ fail() {
   exit 1
 }
 
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    fail "Missing required command: $1"
-  fi
+have() {
+  command -v "$1" >/dev/null 2>&1
 }
 
 check_linux() {
@@ -36,18 +35,125 @@ check_linux() {
   [ "$os_name" = "Linux" ] || fail "This installer is for Linux only."
 }
 
-check_node() {
-  node_version="$(node -v 2>/dev/null || true)"
-  [ -n "$node_version" ] || fail "Failed to read Node.js version."
-  node_major="$(printf '%s' "$node_version" | sed 's/^v//' | cut -d. -f1)"
-  case "$node_major" in
-    ''|*[!0-9]*)
-      fail "Unable to parse Node.js version: $node_version"
+# === 提权 ===
+# 以 root 跑就空字符串,普通用户优先 sudo,实在没辙就放弃
+detect_sudo() {
+  if [ "$(id -u)" = "0" ]; then
+    SUDO=""
+    return
+  fi
+  if have sudo; then
+    SUDO="sudo"
+    return
+  fi
+  fail "Need root privileges to install system packages. Run as root or install sudo."
+}
+
+# === 包管理器探测 ===
+detect_pkg_mgr() {
+  if have apt-get; then PKG_MGR=apt; return; fi
+  if have dnf;     then PKG_MGR=dnf; return; fi
+  if have yum;     then PKG_MGR=yum; return; fi
+  if have apk;     then PKG_MGR=apk; return; fi
+  if have pacman;  then PKG_MGR=pacman; return; fi
+  PKG_MGR=unknown
+}
+
+apt_updated=0
+pkg_install() {
+  case "$PKG_MGR" in
+    apt)
+      if [ "$apt_updated" -eq 0 ]; then
+        log "apt-get update"
+        $SUDO apt-get update -y >/dev/null
+        apt_updated=1
+      fi
+      DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y "$@"
+      ;;
+    dnf)    $SUDO dnf install -y "$@" ;;
+    yum)    $SUDO yum install -y "$@" ;;
+    apk)    $SUDO apk add --no-cache "$@" ;;
+    pacman) $SUDO pacman -Sy --noconfirm "$@" ;;
+    *)      fail "Unknown package manager. Please install manually: $*" ;;
+  esac
+}
+
+ensure_command() {
+  cmd="$1"
+  pkg="${2:-$1}"
+  if ! have "$cmd"; then
+    log "Installing $pkg ($cmd not found)"
+    pkg_install "$pkg"
+  fi
+}
+
+# === Node.js ===
+node_major() {
+  v="$(node -v 2>/dev/null | sed 's/^v//' | cut -d. -f1)"
+  case "$v" in
+    ''|*[!0-9]*) printf 0 ;;
+    *)           printf '%s' "$v" ;;
+  esac
+}
+
+ensure_node() {
+  need=0
+  if ! have node; then
+    need=1
+  elif [ "$(node_major)" -lt "$NODE_MAJOR_REQUIRED" ]; then
+    log "Node.js $(node -v) too old, need >= $NODE_MAJOR_REQUIRED"
+    need=1
+  fi
+  [ "$need" -eq 0 ] && return 0
+
+  log "Installing Node.js $NODE_MAJOR_REQUIRED.x"
+  case "$PKG_MGR" in
+    apt)
+      ensure_command curl
+      curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO -E bash - >/dev/null
+      pkg_install nodejs
+      ;;
+    dnf|yum)
+      ensure_command curl
+      curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR_REQUIRED}.x" | $SUDO -E bash - >/dev/null
+      pkg_install nodejs
+      ;;
+    apk)
+      pkg_install nodejs npm
+      ;;
+    pacman)
+      pkg_install nodejs npm
+      ;;
+    *)
+      fail "Cannot auto-install Node.js on this system. Please install Node $NODE_MAJOR_REQUIRED+ manually."
       ;;
   esac
-  if [ "$node_major" -lt 20 ]; then
-    fail "Node.js 20 or newer is required. Current version: $node_version"
+
+  if ! have node || [ "$(node_major)" -lt "$NODE_MAJOR_REQUIRED" ]; then
+    fail "Node.js install completed but version check failed."
   fi
+  log "Node.js: $(node -v)"
+}
+
+# 部分发行版 npm 跟 nodejs 同包,有的(老版本 Debian)分开;兜底装一遍
+ensure_npm() {
+  if have npm; then return; fi
+  case "$PKG_MGR" in
+    apt|dnf|yum) pkg_install npm 2>/dev/null || true ;;
+    apk|pacman)  pkg_install npm 2>/dev/null || true ;;
+  esac
+  have npm || fail "npm still missing after install attempt."
+}
+
+bootstrap_prereqs() {
+  detect_sudo
+  detect_pkg_mgr
+
+  ensure_command curl
+  ensure_command git
+  ensure_command rsync
+  ensure_node
+  ensure_npm
 }
 
 ensure_dirs() {
@@ -87,11 +193,11 @@ clear_language_bake_marker() {
 
 port_in_use() {
   port="$1"
-  if command -v lsof >/dev/null 2>&1; then
+  if have lsof; then
     if lsof -n -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
       return 0
     fi
-  elif command -v ss >/dev/null 2>&1; then
+  elif have ss; then
     if ss -ltn "( sport = :$port )" 2>/dev/null | grep -q ":$port"; then
       return 0
     fi
@@ -191,12 +297,7 @@ print_failure_logs() {
 
 main() {
   check_linux
-  require_command curl
-  require_command git
-  require_command node
-  require_command npm
-  require_command rsync
-  check_node
+  bootstrap_prereqs
   ensure_dirs
   update_repo
   sync_app

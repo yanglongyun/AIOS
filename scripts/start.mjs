@@ -18,7 +18,7 @@
  *   4. 在 projectRoot 下写 .aios/settings.json（locale + appliedAt）
  *
  * 本脚本自定位到 dirname($0)/..，可以跑在主仓 AIOS/ 或任何 AIOS/ 的副本里
- * （例如 AIOS-dev/aios、AIOS-wandesk-image/aios）。
+ * （例如 AIOS-run/AIOS、AIOS-wandesk-image/aios）。
  *
  * 用法:
  *   node scripts/start.mjs                  # 默认 locale = zh，走缓存判断
@@ -48,7 +48,7 @@ const sourceBakeAllowed = process.env.AIOS_ALLOW_SOURCE_BAKE === '1';
 
 if (!sourceBakeAllowed && fs.existsSync(path.join(projectRoot, '.git'))) {
   console.error('[start] Refusing to bake language into a git source checkout.');
-  console.error('[start] Use AIOS-dev/scripts/r1.mjs, r2.mjs, or r3.mjs to run a baked runtime copy.');
+  console.error('[start] Use AIOS-run/scripts/r1.mjs, r2.mjs, or r3.mjs to run a baked runtime copy.');
   console.error('[start] If you really need this in the source checkout, set AIOS_ALLOW_SOURCE_BAKE=1 explicitly.');
   process.exit(1);
 }

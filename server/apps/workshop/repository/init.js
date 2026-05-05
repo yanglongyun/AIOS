@@ -49,7 +49,52 @@ const initDatabase = () => {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS workshop_projects (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic       TEXT    NOT NULL,
+      idea_id     TEXT,
+      created_at  TEXT    DEFAULT (datetime('now')),
+      updated_at  TEXT    DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS workshop_plans (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id  INTEGER NOT NULL,
+      slug        TEXT    NOT NULL,
+      title       TEXT    NOT NULL,
+      description TEXT    NOT NULL DEFAULT '',
+      sort_order  INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT    DEFAULT (datetime('now')),
+      FOREIGN KEY (project_id) REFERENCES workshop_projects(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS workshop_tasks (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      plan_id     INTEGER NOT NULL,
+      status      TEXT    NOT NULL DEFAULT 'pending',
+      attempt     INTEGER NOT NULL DEFAULT 1,
+      error       TEXT,
+      started_at  TEXT,
+      finished_at TEXT,
+      created_at  TEXT    DEFAULT (datetime('now')),
+      FOREIGN KEY (plan_id) REFERENCES workshop_plans(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS workshop_results (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_id     INTEGER NOT NULL,
+      html        TEXT    NOT NULL,
+      created_at  TEXT    DEFAULT (datetime('now')),
+      FOREIGN KEY (task_id) REFERENCES workshop_tasks(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_workshop_plans_project ON workshop_plans(project_id);
+    CREATE INDEX IF NOT EXISTS idx_workshop_tasks_plan    ON workshop_tasks(plan_id);
+    CREATE INDEX IF NOT EXISTS idx_workshop_tasks_status  ON workshop_tasks(status);
+    CREATE INDEX IF NOT EXISTS idx_workshop_results_task  ON workshop_results(task_id);
   `);
+  db.pragma("foreign_keys = ON");
 
   const stmt = db.prepare(`
     INSERT OR IGNORE INTO workshop_ideas (id, title, category, summary, prompt)

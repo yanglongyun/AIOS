@@ -1,12 +1,10 @@
 import { createServer } from "http";
 import { readFileSync, existsSync, statSync } from "fs";
-import { join, dirname, extname } from "path";
-import { fileURLToPath } from "url";
+import { join, extname } from "path";
 import { handleApiRequest } from "../../api/index.js";
 import { json } from "../../../shared/http/json.js";
 import { isAuthenticated, isPublicApiPath, isStaticAssetPath } from "../auth/session.js";
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = join(__dirname, "..", "..", "..");
+const ROOT_DIR = process.cwd();
 const PUBLIC_DIR = join(ROOT_DIR, "gui", "dist");
 const MIME = {
   ".html": "text/html; charset=utf-8",

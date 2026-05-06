@@ -1,5 +1,6 @@
 node_modules/
 gui/dist/
+gui2/dist/
 .aios/
 .DS_Store
 *.log

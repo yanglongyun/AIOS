@@ -1,35 +1,5 @@
 <template>
-  <div class="flex min-h-0 min-w-0 flex-1 flex-row" style="background:#f5f3ef">
-    <!-- Sidebar -->
-    <aside class="flex w-56 shrink-0 flex-col border-r" style="background:#ede9e2;border-color:rgba(0,0,0,0.07)">
-      <div class="border-b px-3 py-2.5" style="border-color:rgba(0,0,0,0.07)">
-        <button class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-[9px] border px-3 py-2 text-[13px] font-semibold"
-          style="border-color:rgba(92,67,50,0.14);background:rgba(255,255,255,0.58);color:rgba(61,47,30,0.82)"
-          @click="reset">__T_CLAUDE_CHAT_NEW_SESSION__</button>
-      </div>
-      <div class="flex-1 overflow-y-auto [scrollbar-width:thin] px-1.5 py-1.5">
-        <div v-if="!convList.length" class="px-3 py-4 text-center text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_NO_SESSIONS__</div>
-        <div v-for="c in convList" :key="c.sessionId"
-          class="group mb-1 cursor-pointer rounded-lg px-2.5 py-2"
-          :style="currentId === c.sessionId ? 'background:rgba(255,255,255,0.85);box-shadow:0 1px 2px rgba(0,0,0,0.05)' : ''"
-          @click="openConversation(c.sessionId)">
-          <div class="flex items-center gap-1">
-            <div class="truncate text-[12.5px] flex-1" style="color:#2a1f13">
-              {{ c.title?.trim() || ('__T_CLAUDE_CHAT_SESSION_PREFIX__' + c.sessionId.slice(0, 8)) }}
-            </div>
-            <button class="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 text-[11px] px-1 cc-mono"
-              title="__T_CLAUDE_CHAT_DELETE__" @click.stop="removeConversation(c.sessionId)">✕</button>
-          </div>
-          <div class="mt-0.5 truncate text-[10.5px] cc-mono" style="color:rgba(0,0,0,0.4)">
-            {{ c.cwd?.replace(homedirPrefix, '~') }}
-          </div>
-          <div class="truncate text-[10px]" style="color:rgba(0,0,0,0.35)">
-            {{ '__T_CLAUDE_CHAT_EVENTS__'.replace('{n}', String(c.messageCount || 0)).replace('{time}', formatTime(c.updatedAt)) }}
-          </div>
-        </div>
-      </div>
-    </aside>
-
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col" style="background:#f5f3ef">
     <div class="flex min-h-0 flex-1 flex-col">
       <div ref="msgBox" class="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]" style="scrollbar-color:rgba(160,120,80,0.2) transparent">
         <div class="mx-auto flex max-w-[720px] flex-col gap-0 px-5 py-6">
@@ -210,7 +180,8 @@ marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
 const props = defineProps({
-  installed: { type: Boolean, default: false }
+  installed: { type: Boolean, default: false },
+  loadSessionId: { type: String, default: '' }
 });
 
 const PERMISSION_MODES = [
@@ -600,12 +571,18 @@ function selectPermissionMode(mode) {
 watch(liveEvents, () => scrollToBottom(), { deep: true });
 watch(() => messages.value.length, () => scrollToBottom(false));
 
+watch(() => props.loadSessionId, (sid) => {
+  if (sid && sid !== currentId.value) openConversation(sid);
+});
+
 onMounted(() => {
   loadFsRoots();
   fetchConversations();
+  if (props.loadSessionId) openConversation(props.loadSessionId);
 });
 </script>
 
 <style scoped>
 textarea::placeholder { color: rgba(160,120,80,0.4); }
+
 </style>

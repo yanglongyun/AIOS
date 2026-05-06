@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RotateCw, Search, Hourglass, LayoutGrid, X, Download, Box } from 'lucide-vue-next';
+import AppsTrigger from '@/components/AppsTrigger.vue';
+import ChatTrigger from '@/components/ChatTrigger.vue';
 
 const CATALOG_URL = 'https://iimos.ai/apps/catalog.json';
 
@@ -81,6 +83,14 @@ onMounted(loadCatalog);
 </script>
 
 <template>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="brand"><span class="name">__T_APP_BASE__</span></div>
+      <div class="right">
+        <ChatTrigger />
+        <AppsTrigger />
+      </div>
+    </header>
     <div class="flex h-full flex-col bg-bg">
         <header class="app-content flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_BASE_TITLE__</h1>
@@ -214,9 +224,20 @@ onMounted(loadCatalog);
             </aside>
         </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
+.app-frame { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+.topbar { flex: none; height: 64px; display: flex; align-items: center; padding: 8px 16px; background: var(--bg); }
+.topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
+.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+.topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+@media (max-width: 720px) {
+  .topbar { padding: 8px; height: 56px; }
+  .topbar .brand .name { font-size: 17px; }
+}
+
 .spin { animation: base-spin 1s linear infinite; }
 @keyframes base-spin { to { transform: rotate(360deg); } }
 </style>

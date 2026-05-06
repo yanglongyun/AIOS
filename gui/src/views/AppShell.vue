@@ -1,14 +1,17 @@
 <template>
   <div class="stage">
-    <AppHeader />
-    <div class="body-row">
-      <AppDrawer />
-      <main class="main">
-        <Suspense>
-          <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" v-bind="currentProps" />
-        </Suspense>
-      </main>
-    </div>
+    <main class="main">
+      <Suspense>
+        <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" v-bind="currentProps" />
+      </Suspense>
+    </main>
+
+    <Teleport to="body">
+      <div v-if="showBackdrop" class="app-side-backdrop" @click="view.closeAppDrawer()"></div>
+    </Teleport>
+
+    <AppsPopup />
+    <QuickChat />
     <ConnectionGate />
     <ToastHost />
     <ReloadDialog />
@@ -18,19 +21,25 @@
 <script setup>
 import { computed, ref, shallowRef, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import AppHeader from '../components/AppHeader.vue';
-import AppDrawer from '../components/AppDrawer.vue';
+import AppsPopup from '../components/AppsPopup.vue';
+import QuickChat from '../components/QuickChat.vue';
 import ConnectionGate from '../components/ConnectionGate.vue';
 import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
 import { apps, getApp } from '../apps.js';
 import { useAuthStore } from '@/stores/auth';
+import { useViewStore } from '@/stores/view.js';
 import { connect, disconnect } from '@/system/ws.js';
 
 const route = useRoute();
 const auth = useAuthStore();
+const view = useViewStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
+
+const currentApp = computed(() => activeAppId.value ? getApp(activeAppId.value) : null);
+const showBackdrop = computed(() => currentApp.value?.hasDrawer && view.appDrawerOpen && window.innerWidth < 768);
+
 const currentProps = computed(() => {
   if (activeAppId.value !== 'chat') return {};
   const message = route.query.workshopPrompt ? String(route.query.workshopPrompt) : '';
@@ -82,21 +91,15 @@ onMounted(async () => {
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
-  background: var(--color-bg);
-  color: var(--color-ink);
-}
-.body-row {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  position: relative; /* mobile drawer absolutely 定位时的容器 */
+  background: var(--bg);
+  color: var(--text);
 }
 .main {
   flex: 1;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
   display: flex;
-  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
 }
 </style>

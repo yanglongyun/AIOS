@@ -5,6 +5,8 @@ import {
     ArrowLeft, ChevronRight, Hourglass, LayoutGrid, Lightbulb, Loader2,
     Minus, Package, Plus, RotateCcw, Sparkles, Trash2, X,
 } from 'lucide-vue-next';
+import AppsTrigger from '@/components/AppsTrigger.vue';
+import ChatTrigger from '@/components/ChatTrigger.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -194,243 +196,519 @@ const statusLabel = (s) => ({
     failed: '失败',
 }[s] || s || '未知');
 
-const statusClass = (s) => ({
-    pending: 'bg-bg-hi text-muted',
-    running: 'text-accent border border-accent/30',
-    done: 'text-good border border-good/30',
-    failed: 'text-bad border border-bad/30',
-}[s] || 'bg-bg-hi text-muted');
+const statusClass = (s) => `chip chip-${s || 'unknown'}`;
 
 </script>
 
 <template>
-    <!-- ============== PLAN (iframe) ============== -->
-    <div v-if="view === 'plan'" class="flex h-full flex-col bg-bg">
-        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-            <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                @click="goProject(planMeta?.projectId || routeProjectId)" title="__T_COMMON_BACK__">
-                <ArrowLeft :size="20" :stroke-width="1.8" />
-            </button>
-            <div class="min-w-0 flex-1">
-                <div class="truncate text-[14px] font-semibold text-ink">{{ planMeta?.title || '__T_COMMON_LOADING__' }}</div>
-                <div v-if="planMeta?.description" class="truncate text-[12px] text-faint">{{ planMeta.description }}</div>
-            </div>
-        </header>
+  <div class="app-frame">
+    <header class="topbar">
+      <button v-if="view !== 'list'" class="icon-btn lg" @click="view === 'plan' ? goProject(planMeta?.projectId || routeProjectId) : goList()" title="返回">
+        <span class="msi">arrow_back</span>
+      </button>
+      <div class="brand">
+        <span class="name">{{
+          view === 'list' ? '应用工坊'
+          : view === 'project' ? (project?.topic || '加载中…')
+          : (planMeta?.title || '加载中…')
+        }}</span>
+        <span v-if="view === 'plan' && planMeta?.description" class="sub">{{ planMeta.description }}</span>
+      </div>
+      <div class="right">
+        <ChatTrigger />
+        <AppsTrigger />
+      </div>
+    </header>
 
-        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 px-6 pb-6 pt-1 max-md:px-3 max-md:pb-3">
-            <div v-if="planLoading" class="flex h-full flex-col items-center justify-center gap-2 text-muted">
-                <Hourglass :size="30" :stroke-width="1.6" class="text-faint" />
-                <div class="text-[14px]">__T_COMMON_LOADING__</div>
-            </div>
-            <iframe v-else
-                :srcdoc="planHtml"
-                sandbox="allow-scripts allow-forms allow-modals allow-popups"
-                referrerpolicy="no-referrer"
-                class="block h-full w-full rounded-xl border border-line bg-bg-elev"
-                :title="planMeta?.title || 'workshop'"></iframe>
+    <section class="pane">
+
+      <!-- ============== PLAN (iframe 预览) ============== -->
+      <template v-if="view === 'plan'">
+        <div v-if="planLoading" class="state-empty">
+          <Hourglass :size="30" :stroke-width="1.6" />
+          <div>加载中…</div>
         </div>
-    </div>
+        <iframe v-else class="plan-frame"
+          :srcdoc="planHtml"
+          sandbox="allow-scripts allow-forms allow-modals allow-popups"
+          referrerpolicy="no-referrer"
+          :title="planMeta?.title || 'workshop'"></iframe>
+      </template>
 
-    <!-- ============== PROJECT DETAIL ============== -->
-    <div v-else-if="view === 'project'" class="flex h-full flex-col bg-bg">
-        <header class="mx-auto flex w-full max-w-[1100px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-            <button class="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-hi hover:text-ink"
-                @click="goList" title="__T_COMMON_BACK__">
-                <ArrowLeft :size="20" :stroke-width="1.8" />
-            </button>
-            <div class="min-w-0 flex-1">
-                <div class="truncate text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">
-                    {{ project?.topic || '__T_COMMON_LOADING__' }}
+      <!-- ============== PROJECT DETAIL (plans 网格) ============== -->
+      <template v-else-if="view === 'project'">
+        <div class="content-scroll">
+          <div v-if="error" class="err">{{ error }}</div>
+
+          <div v-if="loadingProject && !plans.length" class="state-empty">
+            <Hourglass :size="30" :stroke-width="1.6" />
+            <div>加载中…</div>
+          </div>
+
+          <div v-else class="plans-grid">
+            <div v-for="p in plans" :key="p.id"
+              class="plan-card"
+              :class="{ clickable: p.hasResult }"
+              @click="p.hasResult && goPlan(project.id, p.id)">
+              <div class="plan-head">
+                <div class="plan-title-wrap">
+                  <div class="plan-title">{{ p.title }}</div>
+                  <div v-if="p.description" class="plan-desc">{{ p.description }}</div>
                 </div>
+                <span class="status-chip" :class="`s-${p.latestTask?.status || 'unknown'}`">
+                  <Loader2 v-if="p.latestTask?.status === 'running'" :size="11" :stroke-width="1.9" class="spin" />
+                  {{ statusLabel(p.latestTask?.status) }}
+                </span>
+              </div>
+              <div v-if="p.latestTask?.status === 'failed' && p.latestTask?.error" class="plan-err">
+                {{ p.latestTask.error }}
+              </div>
+              <div class="plan-foot">
+                <span class="slug">{{ p.slug }}</span>
+                <button v-if="p.latestTask?.status === 'failed' || p.hasResult"
+                  class="mini-btn" @click="regenerate(p.id, $event)" title="再生成">
+                  <RotateCcw :size="13" :stroke-width="1.8" />
+                  <span>再生成</span>
+                </button>
+              </div>
             </div>
-        </header>
-
-        <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-3 max-md:pb-10">
-            <div v-if="error" class="mb-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad"
-                style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-                {{ error }}
-            </div>
-
-            <div v-if="loadingProject && !plans.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                <Hourglass :size="30" :stroke-width="1.6" class="text-faint" />
-                <div class="text-[14px]">__T_COMMON_LOADING__</div>
-            </div>
-
-            <ul v-else class="m-0 grid list-none gap-3 p-0"
-                style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-                <li v-for="p in plans" :key="p.id">
-                    <div class="group flex h-full flex-col gap-2 rounded-[14px] border border-line bg-card p-4 transition-colors hover:border-line-hi hover:bg-card-hi"
-                        :class="{ 'cursor-pointer': p.hasResult }"
-                        @click="p.hasResult && goPlan(project.id, p.id)">
-                        <div class="flex items-start gap-2">
-                            <div class="min-w-0 flex-1">
-                                <div class="truncate text-[14.5px] font-semibold text-ink">{{ p.title }}</div>
-                                <div v-if="p.description" class="mt-0.5 line-clamp-2 text-[12.5px] leading-[1.5] text-muted">{{ p.description }}</div>
-                            </div>
-                            <span class="flex-none inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
-                                :class="statusClass(p.latestTask?.status)">
-                                <Loader2 v-if="p.latestTask?.status === 'running'" :size="12" :stroke-width="1.8" class="spin" />
-                                {{ statusLabel(p.latestTask?.status) }}
-                            </span>
-                        </div>
-                        <div v-if="p.latestTask?.status === 'failed' && p.latestTask?.error"
-                            class="line-clamp-2 text-[11.5px] text-bad">
-                            {{ p.latestTask.error }}
-                        </div>
-                        <div class="mt-auto flex items-center gap-2 pt-1">
-                            <span class="font-mono text-[11px] text-faint">{{ p.slug }}</span>
-                            <button v-if="p.latestTask?.status === 'failed' || p.hasResult"
-                                class="ml-auto inline-flex h-7 cursor-pointer items-center gap-1 rounded-lg border-0 bg-bg-hi px-2 text-[11.5px] text-muted hover:bg-bg-elev hover:text-ink"
-                                @click="regenerate(p.id, $event)" title="再生成">
-                                <RotateCcw :size="13" :stroke-width="1.8" />
-                                <span>再生成</span>
-                            </button>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+          </div>
         </div>
-    </div>
+      </template>
 
-    <!-- ============== LIST ============== -->
-    <div v-else class="flex h-full flex-col bg-bg">
-        <header class="mx-auto flex w-full max-w-[820px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-            <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_APP_WORKSHOP__</h1>
-        </header>
+      <!-- ============== LIST (composer + 项目列表) ============== -->
+      <template v-else>
+        <div class="content-scroll">
 
-        <div class="mx-auto w-full max-w-[820px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-3 max-md:pb-10">
+          <!-- composer card -->
+          <div class="composer-card">
+            <textarea v-model="topic"
+              @keydown="onTopicKey"
+              @compositionstart="composing = true"
+              @compositionend="composing = false"
+              rows="2"
+              placeholder="描述要做的样稿主题,例如:购物车页面 / 项目看板 / 个人主页"
+              class="composer-input" />
+            <div class="composer-toolbar">
+              <div class="count-pill">
+                <button class="count-btn" :disabled="count <= 1 || creating"
+                  @click="count = Math.max(1, (Number(count) || 1) - 1)">
+                  <Minus :size="14" :stroke-width="1.8" />
+                </button>
+                <span class="count-num">{{ count }}</span>
+                <button class="count-btn" :disabled="count >= 6 || creating"
+                  @click="count = Math.min(6, (Number(count) || 1) + 1)">
+                  <Plus :size="14" :stroke-width="1.8" />
+                </button>
+              </div>
+              <button class="ideas-btn" @click="ideasOpen = !ideasOpen"
+                :class="{ on: ideasOpen }" title="灵感库">
+                <Lightbulb :size="14" :stroke-width="1.8" />
+                <span>灵感</span>
+                <span class="ideas-count">{{ ideas.length }}</span>
+              </button>
+              <button class="create-btn"
+                :disabled="creating || !topic.trim()"
+                @click="createProject">
+                <Loader2 v-if="creating" :size="15" :stroke-width="1.9" class="spin" />
+                <Sparkles v-else :size="15" :stroke-width="1.9" />
+                <span>{{ creating ? '规划中…' : '创建项目' }}</span>
+              </button>
+            </div>
+          </div>
 
-            <!-- composer -->
-            <div class="mb-3 rounded-2xl border border-line bg-card p-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-                <textarea v-model="topic"
-                    @keydown="onTopicKey"
-                    @compositionstart="composing = true"
-                    @compositionend="composing = false"
-                    rows="2"
-                    placeholder="描述要做的样稿主题,例如:购物车页面 / 项目看板 / 个人主页"
-                    class="block w-full resize-none rounded-xl border-0 bg-bg-hi px-3.5 py-2 text-[13.5px] leading-[1.55] text-ink outline-none placeholder:text-faint focus:ring-2 focus:ring-accent/40"></textarea>
-                <div class="mt-2 flex items-center gap-2">
-                    <div class="inline-flex h-9 items-center gap-1 rounded-xl bg-bg-hi px-1">
-                        <button class="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent text-muted hover:bg-bg-elev hover:text-ink disabled:opacity-40"
-                            :disabled="count <= 1 || creating"
-                            @click="count = Math.max(1, (Number(count) || 1) - 1)">
-                            <Minus :size="14" :stroke-width="1.8" class="mx-auto" />
-                        </button>
-                        <span class="w-6 text-center font-mono text-[13px] font-semibold text-ink">{{ count }}</span>
-                        <button class="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent text-muted hover:bg-bg-elev hover:text-ink disabled:opacity-40"
-                            :disabled="count >= 6 || creating"
-                            @click="count = Math.min(6, (Number(count) || 1) + 1)">
-                            <Plus :size="14" :stroke-width="1.8" class="mx-auto" />
-                        </button>
-                    </div>
-                    <button class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border-0 bg-bg-hi px-3 text-[12.5px] text-muted hover:bg-bg-elev hover:text-ink"
-                        @click="ideasOpen = !ideasOpen" title="灵感库">
-                        <Lightbulb :size="14" :stroke-width="1.8" />
-                        <span>灵感</span>
-                        <span class="font-mono text-[11px] text-faint">{{ ideas.length }}</span>
-                    </button>
-                    <button class="ml-auto inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border-0 px-4 text-[13px] font-semibold text-white disabled:cursor-default disabled:opacity-45"
-                        :disabled="creating || !topic.trim()"
-                        @click="createProject"
-                        style="background: var(--color-accent); transition: background .12s, box-shadow .12s; box-shadow: 0 1px 2px color-mix(in srgb, var(--color-accent) 30%, transparent);">
-                        <Loader2 v-if="creating" :size="15" :stroke-width="1.9" class="spin" />
-                        <Sparkles v-else :size="15" :stroke-width="1.9" />
-                        <span>{{ creating ? '规划中…' : '创建项目' }}</span>
-                    </button>
+          <!-- ideas drawer -->
+          <transition name="ideas">
+            <div v-if="ideasOpen" class="ideas-drawer">
+              <div class="ideas-head">
+                <Lightbulb :size="14" :stroke-width="1.8" />
+                <span class="ideas-title">灵感库</span>
+                <span class="ideas-hint">点一个把它当起点</span>
+                <button class="x-btn" @click="ideasOpen = false">
+                  <X :size="14" :stroke-width="1.8" />
+                </button>
+              </div>
+              <div class="ideas-grid">
+                <button v-for="idea in ideas" :key="idea.id" class="idea-tile"
+                  @click="useIdea(idea)">
+                  <span class="idea-icon">
+                    <Sparkles :size="16" :stroke-width="1.7" />
+                  </span>
+                  <span class="idea-meta">
+                    <span class="idea-title-row">
+                      <span class="idea-title">{{ idea.title }}</span>
+                      <span class="idea-cat">{{ idea.category }}</span>
+                    </span>
+                    <span class="idea-summary">{{ idea.summary }}</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </transition>
+
+          <div v-if="error" class="err">{{ error }}</div>
+
+          <!-- empty / loading / list -->
+          <div v-if="loadingList && !projects.length" class="state-empty">
+            <Hourglass :size="30" :stroke-width="1.6" />
+            <div>加载中…</div>
+          </div>
+
+          <div v-else-if="!projects.length" class="state-empty">
+            <Package :size="32" :stroke-width="1.5" />
+            <div>还没有项目,在上面输入个主题让 AI 起步</div>
+          </div>
+
+          <div v-else class="proj-list">
+            <div v-for="p in projects" :key="p.id" class="proj-row" @click="goProject(p.id)">
+              <span class="proj-icon">
+                <LayoutGrid :size="20" :stroke-width="1.7" />
+              </span>
+              <div class="proj-meta">
+                <div class="proj-title">{{ p.topic }}</div>
+                <div class="proj-stats">
+                  <span class="stat-faint">{{ p.counts?.plans || 0 }} 个方向</span>
+                  <span v-if="p.counts?.running" class="stat-chip s-running">
+                    <Loader2 :size="11" :stroke-width="1.8" class="spin" />
+                    {{ p.counts.running }} 生成中
+                  </span>
+                  <span v-if="p.counts?.pending" class="stat-chip s-pending">
+                    {{ p.counts.pending }} 排队
+                  </span>
+                  <span v-if="p.counts?.done" class="stat-chip s-done">
+                    {{ p.counts.done }} 完成
+                  </span>
+                  <span v-if="p.counts?.failed" class="stat-chip s-failed">
+                    {{ p.counts.failed }} 失败
+                  </span>
                 </div>
+              </div>
+              <button class="trash-btn" @click="removeProject(p.id, $event)" title="删除">
+                <Trash2 :size="16" :stroke-width="1.7" />
+              </button>
+              <ChevronRight :size="18" :stroke-width="1.6" class="chevron" />
             </div>
+          </div>
 
-            <!-- ideas drawer -->
-            <transition name="ideas">
-                <div v-if="ideasOpen" class="mb-3 rounded-2xl border border-line bg-bg-elev p-3">
-                    <div class="mb-2 flex items-center gap-2">
-                        <Lightbulb :size="14" :stroke-width="1.8" class="text-accent" />
-                        <span class="text-[12.5px] font-semibold text-ink">灵感库</span>
-                        <span class="text-[11px] text-faint">点一个把它当起点</span>
-                        <button class="ml-auto h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent text-faint hover:bg-bg-hi hover:text-ink"
-                            @click="ideasOpen = false">
-                            <X :size="14" :stroke-width="1.8" class="mx-auto" />
-                        </button>
-                    </div>
-                    <ul class="m-0 grid list-none grid-cols-2 gap-2 p-0 max-md:grid-cols-1">
-                        <li v-for="idea in ideas" :key="idea.id">
-                            <button class="group flex h-full w-full cursor-pointer items-start gap-2.5 rounded-lg border border-line bg-bg px-3 py-2.5 text-left transition-colors hover:border-line-hi hover:bg-card-hi"
-                                @click="useIdea(idea)">
-                                <span class="mt-0.5 grid h-8 w-8 flex-none place-items-center rounded-lg bg-bg-hi text-accent">
-                                    <Sparkles :size="16" :stroke-width="1.7" />
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="flex items-baseline gap-2">
-                                        <span class="truncate text-[13px] font-semibold text-ink">{{ idea.title }}</span>
-                                        <span class="shrink-0 rounded border border-line px-1 py-px text-[10px] text-faint">{{ idea.category }}</span>
-                                    </span>
-                                    <span class="mt-0.5 line-clamp-2 block text-[11.5px] leading-[1.5] text-muted">{{ idea.summary }}</span>
-                                </span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </transition>
-
-            <div v-if="error" class="mb-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad"
-                style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-                {{ error }}
-            </div>
-
-            <div v-if="loadingList && !projects.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                <Hourglass :size="30" :stroke-width="1.6" class="text-faint" />
-                <div class="text-[14px]">__T_COMMON_LOADING__</div>
-            </div>
-
-            <div v-else-if="!projects.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                <Package :size="32" :stroke-width="1.5" class="text-faint" />
-                <div class="text-[14px]">__T_WORKSHOP_EMPTY__</div>
-            </div>
-
-            <ul v-else class="m-0 flex list-none flex-col gap-2 p-0">
-                <li v-for="p in projects" :key="p.id">
-                    <div class="group relative flex w-full items-center gap-3 rounded-[14px] border border-line bg-card px-4 py-3 transition-colors hover:border-line-hi hover:bg-card-hi">
-                        <button class="flex flex-1 cursor-pointer items-center gap-3 border-0 bg-transparent text-left p-0"
-                            @click="goProject(p.id)">
-                            <span class="grid h-10 w-10 flex-none place-items-center rounded-lg bg-bg-hi text-muted">
-                                <LayoutGrid :size="18" :stroke-width="1.7" />
-                            </span>
-                            <div class="min-w-0 flex-1">
-                                <div class="truncate text-[14.5px] font-semibold text-ink">{{ p.topic }}</div>
-                                <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[11.5px]">
-                                    <span class="text-faint">{{ p.counts?.plans || 0 }} 个方向</span>
-                                    <span v-if="p.counts?.running" class="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-accent border border-accent/30">
-                                        <Loader2 :size="11" :stroke-width="1.8" class="spin" />
-                                        {{ p.counts.running }} 生成中
-                                    </span>
-                                    <span v-if="p.counts?.pending" class="rounded-full bg-bg-hi px-1.5 py-px text-muted">
-                                        {{ p.counts.pending }} 排队
-                                    </span>
-                                    <span v-if="p.counts?.done" class="rounded-full px-1.5 py-px text-good border border-good/30">
-                                        {{ p.counts.done }} 完成
-                                    </span>
-                                    <span v-if="p.counts?.failed" class="rounded-full px-1.5 py-px text-bad border border-bad/30">
-                                        {{ p.counts.failed }} 失败
-                                    </span>
-                                </div>
-                            </div>
-                        </button>
-                        <button class="ml-2 grid h-9 w-9 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-faint opacity-0 transition-all group-hover:opacity-100 hover:bg-bg-hi hover:text-bad"
-                            @click="removeProject(p.id, $event)" title="删除">
-                            <Trash2 :size="16" :stroke-width="1.7" />
-                        </button>
-                        <ChevronRight :size="18" :stroke-width="1.6" class="flex-none text-faint" />
-                    </div>
-                </li>
-            </ul>
         </div>
-    </div>
+      </template>
+
+    </section>
+  </div>
 </template>
 
 <style scoped>
+.app-frame { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+
+/* topbar */
+.topbar { flex: none; height: 64px; display: flex; align-items: center; padding: 8px 16px; background: var(--bg); }
+.topbar .brand { flex: 1; min-width: 0; display: flex; flex-direction: column; margin: 0 4px 0 12px; }
+.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar .brand .sub { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+
+/* 内容白卡 (跟 chat / files 同样的 pane 模式) */
+.pane {
+  flex: 1; min-height: 0; min-width: 0;
+  display: flex; flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  margin: 0 8px 8px 8px;
+  overflow: hidden;
+  position: relative;
+}
+.content-scroll {
+  flex: 1; min-height: 0; min-width: 0;
+  overflow: auto;
+  padding: 24px 32px 32px;
+}
+.content-scroll > * + * { margin-top: 14px; }
+@media (max-width: 720px) {
+  .pane { margin: 4px; border-radius: 12px; }
+  .content-scroll { padding: 16px 14px 24px; }
+}
+
+/* composer */
+.composer-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: var(--shadow-1);
+}
+.composer-input {
+  width: 100%;
+  resize: none;
+  border: 0; outline: 0;
+  background: var(--bg-elev);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font: inherit; font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+  transition: background .12s, box-shadow .12s;
+}
+.composer-input::placeholder { color: var(--text-3); }
+.composer-input:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent-soft); }
+
+.composer-toolbar { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.count-pill {
+  display: inline-flex; align-items: center;
+  height: 36px; padding: 0 4px;
+  background: var(--bg-elev); border-radius: 18px;
+}
+.count-btn {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border: 0; background: transparent;
+  border-radius: 50%;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.count-btn:hover:not(:disabled) { background: rgba(60,64,67,0.08); color: var(--text); }
+.count-btn:disabled { opacity: .35; cursor: default; }
+.count-num {
+  width: 28px; text-align: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px; font-weight: 600;
+  color: var(--text);
+}
+
+.ideas-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px;
+  border: 0; background: var(--bg-elev);
+  border-radius: 18px;
+  color: var(--text-2);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.ideas-btn:hover { background: rgba(60,64,67,0.08); color: var(--text); }
+.ideas-btn.on { background: var(--accent-soft); color: var(--accent-fg); }
+.ideas-count { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-3); }
+.ideas-btn.on .ideas-count { color: var(--accent-fg); }
+
+.create-btn {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 18px;
+  border: 0;
+  background: var(--accent); color: #fff;
+  border-radius: 18px;
+  font-size: 13.5px; font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(26,115,232,0.3);
+  transition: background .12s, box-shadow .12s, opacity .12s;
+}
+.create-btn:hover:not(:disabled) { background: var(--accent-hi); box-shadow: 0 1px 2px rgba(26,115,232,0.4), 0 4px 12px rgba(26,115,232,0.18); }
+.create-btn:disabled { opacity: .4; cursor: default; box-shadow: none; }
+
+/* ideas drawer */
+.ideas-drawer {
+  background: var(--bg-elev);
+  border-radius: 18px;
+  padding: 14px 16px;
+}
+.ideas-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--accent); }
+.ideas-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.ideas-hint { font-size: 11.5px; color: var(--text-3); }
+.x-btn {
+  margin-left: auto;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border: 0; background: transparent;
+  border-radius: 50%;
+  color: var(--text-3); cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.x-btn:hover { background: rgba(60,64,67,0.08); color: var(--text); }
+
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 720px) { .ideas-grid { grid-template-columns: 1fr; } }
+.idea-tile {
+  display: flex; align-items: flex-start; gap: 10px;
+  border: 0; background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s, box-shadow .12s;
+}
+.idea-tile:hover { background: var(--bg); box-shadow: var(--shadow-1); }
+.idea-icon {
+  flex: none;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+.idea-meta { flex: 1; min-width: 0; }
+.idea-title-row { display: flex; align-items: baseline; gap: 6px; }
+.idea-title { font-size: 13.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.idea-cat {
+  flex: none;
+  font-size: 10px; color: var(--text-3);
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.idea-summary {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 4px;
+  font-size: 12px; line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* error / empty */
+.err {
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  color: var(--bad);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.state-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 80px 20px;
+  color: var(--text-2);
+  font-size: 13.5px;
+  text-align: center;
+}
+.state-empty :first-child { color: var(--text-3); }
+
+/* 项目列表 */
+.proj-list { display: flex; flex-direction: column; gap: 8px; }
+.proj-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .12s;
+}
+.proj-row:hover { background: var(--bg); border-color: var(--line-hi); transform: translateY(-1px); box-shadow: var(--shadow-1); }
+.proj-icon {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+.proj-meta { flex: 1; min-width: 0; }
+.proj-title {
+  font-size: 15px; font-weight: 600;
+  color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.proj-stats { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 11.5px; }
+.stat-faint { color: var(--text-3); }
+.stat-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.stat-chip.s-running { color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.stat-chip.s-pending { color: var(--text-2); background: var(--bg-elev); }
+.stat-chip.s-done { color: var(--good); border: 1px solid color-mix(in srgb, var(--good) 30%, transparent); }
+.stat-chip.s-failed { color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 30%, transparent); }
+
+.trash-btn {
+  flex: none;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; background: transparent;
+  border-radius: 50%;
+  color: var(--text-3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .12s, background .12s, color .12s;
+}
+.proj-row:hover .trash-btn { opacity: 1; }
+.trash-btn:hover { background: color-mix(in srgb, var(--bad) 10%, transparent); color: var(--bad); }
+.chevron { color: var(--text-3); }
+
+/* plan 网格 */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.plan-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  transition: background .12s, border-color .12s, transform .12s, box-shadow .12s;
+}
+.plan-card.clickable { cursor: pointer; }
+.plan-card.clickable:hover { background: var(--bg); border-color: var(--line-hi); transform: translateY(-2px); box-shadow: var(--shadow-1); }
+.plan-head { display: flex; align-items: flex-start; gap: 10px; }
+.plan-title-wrap { flex: 1; min-width: 0; }
+.plan-title { font-size: 14.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 4px;
+  font-size: 12.5px; line-height: 1.5;
+  color: var(--text-2);
+}
+.status-chip {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.status-chip.s-running { color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.status-chip.s-pending { color: var(--text-2); background: var(--bg-elev); }
+.status-chip.s-done { color: var(--good); border: 1px solid color-mix(in srgb, var(--good) 30%, transparent); }
+.status-chip.s-failed { color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 30%, transparent); }
+
+.plan-err {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: 11.5px; color: var(--bad);
+}
+.plan-foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding-top: 4px; }
+.slug { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-3); }
+.mini-btn {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 28px; padding: 0 10px;
+  border: 0; background: var(--bg-elev);
+  border-radius: 14px;
+  color: var(--text-2);
+  font-size: 11.5px; font-weight: 500;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.mini-btn:hover { background: var(--accent-soft); color: var(--accent-fg); }
+
+/* plan iframe */
+.plan-frame {
+  flex: 1; min-height: 0; min-width: 0;
+  width: 100%;
+  border: 0;
+  background: var(--bg);
+}
+
+@media (max-width: 720px) {
+  .topbar { padding: 8px; height: 56px; }
+  .topbar .brand .name { font-size: 17px; }
+}
+
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.ideas-enter-active, .ideas-leave-active { transition: opacity .15s, transform .15s; }
-.ideas-enter-from, .ideas-leave-to { opacity: 0; transform: translateY(-4px); }
+.ideas-enter-active, .ideas-leave-active { transition: opacity .18s, transform .18s; }
+.ideas-enter-from, .ideas-leave-to { opacity: 0; transform: translateY(-6px); }
 </style>

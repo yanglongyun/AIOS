@@ -1,657 +1,561 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted, markRaw } from 'vue';
-import { ArrowLeft, Hourglass, StopCircle, RotateCcw, ChevronsUpDown, RotateCw, Inbox, FilterX, History, CheckCircle2, XCircle, AlertCircle } from 'lucide-vue-next';
-import { useTasksStore } from '@/stores/tasks';
-import * as api from '@/utils/api';
-import { marked } from 'marked';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
+import { useViewStore } from '@/stores/view.js';
+import * as api from '@/utils/api.js';
+import AppsTrigger from '@/components/AppsTrigger.vue';
+import ChatTrigger from '@/components/ChatTrigger.vue';
 
-marked.setOptions({ breaks: true, gfm: true });
-const renderMd = (text) => marked.parse(text || '');
+const view = useViewStore();
 
-const tasks = useTasksStore();
-
-const STATUS_META = {
-    running:   { label: '__T_TASKS_STATUS_RUNNING__',         tone: 'accent', dot: true  },
-    pending:   { label: '__T_TASKS_STATUS_PENDING_SHORT__',   tone: 'accent', dot: true  },
-    done:      { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: markRaw(CheckCircle2) },
-    completed: { label: '__T_TASKS_STATUS_DONE_SHORT__',      tone: 'good',   icon: markRaw(CheckCircle2) },
-    aborted:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: markRaw(XCircle) },
-    stopped:   { label: '__T_TASKS_STATUS_STOPPED_SHORT__',   tone: 'muted',  icon: markRaw(XCircle) },
-    error:     { label: '__T_TASKS_STATUS_ERROR__',           tone: 'bad',    icon: markRaw(AlertCircle) },
-};
-const statusMeta = (s) => STATUS_META[s] || { label: s || '__T_TASKDETAIL_ROLE_UNKNOWN__', tone: 'muted' };
-const TERMINAL = new Set(['done', 'completed', 'aborted', 'stopped', 'error']);
-const isActive = (t) => t && (t.status === 'running' || t.status === 'pending');
-const isFailed = (t) => t && t.status === 'error';
-
-const TONE_BG = { accent: 'bg-accent', good: 'bg-good', bad: 'bg-bad', muted: 'bg-muted' };
-
-function fmtTime(s) {
-    if (!s) return '';
-    const d = new Date(String(s).replace(' ', 'T') + 'Z');
-    const now = new Date();
-    const diff = (now - d) / 1000;
-    if (diff < 60)    return '__T_TASKS_JUST_NOW__';
-    if (diff < 3600)  return `${Math.floor(diff / 60)}m`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    return `${Math.floor(diff / 86400)}d`;
-}
-function fmtFullTime(s) {
-    if (!s) return '';
-    const d = new Date(String(s).replace(' ', 'T') + 'Z');
-    if (Number.isNaN(d.getTime())) return s;
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-}
-
-// ---- Composer ----------------------------------------------------------
-const newPrompt = ref('');
-const composerRef = ref(null);
-const submitting = ref(false);
-const composerError = ref('');
-// 中文输入法状态:Enter 选词时绝不提交
-const composerComposing = ref(false);
-const COMPOSER_MAX_H = 240; // 自动增高上限,超出滚动
-
-function autosizeComposer() {
-    nextTick(() => {
-        const el = composerRef.value;
-        if (!el) return;
-        el.style.height = 'auto';
-        const next = Math.min(el.scrollHeight, COMPOSER_MAX_H);
-        el.style.height = next + 'px';
-        el.style.overflowY = el.scrollHeight > COMPOSER_MAX_H ? 'auto' : 'hidden';
-    });
-}
-
-async function submitCompose() {
-    const text = newPrompt.value.trim();
-    if (!text || submitting.value) return;
-    submitting.value = true;
-    composerError.value = '';
-    try {
-        await tasks.create({ prompt: text });
-        newPrompt.value = '';
-        await nextTick();
-        autosizeComposer();
-        composerRef.value?.focus();
-    } catch (e) {
-        composerError.value = e?.body?.message || e.message || '__T_TASKS_LOAD_FAIL__';
-    } finally {
-        submitting.value = false;
-    }
-}
-
-function composerKeydown(e) {
-    // IME 输入中(中文/日文/韩文输入法选词):Enter 仅用于选词,不提交
-    if (composerComposing.value || e.isComposing || e.keyCode === 229) return;
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        submitCompose();
-    }
-}
-
-// ---- Filtering & grouping ---------------------------------------------
+const tasks = ref([]);
 const filter = ref('all');
+const errMsg = ref('');
+const expandedId = ref(null);
+const detailCache = new Map();   // id -> 详情(避免每次 expand 都重拉)
+const detailFor = ref(null);
+const loading = ref(false);
 
-const filteredAll = computed(() => {
-    let list = tasks.tasks || [];
-    if (filter.value === 'active') list = list.filter(isActive);
-    else if (filter.value === 'failed') list = list.filter(isFailed);
-    return list;
+const newTitle = ref('');
+const submitting = ref(false);
+const showCompleted = ref(true);
+
+const filters = [
+  { id: 'all',     name: '所有任务',  icon: 'inbox' },
+  { id: 'mine',    name: '我创建的',  icon: 'person' },
+  { id: 'running', name: '运行中',    icon: 'autorenew' },
+  { id: 'success', name: '成功',      icon: 'check_circle' },
+  { id: 'failed',  name: '失败',      icon: 'cancel' }
+];
+
+function isMine(t) {
+  // 没有 rerunOf 元信息的认为是用户手动创建的
+  if (!t.meta) return true;
+  try {
+    const m = typeof t.meta === 'string' ? JSON.parse(t.meta) : t.meta;
+    return !m?.rerunOf;
+  } catch { return true; }
+}
+
+function applyFilter(list) {
+  switch (filter.value) {
+    case 'mine':    return list.filter(isMine);
+    case 'running': return list.filter((t) => t.status === 'running' || t.status === 'pending');
+    case 'success': return list.filter((t) => t.status === 'success');
+    case 'failed':  return list.filter((t) => t.status === 'failed');
+    default:        return list;
+  }
+}
+
+const counts = computed(() => ({
+  all:     tasks.value.length,
+  mine:    tasks.value.filter(isMine).length,
+  running: tasks.value.filter((t) => t.status === 'running' || t.status === 'pending').length,
+  success: tasks.value.filter((t) => t.status === 'success').length,
+  failed:  tasks.value.filter((t) => t.status === 'failed').length
+}));
+
+const visibleTasks = computed(() => applyFilter(tasks.value));
+const openTasks = computed(() => visibleTasks.value.filter((t) => t.status === 'pending' || t.status === 'running'));
+const doneTasks = computed(() => visibleTasks.value.filter((t) => t.status === 'success' || t.status === 'failed'));
+
+const STATUS = {
+  pending: { label: '待执行', icon: 'schedule',     cls: 'pending' },
+  running: { label: '执行中', icon: 'autorenew',    cls: 'running' },
+  success: { label: '成功',   icon: 'check_circle', cls: 'success' },
+  failed:  { label: '失败',   icon: 'cancel',       cls: 'failed' }
+};
+function st(t) { return STATUS[t.status || 'pending'] || STATUS.pending; }
+
+// ── 加载 ──
+async function load() {
+  loading.value = true;
+  try {
+    const res = await api.get('/api/task', { query: { limit: 200 } });
+    tasks.value = Array.isArray(res) ? res : (res?.tasks || res?.items || []);
+    // 如果当前展开的项还在,顺便刷新它的 detail
+    if (expandedId.value) {
+      const fresh = tasks.value.find((t) => t.id === expandedId.value);
+      if (fresh) {
+        detailCache.set(expandedId.value, fresh);
+        detailFor.value = fresh;
+      }
+    }
+  } catch (e) { errMsg.value = '加载任务失败: ' + (e?.body?.message || e.message || e); }
+  loading.value = false;
+}
+
+// ── 自动轮询 (有 running 时) ──
+let pollTimer = null;
+watch(() => tasks.value.some((t) => t.status === 'running'), (busy) => {
+  clearInterval(pollTimer); pollTimer = null;
+  if (busy) pollTimer = setInterval(load, 4000);
 });
 
-const grouped = computed(() => {
-    const list = filteredAll.value;
-    return {
-        active: list.filter(isActive),
-        recent: list.filter(t => !isActive(t)),
-    };
-});
-
-// ---- Detail -----------------------------------------------------------
-const selectedId = ref(null);
-const detail = ref(null);
-const detailMessages = ref([]);
-const detailError = ref('');
-let detailPoller = null;
-
-const selected = computed(() => detail.value);
-
-async function openDetail(id) {
-    if (detailPoller) { clearInterval(detailPoller); detailPoller = null; }
-    selectedId.value = id;
-    detailError.value = '';
-    detail.value = null;
-    detailMessages.value = [];
-    await refreshDetail();
-    detailPoller = setInterval(() => {
-        if (!detail.value || isActive(detail.value)) refreshDetail();
-        else { clearInterval(detailPoller); detailPoller = null; }
-    }, 2000);
-}
-async function refreshDetail() {
-    if (!selectedId.value) return;
-    try {
-        const [data, msgData] = await Promise.all([
-            api.get('/api/task/detail', { query: { id: selectedId.value } }),
-            api.get('/api/task/messages', { query: { id: selectedId.value } }),
-        ]);
-        detail.value = data?.task || null;
-        detailMessages.value = Array.isArray(msgData?.messages) ? msgData.messages : [];
-    } catch (err) {
-        detailError.value = err?.body?.message || err.message || '__T_TASKS_LOAD_FAIL__';
-    }
-}
-function backToList() {
-    selectedId.value = null;
-    detail.value = null;
-    detailMessages.value = [];
-    detailError.value = '';
-    if (detailPoller) { clearInterval(detailPoller); detailPoller = null; }
+// ── 展开详情 ──
+async function toggleExpand(t) {
+  if (expandedId.value === t.id) {
+    expandedId.value = null;
+    detailFor.value = null;
+    return;
+  }
+  expandedId.value = t.id;
+  detailFor.value = detailCache.get(t.id) || t;
+  try {
+    const d = await api.get('/api/task/detail', { query: { id: t.id } });
+    const taskObj = d?.task || d;
+    detailCache.set(t.id, taskObj);
+    if (expandedId.value === t.id) detailFor.value = taskObj;
+  } catch {}
 }
 
-async function stopFromDetail() {
-    if (!detail.value) return;
-    try {
-        await tasks.stop(detail.value.id);
-        await refreshDetail();
-    } catch {}
-}
-
-async function rerunFromDetail() {
-    if (!detail.value?.prompt) return;
-    try {
-        await tasks.rerun(detail.value);
-        backToList();
-    } catch (e) {
-        detailError.value = e?.body?.message || e.message || '__T_TASKS_LOAD_FAIL__';
-    }
-}
-
-// ---- Lifecycle ---------------------------------------------------------
-let listPoller = null;
-onMounted(() => {
-    tasks.fetch();
-    nextTick(() => {
-        composerRef.value?.focus();
-        autosizeComposer();
+// ── 创建 ──
+async function addTask() {
+  const t = newTitle.value.trim();
+  if (!t || submitting.value) return;
+  submitting.value = true; errMsg.value = '';
+  try {
+    const data = await api.post('/api/task/create/agent', {
+      app:    'tasks',
+      title:  t.slice(0, 80),
+      prompt: t,
+      meta:   null,
+      wait:   false
     });
-    listPoller = setInterval(() => { if (!selectedId.value) tasks.fetch(); }, 4000);
-});
-onUnmounted(() => {
-    if (listPoller) clearInterval(listPoller);
-    if (detailPoller) clearInterval(detailPoller);
-});
-
-function toolCallName(msg) { return msg?.tool_calls?.[0]?.function?.name || 'tool'; }
-function toolCallArgs(msg) { return msg?.tool_calls?.[0]?.function?.arguments || ''; }
-function messageText(msg) { return msg?.content == null ? '' : String(msg.content); }
-function messageRoleLabel(role) {
-    if (role === 'assistant') return '__T_TASKS_ROLE_MODEL__';
-    if (role === 'tool')      return '__T_TASKDETAIL_ROLE_TOOL_RESULT__';
-    if (role === 'user')      return '__T_TASKDETAIL_ROLE_USER__';
-    if (role === 'system')    return '__T_TASKS_ROLE_SYSTEM__';
-    return role || '__T_TASKS_ROLE_MESSAGE__';
+    newTitle.value = '';
+    await load();
+    if (data?.id) {
+      expandedId.value = data.id;
+      detailFor.value = tasks.value.find((x) => x.id === data.id) || null;
+    }
+  } catch (e) { errMsg.value = '创建失败: ' + (e?.body?.message || e.message || e); }
+  submitting.value = false;
 }
+
+// ── 操作 ──
+async function stopTask(id, e) {
+  e?.stopPropagation();
+  try { await api.post('/api/task/stop', { id }); await load(); }
+  catch (err) { errMsg.value = '停止失败: ' + (err?.body?.message || err.message || err); }
+}
+async function rerun(t, e) {
+  e?.stopPropagation();
+  try {
+    const data = await api.post('/api/task/create/agent', {
+      app:    t.app || 'tasks',
+      title:  t.title || (t.prompt || '').slice(0, 80),
+      prompt: t.prompt,
+      meta:   { rerunOf: t.id },
+      wait:   false
+    });
+    await load();
+    if (data?.id) { expandedId.value = data.id; detailFor.value = tasks.value.find((x) => x.id === data.id) || null; }
+  } catch (err) { errMsg.value = '重跑失败: ' + (err?.body?.message || err.message || err); }
+}
+
+function pickFilter(id) {
+  filter.value = id;
+  expandedId.value = null;
+  detailFor.value = null;
+  if (window.innerWidth < 720) view.closeAppDrawer();
+}
+
+function relTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return ts;
+  const diffSec = (Date.now() - d.getTime()) / 1000;
+  if (diffSec < 60) return Math.round(diffSec) + 's 前';
+  if (diffSec < 3600) return Math.round(diffSec / 60) + ' 分前';
+  if (diffSec < 86400) return Math.round(diffSec / 3600) + ' 小时前';
+  return Math.round(diffSec / 86400) + ' 天前';
+}
+function preview(s, n = 80) {
+  s = String(s || '').replace(/\s+/g, ' ').trim();
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+onMounted(load);
+onActivated(load);
+onDeactivated(() => { clearInterval(pollTimer); pollTimer = null; });
+onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 </script>
 
 <template>
-    <div class="tasks-shell flex h-full flex-col">
-
-        <!-- ============== DETAIL ============== -->
-        <div v-if="selectedId" class="app-content flex h-full min-w-0 flex-col">
-            <header class="flex flex-none items-center gap-2 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-                <button class="header-icon" @click="backToList" :title="'__T_TASKDETAIL_BACK__'">
-                    <ArrowLeft :size="18" :stroke-width="1.8" />
-                </button>
-            </header>
-
-            <div v-if="detailError" class="mx-8 mt-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-4"
-                 style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-                {{ detailError }}
-            </div>
-
-            <div v-if="!selected && !detailError" class="flex flex-1 flex-col items-center gap-2 py-15 text-muted">
-                <Hourglass :size="28" :stroke-width="1.6" class="text-faint" />
-                <div class="text-[14px]">__T_TASKS_LOADING__</div>
-            </div>
-
-            <div v-else-if="selected" class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-4 max-md:pb-10">
-
-                <!-- Title -->
-                <h2 class="m-0 mb-2 break-words text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-ink max-md:text-[22px]">
-                    {{ selected.title || '__T_TASKS_NO_TITLE__' }}
-                </h2>
-
-                <!-- Status meta line -->
-                <div class="mb-4 flex flex-wrap items-center gap-2">
-                    <span class="status-pill" :class="['tone-' + statusMeta(selected.status).tone]">
-                        <span v-if="statusMeta(selected.status).dot"
-                            class="h-1.5 w-1.5 rounded-full animate-status-pulse"
-                            :class="TONE_BG[statusMeta(selected.status).tone]"></span>
-                        <component v-else-if="statusMeta(selected.status).icon" :is="statusMeta(selected.status).icon" :size="13" :stroke-width="1.8" />
-                        {{ statusMeta(selected.status).label }}
-                    </span>
-                    <span v-if="selected.app && selected.app !== 'tasks'" class="app-tag">{{ selected.app }}</span>
-                    <span class="text-[12px] text-faint">#{{ selected.id }}</span>
-                    <span v-if="selected.created_at" class="text-[12px] text-faint">·  {{ fmtFullTime(selected.created_at) }}</span>
-                </div>
-
-                <!-- Hero run card -->
-                <div class="run-card mb-7" :class="{ 'is-active': isActive(selected) }">
-                    <div class="run-card-body">
-                        <div class="run-card-title">
-                            <span v-if="isActive(selected)">__T_TASKS_RUNCARD_TITLE_RUNNING__</span>
-                            <span v-else-if="selected.status === 'error'">__T_TASKS_RUNCARD_TITLE_FAILED__</span>
-                            <span v-else>__T_TASKS_RUNCARD_TITLE_DONE__</span>
-                        </div>
-                        <div class="run-card-sub">
-                            <span v-if="isActive(selected)">__T_TASKS_RUNCARD_SUB_RUNNING__</span>
-                            <span v-else-if="selected.status === 'error'">__T_TASKS_RUNCARD_SUB_FAILED__</span>
-                            <span v-else>__T_TASKS_RUNCARD_SUB_DONE__</span>
-                        </div>
-                    </div>
-                    <button v-if="isActive(selected)" class="run-btn is-stop" @click="stopFromDetail">
-                        <StopCircle :size="20" :stroke-width="1.8" />
-                        <span>__T_TASKS_STOP__</span>
-                    </button>
-                    <button v-else class="run-btn is-go" @click="rerunFromDetail">
-                        <RotateCcw :size="20" :stroke-width="1.8" />
-                        <span>__T_TASKS_RUN_AGAIN__</span>
-                    </button>
-                </div>
-
-                <!-- Error -->
-                <div v-if="selected.error" class="mb-5 rounded-lg px-3 py-2 text-[12.5px] text-bad"
-                     style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-                    <div class="text-[10.5px] font-medium uppercase tracking-wider opacity-80">__T_TASKDETAIL_ERROR_LABEL__</div>
-                    <div class="mt-1 whitespace-pre-wrap leading-[1.55]">{{ selected.error }}</div>
-                </div>
-
-                <!-- Prompt -->
-                <section v-if="selected.prompt" class="mb-7">
-                    <div class="section-label">__T_TASKDETAIL_PROMPT_LABEL__</div>
-                    <pre class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-[12px] border border-line bg-card px-4 py-3 text-[13px] leading-[1.6] text-ink">{{ selected.prompt }}</pre>
-                </section>
-
-                <!-- Run history -->
-                <details v-if="detailMessages.length" class="mb-7 rounded-[12px] border border-line bg-bg-elev">
-                    <summary class="cursor-pointer select-none list-none px-3.5 py-2.5 text-[12px] text-muted hover:text-ink">
-                        <ChevronsUpDown :size="14" :stroke-width="1.8" class="inline-block align-[-2px]" />
-                        __T_TASKDETAIL_MESSAGES_TITLE__
-                        <span class="text-faint">·  {{ '__T_TASKDETAIL_MESSAGES_COUNT__'.replace('{count}', detailMessages.length) }}</span>
-                    </summary>
-                    <ol class="m-0 flex list-none flex-col gap-2 px-3 pb-3 pt-1">
-                        <li v-for="row in detailMessages" :key="row.id" class="rounded-lg border border-line bg-bg px-3 py-2.5">
-                            <div class="mb-1 flex items-center gap-2 text-[11px] text-faint">
-                                <span class="font-medium text-ink">{{ messageRoleLabel(row.message?.role) }}</span>
-                                <span v-if="row.message?.tool_calls?.length">·  __T_TASKS_TOOL_CALL__ <span class="font-mono text-ink">{{ toolCallName(row.message) }}</span></span>
-                            </div>
-                            <pre v-if="row.message?.tool_calls?.length"
-                                class="m-0 max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-[1.5] text-muted">{{ toolCallArgs(row.message) }}</pre>
-                            <div v-if="messageText(row.message)"
-                                class="whitespace-pre-wrap break-words text-[12.5px] leading-[1.55] text-muted">{{ messageText(row.message) }}</div>
-                        </li>
-                    </ol>
-                </details>
-
-                <!-- Result -->
-                <section v-if="selected.response" class="mb-7">
-                    <div class="section-label">__T_TASKS_RESPONSE__</div>
-                    <div class="md rounded-[12px] border border-line bg-card px-4 py-3.5 text-[13.5px] leading-[1.65] text-ink break-words"
-                         v-html="renderMd(selected.response)"></div>
-                </section>
-            </div>
-        </div>
-
-        <!-- ============== LIST ============== -->
-        <div v-else class="app-content flex h-full min-w-0 flex-col">
-            <header class="flex flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
-                <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_TASKS_TITLE__</h1>
-                <div class="ml-auto flex items-center gap-2">
-                    <button class="header-icon"
-                        :disabled="tasks.loading"
-                        @click="tasks.fetch"
-                        :title="'__T_TASKS_REFRESH__'">
-                        <RotateCw :size="18" :stroke-width="1.8" :class="{ 'animate-spin': tasks.loading }" />
-                    </button>
-                </div>
-            </header>
-
-            <!-- Composer -->
-            <div class="composer-card mx-8 mb-3 flex flex-none items-end gap-2.5 px-4 py-3 max-md:mx-3 max-md:px-3.5">
-                <textarea ref="composerRef" v-model="newPrompt"
-                    @keydown="composerKeydown"
-                    @input="autosizeComposer"
-                    @compositionstart="composerComposing = true"
-                    @compositionend="composerComposing = false; autosizeComposer()"
-                    rows="1"
-                    placeholder="__T_TASKS_COMPOSER_PLACEHOLDER__"
-                    class="composer-input min-w-0 flex-1 resize-none border-0 bg-transparent py-1 text-[15px] leading-[1.55] text-ink outline-none"></textarea>
-                <button class="composer-btn cursor-pointer rounded-full border-0 px-4 py-1.5 text-[13px] font-semibold text-white disabled:cursor-default disabled:opacity-45"
-                    :disabled="submitting || !newPrompt.trim()" @click="submitCompose">
-                    {{ submitting ? '__T_TASKS_LOADING__' : '__T_TASKS_COMPOSER_SUBMIT__' }}
-                </button>
-            </div>
-
-            <div v-if="composerError" class="mx-8 mb-3 rounded-[10px] px-3.5 py-2 text-[13px] text-bad max-md:mx-3"
-                 style="background:color-mix(in srgb, var(--color-bad) 12%, transparent)">
-                {{ composerError }}
-            </div>
-
-            <!-- Filter chips -->
-            <div class="mx-8 mb-3 flex flex-none items-center gap-2 max-md:mx-3">
-                <div class="flex flex-none items-center gap-1 rounded-full bg-card-sub p-0.5">
-                    <button v-for="opt in [
-                        { v: 'all',    k: '__T_TASKS_FILTER_ALL__' },
-                        { v: 'active', k: '__T_TASKS_FILTER_ACTIVE__' },
-                        { v: 'failed', k: '__T_TASKS_FILTER_FAILED__' }
-                    ]" :key="opt.v"
-                        class="cursor-pointer rounded-full border-0 bg-transparent px-3 py-1 text-[12.5px] font-medium text-muted transition-colors"
-                        :class="filter === opt.v ? '!bg-bg !text-ink shadow-[0_1px_2px_var(--color-shadow)]' : 'hover:text-ink'"
-                        @click="filter = opt.v">{{ opt.k }}</button>
-                </div>
-            </div>
-
-            <div class="min-h-0 flex-1 overflow-auto px-8 pb-15 pt-1 max-md:px-3 max-md:pb-10">
-                <!-- Empty -->
-                <div v-if="!tasks.tasks.length" class="flex flex-col items-center gap-2 py-20 text-muted">
-                    <Inbox :size="30" :stroke-width="1.6" class="text-faint" />
-                    <div class="text-[14px]">{{ tasks.loading ? '__T_TASKS_LOADING__' : '__T_TASKS_EMPTY_PLAIN__' }}</div>
-                    <div v-if="!tasks.loading" class="text-[12px] text-faint">__T_TASKS_EMPTY_HINT__</div>
-                </div>
-
-                <!-- No match for filter -->
-                <div v-else-if="!filteredAll.length" class="flex flex-col items-center gap-2 py-15 text-muted">
-                    <FilterX :size="26" :stroke-width="1.6" class="text-faint" />
-                    <div class="text-[13px]">__T_TASKS_FILTER_NO_MATCH__</div>
-                </div>
-
-                <template v-else>
-                    <!-- Active group -->
-                    <section v-if="grouped.active.length" class="mb-5">
-                        <div class="section-h text-accent">
-                            <span class="h-1.5 w-1.5 rounded-full bg-accent animate-status-pulse"></span>
-                            __T_TASKS_SECTION_ACTIVE__
-                            <span class="ct">{{ grouped.active.length }}</span>
-                        </div>
-                        <ul class="task-card m-0 flex list-none flex-col p-0">
-                            <li v-for="t in grouped.active" :key="t.id"
-                                class="task-row is-active group flex items-center gap-3.5 px-4 py-3.5 cursor-pointer transition-colors max-md:gap-2.5 max-md:px-3 max-md:py-3"
-                                @click="openDetail(t.id)">
-                                <span class="task-spinner flex-none"></span>
-                                <div class="min-w-0 flex-1">
-                                    <div class="break-words text-[14.5px] font-medium text-ink truncate">
-                                        {{ t.title || (t.prompt && t.prompt.slice(0, 80)) || '__T_TASKS_NO_TITLE__' }}
-                                    </div>
-                                    <div class="mt-1.5 flex items-center gap-2">
-                                        <span class="status-pill" :class="['tone-' + statusMeta(t.status).tone]">
-                                            <span class="h-1.5 w-1.5 rounded-full animate-status-pulse"
-                                                :class="TONE_BG[statusMeta(t.status).tone]"></span>
-                                            {{ statusMeta(t.status).label }}
-                                        </span>
-                                        <span v-if="t.app && t.app !== 'tasks'" class="app-tag">{{ t.app }}</span>
-                                        <span class="text-[11.5px] text-faint">{{ fmtTime(t.created_at) }}</span>
-                                    </div>
-                                </div>
-                                <button class="row-stop"
-                                    :title="'__T_TASKS_STOP__'"
-                                    @click.stop="tasks.stop(t.id)">
-                                    <StopCircle :size="14" :stroke-width="1.8" class="inline-block" />
-                                    __T_TASKS_STOP__
-                                </button>
-                            </li>
-                        </ul>
-                    </section>
-
-                    <!-- Recent group -->
-                    <section v-if="grouped.recent.length" class="mb-5">
-                        <div v-if="grouped.active.length" class="section-h">
-                            <History :size="14" :stroke-width="1.8" class="text-faint" />
-                            __T_TASKS_SECTION_RECENT__
-                            <span class="ct">{{ grouped.recent.length }}</span>
-                        </div>
-                        <ul class="task-card m-0 flex list-none flex-col p-0">
-                            <li v-for="t in grouped.recent" :key="t.id"
-                                class="task-row group flex items-center gap-3.5 px-4 py-3.5 cursor-pointer transition-colors max-md:gap-2.5 max-md:px-3 max-md:py-3"
-                                @click="openDetail(t.id)">
-                                <span class="task-status-dot flex-none"
-                                    :class="['tone-' + statusMeta(t.status).tone]">
-                                    <component v-if="statusMeta(t.status).icon" :is="statusMeta(t.status).icon" :size="13" :stroke-width="1.8" />
-                                </span>
-                                <div class="min-w-0 flex-1">
-                                    <div class="break-words text-[14px] text-ink truncate">
-                                        {{ t.title || (t.prompt && t.prompt.slice(0, 80)) || '__T_TASKS_NO_TITLE__' }}
-                                    </div>
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <span class="status-pill is-tight" :class="['tone-' + statusMeta(t.status).tone]">
-                                            {{ statusMeta(t.status).label }}
-                                        </span>
-                                        <span v-if="t.app && t.app !== 'tasks'" class="app-tag">{{ t.app }}</span>
-                                        <span class="text-[11.5px] text-faint">{{ fmtTime(t.created_at) }}</span>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </section>
-
-                </template>
-            </div>
-        </div>
-
+  <div class="app-frame">
+    <header class="topbar">
+      <button class="icon-btn lg" :class="{ active: view.appDrawerOpen }"
+        @click="view.toggleAppDrawer()" title="侧栏">
+        <span class="msi">menu</span>
+      </button>
+      <div class="brand"><span class="name">任务</span></div>
+      <div class="right">
+        <ChatTrigger />
+        <AppsTrigger />
+      </div>
+    </header>
+    <div class="app-body">
+      <aside class="app-side" :class="{ collapsed: !view.appDrawerOpen }">
+    <div class="app-side-inner">
+      <div v-for="f in filters" :key="f.id"
+        class="list-item"
+        :class="{ active: f.id === filter }"
+        @click="pickFilter(f.id)">
+        <span class="msi sm ic">{{ f.icon }}</span>
+        <span class="label">{{ f.name }}</span>
+        <span class="cnt" v-if="counts[f.id]">{{ counts[f.id] }}</span>
+      </div>
     </div>
+  </aside>
+
+  <section class="page">
+    <div class="inner">
+      <!-- 添加任务 -->
+      <form class="add" @submit.prevent="addTask">
+        <span class="msi" :style="{ color: submitting ? 'var(--text-3)' : 'var(--accent)' }">
+          {{ submitting ? 'hourglass_top' : 'add' }}
+        </span>
+        <input v-model="newTitle"
+          :placeholder="submitting ? '创建中…' : '添加任务,Enter 让 AI 立刻去做'"
+          :disabled="submitting" />
+      </form>
+
+      <div v-if="errMsg" class="err-bar">{{ errMsg }}</div>
+
+      <!-- 进行中 -->
+      <template v-if="openTasks.length">
+        <div v-for="t in openTasks" :key="t.id"
+          class="task" :class="[st(t).cls, { expanded: expandedId === t.id }]"
+          @click="toggleExpand(t)">
+          <button class="check" :class="st(t).cls" @click.stop>
+            <span v-if="t.status === 'running'" class="msi xxs">autorenew</span>
+            <span v-else-if="t.status === 'success'" class="msi xxs">check</span>
+            <span v-else-if="t.status === 'failed'" class="msi xxs">close</span>
+          </button>
+          <div class="body">
+            <div class="title">{{ t.title || (t.prompt || '').slice(0, 80) || '(空)' }}</div>
+            <div v-if="t.prompt && t.prompt !== t.title" class="detail">{{ preview(t.prompt) }}</div>
+            <div class="meta">
+              <span class="badge" :class="st(t).cls">
+                <span class="msi xxs">{{ st(t).icon }}</span>
+                {{ st(t).label }}
+              </span>
+              <span class="app-tag">{{ t.app }}</span>
+              <span class="time">{{ relTime(t.created_at) }}</span>
+            </div>
+            <div v-if="expandedId === t.id" class="expand">
+              <div v-if="detailFor?.prompt" class="block">
+                <div class="block-h">Prompt</div>
+                <pre>{{ detailFor.prompt }}</pre>
+              </div>
+              <div v-if="detailFor?.response" class="block">
+                <div class="block-h">Response</div>
+                <pre>{{ typeof detailFor.response === 'string' ? detailFor.response : JSON.stringify(detailFor.response, null, 2) }}</pre>
+              </div>
+              <div v-if="detailFor?.error" class="block err">
+                <div class="block-h">Error</div>
+                <pre>{{ detailFor.error }}</pre>
+              </div>
+            </div>
+          </div>
+          <div class="actions" @click.stop>
+            <button v-if="t.status === 'running'" class="act danger" title="停止" @click="stopTask(t.id, $event)">
+              <span class="msi sm">stop</span>
+            </button>
+            <button class="act" title="重跑" @click="rerun(t, $event)">
+              <span class="msi sm">replay</span>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 已完成(只在 all/mine 时折叠展示) -->
+      <template v-if="(filter === 'all' || filter === 'mine') && doneTasks.length">
+        <button class="completed-toggle" @click="showCompleted = !showCompleted">
+          <span class="msi sm" :style="{ transform: showCompleted ? '' : 'rotate(-90deg)' }">expand_more</span>
+          <span>已完成 ({{ doneTasks.length }})</span>
+        </button>
+        <div v-if="showCompleted">
+          <div v-for="t in doneTasks" :key="t.id"
+            class="task done" :class="[st(t).cls, { expanded: expandedId === t.id }]"
+            @click="toggleExpand(t)">
+            <button class="check" :class="st(t).cls" @click.stop>
+              <span v-if="t.status === 'success'" class="msi xxs">check</span>
+              <span v-else class="msi xxs">close</span>
+            </button>
+            <div class="body">
+              <div class="title">{{ t.title || (t.prompt || '').slice(0, 80) || '(空)' }}</div>
+              <div v-if="t.prompt && t.prompt !== t.title" class="detail">{{ preview(t.prompt) }}</div>
+              <div class="meta">
+                <span class="app-tag">{{ t.app }}</span>
+                <span class="time">{{ relTime(t.created_at) }}</span>
+              </div>
+              <div v-if="expandedId === t.id" class="expand">
+                <div v-if="detailFor?.prompt" class="block">
+                  <div class="block-h">Prompt</div>
+                  <pre>{{ detailFor.prompt }}</pre>
+                </div>
+                <div v-if="detailFor?.response" class="block">
+                  <div class="block-h">Response</div>
+                  <pre>{{ typeof detailFor.response === 'string' ? detailFor.response : JSON.stringify(detailFor.response, null, 2) }}</pre>
+                </div>
+                <div v-if="detailFor?.error" class="block err">
+                  <div class="block-h">Error</div>
+                  <pre>{{ detailFor.error }}</pre>
+                </div>
+              </div>
+            </div>
+            <div class="actions" @click.stop>
+              <button class="act" title="重跑" @click="rerun(t, $event)">
+                <span class="msi sm">replay</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- 单状态过滤下没有"已完成"折叠,直接平铺 -->
+      <template v-if="filter !== 'all' && filter !== 'mine'">
+        <div v-for="t in doneTasks" :key="t.id"
+          class="task" :class="[st(t).cls, { expanded: expandedId === t.id }]"
+          @click="toggleExpand(t)">
+          <button class="check" :class="st(t).cls" @click.stop>
+            <span v-if="t.status === 'success'" class="msi xxs">check</span>
+            <span v-else class="msi xxs">close</span>
+          </button>
+          <div class="body">
+            <div class="title">{{ t.title || (t.prompt || '').slice(0, 80) || '(空)' }}</div>
+            <div v-if="t.prompt && t.prompt !== t.title" class="detail">{{ preview(t.prompt) }}</div>
+            <div class="meta">
+              <span class="app-tag">{{ t.app }}</span>
+              <span class="time">{{ relTime(t.created_at) }}</span>
+            </div>
+            <div v-if="expandedId === t.id" class="expand">
+              <div v-if="detailFor?.prompt" class="block">
+                <div class="block-h">Prompt</div>
+                <pre>{{ detailFor.prompt }}</pre>
+              </div>
+              <div v-if="detailFor?.response" class="block">
+                <div class="block-h">Response</div>
+                <pre>{{ typeof detailFor.response === 'string' ? detailFor.response : JSON.stringify(detailFor.response, null, 2) }}</pre>
+              </div>
+              <div v-if="detailFor?.error" class="block err">
+                <div class="block-h">Error</div>
+                <pre>{{ detailFor.error }}</pre>
+              </div>
+            </div>
+          </div>
+          <div class="actions" @click.stop>
+            <button class="act" title="重跑" @click="rerun(t, $event)">
+              <span class="msi sm">replay</span>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 空状态 -->
+      <div v-if="!visibleTasks.length && !loading" class="empty">
+        <span class="msi" style="font-size:48px;color:var(--text-3)">task_alt</span>
+        <div>{{ filter === 'all' ? '还没有任务,在上面添加一条试试' : '当前过滤条件下没有任务' }}</div>
+      </div>
+    </div>
+  </section>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.tasks-shell {
-    color: var(--color-ink);
-    background: var(--color-bg);
+/* ─── 自有顶栏 ─── */
+.topbar {
+  flex: none; height: 64px;
+  display: flex; align-items: center;
+  padding: 8px 16px;
+  background: var(--bg);
+}
+.topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
+.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
+.topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+@media (max-width: 720px) {
+  .topbar { padding: 8px; height: 56px; }
+  .topbar .brand .name { font-size: 17px; }
 }
 
-.composer-input::placeholder { color: var(--color-faint); }
+/* ─── 左侧 rail (Google Tasks 风) ─── */
+.app-side { background: var(--bg); }
+.list-item {
+  display: flex; align-items: center;
+  gap: 14px;
+  height: 40px;
+  padding: 0 14px 0 24px;
+  margin: 2px 12px 2px 0;
+  border-radius: 0 20px 20px 0;
+  color: var(--text);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+.list-item:hover { background: var(--bg-hover); }
+.list-item.active { background: var(--accent-soft); color: var(--accent-fg); }
+.list-item .ic { color: var(--text-2); }
+.list-item.active .ic { color: var(--accent-fg); }
+.list-item .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-item .cnt {
+  font-size: 11.5px; color: var(--text-3);
+  background: var(--bg-elev);
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.list-item.active .cnt { background: rgba(255,255,255,0.5); color: var(--accent-fg); }
 
-.animate-status-pulse { animation: status-pulse 1.4s ease-in-out infinite; }
-@keyframes status-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+/* ─── 主区 ─── */
+.page { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; padding: 0 24px 80px; background: var(--bg); }
+.inner { max-width: 720px; margin: 0 auto; padding: 16px 0; }
 
-/* Composer card —— 与 chat / store / cryptobot 一致:边框 + 微 focus 高亮,无重阴影 */
-.composer-card {
-    background: var(--color-bg-elev);
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    transition: border-color .15s;
+/* 添加输入框 */
+.add {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  margin: 8px 0 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(60,64,67,0.06), 0 1px 3px rgba(60,64,67,0.04);
+  transition: border-color .15s, box-shadow .15s;
 }
-.composer-card:focus-within { border-color: var(--color-accent); }
-.composer-btn {
-    background: var(--color-blue-bg);
-    color: var(--color-blue-fg);
+.add:hover  { box-shadow: 0 1px 3px rgba(60,64,67,0.10), 0 4px 10px rgba(60,64,67,0.06); }
+.add:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 1px 3px rgba(60,64,67,0.06);
 }
-.composer-btn:hover:not(:disabled) { background: var(--color-blue-soft); }
+.add input {
+  flex: 1; border: 0; background: transparent; outline: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+.add input::placeholder { color: var(--text-3); font-weight: 400; }
+.add input:disabled { color: var(--text-3); }
 
-/* Section header */
-.section-h {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    margin: 14px 4px 8px;
-    color: var(--color-muted);
-    font-size: 12.5px;
-    font-weight: 600;
-}
-.section-h .ct {
-    color: var(--color-faint);
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-}
+.err-bar { margin: 8px 0; padding: 10px 14px; background: #fce8e6; color: var(--bad); border-radius: 10px; font-size: 12.5px; }
 
-/* List card */
-.task-card {
-    background: var(--color-bg-elev);
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    overflow: hidden;
+/* ─── 任务行 ─── */
+.task {
+  display: flex; align-items: flex-start;
+  gap: 12px;
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background .15s;
+  cursor: pointer;
+  position: relative;
 }
+.task:hover { background: var(--bg-hover); }
+.task.expanded { background: var(--bg-hover); }
 
-.task-row + .task-row { border-top: 1px solid var(--color-line); }
-.task-row:hover { background: var(--color-bg-hi); }
-.task-row.is-active { box-shadow: inset 3px 0 0 0 var(--color-accent); background: var(--color-blue-bg); }
-.task-row.is-active:hover { background: var(--color-blue-soft); }
+.check {
+  flex: none; width: 22px; height: 22px;
+  margin-top: 2px;
+  border: 2px solid var(--text-2);
+  border-radius: 50%;
+  background: transparent;
+  cursor: default;
+  display: grid; place-items: center;
+  color: #fff;
+  transition: border-color .15s, background .15s;
+}
+.check.pending { border-color: var(--text-3); background: transparent; }
+.check.running { border-color: var(--accent); }
+.check.running .msi { color: var(--accent); animation: spin 1.4s linear infinite; }
+.check.success { border-color: var(--good); background: var(--good); }
+.check.failed  { border-color: var(--bad);  background: var(--bad); }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Spinner ring for active row */
-.task-spinner {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: conic-gradient(from 0deg, var(--color-accent) 0%, var(--color-accent) 70%, transparent 70%);
-    animation: spin 1.2s linear infinite;
-    display: grid; place-items: center;
-    flex: none;
-    position: relative;
-}
-.task-spinner::after {
-    content: '';
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--color-bg-elev);
-}
+.body { flex: 1; min-width: 0; }
+.title { font-size: 14px; line-height: 1.5; color: var(--text); word-break: break-word; }
+.task.success .title, .task.failed .title { color: var(--text-3); }
+.detail { font-size: 12.5px; color: var(--text-2); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task.expanded .detail { white-space: normal; overflow: visible; }
 
-/* Status dot for recent rows */
-.task-status-dot {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    flex: none;
+.meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 11.5px; color: var(--text-3); }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 500;
 }
-.task-status-dot.tone-good {
-    background: color-mix(in srgb, var(--color-good) 14%, transparent);
-    color: var(--color-good);
-}
-.task-status-dot.tone-bad {
-    background: color-mix(in srgb, var(--color-bad) 14%, transparent);
-    color: var(--color-bad);
-}
-.task-status-dot.tone-muted {
-    background: var(--color-bg-hi);
-    color: var(--color-muted);
-}
-
-/* Status pill */
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 500;
-}
-.status-pill.is-tight { padding: 1px 8px; font-size: 10.5px; }
-.status-pill.tone-accent { background: var(--color-blue-bg); color: var(--color-blue-fg); }
-.status-pill.tone-good   { background: color-mix(in srgb, var(--color-good) 14%, transparent); color: var(--color-good); }
-.status-pill.tone-bad    { background: color-mix(in srgb, var(--color-bad) 12%, transparent); color: var(--color-bad); }
-.status-pill.tone-muted  { background: var(--color-bg-hi); color: var(--color-muted); }
-
-/* App tag */
+.badge.pending { background: #fef7e0; color: #b06000; }
+.badge.running { background: var(--accent-soft); color: var(--accent-fg); }
+.badge.success { background: #e6f4ea; color: var(--good); }
+.badge.failed  { background: #fce8e6; color: var(--bad); }
 .app-tag {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: 999px;
-    background: var(--color-bg-hi);
-    color: var(--color-muted);
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+  padding: 1px 7px; background: var(--bg-elev); border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 10.5px;
+  color: var(--text-2);
 }
 
-/* Row-level Stop button (only for active rows) */
-.row-stop {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    height: 28px;
-    padding: 0 10px;
-    border: 1px solid color-mix(in srgb, var(--color-bad) 35%, transparent);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-bad);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .12s, border-color .12s;
-    flex: none;
-    opacity: 0;
+/* 操作按钮 */
+.actions {
+  display: flex; gap: 2px; flex: none;
+  opacity: 0; transition: opacity .15s;
+  margin: -2px -6px 0 0;
 }
-.task-row:hover .row-stop { opacity: 1; }
-.row-stop:hover { background: color-mix(in srgb, var(--color-bad) 12%, transparent); border-color: var(--color-bad); }
-@media (max-width: 768px) {
-    .row-stop { opacity: 1; }
+.task:hover .actions, .task.expanded .actions { opacity: 1; }
+.task.running .actions { opacity: 1; }
+.act {
+  width: 32px; height: 32px;
+  border: 0; background: transparent;
+  color: var(--text-3);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.act:hover { background: rgba(0,0,0,0.06); color: var(--text); }
+.act.danger:hover { background: rgba(217,48,37,0.1); color: var(--bad); }
+
+/* 展开详情区 */
+.expand {
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.block { background: #fafbfc; border-radius: 10px; padding: 10px 14px; }
+.block.err { background: #fff3f2; }
+.block-h {
+  font-size: 10.5px; color: var(--text-3);
+  letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500;
+  margin-bottom: 4px;
+}
+.block.err .block-h { color: var(--bad); }
+.block pre {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-size: 12px; line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word;
+  color: var(--text);
+  max-height: 320px; overflow-y: auto;
 }
 
-/* Header icon button */
-.header-icon {
-    display: grid; place-items: center;
-    height: 36px; width: 36px;
-    border: 0; border-radius: 999px;
-    background: transparent;
-    color: var(--color-muted);
-    cursor: pointer;
-    transition: background .12s, color .12s;
+/* 已完成 折叠 */
+.completed-toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin: 24px 0 4px;
+  padding: 8px 12px;
+  border: 0; background: transparent;
+  font-size: 14px; font-weight: 500;
+  color: var(--text);
+  border-radius: 8px;
+  width: 100%; text-align: left;
+  cursor: pointer;
 }
-.header-icon:hover { background: var(--color-bg-hi); color: var(--color-ink); }
-.header-icon:disabled { opacity: 0.45; cursor: default; }
+.completed-toggle:hover { background: var(--bg-hover); }
+.completed-toggle .msi { transition: transform .15s; color: var(--text-2); }
 
-/* Section labels (detail page) */
-.section-label {
-    margin-bottom: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-faint);
+/* 空态 */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 80px 20px;
+  color: var(--text-3); font-size: 13.5px;
 }
 
-/* Hero run card (detail page) */
-.run-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 18px;
-    background: var(--color-bg-elev);
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
+@media (max-width: 720px) {
+  .page { padding: 0 12px 80px; }
 }
-.run-card.is-active {
-    border-color: var(--color-accent);
-    background: var(--color-blue-bg);
-}
-.run-card-body { flex: 1; min-width: 0; }
-.run-card-title {
-    font-size: 14.5px;
-    font-weight: 600;
-    color: var(--color-ink);
-    line-height: 1.4;
-}
-.run-card-sub {
-    margin-top: 2px;
-    font-size: 12.5px;
-    color: var(--color-muted);
-    line-height: 1.45;
-}
-.run-btn {
-    appearance: none; border: 0;
-    display: inline-flex; align-items: center; gap: 8px;
-    height: 40px;
-    padding: 0 18px;
-    border-radius: 999px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    flex: none;
-    transition: background .14s;
-}
-.run-btn.is-go { background: var(--color-blue-bg); color: var(--color-blue-fg); }
-.run-btn.is-go:hover { background: var(--color-blue-soft); }
-.run-btn.is-stop {
-    background: color-mix(in srgb, var(--color-bad) 14%, transparent);
-    color: var(--color-bad);
-}
-.run-btn.is-stop:hover { background: color-mix(in srgb, var(--color-bad) 22%, transparent); }
 </style>

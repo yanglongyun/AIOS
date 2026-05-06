@@ -1,6 +1,6 @@
 // 全局视图状态:抽屉开关 + 当前路由对应的 app(用于 AppHeader 标题).
 //
-// 切应用走 AppDrawer 里的 nav 列表(由 apps.js 派生). AppLauncher 9 宫格已废弃.
+// 切应用走 AppDrawer 里的 nav 列表(由 apps.js 派生).
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';

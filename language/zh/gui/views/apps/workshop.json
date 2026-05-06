@@ -6,8 +6,5 @@
   "workshop_select_hint": "选择一个灵感生成 demo",
   "workshop_generate": "生成 demo",
   "workshop_send_to_chat": "交给对话生成",
-  "workshop_prompt_label": "生成提示",
-  "qc_label_workshop_root": "工坊",
-  "qc_label_workshop_idea": "工坊: {name}",
-  "qc_field_workshop_total": "灵感数: {count}"
+  "workshop_prompt_label": "生成提示"
 }

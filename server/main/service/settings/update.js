@@ -6,9 +6,14 @@ const clampToolResultMaxChars = (value) => {
 const clampToolMaxRounds = (value) => {
   return Math.max(1, Math.min(500, Number(value) || 50));
 };
+const normalizeLanguage = (value) => {
+  const lang = String(value || "").trim();
+  return lang === "en" ? "en" : "zh";
+};
 const updateSettings = (body = {}) => {
   if (body.provider !== void 0) saveSetting("provider", body.provider);
   if (body.systemPrompt !== void 0) saveSetting("systemPrompt", body.systemPrompt);
+  if (body.language !== void 0) saveSetting("language", normalizeLanguage(body.language));
   if (body.contextRounds !== void 0) saveSetting("contextRounds", String(normalizeContextRounds(body.contextRounds)));
   if (body.apiUrl !== void 0) saveSetting("apiUrl", body.apiUrl);
   if (body.apiKey !== void 0) saveSetting("apiKey", body.apiKey);

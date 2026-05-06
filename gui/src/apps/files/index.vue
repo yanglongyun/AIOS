@@ -1,5 +1,5 @@
 <script setup>
-// 复用 meem 的 FilesView. AppLauncher 已在 FilesToolbar 顶栏右端.
+// 复用 meem 的 FilesView 结构,接入 AIOS 的单连接 WebSocket.
 import { onMounted } from 'vue';
 import { useWsStore } from '@/stores/ws';
 import { useFilesStore } from '@/stores/files';

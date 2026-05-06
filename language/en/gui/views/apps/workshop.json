@@ -1,6 +1,4 @@
 {
   "workshop_title": "Workshop",
-  "workshop_empty": "No projects yet — describe a topic to create the first one",
-  "qc_label_workshop_root": "Workshop",
-  "qc_field_workshop_total": "Projects: {count}"
+  "workshop_empty": "No projects yet — describe a topic to create the first one"
 }

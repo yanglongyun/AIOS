@@ -53,12 +53,12 @@ const stopProbe = async (probe) => {
   }
 };
 
-const buildFrontend = () => {
+const buildFrontend = (options = {}) => {
   execFileSync(NODE_BIN, [resolveNpmCli(), "run", "build"], {
     cwd: ROOT_DIR,
     timeout: 12e4,
     stdio: "pipe",
-    env: withBundledNodePath()
+    env: withBundledNodePath(options.env || {})
   });
 };
 const probeProcess = async (entry, probePort, healthPath) => {
@@ -167,5 +167,6 @@ export {
   requestReload,
   restartAppsProcess,
   runReload,
-  scheduleServerRestart
+  scheduleServerRestart,
+  withBundledNodePath
 };

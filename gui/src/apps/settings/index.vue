@@ -30,10 +30,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, ref, watchEffect } from 'vue';
-import { useQuickChatStore } from '@/stores/quickChat';
-
-const qc = useQuickChatStore();
+import { computed, defineComponent, h, onMounted, ref } from 'vue';
 import AccountTab from './AccountTab.vue';
 import ModelTab from './ModelTab.vue';
 import ContextTab from './ContextTab.vue';
@@ -53,7 +50,6 @@ const tabs = [
 ];
 
 const activeTab = ref('account');
-const currentTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '');
 const saveNotice = ref({ type: '', message: '' });
 
 // 统一传给 TabContent 的 props
@@ -236,13 +232,6 @@ onMounted(async () => {
   await fetchSettings();
 });
 
-watchEffect(() => {
-  qc.setContext({
-    scope: `settings:${activeTab.value}`,
-    label: '__T_QC_LABEL_SETTINGS__'.replace('{tab}', currentTabLabel.value),
-    snapshot: '__T_QC_FIELD_ACTIVE_TAB__'.replace('{tab}', currentTabLabel.value),
-  });
-});
 </script>
 
 <style scoped>

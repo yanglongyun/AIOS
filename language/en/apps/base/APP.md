@@ -1,6 +1,14 @@
+---
+name: base
+description: Base app for browsing the remote iimos app catalog, categories, versions, package status, and app metadata.
+backend: none
+frontend: gui/src/apps/base
+database: none
+---
+
 # base
 
-Base. A frontend-only app for inspecting the remote app catalog and package status.
+Base. A frontend-only app for inspecting the remote app catalog, categories, versions, package status, and app metadata.
 
 ## Location
 
@@ -10,4 +18,4 @@ Base. A frontend-only app for inspecting the remote app catalog and package stat
 
 ## Data Source
 
-The frontend reads `https://aios.ai/apps/catalog.json`.
+The frontend reads `https://iimos.ai/apps/catalog.json`.

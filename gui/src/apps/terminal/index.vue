@@ -1,5 +1,5 @@
 <script setup>
-// 直接复用 meem 的 TerminalView 结构. 区别:右上角 AppLauncher 已塞进 TerminalToolbar.
+// 直接复用 meem 的 TerminalView 结构,接入 AIOS 的单连接 WebSocket.
 // 也额外在 mount 时 ws.init() —— meem 原版在 App.vue 里调,我们这里 app 自管.
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useWsStore } from '@/stores/ws';

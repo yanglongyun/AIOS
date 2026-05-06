@@ -12,7 +12,6 @@
     <ConnectionGate />
     <ToastHost />
     <ReloadDialog />
-    <QuickChat />
   </div>
 </template>
 
@@ -24,14 +23,12 @@ import AppDrawer from '../components/AppDrawer.vue';
 import ConnectionGate from '../components/ConnectionGate.vue';
 import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
-import QuickChat from '../components/QuickChat.vue';
 import { apps, getApp } from '../apps.js';
 import { useAuthStore } from '@/stores/auth';
-import { useQuickChatStore } from '@/stores/quickChat';
+import { connect, disconnect } from '@/system/ws.js';
 
 const route = useRoute();
 const auth = useAuthStore();
-const qc = useQuickChatStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
 const currentProps = computed(() => {
@@ -50,9 +47,6 @@ const currentProps = computed(() => {
 async function loadApp(id) {
   const app = getApp(id);
   if (!app) return;
-  // 切到新 app 时先清掉上一个 app 注入的 quick-chat 上下文,新 app 的
-  // setContext 会在挂载/视图变化时重新填。
-  qc.setContext(null);
   const mod = await app.load();
   currentComponent.value = mod?.default || mod;
   activeAppId.value = id;
@@ -67,8 +61,17 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  auth.init();
+watch(
+  () => auth.authenticated,
+  (authenticated) => {
+    if (authenticated) connect();
+    else disconnect();
+  }
+);
+
+onMounted(async () => {
+  await auth.init();
+  if (auth.authenticated) connect();
 });
 </script>
 

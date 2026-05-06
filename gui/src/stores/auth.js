@@ -44,10 +44,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    async function setupPassword(password) {
+    async function setupPassword(password, language = 'zh') {
         authError.value = '';
         try {
-            await api.post('/api/auth/setup', { password });
+            await api.post('/api/auth/setup', { password, language });
             await refreshState();
             return true;
         } catch (err) {

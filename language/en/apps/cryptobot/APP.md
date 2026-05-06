@@ -1,3 +1,11 @@
+---
+name: cryptobot
+description: CryptoBot app for exchange setup, market/position/order views, and periodic local trading-agent runs.
+backend: server/apps/cryptobot
+frontend: gui/src/apps/cryptobot
+database: database/apps/cryptobot.db
+---
+
 # cryptobot
 
 Crypto trading bot app for exchange connectivity, market/position views, and local trading-agent runs.

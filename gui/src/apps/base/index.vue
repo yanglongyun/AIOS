@@ -1,9 +1,6 @@
 <script setup>
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RotateCw, Search, Hourglass, LayoutGrid, X, Download, Box } from 'lucide-vue-next';
-import { useQuickChatStore } from '@/stores/quickChat';
-
-const qc = useQuickChatStore();
 
 const CATALOG_URL = 'https://iimos.ai/apps/catalog.json';
 
@@ -81,24 +78,6 @@ const categoryLabel = (key) => CATEGORY_LABELS[key] || key || 'tools';
 const packageState = (item) => item.packageUrl || item.packageKey ? '__T_BASE_PACKAGE_READY__' : '__T_BASE_PACKAGE_PENDING__';
 
 onMounted(loadCatalog);
-
-watchEffect(() => {
-    const sel = selected.value;
-    const lines = [
-        '__T_QC_FIELD_TOTAL_APPS__'.replace('{count}', items.value.length),
-        category.value !== 'all' ? '__T_QC_FIELD_CATEGORY_FILTER__'.replace('{value}', categoryLabel(category.value)) : null,
-        query.value ? '__T_QC_FIELD_SEARCH__'.replace('{value}', query.value) : null,
-        sel ? '__T_QC_FIELD_SELECTED__'.replace('{name}', sel.title || sel.id) : null,
-        sel?.description ? '__T_QC_FIELD_INTRO__'.replace('{value}', String(sel.description).slice(0, 200)) : null,
-    ].filter(Boolean);
-    qc.setContext({
-        scope: `base:${sel?.id || category.value || 'list'}`,
-        label: sel
-            ? '__T_QC_LABEL_BASE_APP__'.replace('{name}', sel.title || sel.id)
-            : '__T_QC_LABEL_BASE_ROOT__',
-        snapshot: lines.join('\n'),
-    });
-});
 </script>
 
 <template>

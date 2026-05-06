@@ -61,7 +61,7 @@ function pickSort(by) {
 
 <template>
     <div class="shrink-0 border-b border-line bg-bg">
-        <!-- Row 1: actions + 应用面板 -->
+        <!-- Row 1: file actions -->
         <div class="flex items-center gap-1 px-3 py-2.5">
           <div class="flex flex-wrap items-center gap-1 min-w-0 flex-1">
             <button @click="toggleSearch" class="tb-btn"

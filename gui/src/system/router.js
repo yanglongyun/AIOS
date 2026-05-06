@@ -5,6 +5,7 @@ import * as api from "../utils/api.js";
 
 const routes = [
   { path: "/", redirect: "/app/chat" },
+  { path: "/welcome", name: "welcome", component: LoginView, meta: { public: true, mode: "setup" } },
   { path: "/login", name: "login", component: LoginView, meta: { public: true } },
   { path: "/app/:id/:p1?/:p2?", component: AppShell },
   { path: "/:pathMatch(.*)*", redirect: "/" }
@@ -19,21 +20,27 @@ const router = createRouter({
 // 每次进入需鉴权路由前查一次 /api/auth/state.SQL 单行查询很便宜,
 // 不做缓存避免登录/登出后状态滞后.
 router.beforeEach(async (to) => {
-  if (to.meta?.public) return true;
   let s;
   try {
     s = await api.get("/api/auth/state");
   } catch {
     s = { configured: false, authenticated: false };
   }
-  if (!s.authenticated) return { name: "login", replace: true };
+  if (to.meta?.public) {
+    if (s.authenticated) return { path: "/", replace: true };
+    if (to.name === "login" && !s.configured) return { name: "welcome", replace: true };
+    if (to.name === "welcome" && s.configured) return { name: "login", replace: true };
+    return true;
+  }
+  if (!s.authenticated) return { name: s.configured ? "login" : "welcome", replace: true };
   return true;
 });
 
-// 任何 401 → 立即跳登录
+// 任何 401 → 回到鉴权入口；守卫会根据是否已配置密码决定 /welcome 或 /login。
 api.setOn401(() => {
-  if (router.currentRoute.value.name !== "login") {
-    router.replace({ name: "login" });
+  const currentName = router.currentRoute.value.name;
+  if (currentName !== "login" && currentName !== "welcome") {
+    router.replace({ path: "/" });
   }
 });
 

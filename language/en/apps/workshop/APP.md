@@ -1,3 +1,13 @@
+---
+name: workshop
+description: Workshop app that starts from a topic, generates multiple UI directions, and asynchronously produces previewable single-file HTML demos.
+backend: server/apps/workshop
+frontend: gui/src/apps/workshop
+database: database/apps/workshop.db
+---
+
+# workshop
+
 Workshop. From a single topic, AI generates N distinct UI design directions in parallel, each producing a complete previewable single-file HTML demo.
 
 Data model: projects → plans (N design directions) → tasks (one execution per attempt) → results (HTML artifacts).

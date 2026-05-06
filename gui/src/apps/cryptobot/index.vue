@@ -1,9 +1,6 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { ArrowLeft, ArrowLeftRight, Bot, CandlestickChart, ReceiptText, Wallet } from 'lucide-vue-next';
-import { useQuickChatStore } from '@/stores/quickChat';
-
-const qc = useQuickChatStore();
 import { fmtTime } from './formatters';
 import AgentTab from './tabs/AgentTab.vue';
 import DecisionsTab from './tabs/DecisionsTab.vue';
@@ -283,31 +280,6 @@ onUnmounted(() => {
     if (marketPoller) clearInterval(marketPoller);
 });
 
-watchEffect(() => {
-    const sel = selectedDecision.value;
-    if (sel) {
-        qc.setContext({
-            scope: `cryptobot:decision:${sel.id}`,
-            label: '__T_QC_LABEL_CRYPTOBOT_DECISION__'.replace('{id}', sel.id),
-            snapshot: [
-                '__T_QC_FIELD_RESULT__'.replace('{value}', sel.ok ? '__T_QC_RESULT_OK__' : '__T_QC_RESULT_FAIL__'),
-                sel.task_id ? '__T_QC_FIELD_TASK_REF__'.replace('{id}', sel.task_id) : null,
-                sel.summary ? '__T_QC_FIELD_SUMMARY__'.replace('{value}', String(sel.summary).slice(0, 400)) : null,
-                sel.error ? '__T_QC_FIELD_ERROR__'.replace('{value}', String(sel.error).slice(0, 200)) : null,
-            ].filter(Boolean).join('\n'),
-        });
-        return;
-    }
-    qc.setContext({
-        scope: 'cryptobot:overview',
-        label: '__T_QC_LABEL_CRYPTOBOT_ROOT__',
-        snapshot: [
-            '__T_QC_FIELD_RUNNING__'.replace('{value}', status.state.running ? '__T_QC_YES__' : '__T_QC_NO__'),
-            '__T_QC_FIELD_DECISIONS__'.replace('{count}', decisions.value.length),
-            status.config?.goal ? '__T_QC_FIELD_GOAL__'.replace('{value}', status.config.goal) : null,
-        ].filter(Boolean).join('\n'),
-    });
-});
 </script>
 
 <template>

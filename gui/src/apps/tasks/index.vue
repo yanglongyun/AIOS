@@ -1,15 +1,13 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted, watchEffect, markRaw } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted, markRaw } from 'vue';
 import { ArrowLeft, Hourglass, StopCircle, RotateCcw, ChevronsUpDown, RotateCw, Inbox, FilterX, History, CheckCircle2, XCircle, AlertCircle } from 'lucide-vue-next';
 import { useTasksStore } from '@/stores/tasks';
-import { useQuickChatStore } from '@/stores/quickChat';
 import * as api from '@/utils/api';
 import { marked } from 'marked';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (text) => marked.parse(text || '');
 
-const qc = useQuickChatStore();
 const tasks = useTasksStore();
 
 const STATUS_META = {
@@ -183,39 +181,6 @@ onMounted(() => {
 onUnmounted(() => {
     if (listPoller) clearInterval(listPoller);
     if (detailPoller) clearInterval(detailPoller);
-});
-
-watchEffect(() => {
-    if (selectedId.value && selected.value) {
-        const t = selected.value;
-        qc.setContext({
-            scope: `tasks:detail:${t.id}`,
-            label: '__T_QC_LABEL_TASKS_ITEM__'.replace('{title}', t.title || ('#' + t.id)),
-            snapshot: [
-                '__T_QC_FIELD_STATUS__'.replace('{value}', t.status || '?'),
-                t.app ? '__T_QC_FIELD_APP__'.replace('{value}', t.app) : null,
-                t.prompt ? '__T_QC_FIELD_PROMPT__'.replace('{value}', String(t.prompt).slice(0, 400)) : null,
-                t.error ? '__T_QC_FIELD_ERROR__'.replace('{value}', String(t.error).slice(0, 300)) : null,
-                t.response ? '__T_QC_FIELD_RESPONSE__'.replace('{value}', String(t.response).slice(0, 400)) : null,
-            ].filter(Boolean).join('\n'),
-        });
-    } else {
-        const list = tasks.tasks || [];
-        const running = list.filter(x => x.status === 'running' || x.status === 'pending');
-        qc.setContext({
-            scope: 'tasks:list',
-            label: '__T_QC_LABEL_TASKS_ROOT__',
-            snapshot: [
-                '__T_QC_FIELD_COUNT_WITH_RUNNING__'
-                    .replace('{count}', list.length)
-                    .replace('{running}', running.length),
-                running.length
-                    ? '__T_QC_FIELD_RUNNING_LIST__'
-                        .replace('{list}', running.slice(0, 5).map(t => '#' + t.id + ' ' + (t.title || '')).join(', '))
-                    : null,
-            ].filter(Boolean).join('\n'),
-        });
-    }
 });
 
 function toolCallName(msg) { return msg?.tool_calls?.[0]?.function?.name || 'tool'; }

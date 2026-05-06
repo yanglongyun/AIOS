@@ -49,7 +49,7 @@ The task's LLM message stream lives in the `messages` table, linked by `conversa
 ## Where it lives in AIOS
 
 - Frontend sits in the rail's `top` group (same group as `chat`). It polls `/api/task` for the list, and once a task is opened, polls `/api/task/detail` and `/api/task/messages`.
-- Registration: `gui/src/apps.js`, `gui/src/stores/tasks.js`, `gui/src/stores/view.js`
+- Registration: `gui/src/apps.js`; state lives in `gui/src/stores/tasks.js`
 - Tasks are created by other apps or by core services via `createInstantTask` / `createAgentTask`. This app only reads and stops — it does not start tasks itself.
 
 ## Future extensions

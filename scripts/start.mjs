@@ -184,7 +184,17 @@ const appsSrcRoot = path.join(langDir, 'apps');
 const appsDstRoot = path.join(projectRoot, 'apps');
 let mdCount = 0;
 if (fs.existsSync(appsSrcRoot)) {
-  for (const appName of fs.readdirSync(appsSrcRoot)) {
+  const appNames = new Set(fs.readdirSync(appsSrcRoot));
+  if (fs.existsSync(appsDstRoot)) {
+    for (const entry of fs.readdirSync(appsDstRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (entry.name === 'app_shared') continue;
+      if (!appNames.has(entry.name)) {
+        fs.rmSync(path.join(appsDstRoot, entry.name), { recursive: true, force: true });
+      }
+    }
+  }
+  for (const appName of appNames) {
     const srcMd = path.join(appsSrcRoot, appName, 'APP.md');
     if (!fs.existsSync(srcMd)) continue;
     const dstDir = path.join(appsDstRoot, appName);

@@ -1,14 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
     ArrowLeft, ChevronRight, Hourglass, LayoutGrid, Lightbulb, Loader2,
-    Minus, Package, Plus, RotateCcw, Sparkles, Trash2, Wand2, X,
+    Minus, Package, Plus, RotateCcw, Sparkles, Trash2, X,
 } from 'lucide-vue-next';
-import AppLauncher from '@/components/AppLauncher.vue';
-import { useQuickChatStore } from '@/stores/quickChat';
 
-const qc = useQuickChatStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -204,22 +201,6 @@ const statusClass = (s) => ({
     failed: 'text-bad border border-bad/30',
 }[s] || 'bg-bg-hi text-muted');
 
-// quick-chat 联动
-watchEffect(() => {
-    let snapshot;
-    let scope;
-    if (view.value === 'plan' && planMeta.value) {
-        scope = `workshop:plan:${routePlanId.value}`;
-        snapshot = `${planMeta.value.title}\n${planMeta.value.description || ''}`;
-    } else if (view.value === 'project' && project.value) {
-        scope = `workshop:project:${project.value.id}`;
-        snapshot = `${project.value.topic} · ${plans.value.length} 个方向`;
-    } else {
-        scope = 'workshop:list';
-        snapshot = `${projects.value.length} 个项目 · ${ideas.value.length} 个灵感`;
-    }
-    qc.setContext({ scope, label: '__T_APP_WORKSHOP__', snapshot });
-});
 </script>
 
 <template>
@@ -234,7 +215,6 @@ watchEffect(() => {
                 <div class="truncate text-[14px] font-semibold text-ink">{{ planMeta?.title || '__T_COMMON_LOADING__' }}</div>
                 <div v-if="planMeta?.description" class="truncate text-[12px] text-faint">{{ planMeta.description }}</div>
             </div>
-            <AppLauncher />
         </header>
 
         <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 px-6 pb-6 pt-1 max-md:px-3 max-md:pb-3">
@@ -263,7 +243,6 @@ watchEffect(() => {
                     {{ project?.topic || '__T_COMMON_LOADING__' }}
                 </div>
             </div>
-            <AppLauncher />
         </header>
 
         <div class="mx-auto w-full max-w-[1100px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-3 max-md:pb-10">
@@ -317,7 +296,6 @@ watchEffect(() => {
     <div v-else class="flex h-full flex-col bg-bg">
         <header class="mx-auto flex w-full max-w-[820px] flex-none items-center gap-3 px-8 pb-3 pt-7 max-md:px-4 max-md:pb-2 max-md:pt-5">
             <h1 class="m-0 text-[22px] font-semibold leading-[1.2] tracking-[-0.015em] text-ink max-md:text-[19px]">__T_APP_WORKSHOP__</h1>
-            <AppLauncher class="ml-auto self-center" />
         </header>
 
         <div class="mx-auto w-full max-w-[820px] min-h-0 flex-1 overflow-auto px-8 pb-15 pt-2 max-md:px-3 max-md:pb-10">

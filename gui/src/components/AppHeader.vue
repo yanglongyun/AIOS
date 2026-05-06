@@ -1,6 +1,5 @@
 <script setup>
 // 全局顶栏: ☰ 抽屉触发 + 当前 app 名 + WS 连接状态指示.
-// 取代了之前每个 app 自己画的 header + AppLauncher 按钮.
 import { computed } from 'vue';
 import { Menu } from 'lucide-vue-next';
 import { useViewStore } from '@/stores/view';

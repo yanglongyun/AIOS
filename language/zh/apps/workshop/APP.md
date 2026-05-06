@@ -1,3 +1,13 @@
+---
+name: workshop
+description: 工坊应用，从一个主题出发生成多个 UI 设计方向，并异步产出可预览的单文件 HTML demo。
+backend: server/apps/workshop
+frontend: gui/src/apps/workshop
+database: database/apps/workshop.db
+---
+
+# workshop
+
 工坊(workshop)。从一个主题出发,AI 同时生成 N 个风格各异的 UI 设计方向,并各自生成一个完整可预览的 HTML demo。
 
 数据模型:projects(项目) → plans(N 个设计方向) → tasks(每次生成的执行) → results(HTML 产物)。

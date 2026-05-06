@@ -14,6 +14,7 @@ import {
   buildSessionCookie,
   buildClearCookie,
 } from "../../service/auth/session.js";
+import { saveSetting } from "../../repository/settings/save.js";
 
 // 失败计数 —— 内存级,不持久化,服务重启清零.防止暴破而已.
 const failedAttempts = new Map(); // ip -> { count, firstAt }
@@ -69,10 +70,12 @@ const handleAuthApi = async (req, res, path) => {
     }
     const body = await readBody(req);
     const password = String(body?.password || "");
+    const language = String(body?.language || "").trim() === "en" ? "en" : "zh";
     if (password.length < 8) {
       return json(res, { success: false, message: "密码至少 8 位" }, 400);
     }
     setupAuth(password);
+    saveSetting("language", language);
     exposeTokenToEnv();
     const session = createSession();
     res.setHeader("Set-Cookie", buildSessionCookie(session.id));

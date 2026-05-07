@@ -9,8 +9,34 @@ const api = async (path, init) => {
 };
 
 export function useLovehouse() {
+    const character = ref(null);
+    const characterReady = ref(false);
     const messages = ref([]);
     const sending = ref(false);
+
+    const loadCharacter = async () => {
+        try {
+            const data = await api("/character");
+            character.value = data.character || null;
+        } catch {
+            character.value = null;
+        } finally {
+            characterReady.value = true;
+        }
+    };
+
+    const saveCharacter = async (form) => {
+        const data = await api("/character", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form)
+        });
+        if (data?.success) {
+            character.value = data.character;
+            return { success: true };
+        }
+        return { success: false, message: data?.message || "保存失败" };
+    };
 
     const loadMessages = async () => {
         try {
@@ -65,5 +91,14 @@ export function useLovehouse() {
         }
     };
 
-    return { messages, sending, loadMessages, sendMessage };
+    return {
+        character,
+        characterReady,
+        messages,
+        sending,
+        loadCharacter,
+        saveCharacter,
+        loadMessages,
+        sendMessage
+    };
 }

@@ -1,320 +1,75 @@
 <script setup>
-import { nextTick, ref, watch } from 'vue';
-
-const props = defineProps({
+defineProps({
   messages: { type: Array, default: () => [] },
   sending:  { type: Boolean, default: false }
 });
-
-const scrollEl = ref(null);
-const scrollEnd = () => {
-  nextTick(() => {
-    if (scrollEl.value) scrollEl.value.scrollTop = scrollEl.value.scrollHeight;
-  });
-};
-
-watch(() => props.messages.length, scrollEnd);
-watch(() => props.sending, scrollEnd);
-
-defineExpose({ scrollEnd });
 </script>
 
 <template>
-  <div ref="scrollEl" class="ml-scroll">
-    <!-- 漂浮的小爱心装饰 -->
-    <div class="hearts">
-      <span class="heart h1">♡</span>
-      <span class="heart h2">♥</span>
-      <span class="heart h3">♡</span>
-      <span class="heart h4">♥</span>
-    </div>
-
-    <div v-if="!messages.length" class="ml-empty">
-      <div class="empty-card">
-        <div class="empty-icon">🌸</div>
-        <div class="empty-title">小桃在等你说话…</div>
-        <div class="empty-hint">
-          每一句回复, 你都能看到 <span class="hi">ta 的内心想法</span>
-        </div>
-        <div class="empty-suggests">
-          <span class="suggest">在干嘛呀</span>
-          <span class="suggest">想我了吗 ♡</span>
-          <span class="suggest">今天心情怎么样</span>
-        </div>
-      </div>
-    </div>
-
+  <div class="flex flex-col gap-4 pb-28">
     <template v-for="msg in messages" :key="msg.id">
-      <!-- 用户气泡 -->
-      <div v-if="msg.role === 'user'" class="row row-user">
-        <div class="bubble bubble-user">{{ msg.content }}</div>
+      <!-- 用户气泡: 实心粉红 -->
+      <div v-if="msg.role === 'user'" class="flex justify-end">
+        <div class="max-w-[80%] py-2 px-4 text-[15px] leading-relaxed break-words whitespace-pre-wrap
+                    bg-pink-500 text-white
+                    rounded-2xl rounded-tr-sm
+                    shadow-sm shadow-pink-500/20">
+          {{ msg.content }}
+        </div>
       </div>
 
-      <!-- AI: 内心想法 + 公开回复 -->
-      <div v-else class="row row-ai">
-        <div class="ai-avatar">🌸</div>
-        <div class="ai-wrap">
-          <div v-if="msg.thought" class="thought">
-            <span class="thought-tag">
-              <span class="msi">psychology</span>
-              <span>内心 OS</span>
+      <!-- AI 气泡: 白底 + thought + reply + mood -->
+      <div v-else class="flex justify-start">
+        <div class="max-w-[80%] py-3 px-4 break-words whitespace-pre-wrap
+                    bg-white text-gray-800
+                    rounded-2xl rounded-tl-sm
+                    border border-pink-100
+                    shadow-md">
+          <!-- 内心 OS -->
+          <div v-if="msg.thought" class="relative pt-6 mb-3 mt-1">
+            <span class="absolute top-0 left-0 px-2.5 py-0.5
+                         text-[11px] font-medium
+                         bg-yellow-100 text-yellow-800 border border-yellow-200
+                         rounded-full shadow-sm">
+              内心 OS
             </span>
-            <span class="thought-text">{{ msg.thought }}</span>
+            <div class="text-[13px] italic text-pink-400 leading-snug">
+              💭 "{{ msg.thought }}"
+            </div>
           </div>
-          <div class="bubble bubble-ai">
-            <span class="bubble-text">{{ msg.content }}</span>
-            <span v-if="msg.mood" class="mood-tag">{{ msg.mood }}</span>
+
+          <!-- 公开回复 -->
+          <div class="text-[15px] leading-relaxed text-gray-800">{{ msg.content }}</div>
+
+          <!-- 情绪 chip -->
+          <div v-if="msg.mood"
+            class="inline-block mt-2 px-2.5 py-0.5
+                   text-[11px] font-medium
+                   bg-pink-100 text-pink-700 border border-pink-200
+                   rounded-full">
+            {{ msg.mood }}
           </div>
         </div>
       </div>
     </template>
 
-    <div v-if="sending" class="row row-ai">
-      <div class="ai-avatar">🌸</div>
-      <div class="ai-wrap">
-        <div class="bubble bubble-ai typing">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-        </div>
+    <!-- 打字指示器 -->
+    <div v-if="sending" class="flex justify-start">
+      <div class="inline-flex gap-1.5 py-3.5 px-4
+                  bg-white border border-pink-100 shadow-md
+                  rounded-2xl rounded-tl-sm">
+        <span class="lh-typing-dot size-1.5 rounded-full bg-pink-500/40"></span>
+        <span class="lh-typing-dot size-1.5 rounded-full bg-pink-500/40"></span>
+        <span class="lh-typing-dot size-1.5 rounded-full bg-pink-500/40"></span>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.ml-scroll {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 24px 18px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.ml-scroll::-webkit-scrollbar { width: 6px; }
-.ml-scroll::-webkit-scrollbar-thumb { background: rgba(236, 64, 122, 0.15); border-radius: 3px; }
-
-/* ─── 飘动爱心 ──────────────────────────── */
-.hearts {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-.heart {
-  position: absolute;
-  color: rgba(236, 64, 122, 0.18);
-  font-size: 18px;
-  animation: float 14s linear infinite;
-}
-.h1 { left: 8%;  top: 100%; animation-delay: 0s;  }
-.h2 { left: 32%; top: 100%; animation-delay: -4s; font-size: 14px; }
-.h3 { left: 62%; top: 100%; animation-delay: -8s; font-size: 22px; }
-.h4 { left: 86%; top: 100%; animation-delay: -11s;}
-@keyframes float {
-  0%   { transform: translateY(0)    rotate(0deg);   opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(-120vh) rotate(40deg); opacity: 0; }
-}
-
-/* ─── 空态 ──────────────────────────────── */
-.ml-empty {
-  margin: auto;
-  z-index: 1;
-}
-.empty-card {
-  text-align: center;
-  padding: 32px 28px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(236, 64, 122, 0.12);
-  border-radius: 28px;
-  box-shadow:
-    0 12px 40px -8px rgba(236, 64, 122, 0.18),
-    0 2px 8px rgba(236, 64, 122, 0.06);
-  max-width: 320px;
-}
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 4px 12px rgba(236, 64, 122, 0.3));
-  animation: bob 3s ease-in-out infinite;
-}
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-.empty-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: #5d2c3e;
-  margin-bottom: 6px;
-}
-.empty-hint {
-  font-size: 13px;
-  color: #b07a8a;
-  margin-bottom: 18px;
-  line-height: 1.6;
-}
-.empty-hint .hi { color: #ec407a; font-weight: 500; }
-.empty-suggests {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-.suggest {
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #ffe0ec 0%, #ffc4d6 100%);
-  color: #c2185b;
-  font-size: 13px;
-  border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 2px 6px rgba(236, 64, 122, 0.12);
-}
-
-/* ─── 行 / 头像 ─────────────────────────── */
-.row { display: flex; gap: 8px; position: relative; z-index: 1; }
-.row-user { justify-content: flex-end; }
-.row-ai { justify-content: flex-start; align-items: flex-end; }
-
-.ai-avatar {
-  flex: none;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ffe0ec 0%, #ffc4d6 100%);
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(236, 64, 122, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  margin-bottom: 2px;
-}
-
-.ai-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: calc(100% - 56px);
-}
-
-/* ─── 气泡 ──────────────────────────────── */
-.bubble {
-  padding: 11px 16px;
-  font-size: 15px;
-  line-height: 1.6;
-  word-break: break-word;
-  white-space: pre-wrap;
-  position: relative;
-}
-
-.bubble-user {
-  align-self: flex-end;
-  max-width: 78%;
-  background: linear-gradient(135deg, #ff8fab 0%, #ec407a 100%);
-  color: #fff;
-  border-radius: 22px 22px 6px 22px;
-  box-shadow:
-    0 6px 18px -4px rgba(236, 64, 122, 0.4),
-    inset 0 1px 0 rgba(255,255,255,0.25);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-}
-
-.bubble-ai {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  color: #4a2030;
-  border-radius: 22px 22px 22px 6px;
-  border: 1px solid rgba(236, 64, 122, 0.1);
-  box-shadow:
-    0 4px 14px -4px rgba(236, 64, 122, 0.18),
-    0 1px 0 rgba(255,255,255,0.6) inset;
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.bubble-text { display: inline; }
-
-/* ─── 内心想法 ──────────────────────────── */
-.thought {
-  position: relative;
-  padding: 10px 14px 10px 16px;
-  background:
-    linear-gradient(135deg, rgba(255, 240, 246, 0.6) 0%, rgba(255, 228, 236, 0.4) 100%);
-  border: 1px dashed rgba(236, 64, 122, 0.35);
-  border-radius: 18px 18px 18px 4px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #8e3a5a;
-  font-style: italic;
-  letter-spacing: 0.01em;
-}
-.thought::before {
-  content: "";
-  position: absolute;
-  left: 14px; bottom: -7px;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 228, 236, 0.6);
-  border: 1px dashed rgba(236, 64, 122, 0.35);
-}
-.thought-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 8px;
-  margin-right: 6px;
-  background: rgba(236, 64, 122, 0.12);
-  color: #ec407a;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 500;
-  border-radius: 999px;
-  vertical-align: 1px;
-}
-.thought-tag .msi {
-  font-family: 'Material Symbols Outlined';
-  font-size: 13px;
-}
-.thought-text { color: #8e3a5a; }
-
-/* ─── 情绪 chip ────────────────────────── */
-.mood-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 500;
-  background: linear-gradient(135deg, #ffd6e3 0%, #ffb6c8 100%);
-  color: #ad1457;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.7);
-  box-shadow: 0 2px 4px rgba(236, 64, 122, 0.15);
-  white-space: nowrap;
-}
-
-/* ─── 打字指示器 ────────────────────────── */
-.typing {
-  display: inline-flex;
-  gap: 5px;
-  padding: 14px 16px;
-}
-.typing .dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff8fab, #ec407a);
-  animation: blink 1.2s infinite;
-}
-.typing .dot:nth-child(2) { animation-delay: 0.2s; }
-.typing .dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-3px); }
-}
+/* keyframes 是 Tailwind 任意值无法表达的部分, 仅保留 4 行 */
+@keyframes lh-blink { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.lh-typing-dot { animation: lh-blink 1.2s infinite; }
+.lh-typing-dot:nth-child(2) { animation-delay: .2s; }
+.lh-typing-dot:nth-child(3) { animation-delay: .4s; }
 </style>

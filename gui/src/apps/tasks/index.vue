@@ -33,31 +33,37 @@ const filters = [
   { id: 'all',     name: '所有任务',  icon: 'inbox' },
   { id: 'mine',    name: '我创建的',  icon: 'person' },
   { id: 'running', name: '运行中',    icon: 'autorenew' },
-  { id: 'success', name: '成功',      icon: 'check_circle' },
-  { id: 'failed',  name: '失败',      icon: 'cancel' }
+  { id: 'done',    name: '成功',      icon: 'check_circle' },
+  { id: 'error',   name: '失败',      icon: 'cancel' }
 ];
 
+// 后端状态: pending = 正在执行 (无队列) / done / error / aborted
 const STATUS = {
-  pending: { label: '待执行', icon: 'schedule',     cls: 'pending' },
-  running: { label: '执行中', icon: 'autorenew',    cls: 'running' },
-  success: { label: '成功',   icon: 'check_circle', cls: 'success' },
-  failed:  { label: '失败',   icon: 'cancel',       cls: 'failed' }
+  pending: { label: '执行中', icon: 'autorenew',    cls: 'running' },
+  done:    { label: '成功',   icon: 'check_circle', cls: 'done' },
+  error:   { label: '失败',   icon: 'cancel',       cls: 'error' },
+  aborted: { label: '已终止', icon: 'block',        cls: 'error' }
 };
-const st = (t) => STATUS[t.status || 'pending'] || STATUS.pending;
+const isOpen  = (t) => t.status === 'pending';
+const isDone  = (t) => t.status === 'done';
+const isError = (t) => t.status === 'error' || t.status === 'aborted';
+const st = (t) => STATUS[t.status] || STATUS.pending;
 
 // ─── computed ─────────────────────────────────────
+// "我创建的" = 用户在任务页顶部手动添加的任务 (app === 'tasks' 且不是 rerun)
 function isMine(t) {
+  if (t.app !== 'tasks') return false;
   if (!t.meta) return true;
-  try { const m = typeof t.meta === 'string' ? JSON.parse(t.meta) : t.meta; return !m?.rerunOf; }
-  catch { return true; }
+  const m = typeof t.meta === 'string' ? JSON.parse(t.meta) : t.meta;
+  return !m?.rerunOf;
 }
 
 function applyFilter(list) {
   switch (filter.value) {
     case 'mine':    return list.filter(isMine);
-    case 'running': return list.filter((t) => t.status === 'running' || t.status === 'pending');
-    case 'success': return list.filter((t) => t.status === 'success');
-    case 'failed':  return list.filter((t) => t.status === 'failed');
+    case 'running': return list.filter(isOpen);
+    case 'done':    return list.filter(isDone);
+    case 'error':   return list.filter(isError);
     default:        return list;
   }
 }
@@ -65,14 +71,14 @@ function applyFilter(list) {
 const counts = computed(() => ({
   all:     tasks.value.length,
   mine:    tasks.value.filter(isMine).length,
-  running: tasks.value.filter((t) => t.status === 'running' || t.status === 'pending').length,
-  success: tasks.value.filter((t) => t.status === 'success').length,
-  failed:  tasks.value.filter((t) => t.status === 'failed').length
+  running: tasks.value.filter(isOpen).length,
+  done:    tasks.value.filter(isDone).length,
+  error:   tasks.value.filter(isError).length
 }));
 
 const visibleTasks = computed(() => applyFilter(tasks.value));
-const openTasks    = computed(() => visibleTasks.value.filter((t) => t.status === 'pending' || t.status === 'running'));
-const doneTasks    = computed(() => visibleTasks.value.filter((t) => t.status === 'success' || t.status === 'failed'));
+const openTasks    = computed(() => visibleTasks.value.filter(isOpen));
+const doneTasks    = computed(() => visibleTasks.value.filter((t) => isDone(t) || isError(t)));
 
 // ─── helpers ──────────────────────────────────────
 function relTime(ts) {
@@ -106,9 +112,9 @@ async function load() {
   loading.value = false;
 }
 
-// 自动轮询 (有 running 时)
+// 有 pending 时自动轮询
 let pollTimer = null;
-watch(() => tasks.value.some((t) => t.status === 'running'), (busy) => {
+watch(() => tasks.value.some(isOpen), (busy) => {
   clearInterval(pollTimer); pollTimer = null;
   if (busy) pollTimer = setInterval(load, 4000);
 });
@@ -176,102 +182,117 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 <template>
   <div class="app-frame">
 
-    <!-- topbar -->
-    <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
-      <button class="icon-btn lg" :class="{ active: view.appDrawerOpen }"
-        @click="view.toggleAppDrawer()" title="侧栏">
-        <span class="msi">menu</span>
-      </button>
-      <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-        任务
-      </div>
-      <div class="ml-auto flex items-center gap-1">
-        <ChatTrigger />
-        <AppsTrigger />
-      </div>
-    </header>
-
-    <div class="app-body">
-      <Transition name="mask">
-        <div v-if="view.appDrawerOpen" class="app-side-mask" @click="view.closeAppDrawer()" />
-      </Transition>
-
-      <aside class="app-side !bg-bg" :class="{ collapsed: !view.appDrawerOpen }">
-        <div class="app-side-inner">
-          <Sidebar :filters="filters" :current="filter" :counts="counts" @pick="pickFilter" />
+    <!-- ═══════════ 详情模式 ═══════════ -->
+    <template v-if="selectedId && detailFor">
+      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
+        <button class="icon-btn lg" title="返回列表" @click="backToList">
+          <span class="msi">arrow_back</span>
+        </button>
+        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
+          {{ detailFor.title || (detailFor.prompt || '').slice(0, 40) || '任务详情' }}
         </div>
-      </aside>
+        <div class="ml-auto flex items-center gap-1">
+          <button class="icon-btn" title="刷新" @click="openDetail(detailFor)">
+            <span class="msi">refresh</span>
+          </button>
+          <ChatTrigger />
+          <AppsTrigger />
+        </div>
+      </header>
 
-      <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-6 pb-20 max-md:px-3">
-
-        <!-- 详情视图 -->
-        <TaskDetail v-if="selectedId && detailFor"
+      <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-6 pb-4 max-md:px-3">
+        <TaskDetail
           :task="detailFor"
           :status="st(detailFor)"
           :rel-time="relTime"
-          @back="backToList"
           @stop="stopTask"
           @rerun="rerun" />
+      </section>
+    </template>
 
-        <!-- 列表视图 -->
-        <div v-else class="max-w-[720px] mx-auto py-4">
-          <AddBar v-model="newTitle" :submitting="submitting" @submit="addTask" />
+    <!-- ═══════════ 列表模式 ═══════════ -->
+    <template v-else>
+      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
+        <button class="icon-btn lg" :class="{ active: view.appDrawerOpen }"
+          @click="view.toggleAppDrawer()" title="侧栏">
+          <span class="msi">menu</span>
+        </button>
+        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
+          任务
+        </div>
+        <div class="ml-auto flex items-center gap-1">
+          <ChatTrigger />
+          <AppsTrigger />
+        </div>
+      </header>
 
-          <div v-if="errMsg" class="my-2 px-3.5 py-2.5 rounded-[10px] bg-[#fce8e6] text-bad text-[12.5px]">
-            {{ errMsg }}
+      <div class="app-body">
+        <Transition name="mask">
+          <div v-if="view.appDrawerOpen" class="app-side-mask" @click="view.closeAppDrawer()" />
+        </Transition>
+
+        <aside class="app-side !bg-bg" :class="{ collapsed: !view.appDrawerOpen }">
+          <div class="app-side-inner">
+            <Sidebar :filters="filters" :current="filter" :counts="counts" @pick="pickFilter" />
           </div>
+        </aside>
 
-          <!-- 进行中 -->
-          <TaskRow v-for="t in openTasks" :key="t.id"
-            :task="t"
-            :status="st(t)"
-            :preview="preview"
-            :rel-time="relTime"
-            @open="openDetail"
-            @stop="stopTask"
-            @rerun="rerun" />
+        <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-6 pb-4 max-md:px-3">
+          <div class="max-w-[720px] mx-auto py-4">
+            <AddBar v-model="newTitle" :submitting="submitting" @submit="addTask" />
 
-          <!-- 已完成 (all/mine 折叠) -->
-          <template v-if="(filter === 'all' || filter === 'mine') && doneTasks.length">
-            <button
-              class="mt-6 mb-1 flex w-full items-center gap-2 px-3 py-2 border-0 bg-transparent rounded-lg text-left text-[14px] font-medium text-ink cursor-pointer transition-colors hover:bg-bg-hi"
-              @click="showCompleted = !showCompleted">
-              <span class="msi sm text-muted transition-transform"
-                :class="{ '-rotate-90': !showCompleted }">expand_more</span>
-              <span>已完成 ({{ doneTasks.length }})</span>
-            </button>
-            <div v-if="showCompleted">
-              <TaskRow v-for="t in doneTasks" :key="t.id"
-                :task="t"
-                :status="st(t)"
-                :show-status="false"
-                :preview="preview"
-                :rel-time="relTime"
-                @open="openDetail"
-                @rerun="rerun" />
+            <div v-if="errMsg" class="my-2 px-3.5 py-2.5 rounded-[10px] bg-[#fce8e6] text-bad text-[12.5px]">
+              {{ errMsg }}
             </div>
-          </template>
 
-          <!-- 单状态过滤 (running/success/failed) 平铺 -->
-          <template v-if="filter !== 'all' && filter !== 'mine'">
-            <TaskRow v-for="t in doneTasks" :key="t.id"
+            <TaskRow v-for="t in openTasks" :key="t.id"
               :task="t"
               :status="st(t)"
               :preview="preview"
               :rel-time="relTime"
               @open="openDetail"
+              @stop="stopTask"
               @rerun="rerun" />
-          </template>
 
-          <!-- 空态 -->
-          <div v-if="!visibleTasks.length && !loading"
-            class="flex flex-col items-center justify-center gap-3 py-20 text-faint text-[13.5px]">
-            <span class="msi text-faint" style="font-size:48px">task_alt</span>
-            <div>{{ filter === 'all' ? '还没有任务,在上面添加一条试试' : '当前过滤条件下没有任务' }}</div>
+            <template v-if="(filter === 'all' || filter === 'mine') && doneTasks.length">
+              <button
+                class="mt-6 mb-1 flex w-full items-center gap-2 px-3 py-2 border-0 bg-transparent rounded-lg text-left text-[14px] font-medium text-ink cursor-pointer transition-colors hover:bg-bg-hi"
+                @click="showCompleted = !showCompleted">
+                <span class="msi sm text-muted transition-transform"
+                  :class="{ '-rotate-90': !showCompleted }">expand_more</span>
+                <span>已完成 ({{ doneTasks.length }})</span>
+              </button>
+              <div v-if="showCompleted">
+                <TaskRow v-for="t in doneTasks" :key="t.id"
+                  :task="t"
+                  :status="st(t)"
+                  :show-status="false"
+                  :preview="preview"
+                  :rel-time="relTime"
+                  @open="openDetail"
+                  @rerun="rerun" />
+              </div>
+            </template>
+
+            <template v-if="filter === 'done' || filter === 'error'">
+              <TaskRow v-for="t in doneTasks" :key="t.id"
+                :task="t"
+                :status="st(t)"
+                :preview="preview"
+                :rel-time="relTime"
+                @open="openDetail"
+                @rerun="rerun" />
+            </template>
+
+            <div v-if="!visibleTasks.length && !loading"
+              class="flex flex-col items-center justify-center gap-3 py-20 text-faint text-[13.5px]">
+              <span class="msi text-faint" style="font-size:48px">task_alt</span>
+              <div>{{ filter === 'all' ? '还没有任务,在上面添加一条试试' : '当前过滤条件下没有任务' }}</div>
+            </div>
           </div>
-        </div>
+        </section>
+      </div>
+    </template>
 
-      </section>
-    </div>
   </div>
 </template>

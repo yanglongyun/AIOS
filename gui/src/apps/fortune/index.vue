@@ -216,12 +216,77 @@ onMounted(() => {
 
 <style scoped>
 .app-frame { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
-.topbar { flex: none; height: 64px; display: flex; align-items: center; padding: 8px 16px; background: var(--bg); }
+
+/* ── 拟物化顶栏: 宣纸 + 印章 ── */
+.topbar {
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  position: relative;
+  z-index: 5;
+  background-color: #e8ddd0;
+  background-image:
+    radial-gradient(ellipse at 50% 100%, rgba(110, 75, 40, 0.18), transparent 70%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4  0 0 0 0 0.28  0 0 0 0 0.13  0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  box-shadow:
+    inset 0 -1px 0 rgba(110, 75, 40, 0.3),
+    0 4px 6px -4px rgba(80, 50, 20, 0.25);
+}
+/* 底部细回纹 (云雷纹简化版) */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background-image: repeating-linear-gradient(90deg,
+    rgba(110, 75, 40, 0.55) 0 4px, transparent 4px 6px,
+    rgba(110, 75, 40, 0.55) 6px 10px, transparent 10px 14px);
+  opacity: 0.35;
+  pointer-events: none;
+}
 .topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
-.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+.topbar .brand .name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: #5a4020;
+  text-shadow: 0 1px 0 rgba(255, 250, 240, 0.5);
+  font-family: 'STKaiti', 'KaiTi', 'PingFang SC', serif;
+  /* 朱印挂在标题左侧 */
+  padding-left: 22px;
+  position: relative;
+}
+.topbar .brand .name::before {
+  content: "卜";
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 18px; height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fdf3e6;
+  background: linear-gradient(135deg, #b73a2a 0%, #8a1f12 100%);
+  border-radius: 2px;
+  letter-spacing: 0;
+  box-shadow:
+    inset 0 0 4px rgba(0,0,0,0.35),
+    0 1px 2px rgba(0,0,0,0.2);
+  text-shadow: none;
+}
 .topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.topbar :deep(.icon-btn),
+.topbar :deep(button) { color: #5a4020; }
+.topbar :deep(.icon-btn:hover),
+.topbar :deep(button:hover) { background: rgba(90, 64, 32, 0.1); }
+
 @media (max-width: 720px) {
   .topbar { padding: 8px; height: 56px; }
-  .topbar .brand .name { font-size: 17px; }
+  .topbar .brand .name { font-size: 18px; letter-spacing: 0.24em; padding-left: 20px; }
+  .topbar .brand .name::before { width: 16px; height: 16px; font-size: 9px; }
 }
 </style>

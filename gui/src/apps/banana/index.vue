@@ -1,7 +1,7 @@
 <template>
   <div class="app-frame">
     <header class="topbar">
-      <div class="brand"><span class="name">老手机</span></div>
+      <div class="brand"><span class="name">banana</span></div>
       <div class="right">
         <ChatTrigger />
         <AppsTrigger />
@@ -246,15 +246,73 @@ BAD example (DON'T DO THIS):
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-/* 主项目通用顶栏(跟其他 app 一致) */
 .app-frame { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
-.app-frame .topbar { flex: none; height: 64px; display: flex; align-items: center; padding: 8px 16px; background: var(--bg); }
-.app-frame .topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
-.app-frame .topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
-.app-frame .topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+
+/* ── 顶栏: 像门店上方的发光招牌, 暖白灯箱面板悬挂在展台上方 ── */
+.app-frame .topbar {
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  position: relative;
+  z-index: 5;
+  /* 暖白灯箱: 顶部偏黄, 中间最亮, 底部回暖 */
+  background:
+    radial-gradient(ellipse 60% 90% at 50% 60%, rgba(255, 240, 200, 0.55), transparent 70%),
+    linear-gradient(180deg, #fff8ec 0%, #ffffff 50%, #fff3dc 100%);
+  /* 招牌的存在感: 上沿一道细金边 + 下沿厚阴影投到展台上 */
+  border-top: 1px solid rgba(180, 130, 60, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(180, 130, 60, 0.18),
+    0 6px 14px -4px rgba(0, 0, 0, 0.28),
+    0 2px 0 rgba(0, 0, 0, 0.06);
+}
+/* 灯箱左右两枚悬挂铆钉 */
+.app-frame .topbar::before,
+.app-frame .topbar::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f4dca0 0%, #8a6a30 70%, #3e2e10 100%);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.4), inset 0 -1px 1px rgba(0,0,0,0.4);
+}
+.app-frame .topbar::before { left: 10px; }
+.app-frame .topbar::after  { right: 10px; }
+
+.app-frame .topbar .brand {
+  flex: 1; min-width: 0;
+  margin: 0 4px 0 14px;
+  padding-top: 4px;   /* 给上方的铆钉留点呼吸 */
+}
+.app-frame .topbar .brand .name {
+  font-family: 'Pacifico', cursive;
+  font-size: 30px;
+  letter-spacing: 1.5px;
+  /* 蛋黄→琥珀渐变填字, 像霓虹笔写出来的店招 */
+  background: linear-gradient(180deg, #f4c340 0%, #d68a1a 60%, #a85e0e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 2px 4px rgba(120, 70, 10, 0.35));
+  line-height: 1;
+}
+.app-frame .topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; padding-top: 4px; }
+.app-frame .topbar :deep(.icon-btn),
+.app-frame .topbar :deep(button) { color: #6b4a16; }
+.app-frame .topbar :deep(.icon-btn:hover),
+.app-frame .topbar :deep(button:hover) { background: rgba(180, 130, 60, 0.14); }
+
 @media (max-width: 720px) {
-  .app-frame .topbar { padding: 8px; height: 56px; }
-  .app-frame .topbar .brand .name { font-size: 17px; }
+  .app-frame .topbar { height: 56px; padding: 0 14px; }
+  .app-frame .topbar .brand .name { font-size: 24px; letter-spacing: 1px; }
+  .app-frame .topbar::before { left: 8px; }
+  .app-frame .topbar::after  { right: 8px; }
 }
 
 .earpiece {

@@ -2,6 +2,7 @@
 // 文明 — 人类世仪表盘
 // 8 个区块: 行星 / 自然 / 太空 / 经济 / 加密 / 知识 / 媒体 / 人间(秒级插值)
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { renderMd } from '@/utils/renderMd.js';
 import AppsTrigger from '@/components/AppsTrigger.vue';
 import ChatTrigger from '@/components/ChatTrigger.vue';
 import Sparkline from './Sparkline.vue';
@@ -21,9 +22,12 @@ const arxiv   = ref([]);
 const conflict = ref(null);
 const econ     = ref(null);
 const report = ref('');
+const reportId = ref(null);
 const reportGeneratedAt = ref('');
 const reportLoading = ref(false);
 const reportError = ref('');
+const reportHistory = ref([]);
+const reportHtml = computed(() => renderMd(report.value));
 
 // 轻量请求工具
 const get = async (path) => {
@@ -62,14 +66,36 @@ function loadAll() {
   loadConflict(); loadEcon();
 }
 
+function applyReport(item) {
+  if (!item) return;
+  report.value = item.report || '';
+  reportId.value = item.id || null;
+  reportGeneratedAt.value = item.created_at || item.generatedAt || '';
+}
+
+async function loadLatestReport() {
+  const r = await get('/apps/civ/report/latest');
+  if (r?.item) applyReport(r.item);
+}
+
+async function loadReportHistory() {
+  const r = await get('/apps/civ/report/list');
+  if (r?.items) reportHistory.value = r.items;
+}
+
+async function switchReport(id) {
+  const r = await get(`/apps/civ/report/detail?id=${id}`);
+  if (r?.item) applyReport(r.item);
+}
+
 async function generateReport() {
   if (reportLoading.value) return;
   reportLoading.value = true;
   reportError.value = '';
   try {
     const data = await post(`/apps/civ/report?lang=${wikiLang.value}`);
-    report.value = data.report || '';
-    reportGeneratedAt.value = data.generatedAt || new Date().toISOString();
+    applyReport({ id: data.id, report: data.report, created_at: data.generatedAt });
+    await loadReportHistory();
   } catch (e) {
     reportError.value = e.message || '报告生成失败';
   } finally {
@@ -162,8 +188,9 @@ const forex      = computed(() => markets.value.filter((m) => m.region === '汇�
 let dataTimer = null;
 onMounted(() => {
   loadAll();
+  loadLatestReport();
+  loadReportHistory();
   timer = setInterval(() => { tick.value++; }, 200);
-  // 数据每 60s 静默刷新一次
   dataTimer = setInterval(loadAll, 60000);
 });
 onBeforeUnmount(() => { if (timer) clearInterval(timer); if (dataTimer) clearInterval(dataTimer); });
@@ -191,47 +218,37 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer); if (dataTimer) clearInt
     <section class="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 pb-12 max-md:px-3">
       <div class="max-w-[1400px] mx-auto grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
         <section class="report-card lg:col-span-2 xl:col-span-3">
-          <div class="flex items-start justify-between gap-4 max-md:flex-col">
-            <div class="min-w-0">
-              <div class="block-label mb-2">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="block-label mb-0">
                 <span class="dot bg-cyan-300"></span>
                 文明报告
               </div>
-              <div class="text-[12px] text-[#7a8298]">
-                基于下方所有数据看板生成。报告是 AI 分析层，数据卡片是证据层。
-                <span v-if="reportGeneratedAt" class="ml-2 font-mono text-[#525968]">生成于 {{ fmtDateTime(reportGeneratedAt) }}</span>
-              </div>
+              <select
+                v-if="reportHistory.length > 0"
+                class="report-select"
+                :value="reportId"
+                @change="switchReport(Number($event.target.value))"
+              >
+                <option v-for="h in reportHistory" :key="h.id" :value="h.id">{{ fmtDateTime(h.created_at) }}</option>
+              </select>
             </div>
-            <div class="flex shrink-0 items-center gap-2">
-              <button class="report-btn secondary" :disabled="reportLoading" @click="loadAll">
-                刷新数据
-              </button>
-              <button class="report-btn" :disabled="reportLoading" @click="generateReport">
-                <span v-if="reportLoading">生成中…</span>
-                <span v-else>{{ report ? '刷新报告' : '生成报告' }}</span>
-              </button>
-            </div>
+            <button v-if="report" class="report-btn text-[12px]" :disabled="reportLoading" @click="generateReport">
+              <span v-if="reportLoading">生成中…</span>
+              <span v-else>生成新报告</span>
+            </button>
           </div>
 
           <div v-if="reportError" class="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-[13px] text-rose-200">
             {{ reportError }}
           </div>
-          <div v-else-if="report" class="report-body mt-4 whitespace-pre-wrap text-[14px] leading-7 text-[#d9e2ef]">
-            {{ report }}
-          </div>
-          <div v-else class="mt-5 grid gap-3 text-[13px] text-[#8b95a8] sm:grid-cols-3">
-            <div class="report-placeholder">
-              <div class="text-[#d7e3f5]">判断层</div>
-              <p>把生态、经济、知识、冲突、太空数据合成一份可质疑的报告。</p>
-            </div>
-            <div class="report-placeholder">
-              <div class="text-[#d7e3f5]">证据层</div>
-              <p>下方看板保留原始指标、趋势线和来源入口，报告不替代数据。</p>
-            </div>
-            <div class="report-placeholder">
-              <div class="text-[#d7e3f5]">刷新机制</div>
-              <p>先刷新数据，再生成报告；AI 只在点击按钮时运行。</p>
-            </div>
+          <div v-else-if="report" class="report-body mt-4 text-[14px] leading-7 text-[#d9e2ef]" v-html="reportHtml"></div>
+          <div v-else class="flex flex-col items-center gap-4 py-10">
+            <div class="text-[13px] text-[#525968]">基于下方所有数据看板，AI 生成综合分析报告</div>
+            <button class="report-btn" :disabled="reportLoading" @click="generateReport">
+              <span v-if="reportLoading">生成中…</span>
+              <span v-else>生成报告</span>
+            </button>
           </div>
         </section>
 
@@ -648,21 +665,39 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer); if (dataTimer) clearInt
   background: rgba(255,255,255,0.09);
   border-color: rgba(255,255,255,0.16);
 }
+.report-select {
+  appearance: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 3px 24px 3px 8px;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  color: #8b95a8;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+.report-select:hover { border-color: rgba(255,255,255,0.2); }
+.report-select option { background: #1a1a2e; color: #d0d8e8; }
 .report-body {
   border-top: 1px solid rgba(255,255,255,0.06);
   padding-top: 16px;
 }
-.report-placeholder {
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.035);
-  padding: 14px;
-}
-.report-placeholder p {
-  margin-top: 6px;
-  color: #6f7a8d;
-  line-height: 1.55;
-}
+.report-body :deep(h1) { font-size: 20px; font-weight: 700; margin: 24px 0 8px; color: #e8edf5; }
+.report-body :deep(h2) { font-size: 17px; font-weight: 700; margin: 20px 0 6px; color: #d0d8e8; }
+.report-body :deep(h3) { font-size: 15px; font-weight: 600; margin: 16px 0 4px; color: #b8c4d8; }
+.report-body :deep(p) { margin: 6px 0; }
+.report-body :deep(ul), .report-body :deep(ol) { padding-left: 20px; margin: 6px 0; }
+.report-body :deep(li) { margin: 3px 0; }
+.report-body :deep(strong) { color: #e8edf5; font-weight: 600; }
+.report-body :deep(hr) { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0; }
+.report-body :deep(blockquote) { border-left: 3px solid rgba(100,160,255,0.3); padding-left: 12px; color: #8b95a8; margin: 8px 0; }
+.report-body :deep(code) { background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+.report-body :deep(table) { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+.report-body :deep(th), .report-body :deep(td) { border: 1px solid rgba(255,255,255,0.08); padding: 6px 10px; text-align: left; }
+.report-body :deep(th) { background: rgba(255,255,255,0.04); color: #b8c4d8; font-weight: 600; }
 .block-label {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 14px;

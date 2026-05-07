@@ -2,7 +2,6 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps({
-  title: { type: String, default: '' },
   hasActive: { type: Boolean, default: false },
   remarks: { type: Array, default: () => [] },
   remarksLoading: { type: Boolean, default: false }
@@ -49,11 +48,7 @@ function onDelete() {
 </script>
 
 <template>
-  <header class="relative z-10 flex flex-none items-center gap-1 px-5 pt-3.5 pb-2">
-    <div class="flex-1 min-w-0 truncate text-[17px] font-medium tracking-[-0.01em]">
-      {{ title }}
-    </div>
-
+  <div class="relative flex items-center gap-1">
     <!-- 备注按钮 + 浮层 -->
     <div class="relative">
       <button
@@ -66,7 +61,7 @@ function onDelete() {
       </button>
       <Transition name="pop">
         <div v-if="remarksOpen"
-          class="remarks-pop absolute right-0 top-[calc(100%+6px)] z-20 flex w-80 max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl bg-white shadow-3"
+          class="remarks-pop absolute right-0 top-[calc(100%+6px)] z-20 flex w-80 max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-line/80 bg-white shadow-3"
           style="max-height: min(420px, calc(100vh - 120px))">
           <div class="flex flex-none items-baseline justify-between border-b border-line/60 px-4 pt-3.5 pb-2.5">
             <span class="text-[13px] font-semibold text-ink">对话要点</span>
@@ -98,7 +93,7 @@ function onDelete() {
       </button>
       <Transition name="pop">
         <div v-if="menuOpen"
-          class="menu-pop absolute right-0 top-[calc(100%+6px)] z-20 min-w-[180px] overflow-hidden rounded-2xl bg-white p-1.5 shadow-3">
+          class="menu-pop absolute right-0 top-[calc(100%+6px)] z-20 min-w-[180px] overflow-hidden rounded-2xl border border-line/80 bg-white p-1.5 shadow-3">
           <button
             class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px] text-ink transition-colors hover:bg-[var(--bg-hover)]"
             @click="onRename">
@@ -114,7 +109,7 @@ function onDelete() {
         </div>
       </Transition>
     </div>
-  </header>
+  </div>
 </template>
 
 <style scoped>

@@ -11,8 +11,8 @@ defineEmits(['open', 'stop', 'rerun']);
 const BADGE_CLS = {
   pending: 'bg-[#fef7e0] text-[#b06000]',
   running: 'bg-blue-bg text-blue-fg',
-  success: 'bg-[#e6f4ea] text-good',
-  failed:  'bg-[#fce8e6] text-bad'
+  done:    'bg-[#e6f4ea] text-good',
+  error:   'bg-[#fce8e6] text-bad'
 };
 </script>
 
@@ -23,7 +23,7 @@ const BADGE_CLS = {
 
     <div class="flex-1 min-w-0">
       <div class="text-[14px] leading-[1.5] break-words"
-        :class="(status.cls === 'success' || status.cls === 'failed') ? 'text-faint' : 'text-ink'">
+        :class="(status.cls === 'done' || status.cls === 'error') ? 'text-faint' : 'text-ink'">
         {{ task.title || (task.prompt || '').slice(0, 80) || '(空)' }}
       </div>
       <div v-if="task.prompt && task.prompt !== task.title"
@@ -34,7 +34,7 @@ const BADGE_CLS = {
         <span v-if="showStatus"
           class="inline-flex items-center gap-1 px-2 py-0.5 rounded-[10px] text-[11px] font-medium"
           :class="BADGE_CLS[status.cls] || BADGE_CLS.pending">
-          <span v-if="task.status === 'running'" class="msi xxs animate-spin">autorenew</span>
+          <span v-if="task.status === 'pending'" class="msi xxs animate-spin">autorenew</span>
           <span v-else class="msi xxs">{{ status.icon }}</span>
           {{ status.label }}
         </span>
@@ -47,9 +47,9 @@ const BADGE_CLS = {
 
     <div
       class="flex flex-none gap-0.5 -mt-0.5 -mr-1.5 transition-opacity"
-      :class="task.status === 'running' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+      :class="task.status === 'pending' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
       @click.stop>
-      <button v-if="task.status === 'running'"
+      <button v-if="task.status === 'pending'"
         class="grid h-8 w-8 place-items-center rounded-full border-0 bg-transparent text-faint cursor-pointer transition-colors hover:!bg-bad/10 hover:!text-bad"
         title="停止"
         @click="$emit('stop', task)">

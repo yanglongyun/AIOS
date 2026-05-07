@@ -49,7 +49,7 @@ const composerRef = ref(null);
 
 // ─── computed ──────────────────────────────────────
 const activeConv = computed(() => conversations.value.find((c) => c.conversation_id === activeId.value) || null);
-const activeTitle = computed(() => activeConv.value?.title || (activeId.value ? '对话' : '选择或新建一个对话'));
+const activeTitle = computed(() => activeConv.value?.title || (activeId.value ? '对话' : '新对话'));
 const canSend = computed(() => {
   const hasFiles = composerRef.value?.pendingFiles?.length > 0;
   return (input.value.trim() || hasFiles) && !streaming.value;
@@ -228,9 +228,16 @@ onBeforeUnmount(() => {
         <span class="msi">menu</span>
       </button>
       <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-        对话
+        {{ activeTitle }}
       </div>
       <div class="ml-auto flex items-center gap-1">
+        <Header
+          :has-active="!!activeId"
+          :remarks="remarks"
+          :remarks-loading="remarksLoading"
+          @rename="renameCurrent"
+          @delete="deleteCurrent"
+          @load-remarks="loadRemarks" />
         <AppsTrigger />
       </div>
     </header>
@@ -256,20 +263,11 @@ onBeforeUnmount(() => {
       </aside>
 
       <!-- 主区(白卡) -->
-      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl m-2 ml-0 bg-white max-md:m-1"
+      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl m-2 ml-0 bg-white max-md:m-0 max-md:rounded-none"
         @dragenter="onDragEnter"
         @dragover="onDragOver"
         @dragleave="onDragLeave"
         @drop="onDrop">
-
-        <Header
-          :title="activeTitle"
-          :has-active="!!activeId"
-          :remarks="remarks"
-          :remarks-loading="remarksLoading"
-          @rename="renameCurrent"
-          @delete="deleteCurrent"
-          @load-remarks="loadRemarks" />
 
         <!-- 错误条 -->
         <div v-if="errMsg"
@@ -282,7 +280,8 @@ onBeforeUnmount(() => {
           :messages="messages"
           :streaming="streaming"
           :has-active="!!activeId"
-          :err-msg="errMsg" />
+          :err-msg="errMsg"
+          @pick="(t) => { input = t; nextTick(() => composerRef?.focus?.()); }" />
 
         <Composer
           ref="composerRef"

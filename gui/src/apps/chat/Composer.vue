@@ -1,5 +1,5 @@
 <script setup>
-import { defineExpose, ref } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps({
   modelValue: { type: String, default: '' },     // input 文本
@@ -80,7 +80,8 @@ function fmtSize(n) {
 }
 
 // 父组件可拿到这些 — 主要给 drag-drop / sendMsg 协作
-defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight });
+const focus = () => { textareaEl.value?.focus(); };
+defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus });
 </script>
 
 <template>

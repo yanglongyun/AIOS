@@ -12,6 +12,7 @@ import { fetchArxiv } from "../sources/arxiv.js";
 import { fetchConflict } from "../sources/conflict.js";
 import { fetchEcon } from "../sources/econ.js";
 import { generateCivReport } from "../service/report.js";
+import { getLatestReport, listReports, getReportById } from "../repository/reports.js";
 
 const wrap = async (res, fn) => {
   try { return json(res, { ok: true, ...(await fn()) }); }
@@ -37,6 +38,16 @@ export const handleCivApi = async (req, res, path) => {
   if (path === "/apps/civ/report" && req.method === "POST") {
     const lang = url.searchParams.get("lang") || "zh";
     return wrap(res, async () => await generateCivReport({ wikiLang: lang }));
+  }
+  if (path === "/apps/civ/report/latest" && req.method === "GET") {
+    return wrap(res, async () => ({ item: getLatestReport() }));
+  }
+  if (path === "/apps/civ/report/list" && req.method === "GET") {
+    return wrap(res, async () => ({ items: listReports() }));
+  }
+  if (path === "/apps/civ/report/detail" && req.method === "GET") {
+    const id = url.searchParams.get("id");
+    return wrap(res, async () => ({ item: getReportById(Number(id)) }));
   }
   if (path === "/apps/civ/wiki" && req.method === "GET") {
     const lang = url.searchParams.get("lang") || "zh";

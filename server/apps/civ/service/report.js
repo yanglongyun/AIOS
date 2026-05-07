@@ -1,4 +1,5 @@
 import { instantTask } from "../../app_shared/instantTask.js";
+import { insertReport } from "../repository/reports.js";
 import { fetchArxiv } from "../sources/arxiv.js";
 import { fetchCO2 } from "../sources/co2.js";
 import { fetchConflict } from "../sources/conflict.js";
@@ -98,11 +99,16 @@ const generateCivReport = async ({ wikiLang = "zh" } = {}) => {
     meta: { generatedAt: snapshot.generatedAt, source: "civ-report" }
   });
 
+  const reportText = result.response || "";
+  const taskId = result.id || null;
+  const rowId = insertReport({ report: reportText, taskId });
+
   return {
     success: true,
-    report: result.response || "",
+    id: rowId,
+    report: reportText,
     generatedAt: snapshot.generatedAt,
-    taskId: result.id || null
+    taskId
   };
 };
 

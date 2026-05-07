@@ -262,15 +262,61 @@ onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); })
 
 <style scoped>
 .app-frame { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--bg); }
-.app-frame > .topbar { flex: none; height: 64px; display: flex; align-items: center; padding: 8px 16px; background: var(--bg); position: relative; z-index: 5; }
+
+/* ── 拟物化顶栏: 深色木框条 (软木板的相框上沿) ── */
+.app-frame > .topbar {
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  position: relative;
+  z-index: 5;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 20%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.2) 100%),
+    repeating-linear-gradient(90deg, rgba(255,240,210,0.06) 0 1px, rgba(80,50,20,0.04) 1px 2px, transparent 2px 5px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8 3' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25  0 0 0 0 0.15  0 0 0 0 0.06  0 0 0 0.12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #c49a6c 0%, #a67c52 50%, #8a6038 100%);
+  background-blend-mode: normal, overlay, multiply, normal;
+  box-shadow:
+    inset 0 1px 0 rgba(255,235,200,0.4),
+    inset 0 -1px 0 rgba(60,30,0,0.35),
+    0 5px 12px -3px rgba(0,0,0,0.4),
+    0 2px 0 rgba(0,0,0,0.2);
+}
+/* 底部细木纹装饰线 */
+.app-frame > .topbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(180deg, rgba(80,50,20,0.3) 0%, rgba(120,80,40,0.4) 50%, rgba(180,140,80,0.2) 100%);
+  pointer-events: none;
+}
+
 .app-frame > .topbar .left-spacer { width: 8px; }
 .app-frame > .topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
-.app-frame > .topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+.app-frame > .topbar .brand .name {
+  font-family: 'STKaiti', 'KaiTi', 'PingFang SC', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #3a2210;
+  text-shadow:
+    0 1px 0 rgba(255,230,180,0.5),
+    0 -1px 0 rgba(40,20,0,0.3);
+}
 .app-frame > .topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.app-frame > .topbar :deep(.icon-btn),
+.app-frame > .topbar :deep(button) { color: #4a3018; }
+.app-frame > .topbar :deep(.icon-btn:hover),
+.app-frame > .topbar :deep(button:hover) { background: rgba(60,30,0,0.1); }
+
 .notebook-main { flex: 1; min-height: 0; min-width: 0; display: flex; }
+
 @media (max-width: 720px) {
   .app-frame > .topbar { padding: 8px; height: 56px; }
-  .app-frame > .topbar .brand .name { font-size: 17px; }
+  .app-frame > .topbar .brand .name { font-size: 17px; letter-spacing: 0.16em; }
 }
 </style>
 <style>

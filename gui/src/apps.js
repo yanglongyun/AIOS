@@ -21,12 +21,20 @@ const apps = [
     load: () => import('./apps/tasks/index.vue')
   },
   {
-    id: 'notes',
-    name: '笔记',
-    icon: 'sticky_note_2',
-    color: '#fbbc04',
+    id: 'notebook',
+    name: '笔记本',
+    icon: 'push_pin',
+    color: '#b5835a',
     hasDrawer: false,
-    load: () => import('./apps/notes/index.vue')
+    load: () => import('./apps/notebook/index.vue')
+  },
+  {
+    id: 'finance',
+    name: '记账本',
+    icon: 'menu_book',
+    color: '#a41b1b',
+    hasDrawer: false,
+    load: () => import('./apps/finance/index.vue')
   },
   {
     id: 'terminal',
@@ -101,6 +109,22 @@ const apps = [
     load: () => import('./apps/rssreader/index.vue')
   },
   {
+    id: 'memory',
+    name: '记忆',
+    icon: 'psychology',
+    color: '#8e6e3c',
+    hasDrawer: false,
+    load: () => import('./apps/memory/index.vue')
+  },
+  {
+    id: 'lovehouse',
+    name: '虚拟伴侣',
+    icon: 'favorite',
+    color: '#ec407a',
+    hasDrawer: false,
+    load: () => import('./apps/lovehouse/index.vue')
+  },
+  {
     id: 'hackernews',
     name: 'Hacker News',
     icon: 'forum',
@@ -133,12 +157,20 @@ const apps = [
     load: () => import('./apps/debate/index.vue')
   },
   {
-    id: 'earthquake',
-    name: '地震',
+    id: 'earth',
+    name: '地球',
     icon: 'public',
-    color: '#dc2626',
+    color: '#0ea5e9',
+    hasDrawer: true,
+    load: () => import('./apps/earth/index.vue')
+  },
+  {
+    id: 'civ',
+    name: '文明',
+    icon: 'language',
+    color: '#a855f7',
     hasDrawer: false,
-    load: () => import('./apps/earthquake/index.vue')
+    load: () => import('./apps/civ/index.vue')
   },
   {
     id: 'cryptobot',

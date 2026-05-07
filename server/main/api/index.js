@@ -7,6 +7,7 @@ import { handleTaskApi } from "./task/index.js";
 import { handleRuntimeApi } from "./runtime/index.js";
 import { handleAuthApi } from "./auth/index.js";
 import { handleNotesApi } from "./notes/index.js";
+import { handleMemoryApi } from "./memory/index.js";
 
 const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -45,6 +46,10 @@ const handleApiRequest = async (req, res, url) => {
     }
     if (path.startsWith("/api/notes/")) {
       await handleNotesApi(req, res, path, url);
+      return true;
+    }
+    if (path.startsWith("/api/memory/")) {
+      await handleMemoryApi(req, res, path);
       return true;
     }
     json(res, { success: false, message: "API endpoint not found" }, 404);

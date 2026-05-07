@@ -12,7 +12,11 @@ const appLoaders = [
     () => import("./hackernews/index.js"),
     () => import("./debate/index.js"),
     () => import("./treasure/index.js"),
-    () => import("./earthquake/index.js"),
+    () => import("./earth/index.js"),
+    () => import("./finance/index.js"),
+    () => import("./notebook/index.js"),
+    () => import("./civ/index.js"),
+    () => import("./lovehouse/index.js"),
 ];
 
 export {

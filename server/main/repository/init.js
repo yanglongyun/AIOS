@@ -113,8 +113,16 @@ const createTables = () => {
   `);
 };
 
+// 老库平滑加列(SQLite 单独一条 ALTER 才不会因为列已存在直接 fail). 全部包 try/catch.
+const migrateContexts = () => {
+  const safeAdd = (sql) => { try { db.exec(sql); } catch {} };
+  safeAdd("ALTER TABLE contexts ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0");
+  safeAdd("ALTER TABLE contexts ADD COLUMN created_at TEXT DEFAULT (datetime('now'))");
+};
+
 const initDatabase = () => {
   createTables();
+  migrateContexts();
 };
 
 export {

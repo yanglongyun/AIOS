@@ -21,6 +21,14 @@ const apps = [
     load: () => import('./apps/tasks/index.vue')
   },
   {
+    id: 'notes',
+    name: '笔记',
+    icon: 'sticky_note_2',
+    color: '#fbbc04',
+    hasDrawer: false,
+    load: () => import('./apps/notes/index.vue')
+  },
+  {
     id: 'terminal',
     name: '终端',
     icon: 'terminal',
@@ -53,6 +61,86 @@ const apps = [
     load: () => import('./apps/sysinfo/index.vue')
   },
   {
+    id: 'subbox',
+    name: '订阅箱',
+    icon: 'inbox',
+    color: '#0ea5e9',
+    hasDrawer: false,
+    load: () => import('./apps/subbox/index.vue')
+  },
+  {
+    id: 'banana',
+    name: '老手机',
+    icon: 'smartphone',
+    color: '#a8b89c',
+    hasDrawer: false,
+    load: () => import('./apps/banana/index.vue')
+  },
+  {
+    id: 'fortune',
+    name: '算一卦',
+    icon: 'auto_awesome',
+    color: '#b8860b',
+    hasDrawer: false,
+    load: () => import('./apps/fortune/index.vue')
+  },
+  {
+    id: 'ghtrending',
+    name: 'GH 热榜',
+    icon: 'trending_up',
+    color: '#24292e',
+    hasDrawer: true,
+    load: () => import('./apps/ghtrending/index.vue')
+  },
+  {
+    id: 'rssreader',
+    name: 'RSS 阅读',
+    icon: 'rss_feed',
+    color: '#ee802f',
+    hasDrawer: false,
+    load: () => import('./apps/rssreader/index.vue')
+  },
+  {
+    id: 'hackernews',
+    name: 'Hacker News',
+    icon: 'forum',
+    color: '#ff6600',
+    hasDrawer: false,
+    load: () => import('./apps/hackernews/index.vue')
+  },
+  {
+    id: 'poker',
+    name: '炸金花',
+    icon: 'casino',
+    color: '#16a34a',
+    hasDrawer: false,
+    load: () => import('./apps/poker/index.vue')
+  },
+  {
+    id: 'treasure',
+    name: '藏宝阁',
+    icon: 'inventory_2',
+    color: '#8b6f47',
+    hasDrawer: false,
+    load: () => import('./apps/treasure/index.vue')
+  },
+  {
+    id: 'debate',
+    name: '辩论台',
+    icon: 'forum',
+    color: '#7c3aed',
+    hasDrawer: false,
+    load: () => import('./apps/debate/index.vue')
+  },
+  {
+    id: 'earthquake',
+    name: '地震',
+    icon: 'public',
+    color: '#dc2626',
+    hasDrawer: false,
+    load: () => import('./apps/earthquake/index.vue')
+  },
+  {
     id: 'cryptobot',
     name: '__T_APP_CRYPTOBOT__',
     icon: 'currency_bitcoin',
@@ -67,14 +155,6 @@ const apps = [
     color: '#0f9d58',
     hasDrawer: false,
     load: () => import('./apps/workshop/index.vue')
-  },
-  {
-    id: 'base',
-    name: '__T_APP_BASE__',
-    icon: 'apartment',
-    color: '#0b8043',
-    hasDrawer: false,
-    load: () => import('./apps/base/index.vue')
   },
   {
     id: 'settings',

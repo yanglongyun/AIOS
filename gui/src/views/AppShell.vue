@@ -6,10 +6,6 @@
       </Suspense>
     </main>
 
-    <Teleport to="body">
-      <div v-if="showBackdrop" class="app-side-backdrop" @click="view.closeAppDrawer()"></div>
-    </Teleport>
-
     <AppsPopup />
     <QuickChat />
     <ConnectionGate />
@@ -19,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, ref, shallowRef, onMounted, watch } from 'vue';
+import { ref, shallowRef, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppsPopup from '../components/AppsPopup.vue';
 import QuickChat from '../components/QuickChat.vue';
@@ -28,17 +24,12 @@ import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
 import { apps, getApp } from '../apps.js';
 import { useAuthStore } from '@/stores/auth';
-import { useViewStore } from '@/stores/view.js';
 import { connect, disconnect } from '@/system/ws.js';
 
 const route = useRoute();
 const auth = useAuthStore();
-const view = useViewStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
-
-const currentApp = computed(() => activeAppId.value ? getApp(activeAppId.value) : null);
-const showBackdrop = computed(() => currentApp.value?.hasDrawer && view.appDrawerOpen && window.innerWidth < 768);
 
 const currentProps = computed(() => {
   if (activeAppId.value !== 'chat') return {};

@@ -168,6 +168,7 @@ onActivated(() => { setTimeout(() => mount(activeId.value), 0); });
       </div>
     </header>
     <div class="app-body">
+      <Transition name="mask"><div v-if="view.appDrawerOpen" class="app-side-mask" @click="view.closeAppDrawer()" /></Transition>
       <aside class="app-side" :class="{ collapsed: !view.appDrawerOpen }">
     <div class="app-side-inner">
       <div class="head">

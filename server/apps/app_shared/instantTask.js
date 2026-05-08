@@ -23,8 +23,28 @@ const requestInstant = async (body = {}) => {
     return data;
 };
 
-const instantTask = async ({ app, title = "", prompt, schema = null, meta = null }) => {
-    return await requestInstant({ app, title, prompt, schema, meta });
+const instantTask = async ({
+    app,
+    title = "",
+    prompt,
+    schema = null,
+    meta = null,
+    messages = null,
+    tools = null,
+    tool_choice = void 0,
+    parallel_tool_calls = void 0
+} = {}) => {
+    return await requestInstant({
+        app,
+        title,
+        prompt,
+        schema,
+        meta,
+        messages,
+        tools,
+        tool_choice,
+        parallel_tool_calls
+    });
 };
 
 const instantTaskJson = async (args = {}) => {

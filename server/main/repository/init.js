@@ -1,8 +1,10 @@
-import { dirname } from "path";
+import { dirname, resolve } from "path";
+import { existsSync, readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { db } from "./client.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(__dirname, "..", "..", "..");
 
 const createTables = () => {
   db.exec(`
@@ -120,9 +122,48 @@ const migrateContexts = () => {
   safeAdd("ALTER TABLE contexts ADD COLUMN created_at TEXT DEFAULT (datetime('now'))");
 };
 
+const seedSystemContexts = () => {
+  const file = resolve(projectRoot, ".aios", "system-contexts.json");
+  if (!existsSync(file)) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(file, "utf8"));
+  } catch (error) {
+    console.warn("[db] failed to read system contexts:", error?.message || error);
+    return;
+  }
+  const items = Array.isArray(parsed.items) ? parsed.items : [];
+  if (!items.length) return;
+  const stmt = db.prepare(`
+    INSERT INTO contexts (source, source_id, title, summary, content, access, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(source, source_id) DO UPDATE SET
+      title = excluded.title,
+      summary = excluded.summary,
+      content = excluded.content,
+      access = excluded.access,
+      updated_at = datetime('now')
+  `);
+  for (const item of items) {
+    const source = String(item.source || "system").trim() || "system";
+    const sourceId = String(item.sourceId || "").trim();
+    if (!sourceId) continue;
+    const access = ["summary", "full"].includes(String(item.access || "")) ? String(item.access) : "full";
+    stmt.run(
+      source,
+      sourceId,
+      String(item.title || ""),
+      String(item.summary || ""),
+      String(item.content || ""),
+      access
+    );
+  }
+};
+
 const initDatabase = () => {
   createTables();
   migrateContexts();
+  seedSystemContexts();
 };
 
 export {

@@ -34,7 +34,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -202,6 +202,69 @@ if (fs.existsSync(appsSrcRoot)) {
   }
 }
 console.log(`[start] mirrored ${mdCount} app docs to apps/`);
+
+// Seed AI-readable contexts. Runtime copies keep a baked manifest under .aios
+// so server startup can upsert these entries without requiring language/.
+const seedContexts = async () => {
+  const seedsFile = path.join(langDir, 'contexts', 'seeds.json');
+  if (!fs.existsSync(seedsFile)) {
+    console.log('[start] mirrored 0 system contexts');
+    return;
+  }
+
+  let seeds;
+  try {
+    seeds = JSON.parse(fs.readFileSync(seedsFile, 'utf8'));
+  } catch (err) {
+    console.error(`[start] invalid contexts seed: ${seedsFile}\n  ${err.message}`);
+    process.exit(1);
+  }
+
+  const items = Array.isArray(seeds.items) ? seeds.items : [];
+  if (!items.length) {
+    console.log('[start] mirrored 0 system contexts');
+    return;
+  }
+
+  const contexts = [];
+  for (const item of items) {
+    if (item.enabled === 0 || item.enabled === false) continue;
+    const contentFile = String(item.contentFile || '').trim();
+    if (!contentFile) continue;
+    const contentPath = path.join(langDir, 'contexts', contentFile);
+    if (!fs.existsSync(contentPath)) {
+      console.warn(`[start] missing context content: ${path.relative(projectRoot, contentPath)}`);
+      continue;
+    }
+    contexts.push({
+      source: String(item.source || item.creator || 'system').trim() || 'system',
+      sourceId: String(item.sourceId || contentFile.replace(/\.[^.]+$/, '')).trim(),
+      title: String(item.title || '').trim(),
+      summary: String(item.description || item.summary || '').trim(),
+      content: fs.readFileSync(contentPath, 'utf8').trim(),
+      access: String(item.access || 'full').trim()
+    });
+  }
+
+  fs.mkdirSync(settingsDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(settingsDir, 'system-contexts.json'),
+    JSON.stringify({ locale, items: contexts }, null, 2) + '\n'
+  );
+
+  try {
+    const initModule = await import(pathToFileURL(path.join(projectRoot, 'server/main/repository/init.js')).href);
+    const contextModule = await import(pathToFileURL(path.join(projectRoot, 'server/main/repository/context.js')).href);
+    initModule.initDatabase();
+    for (const context of contexts) contextModule.upsertContext(context);
+    console.log(`[start] mirrored ${contexts.length} system contexts`);
+  } catch (err) {
+    console.error(`[start] failed to seed system contexts\n  ${err.message}`);
+    process.exit(1);
+  }
+};
+
+await seedContexts();
 
 let unresolvedCount = 0;
 const unresolvedFiles = new Set();

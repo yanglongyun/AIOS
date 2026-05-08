@@ -75,7 +75,7 @@ const resolveMessage = (data) => {
 };
 
 const loadStatus = async () => {
-  const data = await request('/aios/apps/poker/status');
+  const data = await request('/apps/poker/status');
   if (data.success) {
     economy.value = data.economy;
   }
@@ -88,7 +88,7 @@ onMounted(() => {
 const startGame = async () => {
   busy.value = true;
   try {
-    const data = await request('/aios/apps/poker/start', { method: 'POST' });
+    const data = await request('/apps/poker/start', { method: 'POST' });
     if (data.success) {
       game.value = data.game;
       economy.value = data.economy || economy.value;
@@ -116,7 +116,7 @@ const handleAction = async (action) => {
   else if (action === 'raise') lastActionText.value = '__T_POKER_PLAYER_RAISED_WAITING__';
   else lastActionText.value = '__T_POKER_PLAYER_CALLED_WAITING__';
   try {
-    const data = await request('/aios/apps/poker/action', {
+    const data = await request('/apps/poker/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: game.value.id, action })

@@ -11,10 +11,8 @@
  *      - 源码里 __T_<KEY_UPPER>__ 占位符被替换成真实文案
  *      - 支持双引号 / 单引号 / 反引号 / 裸文本四种上下文的正确转义
  *      - language/<locale>/apps/<app>/APP.md 烘焙到 apps/<app>/APP.md(根,无 lang 层)
- *      - language/<locale>/AGENTS.md 烘焙到根 AGENTS.md
- *      - language/<locale>/CLAUDE.md 烘焙到根 CLAUDE.md
- *      所有烘焙目标都是 runtime,gitignored;`git clone`+`npm i` 后根目录无任何这些产物,
- *      首次跑 npm start/build/dev 才生成;AI 在日常对话里改 runtime 那份。
+ *      APP.md 烘焙目标是 runtime,gitignored;`git clone`+`npm i` 后根目录无这些产物,
+ *      首次跑 npm start/build/dev 才生成。
  *   4. 在 projectRoot 下写 .aios/settings.json（locale + appliedAt）
  *
  * 本脚本自定位到 dirname($0)/..，可以跑在主仓 AIOS/ 或任何 AIOS/ 的副本里
@@ -204,21 +202,6 @@ if (fs.existsSync(appsSrcRoot)) {
   }
 }
 console.log(`[start] mirrored ${mdCount} app docs to apps/`);
-
-// Bake the runtime root-level locale-picked artifacts:
-//   AGENTS.md  — system prompt (read fresh by prompt/index.js on every chat)
-//   CLAUDE.md  — orientation for external dev collaborators (Claude Code / Codex)
-// Sources live in language/<locale>/<NAME>.md; both are gitignored at the root.
-for (const name of ['AGENTS.md', 'CLAUDE.md']) {
-  const src = path.join(projectRoot, 'language', locale, name);
-  const dst = path.join(projectRoot, name);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, dst);
-    console.log(`[start] mirrored ${name} from language/${locale}`);
-  } else {
-    console.warn(`[start] missing language/${locale}/${name}, root ${name} left untouched`);
-  }
-}
 
 let unresolvedCount = 0;
 const unresolvedFiles = new Set();

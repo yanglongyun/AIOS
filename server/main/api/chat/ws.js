@@ -78,15 +78,21 @@ const createSession = (wsSend) => {
       const abortController = new AbortController();
       conversations.set(cid, { abortController });
       setChatState(cid, "running");
-      const remarkFilter = createRemarkStreamFilter((delta) => {
+      const forwardDelta = (delta) => {
         wsSend({ type: "delta", conversationId: cid, delta });
-      });
+      };
+      let remarkFilter = createRemarkStreamFilter(forwardDelta);
+      const resetRemarkFilter = () => {
+        remarkFilter = createRemarkStreamFilter(forwardDelta);
+      };
       const send = (msg) => {
         if (msg.type === "delta") {
           remarkFilter.push(msg.delta || "");
           return;
         }
         if (msg.type === "assistant_tool_calls") {
+          remarkFilter.flush();
+          resetRemarkFilter();
           if (msg.message) saveMessage(cid, msg.message, null);
           return;
         }
@@ -106,6 +112,7 @@ const createSession = (wsSend) => {
         }
         if (msg.type === "done") {
           remarkFilter.flush();
+          resetRemarkFilter();
           if (msg.message) {
             const raw = String(msg.message.content || "");
             const { content, remark } = extractRemark(raw);

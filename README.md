@@ -173,7 +173,18 @@ AIOS 相信四件事:
 3. **每个人都该有专属软件** —— 当代码由 AI 生成,软件不再属于开发者,属于使用它的人。
 4. **AI 与 App 双向调用** —— App 不只是 AI 的展示层,App 也能向底层 AI 下发 Task,让系统接管复杂逻辑。
 
-完整版:[doc/理念阐述.md](./doc/理念阐述.md)
+完整版:[在 iimos.ai 阅读 →](https://iimos.ai/blog/aios-philosophy)
+
+更多关于 AIOS 的产品思考:
+
+- [AIOS——AI 时代的操作系统](https://iimos.ai/blog/aios-open-source-launch)
+- [Agent OS kernel + Agent-native Apps = AIOS](https://iimos.ai/blog/agent-os-kernel-and-apps)
+- [一切皆命令](https://iimos.ai/blog/everything-is-a-command)
+- [你需要的可能不是 OpenClaw,你需要的是 AIOS](https://iimos.ai/blog/not-openclaw-but-aios)
+- [软件行业将迎来深刻改变](https://iimos.ai/blog/software-industry-deep-shift)
+- [苹果并不知道如何打造 AI 时代的操作系统](https://iimos.ai/blog/apple-misses-ai-os)
+- [关于用户不知道做什么应用](https://iimos.ai/blog/users-dont-know-what-to-build)
+- [更多文章 →](https://iimos.ai/blog)
 
 ---
 

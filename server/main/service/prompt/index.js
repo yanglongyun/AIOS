@@ -3,6 +3,7 @@ import { apps as appsSection } from "./apps.js";
 import { chats as chatsSection } from "./chats.js";
 import { DEFAULT_SYSTEM_PROMPT } from "./default.js";
 import { environment as environmentSection } from "./environment.js";
+import { memory as memorySection } from "./memory.js";
 import { model as modelSection } from "./model.js";
 import { remarks as remarksSection } from "./remarks.js";
 import { systemDocs as systemDocsSection } from "./system-docs.js";
@@ -44,6 +45,7 @@ const buildSystemPrompt = (currentConversationId = "", { appContext = "" } = {})
   prompt += chatsSection(currentConversationId);
   prompt += remarksSection(currentConversationId);
   prompt += systemDocsSection();
+  prompt += memorySection();
   prompt += appContextSection(appContext);
   return prompt;
 };

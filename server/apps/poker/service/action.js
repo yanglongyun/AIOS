@@ -1,6 +1,6 @@
 import { getPokerEconomy, setPokerBalances } from "../repository/economy.js";
 import { getGameById, updateGame } from "../repository/game.js";
-import { instantTaskJson } from "../../app_shared/instantTask.js";
+import { instantTaskJson } from "../../../shared/apps/instantTask.js";
 const RANK_VALUE = { "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, "Q": 12, "K": 13, "A": 14 };
 const handRank = (cards) => {
   const vals = cards.map((c) => RANK_VALUE[c.rank]).sort((a, b) => b - a);

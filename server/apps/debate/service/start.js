@@ -1,5 +1,5 @@
 import { upsertSession } from '../repository/session.js';
-import { instantTaskJson } from '../../app_shared/instantTask.js';
+import { instantTaskJson } from '../../../shared/apps/instantTask.js';
 
 export const startDebate = async (body = {}, req) => {
   const debateId = String(body.debateId || '').trim();

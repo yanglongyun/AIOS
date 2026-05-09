@@ -3,6 +3,14 @@
 /**
  * start.mjs
  *
+ * 为什么是「语言烘焙」,而不是 vue-i18n / i18next?
+ * AIOS 的核心场景是 AI 生成 / 维护应用。运行时 i18n 会强迫 AI:
+ * 包 t() / 同步 N 份翻译 JSON / 想 key 不冲突 / 不能漏字符串 ——
+ * 这是会复利的认知税。AIOS 反过来:源码里直接写自然语言(或
+ * __T_XXX__ token),只在构建时一次性烘焙成目标语言。AI 写应用
+ * 时完全不必思考 i18n,代价是每次切语言要重跑这个脚本(已烘焙
+ * 缓存命中 < 10ms)。请勿"现代化"成运行时 i18n 库。
+ *
  * AIOS 启动前置脚本。单文件负责：
  *
  *   1. 检查 .aios/settings.json 标记文件的 locale 字段
@@ -186,7 +194,6 @@ if (fs.existsSync(appsSrcRoot)) {
   if (fs.existsSync(appsDstRoot)) {
     for (const entry of fs.readdirSync(appsDstRoot, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
-      if (entry.name === 'app_shared') continue;
       if (!appNames.has(entry.name)) {
         fs.rmSync(path.join(appsDstRoot, entry.name), { recursive: true, force: true });
       }

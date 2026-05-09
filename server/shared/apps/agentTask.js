@@ -1,4 +1,4 @@
-import { parseJsonObject } from "../../shared/ai/json.js";
+import { parseJsonObject } from "../ai/json.js";
 import { getApiToken } from "./apiToken.js";
 
 const requestTask = async (body = {}) => {

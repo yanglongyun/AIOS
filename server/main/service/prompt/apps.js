@@ -37,7 +37,6 @@ const apps = () => {
   }
   const list = [];
   for (const name of readdirSync(APPS_ROOT)) {
-    if (name === "app_shared") continue;
     const dir = join(APPS_ROOT, name);
     let isDir = false;
     try {

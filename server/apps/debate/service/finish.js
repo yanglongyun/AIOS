@@ -1,6 +1,6 @@
 import { updateSessionEnd } from '../repository/session.js';
 import { incrementWinCount } from '../repository/parties.js';
-import { instantTaskJson } from '../../app_shared/instantTask.js';
+import { instantTaskJson } from '../../../shared/apps/instantTask.js';
 
 export const finishDebate = async (body = {}, req) => {
   const debateId = String(body.debateId || '').trim();

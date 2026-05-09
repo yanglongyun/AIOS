@@ -1,4 +1,4 @@
-import { agentTask } from "../../app_shared/agentTask.js";
+import { agentTask } from "../../../shared/apps/agentTask.js";
 
 const summarize = async ({ title, url, text, locale = "en" }) => {
   const lang = locale === "zh" ? "中文" : "English";

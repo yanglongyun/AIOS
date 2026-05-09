@@ -1,4 +1,4 @@
-import { instantTask } from '../../app_shared/instantTask.js';
+import { instantTask } from '../../../shared/apps/instantTask.js';
 
 export const optimizeNotebook = async ({ content, prompt, taskTitle, req }) => {
   if (!content?.trim()) return { error: '内容为空', status: 400 };

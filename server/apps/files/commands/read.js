@@ -1,7 +1,7 @@
 const fsp = require('fs').promises;
 const path = require('path');
-const ws = require('../../core/ws');
-const { guessMime } = require('../../core/mime');
+const ws = require('../../../shared/apps-core/ws');
+const { guessMime } = require('../../../shared/apps-core/mime');
 
 const READ_CHUNK = 256 * 1024;
 const MAX_PREVIEW_BYTES = 20 * 1024 * 1024;

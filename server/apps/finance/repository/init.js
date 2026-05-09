@@ -1,5 +1,5 @@
 import { db } from './client.js';
-import { getSystemLanguage } from '../../app_shared/settings/language.js';
+import { getSystemLanguage } from '../../../shared/apps/settings/language.js';
 
 const FINANCE_SEEDS_BY_LANGUAGE = {
   zh: [

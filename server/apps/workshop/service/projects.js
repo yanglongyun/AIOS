@@ -1,4 +1,4 @@
-import { instantTask } from "../../app_shared/instantTask.js";
+import { instantTask } from "../../../shared/apps/instantTask.js";
 import {
     insertProject, listProjects, getProject, deleteProject,
     insertPlan, listPlansForProject, getPlan,

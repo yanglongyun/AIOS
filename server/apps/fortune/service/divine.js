@@ -1,4 +1,4 @@
-import { instantTaskJson } from "../../app_shared/instantTask.js";
+import { instantTaskJson } from "../../../shared/apps/instantTask.js";
 import { insertRecord } from "../repository/divine.js";
 const divine = async ({ question, hexagram, prompt, messages, taskTitle, req }) => {
   const promptText = String(prompt || "").trim();

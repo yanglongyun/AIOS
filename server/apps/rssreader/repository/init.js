@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { db } from "./client.js";
-import { getSystemLanguage } from "../../app_shared/settings/language.js";
+import { getSystemLanguage } from "../../../shared/apps/settings/language.js";
 
 // 默认订阅源放在 language/<locale>/apps/rssreader/seeds.json,
 // 跟 APP.md 同目录,bake 不动这种非字符串 JSON.

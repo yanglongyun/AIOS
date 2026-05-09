@@ -1,4 +1,4 @@
-import { agentTask } from "../../app_shared/agentTask.js";
+import { agentTask } from "../../../shared/apps/agentTask.js";
 import { finishRun } from "../repository/config.js";
 import { insertReport } from "../repository/reports.js";
 

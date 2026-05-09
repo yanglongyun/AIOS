@@ -1,5 +1,5 @@
 const sessions = require('../core/sessions');
-const ws = require('../../core/ws');
+const ws = require('../../../shared/apps-core/ws');
 
 async function create(options = {}) {
     const terminal = await sessions.create(options);

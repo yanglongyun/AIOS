@@ -1,6 +1,6 @@
 import { getConfig, claimRun, resetLastRunDate } from "../repository/config.js";
 import { hhmmLocal, todayLocal } from "../repository/client.js";
-import { getApiToken } from "../../app_shared/apiToken.js";
+import { getApiToken } from "../../../shared/apps/apiToken.js";
 import { runOnce } from "./run.js";
 
 const TICK_MS = 30 * 1000;

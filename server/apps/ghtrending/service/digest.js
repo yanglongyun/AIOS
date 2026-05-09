@@ -1,4 +1,4 @@
-import { instantTask } from "../../app_shared/instantTask.js";
+import { instantTask } from "../../../shared/apps/instantTask.js";
 
 const digest = async ({ list = "" }) => {
   const prompt = `Summarize this batch of trending GitHub repositories in English.

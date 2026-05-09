@@ -1,4 +1,4 @@
-import { createAppDb } from "../../app_shared/db/createAppDb.js";
+import { createAppDb } from "../../../shared/apps/db/createAppDb.js";
 const db = createAppDb("cryptobot.db");
 const parseNum = (v, d = 0) => {
   const n = Number(v);

@@ -1,2 +1,2 @@
-import { createAppDb } from '../../app_shared/db/createAppDb.js';
+import { createAppDb } from '../../../shared/apps/db/createAppDb.js';
 export const db = createAppDb('debate.db');

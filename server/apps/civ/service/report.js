@@ -1,4 +1,4 @@
-import { instantTask } from "../../app_shared/instantTask.js";
+import { instantTask } from "../../../shared/apps/instantTask.js";
 import { insertReport } from "../repository/reports.js";
 import { fetchArxiv } from "../sources/arxiv.js";
 import { fetchCO2 } from "../sources/co2.js";

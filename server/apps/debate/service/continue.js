@@ -1,4 +1,4 @@
-import { instantTaskJson } from '../../app_shared/instantTask.js';
+import { instantTaskJson } from '../../../shared/apps/instantTask.js';
 
 export const continueDebate = async (body = {}, req) => {
   const prevTopic = String(body.prevTopic || '').trim();

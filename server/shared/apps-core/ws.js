@@ -1,8 +1,3 @@
-// 老 desktop 时代的 core/ws shim — 桥接到新框架的全局 hub
-// 老 API:
-//   send({type, to, data})        — 任意消息(to: 'web' | 'web:<clientId>')
-//   broadcast(type, data)         — 广播给所有 web 客户端
-//   sendToClient(clientId, type, data) — 发给单个客户端
 const hub = () => globalThis.__meem_ws__ || null;
 
 const rawBroadcast = (msg) => hub()?.broadcast?.(msg);

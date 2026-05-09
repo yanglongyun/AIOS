@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, resolve } from 'path';
 import { insertAppraisal, getAppraisalById } from '../repository/appraise.js';
-import { instantTaskJson } from '../../app_shared/instantTask.js';
+import { instantTaskJson } from '../../../shared/apps/instantTask.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '../../../..');

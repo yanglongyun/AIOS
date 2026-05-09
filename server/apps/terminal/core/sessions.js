@@ -1,7 +1,7 @@
 const pty = require('node-pty');
 const path = require('path');
-const ws = require('../../core/ws');
-const { generateTerminalId } = require('../../core/ids');
+const ws = require('../../../shared/apps-core/ws');
+const { generateTerminalId } = require('../../../shared/apps-core/ids');
 const { getDefaultShell, ensureDirectory, getDefaultDirectory } = require('./shell');
 
 const DEFAULT_COLS = 80;

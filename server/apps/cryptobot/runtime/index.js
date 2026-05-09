@@ -2,7 +2,7 @@ import { nowIso } from "../repository/client.js";
 import { getConfig, saveConfig } from "../repository/config.js";
 import { getState, saveState } from "../repository/state.js";
 import { runTradingCycle } from "./cycle/run.js";
-import { getApiToken } from "../../app_shared/apiToken.js";
+import { getApiToken } from "../../../shared/apps/apiToken.js";
 let timer = null;
 let executing = false;
 

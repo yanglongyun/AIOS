@@ -1,4 +1,4 @@
-import { agentTask } from "../../app_shared/agentTask.js";
+import { agentTask } from "../../../shared/apps/agentTask.js";
 
 const analyze = async ({ repo }) => {
   const prompt = `Analyze this trending GitHub project in English.

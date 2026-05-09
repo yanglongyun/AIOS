@@ -5,7 +5,7 @@
 //   thought  — 角色的内心独白, 用户可以看到, 但角色"不知道"用户能看到
 //   reply    — 实际对外说的话
 //   mood     — 一个简短情绪标签 (开心 / 害羞 / 担心 / 调皮 / 失落 ...) 可省略
-import { instantTaskJson } from "../../app_shared/instantTask.js";
+import { instantTaskJson } from "../../../shared/apps/instantTask.js";
 import { recentForLLM, insertMessage } from "../repository/messages.js";
 import { getCharacter } from "../repository/character.js";
 

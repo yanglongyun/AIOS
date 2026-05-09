@@ -1,6 +1,6 @@
 const fsp = require('fs').promises;
 const path = require('path');
-const ws = require('../../core/ws');
+const ws = require('../../../shared/apps-core/ws');
 const response = require('../core/response');
 const uploads = require('../core/uploads');
 

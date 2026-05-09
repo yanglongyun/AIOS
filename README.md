@@ -10,17 +10,7 @@
 
 ## 界面截图
 
-![首次设置](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)
-
-![聊天首页](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
-
-![笔记应用](https://iimos.ai/blog/iimos-screenshots/images/notes-board.webp)
-
-![GitHub Trending 应用](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
-
-![Hacker News 应用](https://iimos.ai/blog/iimos-screenshots/images/hacker-news.webp)
-
-![炒币机应用](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
+![AIOS 界面截图总览](https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp)
 
 更多截图：[截图一览](https://iimos.ai/blog/iimos-screenshots)
 

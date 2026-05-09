@@ -10,17 +10,7 @@ Make AI your operating system. AIOS brings conversations, tasks, tools, and apps
 
 ## Screenshots
 
-![Welcome setup](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)
-
-![Chat home](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
-
-![Notes app](https://iimos.ai/blog/iimos-screenshots/images/notes-board.webp)
-
-![GitHub Trending app](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
-
-![Hacker News app](https://iimos.ai/blog/iimos-screenshots/images/hacker-news.webp)
-
-![Crypto Bot app](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
+![AIOS screenshots overview](https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp)
 
 More screenshots: [Screenshots](https://iimos.ai/blog/iimos-screenshots)
 

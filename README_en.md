@@ -10,9 +10,13 @@
 
 ![Chat home](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
 
-![Files app](https://iimos.ai/blog/iimos-screenshots/images/files.webp)
+![Notes app](https://iimos.ai/blog/iimos-screenshots/images/notes-board.webp)
 
 ![GitHub Trending app](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
+
+![Hacker News app](https://iimos.ai/blog/iimos-screenshots/images/hacker-news.webp)
+
+![Crypto Bot app](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
 
 More screenshots: [iimos Screenshots](https://iimos.ai/blog/iimos-screenshots)
 

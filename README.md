@@ -10,9 +10,13 @@
 
 ![聊天首页](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
 
-![文件应用](https://iimos.ai/blog/iimos-screenshots/images/files.webp)
+![笔记应用](https://iimos.ai/blog/iimos-screenshots/images/notes-board.webp)
 
 ![GitHub Trending 应用](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
+
+![Hacker News 应用](https://iimos.ai/blog/iimos-screenshots/images/hacker-news.webp)
+
+![炒币机应用](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
 
 更多截图：[iimos 截图一览](https://iimos.ai/blog/iimos-screenshots)
 

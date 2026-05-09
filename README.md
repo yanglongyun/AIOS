@@ -173,7 +173,7 @@ AIOS 相信四件事:
 3. **每个人都该有专属软件** —— 当代码由 AI 生成,软件不再属于开发者,属于使用它的人。
 4. **AI 与 App 双向调用** —— App 不只是 AI 的展示层,App 也能向底层 AI 下发 Task,让系统接管复杂逻辑。
 
-完整版:[在 iimos.ai 阅读 →](https://iimos.ai/blog/aios-philosophy)
+完整版:[在 iimos.ai 阅读 →](https://iimos.ai/philosophy)
 
 更多关于 AIOS 的产品思考:
 

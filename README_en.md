@@ -64,7 +64,7 @@ Open: `http://localhost:9501`
 
 **💬 [Join our Discord Community](https://discord.gg/7YnDeKE8)**
 
-## Core Philosophy
+## Philosophy
 
 ### Dialogue, a New Paradigm for Human-Computer Interaction
 

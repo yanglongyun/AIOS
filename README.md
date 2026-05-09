@@ -64,7 +64,7 @@ npm run start:apps
 
 **💬 [加入 Discord 社区参与交流](https://discord.gg/7YnDeKE8)**
 
-## 核心理念
+## 理念阐述
 
 ### 对话，新的人机交互范式
 

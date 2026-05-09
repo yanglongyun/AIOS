@@ -18,7 +18,7 @@
 
 ![Crypto Bot app](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
 
-More screenshots: [iimos Screenshots](https://iimos.ai/blog/iimos-screenshots)
+More screenshots: [Screenshots](https://iimos.ai/blog/iimos-screenshots)
 
 ## Install
 

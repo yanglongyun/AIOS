@@ -18,7 +18,7 @@
 
 ![炒币机应用](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
 
-更多截图：[iimos 截图一览](https://iimos.ai/blog/iimos-screenshots)
+更多截图：[截图一览](https://iimos.ai/blog/iimos-screenshots)
 
 ## 安装
 

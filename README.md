@@ -9,7 +9,7 @@
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-43853d.svg)](https://nodejs.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-安装)
-[![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/7YnDeKE8)
+[![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/YfCbV3m9Q)
 [![Stars](https://img.shields.io/github/stars/valueriver/AIOS?style=social)](https://github.com/valueriver/AIOS)
 
 [简体中文](./README.md) · [English](./README_en.md)
@@ -236,6 +236,6 @@ AIOS 的核心场景是 AI 生成应用,运行时 i18n 会强迫 AI 在每次写
 
 ## 💬 社区
 
-[![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/7YnDeKE8)
+[![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
 
 有任何想法、bug、AI 原生应用实践都欢迎来聊。

@@ -52,7 +52,7 @@ Open: `http://localhost:9501`
 
 ## Community & Feedback
 
-**💬 [Join our Discord Community](https://discord.gg/7YnDeKE8)**
+**💬 [Join our Discord Community](https://discord.gg/YfCbV3m9Q)**
 
 ## Philosophy
 

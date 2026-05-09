@@ -174,7 +174,7 @@ PR 描述里附上:
 
 ## 联系
 
-- 日常讨论:[Discord](https://discord.gg/7YnDeKE8)
+- 日常讨论:[Discord](https://discord.gg/YfCbV3m9Q)
 - Bug / Feature:[GitHub Issues](https://github.com/valueriver/AIOS/issues)
 
 谢谢 — 期待在 PR 列表里看到你。

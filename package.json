@@ -4,6 +4,9 @@
   "description": "AIOS — local AI operating system for your home computer",
   "type": "module",
   "main": "server/main/index.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "postinstall": "node scripts/fix-node-pty.js",
     "predev": "node scripts/start.mjs",

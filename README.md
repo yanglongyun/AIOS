@@ -1,43 +1,85 @@
+<div align="center">
+
 # AIOS
 
-**简体中文** | [English](./README_en.md)
+**AI 时代的操作系统**
 
-> AI时代的操作系统
+让 AI 成为你的操作系统,打造更紧密贴近你需求的原生应用,统一的 AI 内核,让应用也能和 AI 对话。
 
-## 核心理念
+[![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-43853d.svg)](https://nodejs.org)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-安装)
+[![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/7YnDeKE8)
+[![Stars](https://img.shields.io/github/stars/valueriver/AIOS?style=social)](https://github.com/valueriver/AIOS)
 
-让 AI 成为你的操作系统。AIOS 把对话、任务、工具和应用放在同一个本地优先的工作区里,让你可以用自然语言操作电脑,也可以构建属于自己的 AI 原生应用。
+[简体中文](./README.md) · [English](./README_en.md)
 
-## 界面截图
+<img src="https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp" alt="AIOS Screenshot" width="100%" />
 
-![AIOS 界面截图总览](https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp)
+</div>
 
-更多截图：[截图一览](https://iimos.ai/blog/iimos-screenshots)
+---
 
-## 安装
+## ✨ 它是什么
 
-一键安装。脚本会自动检查并安装 Node.js 20+、git、rsync 等依赖,然后克隆、构建、启动。
+AIOS 是一个**完全本地运行**的 AI 工作台:
 
-macOS（自动装 Homebrew + Node@20）
+- 🗣 **对话即指令** — 用自然语言驱动你的电脑
+- 🧩 **24 个内置应用** — 笔记、记账、终端、文件、Claude Code、订阅箱、地球、文明、辩论台……
+- 🤖 **Agent 任务系统** — 应用可向系统下发 Task,AI 自主调度上下文与工具
+- 🏠 **数据完全自有** — 所有对话、笔记、配置都存在本地 SQLite
+- 🔌 **23+ 模型 Provider** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
+- 🎨 **应用工坊** — 用 AI 生成你专属的应用,而不是被开发者定义
+
+> 不是又一个 LLM 前端 —— 是一个内含应用工坊与 Agent 任务系统的本地操作系统。
+
+---
+
+## 📑 目录
+
+- [安装](#-安装)
+- [第一次使用](#-第一次使用)
+- [支持的模型](#-支持的模型)
+- [内置应用](#-内置应用)
+- [架构](#-架构)
+- [设计哲学](#-设计哲学)
+- [开发与贡献](#-开发与贡献)
+- [FAQ](#-faq)
+- [License](#-license)
+
+---
+
+## 🚀 安装
+
+### 系统要求
+
+| 项 | 要求 |
+|---|---|
+| 操作系统 | macOS 12+ / 主流 Linux 发行版 / Windows 10 1809+ |
+| Node.js | 20 或更高(脚本会自动安装) |
+| 端口 | `9501`(主服务)、`9502`(应用服务)、`5173`(开发模式 Vite) |
+| 磁盘 | ≥ 1 GB |
+
+### 一键安装
+
+> ⚠️ 一键脚本会通过包管理器安装 Node、git、rsync,然后克隆并构建 AIOS。建议先[查看脚本](https://github.com/valueriver/AIOS/blob/main/install-macos.sh)再执行。
+
+**macOS**(自动装 Homebrew + Node@20)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
 ```
 
-Linux（自动用 apt / dnf / yum / apk / pacman + NodeSource 装依赖）
+**Linux**(apt / dnf / yum / apk / pacman + NodeSource)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
 ```
 
-Windows（需要 winget；Win10 1809+ / Win11 自带）
+**Windows**(需要 winget,Win10 1809+ / Win11 自带)
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
 ```
 
-安装完成后打开：`http://localhost:9501`,首次访问会引导你设置访问密码。
-
-## 手动启动
-
-如果你想自己控制流程,跳过一键脚本:
+### 手动安装
 
 ```bash
 git clone https://github.com/valueriver/AIOS.git
@@ -48,56 +90,137 @@ npm run start:main &
 npm run start:apps
 ```
 
-打开：`http://localhost:9501`
+### 卸载
 
-## 交流反馈
-
-**💬 [加入 Discord 社区参与交流](https://discord.gg/7YnDeKE8)**
-
-## 理念阐述
-
-### 对话，新的人机交互范式
-
-AIOS，顾名思义，即由 AI 驱动的操作系统。在 AIOS 中，你可以用自然语言的方式向你的计算机或服务器发出指示，对话是一种自然的表达方式，它简单高效又高度个性化。你可以在一段连续的对话中表达多个复杂的需求，它天然具备上下文，具有情景的连贯性和记忆。
-
-对话正在成为一种全新的人机交互范式，它进一步拉近了人与计算机之间的距离。
+默认安装目录是 `~/.aios`,直接删除即可:
+```bash
+rm -rf ~/.aios
+```
 
 ---
 
-### 界面，依然不可或缺
+## 🎬 第一次使用
 
-尽管对话是一种自然的交互方式，但它并不能取代图形界面（GUI）。
-
-语言本质上是抽象的，有时甚至是费力的。当你试图通过文字描述一个复杂的界面布局，或者精确指定某个颜色、某种排版时，语言反而成了阻碍，远没有鼠标点击或者手指触摸来得直接高效。更重要的是，对话是线性的、流动的——它擅长表达意图，却不擅长承载结果。
-
-想象一个只有聊天窗口的系统。当你想记录一篇笔记，它会被淹没在滚动的对话记录里：没有归集，没有文件夹，无法组织，难以搜索，不能置顶，也无从排版。没有"笔记应用"这个具体的物形，你甚至都想不到这里可以记笔记。
-
-对话往往具有不确定性，想要得到一个好的结果，你需要编辑一份高质量的"提示词"；而即使是同一份提示词，每次也可能带来不同的结果。但日历、账本、阅读器、画板——每一个确定的需求背后，都需要一个与之匹配的具体功能形态。形态不是装饰，形态即是功能，形态就是价值本身。
-
-**未来不会流于无形，依然会留于物形。** 对话与界面，不是竞争和替代关系，而是相辅相成，缺一不可。在真正的 AI 操作系统里，图形界面应用依然是不可或缺的核心枢纽。
+1. 打开 `http://localhost:9501`
+2. 设置一个访问密码(只在你本机使用)
+3. 进入「设置 → 模型」,填入任意一个 Provider 的 API Key
+4. 回到「Chat」开始对话,或打开「应用工坊」生成你的第一个应用
 
 ---
 
-### 每个人都可以拥有专属的软件
+## 🧠 支持的模型
 
-我们即将迎来软件工程史上最大的一次范式转移：很快，几乎所有的代码都将由 AI 完成。
+| 类别 | Provider |
+|---|---|
+| 主流 | OpenAI · Claude · Gemini · Mistral · xAI |
+| 中国 | DeepSeek · Kimi · Qwen · GLM · Z.ai · Stepfun · Minimax · Doubao |
+| 聚合 | OpenRouter · Together · Fireworks |
+| Coding Plan | GLM-Coding · 阿里云百炼 · 火山方舟 · 腾讯混元 · 京东云 · Kimi-Coding |
+| 自定义 | 任意 OpenAI 兼容接口 |
 
-这意味着，你可以根据自己的需求、习惯与喜好，打造专属于你的软件。你不需要学习任何编程语言，不需要雇佣开发者，也不需要等待某个产品团队把你的需求排进漫长的路线图。你只需要向 AI 说出你的想法。
-
-在传统软件世界里，大多数人只能接受由少数掌握编程技能的人定义的产品：接受它的设计语言，接受它的功能边界，接受它认为你"应该"怎么使用。过去的软件，是开发者的软件；而在 AIOS 中，这一切将被彻底颠覆。
-
-软件将真正属于使用它的人。它将不再有广告，没有订阅，它的数据属于使用它的人，它将成为人们需求、喜好、意志的延伸和实现，真正的走进每一个人。
+支持流式输出、Tool Calling、reasoning content。
 
 ---
 
-### AI，让应用本身变得更强大
+## 📦 内置应用
 
-在 AIOS 中，AI 与应用之间建立了一种前所未有的双向调用关系：**AI 可以理解并操作应用，应用也可以反向调度 AI**。
+<!-- TODO: 用一张应用网格截图替换下表,视觉冲击更强 -->
 
-一方面，因为这些应用本身是由 AI 生成的，AI 能够了解它们的底层结构，因此能够更直接、高效地使用它、调度它，更新它。AI 也通过应用更多维度地理解了用户，应用不仅是你与 AI 协作的工作台，更成为了 AI 更好理解你的上下文的窗口。
+| 类别 | 应用 |
+|---|---|
+| 系统 | Chat · Tasks · Settings · 应用工坊 |
+| 工作 | 笔记本 · 记账本 · 文件 · 终端 · Claude Code · 系统状态 |
+| 信息 | 订阅箱 · GH 热榜 · Hacker News · RSS 阅读 |
+| 实验 | 老手机 · 算一卦 · 虚拟伴侣 · 炸金花 · 藏宝阁 · 辩论台 · 地球 · 文明 · 炒币机 · 记忆 |
 
-另一方面，应用本身也迎来了进化。在传统应用中，功能由程序代码决定，流程固定，边界受限——开发者写了什么，用户就能用什么，不多也不少。而在 AIOS 中，应用可以直接向 AI 发送任务。这意味着应用不再受限于预先编写的固定逻辑，它可以随时调用底层 AI 的通用能力。
+应用本身可以向系统下发 Task,让 AI 主动接管复杂逻辑,而不是只做一次性的 API 调用。
 
-以"互动小说应用"为例：在传统的开发模式下，要想让 AI 生成的新章节与前文保持连贯，不遗忘之前的剧情和设定，你必须考虑各种情况，编写复杂的逻辑去手动编排、截断和压缩上下文。即便如此，受限于代码逻辑的僵化，效果依然常常捉襟见肘。
+---
 
-但在 AIOS 中，"生成下一章"不再是一个需要复杂编排上下文的被动 API 调用，而是应用向底层系统下发的一个任务（Task）。底层的 AI 引擎会自主接管：它能够主动查询数据库，自行回顾海量的历史发生记录，动态提取并整合相关设定，最终生成更符合故事逻辑的新章节。
+## 🏗 架构
+
+```text
+AIOS/
+├── server/
+│   ├── main/        # 主服务 :9501  HTTP / WS / Auth / Chat / Task / LLM
+│   │   ├── api/     # 路由入口
+│   │   ├── ai/      # Agent 执行循环 + 工具调用
+│   │   ├── llm/     # Provider / Input / Requester / Output 管线
+│   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
+│   │   └── repository/  # SQLite 数据访问
+│   └── apps/        # 应用服务 :9502  各 app 自带后端
+├── gui/             # Vue 3 前端 (Vite, Pinia, Tailwind v4)
+├── apps/            # 各 app 的 APP.md 与共享资源
+├── language/        # 多语言资源
+└── scripts/         # 启动 / 构建 / 修复脚本
+```
+
+**技术栈**:Node.js 20 · Vue 3 · Vite 7 · better-sqlite3 · Tailwind v4 · ws · node-pty · xterm.js
+
+数据存放:本地单文件 SQLite (`database/aios.db`),完全可备份与迁移。
+
+---
+
+## 💡 设计哲学
+
+> **未来不会流于无形,依然会留于物形。**
+
+AIOS 相信四件事:
+
+1. **对话**是新的人机交互范式 —— 简单、高效、自带上下文。
+2. **界面**依然不可或缺 —— 形态即功能,聊天窗口装不下日历、账本、阅读器。
+3. **每个人都该有专属软件** —— 当代码由 AI 生成,软件不再属于开发者,属于使用它的人。
+4. **AI 与 App 双向调用** —— App 不只是 AI 的展示层,App 也能向底层 AI 下发 Task,让系统接管复杂逻辑。
+
+完整版:[doc/理念阐述.md](./doc/理念阐述.md)
+
+---
+
+## 🛠 开发与贡献
+
+```bash
+# 开发模式(主服务 + 应用服务 + Vite dev)
+npm run dev
+
+# 仅启动后端
+npm run start:main &
+npm run start:apps
+
+# 重置语言烘焙缓存
+npm run lang:reset
+```
+
+欢迎提 Issue 和 PR。提交前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)(WIP)。
+
+---
+
+## ❓ FAQ
+
+**Q: 端口 9501 / 9502 被占用怎么办?**
+通过环境变量覆盖:`AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`。
+
+**Q: 忘记访问密码?**
+删除 `database/aios.db` 中的 `auth` 表记录,或重置整个数据库后重新引导。
+
+**Q: 数据存在哪里?**
+默认 `~/.aios/app/database/aios.db`(一键安装)或仓库 `database/` 目录下(手动安装)。
+
+**Q: `node-pty` 编译失败?**
+脚本会自动尝试修复 (`scripts/fix-node-pty.js`),仍然失败请确认本机有 C++ 编译工具链。
+
+**Q: 和 Open WebUI / LibreChat / LobeChat 有什么区别?**
+那些项目主要是 LLM 聊天前端;AIOS 是带应用工坊和 Agent 任务系统的**本地操作系统**,Chat 只是其中一个入口。
+
+---
+
+## 📄 License
+
+[ISC](./LICENSE) © valueriver
+
+---
+
+## 💬 社区
+
+[![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/7YnDeKE8)
+
+有任何想法、bug、应用工坊作品都欢迎来聊。

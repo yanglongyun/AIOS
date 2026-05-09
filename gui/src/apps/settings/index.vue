@@ -12,7 +12,6 @@ const settings = ref(null);
 const prompt = ref('');
 const providerGroups = ref([]);
 const providers = ref([]);
-const contextItems = ref([]);
 const sysSnap = ref(null);
 
 const loading = ref(true);
@@ -30,7 +29,6 @@ const sections = [
   { key: 'model',    label: '__T_SETTINGS_TAB_MODEL__', icon: 'smart_toy' },
   { key: 'prompt',   label: '__T_SETTINGS_TAB_PROMPT__', icon: 'edit_note' },
   { key: 'context',  label: '__T_SETTINGS_TAB_CONTEXT__', icon: 'history' },
-  { key: 'sources',  label: '__T_SETTINGS_TAB_CONTEXT_SOURCES__', icon: 'inventory_2' },
   { key: 'tools',    label: '__T_SETTINGS_TAB_TOOL_CALLS__', icon: 'handyman' },
   { key: 'about',    label: '__T_SETTINGS_TAB_ABOUT__', icon: 'info' }
 ];
@@ -92,13 +90,6 @@ async function loadAll() {
     saveProviderCache();
   } catch (e) { errMsg.value = '__T_SETTINGS_LOAD_FAILED_PREFIX__' + (e.message || e); }
   loading.value = false;
-}
-
-async function loadContexts() {
-  try {
-    const data = await api.get('/api/settings/contexts');
-    contextItems.value = data?.items || [];
-  } catch (e) { errMsg.value = '__T_SETTINGS_CONTEXT_SOURCES_LOAD_FAILED_PREFIX__' + (e.message || e); }
 }
 
 async function loadSys() {
@@ -165,21 +156,8 @@ async function changePwd() {
   } catch (e) { pwdNotice.value = { kind: 'err', text: e?.body?.message || e.message || '__T_COMMON_UPDATE_FAILED__' }; }
 }
 
-// ───────── 上下文资源 access 文案 ─────────
-function accessLabel(a) {
-  if (a === 'full') return '__T_SETTINGS_CONTEXT_ACCESS_FULL__';
-  if (a === 'summary') return '__T_SETTINGS_CONTEXT_ACCESS_SUMMARY__';
-  return '__T_SETTINGS_CONTEXT_ACCESS_NONE__';
-}
-function accessClass(a) {
-  if (a === 'full') return 'pill-blue';
-  if (a === 'summary') return 'pill-soft';
-  return 'pill-mute';
-}
-
 // ───────── 切换 section 时按需加载 ─────────
 watch(active, (k) => {
-  if (k === 'sources' && !contextItems.value.length) loadContexts();
   if (k === 'about' && !sysSnap.value) loadSys();
 });
 
@@ -355,36 +333,6 @@ onActivated(() => loadAll());
             </div>
             <div class="actions" style="margin-top:14px">
               <button class="btn solid" @click="saveContext">__T_COMMON_SAVE__</button>
-            </div>
-          </section>
-        </template>
-
-        <!-- ━━━━━ 上下文资源 ━━━━━ -->
-        <template v-else-if="active === 'sources'">
-          <section class="card">
-            <header class="sec-head">
-              <div>
-                <div class="sec-title">__T_SETTINGS_CONTEXT_SOURCES_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_CONTEXT_SOURCES_DESC__</div>
-              </div>
-              <button class="btn tonal small" @click="loadContexts">
-                <span class="msi xxs">refresh</span> __T_COMMON_REFRESH__
-              </button>
-            </header>
-            <div v-if="!contextItems.length" class="empty">__T_SETTINGS_CONTEXT_SOURCES_EMPTY__</div>
-            <div v-else class="ctx-list">
-              <article v-for="it in contextItems" :key="it.source + ':' + it.sourceId" class="ctx">
-                <div class="ctx-row">
-                  <span class="src-tag">{{ it.source }}</span>
-                  <h4 class="ctx-title">{{ it.title || (it.source + ':' + it.sourceId) }}</h4>
-                  <span class="pill" :class="accessClass(it.access)">{{ accessLabel(it.access) }}</span>
-                </div>
-                <p v-if="it.summary" class="ctx-sum">{{ it.summary }}</p>
-                <div class="ctx-meta">
-                  <span class="mono">{{ it.sourceId }}</span>
-                  <span v-if="it.updatedAt">{{ it.updatedAt }}</span>
-                </div>
-              </article>
             </div>
           </section>
         </template>

@@ -2,10 +2,12 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useViewStore } from '@/stores/view.js';
+import { useAppContext } from '@/stores/appContext.js';
 import * as api from '@/utils/api.js';
 import { send, on, wsStatus } from '@/system/ws.js';
 
 const view = useViewStore();
+const appContext = useAppContext();
 const route = useRoute();
 // 在 chat app 内不显示快捷聊天(避免套娃)
 const isChat = computed(() => route.path === '/app/chat');
@@ -14,7 +16,7 @@ watch(isChat, (v) => { if (v) view.closeChat(); });
 const input = ref('');
 const inputEl = ref(null);
 const messages = ref([
-  { role: 'ai', text: '你好,我可以帮你看终端、读文件、跑任务、查系统状态。问我吧。' }
+  { role: 'ai', text: '你好,你可以问我关于当前应用的问题,也可以让我帮你做事。' }
 ]);
 const conversationId = ref(null);
 const streaming = ref(false);
@@ -30,8 +32,8 @@ async function ensureConv() {
   return conversationId.value;
 }
 
-async function sendMsg() {
-  const t = input.value.trim();
+async function sendMsg(forceText) {
+  const t = String(forceText ?? input.value).trim();
   if (!t || streaming.value) return;
   try { await ensureConv(); }
   catch (e) {
@@ -40,9 +42,21 @@ async function sendMsg() {
   }
   messages.value.push({ role: 'user', text: t });
   messages.value.push({ role: 'ai', text: '', _streaming: true });
-  input.value = '';
+  if (forceText === undefined) input.value = '';
   streaming.value = true;
-  send({ type: 'message', conversationId: conversationId.value, content: t, attachments: [] });
+  send({
+    type: 'message',
+    conversationId: conversationId.value,
+    content: t,
+    attachments: [],
+    // 应用主动告知 AI 的临时上下文,后端这一轮拼进 system prompt
+    appContext: appContext.context || ''
+  });
+}
+
+function onChip(prompt) {
+  if (streaming.value) return;
+  sendMsg(prompt.text);
 }
 
 function onKey(e) {
@@ -110,6 +124,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
           </div>
         </div>
 
+        <div v-if="appContext.prompts.length" class="chips">
+          <button v-for="p in appContext.prompts" :key="p.label"
+            class="chip" :disabled="streaming" @click="onChip(p)" :title="p.text">
+            {{ p.label }}
+          </button>
+        </div>
+
         <div class="foot">
           <textarea ref="inputEl" v-model="input" rows="1" placeholder="问点什么..." @keydown="onKey" />
           <button v-if="streaming" class="send stop" @click="abort"><span class="msi sm">stop</span></button>
@@ -162,6 +183,31 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
 .msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 .msg.ai { background: #f0f4f9; color: var(--text); border-top-left-radius: 4px; align-self: flex-start; }
 .msg.user { background: var(--accent); color: #fff; border-top-right-radius: 4px; align-self: flex-end; }
+
+.chips {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12.5px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.chip:hover:not(:disabled) { background: #d2e3fc; }
+.chip:disabled { opacity: .5; cursor: default; }
 
 .foot {
   flex: none; display: flex; align-items: center; gap: 4px;

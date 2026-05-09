@@ -47,9 +47,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watchEffect } from 'vue';
 import { useI18n } from '../_shared/i18n.js';
-import { chatPanel } from '../_shared/chatPanel.js';
+import { useAppContext } from '@/stores/appContext.js';
 import AppsTrigger from '@/components/AppsTrigger.vue';
 import ChatTrigger from '@/components/ChatTrigger.vue';
 import FinanceHeader from './FinanceHeader.vue';
@@ -232,12 +232,24 @@ const remove = async (id) => {
   }
 };
 
-onMounted(() => {
-  fetchData();
-  chatPanel.setContext({ scene: 'finance', label: t('app_sidebar_finance') });
-  chatPanel.setQuickMessages([t('finance_chat_quick_1'), t('finance_chat_quick_2'), t('finance_chat_quick_3')]);
+// QuickChat 上下文:让 AI 知道当前在哪个月、收支多少。
+const appCtx = useAppContext();
+const stopAppCtx = watchEffect(() => {
+  appCtx.set({
+    context: [
+      `用户在记账本,正在查看 ${month.value} 月度账目${isCurrentMonth.value ? '(本月)' : ''}。`,
+      `共 ${items.value.length} 条记录,本月收入 ¥${fmtAmt(totalIncome.value)},支出 ¥${fmtAmt(totalExpense.value)},结余 ¥${fmtAmt(endingBalance.value)}.`
+    ].join('\n'),
+    prompts: [
+      { label: t('finance_chat_quick_1'), text: t('finance_chat_quick_1') },
+      { label: t('finance_chat_quick_2'), text: t('finance_chat_quick_2') },
+      { label: t('finance_chat_quick_3'), text: t('finance_chat_quick_3') }
+    ]
+  });
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
+
+onMounted(fetchData);
+onBeforeUnmount(() => { stopAppCtx(); appCtx.clear(); });
 </script>
 
 <style scoped>

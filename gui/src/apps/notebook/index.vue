@@ -50,9 +50,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue';
 import { useI18n } from '../_shared/i18n.js';
-import { chatPanel } from '../_shared/chatPanel.js';
+import { useAppContext } from '@/stores/appContext.js';
 import AppsTrigger from '@/components/AppsTrigger.vue';
 import ChatTrigger from '@/components/ChatTrigger.vue';
 import NotebookEditorView from './NotebookEditorView.vue';
@@ -252,12 +252,37 @@ const formatTime = (v) => {
   return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', { month: 'short', day: 'numeric' });
 };
 
-onMounted(() => {
-  fetchNotes();
-  chatPanel.setContext({ scene: 'notebook', label: t('app_sidebar_notebook') });
-  chatPanel.setQuickMessages([t('notebook_chat_quick_1'), t('notebook_chat_quick_2'), t('notebook_chat_quick_3')]);
+// QuickChat 上下文:让 AI 知道用户在记事本里看什么、写什么。
+const appCtx = useAppContext();
+const stopAppCtx = watchEffect(() => {
+  const isEditor = view.value === 'editor';
+  const draftLen = editorDraft.value.length;
+  const preview = editorDraft.value.replace(/\s+/g, ' ').slice(0, 80);
+  const ctxLines = isEditor
+    ? [
+        `用户正在记事本的编辑视图${editingNoteId.value ? `(笔记 id=${editingNoteId.value})` : '(新建笔记)'}。`,
+        `当前草稿 ${draftLen} 字${preview ? `,内容预览:"${preview}${draftLen > 80 ? '…' : ''}"` : '(空白)'}.`
+      ]
+    : [
+        `用户正在记事本的列表视图,共 ${total.value} 篇笔记,当前第 ${page.value}/${totalPages.value} 页,本页 ${notes.value.length} 篇。`
+      ];
+  appCtx.set({
+    context: ctxLines.join('\n'),
+    prompts: isEditor
+      ? [
+          { label: t('notebook_chat_quick_3'), text: t('notebook_chat_quick_3') }, // 总结要点
+          { label: t('notebook_chat_quick_2'), text: t('notebook_chat_quick_2') }  // 写作灵感
+        ]
+      : [
+          { label: t('notebook_chat_quick_1'), text: t('notebook_chat_quick_1') },
+          { label: t('notebook_chat_quick_2'), text: t('notebook_chat_quick_2') },
+          { label: t('notebook_chat_quick_3'), text: t('notebook_chat_quick_3') }
+        ]
+  });
 });
-onUnmounted(() => { chatPanel.clearContext(); chatPanel.setQuickMessages([]); });
+
+onMounted(fetchNotes);
+onBeforeUnmount(() => { stopAppCtx(); appCtx.clear(); });
 </script>
 
 <style scoped>

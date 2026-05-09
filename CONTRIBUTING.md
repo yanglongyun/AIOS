@@ -99,6 +99,16 @@ apps/<your-app>/APP.md    # 描述这个 app 是什么
 
 不确定的话,先开 Issue 描述你想加的 app(目标用户、核心场景、一张草图),我们对齐后再写。
 
+### 多语言怎么处理
+
+AIOS 不用 vue-i18n / i18next,改用**构建时烘焙**(`scripts/start.mjs`)。这是为了给 AI 减负 —— 写应用时不用包 `t()`、不用同步翻译 JSON。
+
+写新 app 时:
+
+- **默认直接写中文**,不要引入任何 i18n 库
+- 如果同一字符串需要随系统语言切换,写成 `__T_XXX__` token,并在 `language/zh/...json` 和 `language/en/...json` 里给值
+- 不要在 `AIOS/` 源码仓直接跑 `npm run dev` —— 会被防烘焙保护拦,改用 `AIOS-run` 运行副本
+
 ---
 
 ## 新增 LLM Provider

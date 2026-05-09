@@ -15,3 +15,6 @@ gui2/dist/
 
 # Baked APP.md tree (runtime; baked from language/<locale>/apps/<name>/APP.md)
 /apps/
+
+# Baked system docs (runtime; baked from language/<locale>/system/*.md)
+/system/

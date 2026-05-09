@@ -25,13 +25,14 @@
 AIOS 是一个**完全本地运行**的 AI 工作台:
 
 - 🗣 **对话即指令** — 用自然语言驱动你的电脑
-- 🧩 **24 个内置应用** — 笔记、记账、终端、文件、Claude Code、订阅箱、地球、文明、辩论台……
+- 🧩 **23 个内置应用** — 笔记、记账、终端、文件、Claude Code、订阅箱、地球、文明、辩论台……
 - 🤖 **Agent 任务系统** — 应用可向系统下发 Task,AI 自主调度上下文与工具
 - 🏠 **数据完全自有** — 所有对话、笔记、配置都存在本地 SQLite
 - 🔌 **23+ 模型 Provider** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
-- 🎨 **应用工坊** — 用 AI 生成你专属的应用,而不是被开发者定义
+- 🎨 **创造应用是原生能力** — AIOS 的 AI 自带 shell,能写代码、起服务、调试,你描述需求,它把应用交付给你
+- 🌐 **AI 友好的 i18n** — 源码直接写自然语言,构建时一次性烘焙,生成应用的 AI 不必维护翻译
 
-> 不是又一个 LLM 前端 —— 是一个内含应用工坊与 Agent 任务系统的本地操作系统。
+> 不是又一个 LLM 前端 —— AIOS 的 AI 自带 shell 与系统级工具,既能驱动应用,也能为你写应用。
 
 ---
 
@@ -104,7 +105,7 @@ rm -rf ~/.aios
 1. 打开 `http://localhost:9501`
 2. 设置一个访问密码(只在你本机使用)
 3. 进入「设置 → 模型」,填入任意一个 Provider 的 API Key
-4. 回到「Chat」开始对话,或打开「应用工坊」生成你的第一个应用
+4. 回到「Chat」开始对话 —— 告诉 AI "帮我做一个 XXX",它会通过 shell 写代码、起服务,把应用直接交付给你
 
 ---
 
@@ -128,7 +129,7 @@ rm -rf ~/.aios
 
 | 类别 | 应用 |
 |---|---|
-| 系统 | Chat · Tasks · Settings · 应用工坊 |
+| 系统 | Chat · Tasks · Settings |
 | 工作 | 笔记本 · 记账本 · 文件 · 终端 · Claude Code · 系统状态 |
 | 信息 | 订阅箱 · GH 热榜 · Hacker News · RSS 阅读 |
 | 实验 | 老手机 · 算一卦 · 虚拟伴侣 · 炸金花 · 藏宝阁 · 辩论台 · 地球 · 文明 · 炒币机 · 记忆 |
@@ -208,8 +209,11 @@ npm run lang:reset
 **Q: `node-pty` 编译失败?**
 脚本会自动尝试修复 (`scripts/fix-node-pty.js`),仍然失败请确认本机有 C++ 编译工具链。
 
+**Q: 为什么是「语言烘焙」而不是运行时 i18n?**
+AIOS 的核心场景是 AI 生成应用,运行时 i18n 会强迫 AI 在每次写代码时同步多份翻译,这是会复利的认知税。烘焙机制让源码用自然语言,构建时一次性替换成目标语言,代价是每次切语言要重跑 `scripts/start.mjs`(已烘焙缓存命中 < 10ms)。
+
 **Q: 和 Open WebUI / LibreChat / LobeChat 有什么区别?**
-那些项目主要是 LLM 聊天前端;AIOS 是带应用工坊和 Agent 任务系统的**本地操作系统**,Chat 只是其中一个入口。
+那些项目主要是 LLM 聊天前端;AIOS 是带 AI 原生应用和 Agent 任务系统的**本地操作系统**,Chat 只是其中一个入口。
 
 ---
 
@@ -223,4 +227,4 @@ npm run lang:reset
 
 [![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/7YnDeKE8)
 
-有任何想法、bug、应用工坊作品都欢迎来聊。
+有任何想法、bug、AI 原生应用实践都欢迎来聊。

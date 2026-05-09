@@ -59,7 +59,7 @@ const createSession = (wsSend) => {
       });
       const messages = [{
         role: "system",
-        content: buildSystemPrompt(cid)
+        content: buildSystemPrompt(cid, { appContext: data.appContext })
       }, ...historyMessages];
       const userMsg = { role: "user", content: data.content };
       let userMeta = null;

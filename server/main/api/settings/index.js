@@ -1,7 +1,6 @@
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { DEFAULT_SYSTEM_PROMPT } from "../../service/prompt/default.js";
-import { listContextItems } from "../../service/context/list.js";
 import { getSettings } from "../../service/settings/get.js";
 import { updateSettings } from "../../service/settings/update.js";
 
@@ -13,10 +12,6 @@ const handleSettingsApi = async (req, res, path) => {
     const body = await readBody(req);
     updateSettings(body);
     return json(res, getSettings());
-  }
-
-  if (path === "/api/settings/contexts" && req.method === "GET") {
-    return json(res, listContextItems({ includeNone: true }));
   }
 
   if (path === "/api/settings/prompt" && req.method === "GET") {

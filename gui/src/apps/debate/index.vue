@@ -1,7 +1,7 @@
 <template>
   <div class="relative h-full w-full overflow-hidden bg-[#f4f3f0] font-serif">
-    <!-- 浮在右上角的应用切换 (适配深色页头) -->
-    <div class="debate-shell-actions pointer-events-auto absolute right-3 top-3 z-50 flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-1 backdrop-blur-md">
+    <!-- setup 页:浮在右上角的应用切换。辩论开始后由顶栏自己接管,见下方公告条。 -->
+    <div v-if="!debateStarted" class="debate-shell-actions pointer-events-auto absolute right-3 top-3 z-50 flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-1 backdrop-blur-md">
       <ChatTrigger />
       <AppsTrigger />
     </div>
@@ -73,8 +73,14 @@
     <div v-if="debateStarted" class="absolute inset-0 flex flex-col bg-[#f4f3f0]">
       <!-- 顶部深蓝栏 -->
       <div class="shrink-0 border-b-[3px] border-[#c9b06b] bg-[#1c2841] text-[#c9b06b]">
-        <div class="border-b border-white/[0.06] py-1.5 text-center text-[11px] tracking-[4px] text-[#8a9ab5]">
-          🃏 纸牌屋 · 全国直播
+        <!-- 公告条 / 应用切换:三栏栅格,标题居中,触发器右侧内嵌 -->
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center border-b border-white/[0.06] px-2">
+          <span></span>
+          <span class="text-center text-[11px] tracking-[4px] text-[#8a9ab5]">🃏 纸牌屋 · 全国直播</span>
+          <div class="debate-shell-actions justify-self-end flex items-center gap-1">
+            <ChatTrigger />
+            <AppsTrigger />
+          </div>
         </div>
 
         <div class="flex items-stretch">

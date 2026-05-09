@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import AppShell from "../views/AppShell.vue";
+import WelcomeView from "../views/WelcomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import * as api from "../utils/api.js";
 
 const routes = [
   { path: "/", redirect: "/app/chat" },
-  { path: "/welcome", name: "welcome", component: LoginView, meta: { public: true, mode: "setup" } },
+  { path: "/welcome", name: "welcome", component: WelcomeView, meta: { public: true, mode: "setup" } },
   { path: "/login", name: "login", component: LoginView, meta: { public: true } },
   { path: "/app/:id/:p1?/:p2?", component: AppShell },
   { path: "/:pathMatch(.*)*", redirect: "/" }

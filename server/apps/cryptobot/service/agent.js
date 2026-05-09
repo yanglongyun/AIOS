@@ -21,8 +21,12 @@ const getAgent = async () => {
     } catch {
     }
   }
-  const initialEq = parseNum(cfg.initial_equity, equity) || 1;
-  const pnl = equity - initialEq;
+  // 没启动机器人前 initial_equity 是 0,直接显示 0% / $0,
+  // 不要伪造一个 1 块本金算出 -100% 的假亏损。
+  const initialEq = parseNum(cfg.initial_equity);
+  const hasBaseline = initialEq > 0;
+  const pnl = hasBaseline ? equity - initialEq : 0;
+  const pnlRatio = hasBaseline ? pnl / initialEq : 0;
   return {
     success: true,
     config: {
@@ -46,9 +50,9 @@ const getAgent = async () => {
     },
     equity: {
       current: equity,
-      initial: parseNum(cfg.initial_equity),
+      initial: initialEq,
       pnl,
-      pnl_ratio: pnl / initialEq,
+      pnl_ratio: pnlRatio,
       today_change: getTodayChange(equity)
     }
   };

@@ -2,7 +2,8 @@
 import { nextTick, ref, watch } from 'vue';
 
 const props = defineProps({
-  sending: { type: Boolean, default: false }
+  sending: { type: Boolean, default: false },
+  partnerName: { type: String, default: '' }
 });
 const emit = defineEmits(['send']);
 
@@ -44,7 +45,7 @@ watch(text, autoResize);
           ref="textareaEl"
           v-model="text"
           rows="1"
-          :placeholder="sending ? '小桃在想…' : '悄悄说点什么…'"
+          :placeholder="sending ? `${partnerName || 'TA'}在想…` : '悄悄说点什么…'"
           :disabled="sending"
           @keydown="onKeydown"
           @compositionstart="composing = true"

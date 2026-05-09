@@ -105,6 +105,6 @@ const characterBio = computed(() => character.value?.bio || '');
       </div>
     </main>
 
-    <Composer :sending="sending" @send="sendMessage" />
+    <Composer :sending="sending" :partner-name="character.name" @send="sendMessage" />
   </div>
 </template>

@@ -176,7 +176,20 @@ async function api(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  return await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data?.success === false) {
+    // 把服务端透传的 raw / parsed / stack 全部打到 console,看清 AI 究竟生成了什么
+    console.group(`[banana.api] ${path} 失败 — ${res.status}`);
+    console.error('message:', data?.message);
+    if (data?.parsed) console.error('parsed JSON:', data.parsed);
+    if (data?.raw) console.error('AI 原文:\n' + data.raw);
+    if (data?.stack) console.error('stack:', data.stack);
+    console.groupEnd();
+    const err = new Error(data?.message || `请求失败 ${res.status}`);
+    err.detail = data;
+    throw err;
+  }
+  return data;
 }
 
 function buildBananaTaskParams({ history = [], now = '', choices = '', next = '' }) {
@@ -202,9 +215,11 @@ RULES:
 GOOD example (texting screen):
 {"content":"<div>From: Mom<br>Hi! Did you eat?</div>","options":[{"text":"Reply"},{"text":"Delete"},{"text":"Back"}]}
 
-BAD example (DON'T DO THIS):
+BAD examples (DON'T DO ANY OF THESE):
+- options as plain string array: ["Reply","Delete","Back"]   ← MUST be [{"text":"..."}]
+- more than 3 items: [{"text":"a"},{"text":"b"},{"text":"c"},{"text":"d"}]   ← cap at 3, drop the rest
 - options with empty text: [{"text":""}]
-- choices baked into content: "<div>1. Call 2. SMS 3. Game</div>"  ← put these in options instead`
+- choices baked into content: "<div>1. Call 2. SMS 3. Game</div>"   ← put those in options instead`
     : `这是模拟老式手机的互动游戏。输出一屏内容,严格 JSON 格式。
 
 字段定位:
@@ -222,9 +237,11 @@ BAD example (DON'T DO THIS):
 正确示例(短信查看屏):
 {"content":"<div>来自:妈妈<br>吃饭了吗?</div>","options":[{"text":"回复"},{"text":"删除"},{"text":"返回"}]}
 
-错误示例(千万别这样):
-- options 为空字符串: [{"text":""}]
-- 把选项塞进 content: "<div>1.通讯录 2.短信 3.游戏</div>" ← 这些应放在 options 里`;
+错误示例(以下任何一种都别出现):
+- options 直接给字符串数组: ["回复","删除","返回"]   ← 必须是 [{"text":"..."}]
+- 超过 3 项:               [{"text":"a"},{"text":"b"},{"text":"c"},{"text":"d"}]   ← 最多 3 个,自己取舍
+- options 文本为空:         [{"text":""}]
+- 把选项塞进 content:       "<div>1.通讯录 2.短信 3.游戏</div>"   ← 应放在 options 里`;
   const userPrompt = next
     ? (lang === 'en'
       ? `Current screen is '''${now}''', next target is '''${next}'''`

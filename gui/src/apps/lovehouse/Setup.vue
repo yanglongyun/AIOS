@@ -168,7 +168,7 @@ const submit = async () => {
               v-model="form.name"
               type="text"
               maxlength="20"
-              placeholder="比如 小桃 / 阿凯"
+              placeholder="比如 阿月 / 阿凯"
               class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white text-gray-800
                      outline-none transition-colors
                      focus:border-pink-500 focus:ring-2 focus:ring-pink-500/15" />

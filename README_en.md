@@ -6,11 +6,13 @@
 
 ## Screenshots
 
-![iimos / AIOS home](https://iimos.ai/blog/iimos-screenshots/images/screen-01.webp)
+![Welcome setup](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)
 
-![iimos / AIOS app view](https://iimos.ai/blog/iimos-screenshots/images/screen-08.webp)
+![Chat home](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
 
-![iimos / AIOS mobile view](https://iimos.ai/blog/iimos-screenshots/images/screen-14.webp)
+![Files app](https://iimos.ai/blog/iimos-screenshots/images/files.webp)
+
+![GitHub Trending app](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
 
 More screenshots: [iimos Screenshots](https://iimos.ai/blog/iimos-screenshots)
 

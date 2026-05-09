@@ -6,11 +6,13 @@
 
 ## 界面截图
 
-![iimos / AIOS 首页](https://iimos.ai/blog/iimos-screenshots/images/screen-01.webp)
+![首次设置](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)
 
-![iimos / AIOS 应用界面](https://iimos.ai/blog/iimos-screenshots/images/screen-08.webp)
+![聊天首页](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
 
-![iimos / AIOS 移动端界面](https://iimos.ai/blog/iimos-screenshots/images/screen-14.webp)
+![文件应用](https://iimos.ai/blog/iimos-screenshots/images/files.webp)
+
+![GitHub Trending 应用](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
 
 更多截图：[iimos 截图一览](https://iimos.ai/blog/iimos-screenshots)
 

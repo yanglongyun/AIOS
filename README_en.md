@@ -4,6 +4,10 @@
 
 > The Operating System for the AI Era
 
+## Core Idea
+
+Make AI your operating system. AIOS brings conversations, tasks, tools, and apps into one local-first workspace, so you can operate your computer with natural language and build your own AI-native applications.
+
 ## Screenshots
 
 ![Welcome setup](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)

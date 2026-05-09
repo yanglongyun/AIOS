@@ -4,6 +4,10 @@
 
 > AI时代的操作系统
 
+## 核心理念
+
+让 AI 成为你的操作系统。AIOS 把对话、任务、工具和应用放在同一个本地优先的工作区里,让你可以用自然语言操作电脑,也可以构建属于自己的 AI 原生应用。
+
 ## 界面截图
 
 ![首次设置](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)

@@ -4,6 +4,16 @@
 
 > AI时代的操作系统
 
+## 界面截图
+
+![iimos / AIOS 首页](https://iimos.ai/blog/iimos-screenshots/images/screen-01.webp)
+
+![iimos / AIOS 应用界面](https://iimos.ai/blog/iimos-screenshots/images/screen-08.webp)
+
+![iimos / AIOS 移动端界面](https://iimos.ai/blog/iimos-screenshots/images/screen-14.webp)
+
+更多截图：[iimos 截图一览](https://iimos.ai/blog/iimos-screenshots)
+
 ## 安装
 
 一键安装。脚本会自动检查并安装 Node.js 20+、git、rsync 等依赖,然后克隆、构建、启动。

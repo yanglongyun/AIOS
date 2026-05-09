@@ -4,6 +4,16 @@
 
 > The Operating System for the AI Era
 
+## Screenshots
+
+![iimos / AIOS home](https://iimos.ai/blog/iimos-screenshots/images/screen-01.webp)
+
+![iimos / AIOS app view](https://iimos.ai/blog/iimos-screenshots/images/screen-08.webp)
+
+![iimos / AIOS mobile view](https://iimos.ai/blog/iimos-screenshots/images/screen-14.webp)
+
+More screenshots: [iimos Screenshots](https://iimos.ai/blog/iimos-screenshots)
+
 ## Install
 
 One-line install. The script auto-checks and installs Node.js 20+, git, rsync, then clones, builds, and starts.

@@ -18,11 +18,6 @@ import Messages from './Messages.vue';
 import Composer from './Composer.vue';
 import { setupChatStream, parseMessages, mkKey } from './stream.js';
 
-const props = defineProps({
-  pendingMessage: { type: String, default: null },
-  intentRequest: { type: Object, default: null }
-});
-
 const view = useViewStore();
 const MOBILE_BREAK = 720;
 
@@ -196,18 +191,9 @@ onMounted(() => {
 
   loadConversations();
 
-  // workshop 等过来:自动新建并发送
-  const ir = props.intentRequest;
-  if (ir?.intent === 'new_and_send' && ir.payload?.message) {
-    nextTick(async () => {
-      activeId.value = null;
-      messages.value = [];
-      input.value = ir.payload.message;
-      await sendMsg();
-    });
-  } else if (props.pendingMessage) {
-    nextTick(() => { input.value = props.pendingMessage; });
-  }
+  // 外部入口(例如应用面板的「+」)可通过 view.setChatDraft 把一段话塞进输入框
+  const draft = view.consumeChatDraft();
+  if (draft) nextTick(() => { input.value = draft; });
 });
 
 onBeforeUnmount(() => {

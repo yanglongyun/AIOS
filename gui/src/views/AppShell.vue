@@ -2,7 +2,7 @@
   <div class="stage">
     <main class="main">
       <Suspense>
-        <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" v-bind="currentProps" />
+        <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" />
       </Suspense>
     </main>
 
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted, watch, computed } from 'vue';
+import { ref, shallowRef, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import AppsPopup from '../components/AppsPopup.vue';
 import QuickChat from '../components/QuickChat.vue';
@@ -30,19 +30,6 @@ const route = useRoute();
 const auth = useAuthStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
-
-const currentProps = computed(() => {
-  if (activeAppId.value !== 'chat') return {};
-  const message = route.query.workshopPrompt ? String(route.query.workshopPrompt) : '';
-  if (!message) return {};
-  return {
-    intentRequest: {
-      requestId: `workshop-${route.query.t || Date.now()}`,
-      intent: 'new_and_send',
-      payload: { message }
-    }
-  };
-});
 
 async function loadApp(id) {
   const app = getApp(id);

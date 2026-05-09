@@ -9,8 +9,7 @@ const apps = [
     icon: 'forum',
     color: '#34a853',
     hasDrawer: true,
-    load: () => import('./apps/chat/index.vue'),
-    intent: () => import('./apps/chat/intent.js')
+    load: () => import('./apps/chat/index.vue')
   },
   {
     id: 'tasks',
@@ -179,14 +178,6 @@ const apps = [
     color: '#f9ab00',
     hasDrawer: false,
     load: () => import('./apps/cryptobot/index.vue')
-  },
-  {
-    id: 'workshop',
-    name: '__T_APP_WORKSHOP__',
-    icon: 'storefront',
-    color: '#0f9d58',
-    hasDrawer: false,
-    load: () => import('./apps/workshop/index.vue')
   },
   {
     id: 'settings',

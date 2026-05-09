@@ -15,6 +15,15 @@ function go(id) {
 }
 function isActive(id) { return route.path === `/app/${id}`; }
 
+// 应用中心的「+」:不存在"添加应用"页面 —— AIOS 的应用是和 AI 对话出来的。
+// 点击 = 关面板 + 跳到 Chat,顺便往输入框塞一句引导 prompt,提示用户继续描述。
+function newApp() {
+  view.setChatDraft('我想要一个应用,它能');
+  view.closeApps();
+  const path = '/app/chat';
+  if (route.path !== path) router.push(path);
+}
+
 function onDocClick(e) {
   if (!view.appsOpen) return;
   // 别让 AppsTrigger 按钮自己 toggle 时被 doc click 立即关上
@@ -41,7 +50,7 @@ onBeforeUnmount(() => {
       <div class="inner-card">
         <header class="head">
           <div class="title">应用中心</div>
-          <button class="edit-btn" title="添加应用">
+          <button class="edit-btn" title="新建应用 (和 AI 对话即可)" @click="newApp">
             <span class="msi sm">add</span>
           </button>
         </header>

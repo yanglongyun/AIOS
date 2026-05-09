@@ -8,6 +8,9 @@ export const useViewStore = defineStore('view', () => {
   const appDrawerOpen = ref(!isMobile);
   const appsOpen = ref(false);
   const chatOpen = ref(false);
+  // 一次性的 Chat 输入草稿:其他入口(例如应用面板的「+」)
+  // 想把一段话塞进 Chat 的输入框时往这里写,Chat 挂载时读一次并清空。
+  const chatDraft = ref('');
 
   function toggleAppDrawer()  { appDrawerOpen.value = !appDrawerOpen.value; }
   function closeAppDrawer()   { appDrawerOpen.value = false; }
@@ -25,10 +28,18 @@ export const useViewStore = defineStore('view', () => {
   }
   function closeChat() { chatOpen.value = false; }
 
+  function setChatDraft(text) { chatDraft.value = String(text || ''); }
+  function consumeChatDraft() {
+    const v = chatDraft.value;
+    chatDraft.value = '';
+    return v;
+  }
+
   return {
-    appDrawerOpen, appsOpen, chatOpen,
+    appDrawerOpen, appsOpen, chatOpen, chatDraft,
     toggleAppDrawer, closeAppDrawer, openAppDrawer,
     toggleApps, closeApps,
-    toggleChat, closeChat
+    toggleChat, closeChat,
+    setChatDraft, consumeChatDraft
   };
 });

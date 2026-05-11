@@ -48,12 +48,13 @@ const aiDecideByLlm = async ({ req, aiCards, round, aiChips, playerChips, pot, p
     parsed = await instantTaskJson({
       app: "poker",
       title: `炸金花AI决策-第${round}轮`,
-      prompt: "根据牌局状态做跟注/弃牌决策。",
-      schema: { required: ["action", "speech", "expression"] },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
+      payload: {
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" }
+      },
       req
     });
   } catch (error) {
@@ -95,12 +96,13 @@ const aiSpeakOnCompareByLlm = async ({ req, actionHistory, winner, round, potBef
     parsed = await instantTaskJson({
       app: "poker",
       title: `炸金花比牌台词-第${round}轮`,
-      prompt: "根据比牌上下文生成外在台词。",
-      schema: { required: ["speech", "expression"] },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
+      payload: {
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" }
+      },
       req
     });
   } catch (error) {

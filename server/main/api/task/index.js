@@ -4,36 +4,25 @@ import { listTaskRecords } from "../../service/task/list.js";
 import { getTaskDetail } from "../../service/task/detail.js";
 import { listTaskMessages } from "../../service/task/messages.js";
 import { stopTask } from "../../service/task/stop.js";
-import { createInstantTask } from "../../service/task/create/instant.js";
-import { createAgentTask } from "../../service/task/create/agent.js";
+import { createAgentTask, createInstantTask } from "../../service/task/create.js";
 const handleTaskCreateInstantApi = async (req, res, path) => {
   if (path !== "/api/task/create/instant" || req.method !== "POST") return false;
   try {
     const {
       app,
       title = "",
-      prompt,
-      schema = null,
+      payload,
       meta = null,
-      messages = null,
-      tools = null,
-      tool_choice = void 0,
-      parallel_tool_calls = void 0
     } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
-    if (!String(prompt || "").trim() && (!Array.isArray(messages) || messages.length === 0)) {
-      return json(res, { success: false, message: "prompt or messages is required" }, 400);
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
+      return json(res, { success: false, message: "payload.messages is required" }, 400);
     }
     const result = await createInstantTask({
       app: String(app || "").trim(),
       title: String(title || "").trim(),
-      prompt: String(prompt || "").trim(),
-      schema,
       meta,
-      messages,
-      tools,
-      tool_choice,
-      parallel_tool_calls
+      payload
     });
     return json(res, result);
   } catch (e) {
@@ -43,13 +32,15 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
 const handleTaskCreateAgentApi = async (req, res, path) => {
   if (path !== "/api/task/create/agent" || req.method !== "POST") return false;
   try {
-    const { app, title = "", prompt, meta = null, wait = true } = await readBody(req);
+    const { app, title = "", payload, meta = null, wait = true } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
-    if (!String(prompt || "").trim()) return json(res, { success: false, message: "prompt is required" }, 400);
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
+      return json(res, { success: false, message: "payload.messages is required" }, 400);
+    }
     const result = await createAgentTask({
       app: String(app || "").trim(),
       title: String(title || "").trim(),
-      prompt: String(prompt || "").trim(),
+      payload,
       meta,
       wait: Boolean(wait)
     });

@@ -24,12 +24,13 @@ export const continueDebate = async (body = {}, req) => {
     const data = await instantTaskJson({
       app: 'debate',
       title: '辩论过渡发言',
-      prompt: '生成下一议题过渡开场。',
-      schema: { required: ['content'] },
-      messages: [
-        ...messages,
-        { role: 'system', content: '只输出 JSON：{"content":"..."}' }
-      ],
+      payload: {
+        messages: [
+          ...messages,
+          { role: 'system', content: '只输出 JSON：{"content":"..."}' }
+        ],
+        response_format: { type: "json_object" }
+      },
       req
     });
     return { content: String(data.content || '').trim() };

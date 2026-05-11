@@ -18,7 +18,6 @@ const BADGE_CLS = {
   error:   'bg-[#fce8e6] text-bad'
 };
 
-// ─── 任务消息流 ────────────────────────────
 const messages = ref([]);
 let pollTimer = null;
 
@@ -54,7 +53,6 @@ watch(() => props.task?.status, (s) => {
 
 onBeforeUnmount(stopPoll);
 
-// ─── 渲染分流 ───────────────────────────────
 const renderRows = computed(() =>
   messages.value.map((m) => {
     if (m.role === 'tool') {
@@ -103,13 +101,6 @@ const fmtContent = (c) => {
 
     <div class="flex-1 min-h-0 overflow-y-auto pt-5 pb-4 flex flex-col gap-3.5">
 
-      <!-- Prompt -->
-      <section v-if="task.prompt" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
-        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">Prompt</div>
-        <pre class="m-0 font-mono text-[12.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ task.prompt }}</pre>
-      </section>
-
-      <!-- 执行过程 (assistant / tool_call / tool_result), 默认折叠 -->
       <section v-if="renderRows.length" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
         <button type="button"
           class="-mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-md px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-faint cursor-pointer hover:bg-bg-hi"
@@ -170,8 +161,7 @@ const fmtContent = (c) => {
         </div>
       </section>
 
-      <!-- 最终响应 (没消息流时回退展示) -->
-      <section v-if="task.response && !renderRows.length" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
+      <section v-if="task.response" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
         <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">Response</div>
         <pre class="m-0 font-mono text-[12.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ typeof task.response === 'string' ? task.response : JSON.stringify(task.response, null, 2) }}</pre>
       </section>

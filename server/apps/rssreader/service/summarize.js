@@ -10,7 +10,11 @@ Description: ${description || "N/A"}
 
 Return only the summary bullet points, nothing else.`;
 
-  const result = await agentTask({ app: "rssreader", title: `Summarize: ${title}`, prompt });
+  const result = await agentTask({
+    app: "rssreader",
+    title: `Summarize: ${title}`,
+    payload: { messages: [{ role: "user", content: prompt }] }
+  });
   return { success: true, summary: result.response || "" };
 };
 

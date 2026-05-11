@@ -6,12 +6,12 @@ import { getProgress } from "../service/progress.js";
 const handleBananaApi = async (req, res, path) => {
   if (path === "/apps/banana/generation" && req.method === "POST") {
     const body = await readBody(req);
-    const { history, now, choices, next, prompt, messages, taskTitle } = body;
+    const { history, now, choices, next, messages, taskTitle } = body;
     if (!now && !next) return json(res, { success: false, message: "Missing required parameters" }, 400);
 
     let data = null;
     try {
-      data = await generate({ history, now, choices, next, prompt, messages, taskTitle, req });
+      data = await generate({ history, now, choices, next, messages, taskTitle, req });
     } catch (error) {
       console.error("[banana.api] generate 抛异常:", error);
       data = { status: 500, message: error.message || "generation failed", stack: error.stack };

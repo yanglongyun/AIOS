@@ -25,10 +25,6 @@ const initClaudeCodeTables = () => {
     );
     CREATE INDEX IF NOT EXISTS idx_cc_events_conv_seq ON cc_events(conversation_id, seq);
   `);
-  const cols = db.prepare("PRAGMA table_info(cc_conversations)").all();
-  if (!cols.some((col) => col.name === "permission_mode")) {
-    db.exec("ALTER TABLE cc_conversations ADD COLUMN permission_mode TEXT NOT NULL DEFAULT 'default'");
-  }
 };
 
 const initClaudeCodeDatabase = () => {

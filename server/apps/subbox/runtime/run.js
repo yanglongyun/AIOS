@@ -26,7 +26,7 @@ const runOnce = async (cfg) => {
     const data = await agentTask({
       app: "subbox",
       title: (cfg.topic || "").slice(0, 30) || "Subbox Daily",
-      prompt: buildPrompt(cfg)
+      payload: { messages: [{ role: "user", content: buildPrompt(cfg) }] }
     });
     const summary = String(data.response || "").trim();
     insertReport({

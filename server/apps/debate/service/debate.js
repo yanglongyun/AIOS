@@ -68,12 +68,13 @@ export const advanceDebate = async (body = {}, req) => {
     const data = await instantTaskJson({
       app: 'debate',
       title: '辩论推进决策',
-      prompt: '基于当前辩论信息，调用合适工具推进流程，并以 JSON 结构返回。',
-      schema: { required: ['tool_calls'] },
-      messages,
-      tools,
-      tool_choice: 'auto',
-      parallel_tool_calls: false,
+      payload: {
+        messages,
+        response_format: { type: "json_object" },
+        tools,
+        tool_choice: 'auto',
+        parallel_tool_calls: false
+      },
       req
     });
     if (!Array.isArray(data.tool_calls) || !data.tool_calls.length) {

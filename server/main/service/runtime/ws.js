@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
-import { createSession } from "../../api/chat/ws.js";
+import { createChatSession } from "../chat/session.js";
 import { isAuthenticated } from "../auth/session.js";
 import { redact } from "./redact.js";
 
@@ -59,7 +59,7 @@ chatWss.on("connection", (ws) => {
   clientById.set(clientId, ws);
 
   const send = (msg) => sendOne(ws, safeStringify(msg));
-  const { handleMessage } = createSession(send);
+  const { handleMessage } = createChatSession(send);
 
   // 给 meem app 推一份当前快照(终端列表 + 当前活动终端)
   for (const app of meemApps) {

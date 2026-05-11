@@ -26,19 +26,19 @@ const requestTask = async (body = {}) => {
   }
   return data;
 };
-const agentTask = async ({ app, title, prompt, meta = null }) => {
+const agentTask = async ({ app, title, payload, meta = null }) => {
   return await requestTask({
     app,
     title,
-    prompt,
+    payload,
     meta
   });
 };
-const agentTaskStart = async ({ app, title, prompt, meta = null }) => {
+const agentTaskStart = async ({ app, title, payload, meta = null }) => {
   return await requestTask({
     app,
     title,
-    prompt,
+    payload,
     meta,
     wait: false
   });

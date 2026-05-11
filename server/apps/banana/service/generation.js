@@ -2,10 +2,7 @@ import { instantTask } from "../../../shared/apps/instantTask.js";
 import { parseJsonObject } from "../../../shared/ai/json.js";
 import { insertSession } from "../repository/generation.js";
 
-const generate = async ({ history, now, choices, next, prompt, messages, taskTitle, req }) => {
-  const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt is required" };
-
+const generate = async ({ history, now, choices, next, messages, taskTitle, req }) => {
   const taskMessages = Array.isArray(messages) ? messages : [];
   if (taskMessages.length === 0) return { status: 400, message: "messages are required" };
 
@@ -15,9 +12,10 @@ const generate = async ({ history, now, choices, next, prompt, messages, taskTit
     task = await instantTask({
       app: "banana",
       title: String(taskTitle || "").trim() || "老手机界面生成",
-      schema: { required: ["content", "options"] },
-      prompt: promptText,
-      messages: taskMessages,
+      payload: {
+        messages: taskMessages,
+        response_format: { type: "json_object" }
+      },
       req
     });
   } catch (err) {

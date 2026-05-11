@@ -49,9 +49,10 @@ comment(string, 80-180字点评)
     const parsed = await instantTaskJson({
       app: 'treasure',
       title: '鉴宝估值',
-      prompt: '根据图片完成鉴宝估值，按 schema 输出。',
-      schema: { required: ['name', 'category', 'condition', 'summary_tag', 'value', 'comment'] },
-      messages,
+      payload: {
+        messages,
+        response_format: { type: "json_object" }
+      },
       req
     });
     if (!parsed || typeof parsed !== 'object') return { status: 500, message: 'AI 返回格式错误' };

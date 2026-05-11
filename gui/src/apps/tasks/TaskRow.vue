@@ -1,4 +1,17 @@
 <script setup>
+function parsePayload(payload) {
+  if (!payload) return {};
+  if (typeof payload === 'object') return payload;
+  try { return JSON.parse(payload); } catch { return {}; }
+}
+function payloadText(payload) {
+  const p = parsePayload(payload);
+  const first = Array.isArray(p.messages) ? p.messages.find((m) => m?.role === 'user') : null;
+  const content = first?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return content.map((part) => part?.text || '').filter(Boolean).join(' ');
+  return '';
+}
 const props = defineProps({
   task: { type: Object, required: true },
   status: { type: Object, required: true },        // { label, icon, cls }
@@ -24,11 +37,11 @@ const BADGE_CLS = {
     <div class="flex-1 min-w-0">
       <div class="text-[14px] leading-[1.5] break-words"
         :class="(status.cls === 'done' || status.cls === 'error') ? 'text-faint' : 'text-ink'">
-        {{ task.title || (task.prompt || '').slice(0, 80) || '(空)' }}
+        {{ task.title || payloadText(task.payload).slice(0, 80) || '(空)' }}
       </div>
-      <div v-if="task.prompt && task.prompt !== task.title"
+      <div v-if="payloadText(task.payload) && payloadText(task.payload) !== task.title"
         class="mt-0.5 truncate text-[12.5px] text-muted">
-        {{ preview(task.prompt) }}
+        {{ preview(payloadText(task.payload)) }}
       </div>
       <div class="mt-1.5 flex items-center gap-2 text-[11.5px] text-faint">
         <span v-if="showStatus"

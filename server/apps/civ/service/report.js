@@ -95,7 +95,7 @@ const generateCivReport = async ({ wikiLang = "zh" } = {}) => {
   const result = await instantTask({
     app: "civ",
     title: "文明看板分析报告",
-    prompt: buildPrompt(snapshot),
+    payload: { messages: [{ role: "user", content: buildPrompt(snapshot) }] },
     meta: { generatedAt: snapshot.generatedAt, source: "civ-report" }
   });
 

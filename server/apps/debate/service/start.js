@@ -32,9 +32,10 @@ export const startDebate = async (body = {}, req) => {
     const parsed = await instantTaskJson({
       app: 'debate',
       title: '辩论初始化',
-      prompt: '生成辩论议题与开场白。',
-      schema: { required: ['topics', 'prologue'] },
-      messages,
+      payload: {
+        messages,
+        response_format: { type: "json_object" }
+      },
       req
     });
 

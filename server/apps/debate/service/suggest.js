@@ -50,9 +50,10 @@ export const getSuggestions = async (body = {}, req) => {
     const data = await instantTaskJson({
       app: 'debate',
       title: '辩论发言建议',
-      prompt: '生成三条结构化发言建议。',
-      schema: { required: ['suggestions'] },
-      messages,
+      payload: {
+        messages,
+        response_format: { type: "json_object" }
+      },
       req
     });
     return { suggestions: normalizeSuggestions(data.suggestions || []) };

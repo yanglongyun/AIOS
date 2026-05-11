@@ -30,9 +30,10 @@ export const getTopicSummary = async (body = {}, req) => {
     const parsed = await instantTaskJson({
       app: 'debate',
       title: '辩论议题总结',
-      prompt: '生成总结、主张和支持率。',
-      schema: { required: ['summary', 'policy', 'poll'] },
-      messages,
+      payload: {
+        messages,
+        response_format: { type: "json_object" }
+      },
       req
     });
     return {

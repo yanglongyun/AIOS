@@ -14,6 +14,15 @@ const listChatRows = (scene = null) => {
     ORDER BY pinned DESC, created_at DESC
   `).all();
 };
+const listRecentChatSummaryRows = (limit = 3) => {
+  return db.prepare(`
+    SELECT conversation_id, title, description
+    FROM chats
+    ORDER BY datetime(created_at) DESC, id DESC
+    LIMIT ?
+  `).all(limit);
+};
 export {
+  listRecentChatSummaryRows,
   listChatRows
 };

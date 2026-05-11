@@ -1,4 +1,8 @@
-import { db } from "../../repository/client.js";
+import {
+  listHeadRemarkRows,
+  listRemarkRows,
+  listTailRemarkRows
+} from "../../repository/chat/remarks.js";
 
 const REMARK_RE = /<remark>([\s\S]*?)<\/remark>/g;
 const PROBE = "<remark";
@@ -18,16 +22,8 @@ const extractRemark = (text) => {
 
 // 长对话注入策略:头 head 条 + 尾 tail 条,中间跳过(由 remark 自身承接)
 const firstAndRecentRemarks = (conversationId, head = 10, tail = 20) => {
-  const heads = db.prepare(
-    `SELECT id, remark FROM messages
-     WHERE conversation_id = ? AND remark IS NOT NULL
-     ORDER BY id ASC LIMIT ?`
-  ).all(conversationId, head);
-  const tails = db.prepare(
-    `SELECT id, remark FROM messages
-     WHERE conversation_id = ? AND remark IS NOT NULL
-     ORDER BY id DESC LIMIT ?`
-  ).all(conversationId, tail);
+  const heads = listHeadRemarkRows(conversationId, head);
+  const tails = listTailRemarkRows(conversationId, tail);
   const seen = new Set();
   const merged = [];
   for (const row of heads) {
@@ -46,11 +42,7 @@ const firstAndRecentRemarks = (conversationId, head = 10, tail = 20) => {
 
 // UI 面板用:返回当前对话的全部 remark,按时间正序
 const listAllRemarks = (conversationId) => {
-  return db.prepare(
-    `SELECT id, remark, created_at FROM messages
-     WHERE conversation_id = ? AND remark IS NOT NULL
-     ORDER BY id ASC`
-  ).all(conversationId).map((r) => ({
+  return listRemarkRows(conversationId).map((r) => ({
     id: r.id,
     remark: r.remark,
     createdAt: r.created_at

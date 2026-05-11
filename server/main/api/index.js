@@ -1,12 +1,11 @@
 import { json } from "../../shared/http/json.js";
 import { handleChatApi } from "./chat/index.js";
 import { handleSettingsApi } from "./settings/index.js";
-import { handleFsApi } from "./runtime/fs.js";
+import { handleFsApi } from "./fs/index.js";
 import { handleLlmApi } from "./llm/index.js";
 import { handleTaskApi } from "./task/index.js";
 import { handleRuntimeApi } from "./runtime/index.js";
 import { handleAuthApi } from "./auth/index.js";
-import { handleNotesApi } from "./notes/index.js";
 import { handleMemoryApi } from "./memory/index.js";
 
 const handleApiRequest = async (req, res, url) => {
@@ -42,10 +41,6 @@ const handleApiRequest = async (req, res, url) => {
     }
     if (path.startsWith("/api/task")) {
       await handleTaskApi(req, res, path, url);
-      return true;
-    }
-    if (path.startsWith("/api/notes/")) {
-      await handleNotesApi(req, res, path, url);
       return true;
     }
     if (path.startsWith("/api/memory/")) {

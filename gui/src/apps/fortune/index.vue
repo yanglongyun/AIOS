@@ -146,9 +146,6 @@ const divine = async () => {
   const yaoDesc = lang === 'en'
     ? allYaos.map((y, i) => `${['1st', '2nd', '3rd', '4th', '5th', 'top'][i]}:${y ? 'yang' : 'yin'}`).join(', ')
     : allYaos.map((y, i) => `${['初', '二', '三', '四', '五', '上'][i]}爻:${y ? '阳' : '阴'}`).join('，');
-  const prompt = lang === 'en'
-    ? 'Interpret the given hexagram and return JSON by schema.'
-    : '请根据给定卦象完成解卦，按 schema 输出 JSON。';
   const systemText = lang === 'en'
     ? `You are a skilled I Ching diviner with elegant writing.
 The user has already generated a specific hexagram. Interpret strictly based on this hexagram.
@@ -188,7 +185,6 @@ Return JSON only:
       question: question.value.trim(),
       hexagram: name,
       taskTitle: lang === 'en' ? 'I Ching Reading' : '周易解卦',
-      prompt,
       messages: [
         { role: 'system', content: systemText },
         { role: 'user', content: userText }

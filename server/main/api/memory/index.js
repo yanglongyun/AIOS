@@ -1,12 +1,3 @@
-// 记忆 API —— 让用户管理"长期记忆"条目
-// 数据写到 contexts 表 (source='memory'), 主 AI 在拼 system prompt 时读 access != none 的条目
-//
-// Routes:
-//   GET  /api/memory/list
-//   GET  /api/memory/get?id=<n>
-//   POST /api/memory/create  { title, description?, content, enabled?, pinned? }
-//   POST /api/memory/update  { id, title?, description?, content?, enabled?, pinned? }
-//   POST /api/memory/delete  { id }
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { listMemories, getMemory, createMemory, updateMemory, deleteMemory } from "../../repository/memory.js";
@@ -35,7 +26,7 @@ const handleMemoryApi = async (req, res, path) => {
             title,
             description: body.description || "",
             content,
-            enabled: body.enabled !== false,           // 默认启用
+            enabled: body.enabled !== false,
             pinned: !!body.pinned
         });
         return json(res, { success: true, item });

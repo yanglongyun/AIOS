@@ -2,7 +2,7 @@
 
 import * as api from '@/utils/api.js';
 
-const BASE = '/api/notes';
+const BASE = '/apps/notes';
 
 export const listNotes = () => api.get(`${BASE}/list`);
 export const saveNote = (note) => api.post(`${BASE}/save`, note);

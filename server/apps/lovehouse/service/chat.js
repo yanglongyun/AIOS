@@ -1,6 +1,6 @@
 // 虚拟伴侣聊天核心 — 每次回应同时产出 "内心想法" 和 "公开回复"
 //
-// LLM 返回 schema:
+// LLM 返回 JSON:
 // { thought: string, reply: string, mood?: string }
 //   thought  — 角色的内心独白, 用户可以看到, 但角色"不知道"用户能看到
 //   reply    — 实际对外说的话
@@ -73,9 +73,10 @@ export const chat = async ({ content, req }) => {
         parsed = await instantTaskJson({
             app: "lovehouse",
             title: `虚拟伴侣 ${character.name} 对话`,
-            schema: { required: ["thought", "reply"] },
-            prompt: "扮演虚拟伴侣, 同时输出 thought 与 reply, 严格 JSON。",
-            messages,
+            payload: {
+                messages,
+                response_format: { type: "json_object" }
+            },
             req
         });
     } catch (e) {

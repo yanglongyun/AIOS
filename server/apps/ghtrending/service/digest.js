@@ -12,7 +12,7 @@ ${list}`;
   const result = await instantTask({
     app: "ghtrending",
     title: "GitHub Trending Digest",
-    prompt
+    payload: { messages: [{ role: "user", content: prompt }] }
   });
   return { success: true, analysis: result.response || "" };
 };

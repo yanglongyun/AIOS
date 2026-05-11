@@ -194,9 +194,6 @@ async function api(path, body) {
 
 function buildBananaTaskParams({ history = [], now = '', choices = '', next = '' }) {
   const lang = LOCALE;
-  const prompt = lang === 'en'
-    ? 'Generate the next old-phone screen by context and return strict JSON.'
-    : '根据上下文生成下一屏老手机界面。';
   const systemPrompt = lang === 'en'
     ? `Old-phone UI sim game. Output ONE screen as JSON.
 
@@ -250,7 +247,6 @@ BAD examples (DON'T DO ANY OF THESE):
       ? `Recent history: '''${JSON.stringify(history || [])}'''; current screen: '''${now}'''; latest choice: '''${choices}'''`
       : `用户最近的操作历史是'''${JSON.stringify(history || [])}'''，当前界面显示的是'''${now}'''，用户最新做出的选择是'''${choices}'''`);
   return {
-    prompt,
     taskTitle: lang === 'en' ? 'Banana UI Generation' : '老手机界面生成',
     messages: [
       { role: 'system', content: systemPrompt },

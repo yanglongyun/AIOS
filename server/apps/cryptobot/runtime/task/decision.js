@@ -44,7 +44,11 @@ Passphrase: ${cfg.passphrase || ""}
 6. Output rules: plain text only (120-280 words). No JSON, no markdown, no code fences. The summary MUST mention concrete numbers from your tool calls (actual price, actual balance, actual order id). If you did not place an order this run, say so explicitly and explain why based on the real data you saw.
 
 Begin now.`;
-  const data = await agentTask({ app: "cryptobot", title, prompt });
+  const data = await agentTask({
+    app: "cryptobot",
+    title,
+    payload: { messages: [{ role: "user", content: prompt }] }
+  });
   const summary = String(data.response || "").trim() || "This run completed, but no valid summary was returned.";
   return {
     summary: summary.slice(0, 1200),

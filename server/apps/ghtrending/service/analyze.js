@@ -29,7 +29,7 @@ URL: ${repo.url || ""}`;
   const result = await agentTask({
     app: "ghtrending",
     title: `Analyze: ${repo.name}`,
-    prompt
+    payload: { messages: [{ role: "user", content: prompt }] }
   });
   return { success: true, analysis: result.response || "" };
 };

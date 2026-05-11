@@ -1,9 +1,4 @@
 <script setup>
-// tasks 应用根 — 协调器, 不直接渲染任务条目
-//   Sidebar.vue    ← 左侧 rail
-//   AddBar.vue     ← 顶部输入条
-//   TaskRow.vue    ← 单条任务行
-//   TaskDetail.vue ← 详情视图
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
@@ -17,7 +12,6 @@ import TaskDetail from './TaskDetail.vue';
 
 const view = useViewStore();
 
-// ─── state ────────────────────────────────────────
 const tasks       = ref([]);
 const filter      = ref('all');
 const errMsg      = ref('');
@@ -37,7 +31,6 @@ const filters = [
   { id: 'error',   name: '失败',      icon: 'cancel' }
 ];
 
-// 后端状态: pending = 正在执行 (无队列) / done / error / aborted
 const STATUS = {
   pending: { label: '执行中', icon: 'autorenew',    cls: 'running' },
   done:    { label: '成功',   icon: 'check_circle', cls: 'done' },
@@ -49,8 +42,6 @@ const isDone  = (t) => t.status === 'done';
 const isError = (t) => t.status === 'error' || t.status === 'aborted';
 const st = (t) => STATUS[t.status] || STATUS.pending;
 
-// ─── computed ─────────────────────────────────────
-// "我创建的" = 用户在任务页顶部手动添加的任务 (app === 'tasks' 且不是 rerun)
 function isMine(t) {
   if (t.app !== 'tasks') return false;
   if (!t.meta) return true;
@@ -80,7 +71,21 @@ const visibleTasks = computed(() => applyFilter(tasks.value));
 const openTasks    = computed(() => visibleTasks.value.filter(isOpen));
 const doneTasks    = computed(() => visibleTasks.value.filter((t) => isDone(t) || isError(t)));
 
-// ─── helpers ──────────────────────────────────────
+function parsePayload(payload) {
+  if (!payload) return {};
+  if (typeof payload === 'object') return payload;
+  try { return JSON.parse(payload); } catch { return {}; }
+}
+function payloadText(payload) {
+  const p = parsePayload(payload);
+  const first = Array.isArray(p.messages) ? p.messages.find((m) => m?.role === 'user') : null;
+  const content = first?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content.map((part) => part?.text || '').filter(Boolean).join('\n');
+  }
+  return '';
+}
 function relTime(ts) {
   if (!ts) return '';
   const d = new Date(ts);
@@ -97,7 +102,6 @@ function preview(s, n = 80) {
 }
 const setErr = (label, e) => { errMsg.value = `${label}: ${e?.body?.message || e?.message || e}`; };
 
-// ─── 加载 ──────────────────────────────────────────
 async function load() {
   loading.value = true;
   try {
@@ -112,14 +116,12 @@ async function load() {
   loading.value = false;
 }
 
-// 有 pending 时自动轮询
 let pollTimer = null;
 watch(() => tasks.value.some(isOpen), (busy) => {
   clearInterval(pollTimer); pollTimer = null;
   if (busy) pollTimer = setInterval(load, 4000);
 });
 
-// ─── 操作 ──────────────────────────────────────────
 async function openDetail(t) {
   selectedId.value = t.id;
   detailFor.value = detailCache.get(t.id) || t;
@@ -141,7 +143,11 @@ async function addTask() {
   submitting.value = true; errMsg.value = '';
   try {
     await api.post('/api/task/create/agent', {
-      app: 'tasks', title: t.slice(0, 80), prompt: t, meta: null, wait: false
+      app: 'tasks',
+      title: t.slice(0, 80),
+      payload: { messages: [{ role: 'user', content: t }] },
+      meta: null,
+      wait: false
     });
     newTitle.value = '';
     await load();
@@ -157,8 +163,8 @@ async function rerun(t) {
   try {
     await api.post('/api/task/create/agent', {
       app: t.app || 'tasks',
-      title: t.title || (t.prompt || '').slice(0, 80),
-      prompt: t.prompt,
+      title: t.title || payloadText(t.payload).slice(0, 80),
+      payload: parsePayload(t.payload),
       meta: { rerunOf: t.id },
       wait: false
     });
@@ -189,7 +195,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           <span class="msi">arrow_back</span>
         </button>
         <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-          {{ detailFor.title || (detailFor.prompt || '').slice(0, 40) || '任务详情' }}
+          {{ detailFor.title || payloadText(detailFor.payload).slice(0, 40) || '任务详情' }}
         </div>
         <div class="ml-auto flex items-center gap-1">
           <button class="icon-btn" title="刷新" @click="openDetail(detailFor)">

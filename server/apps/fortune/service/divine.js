@@ -1,16 +1,15 @@
 import { instantTaskJson } from "../../../shared/apps/instantTask.js";
 import { insertRecord } from "../repository/divine.js";
-const divine = async ({ question, hexagram, prompt, messages, taskTitle, req }) => {
-  const promptText = String(prompt || "").trim();
-  if (!promptText) return { status: 400, message: "prompt is required" };
+const divine = async ({ question, hexagram, messages, taskTitle, req }) => {
   const taskMessages = Array.isArray(messages) ? messages : [];
   if (taskMessages.length === 0) return { status: 400, message: "messages are required" };
   const parsed = await instantTaskJson({
     app: "fortune",
     title: String(taskTitle || "").trim() || "周易解卦",
-    schema: { required: ["signName", "signPoem", "good", "bad", "advice"] },
-    prompt: promptText,
-    messages: taskMessages,
+    payload: {
+      messages: taskMessages,
+      response_format: { type: "json_object" }
+    },
     req
   });
   const record = {

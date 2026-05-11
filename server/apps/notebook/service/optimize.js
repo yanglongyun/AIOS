@@ -8,7 +8,7 @@ export const optimizeNotebook = async ({ content, prompt, taskTitle, req }) => {
   const data = await instantTask({
     app: 'notebook',
     title: String(taskTitle || '').trim() || '笔记润色',
-    prompt: promptText,
+    payload: { messages: [{ role: 'user', content: promptText }] },
     req
   });
 

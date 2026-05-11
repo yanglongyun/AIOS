@@ -26,24 +26,14 @@ const requestInstant = async (body = {}) => {
 const instantTask = async ({
     app,
     title = "",
-    prompt,
-    schema = null,
+    payload,
     meta = null,
-    messages = null,
-    tools = null,
-    tool_choice = void 0,
-    parallel_tool_calls = void 0
 } = {}) => {
     return await requestInstant({
         app,
         title,
-        prompt,
-        schema,
+        payload,
         meta,
-        messages,
-        tools,
-        tool_choice,
-        parallel_tool_calls
     });
 };
 

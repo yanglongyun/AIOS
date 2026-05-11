@@ -14,6 +14,7 @@ const appLoaders = [
     () => import("./earth/index.js"),
     () => import("./finance/index.js"),
     () => import("./notebook/index.js"),
+    () => import("./notes/index.js"),
     () => import("./civ/index.js"),
     () => import("./lovehouse/index.js"),
 ];

@@ -2,8 +2,8 @@ import os from "os";
 import path from "path";
 import fs from "fs";
 import { promises as fsp } from "fs";
-import { json } from "../../../../shared/http/json.js";
-import { readBody } from "../../../../shared/http/readBody.js";
+import { json } from "../../../shared/http/json.js";
+import { readBody } from "../../../shared/http/readBody.js";
 
 const MIME = {
   ".txt": "text/plain", ".md": "text/markdown", ".json": "application/json",

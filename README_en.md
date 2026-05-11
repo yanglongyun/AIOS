@@ -58,7 +58,7 @@ AIOS is a **fully local-first** AI workstation:
 |---|---|
 | OS | macOS 12+ / mainstream Linux / Windows 10 1809+ |
 | Node.js | 20 or newer (the script auto-installs it) |
-| Ports | `9501` (main), `9502` (apps), `5173` (Vite dev) |
+| Ports | `9502` (main), `9503` (apps), `5173` (Vite dev) |
 | Disk | ≥ 1 GB |
 
 ### One-line Install
@@ -102,7 +102,7 @@ rm -rf ~/.aios
 
 ## 🎬 First Run
 
-1. Open `http://localhost:9501`
+1. Open `http://localhost:9502`
 2. Set an access password (used only on this machine)
 3. Go to **Settings → Model**, fill in an API key for any provider
 4. Back in **Chat**, just say "build me an app that does X" — the AI will write code, start services, and hand the app over to you through its shell
@@ -141,13 +141,13 @@ Apps can dispatch Tasks back to the system, letting AI take over complex flows i
 ```text
 AIOS/
 ├── server/
-│   ├── main/        # Main service :9501  HTTP / WS / Auth / Chat / Task / LLM
+│   ├── main/        # Main service :9502  HTTP / WS / Auth / Chat / Task / LLM
 │   │   ├── api/     # Route entry
 │   │   ├── ai/      # Agent loop + tool calling
 │   │   ├── llm/     # Provider / Input / Requester / Output pipelines
 │   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
 │   │   └── repository/  # SQLite access
-│   └── apps/        # Apps service :9502  each app brings its own backend
+│   └── apps/        # Apps service :9503  each app brings its own backend
 ├── gui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
 ├── apps/            # Per-app APP.md and shared assets
 ├── language/        # Localization sources
@@ -203,7 +203,7 @@ Issues and PRs welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) (WIP) b
 
 ## ❓ FAQ
 
-**Q: Ports 9501 / 9502 are taken — how do I change them?**
+**Q: Ports 9502 / 9503 are taken — how do I change them?**
 Set environment variables: `AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`.
 
 **Q: I forgot the access password.**

@@ -8,7 +8,7 @@ const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
 }
-const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9501;
+const PORT = portArg ? Number(portArg.slice("--port=".length)) : 9502;
 process.env.AIOS_MAIN_PORT = String(PORT);
 
 initSystemDirs();

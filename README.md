@@ -58,7 +58,7 @@ AIOS 是一个**完全本地运行**的 AI 工作台:
 |---|---|
 | 操作系统 | macOS 12+ / 主流 Linux 发行版 / Windows 10 1809+ |
 | Node.js | 20 或更高(脚本会自动安装) |
-| 端口 | `9501`(主服务)、`9502`(应用服务)、`5173`(开发模式 Vite) |
+| 端口 | `9502`(主服务)、`9503`(应用服务)、`5173`(开发模式 Vite) |
 | 磁盘 | ≥ 1 GB |
 
 ### 一键安装
@@ -102,7 +102,7 @@ rm -rf ~/.aios
 
 ## 🎬 第一次使用
 
-1. 打开 `http://localhost:9501`
+1. 打开 `http://localhost:9502`
 2. 设置一个访问密码(只在你本机使用)
 3. 进入「设置 → 模型」,填入任意一个 Provider 的 API Key
 4. 回到「Chat」开始对话 —— 告诉 AI "帮我做一个 XXX",它会通过 shell 写代码、起服务,把应用直接交付给你
@@ -143,13 +143,13 @@ rm -rf ~/.aios
 ```text
 AIOS/
 ├── server/
-│   ├── main/        # 主服务 :9501  HTTP / WS / Auth / Chat / Task / LLM
+│   ├── main/        # 主服务 :9502  HTTP / WS / Auth / Chat / Task / LLM
 │   │   ├── api/     # 路由入口
 │   │   ├── ai/      # Agent 执行循环 + 工具调用
 │   │   ├── llm/     # Provider / Input / Requester / Output 管线
 │   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
 │   │   └── repository/  # SQLite 数据访问
-│   └── apps/        # 应用服务 :9502  各 app 自带后端
+│   └── apps/        # 应用服务 :9503  各 app 自带后端
 ├── gui/             # Vue 3 前端 (Vite, Pinia, Tailwind v4)
 ├── apps/            # 各 app 的 APP.md 与共享资源
 ├── language/        # 多语言资源
@@ -208,7 +208,7 @@ npm run lang:reset
 
 ## ❓ FAQ
 
-**Q: 端口 9501 / 9502 被占用怎么办?**
+**Q: 端口 9502 / 9503 被占用怎么办?**
 通过环境变量覆盖:`AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`。
 
 **Q: 忘记访问密码?**

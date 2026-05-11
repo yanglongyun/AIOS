@@ -12,8 +12,8 @@ $ServerLog = Join-Path $LogDir "server.log"
 $AppsLog = Join-Path $LogDir "apps.log"
 $ServerPidFile = Join-Path $RunDir "server.pid"
 $AppsPidFile = Join-Path $RunDir "apps.pid"
-$ServerPort = if ($env:AIOS_SERVER_PORT) { [int]$env:AIOS_SERVER_PORT } else { 9501 }
-$AppsPort = if ($env:AIOS_APPS_PORT) { [int]$env:AIOS_APPS_PORT } else { 9502 }
+$ServerPort = if ($env:AIOS_SERVER_PORT) { [int]$env:AIOS_SERVER_PORT } else { 9502 }
+$AppsPort = if ($env:AIOS_APPS_PORT) { [int]$env:AIOS_APPS_PORT } else { 9503 }
 $NodeMajorRequired = 20
 
 function Write-Info([string]$Message) {

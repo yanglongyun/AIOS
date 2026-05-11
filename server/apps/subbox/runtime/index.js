@@ -8,7 +8,7 @@ let timer = null;
 let executing = false;
 
 const waitForMain = async (timeoutMs = 30000) => {
-  const port = process.env.AIOS_MAIN_PORT || 9501;
+  const port = process.env.AIOS_MAIN_PORT || 9502;
   const token = getApiToken();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const start = Date.now();

@@ -39,9 +39,9 @@ const shutdown = (code = 0) => {
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
 
-start("main", [join(ROOT, "server/main/index.js"), "--port=9501"], {
-  AIOS_APPS_PORT: "9502"
+start("main", [join(ROOT, "server/main/index.js"), "--port=9502"], {
+  AIOS_APPS_PORT: "9503"
 });
-start("apps", [join(ROOT, "server/apps/index.js"), "--port=9502"], {
-  AIOS_MAIN_PORT: "9501"
+start("apps", [join(ROOT, "server/apps/index.js"), "--port=9503"], {
+  AIOS_MAIN_PORT: "9502"
 });

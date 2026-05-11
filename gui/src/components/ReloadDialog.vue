@@ -72,8 +72,8 @@ const cancel = () => {
 
 const items = [
     { key: 'build', label: '重新构建前端', desc: '构建 gui/ 下的改动，生成 dist/', icon: markRaw(Hammer) },
-    { key: 'restartApps', label: '重启应用服务', desc: '重启 9502 端口，应用后端代码生效', icon: markRaw(LayoutGrid) },
-    { key: 'restartServer', label: '重启主服务', desc: '重启 9501 端口，主系统和 API 生效（中断当前任务）', icon: markRaw(AlertTriangle) },
+    { key: 'restartApps', label: '重启应用服务', desc: '重启 9503 端口，应用后端代码生效', icon: markRaw(LayoutGrid) },
+    { key: 'restartServer', label: '重启主服务', desc: '重启 9502 端口，主系统和 API 生效（中断当前任务）', icon: markRaw(AlertTriangle) },
 ];
 </script>
 

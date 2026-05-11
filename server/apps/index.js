@@ -6,7 +6,7 @@ const portArg = process.argv.find((arg) => arg.startsWith("--port="));
 if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
   throw new Error("Invalid port argument");
 }
-const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9502;
+const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9503;
 const APPS_HOST = "127.0.0.1";
 const moduleCache = /* @__PURE__ */ new Map();
 const appModules = [];

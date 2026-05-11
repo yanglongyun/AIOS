@@ -47,8 +47,8 @@ npm run dev
 
 `npm run dev` 会同时拉起:
 
-- 主服务 `:9501`
-- 应用服务 `:9502`
+- 主服务 `:9502`
+- 应用服务 `:9503`
 - Vite dev server `:5173`(GUI 改动热更新)
 
 打开 `http://localhost:5173` 开发,改后端代码需要手动重启对应进程。
@@ -107,7 +107,7 @@ AIOS 不用 vue-i18n / i18next,改用**构建时烘焙**(`scripts/start.mjs`)。
 
 - **默认直接写中文**,不要引入任何 i18n 库
 - 如果同一字符串需要随系统语言切换,写成 `__T_XXX__` token,并在 `language/zh/...json` 和 `language/en/...json` 里给值
-- 不要在 `AIOS/` 源码仓直接跑 `npm run dev` —— 会被防烘焙保护拦,改用 `AIOS-run` 运行副本
+- 不要在 `AIOS/` 源码仓直接跑 `npm run dev` —— 会被防烘焙保护拦,改用 `AIOS-test` 运行副本
 
 ---
 

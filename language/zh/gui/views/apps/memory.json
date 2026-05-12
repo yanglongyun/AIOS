@@ -31,7 +31,5 @@
   "memory_filter_empty": "这个分类下还没有内容",
 
   "memory_delete_confirm_prefix": "删除「",
-  "memory_delete_confirm_suffix": "」?此操作不可撤销",
-
-  "common_cancel": "取消"
+  "memory_delete_confirm_suffix": "」?此操作不可撤销"
 }

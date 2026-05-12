@@ -106,7 +106,7 @@ AIOS 不用 vue-i18n / i18next,改用**构建时烘焙**(`scripts/start.mjs`)。
 写新 app 时:
 
 - **默认直接写中文**,不要引入任何 i18n 库
-- 如果同一字符串需要随系统语言切换,写成 `__T_XXX__` token,并在 `language/zh/...json` 和 `language/en/...json` 里给值
+- 如果同一字符串需要随系统语言切换,写成 `__T_<KEY>__` token(`<KEY>` 大写,例如 `__T_COMMON_SAVE__`),并在 `language/zh/...json` 和 `language/en/...json` 里给值
 - 不要在 `AIOS/` 源码仓直接跑 `npm run dev` —— 会被防烘焙保护拦,改用 `AIOS-test` 运行副本
 
 ---

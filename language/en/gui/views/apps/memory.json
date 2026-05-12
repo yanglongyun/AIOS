@@ -31,7 +31,5 @@
   "memory_filter_empty": "Nothing here in this filter",
 
   "memory_delete_confirm_prefix": "Delete \"",
-  "memory_delete_confirm_suffix": "\"? This cannot be undone.",
-
-  "common_cancel": "Cancel"
+  "memory_delete_confirm_suffix": "\"? This cannot be undone."
 }

@@ -75,7 +75,9 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 60px; right: 12px;
   width: 360px; max-width: calc(100vw - 24px);
-  max-height: calc(100vh - 80px);
+  /* 100vh 在移动端是"大视口"(URL bar 折叠后),会比可视区高,导致面板
+     从屏幕底部溢出。100dvh 跟着实际可视高度走。 */
+  max-height: calc(100dvh - 80px);
   background: #ebeef5;
   border-radius: 28px;
   box-shadow: var(--shadow-3);
@@ -158,6 +160,8 @@ onBeforeUnmount(() => {
 @media (max-width: 720px) {
   .apps-popup {
     top: 56px; left: 8px; right: 8px; width: auto;
+    /* 移动端再为底部 home indicator 留出 env safe-area-inset-bottom */
+    max-height: calc(100dvh - 72px - env(safe-area-inset-bottom));
     border-radius: 24px;
   }
   .inner-card { border-radius: 18px; }

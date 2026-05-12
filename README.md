@@ -2,9 +2,12 @@
 
 # AIOS
 
-**AI 时代的操作系统**
+### 让 AI 成为你的操作系统。
 
-让 AI 成为你的操作系统,打造更紧密贴近你需求的原生应用,统一的 AI 内核,让应用也能和 AI 对话。
+完成你的日常任务,构建紧贴你需求、习惯、爱好的原生应用。
+通过 AI 任务系统,让你的应用也可以和 AI 对话。
+
+<br />
 
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-43853d.svg)](https://nodejs.org)
@@ -14,98 +17,188 @@
 
 [简体中文](./README.md) · [English](./README_en.md)
 
+[安装](#-安装) · [第一次使用](#-第一次使用) · [模型](#-支持的模型) · [内置应用](#-内置应用) · [架构](#-架构) · [社区](#-社区)
+
 <img src="https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp" alt="AIOS Screenshot" width="100%" />
 
 </div>
 
 ---
 
-## ✨ 它是什么
-
-AIOS 是一个**完全本地运行**的 AI 工作台:
-
-- 🗣 **对话即指令** — 用自然语言驱动你的电脑
-- 🧩 **23 个内置应用** — 笔记、记账、终端、文件、Claude Code、订阅箱、地球、文明、辩论台……
-- 🤖 **Agent 任务系统** — 应用可向系统下发 Task,AI 自主调度上下文与工具
-- 🏠 **数据完全自有** — 所有对话、笔记、配置都存在本地 SQLite
-- 🔌 **23+ 模型 Provider** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
-- 🎨 **创造应用是原生能力** — AIOS 的 AI 自带 shell,能写代码、起服务、调试,你描述需求,它把应用交付给你
-- 🌐 **AI 友好的 i18n** — 源码直接写自然语言,构建时一次性烘焙,生成应用的 AI 不必维护翻译
-
-> 不是又一个 LLM 前端 —— AIOS 的 AI 自带 shell 与系统级工具,既能驱动应用,也能为你写应用。
+> 要想了解它**为什么是 OS**、**根据是什么**、**能做什么**,以及**你要不要用它**,
+> 还是花几分钟,读一读下面的内容。
 
 ---
 
-## 📑 目录
+## 🧭 为什么是 OS?
 
-- [安装](#-安装)
-- [第一次使用](#-第一次使用)
-- [支持的模型](#-支持的模型)
-- [内置应用](#-内置应用)
-- [架构](#-架构)
-- [设计哲学](#-设计哲学)
-- [开发与贡献](#-开发与贡献)
-- [FAQ](#-faq)
-- [License](#-license)
+历史上,操作系统的每一次大迭代,都伴随着交互方式的根本变化。**新的交互范式,催生新的 OS。**
 
----
+现如今,**对话**正成为一种全新的交互范式 —— 自然、无门槛、能一次性表达复杂需求。这一波大模型浪潮,让"和机器说话"从科幻变成日常。
 
-## 🚀 安装
+**但,未来只有对话就够了吗?所有应用都消失了,只剩聊天框?**
 
-### 系统要求
+### 不能。
 
-| 项 | 要求 |
-|---|---|
-| 操作系统 | macOS 12+ / 主流 Linux 发行版 / Windows 10 1809+ |
-| Node.js | 20 或更高(脚本会自动安装) |
-| 端口 | `9502`(主服务)、`9503`(应用服务)、`5173`(开发模式 Vite) |
-| 磁盘 | ≥ 1 GB |
+就算是最简单的「记一条笔记」这件事,如果只有聊天框:
 
-### 一键安装
+- 滚动几屏,它就被刷走了
+- 没法归类,没法置顶
+- 没有「笔记应用」这种 app,你甚至想不起来要去记
 
-> ⚠️ 一键脚本会通过包管理器安装 Node、git、rsync,然后克隆并构建 AIOS。建议先[查看脚本](https://github.com/valueriver/AIOS/blob/main/install-macos.sh)再执行。
+如果换成一个真正的笔记应用:永远在那里,可以打开;有文件夹、有标签、有置顶;它甚至会主动在桌面上提醒你。
 
-**macOS**(自动装 Homebrew + Node@20)
-```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
-```
+所以,**对话与界面不是替代关系,是相辅相成**。在真正的 AI 操作系统里,图形界面与应用依然不可或缺。
 
-**Linux**(apt / dnf / yum / apk / pacman + NodeSource)
-```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
-```
-
-**Windows**(需要 winget,Win10 1809+ / Win11 自带)
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
-```
-
-### 手动安装
-
-```bash
-git clone https://github.com/valueriver/AIOS.git
-cd AIOS
-npm install
-npm run build
-npm run start:main &
-npm run start:apps
-```
-
-### 卸载
-
-默认安装目录是 `~/.aios`,直接删除即可:
-```bash
-rm -rf ~/.aios
-```
+> ✨ **未来不会流于无形,依然会留于物形。**
 
 ---
 
-## 🎬 第一次使用
+## 🧐 那现有的应用,有什么问题?
 
-1. 打开 `http://localhost:9502`
-2. 设置一个访问密码(只在你本机使用)
-3. 进入「设置 → 模型」,填入任意一个 Provider 的 API Key
-4. 回到「Chat」开始对话 —— 告诉 AI "帮我做一个 XXX",它会通过 shell 写代码、起服务,把应用直接交付给你
+问题是 —— **现在这些应用,都不是为你一个人准备的。**
+
+它们是为大众市场准备的,是需求的最大公约数:
+
+- 有广告、有会员、要登录注册
+- 更根本的是,**它们都不属于你**
+- 你的数据也不在你手里
+- 你拥有的只是使用权
+
+从前,软件制作是少数人的技能。这是整个软件行业存在的根本前提 —— 多数人没办法做软件,所以只能用少数人做出来的东西。
+
+而现在,AI 的编码能力越来越强,各大厂商都在疯狂卷的,恰好就是**编码**。这意味着——
+
+> 🛠 **软件构建的门槛正在极大降低。** 每一个普通人,都可以让 AI 替自己构建想要的东西。
+
+---
+
+## 🙋 真的会有很多人做自己的应用吗?
+
+### 会。
+
+也许你一开始不会意识到,但只要**真的试一次**,你就会上瘾。你会被模型气得跳脚,但你仍然会爱上它 —— 因为你喜欢自己构建出东西的感觉。
+
+你会享受这个过程,你的想法会不断显现,你会把你想要的东西**变成现实**。
+
+并且,这不是 Claude Artifacts、灵光闪应用那种**纯前端单页面**:
+
+> 🚀 它是真正的、有前端、有后端、有数据库的**全栈应用**。
+
+---
+
+## 💡 那 Codex / Claude Code 也能写代码,你和它们有什么不同?
+
+从技术原理上讲,没什么不同。
+
+但是现在,缺的不是技术,缺的是**意识、观念、方式** —— 你甚至可以说,缺的是一个**壳**、一个**包装**。
+
+不要小看这层包装。
+
+人类并不生活在原理的世界,而是生活在直观的感受里。**水是 H₂O,但没人喝水的时候会想着这个**;我们活在地球上,但宇宙对大多数人来说,是个非常遥远的东西。
+
+想到「其实」很容易,可是围绕我们生活的,是「其实」**前面**的东西。所以,要记住那句:
+
+> 💫 **Stay foolish.**
+
+让我们想象一下:如果哪一天,OpenAI 出了一台手机 —— 难道上面会只有一个聊天框吗?
+
+我想,大概率不会。**一定会有应用,并且你能够亲手打造应用,应用会和 AI 深度联通。**
+
+---
+
+## 🤖 让 AI 更自然地操作你的应用
+
+现在大多数应用和网页都没有面向 Agent 开发。所以在通用 Agent(Codex / Claude Code / 浏览器自动化工具)的世界里,AI 操作软件只能靠**模拟人**:
+
+```
+┌──────────────────────────────┐
+│  📸 截屏 → OCR → 找按钮坐标   │   慢、易错、靠模拟
+│  🌲 解析 DOM → 找元素        │
+│  🖱  鼠标点击 / 键盘输入      │
+└──────────────────────────────┘
+```
+
+在 AIOS 里就完全不一样:
+
+```
+┌──────────────────────────────┐
+│  📖 AI 读应用的 APP.md       │   快、准、原生
+│  🔧 直接调 API / 函数        │
+│  🗄  直接查数据库            │
+└──────────────────────────────┘
+```
+
+**因为应用本来就是 AI 写的,它当然知道怎么操作自己。** 每个应用都有自己的 `APP.md`,就像 Agent 的 skill 系统里每个 skill 都有 `SKILL.md` 一样。
+
+---
+
+## 💬 让你的应用也可以和 AI 对话
+
+上一节讲的是 AI 怎么操作应用。**但更关键的,是反方向 —— 让应用自己也能去找 AI 帮忙。**
+
+在传统应用里,代码逻辑是固定的:点这个按钮 → 触发这个函数 → 跳到那个页面。
+
+在 AIOS 里,应用可以把意图扔给系统,剩下的让 AI 自己想办法、自己挑工具、自己读历史、自己写完、自己回写数据库。
+
+### 🖋 举个例子:小说写作应用
+
+**传统写法**:开发者要在应用里写死一个「续写一章」的按钮 ——
+
+- 拼提示词
+- 调 OpenAI API
+- 自己处理流式
+- 自己处理错误
+- 自己处理重试
+
+如果以后想换模型,整套代码得跟着改。
+
+**AIOS 任务模式**:应用只发起一个任务:「结合前文,写下第 X 章,保持人设和文风」。
+
+**剩下的 AI 自己搞**。你在「任务」应用里能看到它的进度、中间产出、最终结果。
+
+系统提供两种任务模式:`POST /api/task/create/instant`(同步,适合短任务)和 `POST /api/task/create/agent`(异步,可调用工具的长任务)。
+
+> **应用不再是死板的 UI,而是一台台能调度 AI 的小机器人。**
+
+---
+
+## 🏪 那应用商店呢?会消失吗?
+
+### 也不会。
+
+即使在 AI 编码时代,人们依然需要**分享** —— 好的灵感、好的提示词、好的设计、好的工作流、好的成品。商店这件事永远有需求。
+
+只是**安装方式**会变。
+
+| 模式 | 传统商店 | AIOS 商店 |
+|---|---|---|
+| **形态** | 下载 .exe / .apk / .deb | AI 读源码 |
+| **结果** | 同一份二进制,所有人长得一样 | 融合进你的系统,适配你的习惯、你的偏好 |
+| **性质** | 安装 | **生长** 🌱 |
+
+这里面还有一个变化:**AIOS 商店的应用,都是开源的**。
+
+---
+
+## 🌟 AI 时代的操作系统
+
+这就是 AIOS —— AI 时代应该有 AI 时代的操作系统。
+
+它当然不是传统意义上用来管理硬件的 OS,但它是**产生应用、使用应用、管理应用**的地方。
+
+这样的产品,不能只称它为 App,也不能只称它为网站。
+
+**它就是 OS。**
+
+### 发行版
+
+AIOS 作为通用内核,可以被定制成主题化的发行版,服务不同用户群体:
+
+| 发行版 | 面向 | 主要差异 |
+|---|---|---|
+| **AIOS**(本仓库) | 全球开发者、多语言用户 | 多语言、23+ 模型 Provider、23 内置应用全集 |
+| [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | 中文 DeepSeek 用户 | 只支持中文、DeepSeek 默认、精简到 6 核心应用 |
 
 ---
 
@@ -119,22 +212,117 @@ rm -rf ~/.aios
 | Coding Plan | GLM-Coding · 阿里云百炼 · 火山方舟 · 腾讯混元 · 京东云 · Kimi-Coding |
 | 自定义 | 任意 OpenAI 兼容接口 |
 
-支持流式输出、Tool Calling、reasoning content。
+流式输出、Tool Calling、reasoning content 在各家上都通。
 
 ---
 
 ## 📦 内置应用
 
-<!-- TODO: 用一张应用网格截图替换下表,视觉冲击更强 -->
+AIOS 默认预装 **23 个内置应用**,其他都由你和 AI 在对话里现场生成。
 
 | 类别 | 应用 |
 |---|---|
-| 系统 | Chat · Tasks · Settings |
-| 工作 | 笔记本 · 记账本 · 文件 · 终端 · Claude Code · 系统状态 |
-| 信息 | 订阅箱 · GH 热榜 · Hacker News · RSS 阅读 |
-| 实验 | 老手机 · 算一卦 · 虚拟伴侣 · 炸金花 · 藏宝阁 · 辩论台 · 地球 · 文明 · 炒币机 · 记忆 |
+| **系统** | Chat · Tasks · Settings |
+| **工作** | 笔记本 · 记账本 · 文件 · 终端 · Claude Code · 系统状态 |
+| **信息** | 订阅箱 · GH 热榜 · Hacker News · RSS 阅读 |
+| **实验** | 老手机 · 算一卦 · 虚拟伴侣 · 炸金花 · 藏宝阁 · 辩论台 · 地球 · 文明 · 炒币机 · 记忆 |
 
-应用本身可以向系统下发 Task,让 AI 主动接管复杂逻辑,而不是只做一次性的 API 调用。
+要更多?点应用面板右上角「**创建应用**」,跟 AI 描述一句需求,30 秒后它真的把新应用写进你的系统里。
+
+---
+
+## 🎯 几个值得一提的细节
+
+### 🚀 一句话写应用
+
+不只是聊天,系统在后台真的会编写 Vue 3 前端 + Node.js 后端 + SQLite 表结构,自己装、自己注册、自己改 bug。
+
+### 🧠 零成本的长对话记忆
+
+对话太长模型会忘前文。常规方案要么 RAG 召回(贵),要么定期跑总结 worker(慢)。
+
+我们的做法是:**让 AI 在每次回答末尾自己写本轮要点**,前端流式过滤器实时剥掉(你看不见),服务端入库。下次对话需要时自动注入回 system prompt。
+
+> **零额外 LLM 调用,零延迟,零后台 worker。**
+
+### 🌐 AI 友好的 i18n
+
+不用 vue-i18n / i18next,改用**构建时烘焙**(`scripts/start.mjs`)。源码直接写自然语言或 `__T_XXX__` token,构建时一次性替换成目标语言。AI 生成新应用时不必维护 `t()`、不必同步翻译 JSON —— 给 AI 减负。
+
+### 🔒 数据 100% 本地
+
+所有对话、文件、应用代码,全在你电脑上的一个 SQLite 文件 `database/aios.db` 里。断网也能用,关掉浏览器什么都不会上传。
+
+---
+
+## 🚀 安装
+
+### 系统要求
+
+| 项 | 要求 |
+|---|---|
+| OS | macOS 12+ / 主流 Linux / Windows 10 1809+ |
+| Node.js | 20+(一键脚本会装) |
+| 端口 | `9502` 主服务 / `9503` 应用服务 |
+| 磁盘 | ≥ 1 GB |
+
+### 一键安装
+
+> ⚠️ 脚本会通过包管理器装 Node / git / rsync,再克隆并构建 AIOS。先[看一眼脚本](https://github.com/valueriver/AIOS/blob/main/install-macos.sh)再执行。
+
+<details>
+<summary><b>🍎 macOS</b></summary>
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
+```
+自动装 Homebrew + Node@20。
+</details>
+
+<details>
+<summary><b>🐧 Linux</b></summary>
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
+```
+支持 apt / dnf / yum / apk / pacman + NodeSource。
+</details>
+
+<details>
+<summary><b>🪟 Windows</b></summary>
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
+```
+需要 winget(Win10 1809+ / Win11 自带)。
+</details>
+
+装好后浏览器访问 **`http://localhost:9502`**。
+
+### 手动安装
+
+```bash
+git clone https://github.com/valueriver/AIOS.git
+cd AIOS
+npm install
+npm run build && npm start
+```
+
+### 卸载
+
+```bash
+rm -rf ~/.aios   # 一键安装产物全部在这里
+```
+
+---
+
+## 🎬 第一次使用
+
+1. **打开浏览器** → `http://localhost:9502`
+2. **设个本机访问密码**(只挡浏览器,不上传)
+3. **进「设置 → 模型」**,挑一个 Provider,填 API Key
+4. **回到「Chat」**,试试:
+   > 「帮我做一个番茄钟,左边大字显示倒计时,右边记录今天完成的几个 25 分钟」
 
 ---
 
@@ -143,39 +331,44 @@ rm -rf ~/.aios
 ```text
 AIOS/
 ├── server/
-│   ├── main/        # 主服务 :9502  HTTP / WS / Auth / Chat / Task / LLM
-│   │   ├── api/     # 路由入口
-│   │   ├── ai/      # Agent 执行循环 + 工具调用
-│   │   ├── llm/     # Provider / Input / Requester / Output 管线
-│   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
-│   │   └── repository/  # SQLite 数据访问
-│   └── apps/        # 应用服务 :9503  各 app 自带后端
-├── gui/             # Vue 3 前端 (Vite, Pinia, Tailwind v4)
-├── apps/            # 各 app 的 APP.md 与共享资源
-├── language/        # 多语言资源
-└── scripts/         # 启动 / 构建 / 修复脚本
+│   ├── main/           # 主服务 :9502   HTTP / WS / Auth / Chat / Task / LLM
+│   │   ├── api/        # 路由入口
+│   │   ├── ai/         # Agent 执行循环 + 工具调用
+│   │   ├── llm/        # Provider / Input normalizer / Requester / Output parser
+│   │   ├── service/    # Auth / Chat / Task / Prompt / Runtime / Settings
+│   │   └── repository/ # SQLite 数据访问
+│   └── apps/           # 应用服务 :9503  各 app 自带后端
+├── gui/                # Vue 3 + Vite + Pinia + Tailwind v4 前端
+├── apps/               # 每个 app 的 APP.md 与共享资源
+├── language/           # 多语言资源(烘焙源)
+└── scripts/            # 启动 / 构建 / 修复脚本
 ```
 
 **技术栈**:Node.js 20 · Vue 3 · Vite 7 · better-sqlite3 · Tailwind v4 · ws · node-pty · xterm.js
 
-数据存放:本地单文件 SQLite (`database/aios.db`),完全可备份与迁移。
+**数据**:全部在本地单文件 `database/aios.db`,可备份、可迁移、可一键清空。
 
 ---
 
-## 💡 设计哲学
+## 🛠 开发与贡献
 
-> **未来不会流于无形,依然会留于物形。**
+```bash
+git clone https://github.com/valueriver/AIOS.git
+cd AIOS
+npm install
 
-AIOS 相信四件事:
+npm run dev                    # 开发模式(主服务 + 应用服务 + Vite dev 热更新)
+npm run build && npm start     # 生产构建 + 启动
+npm run lang:reset             # 重置语言烘焙缓存(切语言时用)
+```
 
-1. **对话**是新的人机交互范式 —— 简单、高效、自带上下文。
-2. **界面**依然不可或缺 —— 形态即功能,聊天窗口装不下日历、账本、阅读器。
-3. **每个人都该有专属软件** —— 当代码由 AI 生成,软件不再属于开发者,属于使用它的人。
-4. **AI 与 App 双向调用** —— App 不只是 AI 的展示层,App 也能向底层 AI 下发 Task,让系统接管复杂逻辑。
+提交规范、应用开发约定详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。欢迎提 Issue 和 PR。
 
-完整版:[在 iimos.ai 阅读 →](https://iimos.ai/philosophy)
+---
 
-更多关于 AIOS 的产品思考:
+## 📚 进一步阅读
+
+关于 AIOS 的产品思考:
 
 - [AIOS——AI 时代的操作系统](https://iimos.ai/blog/aios-open-source-launch)
 - [Agent OS kernel + Agent-native Apps = AIOS](https://iimos.ai/blog/agent-os-kernel-and-apps)
@@ -184,47 +377,65 @@ AIOS 相信四件事:
 - [软件行业将迎来深刻改变](https://iimos.ai/blog/software-industry-deep-shift)
 - [苹果并不知道如何打造 AI 时代的操作系统](https://iimos.ai/blog/apple-misses-ai-os)
 - [关于用户不知道做什么应用](https://iimos.ai/blog/users-dont-know-what-to-build)
-- [更多文章 →](https://iimos.ai/blog)
-
----
-
-## 🛠 开发与贡献
-
-```bash
-# 开发模式(主服务 + 应用服务 + Vite dev)
-npm run dev
-
-# 仅启动后端
-npm run start:main &
-npm run start:apps
-
-# 重置语言烘焙缓存
-npm run lang:reset
-```
-
-欢迎提 Issue 和 PR。提交前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)(WIP)。
+- [完整哲学版](https://iimos.ai/philosophy) · [更多文章 →](https://iimos.ai/blog)
 
 ---
 
 ## ❓ FAQ
 
-**Q: 端口 9502 / 9503 被占用怎么办?**
-通过环境变量覆盖:`AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`。
+<details>
+<summary><b>端口 9502 / 9503 被占用怎么办?</b></summary>
 
-**Q: 忘记访问密码?**
-删除 `database/aios.db` 中的 `auth` 表记录,或重置整个数据库后重新引导。
+```bash
+AIOS_MAIN_PORT=9601 AIOS_APPS_PORT=9602 npm start
+```
+</details>
 
-**Q: 数据存在哪里?**
-默认 `~/.aios/app/database/aios.db`(一键安装)或仓库 `database/` 目录下(手动安装)。
+<details>
+<summary><b>忘记访问密码?</b></summary>
 
-**Q: `node-pty` 编译失败?**
-脚本会自动尝试修复 (`scripts/fix-node-pty.js`),仍然失败请确认本机有 C++ 编译工具链。
+```bash
+sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"
+```
+下次访问会重新引导你设置。
+</details>
 
-**Q: 为什么是「语言烘焙」而不是运行时 i18n?**
-AIOS 的核心场景是 AI 生成应用,运行时 i18n 会强迫 AI 在每次写代码时同步多份翻译,这是会复利的认知税。烘焙机制让源码用自然语言,构建时一次性替换成目标语言,代价是每次切语言要重跑 `scripts/start.mjs`(已烘焙缓存命中 < 10ms)。
+<details>
+<summary><b>数据存在哪?</b></summary>
 
-**Q: 和 Open WebUI / LibreChat / LobeChat 有什么区别?**
-那些项目主要是 LLM 聊天前端;AIOS 是带 AI 原生应用和 Agent 任务系统的**本地操作系统**,Chat 只是其中一个入口。
+- 一键安装:`~/.aios/app/database/aios.db`
+- 手动安装:仓库 `database/aios.db`
+
+整个 OS 的状态都在这一个文件里 —— 拷走就能迁移,删掉就能重置。
+</details>
+
+<details>
+<summary><b><code>node-pty</code> 编译失败?</b></summary>
+
+`postinstall` 会自动跑 `scripts/fix-node-pty.js` 尝试修复。仍然失败的话,检查本机 C++ 工具链:
+
+- macOS: `xcode-select --install`
+- Linux: `apt install build-essential`(或对应发行版的等价包)
+- Windows: `npm install --global windows-build-tools`
+</details>
+
+<details>
+<summary><b>为什么是「语言烘焙」而不是运行时 i18n?</b></summary>
+
+AIOS 的核心场景是 AI 生成应用。运行时 i18n 会强迫 AI 每次写代码时同步多份翻译,这是会复利的认知税。烘焙机制让源码用自然语言,构建时一次性替换成目标语言,代价是每次切语言要重跑 `scripts/start.mjs`(已烘焙缓存命中 < 10ms)。
+</details>
+
+<details>
+<summary><b>和 Open WebUI / LibreChat / LobeChat 有什么区别?</b></summary>
+
+那些是 **LLM 聊天前端**。AIOS 是带原生应用、Agent 任务系统和"AI 自己写应用"能力的**本地操作系统** —— 对话只是其中一个入口。
+</details>
+
+<details>
+<summary><b>为什么不用 Electron / Tauri?</b></summary>
+
+就是个 Web 应用 + 两个 Node 进程,浏览器即客户端。你能用任何浏览器、甚至通过 SSH 隧道远程访问。不需要打包成桌面 app。
+</details>
 
 ---
 
@@ -236,6 +447,15 @@ AIOS 的核心场景是 AI 生成应用,运行时 i18n 会强迫 AI 在每次写
 
 ## 💬 社区
 
+<div align="center">
+
 [![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
+[![Issues](https://img.shields.io/badge/反馈-GitHub%20Issues-181717?logo=github&logoColor=white)](https://github.com/valueriver/AIOS/issues)
 
 有任何想法、bug、AI 原生应用实践都欢迎来聊。
+
+<br />
+
+**未来不会流于无形,依然会留于物形。** 🌱
+
+</div>

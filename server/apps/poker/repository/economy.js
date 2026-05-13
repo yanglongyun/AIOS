@@ -1,10 +1,14 @@
 import { db } from "./client.js";
 const setPokerBalances = ({ playerBalance, aiBalance }) => {
-  const tx = db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     db.prepare(`UPDATE poker_accounts SET balance = ? WHERE role = 'player'`).run(Math.max(0, Number(playerBalance || 0)));
     db.prepare(`UPDATE poker_accounts SET balance = ? WHERE role = 'ai'`).run(Math.max(0, Number(aiBalance || 0)));
-  });
-  tx();
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
 };
 const getPokerEconomy = () => {
   const player = db.prepare(`SELECT balance FROM poker_accounts WHERE role = 'player'`).get() || { balance: 0 };

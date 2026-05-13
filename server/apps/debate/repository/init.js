@@ -77,11 +77,15 @@ export const initDebateDatabase = () => {
         name, candidate_name, policy, logo, support_rate, difficulty, win_count, lang
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const tx = db.transaction(() => {
+    db.exec("BEGIN");
+    try {
       for (const p of DEFAULT_PARTIES) {
         stmt.run(p.name, p.candidate_name, p.policy, p.logo, p.support_rate, p.difficulty, p.win_count, p.lang);
       }
-    });
-    tx();
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
   }
 };

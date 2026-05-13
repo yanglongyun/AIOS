@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
 
 const props = defineProps({
   externalError: { type: String, default: '' }
@@ -78,11 +78,11 @@ const submit = async () => {
   <div class="relative flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden
               bg-gradient-to-b from-pink-50/80 to-white/90">
 
-    <!-- 顶栏: 全宽, brand 贴左, AppsTrigger 贴右, 与其他 app 一致 -->
+    <!-- 顶栏: 全宽, brand 贴左, AppHub 贴右, 与其他 app 一致 -->
     <header class="flex-none h-14 px-4 flex items-center justify-between gap-3
                    bg-white/75 backdrop-blur-md backdrop-saturate-150">
       <h1 class="text-base font-semibold text-gray-900 truncate">建立你的虚拟伴侣</h1>
-      <AppsTrigger />
+      <AppHub />
     </header>
 
     <!-- 滚动主区 -->

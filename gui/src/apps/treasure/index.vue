@@ -1,9 +1,8 @@
 <script setup>
 import { computed, onActivated, onMounted, ref } from 'vue';
 import * as api from '@/utils/api.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
-import { Camera, LoaderCircle, Trash2, X, ArrowDownAZ, Coins } from 'lucide-vue-next';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 const fileInput = ref(null);
 const loading = ref(false);
@@ -13,8 +12,8 @@ const totalWealth = ref(0);
 const detailItem = ref(null);
 const sortBy = ref('latest');
 const sortOptions = [
-  { key: 'latest', label: '最新', icon: ArrowDownAZ },
-  { key: 'value',  label: '最贵', icon: Coins }
+  { key: 'latest', label: '最新', icon: 'sort_by_alpha' },
+  { key: 'value',  label: '最贵', icon: 'paid' }
 ];
 
 const sortedItems = computed(() => {
@@ -113,8 +112,8 @@ onActivated(loadItems);
         <span class="name">藏宝阁</span>
       </div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 
@@ -127,8 +126,8 @@ onActivated(loadItems);
             <p class="hero-sub">已陪伴你 {{ daysSinceFirst }} 天</p>
           </div>
           <button class="appraise-btn" @click="pickImage" :disabled="loading">
-            <LoaderCircle v-if="loading" class="spin" :size="16" />
-            <Camera v-else :size="16" />
+            <span v-if="loading" class="msi xxs spin">progress_activity</span>
+            <span v-else class="msi xxs">photo_camera</span>
             <span>{{ loading ? '鉴宝中…' : '鉴宝入库' }}</span>
           </button>
           <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden-input" @change="onFileChange" />
@@ -154,7 +153,7 @@ onActivated(loadItems);
                     class="sort-btn"
                     :class="{ active: sortBy === s.key }"
                     @click="sortBy = s.key">
-              <component :is="s.icon" :size="13" />
+              <span class="msi xxs">{{ s.icon }}</span>
               <span>{{ s.label }}</span>
             </button>
           </div>
@@ -206,10 +205,10 @@ onActivated(loadItems);
           </blockquote>
           <div class="drawer-actions">
             <button class="btn-ghost" @click="detailItem = null">
-              <X :size="14" /><span>关闭</span>
+              <span class="msi xxs">close</span><span>关闭</span>
             </button>
             <button class="btn-danger" @click="removeFromDetail">
-              <Trash2 :size="14" /><span>逐出宝阁</span>
+              <span class="msi xxs">delete</span><span>逐出宝阁</span>
             </button>
           </div>
         </div>

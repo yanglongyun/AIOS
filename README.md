@@ -344,7 +344,7 @@ AIOS/
 └── scripts/            # 启动 / 构建 / 修复脚本
 ```
 
-**技术栈**:Node.js 20 · Vue 3 · Vite 7 · better-sqlite3 · Tailwind v4 · ws · node-pty · xterm.js
+**技术栈**:Node.js 22 · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
 
 **数据**:全部在本地单文件 `database/aios.db`,可备份、可迁移、可一键清空。
 

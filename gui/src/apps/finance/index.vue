@@ -5,8 +5,8 @@
       <span class="left-spacer"></span>
       <div class="brand"><span class="name">记账本</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
     <!-- 书脊与内页之间的金属订线 -->
@@ -48,14 +48,13 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watchEffect } from 'vue';
-import { useI18n } from '../_shared/i18n.js';
+import { LOCALE_FULL } from '@/system/locale.js';
 import { useAppContext } from '@/stores/appContext.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import FinanceHeader from './FinanceHeader.vue';
 import FinanceLedgerTable from './FinanceLedgerTable.vue';
 
-const { locale, t } = useI18n();
 const API_BASE = '/apps/finance';
 
 const now = new Date();
@@ -94,7 +93,7 @@ const endingBalance = computed(() => totalIncome.value - totalExpense.value);
 
 const fmtAmt = (n) => {
   const v = Number(n) || 0;
-  return v.toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return v.toLocaleString(LOCALE_FULL, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const fmtDate = (dateStr) => {
@@ -241,9 +240,9 @@ const stopAppCtx = watchEffect(() => {
       `共 ${items.value.length} 条记录,本月收入 ¥${fmtAmt(totalIncome.value)},支出 ¥${fmtAmt(totalExpense.value)},结余 ¥${fmtAmt(endingBalance.value)}.`
     ].join('\n'),
     prompts: [
-      { label: t('finance_chat_quick_1'), text: t('finance_chat_quick_1') },
-      { label: t('finance_chat_quick_2'), text: t('finance_chat_quick_2') },
-      { label: t('finance_chat_quick_3'), text: t('finance_chat_quick_3') }
+      { label: '__T_FINANCE_CHAT_QUICK_1__', text: '__T_FINANCE_CHAT_QUICK_1__' },
+      { label: '__T_FINANCE_CHAT_QUICK_2__', text: '__T_FINANCE_CHAT_QUICK_2__' },
+      { label: '__T_FINANCE_CHAT_QUICK_3__', text: '__T_FINANCE_CHAT_QUICK_3__' }
     ]
   });
 });

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { Sprout, Eye, EyeOff, Loader2 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
 import * as api from '@/utils/api';
 
@@ -22,7 +21,7 @@ const language = ref(savedLanguage || 'zh');
 const COPY = {
     zh: {
         heroTitle: 'AI 时代的操作系统',
-        heroLead: '完成各种任务,打造你的专属智能应用,构建你和 AI 的数智小宇宙。',
+        heroLead: '你说,它做。从一句话到一个应用,这是你和 AI 共同生活的桌面。',
         title: '欢迎使用 AIOS',
         sub: '为这台机器设置一个登录密码,然后开始使用。',
         passwordPlaceholder: '密码 (至少 8 位)',
@@ -41,14 +40,14 @@ const COPY = {
         en: 'English',
         applying: '正在应用语言,系统即将重启…',
         pillars: [
-            { t: '未来留于物形', d: '在 AI 时代,图形界面的交互方式依然不可或缺,它将成为人们与 AI 互动的重要方式。' },
-            { t: '让软件真正走向每一个人', d: '在 AIOS 中,你可以在对话中让 AI 为你生成更贴近你的需求、符合你的习惯和审美的应用。' },
-            { t: '应用也可以和 AI 对话', d: '在 AIOS 中,应用可以直接向统一的 AI 内核派发智能任务,完成从前的应用做不到的事。' }
+            { t: '未来留于物形', d: '对话驱动,界面承载。AI 的能力,最终化为你看得见、用得着的形态。' },
+            { t: '让软件真正走向每一个人', d: '告诉 AI 你想要什么,应用就在对话中诞生——为你而写,只属于你。' },
+            { t: '应用也可以和 AI 对话', d: '每个应用都能调用 AI 的智慧,不再是孤立的工具,而是懂你的搭档。' }
         ]
     },
     en: {
         heroTitle: 'An operating system for the AI era',
-        heroLead: 'Get things done, craft apps that are truly yours, and build a little universe shared by you and AI.',
+        heroLead: 'You speak, it builds. From a single sentence to a living app — a desktop you share with AI.',
         title: 'Welcome to AIOS',
         sub: 'Set a password for this machine, then start using AIOS.',
         passwordPlaceholder: 'Password (at least 8 characters)',
@@ -67,9 +66,9 @@ const COPY = {
         en: 'English',
         applying: 'Applying language. AIOS will restart…',
         pillars: [
-            { t: 'The future takes form', d: 'In the AI era, graphical interfaces remain essential — they will be a primary way people interact with AI.' },
-            { t: 'Software, finally for everyone', d: 'In AIOS, just chat — and AI generates apps that fit your needs, habits and taste.' },
-            { t: 'Apps can talk to AI too', d: 'In AIOS, apps can dispatch intelligent tasks to the unified AI kernel — doing things ordinary apps simply could not.' }
+            { t: 'The future takes form', d: 'Conversations drive it, interfaces carry it. AI\'s power becomes something you can see and use.' },
+            { t: 'Software, finally for everyone', d: 'Tell AI what you need and an app is born from the conversation — written for you, yours alone.' },
+            { t: 'Apps can talk to AI too', d: 'Every app can tap into AI\'s intelligence — no longer isolated tools, but partners that understand you.' }
         ]
     }
 };
@@ -169,7 +168,7 @@ onMounted(async () => {
                 <!-- 品牌行 -->
                 <div class="flex items-center gap-3.5">
                     <div class="grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_8px_22px_-10px_rgba(52,168,83,0.7)]">
-                        <Sprout :size="22" :stroke-width="1.8" />
+                        <span class="msi" style="font-size:22px">eco</span>
                     </div>
                     <div class="text-[22px] font-bold tracking-tight text-[#f5f7fb]">
                         AIOS<span class="text-[#6dd49b]">.</span>
@@ -245,7 +244,7 @@ onMounted(async () => {
                                 class="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-elev hover:text-ink"
                                 @click="showPassword = !showPassword"
                                 :title="showPassword ? t.hide : t.show">
-                                <component :is="showPassword ? EyeOff : Eye" :size="16" :stroke-width="1.8" />
+                                <span class="msi xxs">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
                             </button>
                         </span>
                     </label>
@@ -266,7 +265,7 @@ onMounted(async () => {
                     <!-- 状态条:语言烘焙中 -->
                     <div v-if="applyingLanguage"
                          class="flex items-center gap-2 rounded-[10px] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] px-3 py-2.5 text-[13px] text-blue-fg">
-                        <Loader2 :size="15" :stroke-width="1.8" class="animate-spin" />
+                        <span class="msi xxs animate-spin">progress_activity</span>
                         <span>{{ t.applying }}</span>
                     </div>
 

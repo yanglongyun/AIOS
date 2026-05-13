@@ -3,15 +3,15 @@
     <header class="topbar">
       <div class="brand"><span class="name">banana</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
     <div class="banana-stage flex flex-1 min-h-0 w-full items-center justify-center overflow-hidden bg-[#c8bcac] bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_2px,transparent_2px,transparent_8px)] font-['PingFang_SC','Microsoft_YaHei',sans-serif] text-[#3e3223]">
     <div class="relative flex max-h-[calc(100%-32px)] w-[280px] flex-col overflow-hidden rounded-[20px] border border-[#ddd6ce] bg-[#eeebe6] p-[14px] shadow-[inset_0_4px_6px_rgba(255,255,255,0.9),inset_0_-4px_6px_rgba(0,0,0,0.06),0_20px_40px_rgba(80,60,40,0.25),0_6px_12px_rgba(80,60,40,0.12)]">
       <div class="mb-3 flex flex-col items-center">
         <div class="earpiece"></div>
-        <div class="font-['Pacifico',cursive] text-[22px] tracking-[2px] text-[#8a7a62] [text-shadow:0_2px_0_rgba(255,255,255,0.6),0_-1px_0_rgba(0,0,0,0.1)]">banana</div>
+        <div class="font-semibold text-[22px] tracking-[2px] text-[#8a7a62] [text-shadow:0_2px_0_rgba(255,255,255,0.6),0_-1px_0_rgba(0,0,0,0.1)]">banana</div>
       </div>
       <BananaScreen
         :is-loading="isLoading"
@@ -36,8 +36,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { LOCALE } from '@/system/locale.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import BananaControls from './BananaControls.vue';
 import BananaScreen from './BananaScreen.vue';
 
@@ -257,8 +257,6 @@ BAD examples (DON'T DO ANY OF THESE):
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-
 .app-frame { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
 
 /* ── 顶栏: 像门店上方的发光招牌, 暖白灯箱面板悬挂在展台上方 ── */
@@ -302,7 +300,7 @@ BAD examples (DON'T DO ANY OF THESE):
   padding-top: 4px;   /* 给上方的铆钉留点呼吸 */
 }
 .app-frame .topbar .brand .name {
-  font-family: 'Pacifico', cursive;
+  font-family: ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
   font-size: 30px;
   letter-spacing: 1.5px;
   /* 蛋黄→琥珀渐变填字, 像霓虹笔写出来的店招 */

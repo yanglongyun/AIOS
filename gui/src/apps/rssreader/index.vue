@@ -7,8 +7,8 @@
       </button>
       <div class="brand"><span class="name">RSS 阅读</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 
@@ -214,8 +214,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { marked } from 'marked';
 import { LOCALE } from '@/system/locale.js';
 import { useViewStore } from '@/stores/view.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (t) => marked.parse(t || '');

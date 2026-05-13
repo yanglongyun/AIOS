@@ -2,8 +2,8 @@
 import { computed, onActivated, onMounted, ref, watch } from 'vue';
 import * as api from '@/utils/api.js';
 import { useAuthStore } from '@/stores/auth.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 const auth = useAuthStore();
 
@@ -171,8 +171,8 @@ onActivated(() => loadAll());
       <span class="left-spacer"></span>
       <div class="brand"><span class="name">__T_SETTINGS_TITLE__</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
     <div class="settings-shell">

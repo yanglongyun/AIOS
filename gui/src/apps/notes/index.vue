@@ -7,8 +7,8 @@
 // Editor     全屏编辑器(自动保存防抖在父级实现)
 
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import * as nt from './api.js';
 
 import ListPane from './ListPane.vue';
@@ -139,8 +139,8 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="ml-auto flex items-center gap-1">
-                <ChatTrigger />
-                <AppsTrigger />
+                <AskAI />
+                <AppHub />
             </div>
         </header>
 

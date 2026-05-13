@@ -1,6 +1,6 @@
 <script setup>
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 </script>
 
 <template>
@@ -10,8 +10,8 @@ import ChatTrigger from '@/components/ChatTrigger.vue';
             __T_APP_SYSINFO__
         </div>
         <div class="ml-auto flex items-center gap-1">
-            <ChatTrigger />
-            <AppsTrigger />
+            <AskAI />
+            <AppHub />
         </div>
     </header>
 </template>

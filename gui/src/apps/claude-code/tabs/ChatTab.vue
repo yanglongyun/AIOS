@@ -35,7 +35,7 @@
                     style="background:rgba(160,120,80,0.05)"
                     @click="toggleToolExpanded(m.key)"
                   >
-                    <ChevronRight class="mt-0.5 h-3 w-3 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)" />
+                    <span class="msi xxs mt-0.5 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)">chevron_right</span>
                     <div class="min-w-0 flex flex-1 items-center gap-2">
                       <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.summary || m.toolName }}</div>
                       <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
@@ -91,7 +91,7 @@
                   @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.8)'"
                   @click="startEditPath"
                   title="__T_CLAUDE_CHAT_EDIT_CWD__">
-                  <FolderOpen class="h-3.5 w-3.5 shrink-0" />
+                  <span class="msi xxs shrink-0">folder_open</span>
                   <span class="cc-mono truncate">{{ cwd }}</span>
                 </button>
                 <input v-else
@@ -105,7 +105,7 @@
               </template>
               <template v-else>
                 <div class="inline-flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs" style="color:rgba(160,120,80,0.6);max-width:420px">
-                  <FolderOpen class="h-3.5 w-3.5 shrink-0" />
+                  <span class="msi xxs shrink-0">folder_open</span>
                   <span class="cc-mono truncate">{{ currentSession?.cwd }}</span>
                 </div>
               </template>
@@ -147,13 +147,13 @@
               <button v-if="busy" type="button"
                 class="flex h-[34px] w-[34px] items-center justify-center rounded-full border-none text-white"
                 style="background:#5c4332" @click="abortStream">
-                <Square class="h-3.5 w-3.5 fill-current" />
+                <span class="msi xs">stop</span>
               </button>
               <button v-else type="submit"
                 :disabled="!canSend"
                 class="flex h-[34px] w-[34px] items-center justify-center rounded-full border transition-all"
                 :style="canSend ? 'cursor:pointer;border-color:transparent;background:#5c4332;color:#fff;box-shadow:0 2px 8px rgba(92,67,50,0.3)' : 'cursor:default;border-color:rgba(160,120,80,0.2);background:rgba(160,120,80,0.06);color:rgba(160,120,80,0.35)'">
-                <ArrowUp class="h-4 w-4" />
+                <span class="msi xs">arrow_upward</span>
               </button>
             </div>
           </form>
@@ -173,7 +173,6 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { marked } from 'marked';
-import { ArrowUp, ChevronRight, FolderOpen, Square } from 'lucide-vue-next';
 import DirectoryPicker from '../../../components/DirectoryPicker.vue';
 
 marked.setOptions({ breaks: true, gfm: true });

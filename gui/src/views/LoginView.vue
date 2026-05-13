@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { Sprout, Eye, EyeOff } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
 
 // 这个组件只在已经设置过密码后使用,所以走烘焙占位符。
@@ -69,7 +68,7 @@ onMounted(async () => {
             <!-- 品牌区 -->
             <div class="mb-[22px] flex flex-col items-center">
                 <div class="grid h-14 w-14 place-items-center rounded-[18px] bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_14px_40px_-16px_rgba(52,168,83,0.85)]">
-                    <Sprout :size="28" :stroke-width="1.7" />
+                    <span class="msi" style="font-size:28px">eco</span>
                 </div>
                 <div class="mt-[14px] text-[26px] font-bold tracking-tight text-ink">
                     AIOS<span class="text-[#34a853]">.</span>
@@ -96,7 +95,7 @@ onMounted(async () => {
                         class="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-elev hover:text-ink"
                         @click="showPassword = !showPassword"
                         :title="showPassword ? '__T_LOGIN_HIDE__' : '__T_LOGIN_SHOW__'">
-                        <component :is="showPassword ? EyeOff : Eye" :size="16" :stroke-width="1.8" />
+                        <span class="msi xxs">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
                     </button>
                 </label>
 

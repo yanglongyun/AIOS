@@ -18,7 +18,7 @@
           @input="$emit('update:editorDraft', $event.target.value)"
           class="absolute inset-0 resize-none border-none bg-transparent pb-4 pl-[55px] pr-4 pt-[50px] font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-lg leading-[30px] tracking-wide outline-none placeholder:italic placeholder:opacity-30"
           :class="cardStyle(editorStyle).inkCls"
-          :placeholder="t('notebook_editor_placeholder')"
+          placeholder="__T_NOTEBOOK_EDITOR_PLACEHOLDER__"
           spellcheck="false"
         ></textarea>
       </div>
@@ -27,26 +27,26 @@
         <div class="ai-drawer overflow-hidden" :class="{ show: aiDrawerOpen }">
           <div class="ai-well mx-3 mt-2.5 flex flex-col overflow-hidden rounded">
             <div class="flex items-center border-b border-white/5 px-2.5 py-1.5">
-              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">{{ t('notebook_ai_polish') }}</div>
+              <div class="ai-tag flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-[#c8a050]">__T_NOTEBOOK_AI_POLISH__</div>
               <div v-if="aiResult && !aiLoading" class="ml-auto flex items-center gap-1.5">
-                <button class="cursor-pointer rounded border-none bg-[linear-gradient(180deg,#4a7a40,#306828)] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[#d0e8c0] [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_2px_0_rgba(20,50,10,0.5),inset_0_1px_0_rgba(200,255,200,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a8a50,#407838)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('apply-ai')">{{ t('notebook_apply_action') }}</button>
-                <button class="cursor-pointer rounded border-none bg-white/[0.06] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[rgba(200,160,100,0.5)] shadow-[0_2px_0_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.1] hover:text-[rgba(200,160,100,0.8)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('close-ai')">{{ t('notebook_close_action') }}</button>
+                <button class="cursor-pointer rounded border-none bg-[linear-gradient(180deg,#4a7a40,#306828)] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[#d0e8c0] [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_2px_0_rgba(20,50,10,0.5),inset_0_1px_0_rgba(200,255,200,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a8a50,#407838)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('apply-ai')">__T_COMMON_APPLY__</button>
+                <button class="cursor-pointer rounded border-none bg-white/[0.06] px-3.5 py-1 text-[11px] font-bold tracking-wider text-[rgba(200,160,100,0.5)] shadow-[0_2px_0_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)] transition-all hover:bg-white/[0.1] hover:text-[rgba(200,160,100,0.8)] active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]" @click="$emit('close-ai')">__T_COMMON_CLOSE__</button>
               </div>
             </div>
             <div v-if="aiLoading" class="ai-loading flex items-center justify-center gap-2.5 px-3 py-4">
               <div class="quill-anim relative h-[18px] w-[18px]"></div>
-              <div class="animate-pulse text-[11px] font-semibold tracking-widest text-[rgba(200,160,80,0.6)]">{{ t('notebook_ai_loading') }}</div>
+              <div class="animate-pulse text-[11px] font-semibold tracking-widest text-[rgba(200,160,80,0.6)]">__T_NOTEBOOK_AI_LOADING__</div>
             </div>
             <div v-else-if="aiResult" class="ai-body overflow-y-auto whitespace-pre-wrap px-3 py-2 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-sm leading-6 tracking-wide">{{ aiResult }}</div>
           </div>
         </div>
 
         <div class="tray-buttons flex shrink-0 items-stretch gap-2.5 px-4 py-2.5 pb-3.5">
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('back')">{{ t('notebook_back') }}</button>
-          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="$emit('optimize')">{{ t('notebook_optimize_action') }}</button>
-          <button v-if="editingNoteId" class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('request-delete')">{{ t('notebook_delete_action') }}</button>
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('back')">__T_COMMON_BACK__</button>
+          <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#1a0828] bg-[linear-gradient(180deg,#4a3848,#3a2838,#2a1828)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(220,200,255,0.6)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#5a4858,#4a3848,#3a2838)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="!editorDraft.trim() || aiLoading" @click="$emit('optimize')">__T_NOTEBOOK_OPTIMIZE_ACTION__</button>
+          <button v-if="editingNoteId" class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('request-delete')">__T_COMMON_DELETE__</button>
           <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#604010] bg-[linear-gradient(180deg,#d0a848,#a88028,#886818)] px-2 py-2.5 text-[13px] font-bold tracking-[0.06em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.3)] shadow-[0_3px_0_rgba(80,50,10,0.6),inset_0_1px_1px_rgba(255,255,200,0.25)] transition-all hover:bg-[linear-gradient(180deg,#e0b858,#b89038,#988028)] active:top-[3px] active:shadow-[0_0_0_rgba(80,50,10,0.6),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" :disabled="saving || !editorDraft.trim()" @click="$emit('save')">
-            {{ saving ? '...' : t('notebook_save_action') }}
+            {{ saving ? '...' : '__T_COMMON_SAVE__' }}
           </button>
         </div>
       </div>
@@ -55,10 +55,10 @@
         <div v-if="showDeleteConfirm" class="absolute inset-0 z-50 flex items-center justify-center rounded-t-2xl rounded-b-3xl" @click.self="$emit('cancel-delete')">
           <div class="ai-modal-backdrop absolute inset-0 rounded-t-2xl rounded-b-3xl"></div>
           <div class="ai-modal-card relative z-10 mx-8 flex w-full max-w-[320px] flex-col items-center overflow-hidden rounded-xl px-6 py-6">
-            <div class="mb-4 text-sm font-semibold text-[rgba(255,200,160,0.8)]">{{ t('notebook_delete_confirm') }}</div>
+            <div class="mb-4 text-sm font-semibold text-[rgba(255,200,160,0.8)]">__T_NOTEBOOK_DELETE_CONFIRM_LONG__</div>
             <div class="flex w-full gap-3">
-              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('cancel-delete')">{{ t('notebook_cancel_action') }}</button>
-              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('confirm-delete')">{{ t('notebook_delete_action') }}</button>
+              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#2a1808] bg-[linear-gradient(180deg,#6a5838,#4a3820,#3a2810)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,220,180,0.5)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#7a6848,#5a4830,#4a3820)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('cancel-delete')">__T_COMMON_CANCEL__</button>
+              <button class="relative top-0 flex-1 cursor-pointer rounded-md border border-[#3a0808] bg-[linear-gradient(180deg,#8a3028,#6a1818,#501010)] px-2 py-2.5 text-center text-[13px] font-bold tracking-[0.06em] text-[rgba(255,200,180,0.7)] [text-shadow:0_1px_1px_rgba(0,0,0,0.5)] shadow-[0_3px_0_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all hover:bg-[linear-gradient(180deg,#9a4038,#7a2828,#601818)] active:top-[3px] active:shadow-[0_0_0_rgba(0,0,0,0.5),inset_0_2px_4px_rgba(0,0,0,0.4)] disabled:cursor-not-allowed disabled:opacity-40" @click="$emit('confirm-delete')">__T_COMMON_DELETE__</button>
             </div>
           </div>
         </div>
@@ -69,9 +69,6 @@
 
 <script setup>
 import { nextTick, ref, watch } from 'vue';
-import { useI18n } from '../_shared/i18n.js';
-
-const { t } = useI18n();
 
 const props = defineProps({
   view: { type: String, required: true },

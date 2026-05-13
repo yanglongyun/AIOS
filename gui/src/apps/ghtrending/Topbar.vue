@@ -1,7 +1,7 @@
 <script setup>
 import { useViewStore } from '@/stores/view.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 const view = useViewStore();
 </script>
@@ -21,8 +21,8 @@ const view = useViewStore();
             <span class="truncate">开源热榜</span>
         </div>
         <div class="ml-auto flex items-center gap-1 dark-icons">
-            <ChatTrigger />
-            <AppsTrigger />
+            <AskAI />
+            <AppHub />
         </div>
     </header>
 </template>

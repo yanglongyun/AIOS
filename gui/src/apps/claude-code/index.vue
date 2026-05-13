@@ -3,8 +3,8 @@
     <header class="topbar">
       <div class="brand"><span class="name">Claude Code</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 
@@ -20,7 +20,7 @@
           class="cc-tab"
           :class="{ active: activeTab === t.id }"
           @click="pickTab(t.id)">
-          <component :is="t.icon" :size="15" :stroke-width="1.8" class="cc-tab-ic" />
+          <span class="msi xxs cc-tab-ic">{{ t.icon }}</span>
           <span>{{ t.label }}</span>
         </button>
       </nav>
@@ -46,23 +46,8 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
-import {
-  BarChart3,
-  Bot,
-  Clock3,
-  FolderKanban,
-  Globe2,
-  History,
-  Map,
-  MessageSquare,
-  Plug,
-  ScrollText,
-  Settings,
-  Sparkles,
-  User,
-} from 'lucide-vue-next';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import './ui.css';
 
 import ChatTab from './tabs/ChatTab.vue';
@@ -81,19 +66,19 @@ import SettingsTab from './tabs/SettingsTab.vue';
 import Onboarding from './Onboarding.vue';
 
 const tabs = [
-  { id: 'chat',     icon: MessageSquare, label: '新对话' },
-  { id: 'conversations', icon: History, label: '对话历史' },
-  { id: 'projects', icon: FolderKanban, label: '__T_CLAUDE_TAB_PROJECTS__' },
-  { id: 'memory',   icon: ScrollText, label: 'CLAUDE.md' },
-  { id: 'plans',    icon: Map, label: '__T_CLAUDE_TAB_PLANS__' },
-  { id: 'history',  icon: Clock3, label: '命令历史' },
-  { id: 'skills',   icon: Sparkles, label: '__T_CLAUDE_TAB_SKILLS__' },
-  { id: 'plugin',   icon: Plug, label: '__T_CLAUDE_TAB_PLUGIN__' },
-  { id: 'agents',   icon: Bot, label: 'Agents' },
-  { id: 'mcp',      icon: Globe2, label: 'MCP' },
-  { id: 'stats',    icon: BarChart3, label: '__T_CLAUDE_TAB_STATS__' },
-  { id: 'settings', icon: Settings, label: '__T_CLAUDE_TAB_SETTINGS__' },
-  { id: 'account',  icon: User, label: '__T_CLAUDE_TAB_ACCOUNT__' }
+  { id: 'chat',     icon: 'chat', label: '新对话' },
+  { id: 'conversations', icon: 'history', label: '对话历史' },
+  { id: 'projects', icon: 'workspaces', label: '__T_CLAUDE_TAB_PROJECTS__' },
+  { id: 'memory',   icon: 'article', label: 'CLAUDE.md' },
+  { id: 'plans',    icon: 'map', label: '__T_CLAUDE_TAB_PLANS__' },
+  { id: 'history',  icon: 'schedule', label: '命令历史' },
+  { id: 'skills',   icon: 'auto_awesome', label: '__T_CLAUDE_TAB_SKILLS__' },
+  { id: 'plugin',   icon: 'extension', label: '__T_CLAUDE_TAB_PLUGIN__' },
+  { id: 'agents',   icon: 'smart_toy', label: 'Agents' },
+  { id: 'mcp',      icon: 'language', label: 'MCP' },
+  { id: 'stats',    icon: 'bar_chart', label: '__T_CLAUDE_TAB_STATS__' },
+  { id: 'settings', icon: 'settings', label: '__T_CLAUDE_TAB_SETTINGS__' },
+  { id: 'account',  icon: 'person', label: '__T_CLAUDE_TAB_ACCOUNT__' }
 ];
 
 const activeTab = ref('chat');

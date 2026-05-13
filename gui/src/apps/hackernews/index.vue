@@ -2,8 +2,8 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 import { marked } from 'marked';
 import * as api from '@/utils/api.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 marked.setOptions({ breaks: true, gfm: true });
 const renderMd = (t) => marked.parse(t || '');
@@ -145,8 +145,8 @@ onActivated(() => { if (!stories.value.length) loadStories(activeTab.value); loa
         <span class="name">Hacker News</span>
       </div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 

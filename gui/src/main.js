@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
+import "material-symbols/outlined.css";
 import "./style.css";
 import { router } from "./system/router.js";
 import { useThemeStore } from "./stores/theme.js";

@@ -2,8 +2,8 @@
   <div class="relative h-full w-full overflow-hidden bg-[#f4f3f0] font-serif">
     <!-- setup 页:浮在右上角的应用切换。辩论开始后由顶栏自己接管,见下方公告条。 -->
     <div v-if="!debateStarted" class="debate-shell-actions pointer-events-auto absolute right-3 top-3 z-50 flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-1 backdrop-blur-md">
-      <ChatTrigger />
-      <AppsTrigger />
+      <AskAI />
+      <AppHub />
     </div>
     <!-- ===== 开始页面 ===== -->
     <div v-if="!debateStarted" class="h-full min-h-0 overflow-y-auto bg-[#eceae5] p-4">
@@ -78,8 +78,8 @@
           <span></span>
           <span class="text-center text-[11px] tracking-[4px] text-[#8a9ab5]">🃏 纸牌屋 · 全国直播</span>
           <div class="debate-shell-actions justify-self-end flex items-center gap-1">
-            <ChatTrigger />
-            <AppsTrigger />
+            <AskAI />
+            <AppHub />
           </div>
         </div>
 
@@ -220,7 +220,7 @@
             class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full transition-colors"
             :class="newMessage.trim() ? 'bg-[#1c2841] text-[#c9b06b] cursor-pointer hover:bg-[#263556]' : 'bg-[#e8e6e0] text-[#bbb] cursor-not-allowed'"
           >
-            <SendHorizontal class="h-5 w-5" />
+            <span class="msi sm">send</span>
           </button>
         </div>
 
@@ -256,7 +256,7 @@
         <!-- 深蓝头部 -->
         <div class="bg-[#1c2841] px-7 pb-5 pt-7 text-center" :class="won ? 'text-[#c9b06b]' : 'text-[#d09090]'">
           <button @click="closeResults" class="absolute right-3 top-3 text-[#8a9ab5] hover:text-white">
-            <X class="h-5 w-5" />
+            <span class="msi sm">close</span>
           </button>
           <div class="mb-2 text-5xl">{{ won ? '🏛️' : '📉' }}</div>
           <div class="mb-1 text-[22px] font-bold tracking-[2px]">{{ won ? '恭喜当选总统！' : '很遗憾，未能胜出' }}</div>
@@ -302,9 +302,8 @@
 
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
-import { SendHorizontal, X } from 'lucide-vue-next';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 const API_BASE = '/apps/debate';
 const parties = ref([]);
 const selectedParty = ref(null);

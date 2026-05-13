@@ -3,8 +3,8 @@
 // 8 个区块: 行星 / 自然 / 太空 / 经济 / 加密 / 知识 / 媒体 / 人间(秒级插值)
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { renderMd } from '@/utils/renderMd.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import Sparkline from './Sparkline.vue';
 
 // ─── 各区块数据 ────────────────────────────────────
@@ -210,8 +210,8 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer); if (dataTimer) clearInt
         <span class="msi sm">refresh</span>
       </button>
       <div class="ml-1 flex items-center gap-1 dark-icons">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 

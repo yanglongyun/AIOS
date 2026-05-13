@@ -26,7 +26,7 @@ function newApp() {
 
 function onDocClick(e) {
   if (!view.appsOpen) return;
-  // 别让 AppsTrigger 按钮自己 toggle 时被 doc click 立即关上
+  // 别让 AppHub 按钮自己 toggle 时被 doc click 立即关上
   if (e.target.closest('.apps-trigger')) return;
   if (e.target.closest('[title="所有应用"]')) return;
   if (e.target.closest('.apps-popup')) return;

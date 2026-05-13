@@ -3,8 +3,8 @@
     <header class="topbar">
       <div class="brand"><span class="name">算一卦</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
     <div class="flex flex-1 min-h-0 bg-[#e8ddd0] font-['PingFang_SC',serif] text-[#3a2e20]">
@@ -48,8 +48,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { LOCALE } from '@/system/locale.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import FortuneHexagramPanel from './FortuneHexagramPanel.vue';
 import FortuneQuestionForm from './FortuneQuestionForm.vue';
 import FortuneResultCard from './FortuneResultCard.vue';

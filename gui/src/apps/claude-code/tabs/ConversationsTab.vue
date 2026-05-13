@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { Trash2 } from 'lucide-vue-next';
 import { formatShortTime } from '../utils.js';
 
 const emit = defineEmits(['open']);
@@ -54,7 +53,7 @@ onMounted(fetchList);
           </div>
         </div>
         <button class="x" type="button" title="删除" @click.stop="removeConversation(c.sessionId)">
-          <Trash2 :size="15" :stroke-width="1.7" />
+          <span class="msi xxs">delete</span>
         </button>
       </li>
     </ul>

@@ -4,8 +4,8 @@
       <span class="left-spacer"></span>
       <div class="brand"><span class="name">记事本</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
     <main class="notebook-main">
@@ -51,14 +51,13 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue';
-import { useI18n } from '../_shared/i18n.js';
+import { LOCALE, LOCALE_FULL } from '@/system/locale.js';
 import { useAppContext } from '@/stores/appContext.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import NotebookEditorView from './NotebookEditorView.vue';
 import NotebookListView from './NotebookListView.vue';
 
-const { locale, t } = useI18n();
 const API_BASE = '/apps/notebook';
 const PAGE_SIZE = 12;
 
@@ -111,7 +110,7 @@ const randomStyle = () => {
 };
 
 const currentDate = computed(() =>
-  new Date().toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', {
+  new Date().toLocaleDateString(LOCALE_FULL, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
@@ -128,7 +127,7 @@ const fetchNotes = async () => {
     total.value = Number(data.total || 0);
     totalPages.value = Number(data.totalPages || 1);
     if (page.value > totalPages.value) { page.value = totalPages.value; return fetchNotes(); }
-  } catch (e) { error.value = e.message || t('notebook_load_failed'); }
+  } catch (e) { error.value = e.message || '__T_NOTES_LOAD_FAILED__'; }
   finally { loading.value = false; }
 };
 
@@ -159,7 +158,7 @@ const saveEditor = async () => {
     page.value = 1;
     await fetchNotes();
     backToList();
-  } catch (e) { error.value = e.message || t('notebook_create_failed'); }
+  } catch (e) { error.value = e.message || '__T_NOTES_SAVE_FAILED__'; }
   finally { saving.value = false; }
 };
 
@@ -175,7 +174,7 @@ const deleteNote = async (id) => {
     const res = await fetch(`${API_BASE}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     await fetchNotes();
-  } catch (e) { error.value = e.message || t('notebook_delete_failed'); }
+  } catch (e) { error.value = e.message || '__T_NOTES_DELETE_FAILED__'; }
 };
 
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
@@ -209,7 +208,7 @@ const startOptimize = async () => {
   aiResult.value = '';
   aiDrawerOpen.value = true;
   try {
-    const lang = locale.value === 'en' ? 'en' : 'zh';
+    const lang = LOCALE === 'en' ? 'en' : 'zh';
     const res = await fetch(`${API_BASE}/optimize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -223,7 +222,7 @@ const startOptimize = async () => {
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
     aiResult.value = data.result || '';
   } catch (e) {
-    error.value = e.message || t('notebook_optimize_failed');
+    error.value = e.message || '__T_NOTEBOOK_OPTIMIZE_FAILED__';
     aiDrawerOpen.value = false;
   } finally {
     aiLoading.value = false;
@@ -245,11 +244,11 @@ const formatTime = (v) => {
   const d = new Date(v.replace(' ', 'T'));
   if (isNaN(d)) return v;
   const diff = Date.now() - d;
-  if (diff < 60000) return t('notebook_just_now');
-  if (diff < 3600000) return t('notebook_minutes_ago', { n: Math.floor(diff / 60000) });
-  if (diff < 86400000) return t('notebook_hours_ago', { n: Math.floor(diff / 3600000) });
-  if (diff < 604800000) return t('notebook_days_ago', { n: Math.floor(diff / 86400000) });
-  return d.toLocaleDateString(locale.value === 'en' ? 'en-US' : 'zh-CN', { month: 'short', day: 'numeric' });
+  if (diff < 60000) return '__T_COMMON_JUST_NOW__';
+  if (diff < 3600000) return '__T_NOTEBOOK_MINUTES_AGO_N__'.replace('{n}', String(Math.floor(diff / 60000)));
+  if (diff < 86400000) return '__T_NOTEBOOK_HOURS_AGO_N__'.replace('{n}', String(Math.floor(diff / 3600000)));
+  if (diff < 604800000) return '__T_NOTEBOOK_DAYS_AGO_N__'.replace('{n}', String(Math.floor(diff / 86400000)));
+  return d.toLocaleDateString(LOCALE_FULL, { month: 'short', day: 'numeric' });
 };
 
 // QuickChat 上下文:让 AI 知道用户在记事本里看什么、写什么。
@@ -270,13 +269,13 @@ const stopAppCtx = watchEffect(() => {
     context: ctxLines.join('\n'),
     prompts: isEditor
       ? [
-          { label: t('notebook_chat_quick_3'), text: t('notebook_chat_quick_3') }, // 总结要点
-          { label: t('notebook_chat_quick_2'), text: t('notebook_chat_quick_2') }  // 写作灵感
+          { label: '__T_NOTEBOOK_CHAT_QUICK_3__', text: '__T_NOTEBOOK_CHAT_QUICK_3__' }, // 总结要点
+          { label: '__T_NOTEBOOK_CHAT_QUICK_2__', text: '__T_NOTEBOOK_CHAT_QUICK_2__' }  // 写作灵感
         ]
       : [
-          { label: t('notebook_chat_quick_1'), text: t('notebook_chat_quick_1') },
-          { label: t('notebook_chat_quick_2'), text: t('notebook_chat_quick_2') },
-          { label: t('notebook_chat_quick_3'), text: t('notebook_chat_quick_3') }
+          { label: '__T_NOTEBOOK_CHAT_QUICK_1__', text: '__T_NOTEBOOK_CHAT_QUICK_1__' },
+          { label: '__T_NOTEBOOK_CHAT_QUICK_2__', text: '__T_NOTEBOOK_CHAT_QUICK_2__' },
+          { label: '__T_NOTEBOOK_CHAT_QUICK_3__', text: '__T_NOTEBOOK_CHAT_QUICK_3__' }
         ]
   });
 });

@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, nextTick, watch, computed } from 'vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
 import MessageList from './MessageList.vue';
 import Composer from './Composer.vue';
 import Setup from './Setup.vue';
@@ -61,11 +61,11 @@ const characterBio = computed(() => character.value?.bio || '');
     class="relative flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden
            bg-gradient-to-b from-pink-50/80 to-white/90">
 
-    <!-- 顶栏: 全宽, brand 贴左, AppsTrigger 贴右, 与其他 app 一致 -->
+    <!-- 顶栏: 全宽, brand 贴左, AppHub 贴右, 与其他 app 一致 -->
     <header class="flex-none h-14 px-4 flex items-center justify-between gap-3
                    bg-white/75 backdrop-blur-md backdrop-saturate-150">
       <div class="font-semibold text-base text-gray-900 truncate">{{ character.name }}</div>
-      <AppsTrigger />
+      <AppHub />
     </header>
 
     <!-- 主滚动区 -->

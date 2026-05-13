@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useViewStore } from '@/stores/view.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import { landPaths } from './worldmap.js';
 
 import EarthquakeLayer from './layers/EarthquakeLayer.vue';
@@ -84,8 +84,8 @@ const selectedColor = computed(() => {
         <span class="msi sm">refresh</span>
       </button>
       <div class="ml-1 flex items-center gap-1 dark-icons">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
 

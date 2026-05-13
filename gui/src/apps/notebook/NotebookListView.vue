@@ -18,7 +18,7 @@
       <div v-if="idx % 3 !== 1" class="pushpin absolute left-1/2 top-[10px] z-20 h-3.5 w-3.5 -translate-x-1/2 rounded-full shadow-[inset_-2px_-2px_4px_rgba(0,0,0,0.4),inset_2px_2px_4px_rgba(255,255,255,0.6),3px_10px_6px_rgba(0,0,0,0.3)]" :class="pinColors[note.style % 4]"></div>
       <div v-else class="pointer-events-none absolute -top-2.5 left-1/2 z-10 h-5 w-[50px] border-x-2 border-dashed border-white/60 bg-white/35 shadow-sm backdrop-blur-[1px]" :style="{ transform: `translateX(-50%) rotate(${idx % 2 ? 5 : -5}deg)` }"></div>
       <div class="line-clamp-[8] whitespace-pre-wrap break-words px-3 font-['Comic_Sans_MS','Chalkboard_SE',cursive] text-base leading-[25px]" :class="cardStyle(note.style).textCls">
-        {{ note.content || t('notebook_empty_card') }}
+        {{ note.content || '__T_NOTEBOOK_EMPTY_CARD__' }}
       </div>
       <div class="absolute bottom-2 right-2.5 font-mono text-[10px] font-bold text-black/40">
         {{ formatTime(note.updated_at || note.created_at) }}
@@ -37,10 +37,6 @@
 </template>
 
 <script setup>
-import { useI18n } from '../_shared/i18n.js';
-
-const { t } = useI18n();
-
 defineProps({
   view: { type: String, required: true },
   notes: { type: Array, required: true },

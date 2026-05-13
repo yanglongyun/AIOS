@@ -2,8 +2,8 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 
 import Sidebar from './Sidebar.vue';
 import AddBar from './AddBar.vue';
@@ -201,8 +201,8 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           <button class="icon-btn" title="刷新" @click="openDetail(detailFor)">
             <span class="msi">refresh</span>
           </button>
-          <ChatTrigger />
-          <AppsTrigger />
+          <AskAI />
+          <AppHub />
         </div>
       </header>
 
@@ -227,8 +227,8 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           任务
         </div>
         <div class="ml-auto flex items-center gap-1">
-          <ChatTrigger />
-          <AppsTrigger />
+          <AskAI />
+          <AppHub />
         </div>
       </header>
 

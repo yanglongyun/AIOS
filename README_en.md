@@ -154,7 +154,7 @@ AIOS/
 └── scripts/         # Start / build / fix scripts
 ```
 
-**Stack**: Node.js 20 · Vue 3 · Vite 7 · better-sqlite3 · Tailwind v4 · ws · node-pty · xterm.js
+**Stack**: Node.js 22 · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
 
 Storage: a single local SQLite file (`database/aios.db`), fully backup-able and portable.
 

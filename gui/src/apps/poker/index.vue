@@ -13,8 +13,8 @@
     />
     <!-- 浮在牌桌右上角的应用切换 -->
     <div class="poker-shell-actions pointer-events-auto absolute right-3 top-3 z-50 flex items-center gap-1 rounded-full bg-black/30 px-1.5 py-1 backdrop-blur-md">
-      <ChatTrigger />
-      <AppsTrigger />
+      <AskAI />
+      <AppHub />
     </div>
     <div class="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center pb-4">
       <PokerControlPanel
@@ -33,8 +33,8 @@
 import { ref, computed, onMounted } from 'vue';
 import PokerControlPanel from './PokerControlPanel.vue';
 import PokerTableView from './PokerTableView.vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 const game = ref(null);
 const busy = ref(false);
 const lastActionText = ref('');

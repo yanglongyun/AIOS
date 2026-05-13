@@ -3,8 +3,8 @@
     <header class="topbar">
       <div class="brand"><span class="name">记忆</span></div>
       <div class="right">
-        <ChatTrigger />
-        <AppsTrigger />
+        <AskAI />
+        <AppHub />
       </div>
     </header>
   <div class="relative flex flex-1 min-h-0 flex-col" style="background:repeating-linear-gradient(#faf6ef 0px,#faf6ef 31px,rgba(170,150,120,0.08) 31px,rgba(170,150,120,0.08) 32px),linear-gradient(135deg,#faf5eb,#f5efe3);color:#2a1f13">
@@ -101,8 +101,8 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue';
-import AppsTrigger from '@/components/AppsTrigger.vue';
-import ChatTrigger from '@/components/ChatTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
+import AskAI from '@/components/AskAI.vue';
 import MemoryCard from './components/MemoryCard.vue';
 
 const loading = ref(false);

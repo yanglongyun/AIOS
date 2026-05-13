@@ -10,7 +10,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
 import { send } from '@/system/ws.js';
-import AppsTrigger from '@/components/AppsTrigger.vue';
+import AppHub from '@/components/AppHub.vue';
 
 import Sidebar from './Sidebar.vue';
 import Header from './Header.vue';
@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
           @rename="renameCurrent"
           @delete="deleteCurrent"
           @load-remarks="loadRemarks" />
-        <AppsTrigger />
+        <AppHub />
       </div>
     </header>
 

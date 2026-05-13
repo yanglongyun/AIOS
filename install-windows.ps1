@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$RepoUrl = if ($env:AIOS_REPO_URL) { $env:AIOS_REPO_URL } else { "https://github.com/valueriver/AIOS.git" }
+$RepoUrl = if ($env:AIOS_REPO_URL) { $env:AIOS_REPO_URL } else { "https://github.com/realuckyang/AIOS.git" }
 $RepoRef = if ($env:AIOS_REPO_REF) { $env:AIOS_REPO_REF } else { "main" }
 $InstallRoot = if ($env:AIOS_INSTALL_ROOT) { $env:AIOS_INSTALL_ROOT } else { Join-Path $HOME ".aios" }
 $RepoDir = Join-Path $InstallRoot "repo"

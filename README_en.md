@@ -10,7 +10,7 @@ Build native apps tailored to your needs through dialogue. A unified AI kernel t
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-43853d.svg)](https://nodejs.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-install)
 [![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/YfCbV3m9Q)
-[![Stars](https://img.shields.io/github/stars/valueriver/AIOS?style=social)](https://github.com/valueriver/AIOS)
+[![Stars](https://img.shields.io/github/stars/realuckyang/AIOS?style=social)](https://github.com/realuckyang/AIOS)
 
 [简体中文](./README.md) · **English**
 
@@ -63,27 +63,27 @@ AIOS is a **fully local-first** AI workstation:
 
 ### One-line Install
 
-> ⚠️ The installer uses your package manager to install Node, git, rsync, then clones and builds AIOS. Read the [script](https://github.com/valueriver/AIOS/blob/main/install-macos.sh) before running.
+> ⚠️ The installer uses your package manager to install Node, git, rsync, then clones and builds AIOS. Read the [script](https://github.com/realuckyang/AIOS/blob/main/install-macos.sh) before running.
 
 **macOS** (auto-installs Homebrew + Node@20)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
+curl -fsSL https://raw.githubusercontent.com/realuckyang/AIOS/main/install-macos.sh | sh
 ```
 
 **Linux** (apt / dnf / yum / apk / pacman + NodeSource)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
+curl -fsSL https://raw.githubusercontent.com/realuckyang/AIOS/main/install-linux.sh | sh
 ```
 
 **Windows** (requires winget; bundled with Win10 1809+ / Win11)
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/realuckyang/AIOS/main/install-windows.ps1 | iex"
 ```
 
 ### Manual Install
 
 ```bash
-git clone https://github.com/valueriver/AIOS.git
+git clone https://github.com/realuckyang/AIOS.git
 cd AIOS
 npm install
 npm run build
@@ -225,7 +225,7 @@ Those are mainly LLM chat frontends. AIOS is a **local operating system** with A
 
 ## 📄 License
 
-[ISC](./LICENSE) © valueriver
+[ISC](./LICENSE) © realuckyang
 
 ---
 

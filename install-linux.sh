@@ -2,7 +2,7 @@
 
 set -eu
 
-REPO_URL="${AIOS_REPO_URL:-https://github.com/valueriver/AIOS.git}"
+REPO_URL="${AIOS_REPO_URL:-https://github.com/realuckyang/AIOS.git}"
 REPO_REF="${AIOS_REPO_REF:-main}"
 INSTALL_ROOT="${AIOS_INSTALL_ROOT:-$HOME/.aios}"
 REPO_DIR="$INSTALL_ROOT/repo"

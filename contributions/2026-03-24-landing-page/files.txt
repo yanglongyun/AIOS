@@ -1,0 +1,16 @@
+A	landing/index.html
+A	landing/package-lock.json
+A	landing/package.json
+A	landing/public/fonts/instrument-serif-italic.woff2
+A	landing/public/fonts/instrument-serif-regular.woff2
+A	landing/public/fonts/inter-latin.woff2
+A	landing/public/video/hero.mp4
+A	landing/src/App.tsx
+A	landing/src/index.css
+A	landing/src/lib/utils.ts
+A	landing/src/main.tsx
+A	landing/src/vite-env.d.ts
+A	landing/tsconfig.app.json
+A	landing/tsconfig.json
+A	landing/tsconfig.node.json
+A	landing/vite.config.ts

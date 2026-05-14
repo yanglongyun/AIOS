@@ -1,0 +1,1721 @@
+commit 2bdac8c51e75854ae138f3207cd469e36b1488ca
+Author: Krysha <akai_sakura@outlook.com>
+Date:   Fri Apr 3 18:55:59 2026 +0800
+
+    feat: add OpenAI Codex OAuth login and Docker compose improvements
+    
+    - Add OAuth 2.0 PKCE flow for OpenAI Codex login (no API key needed)
+    - Add Codex Responses API adapter with SSE stream parsing
+    - Add manual access/refresh token input in Welcome and Settings pages
+    - Route OAuth requests to chatgpt.com/backend-api/codex/responses instead of standard API
+    - Fix token refresh not resetting authMethod on failure
+    - Add OAuth-related i18n keys for zh/en
+    - Switch Docker volumes to relative paths (../../database, ../../files)
+    - Add npm run docker / docker:stop scripts
+---
+ doc/docker/docker-compose.yml     |   8 +-
+ doc/openai-codex-oauth.md         | 323 ++++++++++++++++++++++++++++++++++
+ language/en/views/settings.json   |   6 +
+ language/zh/views/settings.json   |   6 +
+ package.json                      |   4 +-
+ server/api/auth/index.js          |   6 +
+ server/api/auth/openai-oauth.js   | 354 ++++++++++++++++++++++++++++++++++++++
+ server/api/settings.js            |   7 +-
+ server/llm/codex.js               | 232 +++++++++++++++++++++++++
+ server/llm/common.js              |  43 ++++-
+ server/llm/regular.js             |  16 +-
+ server/llm/stream.js              |  18 +-
+ server/service/settings/get.js    |   5 +
+ server/service/settings/update.js |   1 +
+ ui/src/apps/settings/ModelTab.vue | 146 +++++++++++++---
+ ui/src/apps/settings/index.vue    |  10 +-
+ ui/src/data/providers.js          |   3 +-
+ ui/src/views/WelcomeView.vue      | 182 +++++++++++++++++++-
+ 18 files changed, 1324 insertions(+), 46 deletions(-)
+
+diff --git a/doc/docker/docker-compose.yml b/doc/docker/docker-compose.yml
+index 006dcf2..fb3ed02 100644
+--- a/doc/docker/docker-compose.yml
++++ b/doc/docker/docker-compose.yml
+@@ -6,10 +6,6 @@ services:
+     ports:
+       - "9500:9500"
+     volumes:
+-      - aios_database:/app/database
+-      - aios_files:/app/files
++      - ../../database:/app/database
++      - ../../files:/app/files
+     restart: unless-stopped
+-
+-volumes:
+-  aios_database:
+-  aios_files:
+diff --git a/doc/openai-codex-oauth.md b/doc/openai-codex-oauth.md
+new file mode 100644
+index 0000000..017a633
+--- /dev/null
++++ b/doc/openai-codex-oauth.md
+@@ -0,0 +1,323 @@
++# OpenAI Codex OAuth 登录实现文档
++
++## 概述
++
++AIOS 支持通过 OpenAI Codex OAuth 登录，让用户无需手动填写 API Key，直接使用 ChatGPT/Codex 订阅账号调用 OpenAI 模型。
++
++**核心原理**：复用 Codex CLI 的公开 OAuth 客户端凭据，通过 OAuth 2.0 Authorization Code + PKCE 流程获取 access_token，然后使用该 token 调用 Codex Responses API（而非标准的 `api.openai.com/v1/chat/completions`）。
++
++## 关键发现
++
++| 项目 | 说明 |
++|------|------|
++| OAuth token **不能**用于 `api.openai.com` | 标准 OpenAI API 只接受 API Key |
++| OAuth token 用于 Codex Responses API | `https://chatgpt.com/backend-api/codex/responses` |
++| 请求格式不同 | 需要从 Chat Completions 格式转换为 Responses API 格式 |
++| OpenAI 不开放第三方 OAuth 注册 | 所有第三方项目都复用 Codex CLI 的 client_id |
++
++## OAuth 参数
++
++| 参数 | 值 | 来源 |
++|------|------|------|
++| Client ID | `app_EMoamEEZ73f0CkXaXp7hrann` | Codex CLI 源码 (`codex-rs/login/src/auth/manager.rs`) |
++| Authorization URL | `https://auth.openai.com/oauth/authorize` | OpenAI Auth0 |
++| Token URL | `https://auth.openai.com/oauth/token` | OpenAI Auth0 |
++| Redirect URI | `http://localhost:1455/auth/callback` | Codex CLI 注册的固定回调地址 |
++| Scopes | `openid profile email offline_access` | 基础身份 + 离线刷新 |
++| PKCE Method | S256 | 标准 PKCE |
++
++### 关键额外参数
++
++| 参数 | 值 | 作用 |
++|------|------|------|
++| `codex_cli_simplified_flow` | `true` | **跳过组织选择页面**（最重要） |
++| `id_token_add_organizations` | `true` | 将组织信息写入 token，不额外提示 |
++| `originator` | `aios` | 标识调用来源 |
++
++## 完整 OAuth 流程
++
++```
++┌──────────┐     ┌──────────┐     ┌───────────────┐     ┌──────────────┐
++│  Frontend │     │  Backend │     │ localhost:1455 │     │ auth.openai  │
++│  (浏览器)  │     │  (AIOS)  │     │  (临时服务器)   │     │   .com       │
++└────┬─────┘     └────┬─────┘     └───────┬───────┘     └──────┬───────┘
++     │                │                    │                     │
++     │ 1. GET /api/auth/openai/authorize   │                     │
++     │───────────────>│                    │                     │
++     │                │ 2. 生成 PKCE + state                     │
++     │                │ 3. 启动临时 HTTP 服务器                    │
++     │                │──────────────────>│                     │
++     │                │                    │ (监听 127.0.0.1:1455)│
++     │  4. 返回 authorizationUrl           │                     │
++     │<───────────────│                    │                     │
++     │                │                    │                     │
++     │ 5. 打开新标签页跳转到 OpenAI 登录页   │                     │
++     │─────────────────────────────────────────────────────────>│
++     │                │                    │                     │
++     │                │                    │  6. 用户登录并授权    │
++     │                │                    │                     │
++     │                │                    │ 7. OpenAI 回调       │
++     │                │                    │<────────────────────│
++     │                │                    │ GET /auth/callback   │
++     │                │                    │ ?code=xxx&state=xxx  │
++     │                │                    │                     │
++     │                │  8. Promise resolve │                     │
++     │                │<──────────────────│                     │
++     │                │                    │                     │
++     │ 9. POST /api/auth/openai/poll (轮询) │                     │
++     │───────────────>│                    │                     │
++     │                │ 10. 用 code 换 token │                     │
++     │                │──────────────────────────────────────────>│
++     │                │ POST /oauth/token   │                     │
++     │                │ {code, code_verifier}│                    │
++     │                │<─────────────────────────────────────────│
++     │                │ {access_token, refresh_token}             │
++     │                │                    │                     │
++     │                │ 11. 从 JWT 提取 accountId                 │
++     │                │ 12. 存储 token 到数据库                    │
++     │                │                    │                     │
++     │  13. 返回 status: "complete"         │                     │
++     │<───────────────│                    │                     │
++```
++
++### 详细步骤
++
++#### 1. 发起授权 (`GET /api/auth/openai/authorize`)
++
++- 生成 32 字节随机 PKCE `code_verifier`，SHA-256 哈希得到 `code_challenge`
++- 生成 24 字节随机 `state` 防止 CSRF
++- 在 `127.0.0.1:1455` 启动临时 HTTP 服务器等待回调
++- 返回完整的授权 URL
++
++#### 2. 用户登录
++
++- 前端打开新标签页跳转到 `https://auth.openai.com/oauth/authorize?...`
++- 用户在 OpenAI 登录页面输入账号密码
++- `codex_cli_simplified_flow=true` 参数跳过组织选择步骤
++
++#### 3. 回调捕获
++
++- OpenAI 登录成功后重定向到 `http://localhost:1455/auth/callback?code=xxx&state=xxx`
++- 临时服务器接收到请求，验证 `state`，提取 `code`
++- 向用户返回 "Authorization Successful" HTML 页面
++- Promise resolve，服务器关闭
++
++#### 4. 前端轮询 (`POST /api/auth/openai/poll`)
++
++- 前端每 1.5 秒轮询一次
++- 使用 `Promise.race` 与 200ms 超时竞争，实现非阻塞检查
++- 回调到达后，用授权码换取 token
++
++#### 5. Token 交换
++
++```json
++POST https://auth.openai.com/oauth/token
++{
++  "grant_type": "authorization_code",
++  "client_id": "app_EMoamEEZ73f0CkXaXp7hrann",
++  "code": "<authorization_code>",
++  "redirect_uri": "http://localhost:1455/auth/callback",
++  "code_verifier": "<pkce_verifier>"
++}
++```
++
++返回：
++
++```json
++{
++  "access_token": "<JWT>",
++  "refresh_token": "<token>",
++  "expires_in": 3600,
++  "token_type": "Bearer"
++}
++```
++
++#### 6. 提取 Account ID
++
++access_token 是 JWT 格式，解码 payload 后提取：
++
++```javascript
++payload["https://api.openai.com/auth"].chatgpt_account_id
++```
++
++此 `accountId` 在调用 Codex API 时作为 `chatgpt-account-id` 请求头必须携带。
++
++#### 7. Token 自动刷新
++
++- 每次 LLM 请求前检查 token 是否在 5 分钟内过期
++- 过期则自动刷新：
++
++```json
++POST https://auth.openai.com/oauth/token
++{
++  "grant_type": "refresh_token",
++  "client_id": "app_EMoamEEZ73f0CkXaXp7hrann",
++  "refresh_token": "<refresh_token>"
++}
++```
++
++## Codex Responses API 适配
++
++### 为什么不能用标准 API
++
++OAuth token 是通过 ChatGPT/Codex 登录获得的，绑定的是用户的 ChatGPT 订阅（Plus/Pro），不是 API 额度。因此只能调用 Codex 专属端点。
++
++### API 端点
++
++```
++POST https://chatgpt.com/backend-api/codex/responses
++```
++
++### 请求头
++
++```
++Authorization: Bearer <access_token>
++chatgpt-account-id: <account_id>
++OpenAI-Beta: responses=experimental
++Content-Type: application/json
++```
++
++### 请求格式转换
++
++**Chat Completions 格式（AIOS 内部使用）：**
++
++```json
++{
++  "model": "gpt-4.1-mini",
++  "messages": [
++    { "role": "system", "content": "You are a helpful assistant." },
++    { "role": "user", "content": "Hello" },
++    { "role": "assistant", "content": "Hi there!" },
++    { "role": "user", "content": "What is 2+2?" }
++  ],
++  "tools": [{ "type": "function", "function": { "name": "...", ... } }]
++}
++```
++
++**Codex Responses API 格式（实际发送）：**
++
++```json
++{
++  "model": "gpt-4.1-mini",
++  "instructions": "You are a helpful assistant.",
++  "input": [
++    {
++      "type": "message",
++      "role": "user",
++      "content": [{ "type": "input_text", "text": "Hello" }]
++    },
++    {
++      "type": "message",
++      "role": "assistant",
++      "content": [{ "type": "output_text", "text": "Hi there!" }]
++    },
++    {
++      "type": "message",
++      "role": "user",
++      "content": [{ "type": "input_text", "text": "What is 2+2?" }]
++    }
++  ],
++  "store": false,
++  "stream": true,
++  "tools": [{ "type": "function", "name": "...", "description": "...", "parameters": {} }]
++}
++```
++
++#### 转换规则
++
++| Chat Completions | Responses API |
++|------------------|---------------|
++| `messages[role=system].content` | `instructions` 字段 |
++| `messages[role=user].content` | `input[].content[].type = "input_text"` |
++| `messages[role=assistant].content` | `input[].content[].type = "output_text"` |
++| `messages[role=assistant].tool_calls` | `input[].content[].type = "function_call"` |
++| `messages[role=tool]` | `input[].type = "function_call_output"` |
++| `tools[].function` | `tools[]` (扁平化，type/name/description/parameters 同级) |
++| `stream: true` | `stream: true` |
++| *(无)* | `store: false` (必须) |
++
++### SSE 响应格式
++
++Codex Responses API 返回的 SSE 事件类型：
++
++| 事件类型 | 含义 | 对应 Chat Completions |
++|---------|------|---------------------|
++| `response.output_text.delta` | 文本增量 `{ delta: "..." }` | `choices[0].delta.content` |
++| `response.output_item.added` | 新输出项（文本或函数调用） | - |
++| `response.function_call_arguments.delta` | 函数参数增量 | `choices[0].delta.tool_calls[].function.arguments` |
++| `response.output_item.done` | 输出项完成 | - |
++| `response.completed` | 响应完成 | `[DONE]` |
++
++## 架构图
++
++```
++用户发消息 → WebSocket → chat handler → getSettings()
++                                            │
++                                    authMethod === "oauth"?
++                                     ┌──────┴──────┐
++                                    YES            NO
++                                     │              │
++                              resolveOAuth()   buildLlmHeaders()
++                              (刷新 token)     (标准 Bearer key)
++                                     │              │
++                              callCodexStream()  callLlmStream()
++                              ┌──────────────┐  ┌──────────────┐
++                              │ 格式转换:      │  │ 标准 Chat     │
++                              │ Chat → Responses│ │ Completions   │
++                              │ 发送到:        │  │ api.openai.com│
++                              │ chatgpt.com/   │  │ (或其他供应商) │
++                              │ backend-api/   │  │              │
++                              │ codex/responses│  │              │
++                              └──────┬─────────┘ └──────┬───────┘
++                                     │              │
++                              SSE 解析 +        SSE 解析
++                              格式转换回         (标准格式)
++                              Chat Completions
++                                     │              │
++                                     └──────┬───────┘
++                                            │
++                                     返回统一格式:
++                                     { role, content, tool_calls? }
++```
++
++## 涉及的文件
++
++| 文件 | 职责 |
++|------|------|
++| `server/api/auth/openai-oauth.js` | OAuth 流程：授权、回调、token 交换、刷新、断开 |
++| `server/llm/codex.js` | Codex Responses API 适配器：格式转换 + SSE 解析 |
++| `server/llm/common.js` | `resolveOAuth()` 判断是否走 Codex 路径，自动刷新 token |
++| `server/llm/stream.js` | 流式调用入口，路由到 Codex 或标准 API |
++| `server/llm/regular.js` | 非流式调用入口，同上 |
++| `server/service/settings/get.js` | Settings 增加 `authMethod`, `oauthAccessToken`, `oauthAccountId` 等字段 |
++| `server/api/settings.js` | GET 响应隐藏 OAuth token，只暴露 `oauthConnected` 状态 |
++| `ui/src/data/providers.js` | OpenAI provider 添加 `supportsOAuth: true` |
++| `ui/src/views/WelcomeView.vue` | Welcome Step 3 添加 OAuth 登录选项 |
++| `ui/src/apps/settings/ModelTab.vue` | 设置页添加 OAuth 切换和手动 Token 输入 |
++
++## 数据库存储 (settings 表)
++
++| Key | 说明 | 示例 |
++|-----|------|------|
++| `authMethod` | 认证方式 | `"oauth"` 或 `"apikey"` |
++| `oauthAccessToken` | JWT access token | `"eyJhbGciOi..."` |
++| `oauthAccountId` | ChatGPT 账号 ID（从 JWT 提取） | `"acct_xxx"` |
++| `oauthRefreshToken` | 刷新 token | `"rt_xxx"` |
++| `oauthTokenExpiresAt` | 过期时间戳 (ms) | `"1719849600000"` |
++
++## 限制
++
++1. **仅限本地部署** — redirect_uri 是 `localhost:1455`，远程服务器部署时浏览器的 localhost 不是服务器
++2. **依赖 Codex client_id** — OpenAI 未开放第三方 OAuth 注册，使用 Codex 的公开 client_id
++3. **模型受限** — 只能使用 Codex 支持的模型（如 gpt-4.1-mini 等），取决于用户的 ChatGPT 订阅等级
++4. **授权页显示 "Codex"** — 因为复用了 Codex 的 OAuth 客户端
++
++## 参考项目
++
++| 项目 | 链接 | 说明 |
++|------|------|------|
++| OpenAI Codex CLI | https://github.com/openai/codex | client_id 和 OAuth 流程的来源 |
++| OpenClaw | https://github.com/openclaw/openclaw | 完整的 Codex OAuth 集成参考 |
++| pi-mono (badlogic) | https://github.com/badlogic/pi-mono | OpenClaw 底层的 OAuth 实现库 |
++| openai-oauth | https://github.com/EvanZhouDev/openai-oauth | Chat Completions → Codex Responses 代理 |
++| codex-proxy | https://github.com/icebear0828/codex-proxy | 多格式 Codex 代理 |
+diff --git a/language/en/views/settings.json b/language/en/views/settings.json
+index d56bf41..8441eac 100644
+--- a/language/en/views/settings.json
++++ b/language/en/views/settings.json
+@@ -42,6 +42,12 @@
+   "settings_skills_source_project": "Project",
+   "settings_skills_source_system": "System",
+   "settings_skills_empty_group": "No skills found in this group.",
++  "settings_oauth_connected": "Connected to OpenAI via OAuth",
++  "settings_oauth_disconnect": "Disconnect",
++  "settings_oauth_hint": "Sign in with your OpenAI account. No API key needed.",
++  "settings_oauth_connecting": "Connecting…",
++  "settings_oauth_login": "Sign in with OpenAI",
++  "settings_oauth_login_short": "Login",
+   "settings_saved": "Saved",
+   "settings_save_failed": "Save failed: {message}",
+   "settings_saving": "Saving…"
+diff --git a/language/zh/views/settings.json b/language/zh/views/settings.json
+index f3a0b8d..870717a 100644
+--- a/language/zh/views/settings.json
++++ b/language/zh/views/settings.json
+@@ -42,6 +42,12 @@
+   "settings_skills_source_project": "项目",
+   "settings_skills_source_system": "系统",
+   "settings_skills_empty_group": "当前分组没有可用技能。",
++  "settings_oauth_connected": "已通过 OAuth 连接 OpenAI",
++  "settings_oauth_disconnect": "断开连接",
++  "settings_oauth_hint": "通过 OpenAI 账号授权登录，无需手动填写 API Key。",
++  "settings_oauth_connecting": "连接中…",
++  "settings_oauth_login": "使用 OpenAI 账号登录",
++  "settings_oauth_login_short": "登录",
+   "settings_saved": "配置已保存",
+   "settings_save_failed": "保存失败：{message}",
+   "settings_saving": "保存中…"
+diff --git a/package.json b/package.json
+index 749c2b1..74b3e49 100644
+--- a/package.json
++++ b/package.json
+@@ -8,7 +8,9 @@
+     "dev": "node server/index.js & node apps/index.js & vite --config ui/vite.config.js ui",
+     "build": "vite build --config ui/vite.config.js ui",
+     "start": "node server/index.js",
+-    "start:apps": "node apps/index.js"
++    "start:apps": "node apps/index.js",
++    "docker": "docker compose -f doc/docker/docker-compose.yml up -d --build",
++    "docker:stop": "docker compose -f doc/docker/docker-compose.yml down"
+   },
+   "keywords": [],
+   "author": "",
+diff --git a/server/api/auth/index.js b/server/api/auth/index.js
+index f0c82a7..dad76c6 100644
+--- a/server/api/auth/index.js
++++ b/server/api/auth/index.js
+@@ -4,12 +4,18 @@ import { register } from "./register.js";
+ import { logout } from "./logout.js";
+ import { me } from "./me.js";
+ import { changePassword } from "./password.js";
++import { authorize, poll, refresh, disconnect, manualTokens } from "./openai-oauth.js";
+ const handleAuthApi = async (req, res, path) => {
+   if (path === "/api/auth/register" && req.method === "POST") return register(req, res);
+   if (path === "/api/auth/login" && req.method === "POST") return login(req, res);
+   if (path === "/api/auth/logout" && req.method === "POST") return logout(req, res);
+   if (path === "/api/auth/me" && req.method === "GET") return me(req, res);
+   if (path === "/api/auth/password" && req.method === "POST") return changePassword(req, res);
++  if (path === "/api/auth/openai/authorize" && req.method === "GET") return authorize(req, res);
++  if (path === "/api/auth/openai/poll" && req.method === "POST") return poll(req, res);
++  if (path === "/api/auth/openai/refresh" && req.method === "POST") return refresh(req, res);
++  if (path === "/api/auth/openai/disconnect" && req.method === "POST") return disconnect(req, res);
++  if (path === "/api/auth/openai/manual-tokens" && req.method === "POST") return manualTokens(req, res);
+   return json(res, { success: false, message: "API endpoint not found" }, 404);
+ };
+ export {
+diff --git a/server/api/auth/openai-oauth.js b/server/api/auth/openai-oauth.js
+new file mode 100644
+index 0000000..0eb0d0b
+--- /dev/null
++++ b/server/api/auth/openai-oauth.js
+@@ -0,0 +1,354 @@
++import { randomBytes, createHash } from "crypto";
++import { createServer } from "http";
++import { json } from "../../../shared/http/json.js";
++import { saveSetting } from "../../repository/settings/save.js";
++import { getSettings } from "../../service/settings/get.js";
++
++/**
++ * OpenAI OAuth 2.0 Authorization Code + PKCE flow
++ *
++ * Uses the same OAuth configuration as Codex CLI:
++ *   - client_id: app_EMoamEEZ73f0CkXaXp7hrann
++ *   - redirect_uri: http://localhost:1455/auth/callback
++ *   - A temporary HTTP server on port 1455 captures the callback
++ *
++ * References:
++ *   - https://github.com/openai/codex (codex-rs/login/src/)
++ *   - https://docs.openclaw.ai/concepts/oauth
++ */
++
++const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
++const AUTH_URL = "https://auth.openai.com/oauth/authorize";
++const TOKEN_URL = "https://auth.openai.com/oauth/token";
++const CALLBACK_PORT = 1455;
++const REDIRECT_URI = `http://localhost:${CALLBACK_PORT}/auth/callback`;
++const SCOPES = "openid profile email offline_access";
++
++const base64url = (buffer) =>
++  buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
++
++const generatePkce = () => {
++  const verifier = base64url(randomBytes(32));
++  const challenge = base64url(createHash("sha256").update(verifier).digest());
++  return { verifier, challenge };
++};
++
++// In-memory state for one active OAuth flow at a time
++let activeFlow = null;
++
++const cleanupFlow = () => {
++  if (activeFlow?.server) {
++    try { activeFlow.server.close(); } catch {}
++  }
++  if (activeFlow?.timeout) {
++    clearTimeout(activeFlow.timeout);
++  }
++  activeFlow = null;
++};
++
++/**
++ * GET /api/auth/openai/authorize
++ *
++ * 1. Generates PKCE verifier/challenge + random state
++ * 2. Starts a temporary HTTP server on port 1455 to capture the callback
++ * 3. Returns the authorization URL for the frontend to open
++ */
++export const authorize = async (req, res) => {
++  // Clean up any previous flow
++  cleanupFlow();
++
++  const state = base64url(randomBytes(24));
++  const { verifier, challenge } = generatePkce();
++
++  // Build authorization URL
++  const params = new URLSearchParams({
++    response_type: "code",
++    client_id: CLIENT_ID,
++    redirect_uri: REDIRECT_URI,
++    scope: SCOPES,
++    state,
++    code_challenge: challenge,
++    code_challenge_method: "S256",
++    id_token_add_organizations: "true",
++    codex_cli_simplified_flow: "true",
++    originator: "aios"
++  });
++  const authorizationUrl = `${AUTH_URL}?${params.toString()}`;
++
++  // Create a promise that resolves when the callback is received
++  const flowPromise = new Promise((resolve, reject) => {
++    const server = createServer((cbReq, cbRes) => {
++      const cbUrl = new URL(cbReq.url, `http://localhost:${CALLBACK_PORT}`);
++
++      if (!cbUrl.pathname.startsWith("/auth/callback")) {
++        cbRes.writeHead(404);
++        cbRes.end("Not Found");
++        return;
++      }
++
++      const code = cbUrl.searchParams.get("code");
++      const returnedState = cbUrl.searchParams.get("state");
++      const error = cbUrl.searchParams.get("error");
++
++      // Return a page that tells the user they can close the window
++      cbRes.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
++
++      if (error) {
++        const desc = cbUrl.searchParams.get("error_description") || error;
++        cbRes.end(`<!DOCTYPE html><html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a1a;color:#e0e0e0"><div style="text-align:center"><h2>Authorization Failed</h2><p>${desc}</p><p style="color:#888">You can close this window.</p></div></body></html>`);
++        resolve({ error: desc });
++        return;
++      }
++
++      if (returnedState !== state) {
++        cbRes.end(`<!DOCTYPE html><html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a1a;color:#e0e0e0"><div style="text-align:center"><h2>State Mismatch</h2><p style="color:#888">Please try again.</p></div></body></html>`);
++        resolve({ error: "state mismatch" });
++        return;
++      }
++
++      cbRes.end(`<!DOCTYPE html><html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a1a;color:#e0e0e0"><div style="text-align:center"><h2 style="color:#10a37f">Authorization Successful</h2><p style="color:#888">You can close this window and return to AIOS.</p></div></body></html>`);
++      resolve({ code });
++    });
++
++    server.on("error", (err) => {
++      reject(new Error(`Failed to start callback server on port ${CALLBACK_PORT}: ${err.message}`));
++    });
++
++    server.listen(CALLBACK_PORT, "127.0.0.1", () => {
++      // Server started successfully
++    });
++
++    activeFlow = {
++      server,
++      state,
++      codeVerifier: verifier,
++      resolve,
++      timeout: setTimeout(() => {
++        resolve({ error: "timeout" });
++        cleanupFlow();
++      }, 5 * 60 * 1000) // 5 minute timeout
++    };
++  });
++
++  // Store the flow promise for the poll endpoint
++  activeFlow.promise = flowPromise;
++
++  return json(res, {
++    success: true,
++    authorizationUrl
++  });
++};
++
++/**
++ * POST /api/auth/openai/poll
++ *
++ * Frontend polls this endpoint to check if the OAuth callback was received.
++ * When the user completes login in the browser, the callback server captures
++ * the code, and this endpoint exchanges it for tokens.
++ */
++export const poll = async (req, res) => {
++  if (!activeFlow || !activeFlow.promise) {
++    return json(res, { success: false, status: "no_flow", message: "No active OAuth flow" }, 400);
++  }
++
++  // Save references before any async work (activeFlow may be cleared by concurrent polls)
++  const flowPromise = activeFlow.promise;
++  const codeVerifier = activeFlow.codeVerifier;
++
++  // Check if the callback has been received (non-blocking with race)
++  const timeout = new Promise((r) => setTimeout(() => r({ pending: true }), 200));
++  const result = await Promise.race([flowPromise, timeout]);
++
++  if (result.pending) {
++    return json(res, { success: true, status: "pending" });
++  }
++
++  // Callback received — clean up the server
++  cleanupFlow();
++
++  if (result.error) {
++    return json(res, { success: false, status: "error", message: result.error });
++  }
++
++  // Exchange authorization code for tokens
++  try {
++    const tokenRes = await fetch(TOKEN_URL, {
++      method: "POST",
++      headers: { "Content-Type": "application/json" },
++      body: JSON.stringify({
++        grant_type: "authorization_code",
++        client_id: CLIENT_ID,
++        code: result.code,
++        redirect_uri: REDIRECT_URI,
++        code_verifier: codeVerifier
++      })
++    });
++
++    const tokenData = await tokenRes.json();
++
++    if (!tokenRes.ok || !tokenData.access_token) {
++      const errMsg = tokenData.error_description || tokenData.error || "Token exchange failed";
++      return json(res, { success: false, status: "error", message: errMsg }, 400);
++    }
++
++    // Extract accountId from JWT access_token
++    let accountId = "";
++    try {
++      const parts = tokenData.access_token.split(".");
++      if (parts.length >= 2) {
++        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
++        accountId = payload?.["https://api.openai.com/auth"]?.chatgpt_account_id || "";
++      }
++    } catch {}
++
++    // Store OAuth tokens
++    saveSetting("authMethod", "oauth");
++    saveSetting("oauthAccessToken", tokenData.access_token);
++    saveSetting("oauthAccountId", accountId);
++    if (tokenData.refresh_token) {
++      saveSetting("oauthRefreshToken", tokenData.refresh_token);
++    }
++    if (tokenData.expires_in) {
++      saveSetting("oauthTokenExpiresAt", String(Date.now() + tokenData.expires_in * 1000));
++    }
++
++    // Auto-set provider and apiUrl for OpenAI Codex
++    saveSetting("provider", "openai");
++    saveSetting("apiUrl", "https://api.openai.com/v1/chat/completions");
++
++    return json(res, {
++      success: true,
++      status: "complete",
++      message: "OAuth login successful"
++    });
++  } catch (err) {
++    return json(res, {
++      success: false,
++      status: "error",
++      message: `Token exchange failed: ${err.message}`
++    }, 500);
++  }
++};
++
++/**
++ * POST /api/auth/openai/refresh
++ * Refreshes the OAuth access token using the stored refresh token.
++ */
++export const refresh = async (req, res) => {
++  const settings = getSettings();
++  const refreshToken = settings.oauthRefreshToken;
++
++  if (!refreshToken) {
++    return json(res, { success: false, message: "No refresh token available" }, 400);
++  }
++
++  try {
++    const result = await refreshOAuthToken(refreshToken);
++    if (result.error) {
++      return json(res, { success: false, message: result.error }, 401);
++    }
++    return json(res, { success: true, message: "Token refreshed" });
++  } catch (err) {
++    return json(res, { success: false, message: `Token refresh failed: ${err.message}` }, 500);
++  }
++};
++
++/**
++ * Shared refresh logic — also used by LLM layer for auto-refresh.
++ */
++export const refreshOAuthToken = async (refreshToken) => {
++  const tokenRes = await fetch(TOKEN_URL, {
++    method: "POST",
++    headers: { "Content-Type": "application/json" },
++    body: JSON.stringify({
++      grant_type: "refresh_token",
++      client_id: CLIENT_ID,
++      refresh_token: refreshToken
++    })
++  });
++
++  const tokenData = await tokenRes.json();
++
++  if (!tokenRes.ok || !tokenData.access_token) {
++    // Don't reset authMethod here — let the caller decide.
++    // The existing access token may still work even if refresh fails.
++    return { error: tokenData.error_description || tokenData.error || "Token refresh failed" };
++  }
++
++  saveSetting("oauthAccessToken", tokenData.access_token);
++  // Update accountId from new token
++  try {
++    const parts = tokenData.access_token.split(".");
++    if (parts.length >= 2) {
++      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
++      const acctId = payload?.["https://api.openai.com/auth"]?.chatgpt_account_id || "";
++      if (acctId) saveSetting("oauthAccountId", acctId);
++    }
++  } catch {}
++  if (tokenData.refresh_token) {
++    saveSetting("oauthRefreshToken", tokenData.refresh_token);
++  }
++  if (tokenData.expires_in) {
++    saveSetting("oauthTokenExpiresAt", String(Date.now() + tokenData.expires_in * 1000));
++  }
++  return { accessToken: tokenData.access_token };
++};
++
++/**
++ * POST /api/auth/openai/manual-tokens
++ * Debug: manually set access/refresh tokens without going through OAuth flow.
++ */
++export const manualTokens = async (req, res) => {
++  const { readBody } = await import("../../../shared/http/readBody.js");
++  const body = await readBody(req);
++  const { accessToken, refreshToken } = body || {};
++  if (!accessToken) {
++    return json(res, { success: false, message: "accessToken is required" }, 400);
++  }
++
++  // Extract accountId from JWT
++  let accountId = "";
++  try {
++    const parts = accessToken.split(".");
++    if (parts.length >= 2) {
++      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
++      accountId = payload?.["https://api.openai.com/auth"]?.chatgpt_account_id || "";
++    }
++  } catch {}
++
++  saveSetting("authMethod", "oauth");
++  saveSetting("oauthAccessToken", accessToken);
++  saveSetting("oauthAccountId", accountId);
++  if (refreshToken) saveSetting("oauthRefreshToken", refreshToken);
++  // Set expiration: try to read from JWT, otherwise default to 1 hour
++  let expiresIn = 3600;
++  try {
++    const parts = accessToken.split(".");
++    if (parts.length >= 2) {
++      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
++      if (payload.exp) {
++        expiresIn = payload.exp - Math.floor(Date.now() / 1000);
++        if (expiresIn < 0) expiresIn = 3600;
++      }
++    }
++  } catch {}
++  saveSetting("oauthTokenExpiresAt", String(Date.now() + expiresIn * 1000));
++  saveSetting("provider", "openai");
++  saveSetting("apiUrl", "https://api.openai.com/v1/chat/completions");
++
++  return json(res, { success: true, accountId });
++};
++
++/**
++ * POST /api/auth/openai/disconnect
++ * Clears OAuth tokens and reverts to API key auth.
++ */
++export const disconnect = async (req, res) => {
++  cleanupFlow();
++  saveSetting("authMethod", "apikey");
++  saveSetting("oauthAccessToken", "");
++  saveSetting("oauthAccountId", "");
++  saveSetting("oauthRefreshToken", "");
++  saveSetting("oauthTokenExpiresAt", "");
++  return json(res, { success: true, message: "OAuth disconnected" });
++};
+diff --git a/server/api/settings.js b/server/api/settings.js
+index faf29c1..527e857 100644
+--- a/server/api/settings.js
++++ b/server/api/settings.js
+@@ -5,7 +5,12 @@ import { updateSettings } from "../service/settings/update.js";
+ import { listSkills } from "../service/skills/list.js";
+ const handleSettingsApi = async (req, res, path) => {
+   if (path === "/api/settings" && req.method === "GET") {
+-    return json(res, getSettings());
++    const settings = getSettings();
++    // Don't expose OAuth tokens to frontend
++    const { oauthAccessToken, oauthAccountId, oauthRefreshToken, oauthTokenExpiresAt, ...safeSettings } = settings;
++    // Indicate whether OAuth is connected
++    safeSettings.oauthConnected = Boolean(oauthAccessToken);
++    return json(res, safeSettings);
+   }
+   if (path === "/api/settings/skills" && req.method === "GET") {
+     return json(res, {
+diff --git a/server/llm/codex.js b/server/llm/codex.js
+new file mode 100644
+index 0000000..ac9b404
+--- /dev/null
++++ b/server/llm/codex.js
+@@ -0,0 +1,232 @@
++/**
++ * Codex Responses API adapter
++ *
++ * Translates Chat Completions format ↔ Codex Responses API format.
++ * Used when authMethod is "oauth" (token from OpenAI ChatGPT login).
++ *
++ * Codex endpoint: https://chatgpt.com/backend-api/codex/responses
++ * Required headers: Authorization, chatgpt-account-id, OpenAI-Beta
++ */
++
++import { parseJson } from "../../shared/json/parse.js";
++
++const CODEX_API_URL = "https://chatgpt.com/backend-api/codex/responses";
++
++/**
++ * Convert Chat Completions messages → Codex Responses API input format.
++ *
++ * Chat Completions:  [{ role, content }]
++ * Responses API:     instructions (system) + input [{ type:"message", role, content:[{type, text}] }]
++ */
++const convertMessages = (messages) => {
++  let instructions = "";
++  const input = [];
++
++  for (const msg of messages) {
++    if (msg.role === "system") {
++      // System messages become the "instructions" field
++      instructions += (instructions ? "\n" : "") + (typeof msg.content === "string" ? msg.content : "");
++      continue;
++    }
++
++    if (msg.role === "user") {
++      const text = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
++      input.push({
++        type: "message",
++        role: "user",
++        content: [{ type: "input_text", text }]
++      });
++      continue;
++    }
++
++    if (msg.role === "assistant") {
++      const parts = [];
++      if (msg.content) {
++        parts.push({ type: "output_text", text: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content) });
++      }
++      // Convert tool_calls if present
++      if (Array.isArray(msg.tool_calls)) {
++        for (const tc of msg.tool_calls) {
++          parts.push({
++            type: "function_call",
++            id: tc.id || "",
++            name: tc.function?.name || "",
++            arguments: tc.function?.arguments || "{}"
++          });
++        }
++      }
++      if (parts.length > 0) {
++        input.push({ type: "message", role: "assistant", content: parts });
++      }
++      continue;
++    }
++
++    if (msg.role === "tool") {
++      input.push({
++        type: "function_call_output",
++        call_id: msg.tool_call_id || "",
++        output: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
++      });
++      continue;
++    }
++  }
++
++  return { instructions, input };
++};
++
++/**
++ * Convert Chat Completions tools → Responses API tools format.
++ */
++const convertTools = (tools) => {
++  if (!Array.isArray(tools) || tools.length === 0) return undefined;
++  return tools.map((t) => ({
++    type: "function",
++    name: t.function?.name || "",
++    description: t.function?.description || "",
++    parameters: t.function?.parameters || {}
++  }));
++};
++
++/**
++ * Build the Codex Responses API request body from a Chat Completions payload.
++ */
++const buildCodexPayload = (payload) => {
++  const { instructions, input } = convertMessages(payload.messages || []);
++  const body = {
++    model: payload.model || "gpt-4.1-mini",
++    instructions: instructions || "You are a helpful assistant.",
++    input,
++    store: false,
++    stream: true
++  };
++
++  const tools = convertTools(payload.tools);
++  if (tools) body.tools = tools;
++
++  if (payload.temperature !== undefined) body.temperature = payload.temperature;
++  if (payload.top_p !== undefined) body.top_p = payload.top_p;
++
++  return body;
++};
++
++/**
++ * Build headers for the Codex Responses API.
++ */
++const buildCodexHeaders = (accessToken, accountId) => ({
++  "Content-Type": "application/json",
++  "Authorization": `Bearer ${accessToken}`,
++  "chatgpt-account-id": accountId || "",
++  "OpenAI-Beta": "responses=experimental"
++});
++
++/**
++ * Parse Codex SSE stream and extract content + tool_calls in Chat Completions format.
++ *
++ * Codex streams events like:
++ *   response.output_text.delta  → { delta: "text" }
++ *   response.function_call_arguments.delta → { delta: "args" }
++ *   response.completed → final response
++ */
++const callCodexStream = async (accessToken, accountId, payload, { signal, onDelta } = {}) => {
++  const codexPayload = buildCodexPayload(payload);
++
++  const res = await fetch(CODEX_API_URL, {
++    method: "POST",
++    headers: buildCodexHeaders(accessToken, accountId),
++    body: JSON.stringify(codexPayload),
++    signal
++  });
++
++  if (!res.ok) {
++    const text = await res.text();
++    throw new Error(`Codex ${res.status}: ${text}`);
++  }
++
++  if (!res.body) throw new Error("Codex stream body is empty");
++
++  const reader = res.body.getReader();
++  const decoder = new TextDecoder("utf-8");
++  let buffer = "";
++
++  const state = { content: "", toolCalls: [] };
++  // Track current function call being built
++  const fnCallMap = new Map();
++
++  while (true) {
++    const { done, value } = await reader.read();
++    if (done) break;
++
++    buffer += decoder.decode(value, { stream: true });
++    let sep = buffer.indexOf("\n\n");
++    while (sep >= 0) {
++      const event = buffer.slice(0, sep);
++      buffer = buffer.slice(sep + 2);
++      sep = buffer.indexOf("\n\n");
++
++      // Parse SSE lines
++      let eventType = "";
++      let eventData = "";
++      for (const line of event.split("\n")) {
++        if (line.startsWith("event:")) eventType = line.slice(6).trim();
++        else if (line.startsWith("data:")) eventData = line.slice(5).trim();
++      }
++
++      if (!eventData || eventData === "[DONE]") continue;
++
++      const json = parseJson(eventData, "codex.stream");
++      if (!json) continue;
++
++      // Handle different event types
++      if (eventType === "response.output_text.delta") {
++        const text = json.delta || "";
++        if (text) {
++          state.content += text;
++          onDelta?.(text);
++        }
++      } else if (eventType === "response.function_call_arguments.delta") {
++        // Build up function call arguments
++        const itemId = json.item_id || "";
++        if (!fnCallMap.has(itemId)) {
++          fnCallMap.set(itemId, { id: "", name: "", arguments: "" });
++        }
++        fnCallMap.get(itemId).arguments += json.delta || "";
++      } else if (eventType === "response.output_item.added") {
++        // New output item (could be text or function_call)
++        const item = json.item || {};
++        if (item.type === "function_call") {
++          fnCallMap.set(item.id || "", {
++            id: item.call_id || item.id || "",
++            name: item.name || "",
++            arguments: ""
++          });
++        }
++      } else if (eventType === "response.output_item.done") {
++        // Output item completed
++        const item = json.item || {};
++        if (item.type === "function_call") {
++          const fc = fnCallMap.get(item.id || "") || {};
++          state.toolCalls.push({
++            id: item.call_id || fc.id || item.id || "",
++            type: "function",
++            function: {
++              name: item.name || fc.name || "",
++              arguments: item.arguments || fc.arguments || "{}"
++            }
++          });
++        }
++      }
++      // Ignore other event types (response.created, response.completed, etc.)
++    }
++  }
++
++  if (state.toolCalls.length > 0) {
++    return {
++      role: "assistant",
++      content: state.content || null,
++      tool_calls: state.toolCalls
++    };
++  }
++  return { role: "assistant", content: state.content };
++};
++
++export { callCodexStream, CODEX_API_URL };
+diff --git a/server/llm/common.js b/server/llm/common.js
+index e5c91d6..dec8c3d 100644
+--- a/server/llm/common.js
++++ b/server/llm/common.js
+@@ -1,3 +1,42 @@
++import { getSettings } from "../service/settings/get.js";
++import { refreshOAuthToken } from "../api/auth/openai-oauth.js";
++
++/**
++ * Check if the current request should use the Codex OAuth path.
++ * Returns { useCodex, accessToken, accountId } or { useCodex: false }.
++ */
++const resolveOAuth = async () => {
++  const settings = getSettings();
++  if (settings.authMethod !== "oauth") return { useCodex: false };
++
++  const { oauthRefreshToken, oauthAccessToken, oauthTokenExpiresAt, oauthAccountId } = settings;
++  if (!oauthAccessToken) return { useCodex: false };
++
++  // Check if token is expiring within 5 minutes
++  const expiresAt = Number(oauthTokenExpiresAt) || 0;
++  if (expiresAt > Date.now() + 5 * 60 * 1000) {
++    return { useCodex: true, accessToken: oauthAccessToken, accountId: oauthAccountId || "" };
++  }
++
++  // Token expired or about to expire — try refresh but don't break if it fails
++  if (oauthRefreshToken) {
++    try {
++      const result = await refreshOAuthToken(oauthRefreshToken);
++      if (result.accessToken) {
++        const refreshedSettings = getSettings();
++        return {
++          useCodex: true,
++          accessToken: result.accessToken,
++          accountId: refreshedSettings.oauthAccountId || oauthAccountId || ""
++        };
++      }
++    } catch {
++      // refresh failed — fall through to use existing token
++    }
++  }
++  return { useCodex: true, accessToken: oauthAccessToken, accountId: oauthAccountId || "" };
++};
++
+ const buildLlmHeaders = (provider, apiUrl, apiKey) => {
+   const headers = { "Content-Type": "application/json" };
+   if (provider === "claude") {
+@@ -12,6 +51,8 @@ const buildLlmHeaders = (provider, apiUrl, apiKey) => {
+   }
+   return headers;
+ };
++
+ export {
+-  buildLlmHeaders
++  buildLlmHeaders,
++  resolveOAuth
+ };
+diff --git a/server/llm/regular.js b/server/llm/regular.js
+index 53e577a..7ed5ad6 100644
+--- a/server/llm/regular.js
++++ b/server/llm/regular.js
+@@ -1,5 +1,14 @@
+-import { buildLlmHeaders } from "./common.js";
++import { buildLlmHeaders, resolveOAuth } from "./common.js";
++import { callCodexStream } from "./codex.js";
++
+ const callLlmRegular = async (provider, apiUrl, apiKey, payload, signal) => {
++  // Check if we should use the Codex OAuth path
++  // Codex only supports streaming, so we use stream and collect the result
++  const oauth = await resolveOAuth();
++  if (oauth.useCodex && provider === "openai") {
++    return callCodexStream(oauth.accessToken, oauth.accountId, payload, { signal });
++  }
++
+   try {
+     const res = await fetch(apiUrl, {
+       method: "POST",
+@@ -17,6 +26,5 @@ const callLlmRegular = async (provider, apiUrl, apiKey, payload, signal) => {
+     throw error;
+   }
+ };
+-export {
+-  callLlmRegular
+-};
++
++export { callLlmRegular };
+diff --git a/server/llm/stream.js b/server/llm/stream.js
+index 6e1856a..e961371 100644
+--- a/server/llm/stream.js
++++ b/server/llm/stream.js
+@@ -1,5 +1,7 @@
+-import { buildLlmHeaders } from "./common.js";
++import { buildLlmHeaders, resolveOAuth } from "./common.js";
++import { callCodexStream } from "./codex.js";
+ import { parseJson } from "../../shared/json/parse.js";
++
+ const ensureToolCall = (toolCalls, index) => {
+   if (!toolCalls[index]) {
+     toolCalls[index] = {
+@@ -10,6 +12,7 @@ const ensureToolCall = (toolCalls, index) => {
+   }
+   return toolCalls[index];
+ };
++
+ const parseOpenAiDelta = (json, state, onDelta) => {
+   const choice = json?.choices?.[0];
+   if (!choice) return;
+@@ -30,7 +33,15 @@ const parseOpenAiDelta = (json, state, onDelta) => {
+     }
+   }
+ };
++
+ const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelta } = {}) => {
++  // Check if we should use the Codex OAuth path
++  const oauth = await resolveOAuth();
++  if (oauth.useCodex && provider === "openai") {
++    return callCodexStream(oauth.accessToken, oauth.accountId, payload, { signal, onDelta });
++  }
++
++  // Standard Chat Completions path
+   const streamPayload = { ...payload, stream: true };
+   const state = { content: "", toolCalls: [] };
+   try {
+@@ -78,6 +89,5 @@ const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelt
+     throw error;
+   }
+ };
+-export {
+-  callLlmStream
+-};
++
++export { callLlmStream };
+diff --git a/server/service/settings/get.js b/server/service/settings/get.js
+index 55a563d..847dbac 100644
+--- a/server/service/settings/get.js
++++ b/server/service/settings/get.js
+@@ -20,6 +20,11 @@ const getSettings = () => {
+     apiUrl: obj.apiUrl || "https://api.openai.com/v1/chat/completions",
+     apiKey: obj.apiKey || "",
+     model: obj.model || "gpt-5.4",
++    authMethod: obj.authMethod || "apikey",
++    oauthAccessToken: obj.oauthAccessToken || "",
++    oauthAccountId: obj.oauthAccountId || "",
++    oauthRefreshToken: obj.oauthRefreshToken || "",
++    oauthTokenExpiresAt: obj.oauthTokenExpiresAt || "",
+     enableToolResultTruncate: obj.enableToolResultTruncate === void 0 ? true : obj.enableToolResultTruncate === "1",
+     toolResultMaxChars,
+     enableToolLoopLimit: obj.enableToolLoopLimit === void 0 ? true : obj.enableToolLoopLimit === "1",
+diff --git a/server/service/settings/update.js b/server/service/settings/update.js
+index 9a0625f..c06b4a7 100644
+--- a/server/service/settings/update.js
++++ b/server/service/settings/update.js
+@@ -13,6 +13,7 @@ const updateSettings = (body = {}) => {
+   if (body.apiUrl !== void 0) saveSetting("apiUrl", body.apiUrl);
+   if (body.apiKey !== void 0) saveSetting("apiKey", body.apiKey);
+   if (body.model !== void 0) saveSetting("model", body.model);
++  if (body.authMethod !== void 0) saveSetting("authMethod", body.authMethod);
+   if (body.enableToolResultTruncate !== void 0) saveSetting("enableToolResultTruncate", body.enableToolResultTruncate ? "1" : "0");
+   if (body.toolResultMaxChars !== void 0) saveSetting("toolResultMaxChars", String(clampToolResultMaxChars(body.toolResultMaxChars)));
+   if (body.enableToolLoopLimit !== void 0) saveSetting("enableToolLoopLimit", body.enableToolLoopLimit ? "1" : "0");
+diff --git a/ui/src/apps/settings/ModelTab.vue b/ui/src/apps/settings/ModelTab.vue
+index dc3ca2a..658320d 100644
+--- a/ui/src/apps/settings/ModelTab.vue
++++ b/ui/src/apps/settings/ModelTab.vue
+@@ -14,25 +14,65 @@
+       </select>
+     </div>
+ 
+-    <div>
+-      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">__T_SETTINGS_API_URL__</div>
+-      <input
+-        :value="apiUrl"
+-        @input="$emit('update:api-url', $event.target.value)"
+-        placeholder="https://api.example.com/v1/chat/completions"
+-        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
+-      />
++    <!-- Auth method toggle -->
++    <div v-if="providerSupportsOAuth" class="flex gap-2">
++      <button
++        v-for="m in authMethods"
++        :key="m.id"
++        class="flex-1 rounded-lg border px-3 py-2 text-[12px] tracking-wide transition-all cursor-pointer"
++        :class="authMethod === m.id
++          ? 'border-[#b08a40] bg-[rgba(176,138,64,0.08)] text-[#b08a40] font-semibold dark:border-[#c8a060] dark:bg-[rgba(200,160,96,0.1)] dark:text-[#c8a060]'
++          : 'border-[#dcd0b8] text-[#b8a888] hover:border-[#b8a888] dark:border-[#2a1e14] dark:text-[#6a5840] dark:hover:border-[#5a4a35]'"
++        @click="$emit('update:auth-method', m.id)"
++      >
++        {{ m.label }}
++      </button>
+     </div>
+ 
+-    <div>
+-      <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">__T_SETTINGS_API_KEY__</div>
+-      <input
+-        :value="apiKey"
+-        @input="$emit('update:api-key', $event.target.value)"
+-        type="password"
+-        placeholder="__T_SETTINGS_API_KEY__"
+-        class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
+-      />
++    <!-- API Key mode -->
++    <template v-if="authMethod !== 'oauth'">
++      <div>
++        <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">__T_SETTINGS_API_URL__</div>
++        <input
++          :value="apiUrl"
++          @input="$emit('update:api-url', $event.target.value)"
++          placeholder="https://api.example.com/v1/chat/completions"
++          class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
++        />
++      </div>
++
++      <div>
++        <div class="text-xs font-medium text-[#a0907a] dark:text-[#6a5840] mb-1.5">__T_SETTINGS_API_KEY__</div>
++        <input
++          :value="apiKey"
++          @input="$emit('update:api-key', $event.target.value)"
++          type="password"
++          placeholder="__T_SETTINGS_API_KEY__"
++          class="w-full px-3 py-2.5 rounded-lg text-[13px] bg-[#fffdf8] border border-[#dcd0b8] text-[#4a3a28] placeholder-[#c0b098] outline-none focus:border-[#b08a40] transition-colors dark:bg-[rgba(30,22,14,0.8)] dark:border-[#2a1e14] dark:text-[#e8dcc8] dark:placeholder-[#3a2a1a] dark:focus:border-[#c8a060]"
++        />
++      </div>
++    </template>
++
++    <!-- OAuth mode -->
++    <div v-else class="rounded-lg border border-[#dcd0b8] dark:border-[#2a1e14] bg-[#fffdf8] dark:bg-[rgba(30,22,14,0.8)] p-4">
++      <div v-if="isOAuthConnected" class="flex items-center justify-between">
++        <div class="flex items-center gap-2">
++          <div class="h-2 w-2 rounded-full bg-green-500"></div>
++          <span class="text-[13px] text-[#4a3a28] dark:text-[#a09078]">__T_SETTINGS_OAUTH_CONNECTED__</span>
++        </div>
++        <button
++          @click="disconnectOAuth"
++          class="text-[12px] text-[#b8a888] hover:text-[#a94f4f] dark:text-[#6a5840] dark:hover:text-[#c85050] transition-colors cursor-pointer"
++        >__T_SETTINGS_OAUTH_DISCONNECT__</button>
++      </div>
++      <div v-else>
++        <p class="mb-3 text-[12px] text-[#b8a888] dark:text-[#6a5840]">__T_SETTINGS_OAUTH_HINT__</p>
++        <button
++          class="rounded-lg bg-[#10a37f] px-5 py-2 text-[13px] font-semibold text-white hover:bg-[#0d8c6d] transition-colors cursor-pointer disabled:opacity-40"
++          :disabled="oauthPending"
++          @click="startOAuth"
++        >{{ oauthPending ? '__T_SETTINGS_OAUTH_CONNECTING__' : '__T_SETTINGS_OAUTH_LOGIN__' }}</button>
++      </div>
+     </div>
+ 
+     <div>
+@@ -52,12 +92,16 @@
+ </template>
+ 
+ <script setup>
+-import { PROVIDER_GROUPS, getProvidersByGroup } from '../../data/providers.js';
+-defineProps({
++import { ref, computed } from 'vue';
++import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../../data/providers.js';
++
++const props = defineProps({
+   provider: { type: String, default: 'openrouter' },
+   apiUrl: { type: String, default: '' },
+   apiKey: { type: String, default: '' },
+-  model: { type: String, default: '' }
++  model: { type: String, default: '' },
++  authMethod: { type: String, default: 'apikey' },
++  oauthConnected: { type: Boolean, default: false }
+ });
+ 
+ const emit = defineEmits([
+@@ -65,11 +109,73 @@ const emit = defineEmits([
+   'update:api-url',
+   'update:api-key',
+   'update:model',
++  'update:auth-method',
+   'save'
+ ]);
+ 
++const oauthPending = ref(false);
++const isOAuthConnected = ref(props.oauthConnected);
++
++const authMethods = [
++  { id: 'apikey', label: 'API Key' },
++  { id: 'oauth', label: 'OAuth __T_SETTINGS_OAUTH_LOGIN_SHORT__' }
++];
++
++const providerSupportsOAuth = computed(() => {
++  const p = getProvider(props.provider);
++  return p?.supportsOAuth === true;
++});
++
+ const onProviderChange = (e) => {
+   const value = e.target.value;
+   emit('update:provider', value);
++  // Reset to apikey when switching providers
++  emit('update:auth-method', 'apikey');
++  isOAuthConnected.value = false;
++};
++
++const startOAuth = async () => {
++  oauthPending.value = true;
++  try {
++    const res = await fetch('/aios/api/auth/openai/authorize', { credentials: 'include' });
++    const data = await res.json();
++    if (!res.ok || !data.success) throw new Error(data.message || 'Failed');
++
++    window.open(data.authorizationUrl, '_blank');
++
++    const pollInterval = setInterval(async () => {
++      try {
++        const pollRes = await fetch('/aios/api/auth/openai/poll', {
++          method: 'POST',
++          credentials: 'include'
++        });
++        const pollData = await pollRes.json();
++        if (pollData.status === 'pending') return;
++
++        clearInterval(pollInterval);
++        if (pollData.status === 'complete') {
++          isOAuthConnected.value = true;
++          emit('update:auth-method', 'oauth');
++        }
++        oauthPending.value = false;
++      } catch {
++        clearInterval(pollInterval);
++        oauthPending.value = false;
++      }
++    }, 1500);
++  } catch {
++    oauthPending.value = false;
++  }
++};
++
++const disconnectOAuth = async () => {
++  try {
++    await fetch('/aios/api/auth/openai/disconnect', {
++      method: 'POST',
++      credentials: 'include'
++    });
++  } catch {}
++  isOAuthConnected.value = false;
++  emit('update:auth-method', 'apikey');
+ };
+ </script>
+diff --git a/ui/src/apps/settings/index.vue b/ui/src/apps/settings/index.vue
+index 8782f5c..aee2d0d 100644
+--- a/ui/src/apps/settings/index.vue
++++ b/ui/src/apps/settings/index.vue
+@@ -36,11 +36,14 @@
+           :api-url="editApiUrl"
+           :api-key="editApiKey"
+           :model="editModel"
++          :auth-method="authMethod"
++          :oauth-connected="oauthConnected"
+           @save="save"
+           @update:provider="onProviderChange"
+           @update:api-url="editApiUrl = $event"
+           @update:api-key="editApiKey = $event"
+           @update:model="editModel = $event"
++          @update:auth-method="authMethod = $event"
+         />
+         <ToolTab
+           v-else-if="activeTab === 'tools'"
+@@ -111,6 +114,8 @@ const toolMaxRounds = ref(50);
+ const editApiUrl = ref('');
+ const editApiKey = ref('');
+ const editModel = ref('');
++const authMethod = ref('apikey');
++const oauthConnected = ref(false);
+ const accountUsername = ref('');
+ const oldPassword = ref('');
+ const newPassword = ref('');
+@@ -179,6 +184,8 @@ const fetchSettings = async () => {
+   editApiUrl.value = data.apiUrl || '';
+   editApiKey.value = data.apiKey || '';
+   editModel.value = data.model || '';
++  authMethod.value = data.authMethod || 'apikey';
++  oauthConnected.value = data.oauthConnected === true;
+   providerConfigs.value[provider.value] = {
+     apiUrl: editApiUrl.value,
+     apiKey: editApiKey.value,
+@@ -224,7 +231,8 @@ const save = async () => {
+         toolMaxRounds: maxRounds,
+         apiUrl: editApiUrl.value,
+         apiKey: editApiKey.value,
+-        model: editModel.value
++        model: editModel.value,
++        authMethod: authMethod.value
+       })
+     });
+ 
+diff --git a/ui/src/data/providers.js b/ui/src/data/providers.js
+index 991f25b..6c3c2a1 100644
+--- a/ui/src/data/providers.js
++++ b/ui/src/data/providers.js
+@@ -12,7 +12,8 @@ const PROVIDERS = [
+     name: "OpenAI",
+     group: "default",
+     apiUrl: "https://api.openai.com/v1/chat/completions",
+-    defaultModel: "gpt-5.4"
++    defaultModel: "gpt-5.4",
++    supportsOAuth: true
+   },
+   {
+     id: "claude",
+diff --git a/ui/src/views/WelcomeView.vue b/ui/src/views/WelcomeView.vue
+index e86f721..5cb2459 100644
+--- a/ui/src/views/WelcomeView.vue
++++ b/ui/src/views/WelcomeView.vue
+@@ -99,13 +99,59 @@
+                 <input v-model.trim="model.model" placeholder="gpt-5.4" class="wiz-input" />
+               </div>
+             </div>
+-            <div>
+-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_url }}</label>
+-              <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
++
++            <!-- Auth method toggle (only for providers that support OAuth) -->
++            <div v-if="currentProviderSupportsOAuth" class="flex gap-3">
++              <button
++                v-for="m in [{ id: 'apikey', label: t.auth_apikey }, { id: 'oauth', label: t.auth_oauth }]"
++                :key="m.id"
++                class="relative flex-1 rounded-lg border px-4 py-2.5 text-[13px] tracking-wide transition-all cursor-pointer"
++                :class="model.authMethod === m.id
++                  ? 'border-[#c8a060] bg-[rgba(200,160,96,0.1)] text-[#c8a060] font-semibold'
++                  : 'border-[#3a2a18] text-[#6a5840] hover:border-[#5a4a35] hover:text-[#a08c70]'"
++                @click="model.authMethod = m.id">
++                {{ m.label }}
++              </button>
+             </div>
+-            <div>
+-              <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_key }}</label>
+-              <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
++
++            <!-- API Key fields (shown when authMethod is apikey) -->
++            <template v-if="model.authMethod !== 'oauth'">
++              <div>
++                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_url }}</label>
++                <input v-model.trim="model.apiUrl" placeholder="https://..." class="wiz-input" />
++              </div>
++              <div>
++                <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">{{ t.api_key }}</label>
++                <input v-model.trim="model.apiKey" placeholder="sk-..." class="wiz-input" />
++              </div>
++            </template>
++
++            <!-- OAuth login (shown when authMethod is oauth) -->
++            <div v-else class="rounded-lg border border-[#3a2a18] bg-[rgba(0,0,0,0.2)] p-5">
++              <div v-if="oauthConnected" class="flex items-center gap-3">
++                <div class="h-2 w-2 rounded-full bg-green-500"></div>
++                <span class="text-[13px] text-[#a09078]">{{ t.oauth_connected }}</span>
++              </div>
++              <div v-else>
++                <p class="mb-4 text-[13px] leading-relaxed text-[#8a7860]">{{ t.oauth_hint }}</p>
++                <button
++                  class="rounded bg-[#10a37f] px-6 py-2.5 text-[13px] font-semibold text-white hover:bg-[#0d8c6d] shadow-[0_4px_14px_rgba(16,163,127,0.3)] transition-all cursor-pointer disabled:opacity-40"
++                  :disabled="pending"
++                  @click="startOAuthLogin">
++                  {{ pending ? t.oauth_connecting : t.oauth_login }}
++                </button>
++              </div>
++              <div class="mt-4 space-y-3 border-t border-[#3a2a18] pt-4">
++                <p class="text-[11px] uppercase tracking-widest text-[#6a5840]">{{ t.oauth_manual_hint }}</p>
++                <div>
++                  <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">Access Token</label>
++                  <input v-model.trim="model.accessToken" placeholder="eyJhbGci..." class="wiz-input" />
++                </div>
++                <div>
++                  <label class="mb-2 block text-[11px] uppercase tracking-widest text-[#8a7860]">Refresh Token</label>
++                  <input v-model.trim="model.refreshToken" placeholder="eyJhbGci..." class="wiz-input" />
++                </div>
++              </div>
+             </div>
+           </div>
+           <div v-if="error" class="mt-4 rounded-lg border border-[#a94f4f] bg-[#5a2727]/80 px-3 py-2 text-sm">{{ error }}</div>
+@@ -114,10 +160,17 @@
+             <button class="text-[13px] tracking-wide text-[#6a5840] hover:text-[#c8a060] transition-colors cursor-pointer"
+               @click="step = 2">{{ t.prev }}</button>
+             <button
++              v-if="model.authMethod !== 'oauth'"
+               class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
+               :disabled="pending" @click="saveModelAndTest">
+               {{ pending ? t.testing : t.save_test }}
+             </button>
++            <button
++              v-else-if="oauthConnected || model.accessToken"
++              class="rounded bg-[#c8a060] px-8 py-3 text-[14px] font-semibold text-[#1a1008] hover:bg-[#d4b070] shadow-[0_4px_14px_rgba(200,160,96,0.3)] transition-all disabled:opacity-40 cursor-pointer"
++              :disabled="pending" @click="saveOAuthAndTest">
++              {{ pending ? t.testing : t.save_test }}
++            </button>
+           </div>
+         </div>
+ 
+@@ -154,7 +207,7 @@
+ </template>
+ 
+ <script setup>
+-import { ref, computed, onUnmounted } from 'vue';
++import { ref, computed, onMounted, onUnmounted } from 'vue';
+ import { PROVIDER_GROUPS, getProvidersByGroup, getProvider } from '../data/providers.js';
+ import { clearAuthCache } from '../auth/session.js';
+ 
+@@ -180,6 +233,13 @@ const texts = {
+     model_label: '模型',
+     api_url: 'API 链接 (可选)',
+     api_key: 'API Key',
++    auth_apikey: 'API Key',
++    auth_oauth: 'OAuth 登录',
++    oauth_hint: '通过 OpenAI 账号授权登录，无需手动填写 API Key。',
++    oauth_login: '使用 OpenAI 账号登录',
++    oauth_connecting: '连接中…',
++    oauth_connected: '已通过 OAuth 连接 OpenAI',
++    oauth_manual_hint: '或手动填写 Token',
+     testing: '检查中…',
+     save_test: '连接大模型',
+     intro_title: '初始化完成',
+@@ -219,6 +279,13 @@ const texts = {
+     model_label: 'Model',
+     api_url: 'API URL (Optional)',
+     api_key: 'API Key',
++    auth_apikey: 'API Key',
++    auth_oauth: 'OAuth Login',
++    oauth_hint: 'Sign in with your OpenAI account. No API key needed.',
++    oauth_login: 'Sign in with OpenAI',
++    oauth_connecting: 'Connecting…',
++    oauth_connected: 'Connected to OpenAI via OAuth',
++    oauth_manual_hint: 'Or enter tokens manually',
+     testing: 'Checking…',
+     save_test: 'Connect Model',
+     intro_title: 'Initialization Complete',
+@@ -258,9 +325,19 @@ const model = ref({
+   apiUrl: getProvider('openai')?.apiUrl || '',
+   model: getProvider('openai')?.defaultModel || '',
+   apiKey: '',
++  accessToken: '',
++  refreshToken: '',
++  authMethod: 'apikey',
+   language: detectedLanguage
+ });
+ 
++const oauthConnected = ref(false);
++
++const currentProviderSupportsOAuth = computed(() => {
++  const p = getProvider(model.value.provider);
++  return p?.supportsOAuth === true;
++});
++
+ const t = computed(() => texts[model.value.language] || texts.en);
+ const installMessage = computed(() => {
+   if (error.value && !pending.value && !installing.value && !installReady.value && step.value === 4) {
+@@ -276,6 +353,10 @@ const applyProviderDefault = () => {
+   const item = getProvider(model.value.provider);
+   model.value.apiUrl = item?.apiUrl || '';
+   model.value.model = item?.defaultModel || '';
++  model.value.authMethod = 'apikey';
++  model.value.accessToken = '';
++  model.value.refreshToken = '';
++  oauthConnected.value = false;
+ };
+ 
+ const hasBootstrapModel = (settings) => {
+@@ -430,6 +511,93 @@ const saveModelAndTest = async () => {
+   }
+ };
+ 
++const startOAuthLogin = async () => {
++  error.value = '';
++  pending.value = true;
++  try {
++    // 1. Ask server to start OAuth flow (creates temp server on port 1455)
++    const res = await fetch('/aios/api/auth/openai/authorize', {
++      credentials: 'include'
++    });
++    const data = await res.json();
++    if (!res.ok || !data.success) throw new Error(data.message || 'Failed to start OAuth');
++
++    // 2. Open OpenAI login page in a new tab
++    window.open(data.authorizationUrl, '_blank');
++
++    // 3. Poll server until the callback is received
++    const pollInterval = setInterval(async () => {
++      try {
++        const pollRes = await fetch('/aios/api/auth/openai/poll', {
++          method: 'POST',
++          credentials: 'include'
++        });
++        const pollData = await pollRes.json();
++
++        if (pollData.status === 'pending') return; // still waiting
++
++        clearInterval(pollInterval);
++
++        if (pollData.status === 'complete') {
++          oauthConnected.value = true;
++          pending.value = false;
++        } else {
++          error.value = pollData.message || 'OAuth failed';
++          pending.value = false;
++        }
++      } catch {
++        clearInterval(pollInterval);
++        error.value = 'OAuth polling failed';
++        pending.value = false;
++      }
++    }, 1500);
++  } catch (e) {
++    error.value = e?.message || 'OAuth login failed';
++    pending.value = false;
++  }
++};
++
++const saveOAuthAndTest = async () => {
++  error.value = '';
++  pending.value = true;
++  try {
++    // If user manually filled in tokens, use manual-tokens endpoint
++    if (model.value.accessToken) {
++      const tokenRes = await fetch('/aios/api/auth/openai/manual-tokens', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        credentials: 'include',
++        body: JSON.stringify({
++          accessToken: model.value.accessToken,
++          refreshToken: model.value.refreshToken || undefined
++        })
++      });
++      const tokenData = await tokenRes.json();
++      if (!tokenRes.ok || tokenData?.success === false) {
++        throw new Error(tokenData?.message || t.value.err_save);
++      }
++    }
++    // Save the model name
++    const saveRes = await fetch('/aios/api/settings', {
++      method: 'POST',
++      headers: { 'Content-Type': 'application/json' },
++      credentials: 'include',
++      body: JSON.stringify({
++        model: model.value.model
++      })
++    });
++    const saveData = await saveRes.json();
++    if (!saveRes.ok || saveData?.success === false) {
++      throw new Error(saveData?.message || t.value.err_save);
++    }
++    await enterWelcome();
++  } catch (e) {
++    error.value = e?.message || t.value.err_test;
++  } finally {
++    pending.value = false;
++  }
++};
++
+ const enterSystem = async () => {
+   if (!installReady.value || installing.value) return;
+   clearAuthCache();

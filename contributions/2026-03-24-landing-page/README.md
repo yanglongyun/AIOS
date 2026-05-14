@@ -13,5 +13,4 @@ The original commit included a fullscreen video hero, glass-style navigation, fe
 ## Files
 
 - `files.txt` lists the paths changed by the original commit.
-- `commit.diff` stores the textual diff and commit metadata.
-
+- `code/landing/` contains the actual landing page files from the original commit, including local font and video assets.

@@ -13,5 +13,4 @@ The original commit introduced PKCE OAuth flow documentation, an auth endpoint, 
 ## Files
 
 - `files.txt` lists the paths changed by the original commit.
-- `commit.diff` stores the textual diff and commit metadata.
-
+- `code/` contains the actual files from the original commit, preserving their original paths.

@@ -1,18 +1,18 @@
-M	doc/docker/docker-compose.yml
-A	doc/openai-codex-oauth.md
-M	language/en/views/settings.json
-M	language/zh/views/settings.json
-M	package.json
-M	server/api/auth/index.js
-A	server/api/auth/openai-oauth.js
-M	server/api/settings.js
-A	server/llm/codex.js
-M	server/llm/common.js
-M	server/llm/regular.js
-M	server/llm/stream.js
-M	server/service/settings/get.js
-M	server/service/settings/update.js
-M	ui/src/apps/settings/ModelTab.vue
-M	ui/src/apps/settings/index.vue
-M	ui/src/data/providers.js
-M	ui/src/views/WelcomeView.vue
+doc/docker/docker-compose.yml
+doc/openai-codex-oauth.md
+language/en/views/settings.json
+language/zh/views/settings.json
+package.json
+server/api/auth/index.js
+server/api/auth/openai-oauth.js
+server/api/settings.js
+server/llm/codex.js
+server/llm/common.js
+server/llm/regular.js
+server/llm/stream.js
+server/service/settings/get.js
+server/service/settings/update.js
+ui/src/apps/settings/ModelTab.vue
+ui/src/apps/settings/index.vue
+ui/src/data/providers.js
+ui/src/views/WelcomeView.vue

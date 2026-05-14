@@ -13,5 +13,4 @@ The original commit modified the create-app interface, updated the desktop `Wind
 ## Files
 
 - `files.txt` lists the paths changed by the original commit.
-- `commit.diff` stores the textual diff and commit metadata.
-
+- `code/` contains the actual files from the original commit, preserving their original paths.

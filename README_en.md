@@ -243,3 +243,14 @@ Those are mainly LLM chat frontends. AIOS is a **local operating system** with A
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
 
 Ideas, bugs, AI-native app showcases — come hang out.
+
+---
+
+## Editions
+
+AIOS is a general kernel that can be tailored into themed editions for different user groups:
+
+| Edition | Audience | Main differences |
+|---|---|---|
+| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, full set of 23 built-in apps |
+| [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |

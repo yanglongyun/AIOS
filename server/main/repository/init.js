@@ -66,13 +66,11 @@ const createTables = () => {
       title       TEXT NOT NULL DEFAULT '',
       description TEXT NOT NULL DEFAULT '',
       content     TEXT NOT NULL DEFAULT '',
-      enabled     INTEGER NOT NULL DEFAULT 1,
-      pinned      INTEGER NOT NULL DEFAULT 0,
-      created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+      visibility  TEXT NOT NULL DEFAULT 'full',
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
     );
-    CREATE INDEX IF NOT EXISTS idx_memories_enabled_pinned_updated
-      ON memories(enabled DESC, pinned DESC, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_memories_visibility_id
+      ON memories(visibility, id DESC);
   `);
 };
 

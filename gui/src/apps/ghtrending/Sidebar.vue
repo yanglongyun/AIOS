@@ -29,7 +29,7 @@ defineEmits(['pick-history', 'pick-lang']);
                 :class="{ 'gh-nav-active': mode === 'list' && language === '' }"
                 @click="$emit('pick-lang', '')">
             <span class="msi sm">all_inclusive</span>
-            <span class="flex-1 truncate text-left">__T_GH_ALL_LANGUAGES__</span>
+            <span class="flex-1 truncate text-left">全部语言</span>
         </button>
 
         <button v-for="l in LANGS" :key="l"

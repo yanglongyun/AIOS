@@ -22,6 +22,6 @@ export const LANGS = Object.keys(LANG_COLORS);
 export const langClr = (l) => LANG_COLORS[l] || '#8b949e';
 
 export const TIME_FILTERS = [
-    { id: 'weekly',  label: '__T_GH_WEEKLY__' },
-    { id: 'monthly', label: '__T_GH_MONTHLY__' }
+    { id: 'weekly',  label: '本周' },
+    { id: 'monthly', label: '本月' }
 ];

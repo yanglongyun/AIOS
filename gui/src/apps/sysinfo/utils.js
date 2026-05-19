@@ -13,7 +13,7 @@ export function fmtUptime(s) {
     const d = Math.floor(s / 86400);
     const h = Math.floor((s % 86400) / 3600);
     const m = Math.floor((s % 3600) / 60);
-    return [d && `${d} __T_TIME_DAYS__`, h && `${h} __T_TIME_HOURS__`, `${m} __T_TIME_MINUTES__`].filter(Boolean).join(' ');
+    return [d && `${d} 天`, h && `${h} 小时`, `${m} 分`].filter(Boolean).join(' ');
 }
 
 export function loadColor(load, cores) {

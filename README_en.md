@@ -7,7 +7,7 @@
 Build native apps tailored to your needs through dialogue. A unified AI kernel that lets your apps talk to AI, too.
 
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A520-43853d.svg)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522.5-43853d.svg)](https://nodejs.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-install)
 [![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/YfCbV3m9Q)
 [![Stars](https://img.shields.io/github/stars/realuckyang/AIOS?style=social)](https://github.com/realuckyang/AIOS)
@@ -57,7 +57,7 @@ AIOS is a **fully local-first** AI workstation:
 | Item | Required |
 |---|---|
 | OS | macOS 12+ / mainstream Linux / Windows 10 1809+ |
-| Node.js | 20 or newer (the script auto-installs it) |
+| Node.js | 22.5 or newer (the script auto-installs it) |
 | Ports | `9502` (main), `9503` (apps), `5173` (Vite dev) |
 | Disk | ≥ 1 GB |
 
@@ -65,7 +65,7 @@ AIOS is a **fully local-first** AI workstation:
 
 > ⚠️ The installer uses your package manager to install Node, git, rsync, then clones and builds AIOS. Read the [script](https://github.com/realuckyang/AIOS/blob/main/install-macos.sh) before running.
 
-**macOS** (auto-installs Homebrew + Node@20)
+**macOS** (auto-installs Homebrew + Node@22)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/realuckyang/AIOS/main/install-macos.sh | sh
 ```
@@ -154,7 +154,7 @@ AIOS/
 └── scripts/         # Start / build / fix scripts
 ```
 
-**Stack**: Node.js 22 · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
+**Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
 
 Storage: a single local SQLite file (`database/aios.db`), fully backup-able and portable.
 
@@ -197,7 +197,7 @@ npm run start:apps
 npm run lang:reset
 ```
 
-Issues and PRs welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) (WIP) before submitting.
+Issues and PRs welcome. Please read [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md) (WIP) before submitting.
 
 ---
 

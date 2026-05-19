@@ -5,7 +5,8 @@ import {
 } from "../../repository/chat/remarks.js";
 
 const REMARK_RE = /<remark>([\s\S]*?)<\/remark>/g;
-const PROBE = "<remark";
+const REMARK_OPEN = "<remark";
+const REMARK_CLOSE = "</remark>";
 
 const extractRemark = (text) => {
   const src = String(text || "");
@@ -49,31 +50,50 @@ const listAllRemarks = (conversationId) => {
   }));
 };
 
-// 流式过滤器:只要 buffer 出现 "<remark" 就停止向前端转发后续 delta,
-// 等流结束后服务端再统一从完整 message.content 里抽 remark + 剥离正文.
+// 流式过滤器:只吞掉 <remark>...</remark> 块,其它正文继续按 delta 转发。
+// 完整 remark 仍在流结束后从 message.content 抽取并落库。
 const createRemarkStreamFilter = (forward) => {
   let buffer = "";
-  let muted = false;
-  return {
-    push(chunk) {
-      if (muted) return;
-      buffer += String(chunk || "");
-      const idx = buffer.indexOf(PROBE);
-      if (idx !== -1) {
-        if (idx > 0) forward(buffer.slice(0, idx));
-        muted = true;
-        buffer = "";
+  let inRemark = false;
+  const forwardText = (text) => { if (text) forward(text); };
+  const drain = (force = false) => {
+    while (buffer) {
+      if (inRemark) {
+        const end = buffer.indexOf(REMARK_CLOSE);
+        if (end === -1) {
+          buffer = force ? "" : buffer.slice(-(REMARK_CLOSE.length - 1));
+          return;
+        }
+        buffer = buffer.slice(end + REMARK_CLOSE.length);
+        inRemark = false;
+        continue;
+      }
+
+      const start = buffer.indexOf(REMARK_OPEN);
+      if (start === -1) {
+        const safeLen = force ? buffer.length : Math.max(0, buffer.length - (REMARK_OPEN.length - 1));
+        if (safeLen > 0) {
+          forwardText(buffer.slice(0, safeLen));
+          buffer = buffer.slice(safeLen);
+        }
         return;
       }
-      const safe = buffer.length - PROBE.length;
-      if (safe > 0) {
-        forward(buffer.slice(0, safe));
-        buffer = buffer.slice(safe);
-      }
+
+      forwardText(buffer.slice(0, start));
+      buffer = buffer.slice(start + REMARK_OPEN.length);
+      inRemark = true;
+    }
+  };
+  return {
+    push(chunk) {
+      buffer += String(chunk || "");
+      drain();
     },
     flush() {
-      if (!muted && buffer) forward(buffer);
+      drain(true);
+      if (!inRemark && buffer) forwardText(buffer);
       buffer = "";
+      inRemark = false;
     }
   };
 };

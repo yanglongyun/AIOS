@@ -68,18 +68,18 @@
           <div class="rss-add-section">
             <button v-if="!showAdd" class="rss-add-btn" @click="showAdd = true">
               <span class="msi sm">add</span>
-              <span>__T_RSS_ADD_FEED__</span>
+              <span>添加订阅源</span>
             </button>
             <div v-else class="rss-add-form">
               <input v-model="newUrl" class="rss-add-input"
-                :placeholder="'__T_RSS_ADD_FEED_PLACEHOLDER__'"
+                :placeholder="'RSS / Atom 链接'"
                 @keydown.enter="doAddFeed" />
               <input v-model="newName" class="rss-add-input"
-                :placeholder="'__T_RSS_NAME_PLACEHOLDER__'" />
+                :placeholder="'名称(选填)'" />
               <div class="flex gap-1.5">
                 <button class="rss-add-cancel"
-                  @click="showAdd = false; newUrl = ''; newName = ''">__T_RSS_CANCEL__</button>
-                <button class="rss-add-confirm" @click="doAddFeed">__T_RSS_ADD__</button>
+                  @click="showAdd = false; newUrl = ''; newName = ''">取消</button>
+                <button class="rss-add-confirm" @click="doAddFeed">添加</button>
               </div>
             </div>
           </div>
@@ -112,12 +112,12 @@
         <!-- 空态 -->
         <div v-if="currentView === 'empty'" class="flex-1 flex flex-col items-center justify-center text-text-3 gap-3">
           <span class="msi" style="font-size:48px;opacity:0.4">rss_feed</span>
-          <div class="text-sm">__T_RSS_EMPTY__</div>
+          <div class="text-sm">选择左侧订阅源开始阅读</div>
         </div>
 
         <!-- Article list -->
         <div v-if="currentView === 'articles'" class="flex-1 overflow-y-auto">
-          <div v-if="articlesLoading" class="text-center text-text-3 text-sm py-12">__T_RSS_LOADING__</div>
+          <div v-if="articlesLoading" class="text-center text-text-3 text-sm py-12">加载中…</div>
           <article v-for="item in articles" :key="item.url" class="rss-article">
             <a :href="item.url" target="_blank" class="rss-article-title">{{ item.title }}</a>
             <p class="rss-article-desc">{{ item.description }}</p>
@@ -140,7 +140,7 @@
                 :disabled="summarizingUrl === item.url"
                 @click="doSummarize(item)">
                 <span class="msi xs">{{ summarizingUrl === item.url ? 'hourglass_top' : 'auto_awesome' }}</span>
-                <span>{{ summarizingUrl === item.url ? '__T_RSS_SUMMARIZING__' : '__T_RSS_QUICK_LOOK__' }}</span>
+                <span>{{ summarizingUrl === item.url ? 'AI 思考中…' : 'Quick Look' }}</span>
               </button>
               <button class="rss-chip"
                 :class="{ 'rss-chip-saved': isSaved(item.url) }"
@@ -191,7 +191,7 @@
         <div v-if="currentView === 'bookmarks'" class="flex-1 overflow-y-auto">
           <div v-if="!bookmarks.length" class="flex flex-col items-center justify-center text-text-3 gap-3 py-20">
             <span class="msi" style="font-size:40px;opacity:0.4">bookmark_border</span>
-            <div class="text-sm">__T_RSS_NO_BOOKMARKS__</div>
+            <div class="text-sm">还没有收藏内容</div>
           </div>
           <article v-for="bm in bookmarks" :key="bm.id" class="rss-article">
             <a :href="bm.url" target="_blank" class="rss-article-title">{{ bm.title }}</a>

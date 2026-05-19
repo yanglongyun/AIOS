@@ -26,8 +26,7 @@ const handleMemoryApi = async (req, res, path) => {
             title,
             description: body.description || "",
             content,
-            enabled: body.enabled !== false,
-            pinned: !!body.pinned
+            visibility: body.visibility || "full"
         });
         return json(res, { success: true, item });
     }
@@ -42,8 +41,7 @@ const handleMemoryApi = async (req, res, path) => {
             title:       body.title,
             description: body.description,
             content:     body.content,
-            enabled:     body.enabled,
-            pinned:      body.pinned
+            visibility:  body.visibility
         });
         return json(res, { success: true, item });
     }

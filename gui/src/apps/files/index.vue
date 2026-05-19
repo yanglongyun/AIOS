@@ -62,7 +62,7 @@ onMounted(() => { files.ensureLoaded?.(); });
                 <div v-if="files.isDragOver"
                      class="pointer-events-none absolute inset-2 z-20 grid place-items-center rounded-xl border-2 border-dashed border-accent bg-accent/[0.06]">
                     <div class="rounded-[20px] bg-white px-4 py-2.5 text-sm font-medium text-accent shadow-[var(--shadow-2)]">
-                        __T_FILES_DROP_HERE__
+                        松手放进当前目录
                     </div>
                 </div>
 

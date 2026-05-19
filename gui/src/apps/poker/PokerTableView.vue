@@ -13,7 +13,7 @@
     <div class="relative flex w-[700px] max-w-[96vw] flex-col items-center justify-between rounded-[40px] border-[4px] border-[#3a2010] bg-[radial-gradient(ellipse_at_50%_50%,#2a6a30_0%,#153a1a_100%)] p-4 pt-6 shadow-[inset_0_0_80px_rgba(0,0,0,0.6),0_20px_50px_rgba(0,0,0,0.5)] sm:rounded-[60px] sm:border-[6px] sm:p-6 sm:pt-8">
       <div class="relative flex w-full flex-col items-center gap-2">
         <div class="flex flex-col items-center gap-0.5 rounded-xl bg-black/30 px-4 py-1">
-          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">__T_POKER_AI_STACK__</span>
+          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">AI 筹码</span>
           <span class="font-mono text-base font-bold text-[#d4b878] sm:text-lg">{{ game ? game.aiChips : economy.aiBalance }}</span>
         </div>
         <div class="flex gap-2">
@@ -36,7 +36,7 @@
       <div class="relative my-3 flex shrink-0 flex-col items-center sm:my-5">
         <div class="absolute left-1/2 top-1/2 h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5 sm:h-[220px] sm:w-[220px]"></div>
         <div class="absolute left-1/2 top-1/2 h-[120px] w-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 sm:h-[160px] sm:w-[160px]"></div>
-        <span class="z-10 mb-1 text-[10px] uppercase tracking-widest text-[#a0d0a0]">__T_POKER_TOTAL_POT__</span>
+        <span class="z-10 mb-1 text-[10px] uppercase tracking-widest text-[#a0d0a0]">底池</span>
         <div class="z-10 flex items-center gap-2 rounded-full border border-[#c8a060]/40 bg-[#c8a060]/10 px-5 py-1.5 shadow-[0_0_20px_rgba(200,160,96,0.15)] backdrop-blur sm:px-6 sm:py-2">
           <span class="font-mono text-xl font-bold text-[#ffd700] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] sm:text-2xl">{{ game?.pot ?? 0 }}</span>
         </div>
@@ -58,7 +58,7 @@
           </template>
         </div>
         <div class="mt-1 flex flex-col items-center gap-0.5 rounded-xl bg-black/30 px-4 py-1">
-          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">__T_POKER_YOUR_STACK__</span>
+          <span class="text-[10px] uppercase tracking-widest text-[#80b080]">你的筹码</span>
           <span class="font-mono text-base font-bold text-[#d4b878] sm:text-lg">{{ game ? game.playerChips : economy.playerBalance }}</span>
         </div>
       </div>

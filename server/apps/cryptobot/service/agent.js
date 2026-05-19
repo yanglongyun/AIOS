@@ -89,7 +89,7 @@ const testAgentExchange = async (body = {}) => {
     throw new Error("base_url, API Key, Secret, and Passphrase are required");
   }
   await okxRequest(cfg, "GET", "/api/v5/account/balance");
-  return { success: true, message: "__T_CRYPTOBOT_CONNECTION_SUCCESS__" };
+  return { success: true, message: "连接成功" };
 };
 
 const startAgent = async (body = {}) => {

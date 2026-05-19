@@ -11,8 +11,8 @@
     <div class="h-full w-full overflow-y-auto">
       <div class="mx-auto max-w-[460px] px-5 pb-[60px] pt-7">
         <div class="mb-7 text-center">
-          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">__T_FORTUNE_TITLE__</h1>
-          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">__T_FORTUNE_SUBTITLE__</p>
+          <h1 class="font-serif text-[28px] font-black tracking-[0.15em] text-[#5a4020]">算一卦</h1>
+          <p class="mt-1 text-xs tracking-[0.2em] text-[#a09070]">JU YI GUA · 心诚则灵</p>
         </div>
 
         <FortuneHexagramPanel
@@ -36,7 +36,7 @@
 
         <div class="mt-10 border-t border-dashed border-[rgba(160,140,110,0.3)] pt-5 text-center">
           <p class="font-['PingFang_SC',sans-serif] text-[11px] leading-[1.8] tracking-[0.05em] text-[#a09070] opacity-80">
-            __T_FORTUNE_DISCLAIMER_1__<br>__T_FORTUNE_DISCLAIMER_2__
+            古卦今观,仅供娱乐参考<br>尽人事 · 听天命
           </p>
         </div>
       </div>
@@ -67,12 +67,12 @@ const HEXAGRAM_TABLE = [
 ];
 
 const yaoLabels = computed(() => [
-  '__T_FORTUNE_YAO_TOP__',
-  '__T_FORTUNE_YAO_FIVE__',
-  '__T_FORTUNE_YAO_FOUR__',
-  '__T_FORTUNE_YAO_THREE__',
-  '__T_FORTUNE_YAO_TWO__',
-  '__T_FORTUNE_YAO_ONE__'
+  '上爻',
+  '五爻',
+  '四爻',
+  '三爻',
+  '二爻',
+  '初爻'
 ]);
 
 const trigramIndex = (y0, y1, y2) => y0 * 4 + y1 * 2 + y2;

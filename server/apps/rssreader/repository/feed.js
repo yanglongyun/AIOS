@@ -6,7 +6,7 @@ const addFeed = ({ name, url }) => {
   const existing = db.prepare("SELECT id FROM rss_feeds WHERE url = ?").get(url);
   if (existing) return existing;
   const ret = db.prepare("INSERT INTO rss_feeds (name, url) VALUES (?, ?)").run(name, url);
-  return db.prepare("SELECT * FROM rss_feeds WHERE id = ?").get(ret.lastInsertRowid);
+  return db.prepare("SELECT * FROM rss_feeds WHERE id = ?").get(Number(ret.lastInsertRowid));
 };
 
 const removeFeed = (id) => db.prepare("DELETE FROM rss_feeds WHERE id = ?").run(id);
@@ -15,7 +15,7 @@ const addBookmark = ({ feedId, title, url, summary }) => {
   const existing = db.prepare("SELECT id FROM rss_bookmarks WHERE url = ?").get(url);
   if (existing) return existing;
   const ret = db.prepare("INSERT INTO rss_bookmarks (feed_id, title, url, summary) VALUES (?, ?, ?, ?)").run(feedId || null, title, url, summary || '');
-  return db.prepare("SELECT * FROM rss_bookmarks WHERE id = ?").get(ret.lastInsertRowid);
+  return db.prepare("SELECT * FROM rss_bookmarks WHERE id = ?").get(Number(ret.lastInsertRowid));
 };
 
 const removeBookmark = (id) => db.prepare("DELETE FROM rss_bookmarks WHERE id = ?").run(id);

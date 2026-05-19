@@ -3,14 +3,14 @@
     <!-- Level 1: root list of encoded project dirs -->
     <template v-if="!currentPath">
       <div>
-        <div class="text-[17px] font-bold">__T_CLAUDE_PROJECTS_TITLE__</div>
+        <div class="text-[17px] font-bold">项目</div>
         <div class="text-[11.5px]" style="color:#6b5a46">
-          {{ '__T_CLAUDE_PROJECTS_DESC__'.replace('{n}', String(data?.projects?.length || 0)) }}
+          {{ '找到 {n} 个 Claude 项目根目录'.replace('{n}', String(data?.projects?.length || 0)) }}
         </div>
       </div>
 
-      <div v-if="loading" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_LOADING__</div>
-      <div v-else-if="!data?.projects?.length" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_PROJECTS_EMPTY__</div>
+      <div v-if="loading" class="text-[12px]" style="color:#8a7965">加载中...</div>
+      <div v-else-if="!data?.projects?.length" class="text-[12px]" style="color:#8a7965">没有项目</div>
       <div v-else class="rounded-xl bg-white border overflow-hidden" style="border-color:rgba(140,100,60,0.12)">
         <button v-for="p in data.projects" :key="p.dirName"
           class="w-full text-left grid gap-3 items-center px-4 py-3 border-b last:border-b-0 bg-white hover:bg-[#fdf7e8] transition-colors"
@@ -20,7 +20,7 @@
             <div class="text-[12.5px] truncate" style="color:#2a1f13;font-weight:500">📁 {{ p.cwd }}</div>
             <div class="cc-mono text-[10px] truncate mt-0.5" style="color:#8a7965">{{ p.dirName }}</div>
           </div>
-          <div class="cc-mono text-right" style="font-size:11px;color:#4a3826">{{ '__T_CLAUDE_PROJECTS_SESSION_COUNT__'.replace('{n}', String(p.sessionCount)) }}</div>
+          <div class="cc-mono text-right" style="font-size:11px;color:#4a3826">{{ '{n} 个会话'.replace('{n}', String(p.sessionCount)) }}</div>
           <div class="cc-mono text-right" style="font-size:10.5px;color:#8a7965">{{ formatSize(p.totalSize) }}</div>
           <div class="cc-mono text-right" style="font-size:10.5px;color:#8a7965">{{ formatShortTime(p.lastActivity) }}</div>
           <div style="color:#8a7965">›</div>
@@ -31,7 +31,7 @@
     <!-- Level 2+: contents of a dir / file -->
     <template v-else>
       <div class="flex items-center gap-1 flex-wrap text-[12px]">
-        <button class="hover:underline" style="color:#5c4332" @click="openRoot">__T_CLAUDE_PROJECTS_ROOT__</button>
+        <button class="hover:underline" style="color:#5c4332" @click="openRoot">项目</button>
         <template v-for="(seg, i) in currentPath" :key="i">
           <span style="color:#8a7965">/</span>
           <button class="cc-mono truncate max-w-[260px]"
@@ -46,18 +46,18 @@
       </div>
 
       <div v-if="currentFileName">
-        <div v-if="fileLoading" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_FILE_READING__</div>
-        <div v-else-if="!currentFileData?.ok" class="text-[12px]" style="color:#b03a20">{{ currentFileData?.error || '__T_CLAUDE_LOAD_FAILED__' }}</div>
+        <div v-if="fileLoading" class="text-[12px]" style="color:#8a7965">读取文件中...</div>
+        <div v-else-if="!currentFileData?.ok" class="text-[12px]" style="color:#b03a20">{{ currentFileData?.error || '加载失败' }}</div>
         <div v-else class="rounded-xl border overflow-hidden" style="border-color:rgba(140,100,60,0.12);background:#fff">
           <div class="flex items-center gap-3 border-b px-4 py-3" style="border-color:rgba(140,100,60,0.08);background:#fffaf2">
             <div class="min-w-0 flex-1">
               <div class="cc-mono truncate text-[12.5px] font-semibold" style="color:#2a1f13">{{ currentFileData.path }}</div>
               <div class="cc-mono mt-0.5 text-[10.5px]" style="color:#8a7965">
-                {{ formatSize(currentFileData.size) }}<span v-if="currentFileData.truncated"> · __T_CLAUDE_FILE_TRUNCATED__</span>
+                {{ formatSize(currentFileData.size) }}<span v-if="currentFileData.truncated"> · 已截断</span>
               </div>
             </div>
             <button class="rounded-md px-2.5 py-1 text-[11px] hover:bg-black/5" style="color:#5c4332" @click="copyCurrentFile" :disabled="!currentFileData?.ok">
-              {{ copied ? '__T_CLAUDE_FILE_COPIED__' : '__T_CLAUDE_FILE_COPY__' }}
+              {{ copied ? '已复制' : '复制' }}
             </button>
           </div>
 
@@ -98,18 +98,18 @@
         </div>
       </div>
 
-      <div v-else-if="dirLoading" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_LOADING__</div>
-      <div v-else-if="!dirContents?.ok" class="text-[12px]" style="color:#b03a20">{{ dirContents?.error || '__T_CLAUDE_LOAD_FAILED__' }}</div>
+      <div v-else-if="dirLoading" class="text-[12px]" style="color:#8a7965">加载中...</div>
+      <div v-else-if="!dirContents?.ok" class="text-[12px]" style="color:#b03a20">{{ dirContents?.error || '加载失败' }}</div>
       <template v-else>
         <!-- Human-friendly header when we're at a project root -->
         <div v-if="dirContents.isRootProject" style="padding-bottom:4px">
           <div class="text-[15px] font-bold truncate">{{ leafName(dirContents.cwd) }}</div>
-          <div class="cc-mono text-[10.5px] mt-0.5" style="color:#8a7965">{{ '__T_CLAUDE_PROJECTS_DECODED_CWD__'.replace('{cwd}', dirContents.cwd) }}</div>
+          <div class="cc-mono text-[10.5px] mt-0.5" style="color:#8a7965">{{ '工作目录: {cwd}'.replace('{cwd}', dirContents.cwd) }}</div>
         </div>
 
         <!-- Subdirs -->
         <div v-if="dirContents.subdirs.length">
-          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '__T_CLAUDE_PROJECTS_DIR_SECTION__'.replace('{n}', String(dirContents.subdirs.length)) }}</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '目录 ({n})'.replace('{n}', String(dirContents.subdirs.length)) }}</div>
           <div class="rounded-xl bg-white border overflow-hidden" style="border-color:rgba(140,100,60,0.12)">
             <button v-for="d in dirContents.subdirs" :key="d.name"
               class="w-full text-left flex items-center gap-3 px-4 py-2.5 border-b last:border-b-0 bg-white hover:bg-[#fdf7e8] transition-colors"
@@ -125,7 +125,7 @@
 
         <!-- Sessions -->
         <div v-if="dirContents.sessions.length">
-          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '__T_CLAUDE_PROJECTS_SESSIONS_SECTION__'.replace('{n}', String(dirContents.sessions.length)) }}</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '会话 ({n})'.replace('{n}', String(dirContents.sessions.length)) }}</div>
           <div class="rounded-xl bg-white border overflow-hidden" style="border-color:rgba(140,100,60,0.12)">
             <button v-for="s in dirContents.sessions" :key="s.sessionId"
               class="w-full text-left grid gap-3 items-center px-4 py-2.5 border-b last:border-b-0 bg-white hover:bg-[#fdf7e8] transition-colors"
@@ -133,12 +133,12 @@
               @click="openFile(s.sessionId + '.jsonl')">
               <div class="cc-mono" style="font-size:11px;color:#6b5a46">{{ formatShortTime(s.lastTs) }}</div>
               <div class="min-w-0">
-                <div class="text-[12.5px] truncate" style="color:#2a1f13;font-weight:500">{{ s.firstPrompt || '__T_CLAUDE_PROJECTS_BLANK__' }}</div>
+                <div class="text-[12.5px] truncate" style="color:#2a1f13;font-weight:500">{{ s.firstPrompt || '未命名会话' }}</div>
                 <div class="cc-mono text-[10px] truncate" style="color:#8a7965">
-                  {{ s.sessionId.slice(0, 8) }}... · {{ s.model || '__T_CLAUDE_PROJECTS_UNKNOWN_MODEL__' }}{{ s.gitBranch ? ' · ' + s.gitBranch : '' }}
+                  {{ s.sessionId.slice(0, 8) }}... · {{ s.model || '未知模型' }}{{ s.gitBranch ? ' · ' + s.gitBranch : '' }}
                 </div>
               </div>
-              <div class="cc-mono text-right" style="font-size:11px;color:#8a7965">{{ '__T_CLAUDE_PROJECTS_MESSAGE_COUNT__'.replace('{n}', String(s.messageCount)) }}</div>
+              <div class="cc-mono text-right" style="font-size:11px;color:#8a7965">{{ '{n} 条消息'.replace('{n}', String(s.messageCount)) }}</div>
               <div class="cc-mono text-right" style="font-size:10.5px;color:#8a7965">{{ formatSize(s.sizeBytes) }}</div>
             </button>
           </div>
@@ -146,7 +146,7 @@
 
         <!-- Other files -->
         <div v-if="dirContents.files.length">
-          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '__T_CLAUDE_PROJECTS_FILES_SECTION__'.replace('{n}', String(dirContents.files.length)) }}</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider mb-2" style="color:#8a7965">{{ '文件 ({n})'.replace('{n}', String(dirContents.files.length)) }}</div>
           <div class="rounded-xl bg-white border overflow-hidden" style="border-color:rgba(140,100,60,0.12)">
             <button v-for="f in dirContents.files" :key="f.name"
               class="w-full text-left flex items-center gap-3 px-4 py-2 border-b last:border-b-0 bg-white hover:bg-[#fdf7e8] transition-colors"
@@ -161,7 +161,7 @@
         </div>
 
         <div v-if="!dirContents.subdirs.length && !dirContents.sessions.length && !dirContents.files.length"
-          class="text-[12px]" style="color:#8a7965">__T_CLAUDE_PROJECTS_DIR_EMPTY__</div>
+          class="text-[12px]" style="color:#8a7965">目录为空</div>
       </template>
     </template>
   </div>

@@ -77,7 +77,7 @@ function goHomePage() {
 
 async function init() {
   isLoading.value = true;
-  toast.value = '__T_BANANA_BOOTING__';
+  toast.value = '开机中';
 
   try {
     const res = await fetch(`${API_BASE}/progress`);
@@ -99,12 +99,12 @@ async function init() {
 
   try {
     const params = buildBananaTaskParams({
-      now: '__T_BANANA_BOOT_SCREEN__',
-      next: '__T_BANANA_ENTER_HOME__'
+      now: '开机界面',
+      next: '进入主菜单'
     });
     const result = await api('/generation', {
-      now: '__T_BANANA_BOOT_SCREEN__',
-      next: '__T_BANANA_ENTER_HOME__',
+      now: '开机界面',
+      next: '进入主菜单',
       ...params
     });
 
@@ -136,7 +136,7 @@ async function chooseOption(option) {
   timeLine.value[currentIndex.value].choices = option.text;
 
   const history = timeLine.value.slice(1, 3).reverse().map(item => {
-    return `${'__T_BANANA_CTX_SCREEN__'}${item.content}` + (item.choices ? `${'__T_BANANA_CTX_CHOICE__'}${item.choices}` : '');
+    return `${'屏幕：'}${item.content}` + (item.choices ? `${'，选择：'}${item.choices}` : '');
   });
 
   try {

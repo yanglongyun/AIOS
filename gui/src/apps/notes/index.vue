@@ -34,7 +34,7 @@ async function loadList() {
         const data = await nt.listNotes();
         items.value = data.items || [];
         errMsg.value = '';
-    } catch (e) { setErr('__T_NOTES_LOAD_FAILED__', e); }
+    } catch (e) { setErr('加载失败', e); }
     loading.value = false;
 }
 
@@ -64,7 +64,7 @@ async function persistEditing() {
         if (r?.item) editing.value = { ...editing.value, ...r.item };
         editingDirty.value = false;
         await loadList();
-    } catch (err) { setErr('__T_NOTES_SAVE_FAILED__', err); }
+    } catch (err) { setErr('保存失败', err); }
 }
 
 // 编辑期间防抖自动保存
@@ -81,16 +81,16 @@ watch(() => editing.value && JSON.stringify({
 async function togglePin(item, ev) {
     ev?.stopPropagation();
     try { await nt.pinNote(item.id, item.pinned ? 0 : 1); await loadList(); }
-    catch (e) { setErr('__T_NOTES_PIN_FAILED__', e); }
+    catch (e) { setErr('置顶失败', e); }
 }
 async function removeNote(item, ev) {
     ev?.stopPropagation();
-    if (!confirm('__T_NOTES_DELETE_CONFIRM__')) return;
+    if (!confirm('删除这条笔记?')) return;
     try {
         await nt.deleteNote(item.id);
         if (editing.value?.id === item.id) editing.value = null;
         await loadList();
-    } catch (e) { setErr('__T_NOTES_DELETE_FAILED__', e); }
+    } catch (e) { setErr('删除失败', e); }
 }
 
 // ── 键盘 ──────────────────────
@@ -110,18 +110,18 @@ onBeforeUnmount(() => {
 
         <!-- ── topbar ── -->
         <header class="flex h-16 flex-none items-center gap-2 bg-transparent px-4">
-            <button v-if="editing" class="icon-btn lg" title="__T_NOTES_BACK_TO_LIST__" @click="closeEditor">
+            <button v-if="editing" class="icon-btn lg" title="返回列表" @click="closeEditor">
                 <span class="msi">arrow_back</span>
             </button>
             <div v-if="!editing" class="ml-3 flex-none text-[20px] font-medium tracking-[-0.01em] text-ink max-md:hidden">
-                __T_NOTES_TITLE__
+                笔记
             </div>
 
             <!-- 列表态:搜索 -->
             <div v-if="!editing"
                  class="flex h-11 max-w-[720px] flex-1 items-center gap-2 rounded-[22px] bg-bg-elev px-4 transition-[background,box-shadow] focus-within:bg-white focus-within:shadow-[var(--shadow-1)] max-md:max-w-none">
                 <span class="msi sm text-muted">search</span>
-                <input v-model="search" type="text" placeholder="__T_NOTES_SEARCH_PLACEHOLDER__"
+                <input v-model="search" type="text" placeholder="搜索笔记"
                        class="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-none" />
             </div>
 
@@ -129,11 +129,11 @@ onBeforeUnmount(() => {
             <div v-else class="flex flex-1 items-center gap-1">
                 <button class="icon-btn"
                         :class="{ 'bg-blue-bg !text-blue-fg': editing.pinned }"
-                        :title="editing.pinned ? '__T_NOTEBOOK_UNPIN__' : '__T_NOTEBOOK_PIN__'"
+                        :title="editing.pinned ? '取消置顶' : '置顶'"
                         @click="editing.pinned = editing.pinned ? 0 : 1">
                     <span class="msi sm">push_pin</span>
                 </button>
-                <button v-if="editing.id" class="icon-btn" title="__T_COMMON_DELETE__" @click="removeNote(editing, $event)">
+                <button v-if="editing.id" class="icon-btn" title="删除" @click="removeNote(editing, $event)">
                     <span class="msi sm">delete</span>
                 </button>
             </div>

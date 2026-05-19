@@ -7,14 +7,14 @@
       <div class="ml-auto flex items-center gap-1">
         <template v-if="!editing">
           <button class="text-[11px] px-2 py-0.5 rounded-md hover:bg-black/5" style="color:#5c4332" @click="expanded = !expanded">
-            {{ expanded ? '__T_CLAUDE_MEMORY_COLLAPSE__' : '__T_CLAUDE_MEMORY_EXPAND__' }}
+            {{ expanded ? '收起' : '展开' }}
           </button>
-          <button class="text-[11px] px-2 py-0.5 rounded-md hover:bg-black/5" style="color:#5c4332" @click="startEdit">✎ __T_CLAUDE_MEMORY_EDIT__</button>
+          <button class="text-[11px] px-2 py-0.5 rounded-md hover:bg-black/5" style="color:#5c4332" @click="startEdit">✎ 编辑</button>
         </template>
         <template v-else>
           <span v-if="saveError" class="text-[10.5px]" style="color:#b03a20">{{ saveError }}</span>
-          <button class="text-[11px] px-2 py-0.5 rounded-md hover:bg-black/5" style="color:#8a7965" :disabled="saving" @click="cancelEdit">__T_CLAUDE_MEMORY_CANCEL__</button>
-          <button class="text-[11px] px-2.5 py-0.5 rounded-md cc-btn-primary font-semibold" :disabled="saving" @click="save">{{ saving ? '__T_CLAUDE_MEMORY_SAVING__' : '__T_CLAUDE_MEMORY_SAVE__' }}</button>
+          <button class="text-[11px] px-2 py-0.5 rounded-md hover:bg-black/5" style="color:#8a7965" :disabled="saving" @click="cancelEdit">取消</button>
+          <button class="text-[11px] px-2.5 py-0.5 rounded-md cc-btn-primary font-semibold" :disabled="saving" @click="save">{{ saving ? '保存中...' : '保存' }}</button>
         </template>
       </div>
     </div>
@@ -24,7 +24,7 @@
       style="background:#faf7f0;color:#2a1f13;border:1px solid rgba(140,100,60,0.18);min-height:320px;resize:vertical"
       :disabled="saving"></textarea>
 
-    <pre v-else-if="expanded" class="mt-2 text-[11.5px] cc-mono p-3 rounded-md overflow-x-auto whitespace-pre-wrap" style="background:#faf7f0;color:#2a1f13;max-height:400px;overflow-y:auto">{{ file.content }}{{ file.truncated ? '\n\n__T_CLAUDE_MEMORY_TRUNCATED_SUFFIX__' : '' }}</pre>
+    <pre v-else-if="expanded" class="mt-2 text-[11.5px] cc-mono p-3 rounded-md overflow-x-auto whitespace-pre-wrap" style="background:#faf7f0;color:#2a1f13;max-height:400px;overflow-y:auto">{{ file.content }}{{ file.truncated ? '\n\n[已截断]' : '' }}</pre>
 
     <div v-else class="mt-2 text-[11.5px]" style="color:#6b5a46;max-height:40px;overflow:hidden">{{ firstLines }}</div>
   </div>
@@ -73,7 +73,7 @@ const save = async () => {
     });
     const data = await resp.json();
     if (!data.ok) {
-      saveError.value = data.error || '__T_CLAUDE_MEMORY_SAVE_FAILED__';
+      saveError.value = data.error || '保存失败';
       return;
     }
     editing.value = false;

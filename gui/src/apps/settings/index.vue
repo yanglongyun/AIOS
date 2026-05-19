@@ -25,19 +25,19 @@ function flash(kind, text) {
 }
 
 const sections = [
-  { key: 'account',  label: '__T_SETTINGS_TAB_ACCOUNT__', icon: 'person' },
-  { key: 'model',    label: '__T_SETTINGS_TAB_MODEL__', icon: 'smart_toy' },
-  { key: 'prompt',   label: '__T_SETTINGS_TAB_PROMPT__', icon: 'edit_note' },
-  { key: 'context',  label: '__T_SETTINGS_TAB_CONTEXT__', icon: 'history' },
-  { key: 'tools',    label: '__T_SETTINGS_TAB_TOOL_CALLS__', icon: 'handyman' },
-  { key: 'about',    label: '__T_SETTINGS_TAB_ABOUT__', icon: 'info' }
+  { key: 'account',  label: '账户', icon: 'person' },
+  { key: 'model',    label: '模型', icon: 'smart_toy' },
+  { key: 'prompt',   label: '指令', icon: 'edit_note' },
+  { key: 'context',  label: '上下文', icon: 'history' },
+  { key: 'tools',    label: '工具调用', icon: 'handyman' },
+  { key: 'about',    label: '关于', icon: 'info' }
 ];
 const active = ref('account');
 const activeSection = computed(() => sections.find((s) => s.key === active.value));
 const contextRoundLabels = {
-  30: '__T_SETTINGS_CONTEXT_COMPACT__',
-  100: '__T_SETTINGS_CONTEXT_STANDARD__',
-  500: '__T_SETTINGS_CONTEXT_MAX__'
+  30: '精简',
+  100: '标准',
+  500: '最大'
 };
 
 // ───────── 模型 / Provider ─────────
@@ -88,7 +88,7 @@ async function loadAll() {
     providers.value = prov.providers || [];
     providerCache.value[s.provider] ??= { apiUrl: s.apiUrl, apiKey: s.apiKey, model: s.model };
     saveProviderCache();
-  } catch (e) { errMsg.value = '__T_SETTINGS_LOAD_FAILED_PREFIX__' + (e.message || e); }
+  } catch (e) { errMsg.value = '加载失败: ' + (e.message || e); }
   loading.value = false;
 }
 
@@ -108,21 +108,21 @@ async function saveModel() {
     settings.value = { ...settings.value, ...next };
     providerCache.value[next.provider] = { apiUrl: next.apiUrl, apiKey: next.apiKey, model: next.model };
     saveProviderCache();
-    flash('ok', '__T_SETTINGS_MODEL_SAVED__');
-  } catch (e) { flash('err', '__T_SETTINGS_SAVE_FAILED_PREFIX__' + (e?.body?.message || e.message || e)); }
+    flash('ok', '模型设置已保存');
+  } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
 }
 async function savePrompt() {
   try {
     await api.post('/api/settings/prompt', { content: prompt.value });
-    flash('ok', '__T_SETTINGS_PROMPT_SAVED__');
-  } catch (e) { flash('err', '__T_SETTINGS_SAVE_FAILED_PREFIX__' + (e?.body?.message || e.message || e)); }
+    flash('ok', '指令已保存');
+  } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
 }
 async function saveContext() {
   try {
     const next = await api.post('/api/settings', { contextRounds: settings.value.contextRounds });
     settings.value = { ...settings.value, ...next };
-    flash('ok', '__T_SETTINGS_SAVED_SHORT__');
-  } catch (e) { flash('err', '__T_SETTINGS_SAVE_FAILED_PREFIX__' + (e.message || e)); }
+    flash('ok', '已保存');
+  } catch (e) { flash('err', '保存失败: ' + (e.message || e)); }
 }
 async function saveTools() {
   try {
@@ -135,8 +135,8 @@ async function saveTools() {
       toolMaxRounds: maxRounds
     });
     settings.value = { ...settings.value, ...next };
-    flash('ok', '__T_SETTINGS_TOOLS_SAVED__');
-  } catch (e) { flash('err', '__T_SETTINGS_SAVE_FAILED_PREFIX__' + (e.message || e)); }
+    flash('ok', '工具设置已保存');
+  } catch (e) { flash('err', '保存失败: ' + (e.message || e)); }
 }
 
 // ───────── 修改密码 ─────────
@@ -146,14 +146,14 @@ const canChangePwd = computed(() => pwd.value.old && pwd.value.n1.length >= 6 &&
 async function changePwd() {
   pwdNotice.value = { kind: '', text: '' };
   if (!canChangePwd.value) {
-    pwdNotice.value = { kind: 'err', text: '__T_SETTINGS_PASSWORD_INVALID__' };
+    pwdNotice.value = { kind: 'err', text: '请检查输入(新密码至少 6 位且两次一致)' };
     return;
   }
   try {
     await api.post('/api/auth/change-password', { oldPassword: pwd.value.old, newPassword: pwd.value.n1 });
-    pwdNotice.value = { kind: 'ok', text: '__T_SETTINGS_PASSWORD_UPDATED__' };
+    pwdNotice.value = { kind: 'ok', text: '密码已更新' };
     pwd.value = { old: '', n1: '', n2: '' };
-  } catch (e) { pwdNotice.value = { kind: 'err', text: e?.body?.message || e.message || '__T_COMMON_UPDATE_FAILED__' }; }
+  } catch (e) { pwdNotice.value = { kind: 'err', text: e?.body?.message || e.message || '修改失败' }; }
 }
 
 // ───────── 切换 section 时按需加载 ─────────
@@ -169,7 +169,7 @@ onActivated(() => loadAll());
   <div class="app-frame">
     <header class="topbar">
       <span class="left-spacer"></span>
-      <div class="brand"><span class="name">__T_SETTINGS_TITLE__</span></div>
+      <div class="brand"><span class="name">设置</span></div>
       <div class="right">
         <AskAI />
         <AppHub />
@@ -202,7 +202,7 @@ onActivated(() => loadAll());
       </header>
 
       <div v-if="errMsg" class="err-bar">{{ errMsg }}</div>
-      <div v-if="loading || !settings" class="placeholder">__T_COMMON_LOADING__</div>
+      <div v-if="loading || !settings" class="placeholder">加载中...</div>
 
       <template v-else>
         <!-- ━━━━━ 账户 ━━━━━ -->
@@ -210,26 +210,26 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_CHANGE_PASSWORD__</div>
-                <div class="sec-sub">__T_SETTINGS_CHANGE_PASSWORD_DESC__</div>
+                <div class="sec-title">修改密码</div>
+                <div class="sec-sub">用于本地 Web 登录;AI / 命令行走的是 API Token,不受影响。</div>
               </div>
             </header>
             <div class="form">
               <div class="row">
-                <label>__T_SETTINGS_CURRENT_PASSWORD__</label>
+                <label>当前密码</label>
                 <input class="text-input" type="password" v-model="pwd.old" autocomplete="current-password" />
               </div>
               <div class="row">
-                <label>__T_SETTINGS_NEW_PASSWORD_LABEL__ <span class="hint">__T_SETTINGS_PASSWORD_MIN_HINT__</span></label>
+                <label>新密码 <span class="hint">至少 6 位</span></label>
                 <input class="text-input" type="password" v-model="pwd.n1" autocomplete="new-password" />
               </div>
               <div class="row">
-                <label>__T_SETTINGS_CONFIRM_PASSWORD__</label>
+                <label>再次输入新密码</label>
                 <input class="text-input" type="password" v-model="pwd.n2" autocomplete="new-password" />
               </div>
               <div v-if="pwdNotice.text" class="inline-msg" :class="pwdNotice.kind">{{ pwdNotice.text }}</div>
               <div class="actions">
-                <button class="btn solid" :disabled="!canChangePwd" @click="changePwd">__T_SETTINGS_UPDATE_PASSWORD__</button>
+                <button class="btn solid" :disabled="!canChangePwd" @click="changePwd">更新密码</button>
               </div>
             </div>
           </section>
@@ -237,18 +237,18 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_LOGOUT_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_LOGOUT_DESC__</div>
+                <div class="sec-title">退出登录</div>
+                <div class="sec-sub">登出后会清除本浏览器的会话,下次访问需要重新输入密码。</div>
               </div>
-              <button class="btn outline danger" @click="auth.logout()">__T_SETTINGS_LOGOUT__</button>
+              <button class="btn outline danger" @click="auth.logout()">退出</button>
             </header>
           </section>
 
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_FORGOT_PASSWORD__</div>
-                <div class="sec-sub">__T_SETTINGS_FORGOT_PASSWORD_DESC__</div>
+                <div class="sec-title">忘记密码</div>
+                <div class="sec-sub">忘记密码时只能通过命令行强制重置 (会同时清除所有登录会话):</div>
               </div>
             </header>
             <pre class="code-block">sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"</pre>
@@ -260,13 +260,13 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_MODEL_API_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_MODEL_API_DESC__</div>
+                <div class="sec-title">大模型 API</div>
+                <div class="sec-sub">选一个供应商,填好 URL / API Key / 模型名。每个供应商的配置会在本地缓存。</div>
               </div>
             </header>
             <div class="form">
               <div class="row">
-                <label>__T_SETTINGS_PROVIDER__</label>
+                <label>供应方</label>
                 <div class="provider-row">
                   <select class="text-input select" :value="settings.provider" @change="onProviderChange($event.target.value)">
                     <optgroup v-for="g in providerGroups" :key="g.id" :label="g.name">
@@ -275,24 +275,24 @@ onActivated(() => loadAll());
                   </select>
                   <a v-if="currentProviderMeta?.keyUrl" :href="currentProviderMeta.keyUrl"
                     target="_blank" rel="noopener" class="btn tonal small">
-                    <span class="msi xxs">key</span> __T_SETTINGS_GET_API_KEY__
+                    <span class="msi xxs">key</span> 获取 API Key
                   </a>
                 </div>
               </div>
               <div class="row">
-                <label>__T_SETTINGS_API_URL__</label>
+                <label>请求地址</label>
                 <input class="text-input" v-model="settings.apiUrl" placeholder="https://api.example.com/v1/chat/completions" spellcheck="false" />
               </div>
               <div class="row">
-                <label>__T_SETTINGS_API_KEY__</label>
+                <label>模型 Key</label>
                 <input class="text-input mono" type="password" v-model="settings.apiKey" placeholder="sk-..." spellcheck="false" />
               </div>
               <div class="row">
-                <label>__T_SETTINGS_MODEL__</label>
+                <label>模型</label>
                 <input class="text-input mono" v-model="settings.model" :placeholder="currentProviderMeta?.defaultModel || ''" spellcheck="false" />
               </div>
               <div class="actions">
-                <button class="btn solid" @click="saveModel">__T_COMMON_SAVE__</button>
+                <button class="btn solid" @click="saveModel">保存</button>
               </div>
             </div>
           </section>
@@ -303,14 +303,14 @@ onActivated(() => loadAll());
           <section class="card prompt-card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_SYSTEM_PROMPT_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_SYSTEM_PROMPT_DESC__</div>
+                <div class="sec-title">系统提示词</div>
+                <div class="sec-sub">每次对话前注入到模型上下文最前面。改动后立即生效,无需重启。</div>
               </div>
-              <button class="btn solid" @click="savePrompt">__T_COMMON_SAVE__</button>
+              <button class="btn solid" @click="savePrompt">保存</button>
             </header>
             <textarea class="prompt-area" v-model="prompt" spellcheck="false" rows="22"
-              placeholder="__T_SETTINGS_SYSTEM_PROMPT_PLACEHOLDER__"></textarea>
-            <div class="prompt-meta">{{ prompt.length }} __T_SETTINGS_CHAR_UNIT__</div>
+              placeholder="例如:你是 AIOS 的本机 AI 助理,可以读文件、跑命令、查系统状态…"></textarea>
+            <div class="prompt-meta">{{ prompt.length }} 字符</div>
           </section>
         </template>
 
@@ -319,8 +319,8 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_CONTEXT_ROUNDS_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_CONTEXT_ROUNDS_DESC__</div>
+                <div class="sec-title">历史轮数</div>
+                <div class="sec-sub">每次新提问会带上最近 N 轮对话作为上下文。轮数越多上下文越丰富,但也越费 token。</div>
               </div>
             </header>
             <div class="seg">
@@ -332,7 +332,7 @@ onActivated(() => loadAll());
               </button>
             </div>
             <div class="actions" style="margin-top:14px">
-              <button class="btn solid" @click="saveContext">__T_COMMON_SAVE__</button>
+              <button class="btn solid" @click="saveContext">保存</button>
             </div>
           </section>
         </template>
@@ -342,8 +342,8 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_TOOL_TRUNCATE_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_TOOL_TRUNCATE_DESC__</div>
+                <div class="sec-title">工具结果截断</div>
+                <div class="sec-sub">某些工具(读大文件、长 shell 输出)会返回超长内容,直接塞回模型可能把上下文撑爆。开启后会截断到下面的字符数。</div>
               </div>
               <label class="switch" :class="{ on: settings.enableToolResultTruncate }">
                 <input type="checkbox" v-model="settings.enableToolResultTruncate" />
@@ -351,11 +351,11 @@ onActivated(() => loadAll());
             </header>
             <div class="form">
               <div class="row inline">
-                <label>__T_SETTINGS_TOOL_TRUNCATE_CHARS__</label>
+                <label>截断字符数</label>
                 <input class="text-input num" type="number" min="1000" max="50000" step="1000"
                   :disabled="!settings.enableToolResultTruncate"
                   v-model.number="settings.toolResultMaxChars" />
-                <span class="hint">__T_SETTINGS_TOOL_TRUNCATE_HINT__</span>
+                <span class="hint">建议 8000 ~ 20000</span>
               </div>
             </div>
           </section>
@@ -363,8 +363,8 @@ onActivated(() => loadAll());
           <section class="card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">__T_SETTINGS_TOOL_MAX_ROUNDS_TITLE__</div>
-                <div class="sec-sub">__T_SETTINGS_TOOL_MAX_ROUNDS_DESC__</div>
+                <div class="sec-title">最大工具调用轮数</div>
+                <div class="sec-sub">单次对话里 AI 连续调用工具的硬上限,防止 agent 跑飞。</div>
               </div>
               <label class="switch" :class="{ on: settings.enableToolLoopLimit }">
                 <input type="checkbox" v-model="settings.enableToolLoopLimit" />
@@ -372,14 +372,14 @@ onActivated(() => loadAll());
             </header>
             <div class="form">
               <div class="row inline">
-                <label>__T_SETTINGS_TOOL_MAX_ROUNDS__</label>
+                <label>工具最大循环次数</label>
                 <input class="text-input num" type="number" min="1" max="500" step="1"
                   :disabled="!settings.enableToolLoopLimit"
                   v-model.number="settings.toolMaxRounds" />
-                <span class="hint">__T_SETTINGS_TOOL_MAX_ROUNDS_HINT__</span>
+                <span class="hint">默认 50</span>
               </div>
               <div class="actions">
-                <button class="btn solid" @click="saveTools">__T_COMMON_SAVE__</button>
+                <button class="btn solid" @click="saveTools">保存</button>
               </div>
             </div>
           </section>
@@ -397,13 +397,13 @@ onActivated(() => loadAll());
               </div>
               <div>
                 <div class="about-name">AIOS</div>
-                <div class="about-tag">__T_SETTINGS_ABOUT_TAG__</div>
+                <div class="about-tag">本地 AI 操作系统 · gui2</div>
               </div>
             </div>
             <div class="about-grid">
-              <div class="kv"><span>__T_SETTINGS_VERSION__</span><span>0.1.0</span></div>
-              <div class="kv"><span>__T_SETTINGS_HOST__</span><span>{{ sysSnap?.sys?.hostname || '—' }}</span></div>
-              <div class="kv"><span>__T_SETTINGS_PLATFORM__</span><span>{{ sysSnap?.sys?.platform || '—' }} / {{ sysSnap?.sys?.arch || '—' }}</span></div>
+              <div class="kv"><span>版本</span><span>0.1.0</span></div>
+              <div class="kv"><span>主机</span><span>{{ sysSnap?.sys?.hostname || '—' }}</span></div>
+              <div class="kv"><span>平台</span><span>{{ sysSnap?.sys?.platform || '—' }} / {{ sysSnap?.sys?.arch || '—' }}</span></div>
               <div class="kv"><span>Node</span><span>{{ sysSnap?.sys?.nodeVersion || '—' }}</span></div>
               <div class="kv"><span>Provider</span><span>{{ settings.provider }}</span></div>
               <div class="kv"><span>Model</span><span class="mono">{{ settings.model }}</span></div>

@@ -14,7 +14,8 @@ $ServerPidFile = Join-Path $RunDir "server.pid"
 $AppsPidFile = Join-Path $RunDir "apps.pid"
 $ServerPort = if ($env:AIOS_SERVER_PORT) { [int]$env:AIOS_SERVER_PORT } else { 9502 }
 $AppsPort = if ($env:AIOS_APPS_PORT) { [int]$env:AIOS_APPS_PORT } else { 9503 }
-$NodeMajorRequired = 20
+$NodeMajorRequired = 22
+$NodeMinorRequired = 5
 
 function Write-Info([string]$Message) {
   Write-Host $Message
@@ -55,7 +56,7 @@ function Ensure-Winget {
 winget not found. AIOS installer needs winget to auto-install Node.js / git.
 - Windows 11: should be pre-installed; try 'winget' in a new terminal
 - Windows 10: install 'App Installer' from Microsoft Store, then re-run this script
-- Or install Node 20+ and Git manually, then re-run.
+- Or install Node 22.5+ and Git manually, then re-run.
 "@
 }
 
@@ -81,14 +82,31 @@ function Get-NodeMajor {
   return 0
 }
 
+function Get-NodeMinor {
+  if (-not (Have-Command "node")) { return 0 }
+  $v = (& node -v 2>$null)
+  if (-not $v) { return 0 }
+  $parts = ($v -replace "^v", "").Split(".")
+  if ($parts.Length -lt 2) { return 0 }
+  $n = 0
+  if ([int]::TryParse($parts[1], [ref]$n)) { return $n }
+  return 0
+}
+
+function Test-NodeVersion {
+  $major = Get-NodeMajor
+  $minor = Get-NodeMinor
+  return ($major -gt $NodeMajorRequired) -or (($major -eq $NodeMajorRequired) -and ($minor -ge $NodeMinorRequired))
+}
+
 function Ensure-Node {
-  $current = Get-NodeMajor
-  if ($current -ge $NodeMajorRequired) { return }
-  if ($current -gt 0) {
-    Write-Info "Node.js v$current too old, need >= $NodeMajorRequired"
+  if (Test-NodeVersion) { return }
+  $current = if (Have-Command "node") { & node -v 2>$null } else { "" }
+  if ($current) {
+    Write-Info "Node.js $current too old, need >= $NodeMajorRequired.$NodeMinorRequired"
   }
   Ensure-WingetPackage -Id "OpenJS.NodeJS.LTS" -DisplayName "Node.js LTS"
-  if ((Get-NodeMajor) -lt $NodeMajorRequired) {
+  if (-not (Test-NodeVersion)) {
     Fail "Node.js install completed but version check failed."
   }
   Write-Info "Node.js: $(& node -v)"

@@ -3,12 +3,12 @@
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="text-[13px] font-bold">{{ plan.title }}</div>
-        <div class="cc-mono text-[10.5px] mt-1" style="color:#8a7965">{{ plan.slug }}.md · {{ formatDate(plan.modified) }} · {{ Math.round(plan.sizeBytes / 1024) }}__T_CLAUDE_PLAN_KB__</div>
+        <div class="cc-mono text-[10.5px] mt-1" style="color:#8a7965">{{ plan.slug }}.md · {{ formatDate(plan.modified) }} · {{ Math.round(plan.sizeBytes / 1024) }} KB</div>
       </div>
       <button class="shrink-0 text-[11px] px-2.5 py-1 rounded-md border bg-white hover:bg-[#fdf7e8]"
         style="border-color:rgba(140,100,60,0.18);color:#4a3826"
         :disabled="loading" @click="toggle">
-        {{ loading ? '__T_CLAUDE_LOADING__' : (expanded ? '__T_CLAUDE_PLAN_COLLAPSE__' : '__T_CLAUDE_PLAN_EXPAND__') }}
+        {{ loading ? '加载中...' : (expanded ? '收起' : '展开') }}
       </button>
     </div>
 
@@ -48,7 +48,7 @@ const toggle = async () => {
     const r = await fetch(`/apps/claude-code/plans/file?slug=${encodeURIComponent(props.plan.slug)}`);
     const data = await r.json();
     if (!data.ok) {
-      error.value = data.error || '__T_CLAUDE_LOAD_FAILED__';
+      error.value = data.error || '加载失败';
       expanded.value = true;
       return;
     }

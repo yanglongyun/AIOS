@@ -3,8 +3,8 @@
     <div v-if="visible" class="fixed inset-0 z-[420] flex items-center justify-center bg-black/45 px-6 py-8" @click="emit('close')">
       <div class="flex h-[560px] w-[760px] max-w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1b1b1d] shadow-[0_24px_80px_rgba(0,0,0,0.45)]" @click.stop>
         <div class="border-b border-[#2d2d30] px-5 py-4">
-          <div class="text-[15px] font-semibold text-[#f3f4f6]">__T_DIRECTORY_PICKER_TITLE__</div>
-          <div class="mt-1 text-[12px] text-[#8b949e]">__T_DIRECTORY_PICKER_DESC__</div>
+          <div class="text-[15px] font-semibold text-[#f3f4f6]">选择目录</div>
+          <div class="mt-1 text-[12px] text-[#8b949e]">为 Claude Code 会话选择工作目录。</div>
         </div>
 
         <div class="border-b border-[#2d2d30] px-4 py-3">
@@ -27,9 +27,9 @@
         </div>
 
         <div class="min-h-0 flex-1 overflow-auto px-3 py-3 [scrollbar-width:thin]">
-          <div v-if="loading" class="px-2 py-6 text-[12px] text-[#6a737d]">__T_DIRECTORY_PICKER_LOADING__</div>
+          <div v-if="loading" class="px-2 py-6 text-[12px] text-[#6a737d]">加载中...</div>
           <div v-else-if="error" class="px-2 py-6 text-[12px] text-[#f48771]">{{ error }}</div>
-          <div v-else-if="!folders.length" class="px-2 py-6 text-[12px] text-[#6a737d]">__T_DIRECTORY_PICKER_EMPTY__</div>
+          <div v-else-if="!folders.length" class="px-2 py-6 text-[12px] text-[#6a737d]">没有子目录</div>
           <div v-else class="space-y-1">
             <button
               v-for="folder in folders"
@@ -44,7 +44,7 @@
             >
               <span class="text-[14px]">📁</span>
               <span class="min-w-0 flex-1 truncate">{{ folder.name }}</span>
-              <span class="text-[10px] uppercase tracking-[0.12em] text-[#6a737d]">__T_DIRECTORY_PICKER_OPEN__</span>
+              <span class="text-[10px] uppercase tracking-[0.12em] text-[#6a737d]">打开</span>
             </button>
           </div>
         </div>
@@ -54,18 +54,18 @@
             type="button"
             class="rounded px-3 py-1.5 text-[12px] text-[#9da2a6] transition-colors hover:bg-[#252628] hover:text-white"
             @click="openParent"
-          >__T_DIRECTORY_PICKER_UP__</button>
+          >上一级</button>
           <div class="flex items-center gap-2">
             <button
               type="button"
               class="rounded border border-[#3d4044] px-3 py-1.5 text-[12px] text-[#c9d1d9] transition-colors hover:bg-[#252628]"
               @click="emit('close')"
-            >__T_COMMON_CANCEL__</button>
+            >取消</button>
             <button
               type="button"
               class="rounded bg-[#2f6feb] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#3b82f6]"
               @click="selectCurrent"
-            >__T_DIRECTORY_PICKER_ADD__</button>
+            >选择</button>
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ const folderPath = (folder) => joinPath(currentBase.value, folder.path || folder
 
 const breadcrumbs = computed(() => {
   const segments = normalizePath(currentBase.value).split('/').filter(Boolean);
-  const list = [{ label: '__T_DIRECTORY_PICKER_ROOT__', path: '/' }];
+  const list = [{ label: '根目录', path: '/' }];
   let current = '';
   for (const segment of segments) {
     current = `${current}/${segment}`;
@@ -138,7 +138,7 @@ const loadFolders = async (base) => {
       selectedPath.value = currentBase.value;
       folders.value = Array.isArray(data.entries) ? data.entries.filter((item) => item.type === 'dir') : [];
   } catch (e) {
-    error.value = e.message || '__T_DIRECTORY_PICKER_LOAD_FAILED__';
+    error.value = e.message || '目录加载失败';
     folders.value = [];
   } finally {
     loading.value = false;

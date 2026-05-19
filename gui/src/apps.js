@@ -5,7 +5,7 @@
 const apps = [
   {
     id: 'chat',
-    name: '__T_APP_CHAT__',
+    name: '对话',
     icon: 'forum',
     color: '#34a853',
     hasDrawer: true,
@@ -13,7 +13,7 @@ const apps = [
   },
   {
     id: 'tasks',
-    name: '__T_APP_TASKS__',
+    name: '任务',
     icon: 'task_alt',
     color: '#1a73e8',
     hasDrawer: true,
@@ -173,7 +173,7 @@ const apps = [
   },
   {
     id: 'cryptobot',
-    name: '__T_APP_CRYPTOBOT__',
+    name: '炒币机',
     icon: 'currency_bitcoin',
     color: '#f9ab00',
     hasDrawer: false,
@@ -181,7 +181,7 @@ const apps = [
   },
   {
     id: 'settings',
-    name: '__T_APP_SETTINGS__',
+    name: '设置',
     icon: 'settings',
     color: '#5f6368',
     hasDrawer: false,

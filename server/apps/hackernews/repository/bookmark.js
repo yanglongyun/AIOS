@@ -6,7 +6,7 @@ const addBookmark = ({ hnId, title, url, by, score }) => {
   const ret = db.prepare(
     "INSERT INTO hackernews_bookmarks (hn_id, title, url, by, score) VALUES (?, ?, ?, ?, ?)"
   ).run(hnId, title || '', url || '', by || '', score || 0);
-  return db.prepare("SELECT * FROM hackernews_bookmarks WHERE id = ?").get(ret.lastInsertRowid);
+  return db.prepare("SELECT * FROM hackernews_bookmarks WHERE id = ?").get(Number(ret.lastInsertRowid));
 };
 
 const removeBookmark = (hnId) => {

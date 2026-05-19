@@ -3,7 +3,7 @@ import { db } from "./client.js";
 const insertReport = ({ report, taskId }) => {
   const stmt = db.prepare("INSERT INTO civ_reports (report, task_id) VALUES (?, ?)");
   const info = stmt.run(report, taskId || null);
-  return info.lastInsertRowid;
+  return Number(info.lastInsertRowid);
 };
 
 const getLatestReport = () => {

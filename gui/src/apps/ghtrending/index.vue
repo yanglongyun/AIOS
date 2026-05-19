@@ -54,7 +54,7 @@ async function analyzeRepo(repo) {
     try {
         analyses[repo.id] = (await gh.analyzeRepo(repo)).analysis || '';
     } catch {
-        analyses[repo.id] = '__T_GH_FAILED__';
+        analyses[repo.id] = '加载失败,稍后重试';
     }
     analyzingId.value = null;
 }
@@ -67,7 +67,7 @@ async function doDigest() {
             .join('\n');
         digestText.value = (await gh.digestList(list)).analysis || '';
     } catch {
-        digestText.value = '__T_GH_FAILED__';
+        digestText.value = '加载失败,稍后重试';
     }
     digesting.value = false;
 }
@@ -104,8 +104,8 @@ const stopAppCtx = watchEffect(() => {
     appCtx.set({
       context: `用户在 GH 热榜的历史视图,共 ${historyItems.value.length} 条历史分析记录。`,
       prompts: [
-        { label: '__T_GHTRENDING_CHAT_QUICK_1__', text: '__T_GHTRENDING_CHAT_QUICK_1__' },
-        { label: '__T_GHTRENDING_CHAT_QUICK_3__', text: '__T_GHTRENDING_CHAT_QUICK_3__' }
+        { label: '今天热门的主要是哪些方向', text: '今天热门的主要是哪些方向' },
+        { label: '哪些和 AI 相关', text: '哪些和 AI 相关' }
       ]
     });
     return;
@@ -119,9 +119,9 @@ const stopAppCtx = watchEffect(() => {
       `共 ${repos.value.length} 个项目${top ? `,前 5 个:\n${top}` : '。'}`
     ].join('\n'),
     prompts: [
-      { label: '__T_GHTRENDING_CHAT_QUICK_1__', text: '__T_GHTRENDING_CHAT_QUICK_1__' },
-      { label: '__T_GHTRENDING_CHAT_QUICK_2__', text: '__T_GHTRENDING_CHAT_QUICK_2__' },
-      { label: '__T_GHTRENDING_CHAT_QUICK_3__', text: '__T_GHTRENDING_CHAT_QUICK_3__' }
+      { label: '今天热门的主要是哪些方向', text: '今天热门的主要是哪些方向' },
+      { label: '挑一个适合学习的项目', text: '挑一个适合学习的项目' },
+      { label: '哪些和 AI 相关', text: '哪些和 AI 相关' }
     ]
   });
 });

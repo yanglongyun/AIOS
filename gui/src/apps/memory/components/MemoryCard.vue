@@ -1,7 +1,7 @@
 <template>
   <div
     class="relative cursor-default transition-all duration-200 hover:z-10 hover:scale-[1.02]"
-    :class="item.enabled ? '' : 'opacity-[0.4]'"
+    :class="item.visibility === 'count' ? 'opacity-[0.5]' : ''"
     :style="noteStyle"
   >
     <!-- Paper line texture -->
@@ -33,29 +33,22 @@
       <div class="flex items-center gap-1 border-t pt-2" style="border-color:rgba(0,0,0,0.06)">
         <span class="text-[12px] tabular-nums" style="color:rgba(0,0,0,0.18);font-family:'Caveat',cursive">{{ formatTime(item.created_at) }}</span>
         <div class="ml-auto flex items-center gap-[3px]">
+          <!-- visibility 三档单选 -->
           <button
+            v-for="opt in VIS_OPTS"
+            :key="opt.value"
             class="rounded-xl px-2 py-[2px] text-[11px] font-semibold transition-all hover:brightness-[0.93]"
-            :style="item.enabled
-              ? 'background:rgba(255,255,255,0.5);color:rgba(30,120,55,0.65);box-shadow:0 1px 2px rgba(0,0,0,0.05)'
-              : 'background:rgba(255,255,255,0.3);color:rgba(0,0,0,0.22)'"
+            :style="item.visibility === opt.value ? opt.activeStyle : 'background:rgba(255,255,255,0.3);color:rgba(0,0,0,0.22)'"
             style="font-family:'Caveat',cursive"
-            @click="$emit('toggle-enable')"
-          >{{ item.enabled ? '✓ __T_MEMORY_ENABLED_LABEL__' : '○ __T_MEMORY_DISABLED_LABEL__' }}</button>
-
-          <button
-            class="rounded-xl px-2 py-[2px] text-[11px] font-semibold transition-all hover:brightness-[0.93]"
-            :style="item.pinned
-              ? 'background:rgba(255,255,255,0.5);color:rgba(180,110,20,0.7);box-shadow:0 1px 2px rgba(0,0,0,0.05)'
-              : 'background:rgba(255,255,255,0.3);color:rgba(0,0,0,0.22)'"
-            style="font-family:'Caveat',cursive"
-            @click="$emit('toggle-pin')"
-          >{{ item.pinned ? '📌 __T_MEMORY_PINNED__' : '☆ __T_MEMORY_PINNED__' }}</button>
+            :title="opt.hint"
+            @click="$emit('set-visibility', opt.value)"
+          >{{ opt.label }}</button>
 
           <button
             class="rounded-xl px-2 py-[2px] text-[11px] font-semibold transition-all hover:brightness-[0.93]"
             style="background:rgba(255,255,255,0.3);color:rgba(200,60,60,0.3);font-family:'Caveat',cursive"
             @click="$emit('delete')"
-          >__T_MEMORY_DELETE__</button>
+          >删除</button>
         </div>
       </div>
     </div>
@@ -69,7 +62,29 @@ const props = defineProps({
   item: { type: Object, required: true }
 });
 
-defineEmits(['edit', 'toggle-pin', 'toggle-enable', 'delete']);
+defineEmits(['edit', 'set-visibility', 'delete']);
+
+// 三档可见性的按钮配色 —— 全部沿用 caveat 手写体配色,与原 enabled/pin 按钮风格一致
+const VIS_OPTS = [
+  {
+    value: 'count',
+    label: '◯ 仅数量',
+    hint: 'AI 只知道有这条,看不到任何内容',
+    activeStyle: 'background:rgba(255,255,255,0.5);color:rgba(0,0,0,0.42);box-shadow:0 1px 2px rgba(0,0,0,0.05)'
+  },
+  {
+    value: 'summary',
+    label: '◐ 摘要',
+    hint: 'AI 看得到标题和简介,看不到正文',
+    activeStyle: 'background:rgba(255,255,255,0.5);color:rgba(180,110,20,0.7);box-shadow:0 1px 2px rgba(0,0,0,0.05)'
+  },
+  {
+    value: 'full',
+    label: '● 全部',
+    hint: 'AI 看得到全部内容',
+    activeStyle: 'background:rgba(255,255,255,0.5);color:rgba(30,120,55,0.65);box-shadow:0 1px 2px rgba(0,0,0,0.05)'
+  }
+];
 
 const NOTES = [
   { bg: '#fff9c4', shadow: 'rgba(200,180,60,0.18)', tape: '#e8d44d' },

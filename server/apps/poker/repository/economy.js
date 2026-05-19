@@ -5,9 +5,9 @@ const setPokerBalances = ({ playerBalance, aiBalance }) => {
     db.prepare(`UPDATE poker_accounts SET balance = ? WHERE role = 'player'`).run(Math.max(0, Number(playerBalance || 0)));
     db.prepare(`UPDATE poker_accounts SET balance = ? WHERE role = 'ai'`).run(Math.max(0, Number(aiBalance || 0)));
     db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
+  } catch (e) {
+    try { db.exec("ROLLBACK"); } catch {}
+    throw e;
   }
 };
 const getPokerEconomy = () => {

@@ -28,19 +28,19 @@ defineExpose({
             <input
                 ref="titleEl"
                 v-model="note.title"
-                placeholder="__T_NOTEBOOK_TITLE_PLACEHOLDER__"
+                placeholder="标题"
                 class="w-full resize-none border-0 bg-transparent py-1.5 font-inherit text-[28px] font-bold tracking-[-0.01em] text-ink outline-none placeholder:font-semibold placeholder:text-faint max-md:text-[22px]" />
             <textarea
                 ref="bodyEl"
                 v-model="note.body"
-                placeholder="__T_NOTES_BODY_PLACEHOLDER__"
+                placeholder="开始写…"
                 class="w-full flex-1 resize-none border-0 bg-transparent text-[16px] leading-[1.7] text-ink outline-none placeholder:text-faint max-md:text-[15px]"
                 style="min-height: 60vh"></textarea>
             <div class="flex gap-1.5 border-t border-line-soft pt-1 text-[11.5px] text-faint">
                 <span v-if="note.created_at">{{ relTime(note.updated_at || note.created_at) }}</span>
-                <span v-else>__T_NOTEBOOK_NEW_NOTE__</span>
-                <span v-if="dirty" class="text-warn">· __T_NOTES_UNSAVED__</span>
-                <span v-else-if="note.id" class="text-good opacity-70">· __T_NOTES_SAVED__</span>
+                <span v-else>新建笔记</span>
+                <span v-if="dirty" class="text-warn">· 未保存</span>
+                <span v-else-if="note.id" class="text-good opacity-70">· 已保存</span>
             </div>
         </div>
     </div>

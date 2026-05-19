@@ -119,12 +119,9 @@ const createChatSession = (wsSend) => {
             const { content, remark } = extractRemark(raw);
             const cleanMsg = { ...msg.message, content };
             saveMessage(cid, cleanMsg, null, remark);
-            wsSend({
-              type: "done",
-              conversationId: cid,
-              content,
-              remark
-            });
+            const doneMsg = { type: "done", conversationId: cid };
+            if (remark) doneMsg.remark = remark;
+            wsSend(doneMsg);
             return;
           }
           wsSend({ type: "done", conversationId: cid });

@@ -66,7 +66,7 @@ comment(string, 80-180字点评)
     const comment = String(parsed.comment || '').trim() || '暂无点评';
 
     const ret = insertAppraisal({ imagePath, name, category, condition, summaryTag, value, comment });
-    const item = getAppraisalById(ret.lastInsertRowid);
+    const item = getAppraisalById(Number(ret.lastInsertRowid));
 
     return { success: true, item };
   } catch (error) {

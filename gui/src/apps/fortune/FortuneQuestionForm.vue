@@ -3,7 +3,7 @@
     <textarea
       :value="question"
       rows="2"
-      placeholder="__T_FORTUNE_INPUT_PLACEHOLDER__"
+      placeholder="把困惑写在这里…"
       :disabled="shaking || loading"
       class="w-full resize-none border-none bg-transparent text-sm leading-[1.6] text-[#3a2e20] outline-none placeholder:text-[#b0a080] disabled:opacity-50"
       @input="$emit('update:question', $event.target.value)"
@@ -13,7 +13,7 @@
       @click="$emit('divine')"
       :disabled="shaking || loading || !question.trim()"
     >
-      {{ shaking ? '__T_FORTUNE_SHAKING__' : loading ? '__T_FORTUNE_READING__' : '__T_FORTUNE_DIVINE__' }}
+      {{ shaking ? '摇卦中…' : loading ? '卦师正在解卦…' : '起卦' }}
     </button>
   </div>
 </template>

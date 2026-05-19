@@ -10,7 +10,7 @@ import * as api from '@/utils/api';
 export const useAuthStore = defineStore('auth', () => {
     // 'pending' | 'ready' | 'offline'
     const state = ref('pending');
-    const statusText = ref('__T_CONNECTION_CONNECTING_PLAIN__');
+    const statusText = ref('连接中...');
 
     const configured = ref(false);
     const authenticated = ref(false);
@@ -24,18 +24,18 @@ export const useAuthStore = defineStore('auth', () => {
             configured.value = Boolean(s.configured);
             authenticated.value = Boolean(s.authenticated);
             state.value = 'ready';
-            statusText.value = authenticated.value ? '__T_CONNECTION_CONNECTED__' : '__T_CONNECTION_NEED_AUTH__';
+            statusText.value = authenticated.value ? '已连接' : '需要认证';
             return s;
         } catch (err) {
             state.value = 'offline';
-            statusText.value = '__T_CONNECTION_FAILED__';
+            statusText.value = '连接失败';
             throw err;
         }
     }
 
     async function init() {
         state.value = 'pending';
-        statusText.value = '__T_CONNECTION_CONNECTING_PLAIN__';
+        statusText.value = '连接中...';
         try {
             await refreshState();
         } catch {
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
             await refreshState();
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '__T_COMMON_SETUP_FAILED__';
+            authError.value = err?.body?.message || err.message || '设置失败';
             return false;
         }
     }
@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
             await refreshState();
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '__T_COMMON_LOGIN_FAILED__';
+            authError.value = err?.body?.message || err.message || '登录失败';
             return false;
         }
     }
@@ -72,7 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
         try { await api.post('/api/auth/logout'); } catch {}
         authenticated.value = false;
         state.value = 'ready';
-        statusText.value = '__T_CONNECTION_NEED_AUTH__';
+        statusText.value = '需要认证';
     }
 
     async function changePassword(oldPassword, newPassword) {
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
             await api.post('/api/auth/change-password', { oldPassword, newPassword });
             return true;
         } catch (err) {
-            authError.value = err?.body?.message || err.message || '__T_COMMON_UPDATE_FAILED__';
+            authError.value = err?.body?.message || err.message || '修改失败';
             return false;
         }
     }

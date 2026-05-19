@@ -8,14 +8,14 @@ defineProps({
     <article class="si-card">
         <header class="mb-3.5 flex items-start justify-between gap-3">
             <div>
-                <div class="text-[15.5px] font-medium tracking-[-0.005em] text-ink">__T_SYSINFO_PROCESSES__</div>
-                <div class="mt-1 text-[12.5px] leading-[1.55] text-muted">__T_SYSINFO_PROCESSES_DESC__</div>
+                <div class="text-[15.5px] font-medium tracking-[-0.005em] text-ink">进程</div>
+                <div class="mt-1 text-[12.5px] leading-[1.55] text-muted">按 CPU 占用排序的前 20 个进程。</div>
             </div>
         </header>
 
         <div class="flex flex-col">
             <div class="proc-row text-[11px] uppercase tracking-[0.06em] text-faint">
-                <span>PID</span><span>CPU%</span><span>__T_SYSINFO_MEMORY_PCT__</span><span>__T_SYSINFO_USER__</span><span>__T_SYSINFO_COMMAND__</span>
+                <span>PID</span><span>CPU%</span><span>内存%</span><span>用户</span><span>命令</span>
             </div>
             <div v-for="p in processes" :key="p.pid"
                  class="proc-row border-b border-line-soft text-[12.5px] transition-colors hover:bg-bg-hi rounded-md">

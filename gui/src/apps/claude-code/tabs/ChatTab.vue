@@ -7,7 +7,7 @@
             <div class="mb-4 text-[40px]">🐙</div>
             <h2 class="mb-2 text-xl font-bold" style="color:#2a1f13">Claude Code</h2>
             <p class="max-w-[320px] text-[13px] leading-relaxed" style="color:rgba(0,0,0,0.4)">
-              __T_CLAUDE_CHAT_EMPTY__
+              从一个工作目录开始 Claude Code 会话。
             </p>
           </div>
 
@@ -38,7 +38,7 @@
                     <span class="msi xxs mt-0.5 shrink-0 transition-transform" :class="isToolExpanded(m.key) ? 'rotate-90' : ''" style="color:rgba(0,0,0,0.35)">chevron_right</span>
                     <div class="min-w-0 flex flex-1 items-center gap-2">
                       <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs" style="color:#3d2f1e">{{ m.summary || m.toolName }}</div>
-                      <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">__T_CLAUDE_CHAT_TOOL_DONE__</span>
+                      <span v-if="m.result !== undefined" class="shrink-0 text-[11px]" style="color:rgba(0,0,0,0.35)">完成</span>
                     </div>
                   </button>
                   <div v-if="isToolExpanded(m.key)" style="border-top:1px solid rgba(160,120,80,0.12)">
@@ -55,7 +55,7 @@
             </div>
 
             <div v-if="busy" class="flex items-start">
-              <div class="py-2 text-sm" style="color:rgba(160,120,80,0.6)">__T_CLAUDE_CHAT_THINKING__<span class="animate-pulse">...</span></div>
+              <div class="py-2 text-sm" style="color:rgba(160,120,80,0.6)">思考中<span class="animate-pulse">...</span></div>
             </div>
           </template>
         </div>
@@ -71,7 +71,7 @@
             <textarea
               ref="textarea" v-model="input" rows="1"
               :disabled="busy || !installed"
-              :placeholder="busy ? '__T_CLAUDE_CHAT_REPLYING__' : (currentId ? '__T_CLAUDE_CHAT_CONTINUE__' : '__T_CLAUDE_CHAT_START_IN__'.replace('{cwd}', cwd))"
+              :placeholder="busy ? 'Claude 正在回复...' : (currentId ? '继续这个会话...' : '在 {cwd} 开始'.replace('{cwd}', cwd))"
               class="min-h-[52px] max-h-[200px] w-full resize-none overflow-y-auto border-none bg-transparent px-4 pb-3 pt-3.5 pr-[176px] text-sm leading-relaxed outline-none disabled:opacity-50"
               style="color:#2a1f13"
               @input="autoResize"
@@ -90,7 +90,7 @@
                   @mouseover="$event.currentTarget.style.background='rgba(160,120,80,0.08)';$event.currentTarget.style.color='#5c4332'"
                   @mouseleave="$event.currentTarget.style.background='transparent';$event.currentTarget.style.color='rgba(160,120,80,0.8)'"
                   @click="startEditPath"
-                  title="__T_CLAUDE_CHAT_EDIT_CWD__">
+                  title="选择工作目录">
                   <span class="msi xxs shrink-0">folder_open</span>
                   <span class="cc-mono truncate">{{ cwd }}</span>
                 </button>
@@ -138,7 +138,7 @@
                   >
                     <div class="flex items-center justify-between gap-3">
                       <span class="cc-mono text-[11px] font-semibold" style="color:#2a1f13">{{ mode.label }}</span>
-                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">__T_CLAUDE_PERMISSION_CURRENT__</span>
+                      <span v-if="permissionMode === mode.id" class="text-[10px]" style="color:#5c4332">当前</span>
                     </div>
                     <div class="mt-1 text-[11px] leading-relaxed" style="color:#6b5a46">{{ mode.description }}</div>
                   </button>
@@ -184,12 +184,12 @@ const props = defineProps({
 });
 
 const PERMISSION_MODES = [
-  { id: 'default', label: 'default', description: '__T_CLAUDE_PERMISSION_DEFAULT_DESC__' },
-  { id: 'plan', label: 'plan', description: '__T_CLAUDE_PERMISSION_PLAN_DESC__' },
-  { id: 'auto', label: 'auto', description: '__T_CLAUDE_PERMISSION_AUTO_DESC__' },
-  { id: 'acceptEdits', label: 'acceptEdits', description: '__T_CLAUDE_PERMISSION_ACCEPT_EDITS_DESC__' },
-  { id: 'dontAsk', label: 'dontAsk', description: '__T_CLAUDE_PERMISSION_DONT_ASK_DESC__' },
-  { id: 'bypassPermissions', label: 'bypassPermissions', description: '__T_CLAUDE_PERMISSION_BYPASS_DESC__' }
+  { id: 'default', label: 'default', description: '危险操作前询问' },
+  { id: 'plan', label: 'plan', description: '先计划再执行' },
+  { id: 'auto', label: 'auto', description: '自动批准低风险操作' },
+  { id: 'acceptEdits', label: 'acceptEdits', description: '接受文件编辑' },
+  { id: 'dontAsk', label: 'dontAsk', description: '不询问权限' },
+  { id: 'bypassPermissions', label: 'bypassPermissions', description: '跳过权限检查' }
 ];
 
 const cwd = ref('~/Desktop');
@@ -221,9 +221,9 @@ const formatTime = (iso) => {
   if (isNaN(d.getTime())) return iso;
   const now = Date.now();
   const diff = (now - d.getTime()) / 1000;
-  if (diff < 60) return '__T_CLAUDE_TIME_JUST_NOW__';
-  if (diff < 3600) return '__T_CLAUDE_TIME_MINUTES_AGO__'.replace('{n}', String(Math.floor(diff / 60)));
-  if (diff < 86400) return '__T_CLAUDE_TIME_HOURS_AGO__'.replace('{n}', String(Math.floor(diff / 3600)));
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return '{n} 分钟前'.replace('{n}', String(Math.floor(diff / 60)));
+  if (diff < 86400) return '{n} 小时前'.replace('{n}', String(Math.floor(diff / 3600)));
   return `${d.getMonth() + 1}/${d.getDate()}`;
 };
 
@@ -254,7 +254,7 @@ const openConversation = async (sid) => {
 };
 
 const removeConversation = async (sid) => {
-  if (!confirm('__T_CLAUDE_CHAT_DELETE_CONFIRM__')) return;
+  if (!confirm('删除这个会话和所有消息？')) return;
   await fetch('/apps/claude-code/conversations/delete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

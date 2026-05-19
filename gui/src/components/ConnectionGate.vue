@@ -12,10 +12,10 @@ const show = computed(() => {
 });
 
 const status = computed(() => {
-    if (auth.state === 'offline')return { id: 'offline',    label: '__T_CONNECTION_OFFLINE__' };
+    if (auth.state === 'offline')return { id: 'offline',    label: '连接已断开,重连中…' };
     if (!auth.authenticated)
-                               return { id: 'pending',    label: '__T_CONNECTION_WAIT_AUTH__' };
-    return                           { id: 'pending',    label: '__T_CONNECTION_CONNECTING__' };
+                               return { id: 'pending',    label: '等待认证…' };
+    return                           { id: 'pending',    label: '连接中…' };
 });
 </script>
 

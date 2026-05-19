@@ -51,13 +51,13 @@ const displayAiCards = computed(() => {
 });
 
 const roundStatusText = computed(() => {
-  if (!game.value) return '__T_POKER_ROUND__' + '0';
+  if (!game.value) return '第 {n} 轮' + '0';
   if (game.value.status === 'done') {
-    if (game.value.winner === 'player') return '__T_POKER_YOU_WIN__';
-    if (game.value.winner === 'draw') return '__T_POKER_DRAW__';
-    return '__T_POKER_AI_WINS__';
+    if (game.value.winner === 'player') return '你赢了这局';
+    if (game.value.winner === 'draw') return '平局';
+    return 'AI 赢了这局';
   }
-  return '__T_POKER_ROUND__' + game.value.round;
+  return '第 {n} 轮' + game.value.round;
 });
 
 const request = async (url, opts) => {
@@ -92,7 +92,7 @@ const startGame = async () => {
     if (data.success) {
       game.value = data.game;
       economy.value = data.economy || economy.value;
-      lastActionText.value = '__T_POKER_TURN_START__';
+      lastActionText.value = '你来';
       aiSpeech.value = '';
       aiExpression.value = '';
       return;
@@ -110,11 +110,11 @@ const startGame = async () => {
 const handleAction = async (action) => {
   if (busy.value || !game.value) return;
   busy.value = true;
-  aiSpeech.value = '__T_POKER_AI_THINKING__';
+  aiSpeech.value = 'AI 思考中…';
   aiExpression.value = '';
-  if (action === 'fold') lastActionText.value = '__T_POKER_PLAYER_FOLDED_WAITING__';
-  else if (action === 'raise') lastActionText.value = '__T_POKER_PLAYER_RAISED_WAITING__';
-  else lastActionText.value = '__T_POKER_PLAYER_CALLED_WAITING__';
+  if (action === 'fold') lastActionText.value = '已弃牌';
+  else if (action === 'raise') lastActionText.value = '已加注,等 AI 出招';
+  else lastActionText.value = '已跟注,等 AI 出招';
   try {
     const data = await request('/apps/poker/action', {
       method: 'POST',
@@ -129,11 +129,11 @@ const handleAction = async (action) => {
       aiExpression.value = data.meta?.aiExpression || '';
 
       if (game.value.status === 'done') {
-        lastActionText.value = '__T_POKER_GAME_OVER__';
+        lastActionText.value = '本局结束';
       } else {
-        if (aiResponseAction === 'fold') lastActionText.value = '__T_POKER_AI_FOLDED__';
-        else if (aiResponseAction === 'raise') lastActionText.value = '__T_POKER_AI_RAISED__'.replace('{0}', data.meta?.aiBet ?? '');
-        else lastActionText.value = '__T_POKER_AI_CALLED__'.replace('{0}', data.meta?.aiBet ?? '');
+        if (aiResponseAction === 'fold') lastActionText.value = 'AI 弃牌';
+        else if (aiResponseAction === 'raise') lastActionText.value = 'AI 加注'.replace('{0}', data.meta?.aiBet ?? '');
+        else lastActionText.value = 'AI 跟注'.replace('{0}', data.meta?.aiBet ?? '');
       }
       return;
     }

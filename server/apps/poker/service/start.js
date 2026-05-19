@@ -38,7 +38,7 @@ const startGame = () => {
   return {
     success: true,
     game: {
-      id: ret.lastInsertRowid,
+      id: Number(ret.lastInsertRowid),
       playerCards,
       aiCards: [null, null, null],
       playerChips,

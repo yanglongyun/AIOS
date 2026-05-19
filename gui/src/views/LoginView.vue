@@ -27,7 +27,7 @@ const canSubmit = computed(() => {
 async function submit() {
     localError.value = '';
     if (password.value.length < 8) {
-        localError.value = '__T_LOGIN_PASSWORD_SHORT__';
+        localError.value = '密码至少 8 位';
         return;
     }
     loading.value = true;
@@ -73,11 +73,11 @@ onMounted(async () => {
                 <div class="mt-[14px] text-[26px] font-bold tracking-tight text-ink">
                     AIOS<span class="text-[#34a853]">.</span>
                 </div>
-                <div class="mt-1.5 text-[12px] tracking-[0.02em] text-muted">__T_LOGIN_TAGLINE__</div>
+                <div class="mt-1.5 text-[12px] tracking-[0.02em] text-muted">本地运行 · 数据归你</div>
             </div>
 
-            <h2 class="m-0 text-center text-[20px] font-bold text-ink">__T_LOGIN_TITLE__</h2>
-            <p class="m-0 text-center text-[13px] text-muted">__T_LOGIN_SUBHEAD__</p>
+            <h2 class="m-0 text-center text-[20px] font-bold text-ink">欢迎回来</h2>
+            <p class="m-0 text-center text-[13px] text-muted">输入密码进入你的 AIOS。</p>
 
             <form class="mt-5 flex flex-col gap-3.5" @submit.prevent="submit">
                 <label class="relative block">
@@ -86,7 +86,7 @@ onMounted(async () => {
                         v-model="password"
                         :type="showPassword ? 'text' : 'password'"
                         autocomplete="current-password"
-                        placeholder="__T_LOGIN_PASSWORD_PLACEHOLDER__"
+                        placeholder="密码 (至少 8 位)"
                         class="text-input w-full pr-10"
                         @input="localError = ''"
                     />
@@ -94,7 +94,7 @@ onMounted(async () => {
                         type="button"
                         class="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-muted transition-colors hover:bg-bg-elev hover:text-ink"
                         @click="showPassword = !showPassword"
-                        :title="showPassword ? '__T_LOGIN_HIDE__' : '__T_LOGIN_SHOW__'">
+                        :title="showPassword ? '隐藏' : '显示'">
                         <span class="msi xxs">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
                     </button>
                 </label>
@@ -107,12 +107,12 @@ onMounted(async () => {
                 <button type="submit"
                         :disabled="!canSubmit"
                         class="mt-1 h-11 rounded-xl border-0 bg-[#1a73e8] text-[14px] font-semibold tracking-[0.01em] text-white shadow-[0_6px_18px_-8px_rgba(26,115,232,0.65)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-[#174ea6] hover:shadow-[0_10px_24px_-10px_rgba(26,115,232,0.8)] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:hover:bg-[#1a73e8]">
-                    {{ loading ? '__T_LOGIN_SUBMITTING__' : '__T_LOGIN_SUBMIT__' }}
+                    {{ loading ? '登录中…' : '进入 AIOS' }}
                 </button>
             </form>
 
             <p class="mt-[22px] text-center text-[11.5px] leading-[1.6] text-faint">
-                __T_LOGIN_FORGOT__<br/>
+                忘记密码?在终端运行:<br/>
                 <code class="mt-1 inline-block rounded-md bg-bg-elev px-2 py-0.5 font-mono text-[11px] text-muted">sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"</code>
             </p>
         </div>

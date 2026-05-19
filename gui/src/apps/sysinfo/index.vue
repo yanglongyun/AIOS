@@ -33,7 +33,7 @@ async function tick() {
         lastAt.value = Date.now();
         errMsg.value = '';
     } catch (e) {
-        errMsg.value = '__T_SYSINFO_LOAD_FAILED_PREFIX__' + (e?.body?.error || e.message || e);
+        errMsg.value = '获取系统状态失败: ' + (e?.body?.error || e.message || e);
     }
     loading.value = false;
 }
@@ -52,7 +52,7 @@ onMounted(() => {
     sinceTimer = setInterval(() => {
         if (!lastAt.value) { sinceText.value = ''; return; }
         const s = Math.max(0, Math.round((Date.now() - lastAt.value) / 1000));
-        sinceText.value = s < 2 ? '__T_COMMON_JUST_NOW__' : `${s}s __T_TIME_AGO__`;
+        sinceText.value = s < 2 ? '刚刚' : `${s}s 前`;
     }, 500);
 });
 onBeforeUnmount(() => clearInterval(sinceTimer));
@@ -71,7 +71,7 @@ const memUsage = computed(() => snap.value?.mem?.usage || 0);
                  class="mx-auto mb-3.5 max-w-[1100px] rounded-[10px] bg-[#fce8e6] px-3.5 py-2.5 text-[13px] text-bad">
                 {{ errMsg }}
             </div>
-            <div v-if="loading && !snap" class="py-15 text-center text-faint">__T_COMMON_LOADING__</div>
+            <div v-if="loading && !snap" class="py-15 text-center text-faint">加载中...</div>
 
             <template v-if="snap">
                 <HeaderCard :sys="snap.sys" :since-text="sinceText" />
@@ -79,9 +79,9 @@ const memUsage = computed(() => snap.value?.mem?.usage || 0);
                 <!-- CPU / 内存 环 -->
                 <div class="mx-auto mb-3.5 grid max-w-[1100px] grid-cols-2 gap-3 max-md:grid-cols-1">
                     <RingCard :usage="cpuUsage" label="CPU" color="var(--accent)">
-                        <div class="kv"><span>__T_SYSINFO_CORES__</span><span>{{ snap.cpu?.cores }} __T_SYSINFO_CORE_UNIT__</span></div>
+                        <div class="kv"><span>核心</span><span>{{ snap.cpu?.cores }} 核</span></div>
                         <div class="kv">
-                            <span>__T_SYSINFO_LOAD_AVG__</span>
+                            <span>负载 1m / 5m / 15m</span>
                             <span :class="{
                                 'text-good': loadColor(snap.sys?.loadavg?.[0] || 0, snap.cpu?.cores || 1) === 'good',
                                 'text-warn': loadColor(snap.sys?.loadavg?.[0] || 0, snap.cpu?.cores || 1) === 'warn',
@@ -91,14 +91,14 @@ const memUsage = computed(() => snap.value?.mem?.usage || 0);
                             </span>
                         </div>
                         <div class="kv kv-model" :title="snap.cpu?.model">
-                            <span>__T_SYSINFO_MODEL__</span><span>{{ snap.cpu?.model }}</span>
+                            <span>型号</span><span>{{ snap.cpu?.model }}</span>
                         </div>
                     </RingCard>
 
-                    <RingCard :usage="memUsage" label="__T_SYSINFO_MEMORY__" color="#9334e6">
-                        <div class="kv"><span>__T_SYSINFO_USED__</span><span>{{ gb(snap.mem?.used) }}</span></div>
-                        <div class="kv"><span>__T_SYSINFO_FREE__</span><span>{{ gb(snap.mem?.free) }}</span></div>
-                        <div class="kv"><span>__T_SYSINFO_TOTAL__</span><span>{{ gb(snap.mem?.total) }}</span></div>
+                    <RingCard :usage="memUsage" label="内存" color="#9334e6">
+                        <div class="kv"><span>已用</span><span>{{ gb(snap.mem?.used) }}</span></div>
+                        <div class="kv"><span>空闲</span><span>{{ gb(snap.mem?.free) }}</span></div>
+                        <div class="kv"><span>总计</span><span>{{ gb(snap.mem?.total) }}</span></div>
                     </RingCard>
                 </div>
 

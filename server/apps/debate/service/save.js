@@ -13,5 +13,5 @@ export const saveRecord = (body = {}) => {
   }
 
   const r = insertRecord({ debateId, topicName, speakerRole, speakerName, content, draft });
-  return { success: true, id: r.lastInsertRowid };
+  return { success: true, id: Number(r.lastInsertRowid) };
 };

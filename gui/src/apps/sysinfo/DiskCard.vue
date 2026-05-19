@@ -16,8 +16,8 @@ const FILL_COLOR = {
     <article class="si-card">
         <header class="mb-3.5 flex items-start justify-between gap-3">
             <div>
-                <div class="text-[15.5px] font-medium tracking-[-0.005em] text-ink">__T_SYSINFO_DISK__</div>
-                <div class="mt-1 text-[12.5px] leading-[1.55] text-muted">__T_SYSINFO_DISK_DESC__</div>
+                <div class="text-[15.5px] font-medium tracking-[-0.005em] text-ink">磁盘</div>
+                <div class="mt-1 text-[12.5px] leading-[1.55] text-muted">本机各挂载点的使用情况。</div>
             </div>
         </header>
 

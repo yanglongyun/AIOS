@@ -30,7 +30,7 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
                 class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[22px] border border-line bg-white px-[18px] text-[14px] font-medium text-ink shadow-[var(--shadow-1)] transition-[background,box-shadow] hover:bg-[#fafbfc] hover:shadow-[var(--shadow-2)]"
                 @click="$emit('new')">
                 <span class="msi sm text-accent">edit</span>
-                <span>__T_NOTEBOOK_NEW_NOTE__</span>
+                <span>新建笔记</span>
             </button>
         </div>
 
@@ -38,17 +38,17 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
             {{ errMsg }}
         </div>
 
-        <div v-if="loading && !items.length" class="px-5 py-20 text-center text-muted">__T_COMMON_LOADING__</div>
+        <div v-if="loading && !items.length" class="px-5 py-20 text-center text-muted">加载中...</div>
 
         <div v-else-if="!filtered.length" class="px-5 py-20 text-center text-muted">
             <span class="msi mx-auto mb-3 block text-faint" style="font-size:42px">edit_note</span>
-            <div class="text-[16px] font-medium text-ink">{{ search ? '__T_NOTES_NO_MATCHES__' : '__T_NOTEBOOK_EMPTY__' }}</div>
-            <div v-if="!search" class="mt-1 text-[13px] text-faint">__T_NOTES_EMPTY_HINT__</div>
+            <div class="text-[16px] font-medium text-ink">{{ search ? '没有匹配的笔记' : '还没有笔记' }}</div>
+            <div v-if="!search" class="mt-1 text-[13px] text-faint">点上方「新笔记」开始</div>
         </div>
 
         <template v-else>
             <section v-if="pinned.length" class="mb-6">
-                <div class="mx-1 mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">__T_NOTES_PINNED__</div>
+                <div class="mx-1 mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">置顶</div>
                 <ul class="m-0 list-none overflow-hidden rounded-xl border border-line bg-white p-0">
                     <li v-for="n in pinned" :key="`p-${n.id}`"
                         class="group flex cursor-pointer items-start gap-2 border-b border-line-soft px-[18px] py-3.5 transition-colors hover:bg-bg-hi last:border-b-0"
@@ -56,7 +56,7 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5">
                                 <span v-if="n.pinned" class="msi xxs flex-none text-accent">push_pin</span>
-                                <h3 class="m-0 truncate text-[15px] font-semibold leading-[1.4] text-ink">{{ n.title || '__T_NOTEBOOK_UNTITLED__' }}</h3>
+                                <h3 class="m-0 truncate text-[15px] font-semibold leading-[1.4] text-ink">{{ n.title || '未命名' }}</h3>
                             </div>
                             <p v-if="n.body"
                                class="line-clamp-2 m-0 mt-0.5 text-[13px] leading-[1.55] text-muted overflow-hidden">
@@ -69,11 +69,11 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
                         <div class="flex flex-none gap-0 opacity-0 transition-opacity group-hover:opacity-100 max-md:opacity-100"
                              @click.stop>
                             <button class="row-act"
-                                    :title="n.pinned ? '__T_NOTEBOOK_UNPIN__' : '__T_NOTEBOOK_PIN__'"
+                                    :title="n.pinned ? '取消置顶' : '置顶'"
                                     @click="$emit('pin', n, $event)">
                                 <span class="msi xs">push_pin</span>
                             </button>
-                            <button class="row-act danger" title="__T_COMMON_DELETE__" @click="$emit('remove', n, $event)">
+                            <button class="row-act danger" title="删除" @click="$emit('remove', n, $event)">
                                 <span class="msi xs">delete</span>
                             </button>
                         </div>
@@ -82,14 +82,14 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
             </section>
 
             <section v-if="others.length">
-                <div v-if="pinned.length" class="mx-1 mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">__T_NOTES_OTHERS__</div>
+                <div v-if="pinned.length" class="mx-1 mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">其它</div>
                 <ul class="m-0 list-none overflow-hidden rounded-xl border border-line bg-white p-0">
                     <li v-for="n in others" :key="n.id"
                         class="group flex cursor-pointer items-start gap-2 border-b border-line-soft px-[18px] py-3.5 transition-colors hover:bg-bg-hi last:border-b-0"
                         @click="$emit('open', n)">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5">
-                                <h3 class="m-0 truncate text-[15px] font-semibold leading-[1.4] text-ink">{{ n.title || '__T_NOTEBOOK_UNTITLED__' }}</h3>
+                                <h3 class="m-0 truncate text-[15px] font-semibold leading-[1.4] text-ink">{{ n.title || '未命名' }}</h3>
                             </div>
                             <p v-if="n.body"
                                class="line-clamp-2 m-0 mt-0.5 text-[13px] leading-[1.55] text-muted overflow-hidden">
@@ -101,10 +101,10 @@ const others = computed(() => filtered.value.filter((n) => !n.pinned));
                         </div>
                         <div class="flex flex-none gap-0 opacity-0 transition-opacity group-hover:opacity-100 max-md:opacity-100"
                              @click.stop>
-                            <button class="row-act" title="__T_NOTEBOOK_PIN__" @click="$emit('pin', n, $event)">
+                            <button class="row-act" title="置顶" @click="$emit('pin', n, $event)">
                                 <span class="msi xs">push_pin</span>
                             </button>
-                            <button class="row-act danger" title="__T_COMMON_DELETE__" @click="$emit('remove', n, $event)">
+                            <button class="row-act danger" title="删除" @click="$emit('remove', n, $event)">
                                 <span class="msi xs">delete</span>
                             </button>
                         </div>

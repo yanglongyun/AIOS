@@ -68,17 +68,17 @@ import Onboarding from './Onboarding.vue';
 const tabs = [
   { id: 'chat',     icon: 'chat', label: '新对话' },
   { id: 'conversations', icon: 'history', label: '对话历史' },
-  { id: 'projects', icon: 'workspaces', label: '__T_CLAUDE_TAB_PROJECTS__' },
+  { id: 'projects', icon: 'workspaces', label: '项目' },
   { id: 'memory',   icon: 'article', label: 'CLAUDE.md' },
-  { id: 'plans',    icon: 'map', label: '__T_CLAUDE_TAB_PLANS__' },
+  { id: 'plans',    icon: 'map', label: '计划' },
   { id: 'history',  icon: 'schedule', label: '命令历史' },
-  { id: 'skills',   icon: 'auto_awesome', label: '__T_CLAUDE_TAB_SKILLS__' },
-  { id: 'plugin',   icon: 'extension', label: '__T_CLAUDE_TAB_PLUGIN__' },
+  { id: 'skills',   icon: 'auto_awesome', label: '技能' },
+  { id: 'plugin',   icon: 'extension', label: '插件' },
   { id: 'agents',   icon: 'smart_toy', label: 'Agents' },
   { id: 'mcp',      icon: 'language', label: 'MCP' },
-  { id: 'stats',    icon: 'bar_chart', label: '__T_CLAUDE_TAB_STATS__' },
-  { id: 'settings', icon: 'settings', label: '__T_CLAUDE_TAB_SETTINGS__' },
-  { id: 'account',  icon: 'person', label: '__T_CLAUDE_TAB_ACCOUNT__' }
+  { id: 'stats',    icon: 'bar_chart', label: '统计' },
+  { id: 'settings', icon: 'settings', label: '设置' },
+  { id: 'account',  icon: 'person', label: '账户' }
 ];
 
 const activeTab = ref('chat');

@@ -1,37 +1,37 @@
 <template>
   <div class="h-full overflow-y-auto cc-thin-scroll px-6 py-5 space-y-4">
     <div>
-      <div class="text-[17px] font-bold">__T_CLAUDE_STATS_TITLE__</div>
-      <div class="text-[11.5px]" style="color:#6b5a46">__T_CLAUDE_STATS_SOURCE__ <span class="cc-mono">~/.claude/stats-cache.json</span></div>
+      <div class="text-[17px] font-bold">统计</div>
+      <div class="text-[11.5px]" style="color:#6b5a46">来源 <span class="cc-mono">~/.claude/stats-cache.json</span></div>
     </div>
-    <div v-if="!data" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_LOADING__</div>
-    <div v-else-if="!data.available" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_STATS_MISSING__</div>
+    <div v-if="!data" class="text-[12px]" style="color:#8a7965">加载中...</div>
+    <div v-else-if="!data.available" class="text-[12px]" style="color:#8a7965">未找到统计缓存</div>
     <template v-else>
       <div class="grid grid-cols-4 gap-3">
         <div class="cc-stat-card">
-          <div class="cc-stat-label">__T_CLAUDE_STATS_TOTAL_SESSIONS__</div>
+          <div class="cc-stat-label">会话总数</div>
           <div class="cc-stat-value">{{ data.totalSessions }}</div>
         </div>
         <div class="cc-stat-card">
-          <div class="cc-stat-label">__T_CLAUDE_STATS_MESSAGES__</div>
+          <div class="cc-stat-label">消息数</div>
           <div class="cc-stat-value">{{ data.totalMessages?.toLocaleString() }}</div>
         </div>
         <div class="cc-stat-card">
-          <div class="cc-stat-label">__T_CLAUDE_STATS_LONGEST__</div>
+          <div class="cc-stat-label">最长会话</div>
           <div class="cc-stat-value">
-            {{ Math.round((data.longestSession?.duration || 0) / 3600000) }}<span class="text-[13px]" style="color:#8a7965;font-weight:400"> __T_CLAUDE_STATS_HOUR_UNIT__</span>
+            {{ Math.round((data.longestSession?.duration || 0) / 3600000) }}<span class="text-[13px]" style="color:#8a7965;font-weight:400"> 小时</span>
           </div>
-          <div class="cc-stat-sub">{{ '__T_CLAUDE_STATS_MESSAGES_SUFFIX__'.replace('{n}', String(data.longestSession?.messageCount || 0)) }}</div>
+          <div class="cc-stat-sub">{{ '{n} 条消息'.replace('{n}', String(data.longestSession?.messageCount || 0)) }}</div>
         </div>
         <div class="cc-stat-card">
-          <div class="cc-stat-label">__T_CLAUDE_STATS_FIRST_SESSION__</div>
+          <div class="cc-stat-label">首次会话</div>
           <div class="cc-stat-value cc-mono" style="font-size:18px">{{ formatDate(data.firstSessionDate) }}</div>
         </div>
       </div>
 
       <div v-if="data.dailyActivity?.length" class="cc-chart-card">
-        <div class="cc-chart-title">__T_CLAUDE_STATS_DAILY_ACTIVITY__</div>
-        <div class="cc-chart-sub mb-3">{{ '__T_CLAUDE_STATS_DAILY_SUB__'.replace('{n}', String(Math.min(data.dailyActivity.length, 14))) }}</div>
+        <div class="cc-chart-title">每日活跃</div>
+        <div class="cc-chart-sub mb-3">{{ '最近 {n} 天'.replace('{n}', String(Math.min(data.dailyActivity.length, 14))) }}</div>
         <div class="flex items-end gap-2" style="height:160px">
           <div v-for="d in data.dailyActivity.slice(-14)" :key="d.date" class="flex h-full flex-1 flex-col items-center justify-end gap-1 self-stretch">
             <div :title="`${d.date} · ${d.messageCount} 消息`" class="w-full rounded-t"
@@ -42,7 +42,7 @@
       </div>
 
       <div v-if="modelEntries.length" class="cc-chart-card">
-        <div class="cc-chart-title mb-3">__T_CLAUDE_STATS_MODEL_PREF__</div>
+        <div class="cc-chart-title mb-3">模型偏好</div>
         <div class="space-y-2">
           <div v-for="m in modelEntries" :key="m.name" class="grid items-center gap-3" style="grid-template-columns:180px 1fr 80px">
             <div class="cc-mono text-[11.5px]" style="color:#4a3826">{{ m.name }}</div>
@@ -55,7 +55,7 @@
       </div>
 
       <div v-if="data.hourCounts" class="cc-chart-card">
-        <div class="cc-chart-title mb-3">__T_CLAUDE_STATS_HOUR_DIST__</div>
+        <div class="cc-chart-title mb-3">时段分布</div>
         <div class="grid gap-1" style="grid-template-columns:repeat(24,1fr)">
           <div v-for="h in 24" :key="h-1" class="rounded-sm text-center cc-mono text-[9px]"
             :style="heatStyle(h - 1)">{{ data.hourCounts?.[h - 1] || '' }}</div>

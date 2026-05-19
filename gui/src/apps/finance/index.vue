@@ -240,9 +240,9 @@ const stopAppCtx = watchEffect(() => {
       `共 ${items.value.length} 条记录,本月收入 ¥${fmtAmt(totalIncome.value)},支出 ¥${fmtAmt(totalExpense.value)},结余 ¥${fmtAmt(endingBalance.value)}.`
     ].join('\n'),
     prompts: [
-      { label: '__T_FINANCE_CHAT_QUICK_1__', text: '__T_FINANCE_CHAT_QUICK_1__' },
-      { label: '__T_FINANCE_CHAT_QUICK_2__', text: '__T_FINANCE_CHAT_QUICK_2__' },
-      { label: '__T_FINANCE_CHAT_QUICK_3__', text: '__T_FINANCE_CHAT_QUICK_3__' }
+      { label: '帮我分析这个月的支出', text: '帮我分析这个月的支出' },
+      { label: '有哪些可以省的开支？', text: '有哪些可以省的开支？' },
+      { label: '生成本月财务小结', text: '生成本月财务小结' }
     ]
   });
 });

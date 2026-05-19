@@ -2,29 +2,29 @@
   <div class="h-full overflow-y-auto cc-thin-scroll px-6 py-5 space-y-5">
     <div class="flex items-end justify-between gap-3">
       <div>
-        <div class="text-[17px] font-bold">__T_CLAUDE_PLUGIN_TITLE__</div>
-        <div class="text-[11.5px]" style="color:#6b5a46">__T_CLAUDE_PLUGIN_SOURCE__ <span class="cc-mono">claude plugin list --json --available</span></div>
+        <div class="text-[17px] font-bold">插件</div>
+        <div class="text-[11.5px]" style="color:#6b5a46">来源 <span class="cc-mono">claude plugin list --json --available</span></div>
       </div>
       <div class="flex items-center gap-2">
-        <input v-model="query" type="text" placeholder="__T_CLAUDE_PLUGIN_SEARCH__"
+        <input v-model="query" type="text" placeholder="搜索插件..."
           class="px-3 py-1.5 rounded-md border bg-white text-[12px] outline-none w-64"
           style="border-color:rgba(140,100,60,0.2);color:#2a1f13" />
       </div>
     </div>
 
-    <div v-if="loading" class="text-[12px]" style="color:#8a7965">__T_CLAUDE_PLUGIN_LOADING_MARKETPLACE__</div>
-    <div v-else-if="!data?.ok" class="text-[12px]" style="color:#b03a20">{{ data?.error || '__T_CLAUDE_LOAD_FAILED__' }}</div>
+    <div v-if="loading" class="text-[12px]" style="color:#8a7965">加载市场中...</div>
+    <div v-else-if="!data?.ok" class="text-[12px]" style="color:#b03a20">{{ data?.error || '加载失败' }}</div>
     <template v-else>
       <!-- 已安装 -->
       <div>
         <div class="flex items-baseline gap-2 mb-2">
-          <div class="text-[12px] font-bold uppercase tracking-wider" style="color:#8a7965">__T_CLAUDE_PLUGIN_INSTALLED__</div>
+          <div class="text-[12px] font-bold uppercase tracking-wider" style="color:#8a7965">已安装</div>
           <span class="text-[10.5px]" style="color:#8a7965">
             {{ filteredInstalled.length }} / {{ data.installed?.length || 0 }}
           </span>
         </div>
-        <div v-if="!data.installed?.length" class="text-[11.5px]" style="color:#8a7965">__T_CLAUDE_PLUGIN_NONE__</div>
-        <div v-else-if="!filteredInstalled.length" class="text-[11.5px]" style="color:#8a7965">__T_CLAUDE_PLUGIN_NO_MATCH__</div>
+        <div v-if="!data.installed?.length" class="text-[11.5px]" style="color:#8a7965">未安装</div>
+        <div v-else-if="!filteredInstalled.length" class="text-[11.5px]" style="color:#8a7965">没有匹配项</div>
         <div v-else class="grid grid-cols-2 gap-3">
           <div v-for="p in filteredInstalled" :key="p.id" class="cc-card">
             <div class="flex items-start gap-3">
@@ -34,7 +34,7 @@
                   <div class="text-[12.5px] font-bold truncate">{{ (p.id || '').split('@')[0] }}</div>
                   <span class="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
                     :style="p.enabled ? 'background:rgba(31,138,92,.12);color:#1f8a5c' : 'background:rgba(176,58,32,.1);color:#b03a20'">
-                    {{ p.enabled ? '__T_CLAUDE_PLUGIN_ENABLED__' : '__T_CLAUDE_PLUGIN_DISABLED__' }}
+                    {{ p.enabled ? '已启用' : '已禁用' }}
                   </span>
                 </div>
                 <div class="text-[10.5px] cc-mono mt-0.5" style="color:#8a7965">v{{ p.version }} · {{ p.scope }}</div>
@@ -47,13 +47,13 @@
       <!-- 市场 -->
       <div>
         <div class="flex items-baseline gap-2 mb-2">
-          <div class="text-[12px] font-bold uppercase tracking-wider" style="color:#8a7965">__T_CLAUDE_PLUGIN_MARKETPLACE__</div>
+          <div class="text-[12px] font-bold uppercase tracking-wider" style="color:#8a7965">市场</div>
           <span class="text-[10.5px]" style="color:#8a7965">
             {{ Math.min(visibleCount, filteredMarketplace.length) }} / {{ filteredMarketplace.length }}
-            <span v-if="query && filteredMarketplace.length !== (data.marketplace?.length || 0)" style="color:#b97d1a">{{ '__T_CLAUDE_PLUGIN_TOTAL_SUFFIX__'.replace('{n}', String(data.marketplace?.length || 0)) }}</span>
+            <span v-if="query && filteredMarketplace.length !== (data.marketplace?.length || 0)" style="color:#b97d1a">{{ '共 {n} 个'.replace('{n}', String(data.marketplace?.length || 0)) }}</span>
           </span>
         </div>
-        <div v-if="!filteredMarketplace.length" class="text-[11.5px]" style="color:#8a7965">__T_CLAUDE_PLUGIN_NO_MATCH__</div>
+        <div v-if="!filteredMarketplace.length" class="text-[11.5px]" style="color:#8a7965">没有匹配项</div>
         <div v-else class="grid grid-cols-2 gap-3">
           <div v-for="p in pagedMarketplace" :key="p.pluginId" class="cc-card">
             <div class="flex items-start gap-3">
@@ -67,7 +67,7 @@
               </div>
             </div>
             <div class="mt-2">
-              <button class="text-[11px] rounded-md px-2.5 py-1 cc-btn-primary font-semibold">__T_CLAUDE_PLUGIN_INSTALL__</button>
+              <button class="text-[11px] rounded-md px-2.5 py-1 cc-btn-primary font-semibold">安装</button>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
           <button class="text-[11.5px] px-4 py-1.5 rounded-md border bg-white hover:bg-[#fdf7e8]"
             style="border-color:rgba(140,100,60,0.18);color:#4a3826"
             @click="visibleCount += 30">
-            {{ '__T_CLAUDE_PLUGIN_LOAD_MORE__'.replace('{n}', String(filteredMarketplace.length - visibleCount)) }}
+            {{ '再显示 {n} 个'.replace('{n}', String(filteredMarketplace.length - visibleCount)) }}
           </button>
         </div>
       </div>

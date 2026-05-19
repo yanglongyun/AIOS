@@ -29,7 +29,7 @@ defineEmits(['pick-time', 'analyze', 'digest', 'clear-digest']);
             </button>
         </div>
 
-        <div v-if="loading" class="py-16 text-center text-sm text-[#484f58]">__T_GH_LOADING__</div>
+        <div v-if="loading" class="py-16 text-center text-sm text-[#484f58]">加载中…</div>
 
         <template v-else>
             <!-- Digest -->
@@ -37,8 +37,8 @@ defineEmits(['pick-time', 'analyze', 'digest', 'clear-digest']);
                 <div v-if="!digestText"
                      class="flex items-center justify-between gap-3 rounded-xl border border-[#388bfd]/20 bg-[#388bfd]/10 p-4">
                     <div class="min-w-0">
-                        <div class="mb-1 text-[13px] font-bold text-[#58a6ff]">__T_GH_DIGEST_TITLE__</div>
-                        <div class="text-[11px] text-[#58a6ff]/70">__T_GH_DIGEST_DESC__</div>
+                        <div class="mb-1 text-[13px] font-bold text-[#58a6ff]">本周热榜总览</div>
+                        <div class="text-[11px] text-[#58a6ff]/70">AI 阅读全部仓库后给出主题与代表项目的中文总结</div>
                     </div>
                     <button :disabled="digesting"
                             class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#238636] px-4 py-2 text-[12px] font-medium text-white transition-all hover:bg-[#2ea043] active:scale-95 disabled:opacity-40"
@@ -49,13 +49,13 @@ defineEmits(['pick-time', 'analyze', 'digest', 'clear-digest']);
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                         <span v-else>✦</span>
-                        {{ digesting ? '__T_GH_DIGESTING__' : '__T_GH_DIGEST__' }}
+                        {{ digesting ? '总览生成中…' : '总览' }}
                     </button>
                 </div>
                 <div v-else class="rounded-xl border border-[#21262d] bg-[#161b22] p-5 text-xs leading-relaxed text-[#8b949e]">
                     <div class="mb-4 flex items-center justify-between border-b border-[#21262d] pb-3">
                         <span class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#58a6ff]">
-                            <span class="text-[14px]">✦</span> __T_GH_DIGEST__
+                            <span class="text-[14px]">✦</span> 总览
                         </span>
                         <button class="text-[12px] text-[#484f58] transition-colors hover:text-[#c9d1d9]"
                                 @click="$emit('clear-digest')">✕</button>
@@ -93,7 +93,7 @@ defineEmits(['pick-time', 'analyze', 'digest', 'clear-digest']);
                                     ? 'bg-[#238636]/15 text-[#3fb950]'
                                     : 'bg-[#21262d] text-[#8b949e] hover:bg-[#388bfd]/10 hover:text-[#58a6ff]'"
                                 @click="$emit('analyze', repo)">
-                            {{ analyses[repo.id] ? '✦ __T_GH_ANALYZED__' : '✦ __T_GH_ANALYZE__' }}
+                            {{ analyses[repo.id] ? '✦ 已分析' : '✦ 深读' }}
                         </button>
                     </div>
                     <div v-if="analyzingId === repo.id && !analyses[repo.id]"
@@ -103,7 +103,7 @@ defineEmits(['pick-time', 'analyze', 'digest', 'clear-digest']);
                             <path class="opacity-75" fill="currentColor"
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        <span class="animate-pulse">__T_GH_ANALYZING_DETAILS__</span>
+                        <span class="animate-pulse">AI 正在阅读 README 与关键文件…</span>
                     </div>
                     <div v-else-if="analyses[repo.id]"
                          class="mt-3 border-t border-[#21262d] pt-3 text-xs leading-relaxed text-[#8b949e]"

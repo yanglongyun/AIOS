@@ -9,19 +9,19 @@
         <div class="min-w-0 flex-1">
           <div class="cc-mono text-[12.5px] font-semibold truncate" style="color:#2a1f13">{{ path }}</div>
           <div v-if="data?.ok" class="text-[10.5px] cc-mono" style="color:#8a7965">
-            {{ formatSize(data.size) }}<span v-if="data.truncated"> · __T_CLAUDE_FILE_TRUNCATED__</span>
+            {{ formatSize(data.size) }}<span v-if="data.truncated"> · 已截断</span>
           </div>
-          <div v-else-if="loading" class="text-[10.5px]" style="color:#8a7965">__T_CLAUDE_LOADING__</div>
+          <div v-else-if="loading" class="text-[10.5px]" style="color:#8a7965">加载中...</div>
         </div>
         <button class="text-[11px] px-2.5 py-1 rounded-md hover:bg-black/5" style="color:#5c4332" @click="copy" :disabled="!data?.ok">
-          {{ copied ? '__T_CLAUDE_FILE_COPIED__' : '__T_CLAUDE_FILE_COPY__' }}
+          {{ copied ? '已复制' : '复制' }}
         </button>
         <button class="text-[14px] px-2 py-1 rounded-md hover:bg-black/5" style="color:#5c4332" @click="close">✕</button>
       </div>
 
       <div class="flex-1 overflow-auto cc-thin-scroll">
-        <div v-if="loading" class="p-6 text-[12px]" style="color:#8a7965">__T_CLAUDE_FILE_READING__</div>
-        <div v-else-if="!data?.ok" class="p-6 text-[12px]" style="color:#b03a20">{{ data?.error || '__T_CLAUDE_LOAD_FAILED__' }}</div>
+        <div v-if="loading" class="p-6 text-[12px]" style="color:#8a7965">读取文件中...</div>
+        <div v-else-if="!data?.ok" class="p-6 text-[12px]" style="color:#b03a20">{{ data?.error || '加载失败' }}</div>
         <div v-else-if="isJsonl" class="px-4 py-3">
           <div v-if="!jsonlEntries.length" class="text-[12px]" style="color:#8a7965">No structured entries.</div>
           <div v-else class="space-y-2">

@@ -70,7 +70,7 @@ export const initDebateDatabase = () => {
     );
   `);
 
-  const count = db.prepare('SELECT COUNT(*) AS c FROM apps_debate_parties').get().c;
+  const count = Number(db.prepare('SELECT COUNT(*) AS c FROM apps_debate_parties').get().c);
   if (!count) {
     const stmt = db.prepare(`
       INSERT INTO apps_debate_parties (
@@ -83,9 +83,9 @@ export const initDebateDatabase = () => {
         stmt.run(p.name, p.candidate_name, p.policy, p.logo, p.support_rate, p.difficulty, p.win_count, p.lang);
       }
       db.exec("COMMIT");
-    } catch (error) {
-      db.exec("ROLLBACK");
-      throw error;
+    } catch (e) {
+      try { db.exec("ROLLBACK"); } catch {}
+      throw e;
     }
   }
 };

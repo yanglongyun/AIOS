@@ -15,7 +15,8 @@ SERVER_PID_FILE="$RUN_DIR/server.pid"
 APPS_PID_FILE="$RUN_DIR/apps.pid"
 SERVER_PORT="${AIOS_SERVER_PORT:-9502}"
 APPS_PORT="${AIOS_APPS_PORT:-9503}"
-NODE_MAJOR_REQUIRED=20
+NODE_MAJOR_REQUIRED=22
+NODE_MINOR_REQUIRED=5
 
 log() {
   printf '%s\n' "$*"
@@ -68,26 +69,42 @@ node_major() {
   esac
 }
 
+node_minor() {
+  v="$(node -v 2>/dev/null | sed 's/^v//' | cut -d. -f2)"
+  case "$v" in
+    ''|*[!0-9]*) printf 0 ;;
+    *)           printf '%s' "$v" ;;
+  esac
+}
+
+node_version_ok() {
+  major="$(node_major)"
+  minor="$(node_minor)"
+  [ "$major" -gt "$NODE_MAJOR_REQUIRED" ] || {
+    [ "$major" -eq "$NODE_MAJOR_REQUIRED" ] && [ "$minor" -ge "$NODE_MINOR_REQUIRED" ]
+  }
+}
+
 ensure_node() {
   need=0
   if ! have node; then
     need=1
-  elif [ "$(node_major)" -lt "$NODE_MAJOR_REQUIRED" ]; then
-    log "Node.js $(node -v) too old, need >= $NODE_MAJOR_REQUIRED"
+  elif ! node_version_ok; then
+    log "Node.js $(node -v) too old, need >= $NODE_MAJOR_REQUIRED.$NODE_MINOR_REQUIRED"
     need=1
   fi
   [ "$need" -eq 0 ] && return 0
 
   log "Installing Node.js $NODE_MAJOR_REQUIRED via brew"
   brew install "node@${NODE_MAJOR_REQUIRED}" >/dev/null
-  # node@20 是 keg-only,得 link 或手动加 PATH
+  # node@22 是 keg-only,得 link 或手动加 PATH
   brew_prefix="$(brew --prefix node@${NODE_MAJOR_REQUIRED} 2>/dev/null)"
   if [ -n "$brew_prefix" ] && [ -x "$brew_prefix/bin/node" ]; then
     PATH="$brew_prefix/bin:$PATH"
     export PATH
   fi
 
-  if ! have node || [ "$(node_major)" -lt "$NODE_MAJOR_REQUIRED" ]; then
+  if ! have node || ! node_version_ok; then
     fail "Node.js install completed but version check failed. Try: brew link --overwrite --force node@${NODE_MAJOR_REQUIRED}"
   fi
   log "Node.js: $(node -v)"

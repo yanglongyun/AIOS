@@ -6,10 +6,10 @@ export function relTime(ts) {
     if (isNaN(d.getTime())) return '';
     const now = new Date();
     const diffH = (now - d) / 3600000;
-    if (diffH < 1) return `${Math.max(1, Math.floor(diffH * 60))} __T_TIME_MINUTES__ __T_TIME_AGO__`;
-    if (diffH < 24) return `${Math.floor(diffH)} __T_TIME_HOURS__ __T_TIME_AGO__`;
+    if (diffH < 1) return `${Math.max(1, Math.floor(diffH * 60))} 分 前`;
+    if (diffH < 24) return `${Math.floor(diffH)} 小时 前`;
     const diffD = Math.floor(diffH / 24);
-    if (diffD < 7) return `${diffD} __T_TIME_DAYS__ __T_TIME_AGO__`;
+    if (diffD < 7) return `${diffD} 天 前`;
     return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 

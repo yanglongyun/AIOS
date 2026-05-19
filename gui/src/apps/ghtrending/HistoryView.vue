@@ -9,7 +9,7 @@ defineProps({
 <template>
     <div class="mx-auto max-w-[820px] px-4 py-4">
         <div v-if="!items.length" class="py-16 text-center text-sm text-[#484f58]">
-            __T_GH_HISTORY_EMPTY__
+            还没有分析过的项目
         </div>
         <div v-else class="space-y-3">
             <div v-for="item in items" :key="item.id"

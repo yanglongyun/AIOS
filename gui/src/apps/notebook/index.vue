@@ -127,7 +127,7 @@ const fetchNotes = async () => {
     total.value = Number(data.total || 0);
     totalPages.value = Number(data.totalPages || 1);
     if (page.value > totalPages.value) { page.value = totalPages.value; return fetchNotes(); }
-  } catch (e) { error.value = e.message || '__T_NOTES_LOAD_FAILED__'; }
+  } catch (e) { error.value = e.message || '加载失败'; }
   finally { loading.value = false; }
 };
 
@@ -158,7 +158,7 @@ const saveEditor = async () => {
     page.value = 1;
     await fetchNotes();
     backToList();
-  } catch (e) { error.value = e.message || '__T_NOTES_SAVE_FAILED__'; }
+  } catch (e) { error.value = e.message || '保存失败'; }
   finally { saving.value = false; }
 };
 
@@ -174,7 +174,7 @@ const deleteNote = async (id) => {
     const res = await fetch(`${API_BASE}/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     await fetchNotes();
-  } catch (e) { error.value = e.message || '__T_NOTES_DELETE_FAILED__'; }
+  } catch (e) { error.value = e.message || '删除失败'; }
 };
 
 const goPrevPage = async () => { if (page.value > 1 && !loading.value) { page.value--; await fetchNotes(); } };
@@ -222,7 +222,7 @@ const startOptimize = async () => {
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
     aiResult.value = data.result || '';
   } catch (e) {
-    error.value = e.message || '__T_NOTEBOOK_OPTIMIZE_FAILED__';
+    error.value = e.message || '优化失败';
     aiDrawerOpen.value = false;
   } finally {
     aiLoading.value = false;
@@ -244,10 +244,10 @@ const formatTime = (v) => {
   const d = new Date(v.replace(' ', 'T'));
   if (isNaN(d)) return v;
   const diff = Date.now() - d;
-  if (diff < 60000) return '__T_COMMON_JUST_NOW__';
-  if (diff < 3600000) return '__T_NOTEBOOK_MINUTES_AGO_N__'.replace('{n}', String(Math.floor(diff / 60000)));
-  if (diff < 86400000) return '__T_NOTEBOOK_HOURS_AGO_N__'.replace('{n}', String(Math.floor(diff / 3600000)));
-  if (diff < 604800000) return '__T_NOTEBOOK_DAYS_AGO_N__'.replace('{n}', String(Math.floor(diff / 86400000)));
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return '{n}分钟前'.replace('{n}', String(Math.floor(diff / 60000)));
+  if (diff < 86400000) return '{n}小时前'.replace('{n}', String(Math.floor(diff / 3600000)));
+  if (diff < 604800000) return '{n}天前'.replace('{n}', String(Math.floor(diff / 86400000)));
   return d.toLocaleDateString(LOCALE_FULL, { month: 'short', day: 'numeric' });
 };
 
@@ -269,13 +269,13 @@ const stopAppCtx = watchEffect(() => {
     context: ctxLines.join('\n'),
     prompts: isEditor
       ? [
-          { label: '__T_NOTEBOOK_CHAT_QUICK_3__', text: '__T_NOTEBOOK_CHAT_QUICK_3__' }, // 总结要点
-          { label: '__T_NOTEBOOK_CHAT_QUICK_2__', text: '__T_NOTEBOOK_CHAT_QUICK_2__' }  // 写作灵感
+          { label: '帮我总结笔记要点', text: '帮我总结笔记要点' }, // 总结要点
+          { label: '给我一些写作灵感', text: '给我一些写作灵感' }  // 写作灵感
         ]
       : [
-          { label: '__T_NOTEBOOK_CHAT_QUICK_1__', text: '__T_NOTEBOOK_CHAT_QUICK_1__' },
-          { label: '__T_NOTEBOOK_CHAT_QUICK_2__', text: '__T_NOTEBOOK_CHAT_QUICK_2__' },
-          { label: '__T_NOTEBOOK_CHAT_QUICK_3__', text: '__T_NOTEBOOK_CHAT_QUICK_3__' }
+          { label: '帮我整理最近的笔记', text: '帮我整理最近的笔记' },
+          { label: '给我一些写作灵感', text: '给我一些写作灵感' },
+          { label: '帮我总结笔记要点', text: '帮我总结笔记要点' }
         ]
   });
 });

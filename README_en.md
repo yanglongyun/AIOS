@@ -199,6 +199,15 @@ npm run lang:reset
 
 Issues and PRs welcome. Please read [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md) (WIP) before submitting.
 
+### Repository Sync
+
+AIOS is maintained in two synchronized remotes:
+
+- GitHub: `https://github.com/realuckyang/AIOS.git`
+- Gitee: `https://gitee.com/realuckyang/aios.git`
+
+Maintainers should keep `main` pointing to the same commit on both remotes. Before publishing, verify `git status` and `git remote -v`, then push `origin main` and `gitee main`.
+
 ---
 
 ## ❓ FAQ

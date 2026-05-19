@@ -364,6 +364,15 @@ npm run lang:reset             # 重置语言烘焙缓存(切语言时用)
 
 提交规范、应用开发约定详见 [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md)。欢迎提 Issue 和 PR。
 
+### 仓库同步
+
+AIOS 同步维护两个远端仓库:
+
+- GitHub: `https://github.com/realuckyang/AIOS.git`
+- Gitee: `https://gitee.com/realuckyang/aios.git`
+
+维护者发布时应保持两边 `main` 指向同一个提交。提交前先核对 `git status` 和 `git remote -v`;推送时分别推送 `origin main` 和 `gitee main`。
+
 ---
 
 ## 📚 进一步阅读

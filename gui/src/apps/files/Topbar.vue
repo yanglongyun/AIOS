@@ -1,19 +1,10 @@
 <script setup>
-import { useViewStore } from '@/stores/view.js';
 import AppHub from '@/components/AppHub.vue';
 import AskAI from '@/components/AskAI.vue';
-
-const view = useViewStore();
 </script>
 
 <template>
     <header class="flex h-16 flex-none items-center bg-bg px-4 max-md:h-14 max-md:px-2">
-        <button class="icon-btn lg"
-                :class="{ active: view.appDrawerOpen }"
-                title="侧栏"
-                @click="view.toggleAppDrawer()">
-            <span class="msi">menu</span>
-        </button>
         <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
             文件
         </div>

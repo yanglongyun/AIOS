@@ -10,7 +10,6 @@ const executeAgentTask = async ({
     apiUrl,
     apiKey,
     model,
-    provider,
     enableToolResultTruncate,
     toolResultMaxChars,
     enableToolLoopLimit,
@@ -36,7 +35,6 @@ const executeAgentTask = async ({
     }
   };
   const response = await chat(messages, {
-    provider,
     apiUrl,
     apiKey,
     model,
@@ -47,8 +45,8 @@ const executeAgentTask = async ({
     toolResultMaxChars
   });
   return {
-    assistantMessage: { role: "assistant", content: response },
-    response
+    assistantMessage: response,
+    response: String(response?.content || "")
   };
 };
 

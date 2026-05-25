@@ -4,7 +4,7 @@ import { buildSystemPrompt } from "../prompt/index.js";
 import { injectAttachmentsMessage } from "./attachments.js";
 import { getMessages, saveMessage } from "./store.js";
 import { hasChat, setChatState } from "./conversations.js";
-import { extractRemark, createRemarkStreamFilter } from "./remarks.js";
+import { extractRemark } from "./remarks.js";
 
 const createChatSession = (wsSend) => {
   const conversations = /* @__PURE__ */ new Map();
@@ -45,7 +45,6 @@ const createChatSession = (wsSend) => {
         apiUrl,
         apiKey,
         model,
-        provider,
         enableToolResultTruncate,
         toolResultMaxChars,
         enableToolLoopLimit,
@@ -79,21 +78,8 @@ const createChatSession = (wsSend) => {
       const abortController = new AbortController();
       conversations.set(cid, { abortController });
       setChatState(cid, "running");
-      const forwardDelta = (delta) => {
-        wsSend({ type: "delta", conversationId: cid, delta });
-      };
-      let remarkFilter = createRemarkStreamFilter(forwardDelta);
-      const resetRemarkFilter = () => {
-        remarkFilter = createRemarkStreamFilter(forwardDelta);
-      };
       const send = (msg) => {
-        if (msg.type === "delta") {
-          remarkFilter.push(msg.delta || "");
-          return;
-        }
         if (msg.type === "assistant_tool_calls") {
-          remarkFilter.flush();
-          resetRemarkFilter();
           if (msg.message) saveMessage(cid, msg.message, null);
           return;
         }
@@ -112,14 +98,17 @@ const createChatSession = (wsSend) => {
           return;
         }
         if (msg.type === "done") {
-          remarkFilter.flush();
-          resetRemarkFilter();
           if (msg.message) {
             const raw = String(msg.message.content || "");
             const { content, remark } = extractRemark(raw);
             const cleanMsg = { ...msg.message, content };
             saveMessage(cid, cleanMsg, null, remark);
-            const doneMsg = { type: "done", conversationId: cid };
+            const doneMsg = {
+              type: "done",
+              conversationId: cid,
+              content,
+              message: cleanMsg
+            };
             if (remark) doneMsg.remark = remark;
             wsSend(doneMsg);
             return;
@@ -130,7 +119,6 @@ const createChatSession = (wsSend) => {
       };
       try {
         await chat(modelMessages, {
-          provider,
           apiUrl,
           apiKey,
           model,

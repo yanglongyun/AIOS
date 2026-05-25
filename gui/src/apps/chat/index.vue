@@ -1,7 +1,7 @@
 <script setup>
 // chat 应用根 — 协调器, 不直接渲染消息内容
 // ────────────────────────────────────────
-//   stream.js     ← WS 监听 + parseMessages
+//   stream.js     ← WS 消息适配 + parseMessages
 //   Sidebar.vue   ← 历史 / 新对话
 //   Header.vue    ← 标题 + 备注 / 更多浮层
 //   Messages.vue  ← 消息流 (派发到 bubbles/)

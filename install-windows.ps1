@@ -161,10 +161,6 @@ function Sync-App {
   }
 }
 
-function Clear-LanguageBakeMarker {
-  Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $AppDir ".aios/settings.json")
-}
-
 function Stop-PreviousProcess([string]$PidFile, [string]$Name) {
   if (-not (Test-Path $PidFile)) {
     return
@@ -215,10 +211,6 @@ function Build-App {
   }
 }
 
-function Remove-RuntimeLanguageSources {
-  Remove-Item -Recurse -Force -ErrorAction SilentlyContinue (Join-Path $AppDir "language")
-}
-
 function Start-ServiceProcess([string]$Command, [string]$LogFile, [string]$PidFile, [string]$Name) {
   Write-Info "Starting $Name"
   $escapedAppDir = $AppDir.Replace('"', '\"')
@@ -257,10 +249,8 @@ try {
   Ensure-Dirs
   Update-Repo
   Sync-App
-  Clear-LanguageBakeMarker
   Install-Dependencies
   Build-App
-  Remove-RuntimeLanguageSources
   Stop-PreviousProcess -PidFile $ServerPidFile -Name "server"
   Stop-PreviousProcess -PidFile $AppsPidFile -Name "apps"
   Assert-PortsFree

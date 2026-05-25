@@ -1,0 +1,55 @@
+# AIOS
+
+AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / notebook / terminal / files 等系统能力，再加上一套可扩展的 apps。
+
+## 仓库边界
+
+- 当前目录同时是开发源头、运行源头和本机使用源头；不要再维护 `AIOS-test` 运行副本。
+- 当前目录是独立 git 仓库；提交、推送、回滚前必须在本目录核对 `git remote -v` 和 `git status`。
+- 当前仓库维护两个同步远端：GitHub `https://github.com/realuckyang/AIOS.git` 作为 `origin`，Gitee `https://gitee.com/realuckyang/aios.git` 作为 `gitee`。发布时两边 `main` 必须指向同一个提交。
+- 当前目录可能已有 `database/`、`files/`、`node_modules/` 等运行态/依赖残留；开发时仍按源码目录处理。
+- `apps/` 是源码的一部分，保存应用给 AI 读取的产品文档和上下文，不要忽略、不要当运行态产物处理。
+- Node 要求见 `package.json`（当前 `>=22.5`）。
+
+## 运行态与数据库
+
+- 本机直接在当前目录运行和使用 AIOS，`database/`、`files/`、`node_modules/` 是本机运行态，默认保留，不因为改代码随手删除。
+- 数据库 DDL 必须保持干净：`server/main/repository/init.js` 和各 `server/apps/<app>/repository/init.js` 写当前最终 schema，不写旧字段兼容、不写临时迁移分支。
+- 新用户以空数据库初始化，应得到干净、正确的当前版本 schema。
+- 开发期如果 schema 方向不对，直接修正 DDL；是否清理本机已有数据要先判断风险，涉及删除本机数据库或运行文件时先说明并得到确认。
+
+## 核心目录
+
+- `server/main/api/`：HTTP/WS API 入口（auth、chat、llm、memory、runtime、settings、task 等）。
+- `server/main/ai/`：AI 执行、工具调用、agent 运行控制。
+- `server/main/llm/`：模型请求、provider、输入输出处理。
+- `server/main/service/`、`server/main/repository/`：业务层与数据库访问层。
+- `server/apps/`：有独立后端边界的应用。
+- `gui/`：前端。
+- `apps/<app>/APP.md`：应用给 AI 看的文档源。
+
+## 代码结构
+
+- 后端继续按 `api / service / repository / llm / apps` 分层，不把跨层逻辑塞进入口文件。
+- 前端也必须模块化：页面只负责组装和状态流转，复杂 UI 拆到 `components/`，可复用逻辑拆到 `composables/` 或贴近业务的工具文件。
+- 单个代码文件目标控制在 200-300 行。超过 300 行要优先拆分组件、组合式函数、常量或样式文件；不要把新增功能继续堆进大文件。
+- 前端新页面和新组件必须默认考虑移动端：布局、表格/列表、弹窗、工具栏、按钮文字、输入区域都要在窄屏可用，不允许只按桌面宽度实现。
+- 样式跟随系统整体风格。已有 Tailwind 和系统组件时优先复用，避免为单个页面制造孤立视觉体系。
+
+## 端口
+
+- 主服务 `9502` / apps 服务 `9503` / Vite `5173`。
+
+## App 注册表
+
+- 前端：`gui/src/apps.js`
+- 后端：`server/apps/registry.js`
+- 当前前端入口：chat、tasks、notebook、finance、terminal、files、claude-code、sysinfo、subbox、banana、fortune、ghtrending、rssreader、memory、lovehouse、hackernews、poker、treasure、debate、earth、civ、cryptobot、settings。
+- 后端 registry 还加载 `notes`，前端入口里没有同名——新增/清理应用时要同时核对前端入口、后端 registry、应用文档。
+- chat/tasks/settings/memory 等系统能力主要在 `server/main/`；普通应用后端优先放 `server/apps/<app>/`。
+
+## 用户安装脚本
+
+`install-macos.sh` / `install-linux.sh` / `install-windows.ps1`（面向最终用户，不是日常开发启动）：
+
+- 把源码拉到用户安装目录，在用户安装目录里装依赖、构建和运行。

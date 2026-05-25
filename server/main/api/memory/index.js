@@ -26,7 +26,8 @@ const handleMemoryApi = async (req, res, path) => {
             title,
             description: body.description || "",
             content,
-            visibility: body.visibility || "full"
+            visibility: body.visibility || "full",
+            starred: body.starred === true
         });
         return json(res, { success: true, item });
     }
@@ -41,7 +42,8 @@ const handleMemoryApi = async (req, res, path) => {
             title:       body.title,
             description: body.description,
             content:     body.content,
-            visibility:  body.visibility
+            visibility:  body.visibility,
+            starred:     body.starred
         });
         return json(res, { success: true, item });
     }

@@ -1,7 +1,7 @@
 // chat 域的 WS 事件适配层
 // ─────────────────────────────────────────
 // 不创建新连接 — 跑在 @/system/ws.js 全局连接之上,
-// 把 delta/done/tool_call/tool_result/aborted/error 翻译成
+// 把 done/tool_call/tool_result/aborted/error 翻译成
 // chat 内部对 messages / streaming / streamingKey 的操作.
 //
 // 用法:
@@ -85,7 +85,7 @@ export function parseMessages(raw) {
     return list;
 }
 
-// ─── stream lifecycle ───────────────────────────────
+// ─── WS lifecycle ───────────────────────────────────
 // 注册全部 WS 处理器, 返回 unsubscribe (聚合调用所有 unsub)
 export function setupChatStream({
     messages, activeId, streaming, streamingKey,
@@ -94,7 +94,7 @@ export function setupChatStream({
     const isCurrent = (d) => d.conversationId === activeId.value;
     const isCurrentOrGlobal = (d) => !d.conversationId || d.conversationId === activeId.value;
 
-    // 收尾正在流式中的 AI 气泡: 有内容就锁定, 没内容就直接删掉
+    // 收尾等待中的 AI 气泡: 有内容就锁定, 没内容就直接删掉
     function closeStreaming(finalText, remark) {
         const key = streamingKey.value;
         streamingKey.value = '';
@@ -109,27 +109,11 @@ export function setupChatStream({
     }
 
     const unsubs = [
-        on('delta', (d) => {
-            if (!isCurrent(d)) return;
-            streaming.value = true;
-            if (!d.delta) return;  // 空 delta 不开气泡
-            let key = streamingKey.value;
-            if (!key) {
-                key = mkKey('asst');
-                streamingKey.value = key;
-                messages.value.push({ role: 'ai', text: '', _key: key, _streaming: true });
-            }
-            const msg = messages.value.find((m) => m._key === key);
-            if (msg) msg.text = (msg.text || '') + d.delta;
-            scrollEnd?.();
-        }),
-
         on('done', (d) => {
             if (!isCurrent(d)) return;
             if (streamingKey.value) {
                 closeStreaming(d.content, d.remark);
             } else if (d.content) {
-                // 没有 streaming 占位但 done 带最终内容 → 直接新建一条
                 messages.value.push({
                     role: 'ai',
                     text: d.content,

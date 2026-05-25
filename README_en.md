@@ -30,7 +30,6 @@ AIOS is a **fully local-first** AI workstation:
 - 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
 - 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
 - 🎨 **Building apps is a native capability** — AIOS's AI carries a full shell, can write code, start services, debug, and ship apps to you. No "workshop" needed — that's just what it does.
-- 🌐 **AI-friendly i18n** — write natural language directly in source; build-time baking handles translation, so AI-generated apps don't carry i18n boilerplate
 
 > Not just another LLM frontend — AIOS's AI carries a full shell and system-level tools. It can drive apps, and write apps for you.
 
@@ -150,8 +149,7 @@ AIOS/
 │   └── apps/        # Apps service :9503  each app brings its own backend
 ├── gui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
 ├── apps/            # Per-app APP.md and shared assets
-├── language/        # Localization sources
-└── scripts/         # Start / build / fix scripts
+└── skills/          # Local skills
 ```
 
 **Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
@@ -193,8 +191,6 @@ npm run dev
 npm run start:main &
 npm run start:apps
 
-# Reset language baking cache
-npm run lang:reset
 ```
 
 Issues and PRs welcome. Please read [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md) (WIP) before submitting.
@@ -220,12 +216,6 @@ Delete the `auth` row in `database/aios.db`, or reset the whole DB and go throug
 
 **Q: Where is my data stored?**
 Default `~/.aios/app/database/aios.db` (one-line install) or `database/` in the cloned repo (manual install).
-
-**Q: `node-pty` build fails.**
-The script tries to fix it (`scripts/fix-node-pty.js`). If it still fails, make sure you have a C++ toolchain installed.
-
-**Q: Why "language baking" instead of runtime i18n?**
-AIOS's core scenario is AI-authored apps. Runtime i18n forces AI to wrap every string in `t()`, maintain N translation JSONs, name keys, and avoid omissions — a compounding cognitive tax. Baking lets source code use natural language, then replaces it once at build time. Cost: re-run `scripts/start.mjs` when switching languages (cached runs hit < 10ms).
 
 **Q: How is AIOS different from Open WebUI / LibreChat / LobeChat?**
 Those are mainly LLM chat frontends. AIOS is a **local operating system** with AI-native apps and an agent task system — Chat is just one entry point.

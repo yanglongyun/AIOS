@@ -1,13 +1,13 @@
-import { callLlmRegular } from "../../../llm/index.js";
+import { callChatCompletion } from "../../../ai/client.js";
 
 const executeInstantTask = async ({
   settings,
   signal,
   payload
 }) => {
-  const { apiUrl, apiKey, provider } = settings;
+  const { apiUrl, apiKey } = settings;
   const requestPayload = { ...payload };
-  const assistant = await callLlmRegular(apiUrl, apiKey, requestPayload, { provider, signal });
+  const { message: assistant } = await callChatCompletion(apiUrl, apiKey, requestPayload, { signal });
   const assistantMessage = {
     role: "assistant",
     content: assistant?.content ?? ""

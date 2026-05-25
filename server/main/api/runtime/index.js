@@ -1,7 +1,6 @@
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { requestReload, runReload } from "../../service/runtime/reload.js";
-import { prepareLanguage, restartAfterLanguageApply } from "../../service/runtime/language.js";
 import { runReloadTest } from "../../service/runtime/test.js";
 import { shell } from "../../ai/functions.js";
 
@@ -64,25 +63,6 @@ const handleRuntimeApi = async (req, res, path) => {
       message: body.message || ""
     });
     return json(res, { success: true, tested: false });
-  }
-  if (matches(path, "/language/apply") && req.method === "POST") {
-    const body = await readBody(req);
-    const language = String(body.language || "").trim();
-    if (language !== "zh" && language !== "en") {
-      return json(res, { success: false, message: "Unsupported language" }, 400);
-    }
-    try {
-      prepareLanguage(language);
-      json(res, { success: true });
-      setTimeout(() => {
-        restartAfterLanguageApply().catch((error) => {
-          console.error("[language.apply]", error);
-        });
-      }, 100);
-    } catch (e) {
-      return json(res, { success: false, message: e instanceof Error ? e.message : "Language apply failed" }, 500);
-    }
-    return;
   }
   if (matches(path, "/reload/test") && req.method === "POST") {
     const body = await readBody(req);

@@ -83,7 +83,7 @@ const pick = (s) => emit('pick', s.prompt);
       <BubbleToolResult v-else-if="m.type === 'tool_result'" :content="m.content" />
     </template>
 
-    <!-- 流式期间的「思考中」指示 -->
+    <!-- 等待完整回复时的状态指示 -->
     <div v-if="streaming" class="px-1 py-1.5 text-[13px] text-faint">
       思考中<span class="ml-0.5 inline-block tracking-[2px] animate-[chat-pulse_1.2s_ease-in-out_infinite]">…</span>
     </div>

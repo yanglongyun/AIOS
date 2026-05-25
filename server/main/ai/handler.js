@@ -1,10 +1,9 @@
 import { tools } from "./tools.js";
 import { runTools } from "./runner.js";
-import { callLlmStream } from "../llm/index.js";
+import { callChatCompletion } from "./client.js";
 import { normalizeAgentMessages, normalizeChatOptions } from "./utils.js";
 
 const chat = async (messages, {
-  provider,
   apiUrl,
   apiKey,
   model,
@@ -21,13 +20,7 @@ const chat = async (messages, {
   while (round++ < opts.maxRounds) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     const payload = { model, messages: workMessages, tools };
-    const message = await callLlmStream(apiUrl, apiKey, payload, {
-      provider,
-      signal,
-      onDelta: (delta) => {
-        if (delta) send({ type: "delta", delta });
-      }
-    });
+    const { message } = await callChatCompletion(apiUrl, apiKey, payload, { signal });
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
       const assistantMsg = {
         role: "assistant",
@@ -52,17 +45,20 @@ const chat = async (messages, {
       }
       continue;
     }
-    const text = message.content ?? "";
-    const replyMsg = { role: "assistant", content: text };
+    const replyMsg = {
+      role: "assistant",
+      content: message.content ?? ""
+    };
     if (message.reasoning_content !== undefined) {
       replyMsg.reasoning_content = message.reasoning_content ?? "";
     }
     workMessages.push(replyMsg);
     send({ type: "done", message: replyMsg });
-    return text;
+    return replyMsg;
   }
-  send({ type: "done", message: { role: "assistant", content: "(达到最大轮次限制)" } });
-  return "(达到最大轮次限制)";
+  const limitMessage = { role: "assistant", content: "(达到最大轮次限制)" };
+  send({ type: "done", message: limitMessage });
+  return limitMessage;
 };
 export {
   chat

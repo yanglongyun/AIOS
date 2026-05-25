@@ -3,8 +3,6 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-// 这个组件只在已经设置过密码后使用,所以走烘焙占位符。
-// 烘焙脚本 scripts/start.mjs 会把 __T_LOGIN_*__ 替换成 language/<locale>/gui/views/login.json
 // 里对应的真实文案。
 
 const auth = useAuthStore();

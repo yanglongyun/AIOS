@@ -68,11 +68,6 @@ function abort() {
 }
 
 onMounted(() => {
-  on('delta', (d) => {
-    if (d.conversationId !== conversationId.value) return;
-    const last = messages.value[messages.value.length - 1];
-    if (last?._streaming && d.delta) last.text += d.delta;
-  });
   on('done', (d) => {
     if (d.conversationId !== conversationId.value) return;
     const last = messages.value[messages.value.length - 1];

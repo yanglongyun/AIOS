@@ -10,8 +10,6 @@ const auth = useAuthStore();
 // ───────── 全局状态 ─────────
 const settings = ref(null);
 const prompt = ref('');
-const providerGroups = ref([]);
-const providers = ref([]);
 const sysSnap = ref(null);
 
 const loading = ref(true);
@@ -40,54 +38,16 @@ const contextRoundLabels = {
   500: '最大'
 };
 
-// ───────── 模型 / Provider ─────────
-const PROVIDER_CACHE_KEY = 'aios.gui2.providerConfigs.v1';
-const providerCache = ref({});
-function loadProviderCache() {
-  try { providerCache.value = JSON.parse(localStorage.getItem(PROVIDER_CACHE_KEY) || '{}'); }
-  catch { providerCache.value = {}; }
-}
-function saveProviderCache() { localStorage.setItem(PROVIDER_CACHE_KEY, JSON.stringify(providerCache.value)); }
-function providersByGroup(gid) { return providers.value.filter((p) => p.group === gid); }
-function getProvider(id) { return providers.value.find((p) => p.id === id) || null; }
-const currentProviderMeta = computed(() => getProvider(settings.value?.provider));
-
-function onProviderChange(nextId) {
-  if (!settings.value) return;
-  // 缓存当前
-  providerCache.value[settings.value.provider] = {
-    apiUrl: settings.value.apiUrl, apiKey: settings.value.apiKey, model: settings.value.model
-  };
-  saveProviderCache();
-  settings.value.provider = nextId;
-  const cached = providerCache.value[nextId];
-  if (cached) {
-    settings.value.apiUrl = cached.apiUrl || '';
-    settings.value.apiKey = cached.apiKey || '';
-    settings.value.model  = cached.model  || '';
-  } else {
-    const meta = getProvider(nextId);
-    settings.value.apiUrl = meta?.apiUrl || '';
-    settings.value.apiKey = '';
-    settings.value.model  = meta?.defaultModel || '';
-  }
-}
-
 // ───────── 加载 ─────────
 async function loadAll() {
   loading.value = true; errMsg.value = '';
   try {
-    const [s, p, prov] = await Promise.all([
+    const [s, p] = await Promise.all([
       api.get('/api/settings'),
-      api.get('/api/settings/prompt').catch(() => ({ content: '' })),
-      api.get('/api/llm/providers').catch(() => ({ groups: [], providers: [] }))
+      api.get('/api/settings/prompt').catch(() => ({ content: '' }))
     ]);
     settings.value = s;
     prompt.value = p?.content || '';
-    providerGroups.value = prov.groups || [];
-    providers.value = prov.providers || [];
-    providerCache.value[s.provider] ??= { apiUrl: s.apiUrl, apiKey: s.apiKey, model: s.model };
-    saveProviderCache();
   } catch (e) { errMsg.value = '加载失败: ' + (e.message || e); }
   loading.value = false;
 }
@@ -100,14 +60,11 @@ async function loadSys() {
 async function saveModel() {
   try {
     const next = await api.post('/api/settings', {
-      provider: settings.value.provider,
       apiUrl:   settings.value.apiUrl,
       apiKey:   settings.value.apiKey,
       model:    settings.value.model
     });
     settings.value = { ...settings.value, ...next };
-    providerCache.value[next.provider] = { apiUrl: next.apiUrl, apiKey: next.apiKey, model: next.model };
-    saveProviderCache();
     flash('ok', '模型设置已保存');
   } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
 }
@@ -161,7 +118,7 @@ watch(active, (k) => {
   if (k === 'about' && !sysSnap.value) loadSys();
 });
 
-onMounted(() => { loadProviderCache(); loadAll(); });
+onMounted(() => { loadAll(); });
 onActivated(() => loadAll());
 </script>
 
@@ -261,27 +218,13 @@ onActivated(() => loadAll());
             <header class="sec-head">
               <div>
                 <div class="sec-title">大模型 API</div>
-                <div class="sec-sub">选一个供应商,填好 URL / API Key / 模型名。每个供应商的配置会在本地缓存。</div>
+                <div class="sec-sub">填写兼容 OpenAI Chat Completions 的接口地址、API Key 和模型名。</div>
               </div>
             </header>
             <div class="form">
               <div class="row">
-                <label>供应方</label>
-                <div class="provider-row">
-                  <select class="text-input select" :value="settings.provider" @change="onProviderChange($event.target.value)">
-                    <optgroup v-for="g in providerGroups" :key="g.id" :label="g.name">
-                      <option v-for="p in providersByGroup(g.id)" :key="p.id" :value="p.id">{{ p.name }}</option>
-                    </optgroup>
-                  </select>
-                  <a v-if="currentProviderMeta?.keyUrl" :href="currentProviderMeta.keyUrl"
-                    target="_blank" rel="noopener" class="btn tonal small">
-                    <span class="msi xxs">key</span> 获取 API Key
-                  </a>
-                </div>
-              </div>
-              <div class="row">
                 <label>请求地址</label>
-                <input class="text-input" v-model="settings.apiUrl" placeholder="https://api.example.com/v1/chat/completions" spellcheck="false" />
+                <input class="text-input" v-model="settings.apiUrl" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false" />
               </div>
               <div class="row">
                 <label>模型 Key</label>
@@ -289,7 +232,7 @@ onActivated(() => loadAll());
               </div>
               <div class="row">
                 <label>模型</label>
-                <input class="text-input mono" v-model="settings.model" :placeholder="currentProviderMeta?.defaultModel || ''" spellcheck="false" />
+                <input class="text-input mono" v-model="settings.model" placeholder="gpt-5.4" spellcheck="false" />
               </div>
               <div class="actions">
                 <button class="btn solid" @click="saveModel">保存</button>
@@ -405,7 +348,6 @@ onActivated(() => loadAll());
               <div class="kv"><span>主机</span><span>{{ sysSnap?.sys?.hostname || '—' }}</span></div>
               <div class="kv"><span>平台</span><span>{{ sysSnap?.sys?.platform || '—' }} / {{ sysSnap?.sys?.arch || '—' }}</span></div>
               <div class="kv"><span>Node</span><span>{{ sysSnap?.sys?.nodeVersion || '—' }}</span></div>
-              <div class="kv"><span>Provider</span><span>{{ settings.provider }}</span></div>
               <div class="kv"><span>Model</span><span class="mono">{{ settings.model }}</span></div>
             </div>
           </section>
@@ -540,12 +482,6 @@ onActivated(() => loadAll());
 .text-input::placeholder { color: var(--text-3); }
 .text-input.mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 13px; }
 .text-input.num { width: 120px; font-variant-numeric: tabular-nums; }
-.text-input.select { appearance: none; cursor: pointer; padding-right: 36px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2380868b' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
-  background-repeat: no-repeat; background-position: right 12px center;
-}
-.provider-row { display: flex; gap: 8px; align-items: center; }
-.provider-row .text-input.select { flex: 1; min-width: 0; }
 .hint { font-size: 11.5px; color: var(--text-3); }
 
 .actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }

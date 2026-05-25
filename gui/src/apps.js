@@ -20,6 +20,14 @@ const apps = [
     load: () => import('./apps/tasks/index.vue')
   },
   {
+    id: 'memory',
+    name: '记忆',
+    icon: 'psychology',
+    color: '#8e6e3c',
+    hasDrawer: false,
+    load: () => import('./apps/memory/index.vue')
+  },
+  {
     id: 'terminal',
     name: '终端',
     icon: 'terminal',
@@ -50,6 +58,14 @@ const apps = [
     color: '#f9ab00',
     hasDrawer: false,
     load: () => import('./apps/cryptobot/index.vue')
+  },
+  {
+    id: 'longvideo',
+    name: '长片工坊',
+    icon: 'movie',
+    color: '#276ef1',
+    hasDrawer: false,
+    load: () => import('./apps/longvideo/index.vue')
   },
   {
     id: 'settings',

@@ -1,4 +1,5 @@
 import { db } from "./client.js";
+import { seedMemories } from "./memory-seeds.js";
 
 const createTables = () => {
   db.exec(`
@@ -67,15 +68,19 @@ const createTables = () => {
       description TEXT NOT NULL DEFAULT '',
       content     TEXT NOT NULL DEFAULT '',
       visibility  TEXT NOT NULL DEFAULT 'full',
+      starred     INTEGER NOT NULL DEFAULT 0,
       created_at  TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_memories_visibility_id
       ON memories(visibility, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_memories_starred_id
+      ON memories(starred, id DESC);
   `);
 };
 
 const initDatabase = () => {
   createTables();
+  seedMemories();
 };
 
 export {

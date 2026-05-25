@@ -13,6 +13,7 @@ const rowToMemory = (row) => row && {
     description: row.description || "",
     content: row.content || "",
     visibility: row.visibility || "full",
+    starred: Number(row.starred || 0) === 1,
     created_at: row.created_at || null
 };
 
@@ -21,9 +22,9 @@ const normVisibility = (v) =>
 
 const listMemories = () => {
     const rows = db.prepare(`
-        SELECT id, title, description, content, visibility, created_at
+        SELECT id, title, description, content, visibility, starred, created_at
         FROM memories
-        ORDER BY id DESC
+        ORDER BY starred DESC, id DESC
     `).all();
     return rows.map(rowToMemory);
 };
@@ -32,7 +33,7 @@ const listMemories = () => {
 // count 档不返回任何字段,只算进 total。
 const listMemoriesForPrompt = () => {
     const rows = db.prepare(`
-        SELECT id, title, description, content, visibility
+        SELECT id, title, description, content, visibility, starred
         FROM memories
         ORDER BY id ASC
     `).all();
@@ -54,20 +55,21 @@ const listMemoriesForPrompt = () => {
 
 const getMemory = (id) => {
     const row = db.prepare(
-        "SELECT id, title, description, content, visibility, created_at FROM memories WHERE id = ?"
+        "SELECT id, title, description, content, visibility, starred, created_at FROM memories WHERE id = ?"
     ).get(Number(id) || 0);
     return rowToMemory(row);
 };
 
-const createMemory = ({ title, description = "", content, visibility = "full" }) => {
+const createMemory = ({ title, description = "", content, visibility = "full", starred = false }) => {
     const ret = db.prepare(`
-        INSERT INTO memories (title, description, content, visibility)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO memories (title, description, content, visibility, starred)
+        VALUES (?, ?, ?, ?, ?)
     `).run(
         String(title || "").trim(),
         String(description || "").trim(),
         String(content || "").trim(),
-        normVisibility(visibility)
+        normVisibility(visibility),
+        starred ? 1 : 0
     );
     return getMemory(Number(ret.lastInsertRowid));
 };
@@ -79,6 +81,7 @@ const updateMemory = (id, patch = {}) => {
     if (patch.description !== undefined) { fields.push("description = ?"); values.push(String(patch.description).trim()); }
     if (patch.content !== undefined) { fields.push("content = ?"); values.push(String(patch.content).trim()); }
     if (patch.visibility !== undefined) { fields.push("visibility = ?"); values.push(normVisibility(patch.visibility)); }
+    if (patch.starred !== undefined) { fields.push("starred = ?"); values.push(patch.starred ? 1 : 0); }
     if (!fields.length) return getMemory(id);
     values.push(Number(id) || 0);
     db.prepare(`UPDATE memories SET ${fields.join(", ")} WHERE id = ?`).run(...values);

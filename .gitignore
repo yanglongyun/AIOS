@@ -1,20 +1,13 @@
 node_modules/
 gui/dist/
-gui2/dist/
+/CLAUDE.md
 .aios/
 .DS_Store
 *.log
 /database/
 /files/
 
-# Baked AGENTS.md (runtime; baked from language/<locale>/AGENTS.md)
-/AGENTS.md
-
-# Baked CLAUDE.md (runtime; baked from language/<locale>/CLAUDE.md)
-/CLAUDE.md
-
-# Baked APP.md tree (runtime; baked from language/<locale>/apps/<name>/APP.md)
-/apps/
-
-# Baked system docs (runtime; baked from language/<locale>/system/*.md)
-/system/
+# Source docs and app prompts are part of the product source.
+!/AGENTS.md
+!/apps/
+!/apps/**

@@ -13,6 +13,7 @@ const prompt = ref('');
 const sysSnap = ref(null);
 
 const loading = ref(true);
+const modelTesting = ref(false);
 const errMsg = ref('');
 const notice = ref({ kind: '', text: '' });
 let noticeTimer = null;
@@ -67,6 +68,23 @@ async function saveModel() {
     settings.value = { ...settings.value, ...next };
     flash('ok', '模型设置已保存');
   } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
+}
+async function testModel() {
+  if (modelTesting.value) return;
+  modelTesting.value = true;
+  try {
+    const result = await api.post('/api/settings/model-test', {
+      apiUrl: settings.value.apiUrl,
+      apiKey: settings.value.apiKey,
+      model: settings.value.model
+    });
+    const content = String(result.content || '').trim();
+    flash('ok', content ? `测试通过：${content}` : '测试通过');
+  } catch (e) {
+    flash('err', '测试失败: ' + (e?.body?.message || e.message || e));
+  } finally {
+    modelTesting.value = false;
+  }
 }
 async function savePrompt() {
   try {
@@ -235,6 +253,9 @@ onActivated(() => loadAll());
                 <input class="text-input mono" v-model="settings.model" placeholder="gpt-5.4" spellcheck="false" />
               </div>
               <div class="actions">
+                <button class="btn tonal" :disabled="modelTesting" @click="testModel">
+                  {{ modelTesting ? '测试中...' : '测试' }}
+                </button>
                 <button class="btn solid" @click="saveModel">保存</button>
               </div>
             </div>
@@ -499,12 +520,12 @@ onActivated(() => loadAll());
   cursor: pointer;
   transition: background .15s, box-shadow .15s, color .15s, border-color .15s;
 }
+.btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
 .btn.small { padding: 6px 12px; font-size: 12.5px; border-radius: 16px; }
 .btn.solid  { background: var(--accent); color: #fff; }
 .btn.solid:hover:not(:disabled) { background: var(--accent-hi); box-shadow: 0 1px 3px rgba(26,115,232,0.4); }
-.btn.solid:disabled { opacity: .4; cursor: default; box-shadow: none; }
 .btn.tonal  { background: var(--accent-soft); color: var(--accent-fg); }
-.btn.tonal:hover { background: #d2e3fc; }
+.btn.tonal:hover:not(:disabled) { background: #d2e3fc; }
 .btn.outline { background: transparent; color: var(--text-2); border: 1px solid var(--line); }
 .btn.outline:hover { background: var(--bg-hover); color: var(--text); }
 .btn.outline.danger:hover { color: var(--bad); border-color: var(--bad); background: rgba(217,48,37,0.04); }

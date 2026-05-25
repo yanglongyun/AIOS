@@ -10,9 +10,9 @@ const readSettingsMap = () => {
 const normalizeContextRounds = (value) => {
   const num = Number(value);
   if (!Number.isFinite(num)) return 100;
-  if (num <= 30) return 30;
   if (num <= 100) return 100;
-  return 500;
+  if (num <= 500) return 500;
+  return 1000;
 };
 
 const hasConfiguredModelSettings = () => {

@@ -9,7 +9,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
-import { send } from '@/system/ws.js';
+import { on, send } from '@/system/ws.js';
 import AppHub from '@/components/AppHub.vue';
 
 import Sidebar from './Sidebar.vue';
@@ -29,6 +29,8 @@ const input = ref('');
 const streaming = ref(false);
 const streamingKey = ref('');
 const errMsg = ref('');
+const hasMoreMessages = ref(false);
+const loadingOlder = ref(false);
 
 // 拖拽到主区(由父级管理, 因为 drop 区是整个 chat-pane)
 const dragActive = ref(false);
@@ -70,20 +72,44 @@ async function pickConv(id) {
   if (!id) return;
   activeId.value = id;
   messages.value = [];
+  hasMoreMessages.value = false;
+  loadingOlder.value = false;
   streamingKey.value = '';
   if (isMobile()) view.closeAppDrawer();
   try {
     const data = await api.get('/api/chat/messages', { query: { conversationId: id, limit: 50, offset: 0 } });
     messages.value = parseMessages(data.messages || []);
+    hasMoreMessages.value = Boolean(data.hasMore);
     streaming.value = data.state === 'running';
     scrollEnd();
   } catch (e) { setErr('加载消息失败', e); }
+}
+
+async function loadOlderMessages() {
+  if (!activeId.value || loadingOlder.value || !hasMoreMessages.value) return;
+  loadingOlder.value = true;
+  const before = messagesRef.value?.snapshotScroll?.() || { top: 0, height: 0 };
+  try {
+    const data = await api.get('/api/chat/messages', {
+      query: { conversationId: activeId.value, limit: 50, offset: messages.value.length }
+    });
+    const older = parseMessages(data.messages || []);
+    messages.value = [...older, ...messages.value];
+    hasMoreMessages.value = Boolean(data.hasMore);
+    messagesRef.value?.restorePrepended?.(before);
+  } catch (e) {
+    setErr('加载更早消息失败', e);
+  } finally {
+    loadingOlder.value = false;
+  }
 }
 
 function newChat() {
   // 只重置 UI 状态;真正的会话等用户发第一条消息时才创建,标题用消息前 30 字
   activeId.value = null;
   messages.value = [];
+  hasMoreMessages.value = false;
+  loadingOlder.value = false;
   streamingKey.value = '';
   streaming.value = false;
   errMsg.value = '';
@@ -140,6 +166,8 @@ async function deleteCurrent() {
     await api.post('/api/chat/delete', { conversationId: activeId.value });
     activeId.value = null;
     messages.value = [];
+    hasMoreMessages.value = false;
+    loadingOlder.value = false;
     await loadConversations();
   } catch (e) { setErr('删除失败', e); }
 }
@@ -181,12 +209,19 @@ async function onDrop(e) {
 
 // ─── 生命周期 ──────────────────────────────────────
 let stopStream = null;
+let stopChatChanged = null;
 
 onMounted(() => {
   stopStream = setupChatStream({
     messages, activeId, streaming, streamingKey,
     onAfterDone: loadConversations,
     scrollEnd
+  });
+  stopChatChanged = on('chat_changed', async (data = {}) => {
+    await loadConversations();
+    if (data.conversationId && data.conversationId === activeId.value && !streaming.value) {
+      await pickConv(activeId.value);
+    }
   });
 
   loadConversations();
@@ -198,6 +233,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopStream?.();
+  stopChatChanged?.();
 });
 </script>
 
@@ -267,6 +303,9 @@ onBeforeUnmount(() => {
           :streaming="streaming"
           :has-active="!!activeId"
           :err-msg="errMsg"
+          :has-more="hasMoreMessages"
+          :loading-older="loadingOlder"
+          @load-older="loadOlderMessages"
           @pick="(t) => { input = t; nextTick(() => composerRef?.focus?.()); }" />
 
         <Composer

@@ -26,25 +26,31 @@ const requestTask = async (body = {}) => {
   }
   return data;
 };
-const agentTask = async ({ app, title, payload, meta = null }) => {
-  return await requestTask({
-    app,
-    title,
-    payload,
-    meta
-  });
-};
-const agentTaskStart = async ({ app, title, payload, meta = null }) => {
+const agentTask = async ({ app, title, payload, meta = null, responseFormat = null, trigger = null }) => {
   return await requestTask({
     app,
     title,
     payload,
     meta,
+    responseFormat,
+    trigger
+  });
+};
+const agentTaskStart = async ({ app, title, payload, meta = null, trigger = null }) => {
+  return await requestTask({
+    app,
+    title,
+    payload,
+    meta,
+    trigger,
     wait: false
   });
 };
 const agentTaskJson = async (args = {}) => {
-  const data = await agentTask(args);
+  const data = await agentTask({
+    ...args,
+    responseFormat: "json",
+  });
   return parseJsonObject(data.response || "");
 };
 export {

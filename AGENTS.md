@@ -11,6 +11,17 @@ AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / note
 - `apps/` 是源码的一部分，保存应用给 AI 读取的产品文档和上下文，不要忽略、不要当运行态产物处理。
 - Node 要求见 `package.json`（当前 `>=22.5`）。
 
+## Git 要求
+
+- 提交信息使用中文。
+- 提交、推送前必须执行并核对 `git status`、`git remote -v`；不能只凭记忆判断当前仓库和远端。
+- 提交前确认没有把 `database/`、`files/`、`node_modules/`、`gui/dist/`、密钥、token、本机配置或运行态数据纳入版本。
+- 小改动可以只写一行标题；结构性、大范围或跨模块变更必须写完整 commit body。
+- 重大提交格式：第一行是清晰标题；空一行后写详细正文，说明动机、主要变化、删除/新增的关键路径、影响范围和验证方式。
+- 同一次提交里如果承接了前一次大改的补充修正，正文必须补充说明上下文，避免只留下过短标题。
+- 推送时同时推送 `origin main` 和 `gitee main`，推送后用 `git log -1 --oneline --decorate` 或 `git status -sb` 确认两个远端指向同一提交。
+- 已经推送的提交不要随意 `--amend` 或强推；确实需要改历史时先说明风险并得到确认。
+
 ## 运行态与数据库
 
 - 本机直接在当前目录运行和使用 AIOS，`database/`、`files/`、`node_modules/` 是本机运行态，默认保留，不因为改代码随手删除。
@@ -20,9 +31,8 @@ AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / note
 
 ## 核心目录
 
-- `server/main/api/`：HTTP/WS API 入口（auth、chat、llm、memory、runtime、settings、task 等）。
+- `server/main/api/`：HTTP/WS API 入口（auth、chat、memory、runtime、settings、task 等）。
 - `server/main/ai/`：AI 执行、工具调用、agent 运行控制。
-- `server/main/llm/`：模型请求、provider、输入输出处理。
 - `server/main/service/`、`server/main/repository/`：业务层与数据库访问层。
 - `server/apps/`：有独立后端边界的应用。
 - `gui/`：前端。
@@ -30,7 +40,9 @@ AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / note
 
 ## 代码结构
 
-- 后端继续按 `api / service / repository / llm / apps` 分层，不把跨层逻辑塞进入口文件。
+- 后端继续按 `api / service / repository / ai / apps` 分层，不把跨层逻辑塞进入口文件。
+- 供应商协议字段只能在对应 service 边界统一生成，不能散落在各业务调用方。业务层表达语义即可，例如任务需要结构化结果时使用 `responseFormat: "json"` 或 `createInstantJsonTask`，由 task service 统一翻译成模型接口需要的 `response_format: { type: "json_object" }`。
+- 不要在多个调用点手写同一个底层协议参数。发现同类参数出现在两个以上业务文件时，先抽到统一入口或 helper，再让调用方使用语义化 API。
 - 前端也必须模块化：页面只负责组装和状态流转，复杂 UI 拆到 `components/`，可复用逻辑拆到 `composables/` 或贴近业务的工具文件。
 - 单个代码文件目标控制在 200-300 行。超过 300 行要优先拆分组件、组合式函数、常量或样式文件；不要把新增功能继续堆进大文件。
 - 前端新页面和新组件必须默认考虑移动端：布局、表格/列表、弹窗、工具栏、按钮文字、输入区域都要在窄屏可用，不允许只按桌面宽度实现。

@@ -20,8 +20,7 @@ const promptBusy = ref(false);
 
 const form = ref({
     title: '',
-    topic: '',
-    durationMin: 90,
+    prompt: '',
 });
 
 const providerSettings = ref({
@@ -31,6 +30,8 @@ const providerSettings = ref({
     ttsSpeaker: 'zh_female_shuangkuaisisi_moon_bigtts',
     ttsFormat: 'mp3',
     ttsSampleRate: '24000',
+    projectPromptTemplate: '',
+    planPromptTemplate: '',
     configured: {
         arkApiKey: false,
         ttsApiKey: false,
@@ -57,8 +58,8 @@ const routeMode = computed(() => {
     return 'list';
 });
 const routeProjectId = computed(() => routeMode.value === 'detail' ? Number(route.params.p2 || 0) : 0);
-const projectMinutes = computed(() => projects.value.reduce((sum, item) => sum + Number(item.durationMin || 0), 0));
 const segmentCount = computed(() => projects.value.reduce((sum, item) => sum + Number(item.segmentCount || 0), 0));
+const plannedCount = computed(() => projects.value.filter((item) => item.status === 'planned').length);
 
 const statusText = {
     draft: '草稿',
@@ -131,6 +132,8 @@ async function saveSettings(clearSecrets = false) {
                 ttsSpeaker: providerSettings.value.ttsSpeaker,
                 ttsFormat: providerSettings.value.ttsFormat,
                 ttsSampleRate: providerSettings.value.ttsSampleRate,
+                projectPromptTemplate: providerSettings.value.projectPromptTemplate,
+                planPromptTemplate: providerSettings.value.planPromptTemplate,
             }
             : {
                 arkApiKey: providerSettings.value.arkApiKey,
@@ -139,6 +142,8 @@ async function saveSettings(clearSecrets = false) {
                 ttsSpeaker: providerSettings.value.ttsSpeaker,
                 ttsFormat: providerSettings.value.ttsFormat,
                 ttsSampleRate: providerSettings.value.ttsSampleRate,
+                projectPromptTemplate: providerSettings.value.projectPromptTemplate,
+                planPromptTemplate: providerSettings.value.planPromptTemplate,
             };
         const res = await lv.saveSettings(payload);
         providerSettings.value = {
@@ -187,7 +192,7 @@ async function create() {
         error.value = '请先填写标题';
         return;
     }
-    if (!form.value.topic.trim()) {
+    if (!form.value.prompt.trim()) {
         error.value = '请先填写描述';
         return;
     }
@@ -205,6 +210,10 @@ async function create() {
     }
 }
 
+function fillPromptTemplate(template, values) {
+    return String(template || '').replace(/\{(\w+)\}/g, (_match, key) => String(values[key] ?? ''));
+}
+
 async function generateProjectPrompt() {
     if (!form.value.title.trim()) {
         error.value = '请先填写标题';
@@ -213,25 +222,29 @@ async function generateProjectPrompt() {
     promptBusy.value = true;
     error.value = '';
     try {
+        const prompt = fillPromptTemplate(providerSettings.value.projectPromptTemplate, {
+            title: form.value.title.trim(),
+            prompt: form.value.prompt.trim(),
+        });
         const res = await lv.generatePrompt({
             app: 'longvideo',
-            title: `生成长视频提示词：${form.value.title.trim()}`,
+            title: `生成视频提示词：${form.value.title.trim()}`,
             payload: {
                 messages: [
                     {
                         role: 'system',
-                        content: '你是长视频策划助手。只输出一段可直接填写到“描述（提示词）”字段里的中文提示词，不要 Markdown，不要标题，不要解释。'
+                        content: '你是视频策划助手。只输出一段可直接填写到“描述（提示词）”字段里的中文提示词，不要 Markdown，不要标题，不要解释。'
                     },
                     {
                         role: 'user',
-                        content: `根据标题生成一个适合 1-2 小时长视频生产的描述提示词。要求包含主题范围、叙事角度、内容结构、画面气质和解说风格，语言具体但不要过长。\n\n标题：${form.value.title.trim()}`
+                        content: prompt
                     }
                 ],
                 temperature: 0.7
             },
             meta: { source: 'longvideo.prompt' }
         });
-        form.value.topic = String(res.response || '').trim();
+        form.value.prompt = String(res.response || '').trim();
     } catch (err) {
         error.value = err?.body?.message || err.message || String(err);
     } finally {
@@ -301,7 +314,7 @@ watch(
                             <span class="msi xxs">arrow_back</span>
                             返回项目列表
                         </button>
-                        <div v-else class="lv-kicker">长片工坊</div>
+                        <div v-else class="lv-kicker">视频工坊</div>
                         <h1 class="mt-1 text-[26px] font-semibold text-[#101820] max-md:text-[22px]">
                             {{ routeMode === 'list' ? '项目列表' : routeMode === 'new' ? '创建项目' : routeMode === 'settings' ? '设置' : '项目详情' }}
                         </h1>
@@ -325,7 +338,7 @@ watch(
                         <section class="grid grid-cols-3 gap-3 text-center max-md:grid-cols-1">
                             <div class="lv-metric"><strong>{{ projects.length }}</strong><span>项目</span></div>
                             <div class="lv-metric"><strong>{{ segmentCount }}</strong><span>段落</span></div>
-                            <div class="lv-metric"><strong>{{ projectMinutes }}</strong><span>分钟</span></div>
+                            <div class="lv-metric"><strong>{{ plannedCount }}</strong><span>已规划</span></div>
                         </section>
 
                         <section class="lv-panel">
@@ -337,8 +350,8 @@ watch(
                                 </button>
                             </div>
                             <div class="mt-3 overflow-hidden rounded-md border border-[#e0e6eb]">
-                                <div class="grid grid-cols-[minmax(0,1fr)_100px_90px_100px] bg-[#f5f7f9] px-3 py-2 text-[12px] font-semibold text-[#67737f] max-md:grid-cols-[minmax(0,1fr)_72px]">
-                                    <span>项目</span><span class="max-md:hidden">时长</span><span class="max-md:hidden">段落</span><span>状态</span>
+                                <div class="grid grid-cols-[minmax(0,1fr)_90px_100px] bg-[#f5f7f9] px-3 py-2 text-[12px] font-semibold text-[#67737f] max-md:grid-cols-[minmax(0,1fr)_72px]">
+                                    <span>项目</span><span class="max-md:hidden">段落</span><span>状态</span>
                                 </div>
                                 <button
                                     v-for="p in projects"
@@ -347,9 +360,8 @@ watch(
                                     @click="goProject(p.id)">
                                     <span class="min-w-0">
                                         <strong class="block truncate text-[13.5px] text-[#1f2a34]">{{ p.title }}</strong>
-                                        <span class="mt-1 block truncate text-[12px] text-[#73808b]">{{ p.topic }}</span>
+                                        <span class="mt-1 block truncate text-[12px] text-[#73808b]">{{ p.prompt }}</span>
                                     </span>
-                                    <span class="max-md:hidden">{{ p.durationMin }} 分钟</span>
                                     <span class="max-md:hidden">{{ p.segmentCount || 0 }} 段</span>
                                     <span class="lv-status justify-self-start">{{ labelStatus(p.status) }}</span>
                                 </button>
@@ -380,7 +392,7 @@ watch(
 
                 <section v-if="routeMode === 'new'" class="lv-panel">
                     <div>
-                        <div class="lv-kicker">新建长视频</div>
+                        <div class="lv-kicker">新建视频</div>
                         <h2 class="mt-1 text-[24px] font-semibold text-[#101820] max-md:text-[20px]">填写标题和描述</h2>
                     </div>
 
@@ -394,7 +406,7 @@ watch(
                                     {{ promptBusy ? '生成中' : '生成提示词' }}
                                 </button>
                             </div>
-                            <textarea v-model="form.topic" class="lv-input min-h-[180px] w-full resize-y" placeholder="描述这部视频要讲什么、面向谁、希望呈现什么风格。"></textarea>
+                            <textarea v-model="form.prompt" class="lv-input min-h-[180px] w-full resize-y" placeholder="描述这部视频要讲什么、面向谁、希望呈现什么风格。"></textarea>
                         </div>
                     </div>
                     <button class="lv-primary mt-4" :disabled="busy === 'create'" @click="create">
@@ -409,7 +421,7 @@ watch(
                             <div class="min-w-0">
                                 <div class="lv-kicker">当前项目</div>
                                 <h2 class="mt-1 truncate text-[22px] font-semibold">{{ active.title }}</h2>
-                                <p class="mt-1 text-[13px] text-[#697681]">{{ active.topic }}</p>
+                                <p class="mt-1 text-[13px] text-[#697681]">{{ active.prompt }}</p>
                             </div>
                             <span class="lv-status">{{ labelStatus(active.status) }}</span>
                         </div>

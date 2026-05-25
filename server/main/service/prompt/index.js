@@ -6,9 +6,13 @@ import { environment as environmentSection } from "./environment.js";
 import { memory as memorySection } from "./memory.js";
 import { model as modelSection } from "./model.js";
 import { remarks as remarksSection } from "./remarks.js";
+import { skills as skillsSection } from "./skills.js";
 import { tools as toolsSection } from "./tools.js";
 
-const instruction = (settings) => String(settings.systemPrompt || "").trim() || DEFAULT_SYSTEM_PROMPT;
+const instruction = (settings, override) => {
+  const source = override === undefined ? settings.systemPrompt : override;
+  return String(source || "").trim() || DEFAULT_SYSTEM_PROMPT;
+};
 
 // 当前会话所在应用提供的临时上下文(QuickChat 在每条消息里随路透传过来)。
 // 应用通过 gui 端 useAppContext().set({ context, prompts }) 注册,
@@ -19,7 +23,7 @@ const appContextSection = (text) => {
   return `\n\n## 当前应用上下文\n用户正在使用某个应用,该应用主动告诉你以下信息:\n${trimmed}`;
 };
 
-const buildSystemPrompt = (currentConversationId = "", { appContext = "" } = {}) => {
+const buildSystemPrompt = (currentConversationId = "", { appContext = "", instructionOverride } = {}) => {
   const settings = getSettings();
   const {
     apiUrl,
@@ -30,7 +34,7 @@ const buildSystemPrompt = (currentConversationId = "", { appContext = "" } = {})
     toolMaxRounds
   } = settings;
   const cwd = process.cwd();
-  let prompt = instruction(settings);
+  let prompt = instruction(settings, instructionOverride);
   prompt += environmentSection(cwd);
   prompt += modelSection({ name: model, apiUrl });
   prompt += toolsSection({
@@ -39,6 +43,7 @@ const buildSystemPrompt = (currentConversationId = "", { appContext = "" } = {})
     enableToolLoopLimit,
     toolMaxRounds
   });
+  prompt += skillsSection();
   prompt += appsSection();
   prompt += chatsSection(currentConversationId);
   prompt += remarksSection(currentConversationId);

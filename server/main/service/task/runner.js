@@ -8,6 +8,8 @@ import {
 } from "../../repository/task/records.js";
 import { saveTaskMessage } from "../../repository/task/messages.js";
 import { registerTaskExecution, unregisterTaskExecution } from "./execution.js";
+import { publishTriggerEvent } from "../triggers/deliver.js";
+import { createTrigger } from "../triggers/create.js";
 
 const createTaskRun = async ({
   mode,
@@ -16,6 +18,7 @@ const createTaskRun = async ({
   payload,
   meta = null,
   wait = true,
+  trigger = null,
   execute,
   errorMessage = "Task execution failed"
 }) => {
@@ -28,6 +31,16 @@ const createTaskRun = async ({
     payload,
     meta
   });
+  let triggerId = null;
+  if (trigger && typeof trigger === "object") {
+    const created = createTrigger({
+      ...trigger,
+      kind: "task",
+      sourceId: taskId,
+      event: trigger.event || "done",
+    });
+    triggerId = created?.id || null;
+  }
   broadcast({ type: "tasks_changed" });
 
   const abortController = new AbortController();
@@ -50,13 +63,32 @@ const createTaskRun = async ({
       if (result?.assistantMessage) emitMessage(result.assistantMessage, null);
       const response = result?.response ?? "";
       updateTaskDone({ taskId, response });
+      publishTriggerEvent({
+        kind: "task",
+        sourceId: taskId,
+        event: "done",
+        payload: { taskId, app, title, response },
+      });
       broadcast({ type: "tasks_changed" });
       return response;
     } catch (error) {
       if (error?.name === "AbortError") {
         updateTaskAborted({ taskId });
+        publishTriggerEvent({
+          kind: "task",
+          sourceId: taskId,
+          event: "aborted",
+          payload: { taskId, app, title, error: "用户中止任务" },
+        });
       } else {
-        updateTaskError({ taskId, message: error?.message || errorMessage });
+        const message = error?.message || errorMessage;
+        updateTaskError({ taskId, message });
+        publishTriggerEvent({
+          kind: "task",
+          sourceId: taskId,
+          event: "error",
+          payload: { taskId, app, title, error: message },
+        });
       }
       broadcast({ type: "tasks_changed" });
       if (wait) throw error;
@@ -68,11 +100,11 @@ const createTaskRun = async ({
 
   if (!wait) {
     exec().catch(() => {});
-    return { id: taskId, conversationId, response: null };
+    return { id: taskId, conversationId, triggerId, response: null };
   }
 
   const response = await exec();
-  return { id: taskId, conversationId, response };
+  return { id: taskId, conversationId, triggerId, response };
 };
 
 export {

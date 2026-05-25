@@ -28,17 +28,24 @@ const instantTask = async ({
     title = "",
     payload,
     meta = null,
+    responseFormat = null,
+    trigger = null,
 } = {}) => {
     return await requestInstant({
         app,
         title,
         payload,
         meta,
+        responseFormat,
+        trigger,
     });
 };
 
 const instantTaskJson = async (args = {}) => {
-    const data = await instantTask(args);
+    const data = await instantTask({
+        ...args,
+        responseFormat: "json",
+    });
     return parseJsonObject(data.response || "");
 };
 

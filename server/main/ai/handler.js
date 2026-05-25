@@ -12,7 +12,8 @@ const chat = async (messages, {
   signal,
   maxRounds = 50,
   enableToolResultTruncate = true,
-  toolResultMaxChars = 12e3
+  toolResultMaxChars = 12e3,
+  responseFormat = null
 } = {}) => {
   const opts = normalizeChatOptions({ maxRounds, enableToolResultTruncate, toolResultMaxChars });
   const workMessages = normalizeAgentMessages(messages);
@@ -20,6 +21,7 @@ const chat = async (messages, {
   while (round++ < opts.maxRounds) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     const payload = { model, messages: workMessages, tools };
+    if (responseFormat) payload.response_format = responseFormat;
     const { message } = await callChatCompletion(apiUrl, apiKey, payload, { signal });
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
       const assistantMsg = {

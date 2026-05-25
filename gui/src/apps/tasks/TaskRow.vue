@@ -25,7 +25,8 @@ const BADGE_CLS = {
   pending: 'bg-[#fef7e0] text-[#b06000]',
   running: 'bg-blue-bg text-blue-fg',
   done:    'bg-[#e6f4ea] text-good',
-  error:   'bg-[#fce8e6] text-bad'
+  error:   'bg-[#fce8e6] text-bad',
+  aborted: 'bg-[#eef3f7] text-muted'
 };
 </script>
 
@@ -36,7 +37,7 @@ const BADGE_CLS = {
 
     <div class="flex-1 min-w-0">
       <div class="text-[14px] leading-[1.5] break-words"
-        :class="(status.cls === 'done' || status.cls === 'error') ? 'text-faint' : 'text-ink'">
+        :class="(status.cls === 'done' || status.cls === 'error' || status.cls === 'aborted') ? 'text-faint' : 'text-ink'">
         {{ task.title || payloadText(task.payload).slice(0, 80) || '(空)' }}
       </div>
       <div v-if="payloadText(task.payload) && payloadText(task.payload) !== task.title"

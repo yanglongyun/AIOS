@@ -4,7 +4,8 @@ const executeAgentTask = async ({
   messages,
   settings,
   emitMessage,
-  signal
+  signal,
+  responseFormat = null
 }) => {
   const {
     apiUrl,
@@ -42,7 +43,8 @@ const executeAgentTask = async ({
     signal,
     maxRounds: enableToolLoopLimit ? toolMaxRounds : 1e5,
     enableToolResultTruncate,
-    toolResultMaxChars
+    toolResultMaxChars,
+    responseFormat
   });
   return {
     assistantMessage: response,

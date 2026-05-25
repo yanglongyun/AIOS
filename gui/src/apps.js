@@ -12,6 +12,14 @@ const apps = [
     load: () => import('./apps/chat/index.vue')
   },
   {
+    id: 'triggers',
+    name: '触发器',
+    icon: 'bolt',
+    color: '#7c4dff',
+    hasDrawer: false,
+    load: () => import('./apps/triggers/index.vue')
+  },
+  {
     id: 'tasks',
     name: '任务',
     icon: 'task_alt',
@@ -61,7 +69,7 @@ const apps = [
   },
   {
     id: 'longvideo',
-    name: '长片工坊',
+    name: '视频工坊',
     icon: 'movie',
     color: '#276ef1',
     hasDrawer: false,

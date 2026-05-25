@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "AIOS Browser Use",
+  "version": "0.1.0",
+  "description": "Local browser bridge for AIOS shell/API browser operations.",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "AIOS Browser Use"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "debugger",
+    "scripting",
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' ws://127.0.0.1:8765 http://127.0.0.1:8765"
+  }
+}

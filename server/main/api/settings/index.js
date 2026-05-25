@@ -1,9 +1,11 @@
 import { readBody } from "../../../shared/http/readBody.js";
 import { json } from "../../../shared/http/json.js";
 import { DEFAULT_SYSTEM_PROMPT } from "../../service/prompt/default.js";
+import { buildSystemPrompt } from "../../service/prompt/index.js";
 import { getSettings } from "../../service/settings/get.js";
 import { updateSettings } from "../../service/settings/update.js";
 import { callChatCompletion } from "../../ai/client.js";
+import { listInstalledSkills } from "../../service/skills/list.js";
 
 const normalizeModelConfig = (body = {}) => {
   const apiUrl = String(body.apiUrl || "").trim();
@@ -55,9 +57,20 @@ const handleSettingsApi = async (req, res, path) => {
     }
   }
 
+  if (path === "/api/settings/skills" && req.method === "GET") {
+    return json(res, { success: true, items: listInstalledSkills() });
+  }
+
   if (path === "/api/settings/prompt" && req.method === "GET") {
     const content = String(getSettings().systemPrompt || "").trim() || DEFAULT_SYSTEM_PROMPT;
     return json(res, { success: true, content });
+  }
+  if (path === "/api/settings/prompt/preview" && req.method === "POST") {
+    const body = await readBody(req);
+    return json(res, {
+      success: true,
+      content: buildSystemPrompt("", { instructionOverride: body.content })
+    });
   }
   if (path === "/api/settings/prompt" && req.method === "POST") {
     const body = await readBody(req);

@@ -1,23 +1,23 @@
 ---
 name: longvideo
-description: 长片工坊应用，用于生成超长解说视频的大纲、分段解说、图片、音频和拼接任务。
+description: 视频工坊应用，用于生成超长解说视频的大纲、分段解说、图片、音频和拼接任务。
 backend: server/apps/longvideo
 frontend: gui/src/apps/longvideo
 database: database/apps/longvideo.db
 ---
 
-# 长片工坊
+# 视频工坊
 
-长片工坊用于制作一到两小时的中文长视频。它把一个主题拆成项目、大纲、分段解说、图片提示词、音频任务、图片任务和最终拼接任务。
+视频工坊用于制作中文长视频。它把项目描述拆成大纲、分段解说、图片提示词、音频任务、图片任务和最终拼接任务。
 
 ## 能力
 
-- 创建长视频项目。
+- 创建视频项目。
 - 用系统模型生成结构化大纲、分段解说词和每段图片提示词。
 - 将分段送入火山引擎图片与语音生成队列。
 - 在素材齐备后进入视频拼接队列。
 
-火山引擎 Ark 图片接口和语音接口的授权信息保存在长片工坊数据库中，由应用内设置页写入。当前未配置或未授权时，素材会停留在 `pending_provider_config` 或 `blocked` 状态。
+火山引擎 Ark 图片接口和语音接口的授权信息保存在视频工坊数据库中，由应用内设置页写入。当前未配置或未授权时，素材会停留在 `pending_provider_config` 或 `blocked` 状态。
 
 ## API
 
@@ -37,10 +37,7 @@ database: database/apps/longvideo.db
 ```json
 {
   "title": "AI 时代的操作系统",
-  "topic": "AI 如何重塑操作系统、应用和软件分发",
-  "audience": "对 AI 和产品趋势感兴趣的观众",
-  "style": "纪录片式、克制、信息密度高",
-  "durationMin": 90
+  "prompt": "讲清楚 AI 如何重塑操作系统、应用和软件分发，整体采用纪录片式叙事，信息密度高，画面克制。"
 }
 ```
 

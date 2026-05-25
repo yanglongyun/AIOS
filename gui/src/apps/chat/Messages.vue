@@ -4,21 +4,40 @@ import BubbleUser from './bubbles/User.vue';
 import BubbleAi from './bubbles/Ai.vue';
 import BubbleToolCall from './bubbles/ToolCall.vue';
 import BubbleToolResult from './bubbles/ToolResult.vue';
+import BubbleNotice from './bubbles/Notice.vue';
 
-defineProps({
+const props = defineProps({
   messages: { type: Array, default: () => [] },
   streaming: { type: Boolean, default: false },
   hasActive: { type: Boolean, default: false },
-  errMsg: { type: String, default: '' }
+  errMsg: { type: String, default: '' },
+  hasMore: { type: Boolean, default: false },
+  loadingOlder: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['pick']);
+const emit = defineEmits(['pick', 'load-older']);
 
 const listEl = ref(null);
 function scrollEnd() {
   nextTick(() => { if (listEl.value) listEl.value.scrollTop = listEl.value.scrollHeight; });
 }
-defineExpose({ scrollEnd });
+function snapshotScroll() {
+  const el = listEl.value;
+  return el ? { top: el.scrollTop, height: el.scrollHeight } : { top: 0, height: 0 };
+}
+function restorePrepended(before) {
+  nextTick(() => {
+    const el = listEl.value;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight - before.height + before.top;
+  });
+}
+function onScroll() {
+  const el = listEl.value;
+  if (!el || !props.hasActive || !props.hasMore || props.loadingOlder) return;
+  if (el.scrollTop <= 80) emit('load-older');
+}
+defineExpose({ scrollEnd, snapshotScroll, restorePrepended });
 
 // ─── 欢迎页内容 ─────────────────────────────────
 const greeting = computed(() => {
@@ -45,7 +64,11 @@ const pick = (s) => emit('pick', s.prompt);
 
 <template>
   <div ref="listEl"
+    @scroll="onScroll"
     class="msgs flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-6 pt-2 pb-6 max-md:px-3 max-md:pb-4">
+    <div v-if="hasActive && (hasMore || loadingOlder)" class="load-older">
+      {{ loadingOlder ? '加载中...' : '向上滚动加载更早消息' }}
+    </div>
 
     <!-- 欢迎页 (没选中对话 & 没消息 & 没错误) -->
     <div v-if="!hasActive && !errMsg && !messages.length"
@@ -79,6 +102,7 @@ const pick = (s) => emit('pick', s.prompt);
     <template v-for="(m, i) in messages" :key="m._key || i">
       <BubbleUser     v-if="m.role === 'user'"            :text="m.text" :attachments="m.attachments" />
       <BubbleAi       v-else-if="m.role === 'ai' && m.text" :text="m.text" :remark="m.remark" />
+      <BubbleNotice   v-else-if="m.role === 'notice'"     :text="m.text" />
       <BubbleToolCall v-else-if="m.type === 'tool_call'"  :msg="m" />
       <BubbleToolResult v-else-if="m.type === 'tool_result'" :content="m.content" />
     </template>
@@ -93,6 +117,16 @@ const pick = (s) => emit('pick', s.prompt);
 <style scoped>
 .msgs > * + * { margin-top: 12px; }
 .msgs > .welcome + * { margin-top: 0; }
+.load-older {
+  margin: 2px auto 12px;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  background: #eef3f8;
+  color: var(--text-3);
+  font-size: 12px;
+  padding: 5px 12px;
+}
 
 @keyframes chat-pulse {
   0%, 100% { opacity: 0.4; }

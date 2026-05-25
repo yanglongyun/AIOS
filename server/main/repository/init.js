@@ -47,8 +47,31 @@ const createTables = () => {
       finished_at TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS triggers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
+      kind TEXT NOT NULL DEFAULT 'task',
+      source_id TEXT,
+      event TEXT NOT NULL DEFAULT 'done',
+      target_mode TEXT NOT NULL DEFAULT 'existing_chat',
+      conversation_id TEXT,
+      chat_title TEXT NOT NULL DEFAULT '',
+      prompt TEXT NOT NULL DEFAULT '',
+      created_by_type TEXT NOT NULL DEFAULT 'ai',
+      created_by_ref TEXT,
+      delivered_message_id INTEGER,
+      error TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      fired_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_triggers_source
+      ON triggers(kind, source_id, event, status);
+    CREATE INDEX IF NOT EXISTS idx_triggers_conversation
+      ON triggers(conversation_id, status, id DESC);
+
     CREATE TABLE IF NOT EXISTS auth (
-      id            INTEGER PRIMARY KEY CHECK (id = 1),
+      id            INTEGER PRIMARY KEY,
       password_hash TEXT NOT NULL,
       password_salt TEXT NOT NULL,
       api_token     TEXT NOT NULL,

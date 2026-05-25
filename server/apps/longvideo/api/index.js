@@ -36,7 +36,7 @@ const handleLongvideoApi = async (req, res, path) => {
     const result = await createAudioJob({
       projectId: "settings-test",
       segmentId: "audio",
-      text: "这是长片工坊的语音生成测试。当前语音服务已经可以连接。",
+      text: "这是视频工坊的语音生成测试。当前语音服务已经可以连接。",
     });
     if (result?.ok === false) return json(res, { success: false, message: result.message, result }, 400);
     return json(res, { success: true, result });
@@ -51,15 +51,12 @@ const handleLongvideoApi = async (req, res, path) => {
 
   if (path === "/apps/longvideo/project" && req.method === "POST") {
     const body = await readBody(req);
-    if (!String(body.topic || "").trim()) {
-      return json(res, { success: false, message: "主题不能为空" }, 400);
+    if (!String(body.prompt || "").trim()) {
+      return json(res, { success: false, message: "描述不能为空" }, 400);
     }
     const project = createProject({
       title: body.title,
-      topic: body.topic,
-      audience: body.audience,
-      style: body.style,
-      durationMin: body.durationMin,
+      prompt: body.prompt,
     });
     return json(res, { success: true, project });
   }

@@ -33,6 +33,12 @@ const getTaskStatusById = (id) => {
   return db.prepare("SELECT id, status FROM tasks WHERE id = ? LIMIT 1").get(id) || null;
 };
 
+const updateTaskPending = ({ taskId }) => {
+  db.prepare(
+    "UPDATE tasks SET response = NULL, error = NULL, status = 'pending', finished_at = NULL WHERE id = ?"
+  ).run(taskId);
+};
+
 const updateTaskDone = ({ taskId, response }) => {
   db.prepare(
     "UPDATE tasks SET response = ?, status = 'done', finished_at = datetime('now') WHERE id = ?"
@@ -41,7 +47,7 @@ const updateTaskDone = ({ taskId, response }) => {
 
 const updateTaskAborted = ({ taskId }) => {
   db.prepare(
-    "UPDATE tasks SET error = '用户终止任务', status = 'aborted', finished_at = datetime('now') WHERE id = ?"
+    "UPDATE tasks SET error = '用户中止任务', status = 'aborted', finished_at = datetime('now') WHERE id = ?"
   ).run(taskId);
 };
 
@@ -56,6 +62,7 @@ export {
   getTaskStatusById,
   insertTaskRecord,
   listTasksByLimit,
+  updateTaskPending,
   updateTaskAborted,
   updateTaskDone,
   updateTaskError

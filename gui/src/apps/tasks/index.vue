@@ -28,18 +28,20 @@ const filters = [
   { id: 'mine',    name: '我创建的',  icon: 'person' },
   { id: 'running', name: '运行中',    icon: 'autorenew' },
   { id: 'done',    name: '成功',      icon: 'check_circle' },
-  { id: 'error',   name: '失败',      icon: 'cancel' }
+  { id: 'error',   name: '失败',      icon: 'cancel' },
+  { id: 'aborted', name: '中止',      icon: 'block' }
 ];
 
 const STATUS = {
   pending: { label: '执行中', icon: 'autorenew',    cls: 'running' },
   done:    { label: '成功',   icon: 'check_circle', cls: 'done' },
   error:   { label: '失败',   icon: 'cancel',       cls: 'error' },
-  aborted: { label: '已终止', icon: 'block',        cls: 'error' }
+  aborted: { label: '中止',   icon: 'block',        cls: 'aborted' }
 };
 const isOpen  = (t) => t.status === 'pending';
 const isDone  = (t) => t.status === 'done';
-const isError = (t) => t.status === 'error' || t.status === 'aborted';
+const isError = (t) => t.status === 'error';
+const isAborted = (t) => t.status === 'aborted';
 const st = (t) => STATUS[t.status] || STATUS.pending;
 
 function isMine(t) {
@@ -55,6 +57,7 @@ function applyFilter(list) {
     case 'running': return list.filter(isOpen);
     case 'done':    return list.filter(isDone);
     case 'error':   return list.filter(isError);
+    case 'aborted': return list.filter(isAborted);
     default:        return list;
   }
 }
@@ -64,12 +67,13 @@ const counts = computed(() => ({
   mine:    tasks.value.filter(isMine).length,
   running: tasks.value.filter(isOpen).length,
   done:    tasks.value.filter(isDone).length,
-  error:   tasks.value.filter(isError).length
+  error:   tasks.value.filter(isError).length,
+  aborted: tasks.value.filter(isAborted).length
 }));
 
 const visibleTasks = computed(() => applyFilter(tasks.value));
 const openTasks    = computed(() => visibleTasks.value.filter(isOpen));
-const doneTasks    = computed(() => visibleTasks.value.filter((t) => isDone(t) || isError(t)));
+const doneTasks    = computed(() => visibleTasks.value.filter((t) => isDone(t) || isError(t) || isAborted(t)));
 
 function parsePayload(payload) {
   if (!payload) return {};
@@ -159,6 +163,14 @@ async function stopTask(t) {
   try { await api.post('/api/task/stop', { id: t.id }); await load(); }
   catch (err) { setErr('停止失败', err); }
 }
+async function continueTask({ task, content }) {
+  try {
+    await api.post('/api/task/continue', { id: task.id, content });
+    await load();
+    const fresh = tasks.value.find((t) => t.id === task.id) || task;
+    await openDetail(fresh);
+  } catch (err) { setErr('继续失败', err); }
+}
 async function rerun(t) {
   try {
     await api.post('/api/task/create/agent', {
@@ -212,6 +224,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           :status="st(detailFor)"
           :rel-time="relTime"
           @stop="stopTask"
+          @continue="continueTask"
           @rerun="rerun" />
       </section>
     </template>
@@ -280,7 +293,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
               </div>
             </template>
 
-            <template v-if="filter === 'done' || filter === 'error'">
+            <template v-if="filter === 'done' || filter === 'error' || filter === 'aborted'">
               <TaskRow v-for="t in doneTasks" :key="t.id"
                 :task="t"
                 :status="st(t)"

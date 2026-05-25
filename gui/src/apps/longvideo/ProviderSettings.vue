@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import ImageProviderTab from './settings/ImageProviderTab.vue';
 import AudioProviderTab from './settings/AudioProviderTab.vue';
+import PromptSettingsTab from './settings/PromptSettingsTab.vue';
 
 defineProps({
     settings: { type: Object, required: true },
@@ -19,6 +20,7 @@ const active = ref('image');
 const tabs = [
     { id: 'image', label: '图片生成', icon: 'image' },
     { id: 'audio', label: '语音生成', icon: 'graphic_eq' },
+    { id: 'prompt', label: '提示词', icon: 'edit_note' },
 ];
 
 const update = (patch) => emit('patch', patch);
@@ -44,7 +46,7 @@ const update = (patch) => emit('patch', patch);
             @test="$emit('test-image')" />
 
         <AudioProviderTab
-            v-else
+            v-else-if="active === 'audio'"
             :settings="settings"
             :ready="audioReady"
             :busy="busy"
@@ -52,6 +54,13 @@ const update = (patch) => emit('patch', patch);
             @patch="update"
             @save="$emit('save')"
             @test="$emit('test-audio')" />
+
+        <PromptSettingsTab
+            v-else
+            :settings="settings"
+            :busy="busy"
+            @patch="update"
+            @save="$emit('save')" />
 
         <div class="actions">
             <button class="secondary" :disabled="busy || Boolean(testing)" @click="$emit('clear')">
@@ -71,14 +80,19 @@ const update = (patch) => emit('patch', patch);
 }
 .tabs {
     display: inline-flex;
-    width: fit-content;
+    width: max-content;
+    max-width: 100%;
     gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
     border-radius: 999px;
     background: #eef3f7;
     padding: 4px;
 }
+.tabs::-webkit-scrollbar { display: none; }
 .tabs button {
     display: inline-flex;
+    flex: 0 0 auto;
     min-height: 34px;
     align-items: center;
     gap: 6px;
@@ -86,6 +100,7 @@ const update = (patch) => emit('patch', patch);
     color: #53616e;
     font-size: 13px;
     font-weight: 650;
+    white-space: nowrap;
     padding: 0 14px;
 }
 .tabs button.active {
@@ -122,9 +137,10 @@ const update = (patch) => emit('patch', patch);
 @media (max-width: 768px) {
     .tabs {
         width: 100%;
+        border-radius: 18px;
     }
     .tabs button {
-        flex: 1;
+        min-width: max-content;
         justify-content: center;
     }
 }

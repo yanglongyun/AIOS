@@ -2,17 +2,14 @@ import { parseJson } from "../../../shared/json/parse.js";
 import { db } from "./client.js";
 
 const projectFields = `
-  id, title, topic, audience, style, duration_min, status,
+  id, title, prompt, status,
   outline_json, notes, created_at, updated_at
 `;
 
 const normalizeProject = (row) => row ? {
   id: row.id,
   title: row.title,
-  topic: row.topic,
-  audience: row.audience,
-  style: row.style,
-  durationMin: row.duration_min,
+  prompt: row.prompt,
   status: row.status,
   outline: row.outline_json ? parseJson(row.outline_json, "longvideo.project.outline") : null,
   notes: row.notes,
@@ -40,7 +37,7 @@ const normalizeSegment = (row) => ({
 });
 
 const listProjects = () => db.prepare(`
-  SELECT p.id, p.title, p.topic, p.audience, p.style, p.duration_min, p.status,
+  SELECT p.id, p.title, p.prompt, p.status,
          p.outline_json, p.notes, p.created_at, p.updated_at,
          COUNT(s.id) AS segment_count
   FROM longvideo_projects p
@@ -68,16 +65,13 @@ const getProject = (id) => {
   return { ...project, segments };
 };
 
-const createProject = ({ title, topic, audience, style, durationMin }) => {
+const createProject = ({ title, prompt }) => {
   const info = db.prepare(`
-    INSERT INTO longvideo_projects (title, topic, audience, style, duration_min, status, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, 'draft', datetime('now'), datetime('now'))
+    INSERT INTO longvideo_projects (title, prompt, status, created_at, updated_at)
+    VALUES (?, ?, 'draft', datetime('now'), datetime('now'))
   `).run(
-    String(title || "").trim() || String(topic || "").trim() || "未命名长视频",
-    String(topic || "").trim(),
-    String(audience || "").trim(),
-    String(style || "").trim(),
-    Math.max(5, Math.min(240, Number(durationMin) || 60))
+    String(title || "").trim() || String(prompt || "").trim() || "未命名视频",
+    String(prompt || "").trim()
   );
   return getProject(info.lastInsertRowid);
 };

@@ -4,10 +4,7 @@ const initDatabase = () => {
   db.exec(`CREATE TABLE IF NOT EXISTS longvideo_projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL DEFAULT '',
-    topic TEXT NOT NULL DEFAULT '',
-    audience TEXT NOT NULL DEFAULT '',
-    style TEXT NOT NULL DEFAULT '',
-    duration_min INTEGER NOT NULL DEFAULT 60,
+    prompt TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL DEFAULT 'draft',
     outline_json TEXT NOT NULL DEFAULT '',
     notes TEXT NOT NULL DEFAULT '',
@@ -31,8 +28,7 @@ const initDatabase = () => {
     video_uri TEXT NOT NULL DEFAULT '',
     error TEXT NOT NULL DEFAULT '',
     created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY(project_id) REFERENCES longvideo_projects(id) ON DELETE CASCADE
+    updated_at TEXT DEFAULT (datetime('now'))
   )`);
 
   db.exec(`CREATE INDEX IF NOT EXISTS idx_longvideo_segments_project

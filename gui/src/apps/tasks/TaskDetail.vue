@@ -7,15 +7,17 @@ const props = defineProps({
   status: { type: Object, required: true },       // { label, icon, cls }
   relTime: { type: Function, required: true }
 });
-defineEmits(['stop']);
+const emit = defineEmits(['stop', 'continue']);
 
 const showProcess = ref(false);
+const continueText = ref('');
 
 const BADGE_CLS = {
   pending: 'bg-[#fef7e0] text-[#b06000]',
   running: 'bg-blue-bg text-blue-fg',
   done:    'bg-[#e6f4ea] text-good',
-  error:   'bg-[#fce8e6] text-bad'
+  error:   'bg-[#fce8e6] text-bad',
+  aborted: 'bg-[#eef3f7] text-muted'
 };
 
 const messages = ref([]);
@@ -30,9 +32,17 @@ async function loadMessages() {
       let parsed = null;
       try { parsed = typeof row.message === 'string' ? JSON.parse(row.message) : row.message; }
       catch { parsed = { role: 'raw', content: row.message }; }
-      return { id: row.id, ts: row.created_at, ...parsed };
+      return { id: row.id, ts: row.createdAt || row.created_at, ...parsed };
     });
   } catch {}
+}
+
+function submitContinue() {
+  const text = continueText.value.trim();
+  if (!text || props.task.status === 'pending') return;
+  continueText.value = '';
+  showProcess.value = true;
+  emit('continue', { task: props.task, content: text });
 }
 
 const stopPoll = () => { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } };
@@ -100,6 +110,26 @@ const fmtContent = (c) => {
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto pt-5 pb-4 flex flex-col gap-3.5">
+
+      <section v-if="task.status !== 'pending'" class="rounded-xl border border-line-soft bg-white px-4.5 py-3.5">
+        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">继续任务</div>
+        <textarea
+          v-model="continueText"
+          class="min-h-[92px] w-full resize-y rounded-xl border border-line bg-[#fafbfc] px-3.5 py-3 text-[13px] leading-[1.55] text-ink outline-none transition-colors focus:border-accent focus:bg-white"
+          placeholder="补充新的指令，让这个任务基于已有过程继续执行"
+          spellcheck="false"
+          @keydown.meta.enter.prevent="submitContinue"
+          @keydown.ctrl.enter.prevent="submitContinue"></textarea>
+        <div class="mt-3 flex justify-end">
+          <button
+            class="inline-flex h-9 items-center gap-1.5 rounded-full border-0 bg-accent px-4 text-[13px] font-medium text-white transition-colors hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45"
+            :disabled="!continueText.trim()"
+            @click="submitContinue">
+            <span class="msi xs">play_arrow</span>
+            继续执行
+          </button>
+        </div>
+      </section>
 
       <section v-if="renderRows.length" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
         <button type="button"

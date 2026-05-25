@@ -80,8 +80,7 @@ const visibilityOptions = [
 <style scoped>
 .detail {
   min-width: 0;
-  border-left: 1px solid #e4e8ed;
-  padding: 18px 0 18px 24px;
+  padding: 0 0 18px;
 }
 .empty {
   display: grid;
@@ -223,9 +222,7 @@ textarea:focus {
 }
 @media (max-width: 980px) {
   .detail {
-    border-left: 0;
-    border-top: 1px solid #e4e8ed;
-    padding: 18px 0 0;
+    padding-bottom: 0;
   }
 }
 @media (max-width: 768px) {

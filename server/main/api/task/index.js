@@ -4,7 +4,9 @@ import { listTaskRecords } from "../../service/task/list.js";
 import { getTaskDetail } from "../../service/task/detail.js";
 import { listTaskMessages } from "../../service/task/messages.js";
 import { stopTask } from "../../service/task/stop.js";
+import { continueTask } from "../../service/task/continue.js";
 import { createAgentTask, createInstantTask } from "../../service/task/create.js";
+
 const handleTaskCreateInstantApi = async (req, res, path) => {
   if (path !== "/api/task/create/instant" || req.method !== "POST") return false;
   try {
@@ -13,6 +15,8 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       title = "",
       payload,
       meta = null,
+      responseFormat = null,
+      trigger = null,
     } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
@@ -22,7 +26,9 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       app: String(app || "").trim(),
       title: String(title || "").trim(),
       meta,
-      payload
+      payload,
+      responseFormat,
+      trigger
     });
     return json(res, result);
   } catch (e) {
@@ -32,7 +38,7 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
 const handleTaskCreateAgentApi = async (req, res, path) => {
   if (path !== "/api/task/create/agent" || req.method !== "POST") return false;
   try {
-    const { app, title = "", payload, meta = null, wait = true } = await readBody(req);
+    const { app, title = "", payload, meta = null, wait = true, responseFormat = null, trigger = null } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
       return json(res, { success: false, message: "payload.messages is required" }, 400);
@@ -42,7 +48,9 @@ const handleTaskCreateAgentApi = async (req, res, path) => {
       title: String(title || "").trim(),
       payload,
       meta,
-      wait: Boolean(wait)
+      wait: Boolean(wait),
+      responseFormat,
+      trigger
     });
     return json(res, result);
   } catch (e) {
@@ -79,6 +87,16 @@ const handleTaskApi = async (req, res, path, url) => {
     const id = Number(body.id || 0);
     if (!Number.isInteger(id) || id <= 0) return json(res, { success: false, message: "Invalid id" }, 400);
     const result = stopTask({ id });
+    if (result?.status) return json(res, { success: false, message: result.message }, result.status);
+    return json(res, result);
+  }
+  if (path === "/api/task/continue" && req.method === "POST") {
+    const body = await readBody(req);
+    const result = await continueTask({
+      id: body.id,
+      content: body.content || body.instruction || body.text,
+      trigger: body.trigger || null,
+    });
     if (result?.status) return json(res, { success: false, message: result.message }, result.status);
     return json(res, result);
   }

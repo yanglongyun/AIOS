@@ -112,7 +112,7 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
         ref="textareaEl"
         :value="modelValue"
         rows="1"
-        :placeholder="streaming ? '进行中…可以中断' : '输入消息 (Enter 发送, Shift+Enter 换行)'"
+        :placeholder="streaming ? '进行中…' : '输入消息 (Enter 发送, Shift+Enter 换行)'"
         :disabled="streaming"
         @input="setText($event.target.value); autoResize()"
         @keydown.enter="onEnter"

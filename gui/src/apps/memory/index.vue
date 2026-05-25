@@ -19,7 +19,7 @@
 
       <main class="memory-main">
         <section class="memory-shell">
-          <div class="memory-head">
+          <div v-if="!showDetail" class="memory-head">
             <div>
               <div class="eyebrow">长期上下文</div>
               <h1>{{ activeTitle }}</h1>
@@ -42,7 +42,7 @@
             action-label="新增记忆"
             @action="openCreate" />
 
-          <div v-else class="memory-content">
+          <div v-else-if="!showDetail" class="memory-list-view">
             <section class="memory-list">
               <MemoryRow
                 v-for="item in filteredItems"
@@ -53,7 +53,13 @@
                 @set-starred="(starred) => setStarred(item, starred)"
                 @delete="deleteItem(item)" />
             </section>
+          </div>
 
+          <div v-else class="memory-detail-view">
+            <button class="back-btn" @click="closeDetail">
+              <span class="msi xxs">arrow_back</span>
+              返回列表
+            </button>
             <MemoryDetail
               :mode="detailMode"
               :title="editTitle"
@@ -77,6 +83,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import MemoryDetail from './components/MemoryDetail.vue';
 import MemoryEmpty from './components/MemoryEmpty.vue';
@@ -116,6 +123,8 @@ const {
   closeDetail,
   saveEdit,
 } = useMemoryItems();
+
+const showDetail = computed(() => detailMode.value !== 'empty');
 
 const pickFilter = (id) => {
   tab.value = id;
@@ -179,14 +188,30 @@ const pickFilter = (id) => {
   font-size: 13px;
   padding: 10px 14px;
 }
-.memory-content {
-  display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
+.memory-list-view,
+.memory-detail-view {
+  width: min(900px, 100%);
 }
 .memory-list {
   min-width: 0;
+}
+.back-btn {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d8e0e7;
+  border-radius: 999px;
+  background: #fff;
+  color: #53616e;
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 12px;
+  padding: 0 14px;
+}
+.back-btn:hover {
+  background: #eef3f7;
+  color: #202124;
 }
 @media (max-width: 768px) {
   .memory-main {
@@ -198,9 +223,9 @@ const pickFilter = (id) => {
   .memory-head h1 {
     font-size: 20px;
   }
-  .memory-content {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .memory-list-view,
+  .memory-detail-view {
+    width: 100%;
   }
 }
 </style>

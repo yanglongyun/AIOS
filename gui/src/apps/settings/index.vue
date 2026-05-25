@@ -10,13 +10,20 @@ const auth = useAuthStore();
 // ───────── 全局状态 ─────────
 const settings = ref(null);
 const prompt = ref('');
+const promptPreview = ref('');
 const sysSnap = ref(null);
+const skills = ref([]);
 
 const loading = ref(true);
 const modelTesting = ref(false);
+const promptPreviewLoading = ref(false);
+const skillsLoading = ref(false);
+const skillsLoaded = ref(false);
 const errMsg = ref('');
 const notice = ref({ kind: '', text: '' });
 let noticeTimer = null;
+let promptPreviewTimer = null;
+let promptPreviewSeq = 0;
 function flash(kind, text) {
   notice.value = { kind, text };
   clearTimeout(noticeTimer);
@@ -26,17 +33,18 @@ function flash(kind, text) {
 const sections = [
   { key: 'account',  label: '账户', icon: 'person' },
   { key: 'model',    label: '模型', icon: 'smart_toy' },
-  { key: 'prompt',   label: '指令', icon: 'edit_note' },
+  { key: 'prompt',   label: '提示词', icon: 'edit_note' },
   { key: 'context',  label: '上下文', icon: 'history' },
   { key: 'tools',    label: '工具调用', icon: 'handyman' },
+  { key: 'skills',   label: '技能', icon: 'extension' },
   { key: 'about',    label: '关于', icon: 'info' }
 ];
 const active = ref('account');
 const activeSection = computed(() => sections.find((s) => s.key === active.value));
 const contextRoundLabels = {
-  30: '精简',
-  100: '标准',
-  500: '最大'
+  100: '精简',
+  500: '标准',
+  1000: '最大'
 };
 
 // ───────── 加载 ─────────
@@ -55,6 +63,37 @@ async function loadAll() {
 
 async function loadSys() {
   try { sysSnap.value = await api.get('/apps/sysinfo/snapshot'); } catch {}
+}
+
+async function loadSkills() {
+  skillsLoading.value = true;
+  try {
+    const data = await api.get('/api/settings/skills');
+    skills.value = Array.isArray(data?.items) ? data.items : [];
+    skillsLoaded.value = true;
+  } catch (e) {
+    flash('err', '技能加载失败: ' + (e?.body?.message || e.message || e));
+  } finally {
+    skillsLoading.value = false;
+  }
+}
+
+async function loadPromptPreview() {
+  const seq = ++promptPreviewSeq;
+  promptPreviewLoading.value = true;
+  try {
+    const data = await api.post('/api/settings/prompt/preview', { content: prompt.value });
+    if (seq === promptPreviewSeq) promptPreview.value = data?.content || '';
+  } catch (e) {
+    if (seq === promptPreviewSeq) flash('err', '提示词预览失败: ' + (e?.body?.message || e.message || e));
+  } finally {
+    if (seq === promptPreviewSeq) promptPreviewLoading.value = false;
+  }
+}
+
+function queuePromptPreview(delay = 240) {
+  clearTimeout(promptPreviewTimer);
+  promptPreviewTimer = setTimeout(loadPromptPreview, delay);
 }
 
 // ───────── 保存动作 ─────────
@@ -89,7 +128,8 @@ async function testModel() {
 async function savePrompt() {
   try {
     await api.post('/api/settings/prompt', { content: prompt.value });
-    flash('ok', '指令已保存');
+    flash('ok', '提示词已保存');
+    await loadPromptPreview();
   } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
 }
 async function saveContext() {
@@ -134,6 +174,12 @@ async function changePwd() {
 // ───────── 切换 section 时按需加载 ─────────
 watch(active, (k) => {
   if (k === 'about' && !sysSnap.value) loadSys();
+  if (k === 'skills' && !skillsLoaded.value) loadSkills();
+  if (k === 'prompt' && !promptPreview.value) queuePromptPreview(0);
+});
+
+watch(prompt, () => {
+  if (active.value === 'prompt') queuePromptPreview();
 });
 
 onMounted(() => { loadAll(); });
@@ -267,14 +313,28 @@ onActivated(() => loadAll());
           <section class="card prompt-card">
             <header class="sec-head">
               <div>
-                <div class="sec-title">系统提示词</div>
-                <div class="sec-sub">每次对话前注入到模型上下文最前面。改动后立即生效,无需重启。</div>
+                <div class="sec-title">用户指令</div>
+                <div class="sec-sub">这部分位于完整提示词最前面,用于定义 AIOS 的基础行为。</div>
               </div>
               <button class="btn solid" @click="savePrompt">保存</button>
             </header>
-            <textarea class="prompt-area" v-model="prompt" spellcheck="false" rows="22"
+            <textarea class="prompt-area user-prompt" v-model="prompt" spellcheck="false" rows="10"
               placeholder="例如:你是 AIOS 的本机 AI 助理,可以读文件、跑命令、查系统状态…"></textarea>
             <div class="prompt-meta">{{ prompt.length }} 字符</div>
+          </section>
+
+          <section class="card prompt-card">
+            <header class="sec-head">
+              <div>
+                <div class="sec-title">完整提示词</div>
+                <div class="sec-sub">当前会话实际注入模型的拼接结果。</div>
+              </div>
+              <button class="btn tonal" :disabled="promptPreviewLoading" @click="loadPromptPreview">
+                {{ promptPreviewLoading ? '生成中...' : '刷新' }}
+              </button>
+            </header>
+            <pre class="prompt-preview">{{ promptPreview || '暂无内容' }}</pre>
+            <div class="prompt-meta">{{ promptPreview.length }} 字符</div>
           </section>
         </template>
 
@@ -288,7 +348,7 @@ onActivated(() => loadAll());
               </div>
             </header>
             <div class="seg">
-              <button v-for="n in [30, 100, 500]" :key="n"
+              <button v-for="n in [100, 500, 1000]" :key="n"
                 class="seg-btn" :class="{ active: settings.contextRounds === n }"
                 @click="settings.contextRounds = n">
                 <span class="seg-n">{{ n }}</span>
@@ -345,6 +405,42 @@ onActivated(() => loadAll());
               <div class="actions">
                 <button class="btn solid" @click="saveTools">保存</button>
               </div>
+            </div>
+          </section>
+        </template>
+
+        <!-- ━━━━━ 技能 ━━━━━ -->
+        <template v-else-if="active === 'skills'">
+          <section class="card">
+            <header class="sec-head">
+              <div>
+                <div class="sec-title">已安装技能</div>
+                <div class="sec-sub">当前运行源中的本地技能。</div>
+              </div>
+              <button class="btn tonal" :disabled="skillsLoading" @click="loadSkills">
+                {{ skillsLoading ? '刷新中...' : '刷新' }}
+              </button>
+            </header>
+
+            <div v-if="skillsLoading && !skills.length" class="empty">加载中...</div>
+            <div v-else-if="!skills.length" class="empty">暂无技能</div>
+            <div v-else class="skill-list">
+              <article v-for="skill in skills" :key="skill.id" class="skill">
+                <div class="skill-icon">
+                  <span class="msi sm">extension</span>
+                </div>
+                <div class="skill-main">
+                  <div class="skill-row">
+                    <h3 class="skill-title">{{ skill.name }}</h3>
+                    <span class="src-tag">{{ skill.id }}</span>
+                  </div>
+                  <p v-if="skill.description" class="skill-desc">{{ skill.description }}</p>
+                  <div class="ctx-meta">
+                    <span class="mono">{{ skill.path }}</span>
+                    <span v-if="skill.scripts?.length">脚本 {{ skill.scripts.length }}</span>
+                  </div>
+                </div>
+              </article>
             </div>
           </section>
         </template>
@@ -592,7 +688,24 @@ onActivated(() => loadAll());
   resize: vertical;
   transition: border-color .15s, box-shadow .15s, background .15s;
 }
+.prompt-area.user-prompt { min-height: 220px; }
 .prompt-area:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+.prompt-preview {
+  width: 100%;
+  max-height: 520px;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafbfc;
+  color: var(--text);
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .prompt-meta { margin-top: 8px; font-size: 11.5px; color: var(--text-3); text-align: right; }
 
 /* ─────────── 上下文资源列表 ─────────── */
@@ -613,6 +726,37 @@ onActivated(() => loadAll());
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ctx-meta { margin-top: 8px; display: flex; gap: 12px; font-size: 11px; color: var(--text-3); }
 .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+
+/* ─────────── 技能列表 ─────────── */
+.skill-list { display: flex; flex-direction: column; gap: 10px; }
+.skill {
+  display: flex; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.skill:last-child { border-bottom: 0; padding-bottom: 0; }
+.skill-icon {
+  flex: none;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+.skill-main { flex: 1; min-width: 0; }
+.skill-row { display: flex; align-items: center; gap: 10px; }
+.skill-title {
+  flex: 1; min-width: 0;
+  margin: 0;
+  font-size: 15px; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.skill-desc {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
 
 /* ─────────── 代码块 ─────────── */
 .code-block {
@@ -646,6 +790,8 @@ onActivated(() => loadAll());
   .nav-foot { display: none; }
   .content { padding: 16px 16px 40px; }
   .h1 { font-size: 22px; }
+  .skill { gap: 10px; }
+  .skill-row { align-items: flex-start; flex-direction: column; gap: 6px; }
   .about-grid { grid-template-columns: 1fr; }
 }
 </style>

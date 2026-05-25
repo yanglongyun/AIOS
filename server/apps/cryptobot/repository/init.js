@@ -3,7 +3,7 @@ import { getConfig } from "./config.js";
 import { getState } from "./state.js";
 const initDatabase = () => {
   db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_config (
-    id INTEGER PRIMARY KEY CHECK(id = 1),
+    id INTEGER PRIMARY KEY,
     base_url TEXT NOT NULL DEFAULT 'https://www.okx.com',
     api_key TEXT NOT NULL DEFAULT '',
     api_secret TEXT NOT NULL DEFAULT '',
@@ -15,7 +15,7 @@ const initDatabase = () => {
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
   db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_state (
-    id INTEGER PRIMARY KEY CHECK(id = 1),
+    id INTEGER PRIMARY KEY,
     running INTEGER NOT NULL DEFAULT 0,
     tick_count INTEGER NOT NULL DEFAULT 0,
     started_at TEXT DEFAULT '',

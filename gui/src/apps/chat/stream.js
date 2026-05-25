@@ -79,10 +79,25 @@ export function parseMessages(raw) {
             const text = typeof m.content === 'string'
                 ? m.content
                 : Array.isArray(m.content) ? m.content.map((p) => p.text || '').filter(Boolean).join('\n') : '';
+            if (m._meta?.source === 'trigger') {
+                list.push({
+                    role: 'notice',
+                    text: normalizeTriggerText(text),
+                    _key: base ? `${base}:trigger` : undefined
+                });
+                continue;
+            }
             list.push({ role: 'user', text, _key: base ? `${base}:user` : undefined });
         }
     }
     return list;
+}
+
+function normalizeTriggerText(text) {
+    return String(text || '')
+        .replace(/^\[TRIGGER\]\n?/, '')
+        .replace(/\n?\[END\]$/, '')
+        .trim();
 }
 
 // ─── WS lifecycle ───────────────────────────────────

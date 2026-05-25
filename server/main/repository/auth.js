@@ -1,7 +1,7 @@
 import { scryptSync, randomBytes, timingSafeEqual } from "crypto";
 import { db } from "./client.js";
 
-// 单用户:auth 表用 id=1 单行 ((id = 1) CHECK 限制).
+// 单用户:auth 表用 id=1 单行.
 // sessions 表存浏览器登录后的会话 id,api_token 单独存在 auth.api_token.
 // 表 DDL 在 repository/init.js 的 createTables() 里统一定义.
 

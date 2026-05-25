@@ -20,22 +20,6 @@ const apps = [
     load: () => import('./apps/tasks/index.vue')
   },
   {
-    id: 'notebook',
-    name: '笔记本',
-    icon: 'push_pin',
-    color: '#b5835a',
-    hasDrawer: false,
-    load: () => import('./apps/notebook/index.vue')
-  },
-  {
-    id: 'finance',
-    name: '记账本',
-    icon: 'menu_book',
-    color: '#a41b1b',
-    hasDrawer: false,
-    load: () => import('./apps/finance/index.vue')
-  },
-  {
     id: 'terminal',
     name: '终端',
     icon: 'terminal',
@@ -52,124 +36,12 @@ const apps = [
     load: () => import('./apps/files/index.vue')
   },
   {
-    id: 'claude-code',
-    name: 'Claude Code',
-    icon: 'code',
-    color: '#d97757',
-    hasDrawer: true,
-    load: () => import('./apps/claude-code/index.vue')
-  },
-  {
     id: 'sysinfo',
     name: '系统状态',
     icon: 'monitoring',
     color: '#9334e6',
     hasDrawer: false,
     load: () => import('./apps/sysinfo/index.vue')
-  },
-  {
-    id: 'subbox',
-    name: '订阅箱',
-    icon: 'inbox',
-    color: '#0ea5e9',
-    hasDrawer: false,
-    load: () => import('./apps/subbox/index.vue')
-  },
-  {
-    id: 'banana',
-    name: '老手机',
-    icon: 'smartphone',
-    color: '#a8b89c',
-    hasDrawer: false,
-    load: () => import('./apps/banana/index.vue')
-  },
-  {
-    id: 'fortune',
-    name: '算一卦',
-    icon: 'auto_awesome',
-    color: '#b8860b',
-    hasDrawer: false,
-    load: () => import('./apps/fortune/index.vue')
-  },
-  {
-    id: 'ghtrending',
-    name: 'GH 热榜',
-    icon: 'trending_up',
-    color: '#24292e',
-    hasDrawer: true,
-    load: () => import('./apps/ghtrending/index.vue')
-  },
-  {
-    id: 'rssreader',
-    name: 'RSS 阅读',
-    icon: 'rss_feed',
-    color: '#ee802f',
-    hasDrawer: false,
-    load: () => import('./apps/rssreader/index.vue')
-  },
-  {
-    id: 'memory',
-    name: '记忆',
-    icon: 'psychology',
-    color: '#8e6e3c',
-    hasDrawer: false,
-    load: () => import('./apps/memory/index.vue')
-  },
-  {
-    id: 'lovehouse',
-    name: '虚拟伴侣',
-    icon: 'favorite',
-    color: '#ec407a',
-    hasDrawer: false,
-    load: () => import('./apps/lovehouse/index.vue')
-  },
-  {
-    id: 'hackernews',
-    name: 'Hacker News',
-    icon: 'forum',
-    color: '#ff6600',
-    hasDrawer: false,
-    load: () => import('./apps/hackernews/index.vue')
-  },
-  {
-    id: 'poker',
-    name: '炸金花',
-    icon: 'casino',
-    color: '#16a34a',
-    hasDrawer: false,
-    load: () => import('./apps/poker/index.vue')
-  },
-  {
-    id: 'treasure',
-    name: '藏宝阁',
-    icon: 'inventory_2',
-    color: '#8b6f47',
-    hasDrawer: false,
-    load: () => import('./apps/treasure/index.vue')
-  },
-  {
-    id: 'debate',
-    name: '辩论台',
-    icon: 'forum',
-    color: '#7c3aed',
-    hasDrawer: false,
-    load: () => import('./apps/debate/index.vue')
-  },
-  {
-    id: 'earth',
-    name: '地球',
-    icon: 'public',
-    color: '#0ea5e9',
-    hasDrawer: true,
-    load: () => import('./apps/earth/index.vue')
-  },
-  {
-    id: 'civ',
-    name: '文明',
-    icon: 'language',
-    color: '#a855f7',
-    hasDrawer: false,
-    load: () => import('./apps/civ/index.vue')
   },
   {
     id: 'cryptobot',

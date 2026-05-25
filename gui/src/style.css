@@ -55,20 +55,22 @@
   --shadow-3:  0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
 }
 
-* { box-sizing: border-box; }
-html, body, #app {
-  margin: 0; padding: 0;
-  height: 100%;
-  background: var(--bg); color: var(--text);
-  font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  * { box-sizing: border-box; }
+  html, body, #app {
+    margin: 0; padding: 0;
+    height: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { overflow: hidden; }
+  #app { display: flex; flex-direction: column; }
+  button, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
 }
-body { overflow: hidden; }
-#app { display: flex; flex-direction: column; }
-button, input, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
-a { color: inherit; text-decoration: none; }
 
 /* 各 app 自带顶栏的标准容器 ——
    .app-frame: app 顶栏 + 主体 的纵向 flex

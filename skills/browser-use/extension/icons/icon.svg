@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="AIOS Browser Use">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="110" y2="116">
+      <stop offset="0" stop-color="#152238"/>
+      <stop offset="1" stop-color="#07101d"/>
+    </linearGradient>
+    <linearGradient id="link" x1="35" y1="46" x2="93" y2="82">
+      <stop offset="0" stop-color="#64e4ff"/>
+      <stop offset="1" stop-color="#a5ff7a"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.39 0 0 0 0 0.89 0 0 0 0 1 0 0 0 0.6 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)"/>
+  <path d="M39 64h50" fill="none" stroke="url(#link)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+  <circle cx="38" cy="64" r="15" fill="#0b1524" stroke="#64e4ff" stroke-width="6"/>
+  <circle cx="90" cy="64" r="15" fill="#0b1524" stroke="#a5ff7a" stroke-width="6"/>
+  <circle cx="64" cy="64" r="6" fill="#ecf4ff"/>
+</svg>

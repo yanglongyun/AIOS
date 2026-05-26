@@ -1,4 +1,5 @@
 const SERVICE_WS_URL = 'ws://127.0.0.1:9522/extension';
+const SERVICE_HTTP_URL = 'http://127.0.0.1:9522';
 const DEBUGGER_VERSION = '1.3';
 const attachedTabs = new Set();
 
@@ -133,8 +134,21 @@ chrome.debugger?.onDetach?.addListener((source) => {
 async function popupStatus() {
   const all = await chrome.tabs.query({});
   const active = await getActiveTab().catch(() => null);
+  let service = { reachable: false, status: null, error: null };
+  try {
+    const response = await fetch(`${SERVICE_HTTP_URL}/status`, { cache: 'no-store' });
+    service = {
+      reachable: response.ok,
+      status: await response.json().catch(() => null),
+      error: response.ok ? null : `HTTP ${response.status}`,
+    };
+  } catch (error) {
+    service = { reachable: false, status: null, error: error?.message || String(error) };
+  }
   return {
     serviceUrl: SERVICE_WS_URL,
+    serviceHttpUrl: SERVICE_HTTP_URL,
+    service,
     bridge: bridgeState(),
     ready: ws?.readyState === WebSocket.OPEN,
     tabsTotal: all.length,

@@ -47,7 +47,7 @@ const createTables = () => {
       finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS triggers (
+    CREATE TABLE IF NOT EXISTS monitors (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'active',
@@ -65,10 +65,10 @@ const createTables = () => {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       fired_at TEXT
     );
-    CREATE INDEX IF NOT EXISTS idx_triggers_source
-      ON triggers(kind, source_id, event, status);
-    CREATE INDEX IF NOT EXISTS idx_triggers_conversation
-      ON triggers(conversation_id, status, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_monitors_source
+      ON monitors(kind, source_id, event, status);
+    CREATE INDEX IF NOT EXISTS idx_monitors_conversation
+      ON monitors(conversation_id, status, id DESC);
 
     CREATE TABLE IF NOT EXISTS auth (
       id            INTEGER PRIMARY KEY,

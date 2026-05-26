@@ -14,10 +14,10 @@ database: database/apps/longvideo.db
 
 - 创建视频项目。
 - 用系统模型生成结构化大纲、分段解说词和每段图片提示词。
-- 将分段送入火山引擎图片与语音生成队列。
+- 将分段送入阿里云百炼图片与语音生成队列。
 - 在素材齐备后进入视频拼接队列。
 
-火山引擎 Ark 图片接口和语音接口的授权信息保存在视频工坊数据库中，由应用内设置页写入。当前未配置或未授权时，素材会停留在 `pending_provider_config` 或 `blocked` 状态。
+阿里云百炼 DashScope 授权信息保存在视频工坊数据库中，由应用内设置页写入。当前未配置或未授权时，素材会停留在 `pending_provider_config` 或 `blocked` 状态。
 
 ## API
 
@@ -47,4 +47,4 @@ database: database/apps/longvideo.db
 - `planned`: 已生成大纲和分段。
 - `asset_queue`: 素材生成队列已创建。
 - `blocked`: 缺少外部 provider 配置或素材。
-- `pending_provider_config`: 分段素材等待火山引擎配置。
+- `pending_provider_config`: 分段素材等待阿里云百炼配置。

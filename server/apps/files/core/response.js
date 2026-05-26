@@ -1,4 +1,4 @@
-const ws = require('../../../shared/apps-core/ws');
+const ws = require('./ws');
 
 function ok(reqId, payload = {}) {
     ws.broadcast('fs.result', { reqId, ok: true, ...payload });

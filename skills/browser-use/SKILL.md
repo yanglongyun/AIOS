@@ -19,7 +19,7 @@ bash skills/browser-use/scripts/start-service.sh
 默认监听：
 
 ```text
-http://127.0.0.1:8765
+http://127.0.0.1:9522
 ```
 
 ## 加载插件
@@ -33,8 +33,10 @@ http://127.0.0.1:8765
 插件会连接：
 
 ```text
-ws://127.0.0.1:8765/extension
+ws://127.0.0.1:9522/extension
 ```
+
+点击 Chrome 工具栏里的插件图标，会打开状态面板，显示本机服务地址、连接状态、标签页数量、当前标签页和插件版本。
 
 ## Shell 调用
 
@@ -55,9 +57,9 @@ bash skills/browser-use/scripts/browser-use.sh browser_screenshot '{"format":"pn
 ## HTTP API
 
 ```bash
-curl -s http://127.0.0.1:8765/status
-curl -s http://127.0.0.1:8765/tools
-curl -s -X POST http://127.0.0.1:8765/call \
+curl -s http://127.0.0.1:9522/status
+curl -s http://127.0.0.1:9522/tools
+curl -s -X POST http://127.0.0.1:9522/call \
   -H 'Content-Type: application/json' \
   -d '{"tool":"browser_tabs","args":{"currentWindow":true}}'
 ```

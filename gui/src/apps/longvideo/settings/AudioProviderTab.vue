@@ -15,33 +15,38 @@ const update = (key, event) => emit('patch', { [key]: event.target.value });
         <div class="section-head">
             <div>
                 <div class="kicker">语音生成</div>
-                <h2>火山引擎 TTS</h2>
+                <h2>阿里云百炼 Qwen-TTS</h2>
             </div>
             <span class="state" :class="{ ready }">{{ ready ? '已保存' : '待填写' }}</span>
         </div>
         <div class="form-grid">
             <label>
                 <span>API Key</span>
-                <input class="input secret" type="password" :value="settings.ttsApiKey" :placeholder="settings.configured?.ttsApiKey ? '语音密钥已保存' : '语音密钥'" autocomplete="off" spellcheck="false" @input="update('ttsApiKey', $event)" />
+                <input class="input secret" type="password" :value="settings.dashscopeApiKey" :placeholder="settings.configured?.dashscopeApiKey ? '百炼密钥已保存' : 'sk-...'" autocomplete="off" spellcheck="false" @input="update('dashscopeApiKey', $event)" />
             </label>
             <label>
-                <span>Resource ID</span>
-                <input class="input" :value="settings.ttsResourceId" autocomplete="off" spellcheck="false" @input="update('ttsResourceId', $event)" />
+                <span>模型</span>
+                <input class="input" :value="settings.ttsModel" autocomplete="off" spellcheck="false" @input="update('ttsModel', $event)" />
             </label>
             <label>
                 <span>音色</span>
-                <input class="input" :value="settings.ttsSpeaker" autocomplete="off" spellcheck="false" @input="update('ttsSpeaker', $event)" />
+                <input class="input" :value="settings.ttsVoice" autocomplete="off" spellcheck="false" @input="update('ttsVoice', $event)" />
             </label>
             <label>
-                <span>格式</span>
-                <input class="input" :value="settings.ttsFormat" autocomplete="off" spellcheck="false" @input="update('ttsFormat', $event)" />
-            </label>
-            <label>
-                <span>采样率</span>
-                <input class="input" :value="settings.ttsSampleRate" autocomplete="off" spellcheck="false" @input="update('ttsSampleRate', $event)" />
+                <span>语种</span>
+                <select class="input" :value="settings.ttsLanguageType" @change="update('ttsLanguageType', $event)">
+                    <option value="Chinese">中文</option>
+                    <option value="English">英文</option>
+                    <option value="Auto">自动</option>
+                    <option value="Japanese">日语</option>
+                    <option value="Korean">韩语</option>
+                    <option value="French">法语</option>
+                    <option value="German">德语</option>
+                    <option value="Spanish">西语</option>
+                </select>
             </label>
         </div>
-        <p class="hint">HTTP Chunked 接口使用新版 API Key。Resource ID 默认 seed-tts-2.0，音色必须属于对应模型版本。</p>
+        <p class="hint">非实时语音合成接口，默认模型 qwen3-tts-flash，默认音色 Cherry。</p>
         <div class="buttons">
             <button class="primary" :disabled="busy || testing" @click="$emit('save')">
                 <span class="msi xxs">save</span>

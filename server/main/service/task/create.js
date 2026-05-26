@@ -47,7 +47,7 @@ const createAgentTask = async ({
   meta = null,
   wait = true,
   responseFormat = null,
-  trigger = null,
+  monitor = null,
 }) => {
   const settings = getSettings();
   const taskPayload = buildTaskPayload({ payload, model: settings.model, responseFormat });
@@ -58,7 +58,7 @@ const createAgentTask = async ({
     payload: taskPayload,
     meta,
     wait,
-    trigger,
+    monitor,
     errorMessage: "任务执行失败",
     execute: ({ emitMessage, signal }) => executeAgentTask({
       messages: taskPayload.messages,
@@ -76,7 +76,7 @@ const createInstantTask = async ({
   payload,
   meta = null,
   responseFormat = null,
-  trigger = null,
+  monitor = null,
 }) => {
   const settings = getSettings();
   const taskPayload = buildTaskPayload({ payload, model: settings.model, responseFormat });
@@ -86,7 +86,7 @@ const createInstantTask = async ({
     title,
     payload: taskPayload,
     meta,
-    trigger,
+    monitor,
     errorMessage: "Task execution failed",
     execute: ({ signal }) => executeInstantTask({
       settings,

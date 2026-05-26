@@ -1,4 +1,4 @@
-const SERVICE_WS_URL = 'ws://127.0.0.1:8765/extension';
+const SERVICE_WS_URL = 'ws://127.0.0.1:9522/extension';
 const DEBUGGER_VERSION = '1.3';
 const attachedTabs = new Set();
 
@@ -6,6 +6,9 @@ let ws = null;
 let reconnectTimer = null;
 let heartbeatTimer = null;
 let reconnectDelay = 500;
+let lastConnectedAt = null;
+let lastDisconnectedAt = null;
+let lastError = null;
 
 function scheduleReconnect() {
   if (reconnectTimer) return;
@@ -26,12 +29,18 @@ function connect() {
 
   ws.onopen = () => {
     reconnectDelay = 500;
+    lastConnectedAt = new Date().toISOString();
+    lastError = null;
     send({ type: 'extension.ready', extensionId: chrome.runtime.id, version: chrome.runtime.getManifest().version });
     startHeartbeat();
   };
   ws.onmessage = (event) => handleFrame(event.data);
-  ws.onclose = scheduleReconnect;
+  ws.onclose = () => {
+    lastDisconnectedAt = new Date().toISOString();
+    scheduleReconnect();
+  };
   ws.onerror = () => {
+    lastError = 'connection_error';
     try { ws.close(); } catch {}
   };
 }
@@ -47,6 +56,13 @@ function send(frame) {
   if (ws?.readyState !== WebSocket.OPEN) return false;
   ws.send(JSON.stringify(frame));
   return true;
+}
+
+function bridgeState() {
+  const state = ws?.readyState;
+  if (state === WebSocket.OPEN) return 'connected';
+  if (state === WebSocket.CONNECTING) return 'connecting';
+  return reconnectTimer ? 'reconnecting' : 'disconnected';
 }
 
 async function handleFrame(raw) {
@@ -113,6 +129,24 @@ async function sendDebuggerCommand(tabId, method, commandParams = {}) {
 chrome.debugger?.onDetach?.addListener((source) => {
   if (typeof source.tabId === 'number') attachedTabs.delete(source.tabId);
 });
+
+async function popupStatus() {
+  const all = await chrome.tabs.query({});
+  const active = await getActiveTab().catch(() => null);
+  return {
+    serviceUrl: SERVICE_WS_URL,
+    bridge: bridgeState(),
+    ready: ws?.readyState === WebSocket.OPEN,
+    tabsTotal: all.length,
+    active: active ? tabSlim(active) : null,
+    attachedTabs: attachedTabs.size,
+    extensionId: chrome.runtime.id,
+    version: chrome.runtime.getManifest().version,
+    lastConnectedAt,
+    lastDisconnectedAt,
+    lastError,
+  };
+}
 
 const handlers = {
   async browser_status() {
@@ -226,4 +260,11 @@ async function runTool(name, args) {
 
 chrome.runtime.onInstalled.addListener(connect);
 chrome.runtime.onStartup.addListener(connect);
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type !== 'browser-use.popup-status') return false;
+  popupStatus()
+    .then((data) => sendResponse({ ok: true, data }))
+    .catch((error) => sendResponse({ ok: false, error: error?.message || String(error) }));
+  return true;
+});
 connect();

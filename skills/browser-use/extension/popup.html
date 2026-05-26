@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AIOS Browser Use</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header class="header">
+        <div>
+          <h1>AIOS Browser Use</h1>
+          <p id="serviceUrl">读取状态中</p>
+        </div>
+        <span id="stateBadge" class="badge">检查中</span>
+      </header>
+
+      <section class="grid">
+        <div class="item">
+          <span>连接</span>
+          <strong id="bridgeState">-</strong>
+        </div>
+        <div class="item">
+          <span>标签页</span>
+          <strong id="tabsTotal">-</strong>
+        </div>
+        <div class="item">
+          <span>调试会话</span>
+          <strong id="attachedTabs">-</strong>
+        </div>
+        <div class="item">
+          <span>版本</span>
+          <strong id="version">-</strong>
+        </div>
+      </section>
+
+      <section class="active-tab">
+        <span>当前标签页</span>
+        <strong id="activeTitle">-</strong>
+        <p id="activeUrl">-</p>
+      </section>
+
+      <footer>
+        <button id="refreshButton" type="button">刷新状态</button>
+        <span id="updatedAt"></span>
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -7,7 +7,7 @@ defineProps({
 
 <template>
   <div
-    class="chat-scroll-bubble ml-auto rounded-2xl rounded-tr-[4px] bg-accent px-3.5 py-2.5 text-[14px] leading-[1.55] text-white"
+    class="chat-scroll-bubble rounded-2xl rounded-tr-[4px] bg-accent px-3.5 py-2.5 text-[14px] leading-[1.55] text-white"
     style="width: fit-content; max-width: min(70%, 560px)">
     <div v-if="text" class="whitespace-pre-wrap break-words">{{ text }}</div>
     <div v-if="attachments?.length" class="mt-1.5 flex flex-wrap gap-1">

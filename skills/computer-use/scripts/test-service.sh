@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-PORT="${COMPUTER_USE_TEST_PORT:-18766}"
+PORT="${COMPUTER_USE_TEST_PORT:-19521}"
 BASE_URL="http://127.0.0.1:$PORT"
 LOG_FILE="${TMPDIR:-/tmp}/computer-use-test.log"
 SCREENSHOT_PATH="${COMPUTER_USE_TEST_SCREENSHOT:-/tmp/computer-use-test.png}"

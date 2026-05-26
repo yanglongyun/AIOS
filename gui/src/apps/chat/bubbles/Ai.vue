@@ -11,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="chat-scroll-bubble mr-auto max-w-[min(78%,720px)] rounded-2xl rounded-tl-[4px] bg-[#f0f4f9] px-3.5 py-2.5 text-[14px] leading-[1.55] max-md:max-w-[92%]">
+  <div class="chat-scroll-bubble max-w-[min(78%,720px)] rounded-2xl rounded-tl-[4px] bg-[#f0f4f9] px-3.5 py-2.5 text-[14px] leading-[1.55] max-md:max-w-[92%]" style="width: fit-content;">
     <div class="md" v-html="renderMd(text)" />
     <div v-if="remark"
       class="mt-2.5 border-t border-dashed border-line pt-2 text-[12.5px] italic leading-[1.55] text-faint">

@@ -5,7 +5,7 @@ import { detectDrivers } from './drivers.js';
 import { toolSchemas } from './schemas.js';
 import { callTool } from './tools.js';
 
-const DEFAULT_PORT = 8766;
+const DEFAULT_PORT = 9521;
 
 function parsePort(argv) {
   const index = argv.indexOf('--port');

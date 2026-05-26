@@ -1,25 +1,31 @@
 import { db } from "./client.js";
 
 const keys = [
-  "arkApiKey",
-  "ttsApiKey",
-  "ttsResourceId",
-  "ttsSpeaker",
-  "ttsFormat",
-  "ttsSampleRate",
+  "dashscopeApiKey",
+  "dashscopeRegion",
+  "imageModel",
+  "imageSize",
+  "imagePromptExtend",
+  "imageWatermark",
+  "ttsModel",
+  "ttsVoice",
+  "ttsLanguageType",
   "projectPromptTemplate",
   "planPromptTemplate",
 ];
 
-const secretKeys = new Set(["arkApiKey", "ttsApiKey"]);
+const secretKeys = new Set(["dashscopeApiKey"]);
 
 const defaults = {
-  arkApiKey: "",
-  ttsApiKey: "",
-  ttsResourceId: "seed-tts-2.0",
-  ttsSpeaker: "zh_female_shuangkuaisisi_moon_bigtts",
-  ttsFormat: "mp3",
-  ttsSampleRate: "24000",
+  dashscopeApiKey: "",
+  dashscopeRegion: "beijing",
+  imageModel: "qwen-image-2.0-pro",
+  imageSize: "2048*2048",
+  imagePromptExtend: "true",
+  imageWatermark: "false",
+  ttsModel: "qwen3-tts-flash",
+  ttsVoice: "Cherry",
+  ttsLanguageType: "Chinese",
   projectPromptTemplate: "根据标题生成一段适合视频工坊使用的项目描述。要求包含主题范围、叙事角度、内容结构、画面气质和解说风格，语言具体但不要过长。\n\n标题：{title}",
   planPromptTemplate: `你是视频总编导。请根据标题和项目描述生成可执行的视频制作方案。
 
@@ -63,19 +69,21 @@ const getRawProviderSettings = () => {
 const getPublicProviderSettings = () => {
   const settings = getRawProviderSettings();
   return {
-    arkApiKey: "",
-    ttsApiKey: "",
-    ttsResourceId: settings.ttsResourceId,
-    ttsSpeaker: settings.ttsSpeaker,
-    ttsFormat: settings.ttsFormat,
-    ttsSampleRate: settings.ttsSampleRate,
+    dashscopeApiKey: "",
+    dashscopeRegion: settings.dashscopeRegion,
+    imageModel: settings.imageModel,
+    imageSize: settings.imageSize,
+    imagePromptExtend: settings.imagePromptExtend,
+    imageWatermark: settings.imageWatermark,
+    ttsModel: settings.ttsModel,
+    ttsVoice: settings.ttsVoice,
+    ttsLanguageType: settings.ttsLanguageType,
     projectPromptTemplate: settings.projectPromptTemplate,
     planPromptTemplate: settings.planPromptTemplate,
     configured: {
-      arkApiKey: Boolean(settings.arkApiKey),
-      ttsApiKey: Boolean(settings.ttsApiKey),
-      image: Boolean(settings.arkApiKey),
-      audio: Boolean(settings.ttsApiKey && settings.ttsResourceId && settings.ttsSpeaker),
+      dashscopeApiKey: Boolean(settings.dashscopeApiKey),
+      image: Boolean(settings.dashscopeApiKey),
+      audio: Boolean(settings.dashscopeApiKey && settings.ttsModel && settings.ttsVoice),
     },
   };
 };
@@ -92,8 +100,7 @@ const saveProviderSettings = (input = {}) => {
   }
 
   if (input.clearSecrets === true) {
-    next.arkApiKey = "";
-    next.ttsApiKey = "";
+    next.dashscopeApiKey = "";
   }
 
   const upsert = db.prepare(`

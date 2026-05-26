@@ -79,6 +79,10 @@ const createChatSession = (wsSend) => {
       conversations.set(cid, { abortController });
       setChatState(cid, "running");
       const send = (msg) => {
+        if (msg.type === "delta") {
+          wsSend({ type: "delta", conversationId: cid, delta: msg.delta });
+          return;
+        }
         if (msg.type === "assistant_tool_calls") {
           if (msg.message) saveMessage(cid, msg.message, null);
           return;

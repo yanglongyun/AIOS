@@ -29,6 +29,10 @@ const runConversation = async ({ conversationId, appContext = "" }) => {
   broadcast({ type: "chat_changed", conversationId });
 
   const send = (msg) => {
+    if (msg.type === "delta") {
+      broadcast({ type: "delta", conversationId, delta: msg.delta });
+      return;
+    }
     if (msg.type === "assistant_tool_calls") {
       if (msg.message) saveMessage(conversationId, msg.message, null);
       return;
@@ -82,7 +86,7 @@ const runConversation = async ({ conversationId, appContext = "" }) => {
     broadcast({
       type: "error",
       conversationId,
-      content: error?.message || "触发器唤醒失败",
+      content: error?.message || "监视器唤醒失败",
     });
   } finally {
     setChatState(conversationId, "idle");

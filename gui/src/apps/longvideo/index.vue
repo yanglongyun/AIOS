@@ -24,17 +24,19 @@ const form = ref({
 });
 
 const providerSettings = ref({
-    arkApiKey: '',
-    ttsApiKey: '',
-    ttsResourceId: 'seed-tts-2.0',
-    ttsSpeaker: 'zh_female_shuangkuaisisi_moon_bigtts',
-    ttsFormat: 'mp3',
-    ttsSampleRate: '24000',
+    dashscopeApiKey: '',
+    dashscopeRegion: 'beijing',
+    imageModel: 'qwen-image-2.0-pro',
+    imageSize: '2048*2048',
+    imagePromptExtend: 'true',
+    imageWatermark: 'false',
+    ttsModel: 'qwen3-tts-flash',
+    ttsVoice: 'Cherry',
+    ttsLanguageType: 'Chinese',
     projectPromptTemplate: '',
     planPromptTemplate: '',
     configured: {
-        arkApiKey: false,
-        ttsApiKey: false,
+        dashscopeApiKey: false,
         image: false,
         audio: false,
     },
@@ -114,8 +116,7 @@ async function loadSettings() {
     providerSettings.value = {
         ...providerSettings.value,
         ...(res.settings || {}),
-        arkApiKey: '',
-        ttsApiKey: '',
+        dashscopeApiKey: '',
     };
 }
 
@@ -128,20 +129,27 @@ async function saveSettings(clearSecrets = false) {
         const payload = clearSecrets
             ? {
                 clearSecrets: true,
-                ttsResourceId: providerSettings.value.ttsResourceId,
-                ttsSpeaker: providerSettings.value.ttsSpeaker,
-                ttsFormat: providerSettings.value.ttsFormat,
-                ttsSampleRate: providerSettings.value.ttsSampleRate,
+                dashscopeRegion: providerSettings.value.dashscopeRegion,
+                imageModel: providerSettings.value.imageModel,
+                imageSize: providerSettings.value.imageSize,
+                imagePromptExtend: providerSettings.value.imagePromptExtend,
+                imageWatermark: providerSettings.value.imageWatermark,
+                ttsModel: providerSettings.value.ttsModel,
+                ttsVoice: providerSettings.value.ttsVoice,
+                ttsLanguageType: providerSettings.value.ttsLanguageType,
                 projectPromptTemplate: providerSettings.value.projectPromptTemplate,
                 planPromptTemplate: providerSettings.value.planPromptTemplate,
             }
             : {
-                arkApiKey: providerSettings.value.arkApiKey,
-                ttsApiKey: providerSettings.value.ttsApiKey,
-                ttsResourceId: providerSettings.value.ttsResourceId,
-                ttsSpeaker: providerSettings.value.ttsSpeaker,
-                ttsFormat: providerSettings.value.ttsFormat,
-                ttsSampleRate: providerSettings.value.ttsSampleRate,
+                dashscopeApiKey: providerSettings.value.dashscopeApiKey,
+                dashscopeRegion: providerSettings.value.dashscopeRegion,
+                imageModel: providerSettings.value.imageModel,
+                imageSize: providerSettings.value.imageSize,
+                imagePromptExtend: providerSettings.value.imagePromptExtend,
+                imageWatermark: providerSettings.value.imageWatermark,
+                ttsModel: providerSettings.value.ttsModel,
+                ttsVoice: providerSettings.value.ttsVoice,
+                ttsLanguageType: providerSettings.value.ttsLanguageType,
                 projectPromptTemplate: providerSettings.value.projectPromptTemplate,
                 planPromptTemplate: providerSettings.value.planPromptTemplate,
             };
@@ -149,8 +157,7 @@ async function saveSettings(clearSecrets = false) {
         providerSettings.value = {
             ...providerSettings.value,
             ...(res.settings || {}),
-            arkApiKey: '',
-            ttsApiKey: '',
+            dashscopeApiKey: '',
         };
         settingsMessage.value = clearSecrets ? '授权已清空' : '设置已保存';
         return true;
@@ -477,7 +484,7 @@ watch(
                             <div class="lv-step"><span>4</span><strong>视频拼接</strong></div>
                         </div>
                         <div class="mt-5 rounded-md bg-[#f7f9fa] p-3 text-[12.5px] leading-6 text-[#697681]">
-                            图片与语音由火山引擎生成；授权未完成时，素材会停在待配置状态。
+                            图片与语音由阿里云百炼生成；授权未完成时，素材会停在待配置状态。
                         </div>
                     </aside>
                 </section>

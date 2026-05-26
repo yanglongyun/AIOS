@@ -2,7 +2,7 @@ import { json } from "../../../shared/http/json.js";
 import { readBody } from "../../../shared/http/readBody.js";
 import { createProject, getProject, listProjects } from "../repository/projects.js";
 import { getPublicProviderSettings, saveProviderSettings } from "../repository/settings.js";
-import { createAudioJob, createImageJob } from "../providers/volcengine.js";
+import { createAudioJob, createImageJob } from "../providers/dashscope.js";
 import { assembleVideo, queueAssets } from "../service/assets.js";
 import { generatePlan } from "../service/planner.js";
 

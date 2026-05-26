@@ -7,10 +7,8 @@ import { redact } from "./redact.js";
 
 const require = createRequire(import.meta.url);
 
-// === meem apps (CJS) — terminal / files ===
-// 这些 app 来自 meem-dev,继续用 `module.exports + require`,
-// 通过 createRequire 加载,挂在同一个 /ws 连接上,按消息 type 分发.
-const meemApps = [
+// files / terminal 是本机 websocket 应用,通过消息 type 分发到各自后端。
+const wsApps = [
   require("../../../apps/terminal/index.js"),
   require("../../../apps/files/index.js")
 ];
@@ -34,20 +32,19 @@ const sendToClient = (clientId, msg) => {
   if (ws) sendOne(ws, safeStringify(msg));
 };
 
-// meem 老代码通过 globalThis.__meem_ws__ 反向调 broadcast / sendToClient.
-globalThis.__meem_ws__ = {
+globalThis.__aios_ws__ = {
   broadcast: (msg) => broadcast(msg),
   sendToClient: (clientId, msg) => sendToClient(clientId, msg)
 };
 
-let meemInited = false;
-const initMeemAppsOnce = async () => {
-  if (meemInited) return;
-  meemInited = true;
-  for (const app of meemApps) {
+let wsAppsInited = false;
+const initWsAppsOnce = async () => {
+  if (wsAppsInited) return;
+  wsAppsInited = true;
+  for (const app of wsApps) {
     if (typeof app.init === "function") {
       try { await app.init(); }
-      catch (err) { console.error(`[meem-init ${app.name}]`, err); }
+      catch (err) { console.error(`[ws-app-init ${app.name}]`, err); }
     }
   }
 };
@@ -61,25 +58,23 @@ chatWss.on("connection", (ws) => {
   const send = (msg) => sendOne(ws, safeStringify(msg));
   const { handleMessage } = createChatSession(send);
 
-  // 给 meem app 推一份当前快照(终端列表 + 当前活动终端)
-  for (const app of meemApps) {
+  for (const app of wsApps) {
     if (typeof app.onClientConnect === "function") {
       try { app.onClientConnect(clientId); }
-      catch (err) { console.error(`[meem-connect ${app.name}]`, err); }
+      catch (err) { console.error(`[ws-app-connect ${app.name}]`, err); }
     }
   }
 
   ws.on("message", async (raw) => {
     let data;
     try { data = JSON.parse(raw); } catch { return; }
-    // 先给 meem app 一次接管机会,不命中再走 AIOS chat 处理.
-    for (const app of meemApps) {
+    for (const app of wsApps) {
       if (typeof app.wsMatch === "function" && app.wsMatch(data?.type)) {
         try {
           data.meta = { ...(data.meta || {}), clientId };
           await app.handleWs(data);
         } catch (err) {
-          console.error(`[meem-ws ${app.name}]`, err);
+          console.error(`[ws-app ${app.name}]`, err);
         }
         return;
       }
@@ -94,7 +89,7 @@ chatWss.on("connection", (ws) => {
 });
 
 export const setupWebSocket = (httpServer) => {
-  initMeemAppsOnce().catch((err) => console.error("[meem-init]", err));
+  initWsAppsOnce().catch((err) => console.error("[ws-app-init]", err));
   httpServer.on("upgrade", (req, socket, head) => {
     try {
       if (!isAuthenticated(req, { allowQueryToken: true })) {

@@ -12,12 +12,12 @@ const apps = [
     load: () => import('./apps/chat/index.vue')
   },
   {
-    id: 'triggers',
-    name: '触发器',
+    id: 'monitors',
+    name: '监视器',
     icon: 'bolt',
     color: '#7c4dff',
     hasDrawer: false,
-    load: () => import('./apps/triggers/index.vue')
+    load: () => import('./apps/monitors/index.vue')
   },
   {
     id: 'tasks',
@@ -66,6 +66,22 @@ const apps = [
     color: '#f9ab00',
     hasDrawer: false,
     load: () => import('./apps/cryptobot/index.vue')
+  },
+  {
+    id: 'demogen',
+    name: 'Demo 生成器',
+    icon: 'view_carousel',
+    color: '#e8710a',
+    hasDrawer: false,
+    load: () => import('./apps/demogen/index.vue')
+  },
+  {
+    id: 'codex',
+    name: 'Codex',
+    icon: 'terminal',
+    color: '#276ef1',
+    hasDrawer: false,
+    load: () => import('./apps/codex/index.vue')
   },
   {
     id: 'longvideo',

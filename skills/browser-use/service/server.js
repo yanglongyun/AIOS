@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { WebSocketServer } from 'ws';
 
-const DEFAULT_PORT = 8765;
+const DEFAULT_PORT = 9522;
 const DEFAULT_TIMEOUT_MS = 30_000;
 
 const toolSchemas = {

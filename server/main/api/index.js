@@ -6,7 +6,7 @@ import { handleTaskApi } from "./task/index.js";
 import { handleRuntimeApi } from "./runtime/index.js";
 import { handleAuthApi } from "./auth/index.js";
 import { handleMemoryApi } from "./memory/index.js";
-import { handleTriggersApi } from "./triggers/index.js";
+import { handleMonitorsApi } from "./monitors/index.js";
 
 const handleApiRequest = async (req, res, url) => {
   const path = url.pathname;
@@ -39,8 +39,8 @@ const handleApiRequest = async (req, res, url) => {
       await handleTaskApi(req, res, path, url);
       return true;
     }
-    if (path.startsWith("/api/triggers")) {
-      await handleTriggersApi(req, res, path, url);
+    if (path.startsWith("/api/monitors")) {
+      await handleMonitorsApi(req, res, path, url);
       return true;
     }
     if (path.startsWith("/api/memory/")) {

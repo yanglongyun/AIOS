@@ -79,11 +79,11 @@ export function parseMessages(raw) {
             const text = typeof m.content === 'string'
                 ? m.content
                 : Array.isArray(m.content) ? m.content.map((p) => p.text || '').filter(Boolean).join('\n') : '';
-            if (m._meta?.source === 'trigger') {
+            if (m._meta?.source === 'monitor') {
                 list.push({
                     role: 'notice',
-                    text: normalizeTriggerText(text),
-                    _key: base ? `${base}:trigger` : undefined
+                    text: normalizeMonitorText(text),
+                    _key: base ? `${base}:monitor` : undefined
                 });
                 continue;
             }
@@ -93,9 +93,9 @@ export function parseMessages(raw) {
     return list;
 }
 
-function normalizeTriggerText(text) {
+function normalizeMonitorText(text) {
     return String(text || '')
-        .replace(/^\[TRIGGER\]\n?/, '')
+        .replace(/^\[MONITOR\]\n?/, '')
         .replace(/\n?\[END\]$/, '')
         .trim();
 }
@@ -124,6 +124,21 @@ export function setupChatStream({
     }
 
     const unsubs = [
+        on('delta', (d) => {
+            if (!isCurrent(d)) return;
+            streaming.value = true;
+            if (!d.delta) return;
+            let key = streamingKey.value;
+            if (!key) {
+                key = mkKey('asst');
+                streamingKey.value = key;
+                messages.value.push({ role: 'ai', text: '', _key: key, _streaming: true });
+            }
+            const msg = messages.value.find((m) => m._key === key);
+            if (msg) msg.text = (msg.text || '') + d.delta;
+            scrollEnd?.();
+        }),
+
         on('done', (d) => {
             if (!isCurrent(d)) return;
             if (streamingKey.value) {

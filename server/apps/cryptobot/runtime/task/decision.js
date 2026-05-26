@@ -1,4 +1,4 @@
-import { agentTask } from "../../../../shared/apps/agentTask.js";
+import { agentTask } from "../../../_shared/task/agentTask.js";
 
 const requestDecisionTask = async (cfg) => {
   const title = "Cryptobot Autonomous Run";

@@ -41,11 +41,15 @@ AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / note
 ## 代码结构
 
 - 后端继续按 `api / service / repository / ai / apps` 分层，不把跨层逻辑塞进入口文件。
+- `server/shared/` 只放真正跨 main/apps 通用的低层能力，例如 HTTP、JSON、时间、AI 响应解析等。应用后端之间共享的能力必须放在 `server/apps/_shared/`，不要新建 `server/shared/apps*` 这类夹层目录。
+- 应用自己的运行桥、外部进程桥、协议适配器必须放在 `server/apps/<app>/bridge/` 或该应用自己的后端目录里，不要放进 `server/main/bridge/`。
+- files、terminal 这类 websocket 应用也有自己的后端边界；属于它们的 ws、mime、id 等辅助逻辑放在各自应用目录，不因为代码短就抽到共享层。
 - 供应商协议字段只能在对应 service 边界统一生成，不能散落在各业务调用方。业务层表达语义即可，例如任务需要结构化结果时使用 `responseFormat: "json"` 或 `createInstantJsonTask`，由 task service 统一翻译成模型接口需要的 `response_format: { type: "json_object" }`。
 - 不要在多个调用点手写同一个底层协议参数。发现同类参数出现在两个以上业务文件时，先抽到统一入口或 helper，再让调用方使用语义化 API。
 - 前端也必须模块化：页面只负责组装和状态流转，复杂 UI 拆到 `components/`，可复用逻辑拆到 `composables/` 或贴近业务的工具文件。
 - 单个代码文件目标控制在 200-300 行。超过 300 行要优先拆分组件、组合式函数、常量或样式文件；不要把新增功能继续堆进大文件。
 - 前端新页面和新组件必须默认考虑移动端：布局、表格/列表、弹窗、工具栏、按钮文字、输入区域都要在窄屏可用，不允许只按桌面宽度实现。
+- 禁止设计或引入系统级顶栏、系统级侧栏、全局 Sidebar/Topbar 组件。每个应用必须自己开发和维护自己的顶部区域与侧边区域；可以复用基础按钮、图标、颜色、间距等低层样式，但不能把应用级布局抽成系统统一组件。
 - 样式跟随系统整体风格。已有 Tailwind 和系统组件时优先复用，避免为单个页面制造孤立视觉体系。
 
 ## 端口
@@ -56,8 +60,8 @@ AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / note
 
 - 前端：`gui/src/apps.js`
 - 后端：`server/apps/registry.js`
-- 当前前端入口：chat、tasks、notebook、finance、terminal、files、claude-code、sysinfo、subbox、banana、fortune、ghtrending、rssreader、memory、lovehouse、hackernews、poker、treasure、debate、earth、civ、cryptobot、settings。
-- 后端 registry 还加载 `notes`，前端入口里没有同名——新增/清理应用时要同时核对前端入口、后端 registry、应用文档。
+- 当前前端入口：chat、monitors、tasks、memory、terminal、files、sysinfo、cryptobot、demogen、codex、longvideo、settings。
+- 当前后端 registry：sysinfo、cryptobot、longvideo、demogen、codex。新增/清理应用时要同时核对前端入口、后端 registry、应用文档。
 - chat/tasks/settings/memory 等系统能力主要在 `server/main/`；普通应用后端优先放 `server/apps/<app>/`。
 
 ## 用户安装脚本

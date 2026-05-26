@@ -16,7 +16,7 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       payload,
       meta = null,
       responseFormat = null,
-      trigger = null,
+      monitor = null,
     } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
@@ -28,7 +28,7 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
       meta,
       payload,
       responseFormat,
-      trigger
+      monitor
     });
     return json(res, result);
   } catch (e) {
@@ -38,7 +38,7 @@ const handleTaskCreateInstantApi = async (req, res, path) => {
 const handleTaskCreateAgentApi = async (req, res, path) => {
   if (path !== "/api/task/create/agent" || req.method !== "POST") return false;
   try {
-    const { app, title = "", payload, meta = null, wait = true, responseFormat = null, trigger = null } = await readBody(req);
+    const { app, title = "", payload, meta = null, wait = true, responseFormat = null, monitor = null } = await readBody(req);
     if (!String(app || "").trim()) return json(res, { success: false, message: "app is required" }, 400);
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.messages) || payload.messages.length === 0) {
       return json(res, { success: false, message: "payload.messages is required" }, 400);
@@ -50,7 +50,7 @@ const handleTaskCreateAgentApi = async (req, res, path) => {
       meta,
       wait: Boolean(wait),
       responseFormat,
-      trigger
+      monitor
     });
     return json(res, result);
   } catch (e) {
@@ -95,7 +95,7 @@ const handleTaskApi = async (req, res, path, url) => {
     const result = await continueTask({
       id: body.id,
       content: body.content || body.instruction || body.text,
-      trigger: body.trigger || null,
+      monitor: body.monitor || null,
     });
     if (result?.status) return json(res, { success: false, message: result.message }, result.status);
     return json(res, result);

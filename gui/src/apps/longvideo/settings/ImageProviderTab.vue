@@ -15,21 +15,53 @@ const update = (key, event) => emit('patch', { [key]: event.target.value });
         <div class="section-head">
             <div>
                 <div class="kicker">图片生成</div>
-                <h2>火山引擎 Ark</h2>
+                <h2>阿里云百炼 Qwen-Image</h2>
             </div>
             <span class="state" :class="{ ready }">{{ ready ? '已保存' : '待填写' }}</span>
         </div>
-        <label>
-            <span>API Key</span>
-            <input
-                class="input secret"
-                type="password"
-                :value="settings.arkApiKey"
-                :placeholder="settings.configured?.arkApiKey ? '图片密钥已保存' : '图片密钥'"
-                autocomplete="off"
-                spellcheck="false"
-                @input="update('arkApiKey', $event)" />
-        </label>
+        <div class="form-grid">
+            <label>
+                <span>API Key</span>
+                <input
+                    class="input secret"
+                    type="password"
+                    :value="settings.dashscopeApiKey"
+                    :placeholder="settings.configured?.dashscopeApiKey ? '百炼密钥已保存' : 'sk-...'"
+                    autocomplete="off"
+                    spellcheck="false"
+                    @input="update('dashscopeApiKey', $event)" />
+            </label>
+            <label>
+                <span>地域</span>
+                <select class="input" :value="settings.dashscopeRegion" @change="update('dashscopeRegion', $event)">
+                    <option value="beijing">北京</option>
+                    <option value="singapore">新加坡</option>
+                </select>
+            </label>
+            <label>
+                <span>模型</span>
+                <input class="input" :value="settings.imageModel" autocomplete="off" spellcheck="false" @input="update('imageModel', $event)" />
+            </label>
+            <label>
+                <span>尺寸</span>
+                <input class="input" :value="settings.imageSize" autocomplete="off" spellcheck="false" @input="update('imageSize', $event)" />
+            </label>
+            <label>
+                <span>Prompt 改写</span>
+                <select class="input" :value="settings.imagePromptExtend" @change="update('imagePromptExtend', $event)">
+                    <option value="true">开启</option>
+                    <option value="false">关闭</option>
+                </select>
+            </label>
+            <label>
+                <span>水印</span>
+                <select class="input" :value="settings.imageWatermark" @change="update('imageWatermark', $event)">
+                    <option value="false">关闭</option>
+                    <option value="true">开启</option>
+                </select>
+            </label>
+        </div>
+        <p class="hint">同步接口，默认模型 qwen-image-2.0-pro，尺寸格式如 2048*2048 或 2688*1536。</p>
         <div class="buttons">
             <button class="primary" :disabled="busy || testing" @click="$emit('save')">
                 <span class="msi xxs">save</span>
@@ -91,6 +123,7 @@ label span {
     font-weight: 650;
 }
 .input {
+    width: 100%;
     min-height: 42px;
     border: 1px solid #d8e0e7;
     border-radius: 6px;
@@ -99,6 +132,12 @@ label span {
     outline: none;
     padding: 10px 12px;
 }
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.hint { color: #6d7882; font-size: 12px; line-height: 1.6; margin-top: 10px; }
 .input:focus {
     border-color: #276ef1;
     background: #fff;
@@ -126,5 +165,9 @@ label span {
 .secondary:disabled {
     cursor: not-allowed;
     opacity: 0.48;
+}
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .section-head { align-items: stretch; flex-direction: column; }
 }
 </style>

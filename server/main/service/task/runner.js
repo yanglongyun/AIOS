@@ -8,8 +8,8 @@ import {
 } from "../../repository/task/records.js";
 import { saveTaskMessage } from "../../repository/task/messages.js";
 import { registerTaskExecution, unregisterTaskExecution } from "./execution.js";
-import { publishTriggerEvent } from "../triggers/deliver.js";
-import { createTrigger } from "../triggers/create.js";
+import { publishMonitorEvent } from "../monitors/deliver.js";
+import { createMonitor } from "../monitors/create.js";
 
 const createTaskRun = async ({
   mode,
@@ -18,7 +18,7 @@ const createTaskRun = async ({
   payload,
   meta = null,
   wait = true,
-  trigger = null,
+  monitor = null,
   execute,
   errorMessage = "Task execution failed"
 }) => {
@@ -31,15 +31,15 @@ const createTaskRun = async ({
     payload,
     meta
   });
-  let triggerId = null;
-  if (trigger && typeof trigger === "object") {
-    const created = createTrigger({
-      ...trigger,
+  let monitorId = null;
+  if (monitor && typeof monitor === "object") {
+    const created = createMonitor({
+      ...monitor,
       kind: "task",
       sourceId: taskId,
-      event: trigger.event || "done",
+      event: monitor.event || "done",
     });
-    triggerId = created?.id || null;
+    monitorId = created?.id || null;
   }
   broadcast({ type: "tasks_changed" });
 
@@ -63,7 +63,7 @@ const createTaskRun = async ({
       if (result?.assistantMessage) emitMessage(result.assistantMessage, null);
       const response = result?.response ?? "";
       updateTaskDone({ taskId, response });
-      publishTriggerEvent({
+      publishMonitorEvent({
         kind: "task",
         sourceId: taskId,
         event: "done",
@@ -74,7 +74,7 @@ const createTaskRun = async ({
     } catch (error) {
       if (error?.name === "AbortError") {
         updateTaskAborted({ taskId });
-        publishTriggerEvent({
+        publishMonitorEvent({
           kind: "task",
           sourceId: taskId,
           event: "aborted",
@@ -83,7 +83,7 @@ const createTaskRun = async ({
       } else {
         const message = error?.message || errorMessage;
         updateTaskError({ taskId, message });
-        publishTriggerEvent({
+        publishMonitorEvent({
           kind: "task",
           sourceId: taskId,
           event: "error",
@@ -100,11 +100,11 @@ const createTaskRun = async ({
 
   if (!wait) {
     exec().catch(() => {});
-    return { id: taskId, conversationId, triggerId, response: null };
+    return { id: taskId, conversationId, monitorId, response: null };
   }
 
   const response = await exec();
-  return { id: taskId, conversationId, triggerId, response };
+  return { id: taskId, conversationId, monitorId, response };
 };
 
 export {

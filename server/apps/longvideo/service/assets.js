@@ -1,4 +1,4 @@
-import { createAudioJob, createImageJob } from "../providers/volcengine.js";
+import { createAudioJob, createImageJob } from "../providers/dashscope.js";
 import { getProject, updateAssetStatuses, updateSegmentAudio, updateSegmentImage } from "../repository/projects.js";
 
 const queueAssets = async ({ projectId }) => {
@@ -39,7 +39,7 @@ const queueAssets = async ({ projectId }) => {
         audioError = audioResult;
         updateSegmentAudio({
           segmentId: segment.id,
-          status: audioResult.code === "VOLCENGINE_AUDIO_NOT_CONFIGURED" ? "pending_provider_config" : "blocked",
+          status: audioResult.code === "DASHSCOPE_API_KEY_NOT_CONFIGURED" ? "pending_provider_config" : "blocked",
           error: audioResult.message,
         });
         break;
@@ -58,7 +58,7 @@ const queueAssets = async ({ projectId }) => {
     return updateAssetStatuses({
       projectId: project.id,
       imageStatus: imageConfigError ? "pending_provider_config" : "ready",
-      audioStatus: audioError?.code === "VOLCENGINE_AUDIO_NOT_CONFIGURED" ? "pending_provider_config" : "blocked",
+      audioStatus: audioError?.code === "DASHSCOPE_API_KEY_NOT_CONFIGURED" ? "pending_provider_config" : "blocked",
       videoStatus: "blocked",
       error: missingConfig.message,
     });

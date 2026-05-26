@@ -1,9 +1,18 @@
 import { tools } from "./tools.js";
 import { runTools } from "./runner.js";
-import { callChatCompletion } from "./client.js";
+import { callLlmRegular } from "../llm/regular.js";
+import { callLlmStream } from "../llm/stream/index.js";
 import { normalizeAgentMessages, normalizeChatOptions } from "./utils.js";
 
+const shouldReplayReasoning = (provider, apiUrl, model) => {
+  const providerId = String(provider || "").trim();
+  const url = String(apiUrl || "").trim();
+  const modelId = String(model || "").trim();
+  return providerId === "deepseek" || url.includes("api.deepseek.com") || modelId.startsWith("deepseek-");
+};
+
 const chat = async (messages, {
+  provider = null,
   apiUrl,
   apiKey,
   model,
@@ -17,12 +26,20 @@ const chat = async (messages, {
 } = {}) => {
   const opts = normalizeChatOptions({ maxRounds, enableToolResultTruncate, toolResultMaxChars });
   const workMessages = normalizeAgentMessages(messages);
+  const replayReasoning = shouldReplayReasoning(provider, apiUrl, model);
   let round = 0;
   while (round++ < opts.maxRounds) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     const payload = { model, messages: workMessages, tools };
     if (responseFormat) payload.response_format = responseFormat;
-    const { message } = await callChatCompletion(apiUrl, apiKey, payload, { signal });
+    const message = responseFormat
+      ? await callLlmRegular(provider, apiUrl, apiKey, payload, signal)
+      : await callLlmStream(provider, apiUrl, apiKey, payload, {
+        signal,
+        onDelta: (delta) => {
+          if (delta) send({ type: "delta", delta });
+        }
+      });
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
       const assistantMsg = {
         role: "assistant",
@@ -31,6 +48,8 @@ const chat = async (messages, {
       };
       if (message.reasoning_content !== undefined) {
         assistantMsg.reasoning_content = message.reasoning_content ?? "";
+      } else if (String(apiUrl || "").includes("moonshot.cn") || String(apiUrl || "").includes("kimi.com")) {
+        assistantMsg.reasoning_content = "";
       }
       workMessages.push(assistantMsg);
       send({ type: "assistant_tool_calls", message: assistantMsg });
@@ -51,7 +70,7 @@ const chat = async (messages, {
       role: "assistant",
       content: message.content ?? ""
     };
-    if (message.reasoning_content !== undefined) {
+    if (replayReasoning && message.reasoning_content !== undefined) {
       replyMsg.reasoning_content = message.reasoning_content ?? "";
     }
     workMessages.push(replyMsg);

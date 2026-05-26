@@ -16,7 +16,7 @@ bash skills/computer-use/scripts/start-service.sh
 默认监听：
 
 ```text
-http://127.0.0.1:8766
+http://127.0.0.1:9521
 ```
 
 ## Shell 调用
@@ -35,9 +35,9 @@ bash skills/computer-use/scripts/computer-use.sh computer_scroll '{"direction":"
 ## HTTP API
 
 ```bash
-curl -s http://127.0.0.1:8766/status
-curl -s http://127.0.0.1:8766/tools
-curl -s -X POST http://127.0.0.1:8766/call \
+curl -s http://127.0.0.1:9521/status
+curl -s http://127.0.0.1:9521/tools
+curl -s -X POST http://127.0.0.1:9521/call \
   -H 'Content-Type: application/json' \
   -d '{"tool":"computer_status","args":{}}'
 ```

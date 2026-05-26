@@ -5,8 +5,8 @@ import { getTaskById, updateTaskPending, updateTaskDone, updateTaskError, update
 import { listMessagesByConversationId, saveTaskMessage } from "../../repository/task/messages.js";
 import { registerTaskExecution, unregisterTaskExecution } from "./execution.js";
 import { executeAgentTask } from "./executors/agent.js";
-import { publishTriggerEvent } from "../triggers/deliver.js";
-import { createTrigger } from "../triggers/create.js";
+import { publishMonitorEvent } from "../monitors/deliver.js";
+import { createMonitor } from "../monitors/create.js";
 
 const taskMessages = (conversationId) => {
   return listMessagesByConversationId(conversationId)
@@ -14,7 +14,7 @@ const taskMessages = (conversationId) => {
     .filter((message) => message && ["system", "user", "assistant", "tool"].includes(message.role));
 };
 
-const continueTask = async ({ id, content, trigger = null }) => {
+const continueTask = async ({ id, content, monitor = null }) => {
   const taskId = Number(id || 0);
   if (!Number.isInteger(taskId) || taskId <= 0) {
     return { status: 400, message: "Invalid id" };
@@ -26,12 +26,12 @@ const continueTask = async ({ id, content, trigger = null }) => {
   if (!task) return { status: 404, message: "Task not found" };
   if (task.status === "pending") return { status: 400, message: "Task is running" };
 
-  if (trigger && typeof trigger === "object") {
-    createTrigger({
-      ...trigger,
+  if (monitor && typeof monitor === "object") {
+    createMonitor({
+      ...monitor,
       kind: "task",
       sourceId: taskId,
-      event: trigger.event || "done",
+      event: monitor.event || "done",
     });
   }
 
@@ -61,7 +61,7 @@ const continueTask = async ({ id, content, trigger = null }) => {
       if (result?.assistantMessage) saveTaskMessage(conversationId, result.assistantMessage);
       const response = result?.response ?? "";
       updateTaskDone({ taskId, response });
-      publishTriggerEvent({
+      publishMonitorEvent({
         kind: "task",
         sourceId: taskId,
         event: "done",
@@ -72,7 +72,7 @@ const continueTask = async ({ id, content, trigger = null }) => {
     } catch (error) {
       if (error?.name === "AbortError") {
         updateTaskAborted({ taskId });
-        publishTriggerEvent({
+        publishMonitorEvent({
           kind: "task",
           sourceId: taskId,
           event: "aborted",
@@ -81,7 +81,7 @@ const continueTask = async ({ id, content, trigger = null }) => {
       } else {
         const message = error?.message || "任务继续执行失败";
         updateTaskError({ taskId, message });
-        publishTriggerEvent({
+        publishMonitorEvent({
           kind: "task",
           sourceId: taskId,
           event: "error",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${COMPUTER_USE_URL:-http://127.0.0.1:8766}"
+BASE_URL="${COMPUTER_USE_URL:-http://127.0.0.1:9521}"
 TOOL="${1:-}"
 ARGS="${2:-}"
 

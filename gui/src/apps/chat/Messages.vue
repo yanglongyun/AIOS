@@ -65,7 +65,7 @@ const pick = (s) => emit('pick', s.prompt);
 <template>
   <div ref="listEl"
     @scroll="onScroll"
-    class="msgs flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-6 pt-2 pb-6 max-md:px-3 max-md:pb-4">
+    class="msgs flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-0 pt-2 pb-6 max-md:px-3 max-md:pb-4">
     <div v-if="hasActive && (hasMore || loadingOlder)" class="load-older">
       {{ loadingOlder ? '加载中...' : '向上滚动加载更早消息' }}
     </div>
@@ -100,25 +100,25 @@ const pick = (s) => emit('pick', s.prompt);
     </div>
 
     <template v-for="(m, i) in messages" :key="m._key || i">
-      <div v-if="m.role === 'user'" class="w-full flex justify-end">
+      <div v-if="m.role === 'user'" class="message-row flex justify-end">
         <BubbleUser :text="m.text" :attachments="m.attachments" />
       </div>
-      <div v-else-if="m.role === 'ai' && m.text" class="w-full flex justify-start">
+      <div v-else-if="m.role === 'ai' && m.text" class="message-row flex justify-start">
         <BubbleAi :text="m.text" :remark="m.remark" />
       </div>
-      <div v-else-if="m.role === 'notice'" class="w-full flex justify-center">
+      <div v-else-if="m.role === 'notice'" class="message-row flex justify-center">
         <BubbleNotice :text="m.text" />
       </div>
-      <div v-else-if="m.type === 'tool_call'" class="w-full flex justify-start">
+      <div v-else-if="m.type === 'tool_call'" class="message-row flex justify-start">
         <BubbleToolCall :msg="m" />
       </div>
-      <div v-else-if="m.type === 'tool_result'" class="w-full flex justify-start">
+      <div v-else-if="m.type === 'tool_result'" class="message-row flex justify-start">
         <BubbleToolResult :content="m.content" />
       </div>
     </template>
 
     <!-- 等待完整回复时的状态指示 -->
-    <div v-if="streaming" class="px-1 py-1.5 text-[13px] text-faint">
+    <div v-if="streaming" class="message-row px-1 py-1.5 text-[13px] text-faint">
       思考中<span class="ml-0.5 inline-block tracking-[2px] animate-[chat-pulse_1.2s_ease-in-out_infinite]">…</span>
     </div>
   </div>
@@ -127,6 +127,16 @@ const pick = (s) => emit('pick', s.prompt);
 <style scoped>
 .msgs > * + * { margin-top: 12px; }
 .msgs > .welcome + * { margin-top: 0; }
+.msgs { scrollbar-gutter: stable both-edges; }
+.message-row {
+  width: calc(100% - 32px);
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 720px) {
+  .message-row { width: 100%; }
+}
 .load-older {
   margin: 2px auto 12px;
   width: fit-content;

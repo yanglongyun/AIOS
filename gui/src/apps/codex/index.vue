@@ -1,14 +1,13 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import * as codexApi from "./api.js";
 import Messages from "./components/Messages.vue";
 import Composer from "./components/Composer.vue";
-import InspectPanel from "./components/InspectPanel.vue";
-import CodexNav from "./components/CodexNav.vue";
-import RunOptions from "./components/RunOptions.vue";
-import HistoryPanel from "./components/HistoryPanel.vue";
+import Sidebar from "./components/Sidebar.vue";
 import CodexTopbar from "./components/CodexTopbar.vue";
-import { modes, tabs } from "./constants.js";
+import ThreadHeader from "./components/ThreadHeader.vue";
+import EnvDrawer from "./components/EnvDrawer.vue";
+import { modes, envPanels } from "./constants.js";
 
 const drawerOpen = ref(!(typeof window !== "undefined" && window.innerWidth <= 720));
 const threads = ref([]);
@@ -16,28 +15,29 @@ const activeThread = ref(null);
 const messages = ref([]);
 const input = ref("");
 const status = ref(null);
-const loading = ref(false);
-const inspectLoading = ref(false);
+const loadingThreads = ref(false);
+const starting = ref(false);
 const running = ref(false);
 const error = ref("");
-const inspectError = ref("");
-const activeTab = ref("new");
-const inspectData = ref({});
+
+const envOpen = ref(false);
+const envPanel = ref("account");
+const envData = ref({});
+const envLoading = ref(false);
+const envError = ref("");
+
 const options = ref({
   mode: "workspace",
   cwd: "/Users/woodchange/Desktop/AIOS",
 });
 
 const connected = computed(() => Boolean(status.value?.connected && status.value?.initialized));
-const activeTitle = computed(() => {
-  if (activeTab.value === "new") return "新会话";
-  if (activeTab.value === "history") return "会话历史";
-  if (activeTab.value === "chat") return activeThread.value?.title || activeThread.value?.name || activeThread.value?.id || "当前会话";
-  return tabs.find((item) => item.id === activeTab.value)?.name || "Codex";
-});
 const activeMode = computed(() => modes.find((item) => item.id === options.value.mode) || modes[1]);
-const currentInspect = computed(() => inspectData.value[activeTab.value] || null);
-const inspectTabs = new Set(["account", "models", "config", "permissions", "skills", "mcp", "plugins", "hooks", "apps"]);
+const activeTitle = computed(() => {
+  if (!connected.value) return "Codex";
+  if (!activeThread.value) return "新会话";
+  return activeThread.value.title || activeThread.value.name || "会话";
+});
 
 function isMobile() {
   return typeof window !== "undefined" && window.innerWidth <= 720;
@@ -101,23 +101,31 @@ function collectMessages(node, out = [], seen = new Set()) {
 }
 
 async function refreshStatus() {
-  const res = await codexApi.status();
-  status.value = res.status || res;
+  try {
+    const res = await codexApi.status();
+    status.value = res.status || res;
+  } catch (err) {
+    // ignore — status check failure means disconnected
+  }
 }
 
 async function startBridge() {
+  if (starting.value) return;
   error.value = "";
+  starting.value = true;
   try {
     const res = await codexApi.start();
     status.value = res.status || res;
-    await loadThreads();
+    if (connected.value) await loadThreads();
   } catch (err) {
     error.value = err?.body?.message || err.message || String(err);
+  } finally {
+    starting.value = false;
   }
 }
 
 async function loadThreads() {
-  loading.value = true;
+  loadingThreads.value = true;
   error.value = "";
   try {
     const res = await codexApi.listThreads({ limit: 80 });
@@ -125,37 +133,30 @@ async function loadThreads() {
   } catch (err) {
     error.value = err?.body?.message || err.message || String(err);
   } finally {
-    loading.value = false;
-    await refreshStatus().catch(() => {});
+    loadingThreads.value = false;
+    await refreshStatus();
   }
 }
 
-async function loadInspect(panel = activeTab.value) {
-  if (!inspectTabs.has(panel)) return;
-  inspectLoading.value = true;
-  inspectError.value = "";
+async function loadEnv(panel = envPanel.value) {
+  if (!envPanels.find((p) => p.id === panel)) return;
+  envLoading.value = true;
+  envError.value = "";
   try {
     const res = await codexApi.inspect({ panel, cwd: options.value.cwd });
-    inspectData.value = { ...inspectData.value, [panel]: res };
+    envData.value = { ...envData.value, [panel]: res };
   } catch (err) {
-    inspectError.value = err?.body?.message || err.message || String(err);
+    envError.value = err?.body?.message || err.message || String(err);
   } finally {
-    inspectLoading.value = false;
-    await refreshStatus().catch(() => {});
+    envLoading.value = false;
   }
 }
 
-async function newThread() {
+function newThread() {
   activeThread.value = null;
   messages.value = [];
   input.value = "";
   error.value = "";
-  activeTab.value = "new";
-}
-
-function pickTab(tab) {
-  if (tab === "new") newThread();
-  else activeTab.value = tab;
   closeDrawerOnMobile();
 }
 
@@ -163,7 +164,6 @@ async function pickThread(thread) {
   activeThread.value = thread;
   messages.value = [];
   error.value = "";
-  activeTab.value = "chat";
   closeDrawerOnMobile();
   try {
     const res = await codexApi.readThread(thread.id);
@@ -171,6 +171,17 @@ async function pickThread(thread) {
   } catch (err) {
     error.value = err?.body?.message || err.message || String(err);
   }
+}
+
+function openEnv() {
+  envOpen.value = true;
+  closeDrawerOnMobile();
+  loadEnv(envPanel.value);
+}
+
+function selectEnvPanel(id) {
+  envPanel.value = id;
+  loadEnv(id);
 }
 
 async function ensureThread() {
@@ -189,14 +200,13 @@ async function ensureThread() {
 
 async function sendPrompt() {
   const prompt = input.value.trim();
-  if (!prompt || running.value) return;
+  if (!prompt || running.value || !connected.value) return;
   input.value = "";
   error.value = "";
   addMessage("user", prompt);
   running.value = true;
   try {
     const thread = await ensureThread();
-    activeTab.value = "chat";
     const res = await codexApi.runTurn({
       threadId: thread.id,
       prompt,
@@ -205,13 +215,7 @@ async function sendPrompt() {
       approvalPolicy: activeMode.value.approvalPolicy,
     });
     const finalText = String(res?.result?.finalText || "").trim();
-    const last = messages.value[messages.value.length - 1];
-    if (last?.role === "assistant" && last.streaming) {
-      last.streaming = false;
-      if (!last.text && finalText) last.text = finalText;
-    } else if (finalText) {
-      addMessage("assistant", finalText);
-    }
+    if (finalText) addMessage("assistant", finalText);
     await loadThreads();
   } catch (err) {
     error.value = err?.body?.message || err.message || String(err);
@@ -221,12 +225,8 @@ async function sendPrompt() {
 }
 
 onMounted(async () => {
-  await refreshStatus().catch(() => {});
+  await refreshStatus();
   if (connected.value) await loadThreads();
-});
-watch(activeTab, (tab) => {
-  if (tab === "history") loadThreads();
-  loadInspect(tab);
 });
 </script>
 
@@ -235,36 +235,48 @@ watch(activeTab, (tab) => {
     <CodexTopbar
       :title="activeTitle"
       :connected="connected"
+      :starting="starting"
       :drawer-open="drawerOpen"
-      @toggle-drawer="toggleDrawer" />
+      @toggle-drawer="toggleDrawer"
+      @start="startBridge" />
 
     <div v-if="error" class="error">{{ error }}</div>
 
     <div class="app-body">
       <Transition name="mask">
-        <div v-if="drawerOpen" class="codex-side-mask" @click="drawerOpen = false" />
+        <div v-if="drawerOpen && isMobile()" class="codex-side-mask" @click="drawerOpen = false" />
       </Transition>
 
       <aside class="codex-side" :class="{ collapsed: !drawerOpen }">
         <div class="codex-side-inner">
-          <CodexNav :items="tabs" :current="activeTab" @pick="pickTab" />
+          <Sidebar
+            :threads="threads"
+            :active-id="activeThread?.id || ''"
+            :loading="loadingThreads"
+            :connected="connected"
+            @new="newThread"
+            @pick="pickThread"
+            @refresh="loadThreads"
+            @env="openEnv" />
         </div>
       </aside>
 
       <section class="codex-content">
-        <HistoryPanel
-          v-if="activeTab === 'history'"
-          :threads="threads"
-          :active-id="activeThread?.id || ''"
-          :connected="connected"
-          :loading="loading"
-          @new="pickTab('new')"
-          @pick="pickThread"
-          @refresh="loadThreads"
-          @start="startBridge" />
+        <div v-if="!connected" class="disconnected">
+          <div class="d-icon">
+            <span class="msi">{{ starting ? 'progress_activity' : 'power_settings_new' }}</span>
+          </div>
+          <h1>{{ starting ? "正在启动 Codex" : "Codex 未连接" }}</h1>
+          <p>{{ starting ? "稍候,正在连接本机 Codex app-server。" : "启动本机 Codex app-server 后开始会话。" }}</p>
+          <button class="start-cta" :disabled="starting" @click="startBridge">
+            <span class="msi" :class="{ spinning: starting }">{{ starting ? 'progress_activity' : 'play_arrow' }}</span>
+            <span>{{ starting ? "启动中" : "启动 Codex" }}</span>
+          </button>
+        </div>
 
-        <main v-else-if="activeTab === 'new' || activeTab === 'chat'" class="codex-main">
-          <RunOptions
+        <main v-else class="codex-main">
+          <ThreadHeader
+            :title="activeTitle"
             :modes="modes"
             :mode="options.mode"
             :cwd="options.cwd"
@@ -274,29 +286,32 @@ watch(activeTab, (tab) => {
           <Messages
             :messages="messages"
             :running="running"
-            :empty-title="activeTab === 'new' ? '新会话' : '当前会话'"
-            :empty-text="activeTab === 'new' ? '选择工作区和模式，然后输入指令。' : '从会话历史选择一个线程，或打开新会话。'" />
-          <Composer v-model="input" :disabled="running || !connected" @send="sendPrompt" />
+            :empty-title="activeThread ? '当前会话' : '新会话'"
+            :empty-text="activeThread ? '从输入框继续这个会话。' : '在下方输入指令开始一个新的 Codex 线程。'" />
+          <Composer v-model="input" :disabled="running" @send="sendPrompt" />
         </main>
-
-        <InspectPanel
-          v-else
-          :panel="activeTab"
-          :data="currentInspect"
-          :loading="inspectLoading"
-          :error="inspectError" />
       </section>
     </div>
+
+    <EnvDrawer
+      :open="envOpen"
+      :panel="envPanel"
+      :data="envData"
+      :loading="envLoading"
+      :error="envError"
+      @close="envOpen = false"
+      @select="selectEnvPanel" />
   </div>
 </template>
 
 <style scoped>
-.codex-app { background: #f3f6f8; color: #202124; }
+.codex-app { background: var(--bg); color: var(--text); position: relative; }
+.app-body { position: relative; }
 .codex-content { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .codex-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .codex-side {
   flex: none;
-  width: 280px;
+  width: 260px;
   background: var(--bg);
   border-right: 1px solid var(--line-soft);
   display: flex;
@@ -309,7 +324,7 @@ watch(activeTab, (tab) => {
   border-right: 0;
 }
 .codex-side-inner {
-  width: 280px;
+  width: 260px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -322,9 +337,63 @@ watch(activeTab, (tab) => {
   background: rgba(0, 0, 0, 0.4);
 }
 .error {
-  flex: none; margin: 10px 14px 0; border-radius: 8px; padding: 9px 12px;
-  background: #fde8e6; color: #b3261e; font-size: 13px;
+  flex: none; margin: 10px 14px 0;
+  border-radius: 8px; padding: 9px 12px;
+  background: rgba(217, 48, 37, 0.08);
+  color: var(--bad);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  box-shadow: inset 0 0 0 1px rgba(217, 48, 37, 0.2);
 }
+
+.disconnected {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.d-icon {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  display: grid; place-items: center;
+  background: var(--bg-elev);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+  margin-bottom: 6px;
+}
+.d-icon .msi { font-size: 38px; }
+.disconnected h1 {
+  margin: 0;
+  font-size: 22px; font-weight: 650; letter-spacing: -0.01em;
+  color: var(--text);
+}
+.disconnected p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-2);
+  max-width: 360px;
+  line-height: 1.65;
+}
+.start-cta {
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 18px;
+  border: 0; border-radius: 999px;
+  background: var(--accent); color: #fff;
+  font: inherit; font-size: 13.5px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: background .15s, box-shadow .15s;
+}
+.start-cta:hover:not(:disabled) { background: var(--accent-hi); box-shadow: var(--shadow-2); }
+.start-cta:disabled { opacity: 0.7; cursor: default; }
+.start-cta .msi { font-size: 20px; }
+
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 @media (min-width: 721px) {
   .codex-side-mask { display: none; }
 }
@@ -340,7 +409,7 @@ watch(activeTab, (tab) => {
     transition: transform 0.18s ease;
   }
   .codex-side.collapsed {
-    width: 280px;
+    width: 260px;
     border-right: 1px solid var(--line-soft);
     transform: translateX(-100%);
   }

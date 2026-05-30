@@ -119,43 +119,80 @@ function hasMultilineBody(item) {
 
 <style scoped>
 .inspect-panel {
-  flex: 1; min-height: 0; overflow: auto; padding: 26px 34px 34px; background: #f3f6f8;
+  flex: 1; min-height: 0; overflow: auto;
+  padding: 24px 32px 32px;
+  background: var(--bg);
 }
 header {
   display: flex; align-items: flex-end; justify-content: space-between; gap: 18px;
-  padding-bottom: 18px; border-bottom: 1px solid #dfe5eb;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
 }
-h1 { margin: 0; font-size: 30px; letter-spacing: 0; color: #202124; }
-p { margin: 7px 0 0; color: #6b7280; line-height: 1.6; }
+h1 {
+  margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.01em;
+  color: var(--text);
+}
+p { margin: 6px 0 0; color: var(--text-2); line-height: 1.6; font-size: 13px; }
 header > span {
-  flex: none; border-radius: 999px; background: #e8eef5; color: #596575;
-  padding: 7px 12px; font-size: 13px; font-weight: 650;
+  flex: none;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--text-2);
+  padding: 5px 11px;
+  font-family: var(--font-mono);
+  font-size: 11.5px; font-weight: 500;
+  letter-spacing: 0.02em;
 }
-.rows { display: grid; }
+.rows { display: grid; margin-top: 4px; }
 .row {
   display: grid; grid-template-columns: minmax(190px, .7fr) minmax(0, 1fr); gap: 18px;
-  padding: 15px 0; border-bottom: 1px solid #dfe5eb;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-soft);
 }
 .row-main { min-width: 0; display: grid; gap: 4px; align-content: start; }
-.row-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #202124; font-size: 15px; }
-.row-main span { color: #6b7280; font-size: 12px; line-height: 1.45; }
+.row-main strong {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--text); font-size: 14px; font-weight: 600;
+}
+.row-main span {
+  color: var(--text-3); font-size: 11.5px; line-height: 1.45;
+  font-family: var(--font-mono);
+}
 pre {
-  min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: #4f5b67; font: inherit; line-height: 1.6;
+  min-width: 0; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text-2);
+  font-family: var(--font-mono); font-size: 12.5px;
+  line-height: 1.6;
 }
 pre.multiline {
-  white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px; color: #374151;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg-elev);
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
 }
 .state {
-  margin-top: 20px; border: 1px dashed #d8dee4; border-radius: 8px; padding: 18px;
-  color: #6b7280; text-align: center;
+  margin-top: 24px; border: 1px dashed var(--line);
+  border-radius: 10px; padding: 24px;
+  color: var(--text-3); text-align: center;
+  font-size: 13px;
+  background: var(--bg-elev);
 }
-.state.error { border-color: #f2b8b5; background: #fde8e6; color: #b3261e; }
+.state.error {
+  border-color: rgba(217, 48, 37, 0.4);
+  background: rgba(217, 48, 37, 0.06);
+  color: var(--bad);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  text-align: left;
+}
 @media (max-width: 760px) {
   .inspect-panel { padding: 18px 16px 24px; }
   header { align-items: flex-start; flex-direction: column; }
-  h1 { font-size: 25px; }
+  h1 { font-size: 19px; }
   .row { grid-template-columns: 1fr; gap: 8px; }
   pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }

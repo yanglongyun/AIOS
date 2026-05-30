@@ -5,10 +5,11 @@ import AskAI from '@/components/AskAI.vue';
 import ProjectList   from './ProjectList.vue';
 import ProjectDetail from './ProjectDetail.vue';
 import WorkDetail    from './WorkDetail.vue';
+import CompareView   from './CompareView.vue';
 import { getProject } from './api.js';
 
 // ── Navigation stack ──────────────────────────────────────────────────────────
-// Each frame: { view: 'list'|'project'|'work', projectId?, work?, project? }
+// Each frame: { view: 'list'|'project'|'work'|'compare', projectId?, work?, project? }
 const stack = ref([{ view: 'list' }]);
 const frame = computed(() => stack.value[stack.value.length - 1]);
 
@@ -23,6 +24,11 @@ function openProject(project) {
 function openWork(work) {
   const f = frame.value;
   push({ view: 'work', work: { ...work }, project: f.project ?? null, projectId: f.projectId });
+}
+
+function openCompare() {
+  const f = frame.value;
+  push({ view: 'compare', projectId: f.projectId, project: f.project ?? null });
 }
 
 async function reloadWork() {
@@ -44,6 +50,7 @@ const breadcrumbs = computed(() => {
     if (f.view === 'list')    return { label: 'Demo 生成器', idx: i };
     if (f.view === 'project') return { label: f.project?.title || f.project?.feature || '项目', idx: i };
     if (f.view === 'work')    return { label: f.work?.name || '作品', idx: i };
+    if (f.view === 'compare') return { label: '并排对比', idx: i };
     return { label: '...', idx: i };
   });
 });
@@ -82,6 +89,14 @@ function navTo(idx) {
 
     <ProjectDetail
       v-else-if="frame.view === 'project'"
+      :project-id="frame.projectId"
+      @back="pop"
+      @open-work="openWork"
+      @open-compare="openCompare"
+    />
+
+    <CompareView
+      v-else-if="frame.view === 'compare'"
       :project-id="frame.projectId"
       @back="pop"
       @open-work="openWork"

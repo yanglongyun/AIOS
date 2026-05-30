@@ -1,5 +1,7 @@
 import { db, nowIso } from "./client.js";
 
+const DEFAULT_STACK = "单文件 HTML（内联 CSS/JS，浏览器直接打开）";
+
 function listProjects() {
   return db.prepare(`
     SELECT
@@ -24,7 +26,7 @@ function createProject({ title, feature, stack, constraints, plan_count = 4 }) {
   `).run(
     String(title || feature || "新项目").trim().slice(0, 120),
     String(feature || "").trim(),
-    String(stack || "").trim(),
+    String(stack || "").trim() || DEFAULT_STACK,
     String(constraints || "").trim(),
     Math.max(1, Math.min(10, Number(plan_count) || 4)),
     now, now

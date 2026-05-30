@@ -23,7 +23,10 @@ const runTradingCycle = async () => {
     summary: result.summary,
     taskId: result.task_id,
     ok: true,
-    error: ""
+    error: "",
+    stance: result.stance,
+    headline: result.headline,
+    actions: result.actions
   });
   const state = getState();
   saveState({

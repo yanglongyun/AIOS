@@ -5,6 +5,7 @@ import { listDecisionRecords } from "../service/decision.js";
 import { getPositions } from "../service/positions.js";
 import { listOrders } from "../service/trade.js";
 import { getMarket } from "../service/market.js";
+import { getEquityHistory } from "../service/equity.js";
 
 const handleCryptobotApi = async (req, res, path) => {
   if (path === "/apps/cryptobot/agent" && req.method === "GET") {
@@ -41,6 +42,11 @@ const handleCryptobotApi = async (req, res, path) => {
   }
   if (path === "/apps/cryptobot/market" && req.method === "GET") {
     return json(res, await getMarket());
+  }
+  if (path === "/apps/cryptobot/equity/history" && req.method === "GET") {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const range = url.searchParams.get("range") || "ALL";
+    return json(res, getEquityHistory(range));
   }
   return false;
 };

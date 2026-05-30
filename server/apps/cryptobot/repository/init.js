@@ -30,6 +30,9 @@ const initDatabase = () => {
     task_id INTEGER NOT NULL DEFAULT 0,
     ok INTEGER NOT NULL DEFAULT 1,
     error TEXT NOT NULL DEFAULT '',
+    stance TEXT NOT NULL DEFAULT 'neutral',
+    headline TEXT NOT NULL DEFAULT '',
+    actions TEXT NOT NULL DEFAULT '[]',
     created_at TEXT DEFAULT (datetime('now'))
   )`);
   db.exec(`CREATE TABLE IF NOT EXISTS cryptobot_equity (

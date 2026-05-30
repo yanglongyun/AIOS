@@ -1,102 +1,57 @@
 <script setup>
-// cryptobot 应用根 — 协调器,持有状态、轮询、生命周期。
-// ─────────────────────────────────────────────
-// utils.js   ← 格式化(fmtMoney/fmtPct/relTime/...)
-// api.js     ← 请求层(8 个端点)
-// Topbar     ← 外层暗色顶栏
-// Header     ← brand + 状态 pill + 启停
-// Equity     ← 净值 + sparkline
-// Tabs       ← tab nav
-// views/*    ← 5 个 tab 视图
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
+// 炒币机 · AI 协作终端 —— 应用根:双栏布局(左数据 / 右 AI 决策流)+ 顶栏 + 设置/分享模态。
+// 数据层在 composables/useCryptoData.js;公共 cb-* 样式在 styles.css。
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import * as cb from './api.js';
-import { isToday, relTime } from './utils.js';
+import { useCryptoData } from './composables/useCryptoData.js';
+import './styles.css';
 
-import Topbar    from './Topbar.vue';
-import Header    from './Header.vue';
-import Equity    from './Equity.vue';
-import Tabs      from './Tabs.vue';
-import Overview  from './views/Overview.vue';
-import Positions from './views/Positions.vue';
-import Orders    from './views/Orders.vue';
-import Decisions from './views/Decisions.vue';
-import Settings  from './views/Settings.vue';
+import CockpitTop   from './components/CockpitTop.vue';
+import Equity       from './Equity.vue';
+import Kpis         from './components/Kpis.vue';
+import MarketStrip  from './components/MarketStrip.vue';
+import AiFeed       from './components/AiFeed.vue';
+import Positions    from './views/Positions.vue';
+import Orders       from './views/Orders.vue';
+import SettingsModal from './components/SettingsModal.vue';
+import ShareCard    from './components/ShareCard.vue';
 
-// ── 主状态 ──────────────────────────
-const agent = ref(null);
-const decisions = ref([]);
-const positions = ref(null);
-const orders = ref(null);
-const ordersFilter = ref('ANY');
-const errMsg = ref('');
+const {
+    agent, decisions, positions, orders, ordersFilter, market, errMsg, refreshKey,
+    loadAgent, loadDecisions, loadPositions, loadOrders, loadMarket, loadAll,
+    eqPnl, eqPnlRatio, todayChange, overviewKpis
+} = useCryptoData();
 
-const tabs = [
-    { key: 'overview',  label: '概览', icon: 'dashboard' },
-    { key: 'positions', label: '持仓', icon: 'account_balance_wallet' },
-    { key: 'orders',    label: '订单', icon: 'receipt_long' },
-    { key: 'decisions', label: '决策', icon: 'auto_awesome' },
-    { key: 'settings',  label: '设置', icon: 'tune' }
-];
-const active = ref('overview');
+// 左下账本:持仓 / 订单
+const ledger = ref('positions');
+watch(ledger, (k) => {
+    if (k === 'positions' && !positions.value) loadPositions();
+    if (k === 'orders' && !orders.value) loadOrders();
+});
 
-// ── notice flash ─────────────────────
+// ── 轮询:行情始终刷新;运行中额外刷新 agent / 净值 / 决策 ──
+let timer = null;
+function tick() {
+    loadMarket();
+    if (agent.value?.state?.running) {
+        loadAgent();
+        refreshKey.value++;
+        loadDecisions();
+    }
+}
+function startTimer() { stopTimer(); timer = setInterval(tick, 5000); }
+function stopTimer() { clearInterval(timer); timer = null; }
+
+// ── notice flash ──
 const notice = ref({ kind: '', text: '' });
 let noticeTimer = null;
 function flash(kind, text, ms = 2200) {
     notice.value = { kind, text };
     clearTimeout(noticeTimer);
-    noticeTimer = setTimeout(() => notice.value = { kind: '', text: '' }, ms);
+    noticeTimer = setTimeout(() => (notice.value = { kind: '', text: '' }), ms);
 }
 
-// ── 加载 ─────────────────────────────
-async function loadAgent() {
-    try { agent.value = await cb.getAgent(); }
-    catch (e) { errMsg.value = '获取 agent 状态失败: ' + (e?.body?.message || e.message || e); }
-}
-async function loadDecisions() {
-    try { decisions.value = (await cb.getDecisions(50))?.items || []; }
-    catch { decisions.value = []; }
-}
-async function loadPositions() {
-    if (!agent.value?.config?.has_keys) return;
-    try { positions.value = await cb.getPositions(); }
-    catch (e) { positions.value = { success: false, message: e.message }; }
-}
-async function loadOrders() {
-    if (!agent.value?.config?.has_keys) return;
-    try { orders.value = await cb.getOrders(ordersFilter.value, 50); }
-    catch (e) { orders.value = { success: false, message: e.message }; }
-}
-
-const loading = ref(false);
-async function loadAll() {
-    loading.value = true;
-    await loadAgent();
-    await loadDecisions();
-    loading.value = false;
-}
-
-// 切 tab 时按需拉
-watch(active, (k) => {
-    if (k === 'positions' && !positions.value) loadPositions();
-    if (k === 'orders' && !orders.value) loadOrders();
-    if (k === 'decisions' && !decisions.value.length) loadDecisions();
-});
-watch(ordersFilter, () => loadOrders());
-
-// running 时每 5s 轮询
-let pollTimer = null;
-watch(() => agent.value?.state?.running, (run) => {
-    clearInterval(pollTimer); pollTimer = null;
-    if (run) {
-        pollTimer = setInterval(() => {
-            loadAgent();
-            if (active.value === 'decisions') loadDecisions();
-        }, 5000);
-    }
-});
-
-// ── 启停 ─────────────────────────────
+// ── 启停 ──
 const busy = ref(false);
 async function startBot() {
     busy.value = true;
@@ -111,7 +66,8 @@ async function stopBot() {
     busy.value = false;
 }
 
-// ── 设置 ─────────────────────────────
+// ── 设置 ──
+const showSettings = ref(false);
 const cfgDraft = ref({ api_key: '', api_secret: '', passphrase: '', goal: '' });
 const cfgSaving = ref(false);
 const cfgTesting = ref(false);
@@ -119,21 +75,13 @@ const cfgTestMsg = ref({ kind: '', text: '' });
 
 watch(() => agent.value?.config, (c) => {
     if (!c) return;
-    cfgDraft.value = {
-        api_key:    c.api_key    || '',
-        api_secret: c.api_secret || '',
-        passphrase: c.passphrase || '',
-        goal:       c.goal       || ''
-    };
+    cfgDraft.value = { api_key: c.api_key || '', api_secret: c.api_secret || '', passphrase: c.passphrase || '', goal: c.goal || '' };
 }, { immediate: true });
 
 async function saveConfig() {
     cfgSaving.value = true;
-    try {
-        await cb.saveConfig(cfgDraft.value);
-        await loadAgent();
-        flash('ok', '设置已保存');
-    } catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
+    try { await cb.saveConfig(cfgDraft.value); await loadAgent(); flash('ok', '设置已保存'); showSettings.value = false; }
+    catch (e) { flash('err', '保存失败: ' + (e?.body?.message || e.message || e)); }
     cfgSaving.value = false;
 }
 async function testExchange() {
@@ -141,286 +89,140 @@ async function testExchange() {
     cfgTestMsg.value = { kind: '', text: '' };
     try {
         const r = await cb.testExchange(cfgDraft.value);
-        cfgTestMsg.value = r?.success
-            ? { kind: 'ok', text: '连接成功 ✓' }
-            : { kind: 'err', text: r?.message || '连接失败' };
-    } catch (e) {
-        cfgTestMsg.value = { kind: 'err', text: e?.body?.message || e.message || '连接失败' };
-    }
+        cfgTestMsg.value = r?.success ? { kind: 'ok', text: '连接成功 ✓' } : { kind: 'err', text: r?.message || '连接失败' };
+    } catch (e) { cfgTestMsg.value = { kind: 'err', text: e?.body?.message || e.message || '连接失败' }; }
     cfgTesting.value = false;
 }
 
-// ── 计算 ─────────────────────────────
-const eqPnl = computed(() => agent.value?.equity?.pnl || 0);
-const eqPnlRatio = computed(() => (agent.value?.equity?.pnl_ratio || 0) * 100);
-const todayChange = computed(() => agent.value?.equity?.today_change || 0);
-const recentDecisions = computed(() => decisions.value.slice(0, 5));
-const overviewKpis = computed(() => ([
-    { label: '持仓数',   value: positions.value?.positions?.length ?? '—',                                   icon: 'account_balance_wallet' },
-    { label: '今日决策', value: decisions.value.filter((d) => isToday(d.created_at)).length,                 icon: 'auto_awesome' },
-    { label: '最近运行', value: relTime(agent.value?.state?.last_run_at),                                    icon: 'timer' },
-    { label: '采样间隔', value: (agent.value?.config?.interval_sec || '—') + 's',                            icon: 'tune' }
-]));
+// ── 分享 ──
+const showShare = ref(false);
 
-// ── 生命周期 ─────────────────────────
-onMounted(loadAll);
-onActivated(loadAll);
-onDeactivated(() => { clearInterval(pollTimer); pollTimer = null; });
-onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
+// ── 生命周期 ──
+async function boot() { await loadAll(); if (positions.value === null) loadPositions(); startTimer(); }
+onMounted(boot);
+onActivated(boot);
+onDeactivated(stopTimer);
+onBeforeUnmount(stopTimer);
 </script>
 
 <template>
-    <div class="crypto-frame app-frame">
-        <Topbar />
+    <div class="cf app-frame">
+        <CockpitTop
+            :agent="agent" :eq-pnl="eqPnl" :eq-pnl-ratio="eqPnlRatio" :busy="busy"
+            @start="startBot" @stop="stopBot" @share="showShare = true" @settings="showSettings = true" />
 
-        <section class="flex-1 min-w-0 min-h-0 overflow-y-auto px-5 pb-15 pt-4 text-[var(--c-text)] max-md:px-3.5 max-md:pb-10"
-                 style="font-feature-settings: 'tnum' 1;">
+        <div class="cf-main">
+            <!-- 左:数据 -->
+            <div class="cf-col">
+                <div v-if="errMsg" class="cb-err-inline">{{ errMsg }}</div>
 
-            <Header
-                :agent="agent"
-                :busy="busy"
-                :notice="notice"
-                @start="startBot"
-                @stop="stopBot" />
+                <article v-if="agent && !agent.config.has_keys" class="cb-card cf-onboard">
+                    <div class="cf-onboard-ic msi">vpn_key</div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-[15px] font-semibold text-[var(--c-text)]">还没配置 OKX API</div>
+                        <div class="mt-1 text-[12.5px] leading-[1.55] text-[var(--c-text-3)]">
+                            填入 OKX 的 API Key / Secret / Passphrase,AI 才能读行情、下单、管仓位。
+                        </div>
+                    </div>
+                    <button class="cb-btn cb-btn-solid" @click="showSettings = true">去设置 →</button>
+                </article>
 
-            <div v-if="errMsg" class="mx-auto mb-3 max-w-[1180px] rounded-lg border border-[var(--c-bear)] bg-[var(--c-bear-soft)] px-3.5 py-2.5 text-[12.5px] text-[var(--c-bear)]">
-                {{ errMsg }}
+                <Equity v-if="agent" :agent="agent" :eq-pnl="eqPnl" :eq-pnl-ratio="eqPnlRatio"
+                        :today-change="todayChange" :refresh-key="refreshKey" />
+
+                <Kpis v-if="agent" :kpis="overviewKpis" />
+
+                <div v-if="agent" class="cf-ledger">
+                    <div class="cf-seg">
+                        <button :class="{ on: ledger === 'positions' }" @click="ledger = 'positions'">持仓</button>
+                        <button :class="{ on: ledger === 'orders' }" @click="ledger = 'orders'">订单</button>
+                    </div>
+                    <Positions v-if="ledger === 'positions'" :positions="positions" @refresh="loadPositions" />
+                    <Orders v-else :orders="orders" :filter="ordersFilter"
+                            @refresh="loadOrders" @update:filter="ordersFilter = $event" />
+                </div>
+
+                <MarketStrip v-if="agent" :market="market" />
             </div>
 
-            <!-- 没配 API key 的引导 -->
-            <article v-if="agent && !agent.config.has_keys" class="cb-card cb-onboard">
-                <div class="grid h-14 w-14 flex-none place-items-center rounded-xl bg-[rgba(240,185,11,0.12)]">
-                    <span class="msi" style="font-size:36px;color:var(--c-gold)">vpn_key</span>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <div class="text-[15px] font-semibold text-[var(--c-text)]">还没配置 OKX API</div>
-                    <div class="mt-1 text-[12.5px] leading-[1.55] text-[var(--c-text-3)]">
-                        炒币机需要你提供 OKX 的 API Key / Secret / Passphrase 才能读取行情、下单和管理仓位。
-                    </div>
-                </div>
-                <button class="cb-btn cb-btn-solid" @click="active = 'settings'">去设置 →</button>
-            </article>
+            <!-- 右:AI 决策流 -->
+            <div class="cf-col cf-right">
+                <AiFeed v-if="agent" :decisions="decisions" :agent="agent" @refresh="loadDecisions" />
+            </div>
+        </div>
 
-            <Equity v-if="agent"
-                    :agent="agent"
-                    :eq-pnl="eqPnl"
-                    :eq-pnl-ratio="eqPnlRatio"
-                    :today-change="todayChange" />
+        <SettingsModal v-if="showSettings" :agent="agent" :cfg-draft="cfgDraft"
+            :saving="cfgSaving" :testing="cfgTesting" :test-msg="cfgTestMsg"
+            @save="saveConfig" @test="testExchange" @close="showSettings = false" />
 
-            <Tabs v-if="agent"
-                  :tabs="tabs"
-                  :active="active"
-                  @update:active="active = $event" />
+        <ShareCard v-if="showShare" :agent="agent" :eq-pnl="eqPnl" :eq-pnl-ratio="eqPnlRatio" @close="showShare = false" />
 
-            <template v-if="agent && active === 'overview'">
-                <Overview :kpis="overviewKpis"
-                          :recent-decisions="recentDecisions"
-                          @go-decisions="active = 'decisions'" />
-            </template>
-
-            <template v-if="agent && active === 'positions'">
-                <Positions :positions="positions"
-                           @refresh="loadPositions" />
-            </template>
-
-            <template v-if="agent && active === 'orders'">
-                <Orders :orders="orders"
-                        :filter="ordersFilter"
-                        @refresh="loadOrders"
-                        @update:filter="ordersFilter = $event" />
-            </template>
-
-            <template v-if="agent && active === 'decisions'">
-                <Decisions :decisions="decisions"
-                           @refresh="loadDecisions" />
-            </template>
-
-            <template v-if="agent && active === 'settings'">
-                <Settings :agent="agent"
-                          :cfg-draft="cfgDraft"
-                          :saving="cfgSaving"
-                          :testing="cfgTesting"
-                          :test-msg="cfgTestMsg"
-                          @save="saveConfig"
-                          @test="testExchange" />
-            </template>
-        </section>
+        <Transition name="cf-fade">
+            <div v-if="notice.text" class="cf-notice" :class="notice.kind">{{ notice.text }}</div>
+        </Transition>
     </div>
 </template>
 
-<!-- 根 frame 的 CSS 变量,所有子组件通过继承读到 -->
 <style scoped>
-.crypto-frame {
-    background: #0b0e15;
+/* 精炼终端调色板:更深的近黑底 + 青绿/品红 + 紫色 AI。子组件经继承读取。 */
+.cf {
+    background: #0a0b0f;
+    display: flex; flex-direction: column; height: 100%; min-height: 0;
 
-    --c-card:      #13161f;
-    --c-card-hi:   #1a1e2a;
-    --c-line:      #23262f;
-    --c-line-soft: #1a1d29;
-    --c-text:      #eef0f5;
-    --c-text-2:    #a0a4b3;
-    --c-text-3:    #6c7180;
-    --c-gold:      #f0b90b;
-    --c-gold-hi:   #fcd535;
-    --c-bull:      #0ecb81;
-    --c-bear:      #f6465d;
-    --c-bull-soft: rgba(14,203,129,0.14);
-    --c-bear-soft: rgba(246,70,93,0.14);
-}
-.crypto-frame > section {
-    background:
-        radial-gradient(1200px 600px at 80% -10%, rgba(240,185,11,0.06), transparent 60%),
-        radial-gradient(900px 500px at 0% 110%, rgba(14,203,129,0.04), transparent 60%),
-        #0b0e15;
-}
-</style>
-
-<!-- 跨子组件复用的 cb-* 公共类(全局,通过 cb- 前缀避免冲突) -->
-<style>
-.cb-card {
-    background: var(--c-card, #13161f);
-    border: 1px solid var(--c-line, #23262f);
-    border-radius: 12px;
-    padding: 18px 20px;
-    margin: 0 auto 12px;
-    max-width: 1180px;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.03),
-        0 1px 2px rgba(0,0,0,0.4),
-        0 6px 20px rgba(0,0,0,0.25);
-}
-
-.cb-sec-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-.cb-sec-title {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    --c-card:      #14171f;
+    --c-card-hi:   #191d27;
+    --c-line:      #1f2330;
+    --c-line-soft: #171a23;
+    --c-text:      #e9ebf2;
+    --c-text-2:    #8a90a2;
+    --c-text-3:    #565c6e;
+    --c-gold:      #f5b738;
+    --c-gold-hi:   #ffcf52;
+    --c-bull:      #2bd4a4;
+    --c-bear:      #ff5470;
+    --c-bull-soft: rgba(43, 212, 164, 0.13);
+    --c-bear-soft: rgba(255, 84, 112, 0.13);
+    --c-ai:        #8b93ff;
+    --c-ai-soft:   rgba(139, 147, 255, 0.12);
+    --c-ai-line:   rgba(139, 147, 255, 0.22);
     color: var(--c-text);
-    text-transform: uppercase;
-}
-.cb-sec-sub {
-    font-size: 12px;
-    color: var(--c-text-3);
-    margin-top: 4px;
-    line-height: 1.55;
-    max-width: 540px;
 }
 
-.cb-empty {
-    padding: 32px;
-    text-align: center;
-    color: var(--c-text-3);
-    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
-    font-size: 13px;
-}
-
-.cb-err-inline {
-    padding: 12px;
-    background: rgba(246,70,93,0.06);
-    border: 1px solid var(--c-bear);
-    color: var(--c-bear);
-    border-radius: 8px;
-    font-size: 12.5px;
-}
-
-.cb-onboard {
-    display: flex;
-    align-items: center;
-    gap: 18px;
+.cf-main {
+    flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 384px; gap: 14px; padding: 14px;
+    overflow: hidden;
     background:
-        linear-gradient(135deg, rgba(240,185,11,0.08), transparent 50%),
-        var(--c-card);
-    border: 1px solid rgba(240,185,11,0.3);
+        radial-gradient(1100px 560px at 78% -8%, rgba(245, 183, 56, 0.05), transparent 60%),
+        radial-gradient(900px 600px at 8% 108%, rgba(139, 147, 255, 0.05), transparent 60%);
 }
+.cf-col { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 2px; }
+.cf-col::-webkit-scrollbar { width: 8px; }
+.cf-col::-webkit-scrollbar-thumb { background: #20242f; border-radius: 8px; }
+.cf-right { gap: 0; }
 
-/* 输入控件 */
-.cb-input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--c-line);
-    background: rgba(0,0,0,0.25);
-    color: var(--c-text);
-    border-radius: 6px;
-    font-size: 13px;
-    outline: 0;
-    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-}
-.cb-input:focus {
-    border-color: var(--c-gold);
-    background: rgba(0,0,0,0.4);
-    box-shadow: 0 0 0 1px var(--c-gold), 0 0 12px rgba(240,185,11,0.15);
-}
-.cb-input-area {
-    font-family: inherit;
-    font-size: 13.5px;
-    line-height: 1.6;
-    resize: vertical;
-    min-height: 110px;
-}
-.cb-input-select {
-    appearance: none;
-    cursor: pointer;
-    padding-right: 36px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0a4b3' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-}
-.cb-input-small { padding: 6px 28px 6px 12px; font-size: 12px; border-radius: 4px; }
+.cf-onboard { display: flex; align-items: center; gap: 16px; background: linear-gradient(135deg, rgba(245, 183, 56, 0.08), transparent 50%), var(--c-card); border: 1px solid rgba(245, 183, 56, 0.3); }
+.cf-onboard-ic { width: 52px; height: 52px; flex: none; display: grid; place-items: center; border-radius: 13px; font-size: 30px; color: var(--c-gold); background: rgba(245, 183, 56, 0.12); }
 
-/* 按钮 */
-.cb-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid var(--c-line);
-    background: rgba(255,255,255,0.04);
-    color: var(--c-text-2);
-    border-radius: 6px;
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+.cf-ledger { margin: 0 auto; max-width: 1180px; width: 100%; }
+.cf-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: rgba(0, 0, 0, 0.34); border: 1px solid var(--c-line); margin-bottom: 10px; }
+.cf-seg button { border: 0; background: transparent; color: var(--c-text-3); font-family: var(--font-mono, monospace); font-size: 12px; font-weight: 600; padding: 6px 18px; border-radius: 6px; cursor: pointer; transition: 0.15s; }
+.cf-seg button.on { background: rgba(245, 183, 56, 0.16); color: var(--c-gold); }
+.cf-seg button:not(.on):hover { color: var(--c-text-2); }
+
+.cf-notice { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 160; padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.cf-notice.ok { background: var(--c-bull); color: #04130d; }
+.cf-notice.err { background: var(--c-bear); color: #1a0006; }
+.cf-fade-enter-active, .cf-fade-leave-active { transition: opacity 0.25s, transform 0.25s; }
+.cf-fade-enter-from, .cf-fade-leave-to { opacity: 0; transform: translate(-50%, 8px); }
+
+@media (max-width: 880px) {
+    .cf-main { grid-template-columns: 1fr; overflow-y: auto; gap: 12px; padding: 12px; }
+    .cf-col { overflow: visible; }
+    .cf-right { order: -1; }
+    .cf-right :deep(.af) { height: 360px; flex: none; }
 }
-.cb-btn:hover { background: rgba(255,255,255,0.08); color: var(--c-text); border-color: rgba(255,255,255,0.15); }
-.cb-btn:active { transform: translateY(1px); }
-.cb-btn-small { padding: 5px 11px; font-size: 11.5px; border-radius: 4px; }
-.cb-btn-ghost { border-color: transparent; background: transparent; }
-.cb-btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--c-text); }
-.cb-btn-solid {
-    background: linear-gradient(180deg, var(--c-gold-hi), var(--c-gold));
-    color: #1a1500;
-    border-color: var(--c-gold);
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.5),
-        0 1px 4px rgba(240,185,11,0.4),
-        0 0 0 1px rgba(240,185,11,0.2);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
-}
-.cb-btn-solid:hover:not(:disabled) {
-    background: linear-gradient(180deg, #ffd95c, var(--c-gold-hi));
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.6),
-        0 2px 10px rgba(240,185,11,0.55),
-        0 0 0 1px rgba(240,185,11,0.3);
-}
-.cb-btn-solid:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
-.cb-btn-danger {
-    color: var(--c-bear);
-    border-color: rgba(246,70,93,0.35);
-    background: rgba(246,70,93,0.06);
-}
-.cb-btn-danger:hover {
-    background: rgba(246,70,93,0.14);
-    border-color: var(--c-bear);
-    box-shadow: 0 0 12px rgba(246,70,93,0.25);
+@media (max-width: 560px) {
+    .cf-main { padding: 10px; gap: 10px; }
+    .cf-right :deep(.af) { height: auto; }
 }
 </style>

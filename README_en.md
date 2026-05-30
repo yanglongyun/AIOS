@@ -25,7 +25,7 @@ Build native apps tailored to your needs through dialogue. A unified AI kernel t
 AIOS is a **fully local-first** AI workstation:
 
 - 🗣 **Conversation as command** — drive your computer in natural language
-- 🧩 **23 built-in apps** — notes, ledger, terminal, files, Claude Code, RSS, earth, debate, and more
+- 🧩 **12 built-in apps** — chat, tasks, memory, files, terminal, Codex, system status, video studio, and more
 - 🤖 **Agent task system** — apps can dispatch Tasks to the system; AI orchestrates context and tools
 - 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
 - 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
@@ -126,10 +126,10 @@ Streaming, tool calling, and reasoning content are all supported.
 
 | Group | Apps |
 |---|---|
-| System | Chat · Tasks · Settings |
-| Work | Notebook · Ledger · Files · Terminal · Claude Code · System Status |
-| Information | Subbox · GitHub Trending · Hacker News · RSS Reader |
-| Experiments | Old Phone · Fortune · Companion · Poker · Treasure · Debate · Earth · Civilization · CryptoBot · Memory |
+| System | Chat · Tasks · Memory · Settings |
+| Work | Files · Terminal · Codex · System Status · Monitors |
+| Creation | Demo Generator · Video Studio |
+| Experiments | CryptoBot |
 
 Apps can dispatch Tasks back to the system, letting AI take over complex flows instead of being stuck behind one-off API calls.
 
@@ -242,5 +242,5 @@ AIOS is a general kernel that can be tailored into themed editions for different
 
 | Edition | Audience | Main differences |
 |---|---|---|
-| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, full set of 23 built-in apps |
+| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, full set of 12 built-in apps |
 | [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |

@@ -8,6 +8,8 @@ export const getAgent = () => api.get(`${BASE}/agent`);
 export const getDecisions = (limit = 50) => api.get(`${BASE}/decision/records`, { query: { limit } });
 export const getPositions = () => api.get(`${BASE}/positions`);
 export const getOrders = (instType = 'ANY', limit = 50) => api.get(`${BASE}/trade/orders`, { query: { instType, limit } });
+export const getMarket = () => api.get(`${BASE}/market`);
+export const getEquityHistory = (range = 'ALL') => api.get(`${BASE}/equity/history`, { query: { range } });
 
 export const startBot = () => api.post(`${BASE}/agent/start`, {});
 export const stopBot = () => api.post(`${BASE}/agent/stop`, {});

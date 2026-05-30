@@ -1,14 +1,22 @@
 import { db } from "./client.js";
-const recordDecision = ({ summary, taskId = 0, ok = true, error = "" }) => {
+const recordDecision = ({ summary, taskId = 0, ok = true, error = "", stance = "neutral", headline = "", actions = [] }) => {
   db.prepare(`
-    INSERT INTO cryptobot_decisions (summary, task_id, ok, error, created_at)
-    VALUES (?, ?, ?, ?, datetime('now'))
-  `).run(String(summary || ""), Number(taskId || 0), ok ? 1 : 0, String(error || ""));
+    INSERT INTO cryptobot_decisions (summary, task_id, ok, error, stance, headline, actions, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+  `).run(
+    String(summary || ""),
+    Number(taskId || 0),
+    ok ? 1 : 0,
+    String(error || ""),
+    String(stance || "neutral"),
+    String(headline || ""),
+    JSON.stringify(Array.isArray(actions) ? actions : [])
+  );
 };
 const listDecisions = (limit = 50) => {
   const size = Math.min(200, Math.max(1, Number(limit) || 50));
   return db.prepare(`
-    SELECT id, summary, task_id, ok, error, created_at
+    SELECT id, summary, task_id, ok, error, stance, headline, actions, created_at
     FROM cryptobot_decisions
     ORDER BY id DESC
     LIMIT ?

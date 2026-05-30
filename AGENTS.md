@@ -1,71 +1,189 @@
-# AIOS
+# AIOS · 给 AI 的工程规则书
 
-AIOS 主系统源码目录。本地 AI 操作系统：内置 chat / tasks / notebook / terminal / files 等系统能力，再加上一套可扩展的 apps。
+> 这份文件是**硬约束**,不是建议。每次改这个仓库前先读一遍。
+> 历史上很多次改动反复犯同一类错误(假数据、堆原生 CSS、写死路径、巨型文件、跨层逻辑)。
+> 下面每一条都是为了堵住一个真实踩过的坑。**违反这些规则的代码视为有缺陷,即使它"能跑"。**
 
-## 仓库边界
+## ★ 产品标准(北极星 —— 一切改动的最终验收线)
 
-- 当前目录同时是开发源头、运行源头和本机使用源头；不要再维护 `AIOS-test` 运行副本。
-- 当前目录是独立 git 仓库；提交、推送、回滚前必须在本目录核对 `git remote -v` 和 `git status`。
-- 当前仓库维护两个同步远端：GitHub `https://github.com/realuckyang/AIOS.git` 作为 `origin`，Gitee `https://gitee.com/realuckyang/aios.git` 作为 `gitee`。发布时两边 `main` 必须指向同一个提交。
-- 当前目录可能已有 `database/`、`files/`、`node_modules/` 等运行态/依赖残留；开发时仍按源码目录处理。
-- `apps/` 是源码的一部分，保存应用给 AI 读取的产品文档和上下文，不要忽略、不要当运行态产物处理。
-- Node 要求见 `package.json`（当前 `>=22.5`）。
+每个应用的目标是**产品级、有市场竞争力**,而不是"能跑的 demo"。具体到每一次改动:
 
-## Git 要求
+- **不求大而全,但该有的必须有。** 砍功能可以,做半成品不行。范围可以小,做出来的部分必须完整。
+- **必须真实可用。** 数据真实、流程跑得通、错误有反馈。任何假数据、占位、未实现按钮都不达标(见 §6)。
+- **交互合理、优雅。** 加载/空/错/成功四态都想到;操作路径短而顺;不让用户困惑。
+- **UI 超级美观、现代。** 对标一线产品的视觉水准:克制的配色、清晰的层次、舒服的留白与动效。
+  美观靠 Tailwind 工具类 + 设计 token 实现(见 §5),不是靠堆原生 CSS。
 
-- 提交信息使用中文。
-- 提交、推送前必须执行并核对 `git status`、`git remote -v`；不能只凭记忆判断当前仓库和远端。
-- 提交前确认没有把 `database/`、`files/`、`node_modules/`、`gui/dist/`、密钥、token、本机配置或运行态数据纳入版本。
-- 小改动可以只写一行标题；结构性、大范围或跨模块变更必须写完整 commit body。
-- 重大提交格式：第一行是清晰标题；空一行后写详细正文，说明动机、主要变化、删除/新增的关键路径、影响范围和验证方式。
-- 同一次提交里如果承接了前一次大改的补充修正，正文必须补充说明上下文，避免只留下过短标题。
-- 推送时同时推送 `origin main` 和 `gitee main`，推送后用 `git log -1 --oneline --decorate` 或 `git status -sb` 确认两个远端指向同一提交。
-- 已经推送的提交不要随意 `--amend` 或强推；确实需要改历史时先说明风险并得到确认。
+> 验收时问自己一句:**"这个东西直接截图发出去、放到产品官网上,拿得出手吗?"** 拿不出手就没做完。
 
-## 运行态与数据库
+AIOS 是本地 AI 操作系统:内置 chat / tasks / notebook / terminal / files 等系统能力,外加一套可扩展的 apps。
+当前目录同时是**开发源头、运行源头、本机使用源头**。
 
-- 本机直接在当前目录运行和使用 AIOS，`database/`、`files/`、`node_modules/` 是本机运行态，默认保留，不因为改代码随手删除。
-- 数据库 DDL 必须保持干净：`server/main/repository/init.js` 和各 `server/apps/<app>/repository/init.js` 写当前最终 schema，不写旧字段兼容、不写临时迁移分支。
-- 新用户以空数据库初始化，应得到干净、正确的当前版本 schema。
-- 开发期如果 schema 方向不对，直接修正 DDL；是否清理本机已有数据要先判断风险，涉及删除本机数据库或运行文件时先说明并得到确认。
+---
 
-## 核心目录
+## 0. 提交前自检清单(先看这个)
 
-- `server/main/api/`：HTTP/WS API 入口（auth、chat、memory、runtime、settings、task 等）。
-- `server/main/ai/`：AI 执行、工具调用、agent 运行控制。
-- `server/main/service/`、`server/main/repository/`：业务层与数据库访问层。
-- `server/apps/`：有独立后端边界的应用。
-- `gui/`：前端。
-- `apps/<app>/APP.md`：应用给 AI 看的文档源。
+动手前想清楚,提交前逐条核对。任何一条为"否"就不要提交:
 
-## 代码结构
+- [ ] 我展示给用户的所有数据都是**真实**的吗?没有写死的假数字、假曲线、假列表?(见 §6)
+- [ ] 样式是用 **Tailwind 工具类 + 设计 token** 写的吗?没有为了偷懒堆 `<style>`、没有写死 hex、没有另造一套 class 系统?(见 §5)
+- [ ] 没有写死任何**绝对路径、用户名、密钥、token、端口**到代码里吗?(见 §7)
+- [ ] 每个改动/新增的文件都 **< 300 行**吗?超了就拆。(见 §4)
+- [ ] 后端逻辑放在了**正确的层**(api / service / repository / runtime),没把业务塞进入口或路由文件?(见 §4)
+- [ ] 新页面/组件在**窄屏(手机)**下可用吗?(见 §5)
+- [ ] 没有引入**系统级顶栏/侧栏/全局布局组件**吗?(见 §5)
+- [ ] 所有按钮、入口都**真的实现了**功能,没有占位、没有 TODO 留给"下一个人"?(见 §6)
+- [ ] `git remote -v` 和 `git status` 都核对过了吗?提交信息是中文吗?(见 §2)
 
-- 后端继续按 `api / service / repository / ai / apps` 分层，不把跨层逻辑塞进入口文件。
-- `server/shared/` 只放真正跨 main/apps 通用的低层能力，例如 HTTP、JSON、时间、AI 响应解析等。应用后端之间共享的能力必须放在 `server/apps/_shared/`，不要新建 `server/shared/apps*` 这类夹层目录。
-- 应用自己的运行桥、外部进程桥、协议适配器必须放在 `server/apps/<app>/bridge/` 或该应用自己的后端目录里，不要放进 `server/main/bridge/`。
-- files、terminal 这类 websocket 应用也有自己的后端边界；属于它们的 ws、mime、id 等辅助逻辑放在各自应用目录，不因为代码短就抽到共享层。
-- 供应商协议字段只能在对应 service 边界统一生成，不能散落在各业务调用方。业务层表达语义即可，例如任务需要结构化结果时使用 `responseFormat: "json"` 或 `createInstantJsonTask`，由 task service 统一翻译成模型接口需要的 `response_format: { type: "json_object" }`。
-- 不要在多个调用点手写同一个底层协议参数。发现同类参数出现在两个以上业务文件时，先抽到统一入口或 helper，再让调用方使用语义化 API。
-- 前端也必须模块化：页面只负责组装和状态流转，复杂 UI 拆到 `components/`，可复用逻辑拆到 `composables/` 或贴近业务的工具文件。
-- 单个代码文件目标控制在 200-300 行。超过 300 行要优先拆分组件、组合式函数、常量或样式文件；不要把新增功能继续堆进大文件。
-- 前端新页面和新组件必须默认考虑移动端：布局、表格/列表、弹窗、工具栏、按钮文字、输入区域都要在窄屏可用，不允许只按桌面宽度实现。
-- 禁止设计或引入系统级顶栏、系统级侧栏、全局 Sidebar/Topbar 组件。每个应用必须自己开发和维护自己的顶部区域与侧边区域；可以复用基础按钮、图标、颜色、间距等低层样式，但不能把应用级布局抽成系统统一组件。
-- 样式跟随系统整体风格。已有 Tailwind 和系统组件时优先复用，避免为单个页面制造孤立视觉体系。
+---
 
-## 端口
+## 1. 仓库边界
 
-- 主服务 `9502` / apps 服务 `9503` / Vite `5173`。
+- 当前目录是独立 git 仓库,也是唯一的源头;**不要**再维护 `AIOS-test` 之类的运行副本。
+- `apps/` 是源码的一部分,保存给 AI 读取的应用产品文档(`apps/<app>/APP.md`),**不要忽略、不要当运行态产物删除**。
+- `database/`、`files/`、`node_modules/`、`gui/dist/` 是本机运行态/依赖残留,默认保留,**不因为改代码随手删**;但也**不准提交进版本**。
+- Node 版本要求见 `package.json`(当前 `>=22.5`)。
 
-## App 注册表
+---
 
-- 前端：`gui/src/apps.js`
-- 后端：`server/apps/registry.js`
-- 当前前端入口：chat、monitors、tasks、memory、terminal、files、sysinfo、cryptobot、demogen、codex、longvideo、settings。
-- 当前后端 registry：sysinfo、cryptobot、longvideo、demogen、codex。新增/清理应用时要同时核对前端入口、后端 registry、应用文档。
-- chat/tasks/settings/memory 等系统能力主要在 `server/main/`；普通应用后端优先放 `server/apps/<app>/`。
+## 2. Git 要求
 
-## 用户安装脚本
+- **提交信息用中文。**
+- 提交、推送前**必须**执行并核对 `git status`、`git remote -v`,不能只凭记忆判断当前仓库和远端。
+- 本仓库维护两个同步远端,发布时两边 `main` 必须指向同一提交:
+  - GitHub `https://github.com/realuckyang/AIOS.git` → `origin`
+  - Gitee `https://gitee.com/realuckyang/aios.git` → `gitee`
+- 推送时同时推 `origin main` 和 `gitee main`,推后用 `git log -1 --oneline --decorate` 确认两端一致。
+- 小改动可只写一行标题;结构性、大范围或跨模块变更**必须**写完整正文(动机、主要变化、关键路径增删、影响范围、验证方式)。
+- 已推送的提交不要随意 `--amend` 或强推;确需改历史先说明风险并取得确认。
+- **提交前确认没有把** `database/`、`files/`、`node_modules/`、`gui/dist/`、密钥、token、本机配置或运行态数据纳入版本。
 
-`install-macos.sh` / `install-linux.sh` / `install-windows.ps1`（面向最终用户，不是日常开发启动）：
+---
 
-- 把源码拉到用户安装目录，在用户安装目录里装依赖、构建和运行。
+## 3. 核心目录
+
+```
+server/
+  main/        主服务 :9502
+    api/         HTTP/WS 入口(auth、chat、memory、runtime、settings、task…)
+    ai/          AI 执行、工具调用、agent 运行控制
+    service/     业务层
+    repository/  数据库访问层
+    llm/         Provider / 输入归一 / 请求 / 输出解析
+  apps/        应用服务 :9503,有独立后端边界的应用
+    _shared/     应用后端之间共享的能力(task、db、auth…)
+  shared/      真正跨 main/apps 的低层能力(http、json、time、ai 响应解析)
+gui/           前端(Vue 3 + Vite + Pinia + Tailwind v4)
+  src/apps/<app>/   每个应用的前端
+apps/<app>/APP.md   给 AI 看的应用文档源
+skills/        本地技能
+```
+
+---
+
+## 4. 后端代码规则
+
+- **严格分层**:`api → service → repository / runtime`。
+  - `api/` 只做路由分发、参数解析、调用 service、返回 json。**不写业务逻辑。**
+  - `service/` 写业务编排;`repository/` 只做数据访问;`runtime/` 接外部进程/交易所/协议桥。
+  - 入口文件(`index.js`)只做注册和导出,**不放跨层逻辑**。
+- **共享代码的归属**:
+  - 跨 main/apps 的低层能力 → `server/shared/`。
+  - 应用后端之间共享 → `server/apps/_shared/`。**不要新建 `server/shared/apps*` 这类夹层。**
+  - 应用自己的运行桥、进程桥、协议适配器 → `server/apps/<app>/bridge/` 或该应用自己的目录,**不要**放进 `server/main/bridge/`。
+  - files、terminal 这类 ws 应用的 ws/mime/id 辅助逻辑放各自应用目录,不因代码短就抽到共享层。
+- **供应商协议字段只在对应 service 边界统一生成**,不能散落在各业务调用方。业务层表达语义即可
+  (例:任务要结构化结果用 `responseFormat: "json"` / `createInstantJsonTask`,由 task service 翻译成 `response_format: { type: "json_object" }`)。
+  同一个底层协议参数出现在两个以上业务文件时,先抽成统一入口或 helper,再让调用方用语义化 API。
+- **数据库 DDL 必须是干净的最终 schema**:`repository/init.js` 写当前最终结构,**不写旧字段兼容、不写临时迁移分支**。
+  新用户用空库初始化应得到正确的当前版本 schema。
+  - 改 schema 时直接改 DDL;对**本机已有运行库**做增量改动(如 `ALTER TABLE ADD COLUMN`)属于不破坏数据的操作,可直接做;
+    任何会**删除本机数据**的操作(drop 表、清库、删运行文件)**必须先说明并取得确认**。
+- **统一响应协议**:service 返回统一形状 `{ success, ... }`,失败用一致的字段(如 `message`),不要一个接口 `message`、另一个 `error`、再一个 `xxxError`。
+
+---
+
+## 5. 前端代码规则
+
+### 5.1 样式:Tailwind 工具类 + 设计 token —— 这是默认,也是绝大多数情况下唯一的方式
+
+项目用 **Tailwind v4**,并在 `gui/src/style.css` 的 `@theme` 里定义了设计 token。**用这些 token,别写死颜色。**
+
+- ✅ **默认用 Tailwind 工具类写所有布局、间距、字号、颜色、圆角、阴影**,通过设计 token 取色:
+  `bg-card` `text-ink` `text-muted` `border-line` `font-mono` `text-good` `text-bad` `bg-blue-soft` 等。
+  Tailwind v4 也支持任意值,需要时用 `text-[13px]`、`gap-3.5`、`bg-[var(--bg-elev)]`。
+- ❌ **不要为了省事整段写 `<style>`。** 凡是 Tailwind 工具类能表达的(flex、grid、padding、字号、颜色、边框、圆角、常规阴影、hover),一律用工具类。
+- ❌ **不要写死 hex 颜色**(`#13161f`、`color: #f0b90b`)。用 token;应用确实需要自己的局部色板时,在该应用根组件用 CSS 变量集中定义一次,子组件通过 `text-[var(--c-x)]` 这类任意值引用,**不要在每个文件里散落 hex**。
+- ❌ **不要另造平行 class 系统**(如给每个应用发明一套 `cb-card` / `cb-btn` / `cb-input` 然后在全局 `<style>` 里手写)。优先复用 Tailwind + 共享基础组件;真要抽样式,抽成 Vue 组件,不要抽成手写 CSS 类库。
+- ✅ `<style scoped>` **只保留给 Tailwind 难以干净表达的东西**:`@keyframes` 动画、`::before/::after` 伪元素、复杂多停渐变、SVG 内部样式。这些是少数例外,不是常态。
+
+> 判断标准:如果一段 `<style>` 里全是 `display:flex; padding:…; font-size:…; color:#…`,那它本就该是模板里的 Tailwind 工具类。重写它。
+
+### 5.2 组件化与文件大小
+
+- **单文件目标 200–300 行,硬上限 300 行。** 超了优先拆组件、拆 `composables/`、拆常量。不要把新功能继续堆进大文件。
+- 页面(`index.vue`)只负责**组装和状态流转**;复杂 UI 拆到 `components/`;可复用逻辑拆到 `composables/`;数据加载/轮询抽成 composable,不要塞在页面里。
+
+### 5.3 移动端(必须,不是可选)
+
+- 新页面和新组件**默认就要考虑窄屏**:布局、表格/列表、弹窗、工具栏、按钮文字、输入区在手机宽度下都要可用。
+- 不允许只按桌面宽度实现。表格在窄屏要么隐藏次要列、要么改卡片式。
+
+### 5.4 禁止系统级布局组件
+
+- **禁止设计或引入系统级顶栏、侧栏、全局 Sidebar/Topbar。** 每个应用自己开发维护自己的顶部区和侧边区。
+- 可以复用基础按钮、图标、颜色、间距等低层样式,但**不能把应用级布局抽成系统统一组件**。
+- 整体视觉跟随系统风格,避免为单个页面制造孤立视觉体系。
+
+---
+
+## 6. 禁止 demo 级实现(数据必须真实)
+
+这是本项目最常被诟病的问题。**应用要能拿出去用,不是"能跑的样子"。**
+
+- ❌ **绝不写死假数据冒充真实数据。** 典型反面教材:把一条"永远向上"的净值曲线坐标写死在组件里、用固定数组假装行情/列表。
+- ✅ 数据来自真实接口。**接口没有就去后端补接口**(很多时候数据其实已经在数据库里,只是没暴露 API)。
+- ✅ 没有数据时给**诚实的空状态/引导**("启动后会生成…"),不要用假数据填满界面。
+- ❌ **不要留未实现的按钮、占位入口、`TODO`/`FIXME` 给下一个人。** 要么这次实现,要么不放出来。
+- ✅ 错误要**有反馈**:加载中、失败原因、可重试。不要静默吞掉(`catch(() => {})`)。
+- 衡量标准不是"功能齐备能用",而是"作为产品,体验上拿得出手"。
+
+---
+
+## 7. 禁止硬编码、密钥与本机信息
+
+- ❌ **不准把绝对路径、用户名写进代码。** 反面教材:前端写死 `cwd: "/Users/xxx/Desktop/AIOS"`。改用运行时获取(`process.cwd()`)或从后端配置读。
+- ❌ **不准把密钥、API Secret、token、密码明文拼进 prompt、日志或前端。** 需要签名/鉴权时,在受控的后端边界处理,不要把 secret 暴露给模型或客户端。
+- ❌ 端口、主机名等可变配置不要散落写死;遵循现有的环境变量约定。
+
+---
+
+## 8. 端口
+
+- 主服务 `9502` / apps 服务 `9503` / Vite dev `5173`。
+- 端口可被环境变量覆盖(`AIOS_MAIN_PORT` / `AIOS_APPS_PORT`),不要在代码里写死依赖某个固定端口。
+
+---
+
+## 9. App 注册表(新增/删除应用时三处必须同步)
+
+- 前端入口:`gui/src/apps.js`
+- 后端 registry:`server/apps/registry.js`
+- 应用文档:`apps/<app>/APP.md`
+
+新增或清理应用时,**同时**核对这三处;不要只改一处导致漂移。
+chat / tasks / settings / memory 等系统能力主要在 `server/main/`;普通应用后端优先放 `server/apps/<app>/`。
+
+---
+
+## 10. 用户安装脚本
+
+`install-macos.sh` / `install-linux.sh` / `install-windows.ps1` 面向最终用户(不是日常开发启动):
+把源码拉到用户安装目录,在该目录里装依赖、构建、运行。改安装流程时三个平台脚本保持一致。
+
+---
+
+## 11. 验证
+
+改完不要只靠"看起来对"。后端改动至少 `node --check` 过语法;能跑的路径尽量本地起服务验证(`npm run dev`,访问 `http://localhost:9502`)。
+涉及前端体验的改动,自己过一遍真实交互路径:空状态、加载、错误、窄屏。

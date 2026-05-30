@@ -68,3 +68,24 @@ const ORDER_STATE = {
 export function orderStateMeta(s) {
     return ORDER_STATE[String(s || '').toLowerCase()] || { label: s || '?', cls: 'mute' };
 }
+
+// AI 决策的市场立场
+const STANCE = {
+    bullish: { label: '看多', cls: 'bull', icon: 'trending_up' },
+    bearish: { label: '看空', cls: 'bear', icon: 'trending_down' },
+    neutral: { label: '观望', cls: 'mute', icon: 'trending_flat' }
+};
+export function stanceMeta(s) {
+    return STANCE[String(s || 'neutral').toLowerCase()] || STANCE.neutral;
+}
+
+// 单个交易动作
+const ACTION = {
+    buy:   { label: '买入', cls: 'bull' },
+    sell:  { label: '卖出', cls: 'bear' },
+    close: { label: '平仓', cls: 'mute' },
+    hold:  { label: '观望', cls: 'mute' }
+};
+export function actionMeta(t) {
+    return ACTION[String(t || 'hold').toLowerCase()] || { label: t || '?', cls: 'mute' };
+}

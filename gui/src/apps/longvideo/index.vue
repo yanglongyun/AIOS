@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Topbar from './Topbar.vue';
 import ProviderSettings from './ProviderSettings.vue';
 import * as lv from './api.js';
+
+const fileUrl = lv.fileUrl;
 
 const route = useRoute();
 const router = useRouter();
@@ -66,16 +68,23 @@ const plannedCount = computed(() => projects.value.filter((item) => item.status 
 const statusText = {
     draft: '草稿',
     planned: '已规划',
-    asset_queue: '素材队列',
-    blocked: '待配置',
-    queued: '队列中',
+    generating: '生成素材中',
+    assets_ready: '素材就绪',
+    rendering: '拼接中',
+    done: '已完成',
+    error: '失败',
+    // 段落级
+    idle: '待生成',
+    running: '生成中',
     ready: '就绪',
-    pending_provider_config: '待配置',
 };
 
 function labelStatus(value) {
     return statusText[value] || value || '草稿';
 }
+
+const isBusyStatus = (s) => s === 'generating' || s === 'rendering';
+const activeBusy = computed(() => isBusyStatus(active.value?.status));
 
 async function refresh() {
     loading.value = !projects.value.length;
@@ -90,9 +99,44 @@ async function refresh() {
     }
 }
 
+let pollTimer = null;
+function stopPoll() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+function syncPoll() {
+    if (activeBusy.value && routeMode.value === 'detail') {
+        if (!pollTimer) pollTimer = setInterval(refreshActive, 2500);
+    } else {
+        stopPoll();
+    }
+}
+async function refreshActive() {
+    if (!activeId.value) return;
+    try {
+        const res = await lv.getProject(activeId.value);
+        active.value = res.project;
+    } catch { /* keep last state */ }
+    syncPoll();
+}
+
 async function loadProject(id) {
     const res = await lv.getProject(id);
     active.value = res.project;
+    syncPoll();
+}
+
+async function retrySegment(segmentId) {
+    busy.value = `seg-${segmentId}`;
+    error.value = '';
+    try {
+        const res = await lv.retrySegment(segmentId);
+        active.value = res.project;
+        syncPoll();
+    } catch (err) {
+        error.value = err?.body?.message || err.message || String(err);
+    } finally {
+        busy.value = '';
+    }
 }
 
 function goList() {
@@ -266,6 +310,7 @@ async function run(action, key) {
     try {
         const res = await action(activeId.value);
         active.value = res.project;
+        syncPoll();
         await refresh();
     } catch (err) {
         error.value = err?.body?.message || err.message || String(err);
@@ -299,10 +344,13 @@ watch(
             return;
         }
         active.value = null;
+        stopPoll();
         if (!['', 'new', 'settings', 'project'].includes(String(route.params.p1 || ''))) goList();
     },
     { immediate: true }
 );
+
+onBeforeUnmount(stopPoll);
 </script>
 
 <template>
@@ -434,18 +482,36 @@ watch(
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-2">
-                            <button class="lv-action" :disabled="busy === 'plan'" @click="run(lv.generatePlan, 'plan')">
+                            <button class="lv-action" :disabled="busy === 'plan' || activeBusy" @click="run(lv.generatePlan, 'plan')">
                                 <span class="msi xxs">auto_awesome</span>
                                 {{ busy === 'plan' ? '规划中' : '生成大纲与解说' }}
                             </button>
-                            <button class="lv-action" :disabled="!hasSegments || busy === 'assets'" @click="run(lv.generateAssets, 'assets')">
+                            <button class="lv-action" :disabled="!hasSegments || busy === 'assets' || activeBusy" @click="run(lv.generateAssets, 'assets')">
                                 <span class="msi xxs">perm_media</span>
-                                生成图片与音频
+                                {{ active.status === 'generating' ? '生成中' : '生成图片与音频' }}
                             </button>
-                            <button class="lv-action" :disabled="!hasSegments || busy === 'assemble'" @click="run(lv.assembleVideo, 'assemble')">
+                            <button class="lv-action" :disabled="!hasSegments || busy === 'assemble' || activeBusy || active.status !== 'assets_ready' && active.status !== 'done'" @click="run(lv.assembleVideo, 'assemble')">
                                 <span class="msi xxs">movie</span>
-                                拼接视频
+                                {{ active.status === 'rendering' ? '拼接中' : active.status === 'done' ? '重新拼接' : '拼接视频' }}
                             </button>
+                        </div>
+
+                        <div v-if="activeBusy" class="mt-4">
+                            <div class="flex items-center justify-between text-[12px] text-[#67737f]">
+                                <span>{{ active.status === 'rendering' ? '视频拼接中…' : '素材生成中…' }}</span>
+                                <span>{{ active.progress || 0 }}%</span>
+                            </div>
+                            <div class="mt-1 h-2 overflow-hidden rounded-full bg-[#e6ebef]">
+                                <div class="h-full rounded-full bg-[var(--lv-blue)] transition-all" :style="{ width: (active.progress || 0) + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <div v-if="active.error" class="mt-4 rounded-md border border-[#f0c9c5] bg-[#fff3f1] px-3 py-2 text-[12.5px] text-[#b3261e]">
+                            {{ active.error }}
+                        </div>
+
+                        <div v-if="active.status === 'done' && active.videoPath" class="mt-5 rounded-md border border-[#dfe5ea] bg-black p-2">
+                            <video :src="fileUrl(active.videoPath)" controls class="w-full rounded" style="max-height:420px"></video>
                         </div>
 
                         <div v-if="active.outline" class="mt-5 rounded-md border border-[#e2e7eb] bg-[#fbfcfd] p-4">
@@ -453,23 +519,36 @@ watch(
                             <p class="mt-2 text-[13px] leading-6 text-[#5f6b76]">{{ active.outline.summary }}</p>
                         </div>
 
-                        <div class="mt-5 overflow-hidden rounded-md border border-[#dfe5ea]">
-                            <div class="grid grid-cols-[56px_1fr_96px_110px] bg-[#f5f7f9] px-3 py-2 text-[12px] font-semibold text-[#67737f] max-md:grid-cols-[44px_1fr_76px]">
-                                <span>#</span><span>段落</span><span>时长</span><span class="max-md:hidden">素材</span>
-                            </div>
-                            <div v-if="!hasSegments" class="px-4 py-10 text-center text-[13px] text-[#7c8792]">还没有分段</div>
-                            <article v-for="s in active.segments" :key="s.id" class="lv-segment">
-                                <span class="font-mono text-[12px] text-[#7a8793]">{{ s.index }}</span>
-                                <div class="min-w-0">
-                                    <div class="text-[13.5px] font-semibold">{{ s.title }}</div>
-                                    <p class="mt-1 line-clamp-2 text-[12.5px] leading-5 text-[#5e6a75]">{{ s.narration }}</p>
-                                    <p class="mt-2 line-clamp-2 rounded bg-[#f6f2e9] px-2 py-1.5 text-[12px] leading-5 text-[#6f5b2d]">{{ s.imagePrompt }}</p>
+                        <div class="mt-5 flex flex-col gap-3">
+                            <div v-if="!hasSegments" class="rounded-md border border-[#dfe5ea] px-4 py-10 text-center text-[13px] text-[#7c8792]">还没有分段</div>
+                            <article v-for="s in active.segments" :key="s.id" class="lv-seg-card">
+                                <div class="lv-seg-thumb">
+                                    <img v-if="s.imageStatus === 'ready' && s.imageLocal" :src="fileUrl(s.imageLocal)" class="h-full w-full object-cover" />
+                                    <span v-else class="msi" :class="{ spin: s.imageStatus === 'running' }">
+                                        {{ s.imageStatus === 'running' ? 'autorenew' : s.imageStatus === 'error' ? 'broken_image' : 'image' }}
+                                    </span>
                                 </div>
-                                <span class="text-[12px] text-[#60707c]">{{ Math.round(s.durationSec / 60) }}m</span>
-                                <div class="flex flex-col gap-1 text-[11px] text-[#6b7782] max-md:hidden">
-                                    <span>图 {{ labelStatus(s.imageStatus) }}</span>
-                                    <span>音 {{ labelStatus(s.audioStatus) }}</span>
-                                    <span>片 {{ labelStatus(s.videoStatus) }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-[12px] text-[#7a8793]">#{{ s.index }}</span>
+                                        <div class="truncate text-[13.5px] font-semibold">{{ s.title }}</div>
+                                        <span class="ml-auto text-[12px] text-[#60707c]">{{ Math.round(s.durationSec / 60) }}m</span>
+                                    </div>
+                                    <p class="mt-1 line-clamp-2 text-[12.5px] leading-5 text-[#5e6a75]">{{ s.narration }}</p>
+                                    <audio v-if="s.audioStatus === 'ready' && s.audioLocal" :src="fileUrl(s.audioLocal)" controls class="mt-2 h-8 w-full"></audio>
+                                    <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                                        <span class="lv-chip" :class="s.imageStatus">图 {{ labelStatus(s.imageStatus) }}</span>
+                                        <span class="lv-chip" :class="s.audioStatus">音 {{ labelStatus(s.audioStatus) }}</span>
+                                        <span v-if="s.audioDuration" class="text-[#8b96a1]">{{ s.audioDuration.toFixed(1) }}s</span>
+                                        <button
+                                            v-if="(s.imageStatus === 'error' || s.audioStatus === 'error') && !activeBusy"
+                                            class="lv-retry"
+                                            :disabled="busy === `seg-${s.id}`"
+                                            @click="retrySegment(s.id)">
+                                            <span class="msi xxs">refresh</span>重试
+                                        </button>
+                                    </div>
+                                    <p v-if="s.error" class="mt-1 text-[11.5px] text-[#b3261e]">{{ s.error }}</p>
                                 </div>
                             </article>
                         </div>
@@ -480,11 +559,11 @@ watch(
                         <div class="mt-4 space-y-3">
                             <div class="lv-step done"><span>1</span><strong>项目定义</strong></div>
                             <div class="lv-step" :class="{ done: hasSegments }"><span>2</span><strong>大纲与解说</strong></div>
-                            <div class="lv-step" :class="{ done: active.status === 'asset_queue' || active.status === 'blocked' }"><span>3</span><strong>图片与音频</strong></div>
-                            <div class="lv-step"><span>4</span><strong>视频拼接</strong></div>
+                            <div class="lv-step" :class="{ done: ['assets_ready', 'rendering', 'done'].includes(active.status) }"><span>3</span><strong>图片与音频</strong></div>
+                            <div class="lv-step" :class="{ done: active.status === 'done' }"><span>4</span><strong>视频拼接</strong></div>
                         </div>
                         <div class="mt-5 rounded-md bg-[#f7f9fa] p-3 text-[12.5px] leading-6 text-[#697681]">
-                            图片与语音由阿里云百炼生成；授权未完成时，素材会停在待配置状态。
+                            图片与语音由阿里云百炼生成并落盘到本地；拼接由 ffmpeg 真实出片。失败段落可单独重试。
                         </div>
                     </aside>
                 </section>
@@ -633,6 +712,49 @@ watch(
 }
 .lv-step.done { color: #1f5f3b; }
 .lv-step.done span { background: #e1f2e7; }
+.lv-seg-card {
+    display: flex;
+    gap: 12px;
+    border: 1px solid #e2e8ed;
+    border-radius: 8px;
+    background: #fbfcfd;
+    padding: 10px;
+}
+.lv-seg-thumb {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 120px;
+    height: 68px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #eef2f5;
+    color: #9aa6b1;
+}
+.lv-seg-thumb .msi { font-size: 26px; }
+.lv-chip {
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-weight: 650;
+    background: #eef2f5;
+    color: #67737f;
+}
+.lv-chip.ready { background: #e8f5ee; color: #1f6b3e; }
+.lv-chip.running { background: #e7f0ff; color: #1f5fc0; }
+.lv-chip.error { background: #fdecea; color: #b3261e; }
+.lv-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    background: #fdecea;
+    color: #b3261e;
+    font-weight: 650;
+    padding: 3px 9px;
+}
+.lv-retry:disabled { opacity: 0.5; }
+.spin { animation: lv-spin 0.9s linear infinite; }
+@keyframes lv-spin { to { transform: rotate(360deg); } }
 .lv-provider-state {
     border-radius: 6px;
     background: #fff6e8;

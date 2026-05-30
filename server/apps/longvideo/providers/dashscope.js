@@ -61,7 +61,21 @@ const requestDashScope = async (config, body) => {
   return { ok: true, data };
 };
 
-const createImageJob = async ({ prompt }) => {
+const downloadToFile = async ({ projectId, kind, segmentId, url, ext }) => {
+  const dir = join(root, "files", "exports", "longvideo", String(projectId), kind);
+  mkdirSync(dir, { recursive: true });
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`下载百炼${kind === "image" ? "图片" : "音频"}失败: ${res.status}`);
+  const buffer = Buffer.from(await res.arrayBuffer());
+  if (!buffer.length) throw new Error("阿里云百炼返回空文件");
+  let suffix = ext || extname(new URL(url).pathname) || (kind === "image" ? ".png" : ".wav");
+  const filepath = join(dir, `segment-${segmentId}-${Date.now()}${suffix}`);
+  writeFileSync(filepath, buffer);
+  return filepath;
+};
+
+// 生成图片：调百炼拿到远端 URL，再落盘到 files/exports/longvideo/<pid>/image。
+const createImageJob = async ({ prompt, projectId, segmentId }) => {
   const config = requireDashScopeConfig();
   if (!config.ok) return config;
 
@@ -94,11 +108,18 @@ const createImageJob = async ({ prompt }) => {
       raw: result.data,
     };
   }
-  return {
-    ok: true,
-    uri: image,
-    raw: result.data,
-  };
+
+  // 配置测试场景没有 projectId，只验证连通性，不落盘。
+  if (!projectId) return { ok: true, uri: image, raw: result.data };
+
+  try {
+    const localPath = await downloadToFile({
+      projectId, kind: "image", segmentId, url: image,
+    });
+    return { ok: true, uri: image, localPath, raw: result.data };
+  } catch (err) {
+    return { ok: false, code: "DASHSCOPE_IMAGE_DOWNLOAD_FAILED", message: err.message };
+  }
 };
 
 const saveAudio = async ({ projectId, segmentId, url, data }) => {
@@ -140,18 +161,17 @@ const createAudioJob = async ({ projectId, segmentId, text }) => {
   if (!result.ok) return result;
 
   const audio = result.data?.output?.audio || {};
-  const uri = await saveAudio({
-    projectId,
-    segmentId,
-    url: audio.url,
-    data: audio.data,
-  });
-
-  return {
-    ok: true,
-    uri,
-    raw: result.data,
-  };
+  try {
+    const localPath = await saveAudio({
+      projectId,
+      segmentId,
+      url: audio.url,
+      data: audio.data,
+    });
+    return { ok: true, localPath, raw: result.data };
+  } catch (err) {
+    return { ok: false, code: "DASHSCOPE_AUDIO_DOWNLOAD_FAILED", message: err.message };
+  }
 };
 
 export {

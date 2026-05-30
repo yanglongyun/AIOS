@@ -12,4 +12,9 @@ export const createProject = (payload) => api.post(`${BASE}/project`, payload);
 export const generatePlan = (id) => api.post(`${BASE}/project/generate-plan`, { id });
 export const generateAssets = (id) => api.post(`${BASE}/project/generate-assets`, { id });
 export const assembleVideo = (id) => api.post(`${BASE}/project/assemble`, { id });
+export const retrySegment = (segmentId) => api.post(`${BASE}/segment/retry`, { segmentId });
 export const generatePrompt = (payload) => api.post('/api/task/create/instant', payload);
+
+// 本地素材预览（图片/音频/成片）走主服务的 /api/fs/read。
+export const fileUrl = (absPath) =>
+    absPath ? `/api/fs/read?path=${encodeURIComponent(absPath)}` : '';

@@ -3,7 +3,7 @@ import { readBody } from "../../../shared/http/readBody.js";
 import { createProject, getProject, listProjects } from "../repository/projects.js";
 import { getPublicProviderSettings, saveProviderSettings } from "../repository/settings.js";
 import { createAudioJob, createImageJob } from "../providers/dashscope.js";
-import { assembleVideo, queueAssets } from "../service/assets.js";
+import { assembleVideo, queueAssets, retrySegment } from "../service/assets.js";
 import { generatePlan } from "../service/planner.js";
 
 const readProjectId = (req, body = {}) => {
@@ -70,6 +70,14 @@ const handleLongvideoApi = async (req, res, path) => {
   if (path === "/apps/longvideo/project/generate-assets" && req.method === "POST") {
     const body = await readBody(req);
     const project = await queueAssets({ projectId: readProjectId(req, body) });
+    return json(res, { success: true, project });
+  }
+
+  if (path === "/apps/longvideo/segment/retry" && req.method === "POST") {
+    const body = await readBody(req);
+    const segmentId = Number(body.segmentId || body.id || 0);
+    if (!segmentId) return json(res, { success: false, message: "缺少 segmentId" }, 400);
+    const project = retrySegment({ segmentId });
     return json(res, { success: true, project });
   }
 

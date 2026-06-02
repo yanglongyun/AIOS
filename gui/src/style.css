@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "@xterm/xterm/css/xterm.css";
 
 /* Tailwind v4 token -- 让 bg-bg / text-ink / border-line 等类能生成。
    注意:v4 的 @theme 是替换不是扩展,所以 text-white / bg-white 这类

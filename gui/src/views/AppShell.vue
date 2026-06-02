@@ -16,7 +16,7 @@
 
 <script setup>
 import { ref, shallowRef, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import AppsPopup from '../components/AppsPopup.vue';
 import QuickChat from '../components/QuickChat.vue';
 import ConnectionGate from '../components/ConnectionGate.vue';
@@ -27,13 +27,17 @@ import { useAuthStore } from '@/stores/auth';
 import { connect, disconnect } from '@/system/ws.js';
 
 const route = useRoute();
+const router = useRouter();
 const auth = useAuthStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
 
 async function loadApp(id) {
   const app = getApp(id);
-  if (!app) return;
+  if (!app) {
+    router.replace('/app/chat');
+    return;
+  }
   const mod = await app.load();
   currentComponent.value = mod?.default || mod;
   activeAppId.value = id;

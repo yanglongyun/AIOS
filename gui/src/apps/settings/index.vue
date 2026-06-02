@@ -11,7 +11,6 @@ const auth = useAuthStore();
 const settings = ref(null);
 const prompt = ref('');
 const promptPreview = ref('');
-const sysSnap = ref(null);
 const skills = ref([]);
 
 const loading = ref(true);
@@ -59,10 +58,6 @@ async function loadAll() {
     prompt.value = p?.content || '';
   } catch (e) { errMsg.value = '加载失败: ' + (e.message || e); }
   loading.value = false;
-}
-
-async function loadSys() {
-  try { sysSnap.value = await api.get('/apps/sysinfo/snapshot'); } catch {}
 }
 
 async function loadSkills() {
@@ -173,7 +168,6 @@ async function changePwd() {
 
 // ───────── 切换 section 时按需加载 ─────────
 watch(active, (k) => {
-  if (k === 'about' && !sysSnap.value) loadSys();
   if (k === 'skills' && !skillsLoaded.value) loadSkills();
   if (k === 'prompt' && !promptPreview.value) queuePromptPreview(0);
 });
@@ -319,7 +313,7 @@ onActivated(() => loadAll());
               <button class="btn solid" @click="savePrompt">保存</button>
             </header>
             <textarea class="prompt-area user-prompt" v-model="prompt" spellcheck="false" rows="10"
-              placeholder="例如:你是 AIOS 的本机 AI 助理,可以读文件、跑命令、查系统状态…"></textarea>
+              placeholder="例如:你是 AIOS 的本机 AI 助理,可以理解需求、调度任务、维护记忆…"></textarea>
             <div class="prompt-meta">{{ prompt.length }} 字符</div>
           </section>
 
@@ -462,9 +456,6 @@ onActivated(() => loadAll());
             </div>
             <div class="about-grid">
               <div class="kv"><span>版本</span><span>0.1.0</span></div>
-              <div class="kv"><span>主机</span><span>{{ sysSnap?.sys?.hostname || '—' }}</span></div>
-              <div class="kv"><span>平台</span><span>{{ sysSnap?.sys?.platform || '—' }} / {{ sysSnap?.sys?.arch || '—' }}</span></div>
-              <div class="kv"><span>Node</span><span>{{ sysSnap?.sys?.nodeVersion || '—' }}</span></div>
               <div class="kv"><span>Model</span><span class="mono">{{ settings.model }}</span></div>
             </div>
           </section>

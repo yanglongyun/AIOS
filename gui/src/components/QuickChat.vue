@@ -99,14 +99,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
       <div class="inner-card">
         <header class="head">
           <span class="bot">
-            <svg viewBox="0 0 24 24" width="20" height="20">
-              <circle cx="12" cy="12" r="10" fill="#1a73e8"/>
-              <circle cx="9" cy="11" r="1.6" fill="#fff"/>
-              <circle cx="15" cy="11" r="1.6" fill="#fff"/>
-              <path d="M8.5 14.5c1 1.2 2.2 1.7 3.5 1.7s2.5-.5 3.5-1.7" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-            </svg>
+            <span class="msi sm">memory</span>
           </span>
-          <span class="title">问 AI</span>
+          <span class="title">AI CHANNEL</span>
           <span class="ws-dot" :class="wsStatus" :title="'WS: ' + wsStatus"></span>
           <button class="icon-btn close-btn" @click="view.closeChat()" title="关闭">
             <span class="msi sm">close</span>
@@ -170,14 +165,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
 
 .head { flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 12px 12px 18px; border-bottom: 1px solid var(--line); }
 .head .bot { display: grid; place-items: center; }
-.head .title { flex: 1; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.head .bot {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(0, 229, 255, .28);
+  border-radius: 4px;
+  color: var(--accent);
+}
+.head .title { flex: 1; font-family: var(--font-mono); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
 .ws-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
 .ws-dot.connected { background: var(--good); box-shadow: 0 0 6px var(--good); }
 .ws-dot.connecting { background: var(--warn); }
 .ws-dot.disconnected { background: var(--bad); }
 
 .body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
-.msg { max-width: 85%; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.msg { max-width: 85%; padding: 10px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 .msg.ai { background: var(--bg-elev); color: var(--text); border: 1px solid var(--line); border-top-left-radius: 2px; align-self: flex-start; }
 .msg.user { background: var(--accent-soft); color: var(--text); border: 1px solid rgba(0, 229, 255, 0.25); border-top-right-radius: 2px; align-self: flex-end; }
 

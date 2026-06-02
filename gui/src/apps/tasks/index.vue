@@ -202,11 +202,11 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 
     <!-- ═══════════ 详情模式 ═══════════ -->
     <template v-if="selectedId && detailFor">
-      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
+      <header class="flex h-14 flex-none items-center border-b border-line bg-card-sub px-4 max-md:h-12 max-md:px-2">
         <button class="icon-btn lg" title="返回列表" @click="backToList">
           <span class="msi">arrow_back</span>
         </button>
-        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
+        <div class="ml-3 mr-1 min-w-0 flex-1 truncate font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-ink max-md:text-[12px]">
           {{ detailFor.title || payloadText(detailFor.payload).slice(0, 40) || '任务详情' }}
         </div>
         <div class="ml-auto flex items-center gap-1">
@@ -231,12 +231,12 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 
     <!-- ═══════════ 列表模式 ═══════════ -->
     <template v-else>
-      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
+      <header class="flex h-14 flex-none items-center border-b border-line bg-card-sub px-4 max-md:h-12 max-md:px-2">
         <button class="icon-btn lg" :class="{ active: view.appDrawerOpen }"
           @click="view.toggleAppDrawer()" title="侧栏">
           <span class="msi">menu</span>
         </button>
-        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
+        <div class="ml-3 mr-1 min-w-0 flex-1 truncate font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-ink max-md:text-[12px]">
           任务
         </div>
         <div class="ml-auto flex items-center gap-1">
@@ -250,17 +250,17 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           <div v-if="view.appDrawerOpen" class="app-side-mask" @click="view.closeAppDrawer()" />
         </Transition>
 
-        <aside class="app-side !bg-bg" :class="{ collapsed: !view.appDrawerOpen }">
+        <aside class="app-side !bg-bg-elev" :class="{ collapsed: !view.appDrawerOpen }">
           <div class="app-side-inner">
             <Sidebar :filters="filters" :current="filter" :counts="counts" @pick="pickFilter" />
           </div>
         </aside>
 
         <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-6 pb-4 max-md:px-3">
-          <div class="max-w-[720px] mx-auto py-4">
+          <div class="mx-auto max-w-[840px] py-4">
             <AddBar v-model="newTitle" :submitting="submitting" @submit="addTask" />
 
-            <div v-if="errMsg" class="my-2 px-3.5 py-2.5 rounded-[10px] bg-[#fce8e6] text-bad text-[12.5px]">
+            <div v-if="errMsg" class="my-2 rounded border border-bad/25 bg-bad/10 px-3.5 py-2.5 font-mono text-[12px] text-bad">
               {{ errMsg }}
             </div>
 
@@ -275,7 +275,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 
             <template v-if="(filter === 'all' || filter === 'mine') && doneTasks.length">
               <button
-                class="mt-6 mb-1 flex w-full items-center gap-2 px-3 py-2 border-0 bg-transparent rounded-lg text-left text-[14px] font-medium text-ink cursor-pointer transition-colors hover:bg-bg-hi"
+                class="mt-6 mb-1 flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-3 py-2 text-left font-mono text-[12px] font-semibold uppercase tracking-[0.04em] text-ink transition-colors hover:bg-bg-hi"
                 @click="showCompleted = !showCompleted">
                 <span class="msi sm text-muted transition-transform"
                   :class="{ '-rotate-90': !showCompleted }">expand_more</span>
@@ -304,7 +304,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
             </template>
 
             <div v-if="!visibleTasks.length && !loading"
-              class="flex flex-col items-center justify-center gap-3 py-20 text-faint text-[13.5px]">
+              class="flex flex-col items-center justify-center gap-3 py-20 font-mono text-[12px] uppercase tracking-[0.08em] text-faint">
               <span class="msi text-faint" style="font-size:48px">task_alt</span>
               <div>{{ filter === 'all' ? '还没有任务,在上面添加一条试试' : '当前过滤条件下没有任务' }}</div>
             </div>

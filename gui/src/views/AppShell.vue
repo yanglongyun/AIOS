@@ -1,7 +1,6 @@
 <template>
   <div id="aios-container">
-    <!-- LEFT SWITCHER (DESKTOP ONLY SIDEBAR) -->
-    <nav class="switcher">
+    <nav class="switcher" aria-label="应用切换器">
       <div class="switcher-top">
         <div class="os-logo">AIOS</div>
         <div class="switcher-apps-container">
@@ -22,7 +21,6 @@
       </div>
     </nav>
 
-    <!-- RIGHT WORKSPACE AREA -->
     <main class="workspace">
       <Suspense>
         <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" />
@@ -101,7 +99,9 @@ onMounted(async () => {
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
-  background: var(--bg-elev);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 229, 255, .08), transparent 30%),
+    linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
 }
 
 .workspace {
@@ -114,7 +114,6 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/* Left Switcher (Desktop) */
 .switcher {
   background-color: var(--bg-elev);
   border-right: 1px solid var(--line);
@@ -147,10 +146,10 @@ onMounted(async () => {
   color: var(--accent);
   font-family: var(--font-mono), monospace;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: -1px;
   margin-bottom: 20px;
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.18);
   flex-shrink: 0;
 }
 
@@ -204,7 +203,7 @@ onMounted(async () => {
 
 .switcher-btn:hover {
   color: var(--text);
-  background-color: var(--bg-card);
+  background-color: var(--bg-hover);
 }
 
 .switcher-btn.active {
@@ -257,9 +256,64 @@ onMounted(async () => {
 @media (max-width: 768px) {
   #aios-container {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
   .switcher {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 70;
+    height: 64px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(9, 10, 15, .94);
+    box-shadow: var(--shadow-3);
+    backdrop-filter: blur(18px);
+  }
+  .switcher-top {
+    height: auto;
+    min-width: 0;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+  }
+  .os-logo,
+  .switcher-bottom {
     display: none;
+  }
+  .switcher-apps-container {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 6px;
+    padding: 0;
+  }
+  .switcher-btn {
+    width: 54px;
+    height: 48px;
+    border-radius: 8px;
+  }
+  .switcher-btn.active::before {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: -1px;
+    width: auto;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+  }
+  .workspace {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
   }
 }
 </style>

@@ -22,37 +22,37 @@ const props = defineProps({
 defineEmits(['open', 'stop', 'rerun']);
 
 const BADGE_CLS = {
-  pending: 'bg-[#fef7e0] text-[#b06000]',
+  pending: 'bg-warn/10 text-warn border border-warn/20',
   running: 'bg-blue-bg text-blue-fg',
-  done:    'bg-[#e6f4ea] text-good',
-  error:   'bg-[#fce8e6] text-bad',
-  aborted: 'bg-[#eef3f7] text-muted'
+  done:    'bg-good/10 text-good border border-good/20',
+  error:   'bg-bad/10 text-bad border border-bad/20',
+  aborted: 'bg-bg-elev text-muted border border-line'
 };
 </script>
 
 <template>
   <div
-    class="group relative flex items-start gap-3 px-3 py-3 border-b border-line-soft cursor-pointer transition-colors hover:bg-bg-hi"
+    class="group relative flex cursor-pointer items-start gap-3 border-b border-line-soft px-3 py-3 transition-colors hover:bg-bg-hi"
     @click="$emit('open', task)">
 
     <div class="flex-1 min-w-0">
-      <div class="text-[14px] leading-[1.5] break-words"
+      <div class="break-words font-mono text-[13px] leading-[1.55]"
         :class="(status.cls === 'done' || status.cls === 'error' || status.cls === 'aborted') ? 'text-faint' : 'text-ink'">
         {{ task.title || payloadText(task.payload).slice(0, 80) || '(空)' }}
       </div>
       <div v-if="payloadText(task.payload) && payloadText(task.payload) !== task.title"
-        class="mt-0.5 truncate text-[12.5px] text-muted">
+        class="mt-1 truncate text-[12px] text-muted">
         {{ preview(payloadText(task.payload)) }}
       </div>
-      <div class="mt-1.5 flex items-center gap-2 text-[11.5px] text-faint">
+      <div class="mt-2 flex items-center gap-2 font-mono text-[10.5px] text-faint">
         <span v-if="showStatus"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-[10px] text-[11px] font-medium"
+          class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10.5px] font-semibold"
           :class="BADGE_CLS[status.cls] || BADGE_CLS.pending">
           <span v-if="task.status === 'pending'" class="msi xxs animate-spin">autorenew</span>
           <span v-else class="msi xxs">{{ status.icon }}</span>
           {{ status.label }}
         </span>
-        <span class="px-1.5 py-px rounded font-mono text-[10.5px] text-muted bg-bg-elev">
+        <span class="rounded bg-bg-elev px-1.5 py-px font-mono text-[10.5px] text-muted">
           {{ task.app }}
         </span>
         <span>{{ relTime(task.created_at) }}</span>
@@ -64,13 +64,13 @@ const BADGE_CLS = {
       :class="task.status === 'pending' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
       @click.stop>
       <button v-if="task.status === 'pending'"
-        class="grid h-8 w-8 place-items-center rounded-full border-0 bg-transparent text-faint cursor-pointer transition-colors hover:!bg-bad/10 hover:!text-bad"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-faint transition-colors hover:!bg-bad/10 hover:!text-bad"
         title="停止"
         @click="$emit('stop', task)">
         <span class="msi sm">stop</span>
       </button>
       <button
-        class="grid h-8 w-8 place-items-center rounded-full border-0 bg-transparent text-faint cursor-pointer transition-colors hover:bg-black/[0.06] hover:text-ink"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-faint transition-colors hover:bg-bg-hi hover:text-ink"
         title="重跑"
         @click="$emit('rerun', task)">
         <span class="msi sm">replay</span>

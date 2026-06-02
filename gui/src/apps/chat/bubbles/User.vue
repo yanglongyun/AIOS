@@ -7,12 +7,12 @@ defineProps({
 
 <template>
   <div
-    class="chat-scroll-bubble rounded-lg rounded-tr-[2px] bg-accent/5 border border-accent/25 px-3.5 py-2.5 text-[14px] leading-[1.55] text-ink"
+    class="chat-scroll-bubble rounded-md rounded-tr-[2px] border border-accent/25 bg-accent/10 px-3.5 py-2.5 font-mono text-[13px] leading-[1.6] text-ink"
     style="width: fit-content; max-width: min(70%, 560px)">
     <div v-if="text" class="whitespace-pre-wrap break-words">{{ text }}</div>
     <div v-if="attachments?.length" class="mt-1.5 flex flex-wrap gap-1">
       <span v-for="(f, idx) in attachments" :key="idx"
-        class="inline-flex items-center gap-1 rounded bg-white/5 border border-line px-2 py-0.5 text-[11px] text-muted">
+        class="inline-flex items-center gap-1 rounded border border-line bg-bg-elev px-2 py-0.5 text-[11px] text-muted">
         <span class="msi xxs">attach_file</span>
         <span class="max-w-[180px] truncate">{{ f.name }}</span>
       </span>

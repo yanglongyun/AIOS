@@ -35,26 +35,29 @@ defineEmits(['pick']);
   height: 40px;
   align-items: center;
   gap: 14px;
-  border-radius: 0 20px 20px 0;
-  color: var(--color-ink, #202124);
-  font-size: 14px;
+  border-radius: 0 6px 6px 0;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 500;
   margin-right: 12px;
   padding: 0 14px 0 24px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 .memory-filter:hover {
-  background: var(--color-bg-hi, #f1f4f8);
+  background: var(--bg-hover);
 }
 .memory-filter.active {
-  background: var(--color-blue-bg, #e8f0fe);
-  color: var(--color-blue-fg, #174ea6);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(0, 229, 255, .22);
+  border-left: 0;
 }
 .memory-filter .msi {
-  color: var(--color-muted, #69737d);
+  color: var(--text-2);
 }
 .memory-filter.active .msi {
-  color: var(--color-blue-fg, #174ea6);
+  color: var(--accent);
 }
 .label {
   min-width: 0;
@@ -65,15 +68,15 @@ defineEmits(['pick']);
   white-space: nowrap;
 }
 .count {
-  border-radius: 999px;
-  background: var(--color-bg-elev, #fff);
-  color: var(--color-faint, #8a9099);
+  border-radius: 4px;
+  background: var(--bg-elev);
+  color: var(--text-3);
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   padding: 1px 8px;
 }
 .active .count {
-  background: rgba(255, 255, 255, 0.55);
-  color: var(--color-blue-fg, #174ea6);
+  background: rgba(0, 229, 255, .12);
+  color: var(--accent);
 }
 </style>

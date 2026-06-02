@@ -24,19 +24,9 @@ const status = computed(() => {
         <div v-if="show" class="gate-bg">
             <div class="gate-card">
                 <div class="gem">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="AIOSGateGem" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0"  stop-color="var(--gem-3)"/>
-                                <stop offset=".5" stop-color="var(--gem-2)"/>
-                                <stop offset="1"  stop-color="var(--gem-1)"/>
-                            </linearGradient>
-                        </defs>
-                        <path d="M12 2c.6 4 3 6.4 7 7-4 .6-6.4 3-7 7-.6-4-3-6.4-7-7 4-.6 6.4-3 7-7z"
-                              fill="url(#AIOSGateGem)"/>
-                    </svg>
+                    <span class="msi">memory</span>
                 </div>
-                <div class="brand">AIOS<span class="dot">.</span></div>
+                <div class="brand">AIOS</div>
                 <div class="status">
                     <span class="gate-dot" :data-state="status.id"></span>
                     <span class="t">{{ status.label }}</span>
@@ -50,7 +40,7 @@ const status = computed(() => {
 .gate-bg {
     position: fixed; inset: 0; z-index: 60;
     display: flex; align-items: center; justify-content: center;
-    background: color-mix(in srgb, var(--color-bg) 78%, transparent);
+    background: color-mix(in srgb, var(--color-bg-elev) 82%, transparent);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
@@ -59,28 +49,30 @@ const status = computed(() => {
     padding: 32px 36px;
     background: var(--color-bg-elev);
     border: 1px solid var(--color-line);
-    border-radius: 24px;
-    box-shadow: var(--shadow-lg);
+    border-radius: 8px;
+    box-shadow: var(--shadow-3);
     min-width: 240px;
 }
 .gem {
     width: 56px; height: 56px;
-    border-radius: 50%;
+    border-radius: 6px;
     display: grid; place-items: center;
-    background: color-mix(in srgb, var(--color-bg-hi) 60%, transparent);
+    background: var(--accent-soft);
+    border: 1px solid rgba(0, 229, 255, .28);
+    color: var(--accent);
 }
-.gem svg { width: 32px; height: 32px; }
+.gem .msi { font-size: 30px; }
 
 .brand {
-    font-size: 24px; font-weight: 600; line-height: 1;
-    letter-spacing: -0.02em;
+    font-family: var(--font-mono);
+    font-size: 22px; font-weight: 800; line-height: 1;
+    letter-spacing: .08em;
     color: var(--color-ink);
 }
-.brand .dot { color: var(--color-accent); margin-left: 2px; }
-
 .status {
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--color-muted);
     margin-top: 2px;
 }
 .gate-dot {

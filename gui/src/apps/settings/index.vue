@@ -469,25 +469,32 @@ onActivated(() => loadAll());
 <style scoped>
 /* ─── 顶栏(自有,不依赖任何共享组件) ─── */
 .topbar {
-  flex: none; height: 64px;
+  flex: none; height: 56px;
   display: flex; align-items: center;
   padding: 8px 16px;
-  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-card-sub);
 }
 .left-spacer { width: 8px; }
 .topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
-.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
+.topbar .brand .name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 .topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 @media (max-width: 720px) {
   .topbar { padding: 8px; height: 56px; }
-  .topbar .brand .name { font-size: 17px; }
+  .topbar .brand .name { font-size: 12px; }
 }
 
 /* ─────────── 整体壳 ─────────── */
 .settings-shell {
   flex: 1; min-width: 0; min-height: 0;
   display: flex;
-  background: var(--bg-elev);
+  background: var(--bg);
 }
 
 /* ─────────── 左导航 ─────────── */
@@ -495,24 +502,26 @@ onActivated(() => loadAll());
   flex: none;
   width: 240px;
   display: flex; flex-direction: column;
-  padding: 24px 12px 12px;
-  background: transparent;
+  padding: 18px 12px 12px;
+  background: var(--bg-elev);
+  border-right: 1px solid var(--line-soft);
 }
 .nav-item {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px;
   border: 1px solid transparent; background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--text-2);
   text-align: left;
-  font-size: 13.5px; font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600;
   cursor: pointer;
   transition: background .12s, color .12s, border-color .12s;
 }
 .nav-item .ic { color: var(--text-3); }
 .nav-item:hover { background: var(--bg-hover); color: var(--text); }
 .nav-item:hover .ic { color: var(--text-2); }
-.nav-item.active { background: var(--bg-hover); border-color: var(--line); color: var(--accent); }
+.nav-item.active { background: var(--accent-soft); border-color: rgba(0, 229, 255, .26); color: var(--accent); }
 .nav-item.active .ic { color: var(--accent); }
 .nav-foot { margin-top: auto; padding: 8px 14px 4px; }
 .badge {
@@ -535,10 +544,10 @@ onActivated(() => loadAll());
   gap: 16px; margin-bottom: 18px;
 }
 .crumb { font-size: 11.5px; color: var(--text-3); letter-spacing: 0.04em; }
-.h1 { margin: 4px 0 0; font-size: 26px; font-weight: 500; letter-spacing: -0.015em; }
+.h1 { margin: 4px 0 0; font-family: var(--font-mono); font-size: 24px; font-weight: 800; letter-spacing: 0; }
 .notice {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 999px;
+  padding: 6px 12px; border-radius: 4px;
   font-size: 12.5px; font-weight: 500;
 }
 .notice.ok  { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent); }
@@ -563,7 +572,13 @@ onActivated(() => loadAll());
   margin-bottom: 12px;
 }
 .sec-head:last-child { margin-bottom: 0; }
-.sec-title { font-size: 15.5px; font-weight: 500; letter-spacing: -0.005em; }
+.sec-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
 .sec-sub { font-size: 12.5px; color: var(--text-2); margin-top: 4px; line-height: 1.55; max-width: 540px; }
 
 /* ─────────── 表单 ─────────── */
@@ -612,12 +627,12 @@ onActivated(() => loadAll());
 .btn.solid  { background: var(--accent); color: var(--bg-elev); font-weight: 700; }
 .btn.solid:hover:not(:disabled) { background: var(--accent-hi); }
 .btn.tonal  { background: var(--bg-hover); color: var(--accent); border-color: var(--line); }
-.btn.tonal:hover:not(:disabled) { background: var(--card-hi); }
+.btn.tonal:hover:not(:disabled) { background: var(--bg-hover); }
 .btn.outline { background: transparent; color: var(--text-2); border: 1px solid var(--line); }
 .btn.outline:hover { background: var(--bg-hover); color: var(--text); }
 .btn.outline.danger:hover { color: var(--bad); border-color: var(--bad); background: rgba(255, 23, 68, 0.05); }
 
-/* ─────────── 开关 (Material 3 switch) ─────────── */
+/* ─────────── 系统开关 ─────────── */
 .switch {
   flex: none;
   position: relative;

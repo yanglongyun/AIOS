@@ -42,21 +42,19 @@ defineExpose({ scrollEnd, snapshotScroll, restorePrepended });
 // ─── 欢迎页内容 ─────────────────────────────────
 const greeting = computed(() => {
   const h = new Date().getHours();
-  if (h < 5)  return { icon: '🌙', text: '深夜好' };
-  if (h < 11) return { icon: '☀️', text: '早上好' };
-  if (h < 13) return { icon: '🌤', text: '中午好' };
-  if (h < 18) return { icon: '🌻', text: '下午好' };
-  if (h < 22) return { icon: '🌆', text: '晚上好' };
-  return { icon: '🌙', text: '夜里好' };
+  if (h < 6) return 'NIGHT CYCLE';
+  if (h < 12) return 'MORNING SHIFT';
+  if (h < 18) return 'DAY SHIFT';
+  return 'EVENING SHIFT';
 });
 
 const suggests = [
-  { icon: 'edit_note',     label: '帮我写点东西',  prompt: '帮我写一段……' },
-  { icon: 'lightbulb',     label: '给我一些灵感',  prompt: '给我一些关于……的灵感' },
-  { icon: 'summarize',     label: '总结一下',      prompt: '帮我总结一下……' },
-  { icon: 'code',          label: '写段代码',      prompt: '用 ____ 写一段代码,实现……' },
-  { icon: 'translate',     label: '翻译',          prompt: '把下面这段翻译成……\n\n' },
-  { icon: 'school',        label: '解释一个概念',  prompt: '用通俗的话解释一下:' }
+  { icon: 'edit_note', label: '起草内容', prompt: '帮我起草一段' },
+  { icon: 'route', label: '拆解计划', prompt: '把这件事拆成可执行步骤:' },
+  { icon: 'summarize', label: '提炼要点', prompt: '总结下面内容的关键点:\n\n' },
+  { icon: 'code', label: '构建代码', prompt: '实现一个功能:' },
+  { icon: 'search', label: '分析资料', prompt: '基于下面信息做判断:\n\n' },
+  { icon: 'psychology', label: '写入记忆', prompt: '这件事需要长期记住:' }
 ];
 
 const pick = (s) => emit('pick', s.prompt);
@@ -65,7 +63,7 @@ const pick = (s) => emit('pick', s.prompt);
 <template>
   <div ref="listEl"
     @scroll="onScroll"
-    class="msgs flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-0 pt-2 pb-6 max-md:px-3 max-md:pb-4">
+    class="msgs flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-0 pt-3 pb-6 max-md:px-3 max-md:pb-4">
     <div v-if="hasActive && (hasMore || loadingOlder)" class="load-older">
       {{ loadingOlder ? '加载中...' : '向上滚动加载更早消息' }}
     </div>
@@ -77,9 +75,9 @@ const pick = (s) => emit('pick', s.prompt);
       <!-- 顶部光晕 -->
       <div class="welcome-halo"></div>
 
-      <div class="welcome-emoji">{{ greeting.icon }}</div>
-      <h1 class="welcome-greeting">{{ greeting.text }}</h1>
-      <p class="welcome-sub">今天想聊点什么?</p>
+      <div class="welcome-mark">AIOS / AGENT</div>
+      <h1 class="welcome-greeting">{{ greeting }}</h1>
+      <p class="welcome-sub">选择一条指令，或直接输入新的操作目标。</p>
 
       <div class="welcome-suggests">
         <button
@@ -95,7 +93,7 @@ const pick = (s) => emit('pick', s.prompt);
 
       <div class="welcome-tip">
         <span class="msi text-[14px] align-[-2px]">arrow_downward</span>
-        在下方输入框开始一段新对话
+        INPUT CHANNEL READY
       </div>
     </div>
 
@@ -141,10 +139,12 @@ const pick = (s) => emit('pick', s.prompt);
   margin: 2px auto 12px;
   width: fit-content;
   max-width: 100%;
-  border-radius: 999px;
-  background: #eef3f8;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
   color: var(--text-3);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   padding: 5px 12px;
 }
 
@@ -171,7 +171,9 @@ const pick = (s) => emit('pick', s.prompt);
   width: min(420px, 90vw);
   height: 420px;
   transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(26, 115, 232, 0.10) 0%, transparent 65%);
+  background:
+    radial-gradient(circle, rgba(0, 229, 255, 0.14) 0%, transparent 58%),
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(0, 229, 255, 0.05) 18px 19px);
   filter: blur(20px);
   pointer-events: none;
   z-index: 0;
@@ -179,31 +181,30 @@ const pick = (s) => emit('pick', s.prompt);
 
 .welcome > *:not(.welcome-halo) { position: relative; z-index: 1; }
 
-.welcome-emoji {
-  font-size: 56px;
-  line-height: 1;
+.welcome-mark {
   margin-bottom: 14px;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.08));
-  animation: bob 4s ease-in-out infinite;
-}
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  border: 1px solid rgba(0, 229, 255, .28);
+  background: rgba(0, 229, 255, .07);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  padding: 8px 12px;
+  border-radius: 4px;
 }
 
 .welcome-greeting {
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #1a73e8 0%, #6c5ce7 50%, #d63384 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-family: var(--font-mono);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--text);
   margin: 0 0 6px;
 }
 .welcome-sub {
   font-size: 14px;
-  color: var(--ink-mute, rgba(0, 0, 0, 0.55));
+  color: var(--text-2);
   margin: 0 0 24px;
 }
 
@@ -224,31 +225,33 @@ const pick = (s) => emit('pick', s.prompt);
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--bg-elev, #ffffff);
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
-  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   text-align: left;
   font-size: 14px;
-  color: var(--ink, #1f1f1f);
+  color: var(--text);
   cursor: pointer;
   transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 .welcome-chip:hover {
-  border-color: rgba(26, 115, 232, 0.35);
-  background: rgba(26, 115, 232, 0.04);
+  border-color: rgba(0, 229, 255, 0.35);
+  background: rgba(0, 229, 255, 0.08);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px -8px rgba(26, 115, 232, 0.35);
+  box-shadow: 0 10px 24px -14px rgba(0, 229, 255, 0.55);
 }
 .welcome-chip .msi {
   font-family: 'Material Symbols Outlined';
   font-size: 20px;
-  color: #1a73e8;
+  color: var(--accent);
   flex: none;
 }
 
 .welcome-tip {
-  font-size: 12.5px;
-  color: var(--ink-mute, rgba(0, 0, 0, 0.45));
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--text-3);
   display: inline-flex;
   align-items: center;
   gap: 4px;

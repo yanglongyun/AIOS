@@ -61,67 +61,65 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="grid h-dvh w-screen grid-cols-1 overflow-hidden bg-[#f8f9fa] md:grid-cols-[1.15fr_1fr] max-md:h-auto max-md:min-h-dvh max-md:grid-rows-[auto_1fr]">
-        <aside class="welcome-hero relative overflow-hidden text-[#f5f7fb]">
+    <div class="grid h-dvh w-screen grid-cols-1 overflow-hidden bg-bg-elev md:grid-cols-[1.05fr_1fr] max-md:h-auto max-md:min-h-dvh max-md:grid-rows-[auto_1fr]">
+        <aside class="welcome-hero relative overflow-hidden text-ink">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="absolute -left-[120px] -top-[100px] h-[420px] w-[420px] rounded-full opacity-55 bg-[radial-gradient(circle,#34a853_0%,transparent_70%)] blur-[60px]"></div>
-                <div class="absolute -right-[160px] -bottom-[160px] h-[480px] w-[480px] rounded-full opacity-55 bg-[radial-gradient(circle,#1a73e8_0%,transparent_55%)] blur-[60px]"></div>
                 <div class="hero-grid absolute inset-0"></div>
             </div>
 
             <div class="relative flex h-full flex-col gap-14 px-16 py-14 max-md:gap-7 max-md:px-8 max-md:pb-9 max-md:pt-10">
                 <div class="flex items-center gap-3.5">
-                    <div class="grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_8px_22px_-10px_rgba(52,168,83,0.7)]">
-                        <span class="msi" style="font-size:22px">eco</span>
+                    <div class="grid h-9 w-9 place-items-center rounded border border-accent bg-accent/10 text-accent">
+                        <span class="msi" style="font-size:22px">memory</span>
                     </div>
-                    <div class="text-[22px] font-bold tracking-tight text-[#f5f7fb]">
-                        AIOS<span class="text-[#6dd49b]">.</span>
+                    <div class="font-mono text-[22px] font-extrabold tracking-[0.08em] text-ink">
+                        AIOS
                     </div>
                 </div>
 
                 <div class="mt-auto flex flex-col gap-3 max-md:mt-0">
-                    <h1 class="m-0 text-[44px] font-bold leading-[1.15] tracking-[-0.02em] text-white max-md:text-[30px]">
-                        AI 时代的操作系统
+                    <h1 class="m-0 font-mono text-[44px] font-extrabold leading-[1.1] tracking-normal text-ink max-md:text-[30px]">
+                        AGENT OS FRAMEWORK
                     </h1>
-                    <p class="m-0 max-w-[460px] text-[15px] leading-[1.65] text-white/75 max-md:text-[14px]">
-                        你说,它做。从一句话到一个应用,这是你和 AI 共同生活的桌面。
+                    <p class="m-0 max-w-[460px] text-[15px] leading-[1.65] text-muted max-md:text-[14px]">
+                        面向 AI Agent 的多应用操作系统框架。应用切换、上下文、任务与记忆在同一个工作台内协作。
                     </p>
                 </div>
 
                 <div class="mt-2 flex flex-col gap-3.5 max-md:hidden">
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,229,255,0.14)]"></div>
                         <div class="min-w-0">
-                            <div class="mb-0.5 text-[14px] font-semibold text-white">未来留于物形</div>
-                            <div class="text-[12.5px] leading-[1.55] text-white/65">对话驱动,界面承载。AI 的能力,最终化为你看得见、用得着的形态。</div>
+                            <div class="mb-0.5 font-mono text-[13px] font-semibold text-ink">应用即边界</div>
+                            <div class="text-[12.5px] leading-[1.55] text-muted">每个应用拥有自己的界面、状态和数据语义。</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,229,255,0.14)]"></div>
                         <div class="min-w-0">
-                            <div class="mb-0.5 text-[14px] font-semibold text-white">让软件真正走向每一个人</div>
-                            <div class="text-[12.5px] leading-[1.55] text-white/65">告诉 AI 你想要什么,应用就在对话中诞生,为你而写,只属于你。</div>
+                            <div class="mb-0.5 font-mono text-[13px] font-semibold text-ink">Agent 可操作</div>
+                            <div class="text-[12.5px] leading-[1.55] text-muted">任务、记忆和对话都能成为 AI 的读写对象。</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,229,255,0.14)]"></div>
                         <div class="min-w-0">
-                            <div class="mb-0.5 text-[14px] font-semibold text-white">应用也可以和 AI 对话</div>
-                            <div class="text-[12.5px] leading-[1.55] text-white/65">每个应用都能调用 AI 的智慧,不再是孤立的工具,而是懂你的搭档。</div>
+                            <div class="mb-0.5 font-mono text-[13px] font-semibold text-ink">本机优先</div>
+                            <div class="text-[12.5px] leading-[1.55] text-muted">数据与运行态默认落在本机，由用户控制。</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-auto font-mono text-[11px] tracking-[0.08em] text-white/40 max-md:hidden">
-                    v0.1 · running locally
+                <div class="mt-auto font-mono text-[11px] uppercase tracking-[0.12em] text-faint max-md:hidden">
+                    v0.1 · local runtime
                 </div>
             </div>
         </aside>
 
-        <main class="flex items-center justify-center overflow-y-auto bg-white px-12 py-10 max-md:px-6 max-md:pb-12 max-md:pt-8">
+        <main class="flex items-center justify-center overflow-y-auto border-l border-line bg-bg px-12 py-10 max-md:border-l-0 max-md:border-t max-md:px-6 max-md:pb-12 max-md:pt-8">
             <div class="flex w-full max-w-[380px] flex-col gap-7">
                 <div class="flex flex-col gap-1.5">
-                    <h2 class="m-0 text-2xl font-bold tracking-tight text-ink">欢迎使用 AIOS</h2>
+                    <h2 class="m-0 font-mono text-2xl font-bold uppercase tracking-[0.06em] text-ink">初始化系统</h2>
                     <p class="m-0 text-[13.5px] leading-[1.55] text-muted">为这台机器设置一个登录密码,然后开始使用。</p>
                 </div>
 
@@ -161,13 +159,13 @@ onMounted(async () => {
                     </label>
 
                     <div v-if="error"
-                         class="flex items-center gap-2 rounded-[10px] bg-[color-mix(in_srgb,var(--color-bad)_10%,transparent)] px-3 py-2.5 text-[13px] leading-snug text-bad">
+                         class="flex items-center gap-2 rounded border border-bad/25 bg-bad/10 px-3 py-2.5 font-mono text-[12px] leading-snug text-bad">
                         {{ error }}
                     </div>
 
                     <button type="submit"
                             :disabled="!canSubmit"
-                            class="mt-1 h-11 rounded-xl border-0 bg-[#1a73e8] text-[14px] font-semibold tracking-[0.01em] text-white shadow-[0_6px_18px_-8px_rgba(26,115,232,0.65)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-[#174ea6] hover:shadow-[0_10px_24px_-10px_rgba(26,115,232,0.8)] disabled:cursor-not-allowed disabled:bg-[#aecbfa] disabled:text-white disabled:shadow-none disabled:hover:bg-[#aecbfa]">
+                            class="mt-1 h-11 rounded-md border-0 bg-accent font-mono text-[13px] font-bold uppercase tracking-[0.08em] text-bg-elev shadow-[0_0_18px_rgba(0,229,255,0.14)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none">
                         {{ loading ? '设置中...' : '设置密码并进入' }}
                     </button>
                 </form>
@@ -179,9 +177,8 @@ onMounted(async () => {
 <style scoped>
 .welcome-hero {
     background:
-        radial-gradient(120% 80% at 0% 0%, #1f3b5e 0%, transparent 60%),
-        radial-gradient(100% 80% at 100% 100%, #0f2a4a 0%, transparent 55%),
-        linear-gradient(135deg, #0d1b2e 0%, #14253b 100%);
+        radial-gradient(90% 70% at 0% 0%, rgba(0,229,255,.16) 0%, transparent 58%),
+        linear-gradient(135deg, var(--bg-elev) 0%, var(--bg) 100%);
 }
 .hero-grid {
     background-image:

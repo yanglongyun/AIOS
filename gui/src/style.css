@@ -7,51 +7,51 @@
 @theme {
   --color-white:     #ffffff;
   --color-black:     #000000;
-  --color-bg:        #ffffff;
-  --color-bg-elev:   #f1f3f4;
-  --color-bg-hi:     #f8f9fa;
-  --color-card:      #ffffff;
-  --color-card-hi:   #f1f3f4;
-  --color-card-sub:  #f8f9fa;
-  --color-line:      #e0e0e0;
-  --color-line-hi:   #bdc1c6;
-  --color-line-soft: #f1f3f4;
-  --color-ink:       #202124;
-  --color-muted:     #5f6368;
-  --color-faint:     #80868b;
-  --color-accent:    #1a73e8;
-  --color-accent-hi: #174ea6;
-  --color-blue-bg:   #e8f0fe;
-  --color-blue-soft: #d2e3fc;
-  --color-blue-fg:   #174ea6;
-  --color-good:      #1e8e3e;
-  --color-bad:       #d93025;
-  --color-warn:      #f9ab00;
+  --color-bg:        #0e1017;
+  --color-bg-elev:   #090a0f;
+  --color-bg-hi:     #1d2130;
+  --color-card:      #141722;
+  --color-card-hi:   #1a1f2d;
+  --color-card-sub:  #10131c;
+  --color-line:      #24293a;
+  --color-line-hi:   #3a435a;
+  --color-line-soft: #1b2030;
+  --color-ink:       #e2e8f0;
+  --color-muted:     #8b96aa;
+  --color-faint:     #64748b;
+  --color-accent:    #00e5ff;
+  --color-accent-hi: #6ff5ff;
+  --color-blue-bg:   #102a34;
+  --color-blue-soft: #173744;
+  --color-blue-fg:   #00e5ff;
+  --color-good:      #00e676;
+  --color-bad:       #ff1744;
+  --color-warn:      #ffd600;
 
   --font-mono:       'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Google 风全局 token (脚本组件用) */
+/* AIOS 工业工作站 token: 系统级 / 应用级界面共享这一套语义色。 */
 :root {
-  --bg:        #ffffff;
-  --bg-elev:   #f1f3f4;
-  --bg-hover:  #f8f9fa;
-  --bg-card:   #ffffff;
-  --text:      #202124;
-  --text-2:    #5f6368;
-  --text-3:    #80868b;
-  --line:      #e0e0e0;
-  --line-soft: #f1f3f4;
-  --accent:    #1a73e8;
-  --accent-hi: #174ea6;
-  --accent-soft:#e8f0fe;
-  --accent-fg: #174ea6;
-  --good:      #1e8e3e;
-  --bad:       #d93025;
-  --warn:      #f9ab00;
-  --shadow-1:  0 1px 2px rgba(60,64,67,0.08), 0 1px 3px 1px rgba(60,64,67,0.06);
-  --shadow-2:  0 1px 2px rgba(60,64,67,0.15), 0 2px 6px 2px rgba(60,64,67,0.10);
-  --shadow-3:  0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
+  --bg:        #0e1017;
+  --bg-elev:   #090a0f;
+  --bg-hover:  #1d2130;
+  --bg-card:   #141722;
+  --text:      #e2e8f0;
+  --text-2:    #8b96aa;
+  --text-3:    #64748b;
+  --line:      #24293a;
+  --line-soft: #1b2030;
+  --accent:    #00e5ff;
+  --accent-hi: #6ff5ff;
+  --accent-soft:rgba(0, 229, 255, 0.10);
+  --accent-fg: #00e5ff;
+  --good:      #00e676;
+  --bad:       #ff1744;
+  --warn:      #ffd600;
+  --shadow-1:  0 1px 2px rgba(0,0,0,0.26), 0 0 0 1px rgba(255,255,255,0.02);
+  --shadow-2:  0 18px 42px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,229,255,0.06);
+  --shadow-3:  0 24px 72px rgba(0,0,0,0.52), 0 0 0 1px rgba(0,229,255,0.10);
 }
 
 @layer base {
@@ -60,7 +60,7 @@
     margin: 0; padding: 0;
     height: 100%;
     background: var(--bg); color: var(--text);
-    font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: Outfit, "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
   }
@@ -78,6 +78,7 @@
 .app-frame {
   flex: 1; min-width: 0; min-height: 0;
   display: flex; flex-direction: column;
+  background: var(--bg);
 }
 .app-body {
   flex: 1; min-width: 0; min-height: 0;
@@ -115,11 +116,11 @@
   display: grid; place-items: center;
   border: 0; background: transparent;
   color: var(--text-2);
-  border-radius: 50%;
-  transition: background .15s;
+  border-radius: 8px;
+  transition: background .15s, color .15s, box-shadow .15s;
 }
-.icon-btn:hover { background: var(--bg-elev); }
-.icon-btn.active { background: var(--accent-soft); color: var(--accent-fg); }
+.icon-btn:hover { background: var(--bg-hover); color: var(--text); }
+.icon-btn.active { background: var(--accent-soft); color: var(--accent-fg); box-shadow: inset 0 0 0 1px rgba(0, 229, 255, .22); }
 .icon-btn.lg { width: 48px; height: 48px; }
 
 /* 软 pill 按钮 */
@@ -128,12 +129,12 @@
   padding: 8px 16px;
   border: 0; background: var(--accent-soft);
   color: var(--accent-fg);
-  border-radius: 18px;
+  border-radius: 6px;
   font-size: 13.5px; font-weight: 500;
   transition: background .15s, box-shadow .15s;
 }
-.pill-btn:hover { background: #d2e3fc; box-shadow: var(--shadow-1); }
-.pill-btn.solid { background: var(--accent); color: #fff; }
+.pill-btn:hover { background: var(--bg-hover); box-shadow: var(--shadow-1); }
+.pill-btn.solid { background: var(--accent); color: var(--bg-elev); }
 .pill-btn.solid:hover { background: var(--accent-hi); }
 
 /* 文本输入 */
@@ -141,9 +142,9 @@
   width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--bg-elev);
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 14px;
   outline: 0;
   transition: border-color .15s;
@@ -155,7 +156,7 @@
 .card {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 16px;
 }
 
@@ -173,7 +174,7 @@
 .app-side {
   flex: none;
   width: 280px;
-  background: var(--bg);
+  background: var(--bg-elev);
   border-right: 1px solid var(--line-soft);
   display: flex;
   flex-direction: column;
@@ -197,7 +198,7 @@
     z-index: 41;
     transform: translateX(0);
     transition: transform 0.18s ease;
-    box-shadow: var(--shadow-2);
+    box-shadow: var(--shadow-3);
   }
   .app-side.collapsed {
     width: 280px;
@@ -211,6 +212,6 @@
 
 /* 滚动条 */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+::-webkit-scrollbar-thumb { background: #293044; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a435a; }
 ::-webkit-scrollbar-track { background: transparent; }

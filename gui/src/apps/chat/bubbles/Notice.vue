@@ -19,7 +19,7 @@ defineProps({
   gap: 10px;
   border-radius: 14px;
   border: 1px solid var(--line);
-  background: #fbfcfd;
+  background: var(--bg-elev);
   padding: 11px 13px;
   color: var(--text-2);
   font-size: 13px;

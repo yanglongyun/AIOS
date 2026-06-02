@@ -46,7 +46,6 @@ onBeforeUnmount(() => {
 <template>
   <Transition name="apps-fade">
     <div v-if="view.appsOpen" class="apps-popup">
-      <!-- 内嵌白色面板 -->
       <div class="inner-card">
         <header class="head">
           <div class="title">应用中心</div>
@@ -60,7 +59,7 @@ onBeforeUnmount(() => {
             :class="{ active: isActive(app.id) }"
             @click="go(app.id)">
             <span class="ic" :style="{ background: app.color }">
-              <span class="msi" style="color:#fff">{{ app.icon }}</span>
+              <span class="msi text-bg-elev">{{ app.icon }}</span>
             </span>
             <span class="name">{{ app.name }}</span>
           </button>
@@ -78,7 +77,7 @@ onBeforeUnmount(() => {
   max-height: calc(100dvh - 80px);
   background: var(--bg-elev);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   z-index: 60;
   padding: 4px;
   display: flex; flex-direction: column;
@@ -91,7 +90,6 @@ onBeforeUnmount(() => {
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* 白色卡 */
 .inner-card {
   flex: 1; min-height: 0;
   background: var(--bg-card);
@@ -107,9 +105,11 @@ onBeforeUnmount(() => {
   flex: none;
 }
 .head .title {
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
   color: var(--text);
 }
 .edit-btn {
@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: background .15s;
 }
-.edit-btn:hover { background: var(--card-hi); }
+.edit-btn:hover { background: var(--bg-hover); }
 
 .grid {
   flex: 1; min-height: 0;
@@ -151,7 +151,8 @@ onBeforeUnmount(() => {
 }
 .tile .ic .msi { font-size: 24px; }
 .tile .name {
-  font-size: 12.5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   line-height: 1.2;
   color: var(--text);
 }

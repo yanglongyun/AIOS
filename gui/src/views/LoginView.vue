@@ -56,20 +56,18 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="relative grid h-dvh w-screen place-items-center overflow-hidden bg-[#f6f8fb] p-6">
-        <!-- 装饰背景:上下两层柔光 + 中央 orb -->
+    <div class="relative grid h-dvh w-screen place-items-center overflow-hidden bg-bg p-6">
         <div class="login-bg pointer-events-none absolute inset-0" aria-hidden="true"></div>
-        <div class="login-orb pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-[55%] rounded-full" aria-hidden="true"></div>
 
-        <div class="relative flex w-full max-w-[380px] flex-col rounded-[22px] border border-black/5 bg-white px-8 pb-7 pt-9 shadow-[0_18px_50px_-20px_rgba(60,64,67,0.18)] max-[480px]:rounded-[18px] max-[480px]:px-5 max-[480px]:pb-[22px] max-[480px]:pt-7">
+        <div class="relative flex w-full max-w-[380px] flex-col rounded-lg border border-line bg-card px-8 pb-7 pt-9 shadow-3 max-[480px]:px-5 max-[480px]:pb-[22px] max-[480px]:pt-7">
 
             <!-- 品牌区 -->
             <div class="mb-[22px] flex flex-col items-center">
-                <div class="grid h-14 w-14 place-items-center rounded-[18px] bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_14px_40px_-16px_rgba(52,168,83,0.85)]">
+                <div class="grid h-14 w-14 place-items-center rounded-lg bg-accent text-bg shadow-[0_0_32px_rgba(0,215,255,0.22)]">
                     <span class="msi" style="font-size:28px">eco</span>
                 </div>
                 <div class="mt-[14px] text-[26px] font-bold tracking-tight text-ink">
-                    AIOS<span class="text-[#34a853]">.</span>
+                    AIOS<span class="text-accent">.</span>
                 </div>
                 <div class="mt-1.5 text-[12px] tracking-[0.02em] text-muted">本地运行 · 数据归你</div>
             </div>
@@ -104,7 +102,7 @@ onMounted(async () => {
 
                 <button type="submit"
                         :disabled="!canSubmit"
-                        class="mt-1 h-11 rounded-xl border-0 bg-[#1a73e8] text-[14px] font-semibold tracking-[0.01em] text-white shadow-[0_6px_18px_-8px_rgba(26,115,232,0.65)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-[#174ea6] hover:shadow-[0_10px_24px_-10px_rgba(26,115,232,0.8)] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:hover:bg-[#1a73e8]">
+                        class="mt-1 h-11 rounded-lg border-0 bg-accent text-[14px] font-semibold tracking-[0.01em] text-bg shadow-[0_0_28px_rgba(0,215,255,0.18)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:hover:bg-accent">
                     {{ loading ? '登录中…' : '进入 AIOS' }}
                 </button>
             </form>
@@ -122,11 +120,9 @@ onMounted(async () => {
    下沉到 scoped style,只这两块不走 Tailwind。 */
 .login-bg {
     background:
-        radial-gradient(60% 50% at 50% 0%, rgba(52,168,83,0.10) 0%, transparent 70%),
-        radial-gradient(70% 60% at 50% 100%, rgba(26,115,232,0.10) 0%, transparent 70%);
-}
-.login-orb {
-    background: radial-gradient(circle, rgba(52,168,83,0.18) 0%, transparent 65%);
-    filter: blur(40px);
+        linear-gradient(rgba(0, 215, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 215, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(60% 50% at 50% 0%, rgba(0,215,255,0.14) 0%, transparent 70%);
+    background-size: 56px 56px, 56px 56px, auto;
 }
 </style>

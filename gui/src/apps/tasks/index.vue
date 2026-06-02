@@ -260,7 +260,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
           <div class="max-w-[720px] mx-auto py-4">
             <AddBar v-model="newTitle" :submitting="submitting" @submit="addTask" />
 
-            <div v-if="errMsg" class="my-2 px-3.5 py-2.5 rounded-[10px] bg-[#fce8e6] text-bad text-[12.5px]">
+            <div v-if="errMsg" class="my-2 border border-bad/25 bg-bad/10 px-3.5 py-2.5 rounded-[10px] text-bad text-[12.5px]">
               {{ errMsg }}
             </div>
 

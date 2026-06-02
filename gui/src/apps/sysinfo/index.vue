@@ -66,9 +66,9 @@ const memUsage = computed(() => snap.value?.mem?.usage || 0);
     <div class="app-frame">
         <Topbar />
 
-        <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-[#f7f9fc] px-8 pb-15 pt-6 max-md:px-3.5 max-md:pb-10 max-md:pt-4">
+        <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-8 pb-15 pt-6 max-md:px-3.5 max-md:pb-10 max-md:pt-4">
             <div v-if="errMsg"
-                 class="mx-auto mb-3.5 max-w-[1100px] rounded-[10px] bg-[#fce8e6] px-3.5 py-2.5 text-[13px] text-bad">
+                 class="mx-auto mb-3.5 max-w-[1100px] rounded-[10px] border border-bad/25 bg-bad/10 px-3.5 py-2.5 text-[13px] text-bad">
                 {{ errMsg }}
             </div>
             <div v-if="loading && !snap" class="py-15 text-center text-faint">加载中...</div>
@@ -112,14 +112,13 @@ const memUsage = computed(() => snap.value?.mem?.usage || 0);
 <!-- 跨子组件复用类:卡片底盒 + kv 行 -->
 <style>
 .si-card {
-    background: #fff;
-    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(7, 24, 39, 0.96), rgba(4, 14, 27, 0.96));
+    border: 1px solid var(--line);
+    border-radius: 8px;
     padding: 22px 24px;
     margin: 0 auto 14px;
     max-width: 1100px;
-    box-shadow:
-        0 1px 2px rgba(60, 64, 67, 0.06),
-        0 4px 12px rgba(60, 64, 67, 0.04);
+    box-shadow: var(--shadow-1);
 }
 .si-card .kv {
     display: flex;

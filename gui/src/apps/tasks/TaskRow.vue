@@ -22,11 +22,11 @@ const props = defineProps({
 defineEmits(['open', 'stop', 'rerun']);
 
 const BADGE_CLS = {
-  pending: 'bg-[#fef7e0] text-[#b06000]',
+  pending: 'bg-warn/10 text-warn',
   running: 'bg-blue-bg text-blue-fg',
-  done:    'bg-[#e6f4ea] text-good',
-  error:   'bg-[#fce8e6] text-bad',
-  aborted: 'bg-[#eef3f7] text-muted'
+  done:    'bg-good/10 text-good',
+  error:   'bg-bad/10 text-bad',
+  aborted: 'bg-bg-elev text-muted'
 };
 </script>
 
@@ -70,7 +70,7 @@ const BADGE_CLS = {
         <span class="msi sm">stop</span>
       </button>
       <button
-        class="grid h-8 w-8 place-items-center rounded-full border-0 bg-transparent text-faint cursor-pointer transition-colors hover:bg-black/[0.06] hover:text-ink"
+        class="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-faint cursor-pointer transition-colors hover:bg-bg-hi hover:text-ink"
         title="重跑"
         @click="$emit('rerun', task)">
         <span class="msi sm">replay</span>

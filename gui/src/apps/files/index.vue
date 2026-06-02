@@ -35,14 +35,14 @@ onMounted(() => { files.ensureLoaded?.(); });
         <Topbar />
 
         <div class="app-body">
-            <section class="files-pane relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden bg-white">
+            <section class="files-pane relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden bg-bg">
                 <FilesToolbar />
                 <FileList />
                 <UploadProgress />
 
                 <div v-if="files.isDragOver"
                      class="pointer-events-none absolute inset-2 z-20 grid place-items-center rounded-xl border-2 border-dashed border-accent bg-accent/[0.06]">
-                    <div class="rounded-[20px] bg-white px-4 py-2.5 text-sm font-medium text-accent shadow-[var(--shadow-2)]">
+                    <div class="rounded-lg border border-line bg-card px-4 py-2.5 text-sm font-medium text-accent shadow-[var(--shadow-2)]">
                         松手放进当前目录
                     </div>
                 </div>

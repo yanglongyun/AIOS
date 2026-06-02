@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
             :class="{ active: isActive(app.id) }"
             @click="go(app.id)">
             <span class="ic" :style="{ background: app.color }">
-              <span class="msi" style="color:#fff">{{ app.icon }}</span>
+              <span class="msi text-bg">{{ app.icon }}</span>
             </span>
             <span class="name">{{ app.name }}</span>
           </button>
@@ -78,8 +78,9 @@ onBeforeUnmount(() => {
   /* 100vh 在移动端是"大视口"(URL bar 折叠后),会比可视区高,导致面板
      从屏幕底部溢出。100dvh 跟着实际可视高度走。 */
   max-height: calc(100dvh - 80px);
-  background: #ebeef5;
-  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(6, 17, 31, 0.98), rgba(3, 10, 21, 0.98));
+  border: 1px solid var(--line);
+  border-radius: 14px;
   box-shadow: var(--shadow-3);
   z-index: 60;
   padding: 8px;
@@ -93,11 +94,11 @@ onBeforeUnmount(() => {
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* 白色卡 */
 .inner-card {
   flex: 1; min-height: 0;
-  background: #fff;
-  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(7, 24, 39, 0.98), rgba(4, 14, 27, 0.98));
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -122,7 +123,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: background .15s;
 }
-.edit-btn:hover { background: #d2e3fc; }
+.edit-btn:hover { background: var(--bg-hover); }
 
 .grid {
   flex: 1; min-height: 0;
@@ -137,7 +138,7 @@ onBeforeUnmount(() => {
   gap: 8px;
   padding: 14px 4px 10px;
   border: 0; background: transparent;
-  border-radius: 12px;
+  border-radius: 8px;
   color: var(--text);
   text-align: center;
   cursor: pointer;
@@ -164,6 +165,6 @@ onBeforeUnmount(() => {
     max-height: calc(100dvh - 72px - env(safe-area-inset-bottom));
     border-radius: 24px;
   }
-  .inner-card { border-radius: 18px; }
+  .inner-card { border-radius: 10px; }
 }
 </style>

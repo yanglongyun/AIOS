@@ -238,10 +238,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col min-w-0 min-h-0 bg-bg">
+  <div class="flex flex-1 flex-col min-w-0 min-h-0 bg-bg text-ink">
 
     <!-- ─── 顶栏 ─── -->
-    <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
+    <header class="flex h-16 flex-none items-center border-b border-line bg-card-sub px-4 max-md:h-14 max-md:px-2">
       <button
         class="icon-btn lg"
         :class="{ active: view.appDrawerOpen }"
@@ -265,9 +265,9 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- ─── 侧栏 + 主区 ─── -->
-    <div class="relative flex flex-1 min-w-0 min-h-0 bg-[#f0f4f9]">
+    <div class="relative flex flex-1 min-w-0 min-h-0 bg-bg">
 
-      <!-- 移动端 drawer 展开时的遮罩(只覆盖 chat-shell 内部, 不挡 topbar) -->
+      <!-- 移动端 drawer 展开时的遮罩(只覆盖聊天主体, 不挡 topbar) -->
       <Transition name="backdrop">
         <div v-if="view.appDrawerOpen"
           class="absolute inset-0 z-40 hidden bg-black/40 max-[720px]:block"
@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
       </Transition>
 
       <!-- 侧栏 -->
-      <aside class="app-side !bg-[#f0f4f9] !border-r-0"
+      <aside class="app-side !bg-bg !border-r !border-line"
         :class="{ collapsed: !view.appDrawerOpen }">
         <Sidebar
           :conversations="conversations"
@@ -284,8 +284,8 @@ onBeforeUnmount(() => {
           @new-chat="newChat" />
       </aside>
 
-      <!-- 主区(白卡) -->
-      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl m-2 ml-0 bg-white max-md:m-0 max-md:rounded-none"
+      <!-- 主区:直接承载消息记录,不再套外层面板 -->
+      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden bg-bg"
         @dragenter="onDragEnter"
         @dragover="onDragOver"
         @dragleave="onDragLeave"
@@ -293,7 +293,7 @@ onBeforeUnmount(() => {
 
         <!-- 错误条 -->
         <div v-if="errMsg"
-          class="mx-6 mb-2 flex-none rounded-lg bg-[#fce8e6] px-3 py-2 text-[12.5px] text-bad">
+          class="mx-auto mt-3 mb-2 w-[calc(100%-32px)] max-w-[760px] flex-none rounded-lg border border-bad/30 bg-bad/10 px-3 py-2 text-[12.5px] text-bad">
           {{ errMsg }}
         </div>
 
@@ -319,7 +319,7 @@ onBeforeUnmount(() => {
         <!-- 拖拽到主区时的浮层提示 -->
         <Transition name="backdrop">
           <div v-if="dragActive"
-            class="pointer-events-none absolute inset-2 z-50 flex items-center justify-center rounded-2xl border-2 border-dashed border-accent bg-accent/5 text-[14px] font-medium text-accent-fg">
+            class="pointer-events-none absolute inset-3 z-50 flex items-center justify-center rounded-lg border-2 border-dashed border-accent bg-accent/5 text-[14px] font-medium text-accent-fg">
             松开即可作为附件加入对话
           </div>
         </Transition>

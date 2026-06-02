@@ -7,7 +7,7 @@ const apps = [
     id: 'chat',
     name: '对话',
     icon: 'forum',
-    color: '#34a853',
+    color: '#00d7ff',
     hasDrawer: true,
     load: () => import('./apps/chat/index.vue')
   },
@@ -15,7 +15,7 @@ const apps = [
     id: 'monitors',
     name: '监视器',
     icon: 'bolt',
-    color: '#7c4dff',
+    color: '#28f0ff',
     hasDrawer: false,
     load: () => import('./apps/monitors/index.vue')
   },
@@ -23,7 +23,7 @@ const apps = [
     id: 'tasks',
     name: '任务',
     icon: 'task_alt',
-    color: '#1a73e8',
+    color: '#1287ff',
     hasDrawer: true,
     load: () => import('./apps/tasks/index.vue')
   },
@@ -31,7 +31,7 @@ const apps = [
     id: 'memory',
     name: '记忆',
     icon: 'psychology',
-    color: '#8e6e3c',
+    color: '#7cf4ff',
     hasDrawer: false,
     load: () => import('./apps/memory/index.vue')
   },
@@ -39,7 +39,7 @@ const apps = [
     id: 'terminal',
     name: '终端',
     icon: 'terminal',
-    color: '#202124',
+    color: '#0b5cff',
     hasDrawer: true,
     load: () => import('./apps/terminal/index.vue')
   },
@@ -47,7 +47,7 @@ const apps = [
     id: 'files',
     name: '文件',
     icon: 'folder',
-    color: '#fbbc04',
+    color: '#02b8ff',
     hasDrawer: true,
     load: () => import('./apps/files/index.vue')
   },
@@ -55,47 +55,15 @@ const apps = [
     id: 'sysinfo',
     name: '系统状态',
     icon: 'monitoring',
-    color: '#9334e6',
+    color: '#3b7dff',
     hasDrawer: false,
     load: () => import('./apps/sysinfo/index.vue')
-  },
-  {
-    id: 'cryptobot',
-    name: '炒币机',
-    icon: 'currency_bitcoin',
-    color: '#f9ab00',
-    hasDrawer: false,
-    load: () => import('./apps/cryptobot/index.vue')
-  },
-  {
-    id: 'demogen',
-    name: 'Demo 生成器',
-    icon: 'view_carousel',
-    color: '#e8710a',
-    hasDrawer: false,
-    load: () => import('./apps/demogen/index.vue')
-  },
-  {
-    id: 'codex',
-    name: 'Codex',
-    icon: 'terminal',
-    color: '#276ef1',
-    hasDrawer: false,
-    load: () => import('./apps/codex/index.vue')
-  },
-  {
-    id: 'longvideo',
-    name: '视频工坊',
-    icon: 'movie',
-    color: '#276ef1',
-    hasDrawer: false,
-    load: () => import('./apps/longvideo/index.vue')
   },
   {
     id: 'settings',
     name: '设置',
     icon: 'settings',
-    color: '#5f6368',
+    color: '#74c7ff',
     hasDrawer: false,
     load: () => import('./apps/settings/index.vue')
   }

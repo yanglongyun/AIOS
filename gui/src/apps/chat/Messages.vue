@@ -141,8 +141,9 @@ const pick = (s) => emit('pick', s.prompt);
   margin: 2px auto 12px;
   width: fit-content;
   max-width: 100%;
-  border-radius: 999px;
-  background: #eef3f8;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
   color: var(--text-3);
   font-size: 12px;
   padding: 5px 12px;
@@ -171,7 +172,7 @@ const pick = (s) => emit('pick', s.prompt);
   width: min(420px, 90vw);
   height: 420px;
   transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(26, 115, 232, 0.10) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(0, 215, 255, 0.20) 0%, transparent 65%);
   filter: blur(20px);
   pointer-events: none;
   z-index: 0;
@@ -195,7 +196,7 @@ const pick = (s) => emit('pick', s.prompt);
   font-size: 28px;
   font-weight: 500;
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #1a73e8 0%, #6c5ce7 50%, #d63384 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hi) 58%, #3b7dff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -203,7 +204,7 @@ const pick = (s) => emit('pick', s.prompt);
 }
 .welcome-sub {
   font-size: 14px;
-  color: var(--ink-mute, rgba(0, 0, 0, 0.55));
+  color: var(--text-2);
   margin: 0 0 24px;
 }
 
@@ -224,31 +225,31 @@ const pick = (s) => emit('pick', s.prompt);
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--bg-elev, #ffffff);
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
-  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   text-align: left;
   font-size: 14px;
-  color: var(--ink, #1f1f1f);
+  color: var(--text);
   cursor: pointer;
   transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 .welcome-chip:hover {
-  border-color: rgba(26, 115, 232, 0.35);
-  background: rgba(26, 115, 232, 0.04);
+  border-color: rgba(0, 215, 255, 0.45);
+  background: rgba(0, 215, 255, 0.10);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px -8px rgba(26, 115, 232, 0.35);
+  box-shadow: 0 0 24px rgba(0, 215, 255, 0.12);
 }
 .welcome-chip .msi {
   font-family: 'Material Symbols Outlined';
   font-size: 20px;
-  color: #1a73e8;
+  color: var(--accent);
   flex: none;
 }
 
 .welcome-tip {
   font-size: 12.5px;
-  color: var(--ink-mute, rgba(0, 0, 0, 0.45));
+  color: var(--text-3);
   display: inline-flex;
   align-items: center;
   gap: 4px;

@@ -166,21 +166,21 @@ onBeforeUnmount(() => unlisten?.());
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: #eef3f7;
+  border-radius: 8px;
+  background: var(--bg-elev);
   color: var(--text-2);
 }
 .state.active {
-  background: #e8f0fe;
-  color: #174ea6;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
 }
 .state.fired {
-  background: #e6f4ea;
-  color: #137333;
+  background: rgba(0, 255, 163, 0.10);
+  color: var(--good);
 }
 .state.paused {
-  background: #fff7df;
-  color: #9a5f00;
+  background: rgba(255, 230, 109, 0.12);
+  color: var(--warn);
 }
 .main {
   min-width: 0;
@@ -202,20 +202,20 @@ onBeforeUnmount(() => unlisten?.());
 }
 .badge {
   flex: none;
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 3px 8px;
   font-size: 11px;
   font-weight: 600;
-  background: #eef3f7;
+  background: var(--bg-elev);
   color: var(--text-2);
 }
 .badge.active {
-  background: #e8f0fe;
-  color: #174ea6;
+  background: var(--accent-soft);
+  color: var(--accent-fg);
 }
 .badge.fired {
-  background: #e6f4ea;
-  color: #137333;
+  background: rgba(0, 255, 163, 0.10);
+  color: var(--good);
 }
 .sub {
   display: flex;
@@ -239,15 +239,16 @@ onBeforeUnmount(() => unlisten?.());
 .empty, .err {
   max-width: 920px;
   margin: 0 auto;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 16px;
   color: var(--text-2);
-  background: #fff;
+  background: var(--bg-card);
   border: 1px solid var(--line);
 }
 .err {
   color: var(--bad);
-  background: #fce8e6;
+  border-color: rgba(255, 63, 110, 0.25);
+  background: rgba(255, 63, 110, 0.10);
 }
 @media (max-width: 720px) {
   .topbar {

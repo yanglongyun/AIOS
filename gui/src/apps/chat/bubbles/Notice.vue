@@ -17,9 +17,10 @@ defineProps({
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  border-radius: 14px;
+  border-radius: 10px;
   border: 1px solid var(--line);
-  background: #fbfcfd;
+  background: linear-gradient(180deg, rgba(7, 24, 39, 0.96), rgba(4, 14, 27, 0.96));
+  box-shadow: var(--shadow-1);
   padding: 11px 13px;
   color: var(--text-2);
   font-size: 13px;

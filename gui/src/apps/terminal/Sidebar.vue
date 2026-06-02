@@ -15,7 +15,7 @@ function shortCwd(p) {
     <div class="flex h-full flex-col">
         <div class="flex items-center gap-2 p-3">
             <button
-                class="inline-flex cursor-pointer items-center gap-2 rounded-[20px] border border-line bg-white px-4 py-[9px] text-[13px] font-medium text-ink shadow-[0_1px_2px_rgba(60,64,67,0.08)] transition-[background,box-shadow] hover:bg-[#fafbfc] hover:shadow-[0_1px_3px_rgba(60,64,67,0.12),0_4px_10px_rgba(60,64,67,0.06)]"
+                class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-line bg-card px-4 py-[9px] text-[13px] font-medium text-ink shadow-1 transition-[background,box-shadow] hover:bg-bg-hi hover:shadow-2"
                 @click="$emit('add')">
                 <span class="msi sm text-accent">add</span>
                 <span>新会话</span>
@@ -41,7 +41,7 @@ function shortCwd(p) {
                     </div>
                 </div>
                 <button
-                    class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full border-0 bg-transparent text-faint opacity-0 transition-[background,opacity] hover:bg-black/10 hover:text-ink group-hover:opacity-100"
+                    class="grid h-[22px] w-[22px] flex-none place-items-center rounded-md border-0 bg-transparent text-faint opacity-0 transition-[background,opacity] hover:bg-bg-hi hover:text-ink group-hover:opacity-100"
                     :class="{ 'opacity-100': t.id === activeId }"
                     title="关闭"
                     @click="$emit('close', t.id, $event)">

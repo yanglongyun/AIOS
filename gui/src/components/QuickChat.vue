@@ -100,10 +100,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
         <header class="head">
           <span class="bot">
             <svg viewBox="0 0 24 24" width="20" height="20">
-              <circle cx="12" cy="12" r="10" fill="#1a73e8"/>
-              <circle cx="9" cy="11" r="1.6" fill="#fff"/>
-              <circle cx="15" cy="11" r="1.6" fill="#fff"/>
-              <path d="M8.5 14.5c1 1.2 2.2 1.7 3.5 1.7s2.5-.5 3.5-1.7" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="10" fill="var(--accent)"/>
+              <circle cx="9" cy="11" r="1.6" fill="var(--bg)"/>
+              <circle cx="15" cy="11" r="1.6" fill="var(--bg)"/>
+              <path d="M8.5 14.5c1 1.2 2.2 1.7 3.5 1.7s2.5-.5 3.5-1.7" stroke="var(--bg)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
             </svg>
           </span>
           <span class="title">问 AI</span>
@@ -142,8 +142,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   top: 60px; right: 12px;
   width: 400px; max-width: calc(100vw - 24px);
   height: min(580px, calc(100vh - 80px));
-  background: #ebeef5;
-  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(6, 17, 31, 0.98), rgba(3, 10, 21, 0.98));
+  border: 1px solid var(--line);
+  border-radius: 14px;
   box-shadow: var(--shadow-3);
   z-index: 60;
   padding: 8px;
@@ -157,11 +158,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* 内嵌白色面板 */
 .inner-card {
   flex: 1; min-height: 0;
-  background: #fff;
-  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(7, 24, 39, 0.98), rgba(4, 14, 27, 0.98));
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -176,8 +177,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
 
 .body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
 .msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-.msg.ai { background: #f0f4f9; color: var(--text); border-top-left-radius: 4px; align-self: flex-start; }
-.msg.user { background: var(--accent); color: #fff; border-top-right-radius: 4px; align-self: flex-end; }
+.msg.ai { background: var(--bg-elev); color: var(--text); border: 1px solid var(--line-soft); border-top-left-radius: 4px; align-self: flex-start; }
+.msg.user { background: var(--accent-soft); color: var(--text); border: 1px solid rgba(0, 215, 255, 0.35); border-top-right-radius: 4px; align-self: flex-end; }
 
 .chips {
   flex: none;
@@ -201,20 +202,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   transition: background .15s;
   white-space: nowrap;
 }
-.chip:hover:not(:disabled) { background: #d2e3fc; }
+.chip:hover:not(:disabled) { background: var(--bg-hover); }
 .chip:disabled { opacity: .5; cursor: default; }
 
 .foot {
   flex: none; display: flex; align-items: center; gap: 4px;
   padding: 6px 6px 6px 14px;
   margin: 4px 12px 12px;
-  background: #f0f4f9;
-  border-radius: 26px;
+  background: rgba(2, 7, 20, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   transition: background .15s, box-shadow .15s;
 }
 .foot:focus-within {
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(60,64,67,0.08);
+  background: rgba(2, 7, 20, 0.9);
+  box-shadow: 0 0 0 1px rgba(0, 215, 255, 0.18), 0 0 18px rgba(0, 215, 255, 0.10);
 }
 .foot textarea {
   flex: 1; min-width: 0;
@@ -226,13 +228,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   max-height: 120px;
   line-height: 1.4;
 }
-.send { width: 36px; height: 36px; display: grid; place-items: center; border: 0; background: var(--accent); color: #fff; border-radius: 50%; transition: background .15s; flex: none; }
+.send { width: 36px; height: 36px; display: grid; place-items: center; border: 0; background: var(--accent); color: #00131f; border-radius: 8px; transition: background .15s; flex: none; }
 .send:hover:not(:disabled) { background: var(--accent-hi); }
 .send:disabled { opacity: .4; cursor: default; }
 .send.stop { background: var(--bad); }
 
 @media (max-width: 720px) {
   .chat-popup { top: 56px; left: 8px; right: 8px; width: auto; height: calc(100vh - 70px); border-radius: 24px; }
-  .inner-card { border-radius: 18px; }
+  .inner-card { border-radius: 10px; }
 }
 </style>

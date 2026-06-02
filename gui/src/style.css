@@ -8,51 +8,51 @@
 @theme {
   --color-white:     #ffffff;
   --color-black:     #000000;
-  --color-bg:        #ffffff;
-  --color-bg-elev:   #f1f3f4;
-  --color-bg-hi:     #f8f9fa;
-  --color-card:      #ffffff;
-  --color-card-hi:   #f1f3f4;
-  --color-card-sub:  #f8f9fa;
-  --color-line:      #e0e0e0;
-  --color-line-hi:   #bdc1c6;
-  --color-line-soft: #f1f3f4;
-  --color-ink:       #202124;
-  --color-muted:     #5f6368;
-  --color-faint:     #80868b;
-  --color-accent:    #1a73e8;
-  --color-accent-hi: #174ea6;
-  --color-blue-bg:   #e8f0fe;
-  --color-blue-soft: #d2e3fc;
-  --color-blue-fg:   #174ea6;
-  --color-good:      #1e8e3e;
-  --color-bad:       #d93025;
-  --color-warn:      #f9ab00;
+  --color-bg:        #020714;
+  --color-bg-elev:   #06111f;
+  --color-bg-hi:     #0b2138;
+  --color-card:      #071827;
+  --color-card-hi:   #0d2842;
+  --color-card-sub:  #05101d;
+  --color-line:      #173c5f;
+  --color-line-hi:   #1e8ad6;
+  --color-line-soft: #0d263d;
+  --color-ink:       #e8f8ff;
+  --color-muted:     #8db8d9;
+  --color-faint:     #527da0;
+  --color-accent:    #00d7ff;
+  --color-accent-hi: #7cf4ff;
+  --color-blue-bg:   #062337;
+  --color-blue-soft: #0a3858;
+  --color-blue-fg:   #00d7ff;
+  --color-good:      #00ffa3;
+  --color-bad:       #ff3f6e;
+  --color-warn:      #ffe66d;
 
   --font-mono:       'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Google 风全局 token (脚本组件用) */
+/* 赛博电光蓝皮肤 token：所有应用共享这套暗底 / 霓虹蓝 / 冷色边框语义。 */
 :root {
-  --bg:        #ffffff;
-  --bg-elev:   #f1f3f4;
-  --bg-hover:  #f8f9fa;
-  --bg-card:   #ffffff;
-  --text:      #202124;
-  --text-2:    #5f6368;
-  --text-3:    #80868b;
-  --line:      #e0e0e0;
-  --line-soft: #f1f3f4;
-  --accent:    #1a73e8;
-  --accent-hi: #174ea6;
-  --accent-soft:#e8f0fe;
-  --accent-fg: #174ea6;
-  --good:      #1e8e3e;
-  --bad:       #d93025;
-  --warn:      #f9ab00;
-  --shadow-1:  0 1px 2px rgba(60,64,67,0.08), 0 1px 3px 1px rgba(60,64,67,0.06);
-  --shadow-2:  0 1px 2px rgba(60,64,67,0.15), 0 2px 6px 2px rgba(60,64,67,0.10);
-  --shadow-3:  0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
+  --bg:        #020714;
+  --bg-elev:   #06111f;
+  --bg-hover:  #0b2138;
+  --bg-card:   #071827;
+  --text:      #e8f8ff;
+  --text-2:    #8db8d9;
+  --text-3:    #527da0;
+  --line:      #173c5f;
+  --line-soft: #0d263d;
+  --accent:    #00d7ff;
+  --accent-hi: #7cf4ff;
+  --accent-soft:rgba(0, 215, 255, 0.12);
+  --accent-fg: #7cf4ff;
+  --good:      #00ffa3;
+  --bad:       #ff3f6e;
+  --warn:      #ffe66d;
+  --shadow-1:  0 0 0 1px rgba(0,215,255,0.08), 0 10px 28px rgba(0, 7, 20, 0.36);
+  --shadow-2:  0 0 0 1px rgba(0,215,255,0.14), 0 18px 52px rgba(0, 7, 20, 0.52);
+  --shadow-3:  0 0 0 1px rgba(0,215,255,0.22), 0 28px 82px rgba(0, 7, 20, 0.68), 0 0 42px rgba(0, 215, 255, 0.08);
 }
 
 @layer base {
@@ -60,8 +60,12 @@
   html, body, #app {
     margin: 0; padding: 0;
     height: 100%;
-    background: var(--bg); color: var(--text);
-    font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(0, 215, 255, 0.16), transparent 34%),
+      radial-gradient(circle at 88% 100%, rgba(18, 90, 180, 0.18), transparent 36%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
   }
@@ -79,6 +83,7 @@
 .app-frame {
   flex: 1; min-width: 0; min-height: 0;
   display: flex; flex-direction: column;
+  background: var(--bg);
 }
 .app-body {
   flex: 1; min-width: 0; min-height: 0;
@@ -116,11 +121,19 @@
   display: grid; place-items: center;
   border: 0; background: transparent;
   color: var(--text-2);
-  border-radius: 50%;
-  transition: background .15s;
+  border-radius: 10px;
+  transition: background .15s, color .15s, box-shadow .15s;
 }
-.icon-btn:hover { background: var(--bg-elev); }
-.icon-btn.active { background: var(--accent-soft); color: var(--accent-fg); }
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent-hi);
+  box-shadow: 0 0 18px rgba(0, 215, 255, 0.12);
+}
+.icon-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent-hi);
+  box-shadow: inset 0 0 0 1px rgba(0, 215, 255, 0.35), 0 0 22px rgba(0, 215, 255, 0.13);
+}
 .icon-btn.lg { width: 48px; height: 48px; }
 
 /* 软 pill 按钮 */
@@ -129,12 +142,12 @@
   padding: 8px 16px;
   border: 0; background: var(--accent-soft);
   color: var(--accent-fg);
-  border-radius: 18px;
+  border-radius: 8px;
   font-size: 13.5px; font-weight: 500;
   transition: background .15s, box-shadow .15s;
 }
-.pill-btn:hover { background: #d2e3fc; box-shadow: var(--shadow-1); }
-.pill-btn.solid { background: var(--accent); color: #fff; }
+.pill-btn:hover { background: var(--bg-hover); box-shadow: var(--shadow-1); }
+.pill-btn.solid { background: var(--accent); color: #00131f; }
 .pill-btn.solid:hover { background: var(--accent-hi); }
 
 /* 文本输入 */
@@ -142,22 +155,26 @@
   width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  background: var(--bg);
+  background: rgba(2, 7, 20, 0.74);
   color: var(--text);
   border-radius: 8px;
   font-size: 14px;
   outline: 0;
   transition: border-color .15s;
 }
-.text-input:focus { border-color: var(--accent); }
+.text-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 215, 255, 0.18), 0 0 18px rgba(0, 215, 255, 0.10);
+}
 .text-input::placeholder { color: var(--text-3); }
 
 /* 卡片 */
 .card {
-  background: var(--bg);
+  background: linear-gradient(180deg, rgba(7, 24, 39, 0.96), rgba(4, 14, 27, 0.96));
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
+  box-shadow: var(--shadow-1);
 }
 
 /* 段标题 */
@@ -174,7 +191,7 @@
 .app-side {
   flex: none;
   width: 280px;
-  background: var(--bg);
+  background: linear-gradient(180deg, rgba(6, 17, 31, 0.98), rgba(3, 10, 21, 0.98));
   border-right: 1px solid var(--line-soft);
   display: flex;
   flex-direction: column;
@@ -212,6 +229,21 @@
 
 /* 滚动条 */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+::-webkit-scrollbar-thumb { background: #0d4c77; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #00a9df; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* 主题迁移保护:旧组件残留的 Tailwind 白底在暗色皮肤下会直接造成低对比。 */
+.bg-white {
+  background-color: var(--bg-card) !important;
+}
+[class*="bg-[#f"],
+[class*="bg-[#e6"],
+[class*="bg-[#ee"] {
+  background-color: var(--bg-card) !important;
+}
+[class*="hover:bg-[#f"]:hover,
+[class*="hover:bg-[#e6"]:hover,
+[class*="hover:bg-[#ee"]:hover {
+  background-color: var(--bg-hover) !important;
+}

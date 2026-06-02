@@ -61,7 +61,7 @@ function onDelete() {
       </button>
       <Transition name="pop">
         <div v-if="remarksOpen"
-          class="remarks-pop absolute right-0 top-[calc(100%+6px)] z-20 flex w-80 max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-line/80 bg-white shadow-3"
+          class="remarks-pop absolute right-0 top-[calc(100%+6px)] z-20 flex w-80 max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-xl border border-line/80 bg-card text-ink shadow-3"
           style="max-height: min(420px, calc(100vh - 120px))">
           <div class="flex flex-none items-baseline justify-between border-b border-line/60 px-4 pt-3.5 pb-2.5">
             <span class="text-[13px] font-semibold text-ink">对话要点</span>
@@ -72,7 +72,7 @@ function onDelete() {
             <div v-else-if="!remarks.length" class="px-3 py-6 text-center text-[12.5px] text-faint">还没有要点摘要</div>
             <div v-else class="flex flex-col gap-1">
               <div v-for="r in remarks" :key="r.id"
-                class="rounded-lg bg-bg-elev px-3 py-2.5 text-[13px] leading-[1.55] text-ink">
+                class="rounded-lg border border-line-soft bg-bg-elev px-3 py-2.5 text-[13px] leading-[1.55] text-ink">
                 {{ r.remark }}
               </div>
             </div>
@@ -93,7 +93,7 @@ function onDelete() {
       </button>
       <Transition name="pop">
         <div v-if="menuOpen"
-          class="menu-pop absolute right-0 top-[calc(100%+6px)] z-20 min-w-[180px] overflow-hidden rounded-2xl border border-line/80 bg-white p-1.5 shadow-3">
+          class="menu-pop absolute right-0 top-[calc(100%+6px)] z-20 min-w-[180px] overflow-hidden rounded-xl border border-line/80 bg-card p-1.5 text-ink shadow-3">
           <button
             class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px] text-ink transition-colors hover:bg-[var(--bg-hover)]"
             @click="onRename">

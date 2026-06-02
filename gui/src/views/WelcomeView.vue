@@ -61,21 +61,19 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="grid h-dvh w-screen grid-cols-1 overflow-hidden bg-[#f8f9fa] md:grid-cols-[1.15fr_1fr] max-md:h-auto max-md:min-h-dvh max-md:grid-rows-[auto_1fr]">
+    <div class="grid h-dvh w-screen grid-cols-1 overflow-hidden bg-bg md:grid-cols-[1.15fr_1fr] max-md:h-auto max-md:min-h-dvh max-md:grid-rows-[auto_1fr]">
         <aside class="welcome-hero relative overflow-hidden text-[#f5f7fb]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="absolute -left-[120px] -top-[100px] h-[420px] w-[420px] rounded-full opacity-55 bg-[radial-gradient(circle,#34a853_0%,transparent_70%)] blur-[60px]"></div>
-                <div class="absolute -right-[160px] -bottom-[160px] h-[480px] w-[480px] rounded-full opacity-55 bg-[radial-gradient(circle,#1a73e8_0%,transparent_55%)] blur-[60px]"></div>
                 <div class="hero-grid absolute inset-0"></div>
             </div>
 
             <div class="relative flex h-full flex-col gap-14 px-16 py-14 max-md:gap-7 max-md:px-8 max-md:pb-9 max-md:pt-10">
                 <div class="flex items-center gap-3.5">
-                    <div class="grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_8px_22px_-10px_rgba(52,168,83,0.7)]">
+                    <div class="grid h-9 w-9 place-items-center rounded-lg bg-accent text-bg shadow-[0_0_26px_rgba(0,215,255,0.22)]">
                         <span class="msi" style="font-size:22px">eco</span>
                     </div>
                     <div class="text-[22px] font-bold tracking-tight text-[#f5f7fb]">
-                        AIOS<span class="text-[#6dd49b]">.</span>
+                        AIOS<span class="text-accent">.</span>
                     </div>
                 </div>
 
@@ -90,21 +88,21 @@ onMounted(async () => {
 
                 <div class="mt-2 flex flex-col gap-3.5 max-md:hidden">
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,215,255,0.16)]"></div>
                         <div class="min-w-0">
                             <div class="mb-0.5 text-[14px] font-semibold text-white">未来留于物形</div>
                             <div class="text-[12.5px] leading-[1.55] text-white/65">对话驱动,界面承载。AI 的能力,最终化为你看得见、用得着的形态。</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,215,255,0.16)]"></div>
                         <div class="min-w-0">
                             <div class="mb-0.5 text-[14px] font-semibold text-white">让软件真正走向每一个人</div>
                             <div class="text-[12.5px] leading-[1.55] text-white/65">告诉 AI 你想要什么,应用就在对话中诞生,为你而写,只属于你。</div>
                         </div>
                     </div>
                     <div class="flex items-start gap-3 pr-3">
-                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-[#6dd49b] shadow-[0_0_0_4px_rgba(109,212,155,0.18)]"></div>
+                        <div class="mt-[7px] h-[7px] w-[7px] flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgba(0,215,255,0.16)]"></div>
                         <div class="min-w-0">
                             <div class="mb-0.5 text-[14px] font-semibold text-white">应用也可以和 AI 对话</div>
                             <div class="text-[12.5px] leading-[1.55] text-white/65">每个应用都能调用 AI 的智慧,不再是孤立的工具,而是懂你的搭档。</div>
@@ -118,7 +116,7 @@ onMounted(async () => {
             </div>
         </aside>
 
-        <main class="flex items-center justify-center overflow-y-auto bg-white px-12 py-10 max-md:px-6 max-md:pb-12 max-md:pt-8">
+        <main class="flex items-center justify-center overflow-y-auto bg-bg px-12 py-10 max-md:px-6 max-md:pb-12 max-md:pt-8">
             <div class="flex w-full max-w-[380px] flex-col gap-7">
                 <div class="flex flex-col gap-1.5">
                     <h2 class="m-0 text-2xl font-bold tracking-tight text-ink">欢迎使用 AIOS</h2>
@@ -167,7 +165,7 @@ onMounted(async () => {
 
                     <button type="submit"
                             :disabled="!canSubmit"
-                            class="mt-1 h-11 rounded-xl border-0 bg-[#1a73e8] text-[14px] font-semibold tracking-[0.01em] text-white shadow-[0_6px_18px_-8px_rgba(26,115,232,0.65)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-[#174ea6] hover:shadow-[0_10px_24px_-10px_rgba(26,115,232,0.8)] disabled:cursor-not-allowed disabled:bg-[#aecbfa] disabled:text-white disabled:shadow-none disabled:hover:bg-[#aecbfa]">
+                            class="mt-1 h-11 rounded-lg border-0 bg-accent text-[14px] font-semibold tracking-[0.01em] text-bg shadow-[0_0_28px_rgba(0,215,255,0.18)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:hover:bg-accent">
                         {{ loading ? '设置中...' : '设置密码并进入' }}
                     </button>
                 </form>
@@ -179,9 +177,9 @@ onMounted(async () => {
 <style scoped>
 .welcome-hero {
     background:
-        radial-gradient(120% 80% at 0% 0%, #1f3b5e 0%, transparent 60%),
-        radial-gradient(100% 80% at 100% 100%, #0f2a4a 0%, transparent 55%),
-        linear-gradient(135deg, #0d1b2e 0%, #14253b 100%);
+        radial-gradient(120% 80% at 0% 0%, rgba(0, 215, 255, 0.18) 0%, transparent 60%),
+        radial-gradient(100% 80% at 100% 100%, rgba(11, 92, 255, 0.18) 0%, transparent 55%),
+        linear-gradient(135deg, #020714 0%, #06111f 100%);
 }
 .hero-grid {
     background-image:

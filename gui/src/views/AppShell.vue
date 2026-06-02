@@ -69,7 +69,13 @@ onMounted(async () => {
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
-  background: var(--bg);
+  background:
+    linear-gradient(rgba(0, 215, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 215, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 18% 0%, rgba(0, 215, 255, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 100%, rgba(12, 80, 170, 0.18), transparent 40%),
+    var(--bg);
+  background-size: 48px 48px, 48px 48px, auto, auto, auto;
   color: var(--text);
 }
 .main {
@@ -77,7 +83,7 @@ onMounted(async () => {
   min-width: 0;
   min-height: 0;
   display: flex;
-  background: var(--bg);
+  background: rgba(2, 7, 20, 0.72);
   overflow: hidden;
 }
 </style>

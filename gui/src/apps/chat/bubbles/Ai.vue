@@ -11,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="chat-scroll-bubble max-w-[min(78%,720px)] rounded-2xl rounded-tl-[4px] bg-[#f0f4f9] px-3.5 py-2.5 text-[14px] leading-[1.55] max-md:max-w-[92%]" style="width: fit-content;">
+  <div class="chat-scroll-bubble max-w-[min(78%,720px)] rounded-xl rounded-tl-[4px] border border-line bg-card px-3.5 py-2.5 text-[14px] leading-[1.6] text-ink shadow-1 max-md:max-w-[92%]" style="width: fit-content;">
     <div class="md" v-html="renderMd(text)" />
     <div v-if="remark"
       class="mt-2.5 border-t border-dashed border-line pt-2 text-[12.5px] italic leading-[1.55] text-faint">
@@ -34,9 +34,10 @@ defineProps({
 :deep(.md p) { margin: 0 0 0.6em; }
 :deep(.md p:last-child) { margin-bottom: 0; }
 :deep(.md pre) {
-  background: #fff;
+  background: rgba(2, 7, 20, 0.78);
+  border: 1px solid var(--line);
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow-x: auto;
   overflow-wrap: normal;
   word-break: normal;
@@ -45,7 +46,8 @@ defineProps({
   margin: 8px 0;
 }
 :deep(.md code) {
-  background: rgba(60, 64, 67, 0.08);
+  background: rgba(0, 215, 255, 0.12);
+  color: var(--accent-hi);
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 13px;

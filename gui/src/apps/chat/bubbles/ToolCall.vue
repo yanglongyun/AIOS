@@ -6,7 +6,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="max-w-[720px] overflow-hidden rounded-xl border border-line bg-white">
+  <div class="max-w-[720px] overflow-hidden rounded-lg border border-line bg-card shadow-1">
     <button type="button"
       class="flex w-full items-center gap-1.5 border-0 bg-accent/5 px-3 py-2.5 text-left transition-colors hover:bg-accent/10"
       @click="msg.expanded = !msg.expanded">
@@ -18,7 +18,7 @@ defineProps({
     </button>
     <div v-if="msg.expanded" class="border-t border-line/60">
       <pre v-if="msg.shell && msg.command"
-        class="m-0 overflow-x-auto whitespace-pre bg-[#f6f8fc] px-3 py-2.5 text-[12px] leading-[1.55] text-good [scrollbar-width:none]"><span class="select-none text-faint">$ </span>{{ msg.command }}</pre>
+        class="m-0 overflow-x-auto whitespace-pre bg-bg-elev px-3 py-2.5 text-[12px] leading-[1.55] text-good [scrollbar-width:none]"><span class="select-none text-faint">$ </span>{{ msg.command }}</pre>
       <pre v-else-if="msg.detail"
         class="m-0 overflow-x-auto whitespace-pre bg-bg-elev px-3 py-2.5 text-[12px] leading-[1.55] text-muted [scrollbar-width:none]">{{ msg.detail }}</pre>
       <pre v-if="msg.result"

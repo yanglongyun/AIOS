@@ -119,16 +119,16 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
         @compositionstart="composing = true"
         @compositionend="composing = false" />
       <button v-if="streaming"
-        class="grid h-9 w-9 place-items-center rounded-full border-0 bg-bad text-white transition-colors hover:bg-[#b3271c]"
+        class="grid h-9 w-9 place-items-center rounded-lg border-0 bg-bad text-bg-elev transition-colors hover:opacity-85"
         title="中断"
         @click="emit('abort')">
-        <span class="msi sm !text-white">stop</span>
+        <span class="msi sm">stop</span>
       </button>
       <button v-else
-        class="grid h-9 w-9 place-items-center rounded-full border-0 bg-accent text-white transition-colors hover:bg-accent-hi disabled:cursor-default disabled:opacity-40"
+        class="grid h-9 w-9 place-items-center rounded-lg border-0 bg-accent text-bg-elev transition-colors hover:bg-accent-hi disabled:cursor-default disabled:opacity-40"
         :disabled="!canSend"
         @click="emit('send')">
-        <span class="msi sm !text-white">send</span>
+        <span class="msi sm">send</span>
       </button>
     </div>
   </div>
@@ -143,13 +143,15 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
 .composer {
   display: flex; align-items: flex-end; gap: 4px;
   padding: 6px 6px 6px 6px;
-  background: #f0f4f9;
-  border-radius: 26px;
+  background: rgba(2, 7, 20, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 12px;
   transition: background .15s, box-shadow .15s;
 }
 .composer:focus-within {
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(60, 64, 67, 0.08);
+  background: rgba(7, 24, 39, 0.98);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 215, 255, 0.18), 0 0 24px rgba(0, 215, 255, 0.12);
 }
 .composer textarea {
   flex: 1; min-width: 0;
@@ -167,12 +169,12 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
   width: 36px; height: 36px;
   display: grid; place-items: center;
   border: 0; background: transparent;
-  border-radius: 50%;
+  border-radius: 8px;
   color: var(--text-2);
   cursor: pointer;
   transition: background .12s, color .12s;
 }
-.tool-btn:hover:not(:disabled) { background: rgba(60, 64, 67, 0.08); color: var(--text); }
+.tool-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--accent-hi); }
 .tool-btn:disabled { opacity: 0.4; cursor: default; }
 
 .composer-files {
@@ -184,7 +186,8 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 4px 3px 10px;
   background: var(--bg-elev);
-  border-radius: 999px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   font-size: 12px;
   color: var(--text);
 }
@@ -196,12 +199,12 @@ defineExpose({ pendingFiles, addFiles, clearFiles, resetTextareaHeight, focus })
   margin-left: 2px;
   display: grid; place-items: center;
   border: 0; background: transparent;
-  border-radius: 50%;
+  border-radius: 6px;
   color: var(--text-3);
   cursor: pointer;
   transition: background .12s, color .12s;
 }
-.file-chip .x:hover { background: rgba(60,64,67,0.12); color: var(--text); }
+.file-chip .x:hover { background: var(--bg-hover); color: var(--text); }
 .upload-err {
   flex-basis: 100%;
   font-size: 11.5px;

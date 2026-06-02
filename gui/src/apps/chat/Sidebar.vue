@@ -22,7 +22,7 @@ function relTime(ts) {
     <!-- 顶部「新对话」按钮 -->
     <div class="flex flex-none items-center gap-2 pl-3 pr-3 pt-3.5 pb-2">
       <button
-        class="inline-flex items-center gap-2 rounded-[22px] border border-line bg-white py-2.5 pl-4 pr-[18px] text-[13.5px] font-medium text-ink shadow-1 transition-[background,box-shadow] hover:bg-[#fafbfc] hover:shadow-2"
+        class="inline-flex items-center gap-2 rounded-lg border border-line bg-card py-2.5 pl-4 pr-[18px] text-[13.5px] font-medium text-ink shadow-1 transition-[background,box-shadow] hover:bg-bg-hi hover:shadow-2"
         @click="emit('new-chat')">
         <span class="msi sm text-accent">edit_square</span>
         <span>新对话</span>
@@ -36,8 +36,8 @@ function relTime(ts) {
         还没有对话,点上方 ✎ 新建一个
       </div>
       <div v-for="c in conversations" :key="c.conversation_id"
-        class="my-px cursor-pointer rounded-[22px] px-3.5 py-2.5 transition-colors hover:bg-black/5"
-        :class="c.conversation_id === activeId ? 'is-active bg-blue-bg' : ''"
+        class="my-px cursor-pointer rounded-lg px-3.5 py-2.5 transition-colors hover:bg-bg-hi"
+        :class="c.conversation_id === activeId ? 'is-active border border-accent/30 bg-accent/10' : 'border border-transparent'"
         @click="emit('pick', c.conversation_id)">
         <div class="flex items-center gap-1.5">
           <span v-if="c.pinned" class="msi xxs flex-none text-accent">push_pin</span>

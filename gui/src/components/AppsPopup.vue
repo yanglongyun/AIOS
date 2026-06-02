@@ -75,14 +75,12 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 60px; right: 12px;
   width: 360px; max-width: calc(100vw - 24px);
-  /* 100vh 在移动端是"大视口"(URL bar 折叠后),会比可视区高,导致面板
-     从屏幕底部溢出。100dvh 跟着实际可视高度走。 */
   max-height: calc(100dvh - 80px);
-  background: #ebeef5;
-  border-radius: 28px;
-  box-shadow: var(--shadow-3);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   z-index: 60;
-  padding: 8px;
+  padding: 4px;
   display: flex; flex-direction: column;
   transform-origin: top right;
 }
@@ -96,8 +94,9 @@ onBeforeUnmount(() => {
 /* 白色卡 */
 .inner-card {
   flex: 1; min-height: 0;
-  background: #fff;
-  border-radius: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -116,13 +115,13 @@ onBeforeUnmount(() => {
 .edit-btn {
   width: 36px; height: 36px;
   display: grid; place-items: center;
-  border: 0; background: var(--accent-soft);
-  color: var(--accent-fg);
-  border-radius: 50%;
+  border: 1px solid var(--line); background: var(--bg-hover);
+  color: var(--accent);
+  border-radius: 4px;
   cursor: pointer;
   transition: background .15s;
 }
-.edit-btn:hover { background: #d2e3fc; }
+.edit-btn:hover { background: var(--card-hi); }
 
 .grid {
   flex: 1; min-height: 0;
@@ -136,19 +135,19 @@ onBeforeUnmount(() => {
   display: flex; flex-direction: column; align-items: center;
   gap: 8px;
   padding: 14px 4px 10px;
-  border: 0; background: transparent;
-  border-radius: 12px;
+  border: 1px solid transparent; background: transparent;
+  border-radius: 4px;
   color: var(--text);
   text-align: center;
   cursor: pointer;
   transition: background .15s;
 }
 .tile:hover { background: var(--bg-hover); }
-.tile.active { background: var(--accent-soft); }
+.tile.active { background: var(--accent-soft); border-color: var(--accent); }
 .tile .ic {
   width: 44px; height: 44px;
   display: grid; place-items: center;
-  border-radius: 12px;
+  border-radius: 4px;
 }
 .tile .ic .msi { font-size: 24px; }
 .tile .name {
@@ -160,10 +159,9 @@ onBeforeUnmount(() => {
 @media (max-width: 720px) {
   .apps-popup {
     top: 56px; left: 8px; right: 8px; width: auto;
-    /* 移动端再为底部 home indicator 留出 env safe-area-inset-bottom */
     max-height: calc(100dvh - 72px - env(safe-area-inset-bottom));
-    border-radius: 24px;
+    border-radius: 6px;
   }
-  .inner-card { border-radius: 18px; }
+  .inner-card { border-radius: 4px; }
 }
 </style>

@@ -14,12 +14,17 @@ const view = useViewStore();
 <style scoped>
 .trigger-btn {
   width: 40px; height: 40px;
-  display: grid; place-items: center;
+  display: none; place-items: center;
   border: 0; background: transparent;
   color: inherit;
   border-radius: 50%;
   cursor: pointer;
   transition: background .12s;
+}
+@media (max-width: 768px) {
+  .trigger-btn {
+    display: grid;
+  }
 }
 .trigger-btn:hover { background: rgba(128,128,128,.12); }
 .trigger-btn.active { background: rgba(128,128,128,.18); }

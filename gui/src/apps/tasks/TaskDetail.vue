@@ -13,11 +13,11 @@ const showProcess = ref(false);
 const continueText = ref('');
 
 const BADGE_CLS = {
-  pending: 'bg-[#fef7e0] text-[#b06000]',
-  running: 'bg-blue-bg text-blue-fg',
-  done:    'bg-[#e6f4ea] text-good',
-  error:   'bg-[#fce8e6] text-bad',
-  aborted: 'bg-[#eef3f7] text-muted'
+  pending: 'bg-warn/10 text-warn border border-warn/20',
+  running: 'bg-blue-bg text-blue-fg border border-accent/20',
+  done:    'bg-good/10 text-good border border-good/20',
+  error:   'bg-bad/10 text-bad border border-bad/20',
+  aborted: 'bg-bg-elev text-muted border border-line'
 };
 
 const messages = ref([]);
@@ -111,18 +111,18 @@ const fmtContent = (c) => {
 
     <div class="flex-1 min-h-0 overflow-y-auto pt-5 pb-4 flex flex-col gap-3.5">
 
-      <section v-if="task.status !== 'pending'" class="rounded-xl border border-line-soft bg-white px-4.5 py-3.5">
-        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">继续任务</div>
+      <section v-if="task.status !== 'pending'" class="rounded-lg border border-line bg-card px-4.5 py-3.5">
+        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint font-mono">继续任务</div>
         <textarea
           v-model="continueText"
-          class="min-h-[92px] w-full resize-y rounded-xl border border-line bg-[#fafbfc] px-3.5 py-3 text-[13px] leading-[1.55] text-ink outline-none transition-colors focus:border-accent focus:bg-white"
+          class="min-h-[92px] w-full resize-y rounded border border-line bg-bg-elev px-3.5 py-3 text-[13px] leading-[1.55] text-ink outline-none transition-colors focus:border-accent focus:bg-card"
           placeholder="补充新的指令，让这个任务基于已有过程继续执行"
           spellcheck="false"
           @keydown.meta.enter.prevent="submitContinue"
           @keydown.ctrl.enter.prevent="submitContinue"></textarea>
         <div class="mt-3 flex justify-end">
           <button
-            class="inline-flex h-9 items-center gap-1.5 rounded-full border-0 bg-accent px-4 text-[13px] font-medium text-white transition-colors hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45"
+            class="inline-flex h-9 items-center gap-1.5 rounded border-0 bg-accent px-4 text-[13px] font-bold text-bg-elev transition-colors hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45"
             :disabled="!continueText.trim()"
             @click="submitContinue">
             <span class="msi xs">play_arrow</span>
@@ -131,13 +131,13 @@ const fmtContent = (c) => {
         </div>
       </section>
 
-      <section v-if="renderRows.length" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
+      <section v-if="renderRows.length" class="rounded-lg border border-line px-4.5 py-3.5 bg-bg-elev">
         <button type="button"
-          class="-mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-md px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-faint cursor-pointer hover:bg-bg-hi"
+          class="-mx-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-md px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-faint cursor-pointer hover:bg-card-hi"
           :class="{ 'mb-3': showProcess }"
           @click="showProcess = !showProcess">
           <span class="msi xxs transition-transform" :class="{ '-rotate-90': !showProcess }">expand_more</span>
-          <span>执行过程</span>
+          <span class="font-mono">执行过程</span>
           <span class="font-mono text-[10.5px] text-muted normal-case tracking-normal">{{ renderRows.length }} 条</span>
           <span v-if="task.status === 'pending'" class="msi xxs animate-spin text-blue-fg">autorenew</span>
         </button>
@@ -147,21 +147,21 @@ const fmtContent = (c) => {
 
             <!-- 助手文字 -->
             <div v-if="r.kind === 'assistant' && r.text"
-              class="rounded-lg bg-white px-3.5 py-2.5 border border-line-soft">
-              <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-blue-fg">assistant</div>
+              class="rounded bg-card px-3.5 py-2.5 border border-line">
+              <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-blue-fg font-mono">assistant</div>
               <pre class="m-0 font-sans text-[13px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ r.text }}</pre>
             </div>
 
             <!-- 助手调用工具 -->
             <div v-else-if="r.kind === 'assistant_call'" class="flex flex-col gap-2">
               <div v-if="r.text"
-                class="rounded-lg bg-white px-3.5 py-2.5 border border-line-soft">
-                <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-blue-fg">assistant</div>
+                class="rounded bg-card px-3.5 py-2.5 border border-line">
+                <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-blue-fg font-mono">assistant</div>
                 <pre class="m-0 font-sans text-[13px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ r.text }}</pre>
               </div>
               <div v-for="c in r.calls" :key="c.id"
-                class="rounded-lg bg-[#fff8e6] border border-[#fde2a7] px-3.5 py-2.5">
-                <div class="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b06000]">
+                class="rounded bg-warn/5 border border-warn/20 px-3.5 py-2.5">
+                <div class="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-warn">
                   <span class="msi xxs">build</span>
                   <span>tool_call</span>
                   <span class="font-mono normal-case tracking-normal text-ink">{{ c.function?.name }}</span>
@@ -172,18 +172,18 @@ const fmtContent = (c) => {
 
             <!-- 工具结果 -->
             <div v-else-if="r.kind === 'tool_result'"
-              class="rounded-lg bg-[#f0f7f4] border border-[#cfe5d8] px-3.5 py-2.5">
+              class="rounded bg-good/5 border border-good/20 px-3.5 py-2.5">
               <div class="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-good">
                 <span class="msi xxs">check</span>
                 <span>tool_result</span>
               </div>
-              <pre class="m-0 font-mono text-[12px] leading-[1.55] text-ink whitespace-pre-wrap break-words">{{ fmtContent(r.content) }}</pre>
+              <pre class="m-0 font-mono text-[11px] leading-[1.5] text-ink whitespace-pre-wrap break-words">{{ fmtContent(r.content) }}</pre>
             </div>
 
             <!-- 系统 / 用户 / 其它 -->
             <div v-else-if="r.text"
-              class="rounded-lg bg-bg-elev px-3.5 py-2.5">
-              <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint">{{ r.kind }}</div>
+              class="rounded bg-card px-3.5 py-2.5 border border-line">
+              <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-faint font-mono">{{ r.kind }}</div>
               <pre class="m-0 font-mono text-[12px] leading-[1.55] text-ink whitespace-pre-wrap break-words">{{ r.text }}</pre>
             </div>
 
@@ -191,22 +191,22 @@ const fmtContent = (c) => {
         </div>
       </section>
 
-      <section v-if="task.response" class="rounded-xl px-4.5 py-3.5 bg-[#fafbfc]">
-        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">Response</div>
-        <pre class="m-0 font-mono text-[12.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ typeof task.response === 'string' ? task.response : JSON.stringify(task.response, null, 2) }}</pre>
+      <section v-if="task.response" class="rounded-lg border border-line px-4.5 py-3.5 bg-bg-elev">
+        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-faint font-mono">Response</div>
+        <pre class="m-0 font-mono text-[12px] leading-[1.55] text-ink whitespace-pre-wrap break-words">{{ typeof task.response === 'string' ? task.response : JSON.stringify(task.response, null, 2) }}</pre>
       </section>
 
       <!-- 错误 -->
-      <section v-if="task.error" class="rounded-xl px-4.5 py-3.5 bg-[#fff3f2]">
-        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-bad">Error</div>
-        <pre class="m-0 font-mono text-[12.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words">{{ task.error }}</pre>
+      <section v-if="task.error" class="rounded-lg border border-line px-4.5 py-3.5 bg-bad/5">
+        <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-bad font-mono">Error</div>
+        <pre class="m-0 font-mono text-[12px] leading-[1.55] text-ink whitespace-pre-wrap break-words">{{ task.error }}</pre>
       </section>
 
       <!-- 真没东西可看 -->
       <section v-if="!task.response && !task.error && !renderRows.length"
-        class="rounded-xl px-4.5 py-3.5 bg-bg-elev flex items-center gap-2 text-[12.5px] text-faint">
+        class="rounded-lg border border-line px-4.5 py-3.5 bg-bg-elev flex items-center gap-2 text-[12.5px] text-faint">
         <span v-if="task.status === 'pending'" class="msi xxs animate-spin">autorenew</span>
-        <span>{{ task.status === 'pending' ? '执行中, 暂无消息…' : '(无输出)' }}</span>
+        <span class="font-mono">{{ task.status === 'pending' ? '执行中, 暂无消息…' : '(无输出)' }}</span>
       </section>
     </div>
   </div>

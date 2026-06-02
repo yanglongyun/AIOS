@@ -445,12 +445,12 @@ onActivated(() => loadAll());
             <div class="about-head">
               <div class="logo">
                 <svg viewBox="0 0 24 24" width="48" height="48">
-                  <circle cx="12" cy="12" r="10" fill="#1a73e8"/>
-                  <path d="M11 16.5L6.5 12l1.4-1.4L11 13.7l5.6-5.6L18 9.5z" fill="#fff"/>
+                  <circle cx="12" cy="12" r="10" fill="var(--accent)"/>
+                  <path d="M11 16.5L6.5 12l1.4-1.4L11 13.7l5.6-5.6L18 9.5z" fill="var(--bg-elev)"/>
                 </svg>
               </div>
               <div>
-                <div class="about-name">AIOS</div>
+                <div class="about-name font-mono">AIOS</div>
                 <div class="about-tag">本地 AI 操作系统 · gui2</div>
               </div>
             </div>
@@ -487,7 +487,7 @@ onActivated(() => loadAll());
 .settings-shell {
   flex: 1; min-width: 0; min-height: 0;
   display: flex;
-  background: #f7f9fc;
+  background: var(--bg-elev);
 }
 
 /* ─────────── 左导航 ─────────── */
@@ -501,24 +501,24 @@ onActivated(() => loadAll());
 .nav-item {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px;
-  border: 0; background: transparent;
-  border-radius: 22px;
+  border: 1px solid transparent; background: transparent;
+  border-radius: 4px;
   color: var(--text-2);
   text-align: left;
   font-size: 13.5px; font-weight: 500;
   cursor: pointer;
-  transition: background .12s, color .12s;
+  transition: background .12s, color .12s, border-color .12s;
 }
 .nav-item .ic { color: var(--text-3); }
-.nav-item:hover { background: rgba(60,64,67,0.06); color: var(--text); }
+.nav-item:hover { background: var(--bg-hover); color: var(--text); }
 .nav-item:hover .ic { color: var(--text-2); }
-.nav-item.active { background: var(--accent-soft); color: var(--accent-fg); }
-.nav-item.active .ic { color: var(--accent-fg); }
+.nav-item.active { background: var(--bg-hover); border-color: var(--line); color: var(--accent); }
+.nav-item.active .ic { color: var(--accent); }
 .nav-foot { margin-top: auto; padding: 8px 14px 4px; }
 .badge {
   display: inline-block; padding: 2px 8px;
-  background: var(--bg-elev); color: var(--text-3);
-  border-radius: 10px; font-size: 11px; font-variant-numeric: tabular-nums;
+  background: var(--bg-card); border: 1px solid var(--line); color: var(--text-3);
+  border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums;
 }
 
 /* ─────────── 内容 ─────────── */
@@ -541,21 +541,21 @@ onActivated(() => loadAll());
   padding: 6px 12px; border-radius: 999px;
   font-size: 12.5px; font-weight: 500;
 }
-.notice.ok  { background: #e6f4ea; color: var(--good); }
-.notice.err { background: #fce8e6; color: var(--bad); }
+.notice.ok  { background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent); }
+.notice.err { background: rgba(255, 23, 68, 0.05); border: 1px solid rgba(255, 23, 68, 0.2); color: var(--bad); }
 .fade-enter-active, .fade-leave-active { transition: opacity .2s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-.err-bar { padding: 10px 14px; background: #fce8e6; color: var(--bad); border-radius: 10px; font-size: 13px; margin-bottom: 14px; }
+.err-bar { padding: 10px 14px; background: rgba(255, 23, 68, 0.05); border: 1px solid rgba(255, 23, 68, 0.2); color: var(--bad); border-radius: 4px; font-size: 13px; margin-bottom: 14px; }
 .placeholder { color: var(--text-3); padding: 60px; text-align: center; }
 
 /* ─────────── 卡片 ─────────── */
 .card {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   padding: 22px 24px;
   margin-bottom: 14px;
-  box-shadow: 0 1px 2px rgba(60,64,67,0.06), 0 4px 12px rgba(60,64,67,0.04);
 }
 .sec-head {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -579,14 +579,14 @@ onActivated(() => loadAll());
   width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--bg-elev);
   color: var(--text);
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 14px;
   outline: 0;
-  transition: border-color .15s, box-shadow .15s;
+  transition: border-color .15s;
 }
-.text-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.text-input:focus { border-color: var(--accent); }
 .text-input::placeholder { color: var(--text-3); }
 .text-input.mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 13px; }
 .text-input.num { width: 120px; font-variant-numeric: tabular-nums; }
@@ -594,28 +594,28 @@ onActivated(() => loadAll());
 
 .actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
 
-.inline-msg { padding: 8px 12px; border-radius: 10px; font-size: 12.5px; }
-.inline-msg.ok  { background: #e6f4ea; color: var(--good); }
-.inline-msg.err { background: #fce8e6; color: var(--bad); }
+.inline-msg { padding: 8px 12px; border-radius: 4px; font-size: 12.5px; border: 1px solid transparent; }
+.inline-msg.ok  { background: rgba(0, 229, 255, 0.05); border-color: rgba(0, 229, 255, 0.2); color: var(--accent); }
+.inline-msg.err { background: rgba(255, 23, 68, 0.05); border-color: rgba(255, 23, 68, 0.2); color: var(--bad); }
 
 /* ─────────── 按钮 ─────────── */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 10px 20px;
-  border: 0; border-radius: 22px;
+  border: 1px solid transparent; border-radius: 4px;
   font-size: 13.5px; font-weight: 500;
   cursor: pointer;
-  transition: background .15s, box-shadow .15s, color .15s, border-color .15s;
+  transition: background .15s, color .15s, border-color .15s;
 }
-.btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
-.btn.small { padding: 6px 12px; font-size: 12.5px; border-radius: 16px; }
-.btn.solid  { background: var(--accent); color: #fff; }
-.btn.solid:hover:not(:disabled) { background: var(--accent-hi); box-shadow: 0 1px 3px rgba(26,115,232,0.4); }
-.btn.tonal  { background: var(--accent-soft); color: var(--accent-fg); }
-.btn.tonal:hover:not(:disabled) { background: #d2e3fc; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.small { padding: 6px 12px; font-size: 12.5px; border-radius: 4px; }
+.btn.solid  { background: var(--accent); color: var(--bg-elev); font-weight: 700; }
+.btn.solid:hover:not(:disabled) { background: var(--accent-hi); }
+.btn.tonal  { background: var(--bg-hover); color: var(--accent); border-color: var(--line); }
+.btn.tonal:hover:not(:disabled) { background: var(--card-hi); }
 .btn.outline { background: transparent; color: var(--text-2); border: 1px solid var(--line); }
 .btn.outline:hover { background: var(--bg-hover); color: var(--text); }
-.btn.outline.danger:hover { color: var(--bad); border-color: var(--bad); background: rgba(217,48,37,0.04); }
+.btn.outline.danger:hover { color: var(--bad); border-color: var(--bad); background: rgba(255, 23, 68, 0.05); }
 
 /* ─────────── 开关 (Material 3 switch) ─────────── */
 .switch {
@@ -639,7 +639,7 @@ onActivated(() => loadAll());
   transition: transform .2s, background .2s, width .2s, height .2s, top .2s, left .2s;
 }
 .switch.on { background: var(--accent); border-color: var(--accent); }
-.switch.on::after { background: #fff; width: 20px; height: 20px; top: 2px; left: 22px; }
+.switch.on::after { background: var(--bg-elev); width: 20px; height: 20px; top: 2px; left: 22px; }
 
 /* ─────────── 段控件(轮数) ─────────── */
 .seg {
@@ -651,16 +651,16 @@ onActivated(() => loadAll());
   padding: 14px;
   border: 1px solid var(--line);
   background: transparent;
-  border-radius: 14px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background .12s, border-color .12s;
 }
 .seg-btn:hover { background: var(--bg-hover); }
-.seg-btn.active { background: var(--accent-soft); border-color: var(--accent-soft); }
+.seg-btn.active { background: var(--accent-soft); border-color: var(--accent); }
 .seg-n { font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
-.seg-btn.active .seg-n { color: var(--accent-fg); }
+.seg-btn.active .seg-n { color: var(--accent); }
 .seg-l { font-size: 11.5px; color: var(--text-3); }
-.seg-btn.active .seg-l { color: var(--accent-fg); }
+.seg-btn.active .seg-l { color: var(--accent); }
 
 /* ─────────── 提示词大输入 ─────────── */
 .prompt-card { display: flex; flex-direction: column; }
@@ -669,18 +669,18 @@ onActivated(() => loadAll());
   min-height: 420px;
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fafbfc;
+  border-radius: 4px;
+  background: var(--bg-elev);
   font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   font-size: 13px;
   line-height: 1.65;
   color: var(--text);
   outline: 0;
   resize: vertical;
-  transition: border-color .15s, box-shadow .15s, background .15s;
+  transition: border-color .15s, background .15s;
 }
 .prompt-area.user-prompt { min-height: 220px; }
-.prompt-area:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+.prompt-area:focus { border-color: var(--accent); background: var(--bg-card); }
 .prompt-preview {
   width: 100%;
   max-height: 520px;
@@ -688,8 +688,8 @@ onActivated(() => loadAll());
   padding: 14px 16px;
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fafbfc;
+  border-radius: 4px;
+  background: var(--bg-elev);
   color: var(--text);
   font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   font-size: 12.5px;
@@ -701,17 +701,17 @@ onActivated(() => loadAll());
 
 /* ─────────── 上下文资源列表 ─────────── */
 .empty { padding: 40px; text-align: center; color: var(--text-3); font-size: 13px;
-  background: #fafbfc; border-radius: 12px; }
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; }
 .ctx-list { display: flex; flex-direction: column; gap: 10px; }
-.ctx { padding: 14px 16px; background: #fafbfc; border-radius: 12px; }
+.ctx { padding: 14px 16px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 4px; }
 .ctx-row { display: flex; align-items: center; gap: 10px; }
 .ctx-title { margin: 0; flex: 1; min-width: 0; font-size: 14px; font-weight: 500;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.src-tag { padding: 2px 8px; background: var(--bg-elev); color: var(--text-2);
-  border-radius: 6px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
-.pill { padding: 2px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 500; }
-.pill-blue { background: var(--accent-soft); color: var(--accent-fg); }
-.pill-soft { background: #fef7e0; color: #b06000; }
+.src-tag { padding: 2px 8px; background: var(--bg-hover); color: var(--text-2);
+  border: 1px solid var(--line); border-radius: 4px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+.pill { padding: 2px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 500; }
+.pill-blue { background: var(--accent-soft); border: 1px solid rgba(0, 229, 255, 0.2); color: var(--accent); }
+.pill-soft { background: rgba(255, 214, 0, 0.05); border: 1px solid rgba(255, 214, 0, 0.2); color: var(--warn); }
 .pill-mute { background: var(--bg-elev); color: var(--text-3); }
 .ctx-sum { margin: 6px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--text-2);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -730,9 +730,10 @@ onActivated(() => loadAll());
   flex: none;
   width: 36px; height: 36px;
   display: grid; place-items: center;
-  border-radius: 12px;
-  background: var(--accent-soft);
-  color: var(--accent-fg);
+  border-radius: 4px;
+  background: var(--bg-hover);
+  border: 1px solid var(--line);
+  color: var(--accent);
 }
 .skill-main { flex: 1; min-width: 0; }
 .skill-row { display: flex; align-items: center; gap: 10px; }
@@ -753,8 +754,9 @@ onActivated(() => loadAll());
 .code-block {
   margin: 0;
   padding: 12px 14px;
-  background: #1e1e1e; color: #e8eaed;
-  border-radius: 10px;
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 4px;
   font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   font-size: 12.5px; line-height: 1.55;
   overflow-x: auto;

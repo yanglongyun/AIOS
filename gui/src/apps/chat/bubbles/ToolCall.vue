@@ -6,23 +6,23 @@ defineProps({
 </script>
 
 <template>
-  <div class="max-w-[720px] overflow-hidden rounded-xl border border-line bg-white">
+  <div class="max-w-[720px] overflow-hidden rounded-lg border border-line bg-bg-elev">
     <button type="button"
-      class="flex w-full items-center gap-1.5 border-0 bg-accent/5 px-3 py-2.5 text-left transition-colors hover:bg-accent/10"
+      class="flex w-full items-center gap-1.5 border-0 bg-accent/5 px-3 py-2 text-left transition-colors hover:bg-accent/10"
       @click="msg.expanded = !msg.expanded">
       <span
         class="msi xs flex-none text-faint transition-transform"
         :class="msg.expanded ? 'rotate-90' : ''">chevron_right</span>
-      <span class="flex-1 truncate text-[12px] text-ink">{{ msg.title }}</span>
-      <span v-if="msg.result" class="text-[11px] text-faint">完成</span>
+      <span class="flex-1 truncate text-[12px] text-ink font-mono">{{ msg.title }}</span>
+      <span v-if="msg.result" class="text-[11px] text-faint font-mono">DONE</span>
     </button>
-    <div v-if="msg.expanded" class="border-t border-line/60">
+    <div v-if="msg.expanded" class="border-t border-line">
       <pre v-if="msg.shell && msg.command"
-        class="m-0 overflow-x-auto whitespace-pre bg-[#f6f8fc] px-3 py-2.5 text-[12px] leading-[1.55] text-good [scrollbar-width:none]"><span class="select-none text-faint">$ </span>{{ msg.command }}</pre>
+        class="m-0 overflow-x-auto whitespace-pre bg-bg-elev px-3 py-2 text-[12px] leading-[1.55] text-good [scrollbar-width:none] font-mono"><span class="select-none text-faint">$ </span>{{ msg.command }}</pre>
       <pre v-else-if="msg.detail"
-        class="m-0 overflow-x-auto whitespace-pre bg-bg-elev px-3 py-2.5 text-[12px] leading-[1.55] text-muted [scrollbar-width:none]">{{ msg.detail }}</pre>
+        class="m-0 overflow-x-auto whitespace-pre bg-bg-elev px-3 py-2 text-[12px] leading-[1.55] text-muted [scrollbar-width:none] font-mono">{{ msg.detail }}</pre>
       <pre v-if="msg.result"
-        class="m-0 max-h-[200px] overflow-x-auto overflow-y-auto whitespace-pre border-t border-line/60 bg-accent/3 px-3 py-2.5 text-[12px] leading-[1.55] text-muted [scrollbar-width:none]">{{ msg.result }}</pre>
+        class="m-0 max-h-[200px] overflow-x-auto overflow-y-auto whitespace-pre border-t border-line bg-bg-elev px-3 py-2 text-[11px] leading-[1.5] text-muted [scrollbar-width:none] font-mono">{{ msg.result }}</pre>
     </div>
   </div>
 </template>

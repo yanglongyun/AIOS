@@ -265,17 +265,17 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- ─── 侧栏 + 主区 ─── -->
-    <div class="relative flex flex-1 min-w-0 min-h-0 bg-[#f0f4f9]">
+    <div class="relative flex flex-1 min-w-0 min-h-0 bg-bg-elev">
 
       <!-- 移动端 drawer 展开时的遮罩(只覆盖 chat-shell 内部, 不挡 topbar) -->
       <Transition name="backdrop">
         <div v-if="view.appDrawerOpen"
-          class="absolute inset-0 z-40 hidden bg-black/40 max-[720px]:block"
+          class="absolute inset-0 z-40 hidden bg-black/60 max-[720px]:block"
           @click="view.closeAppDrawer()"></div>
       </Transition>
 
       <!-- 侧栏 -->
-      <aside class="app-side !bg-[#f0f4f9] !border-r-0"
+      <aside class="app-side !bg-bg-elev !border-r !border-line"
         :class="{ collapsed: !view.appDrawerOpen }">
         <Sidebar
           :conversations="conversations"
@@ -284,8 +284,8 @@ onBeforeUnmount(() => {
           @new-chat="newChat" />
       </aside>
 
-      <!-- 主区(白卡) -->
-      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl m-2 ml-0 bg-white max-md:m-0 max-md:rounded-none"
+      <!-- 主区 (Slate Card Panel with sharp borders) -->
+      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-lg border border-line m-2 ml-0 bg-card max-md:m-0 max-md:rounded-none max-md:border-0"
         @dragenter="onDragEnter"
         @dragover="onDragOver"
         @dragleave="onDragLeave"

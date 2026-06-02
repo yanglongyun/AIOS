@@ -56,23 +56,26 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="relative grid h-dvh w-screen place-items-center overflow-hidden bg-bg-elev p-6">
+    <div class="relative grid h-dvh w-screen place-items-center overflow-hidden bg-[#f6f8fb] p-6">
+        <!-- 装饰背景:上下两层柔光 + 中央 orb -->
         <div class="login-bg pointer-events-none absolute inset-0" aria-hidden="true"></div>
+        <div class="login-orb pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-[55%] rounded-full" aria-hidden="true"></div>
 
-        <div class="relative flex w-full max-w-[400px] flex-col rounded-md border border-line bg-card px-8 pb-7 pt-8 shadow-3 max-[480px]:px-5 max-[480px]:pb-[22px] max-[480px]:pt-7">
+        <div class="relative flex w-full max-w-[380px] flex-col rounded-[22px] border border-black/5 bg-white px-8 pb-7 pt-9 shadow-[0_18px_50px_-20px_rgba(60,64,67,0.18)] max-[480px]:rounded-[18px] max-[480px]:px-5 max-[480px]:pb-[22px] max-[480px]:pt-7">
 
+            <!-- 品牌区 -->
             <div class="mb-[22px] flex flex-col items-center">
-                <div class="grid h-12 w-12 place-items-center rounded border border-accent bg-accent/10 text-accent shadow-[0_0_24px_rgba(0,229,255,0.16)]">
-                    <span class="msi" style="font-size:26px">memory</span>
+                <div class="grid h-14 w-14 place-items-center rounded-[18px] bg-[linear-gradient(140deg,#34a853,#1e8e3e)] text-white shadow-[0_14px_40px_-16px_rgba(52,168,83,0.85)]">
+                    <span class="msi" style="font-size:28px">eco</span>
                 </div>
-                <div class="mt-[14px] font-mono text-[24px] font-extrabold tracking-[0.08em] text-ink">
-                    AIOS
+                <div class="mt-[14px] text-[26px] font-bold tracking-tight text-ink">
+                    AIOS<span class="text-[#34a853]">.</span>
                 </div>
-                <div class="mt-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">LOCAL AGENT OS</div>
+                <div class="mt-1.5 text-[12px] tracking-[0.02em] text-muted">本地运行 · 数据归你</div>
             </div>
 
-            <h2 class="m-0 text-center font-mono text-[18px] font-bold uppercase tracking-[0.06em] text-ink">解锁系统</h2>
-            <p class="m-0 text-center text-[13px] text-muted">输入本机密码进入 AIOS。</p>
+            <h2 class="m-0 text-center text-[20px] font-bold text-ink">欢迎回来</h2>
+            <p class="m-0 text-center text-[13px] text-muted">输入密码进入你的 AIOS。</p>
 
             <form class="mt-5 flex flex-col gap-3.5" @submit.prevent="submit">
                 <label class="relative block">
@@ -95,30 +98,35 @@ onMounted(async () => {
                 </label>
 
                 <div v-if="error"
-                     class="flex items-center gap-2 rounded border border-bad/25 bg-bad/10 px-3 py-2.5 font-mono text-[12px] leading-snug text-bad">
+                     class="flex items-center gap-2 rounded-[10px] bg-[color-mix(in_srgb,var(--color-bad)_10%,transparent)] px-3 py-2.5 text-[13px] leading-snug text-bad">
                     {{ error }}
                 </div>
 
                 <button type="submit"
                         :disabled="!canSubmit"
-                        class="mt-1 h-11 rounded-md border-0 bg-accent font-mono text-[13px] font-bold uppercase tracking-[0.08em] text-bg-elev shadow-[0_0_18px_rgba(0,229,255,0.14)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-accent-hi disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none">
+                        class="mt-1 h-11 rounded-xl border-0 bg-[#1a73e8] text-[14px] font-semibold tracking-[0.01em] text-white shadow-[0_6px_18px_-8px_rgba(26,115,232,0.65)] transition-[background,box-shadow,transform] active:translate-y-px hover:bg-[#174ea6] hover:shadow-[0_10px_24px_-10px_rgba(26,115,232,0.8)] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:hover:bg-[#1a73e8]">
                     {{ loading ? '登录中…' : '进入 AIOS' }}
                 </button>
             </form>
 
             <p class="mt-[22px] text-center text-[11.5px] leading-[1.6] text-faint">
                 忘记密码?在终端运行:<br/>
-                <code class="mt-1 inline-block rounded bg-bg-elev px-2 py-0.5 font-mono text-[11px] text-muted">sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"</code>
+                <code class="mt-1 inline-block rounded-md bg-bg-elev px-2 py-0.5 font-mono text-[11px] text-muted">sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"</code>
             </p>
         </div>
     </div>
 </template>
 
 <style scoped>
+/* 多层径向 + 混合渐变在 Tailwind 任意值里写出来太长且无法换行,
+   下沉到 scoped style,只这两块不走 Tailwind。 */
 .login-bg {
     background:
-        radial-gradient(70% 50% at 50% 0%, rgba(0,229,255,0.13) 0%, transparent 70%),
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 72px),
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 72px);
+        radial-gradient(60% 50% at 50% 0%, rgba(52,168,83,0.10) 0%, transparent 70%),
+        radial-gradient(70% 60% at 50% 100%, rgba(26,115,232,0.10) 0%, transparent 70%);
+}
+.login-orb {
+    background: radial-gradient(circle, rgba(52,168,83,0.18) 0%, transparent 65%);
+    filter: blur(40px);
 }
 </style>

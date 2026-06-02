@@ -1,10 +1,17 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
 import { createChatSession } from "../chat/session.js";
 import { isAuthenticated } from "../auth/session.js";
 import { redact } from "./redact.js";
 
-const wsApps = [];
+const require = createRequire(import.meta.url);
+
+// files / terminal 是本机 websocket 应用,通过消息 type 分发到各自后端。
+const wsApps = [
+  require("../../../apps/terminal/index.js"),
+  require("../../../apps/files/index.js")
+];
 
 const clients = new Set();
 const clientById = new Map(); // clientId → ws

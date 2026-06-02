@@ -1,35 +1,35 @@
 <template>
   <Teleport to="body">
     <div v-if="visible" class="fixed inset-0 z-[420] flex items-center justify-center bg-black/45 px-6 py-8" @click="emit('close')">
-      <div class="flex h-[560px] w-[760px] max-w-full flex-col overflow-hidden rounded-md border border-line bg-card shadow-3" @click.stop>
-        <div class="border-b border-line px-5 py-4">
-          <div class="font-mono text-[13px] font-bold uppercase tracking-[0.08em] text-ink">选择目录</div>
-          <div class="mt-1 text-[12px] text-muted">为会话选择工作目录。</div>
+      <div class="flex h-[560px] w-[760px] max-w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1b1b1d] shadow-[0_24px_80px_rgba(0,0,0,0.45)]" @click.stop>
+        <div class="border-b border-[#2d2d30] px-5 py-4">
+          <div class="text-[15px] font-semibold text-[#f3f4f6]">选择目录</div>
+          <div class="mt-1 text-[12px] text-[#8b949e]">为 Claude Code 会话选择工作目录。</div>
         </div>
 
-        <div class="border-b border-line px-4 py-3">
+        <div class="border-b border-[#2d2d30] px-4 py-3">
           <div class="flex flex-wrap items-center gap-y-1 text-[12px]">
             <template v-for="(crumb, index) in breadcrumbs" :key="crumb.path">
               <button
                 type="button"
                 class="max-w-[180px] rounded px-1.5 py-1 transition-colors"
                 :class="index === breadcrumbs.length - 1
-                  ? 'cursor-default bg-bg-hi text-ink'
-                  : 'text-muted hover:bg-bg-hi hover:text-ink'"
+                  ? 'cursor-default bg-[#2a2d2e] text-[#f3f4f6]'
+                  : 'text-[#9da2a6] hover:bg-[#2a2d2e] hover:text-white'"
                 @click="openBreadcrumb(crumb.path)"
               >
                 <span class="truncate">{{ crumb.label }}</span>
               </button>
-              <span v-if="index < breadcrumbs.length - 1" class="px-1 text-faint">/</span>
+              <span v-if="index < breadcrumbs.length - 1" class="px-1 text-[#5f666d]">/</span>
             </template>
           </div>
-          <div class="mt-2 truncate font-mono text-[11px] text-faint">{{ currentBase || '/' }}</div>
+          <div class="mt-2 truncate text-[11px] text-[#6a737d]">{{ currentBase || '/' }}</div>
         </div>
 
         <div class="min-h-0 flex-1 overflow-auto px-3 py-3 [scrollbar-width:thin]">
-          <div v-if="loading" class="px-2 py-6 text-[12px] text-faint">加载中...</div>
-          <div v-else-if="error" class="px-2 py-6 text-[12px] text-bad">{{ error }}</div>
-          <div v-else-if="!folders.length" class="px-2 py-6 text-[12px] text-faint">没有子目录</div>
+          <div v-if="loading" class="px-2 py-6 text-[12px] text-[#6a737d]">加载中...</div>
+          <div v-else-if="error" class="px-2 py-6 text-[12px] text-[#f48771]">{{ error }}</div>
+          <div v-else-if="!folders.length" class="px-2 py-6 text-[12px] text-[#6a737d]">没有子目录</div>
           <div v-else class="space-y-1">
             <button
               v-for="folder in folders"
@@ -37,33 +37,33 @@
               type="button"
               class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[12px] transition-colors"
               :class="selectedPath === folderPath(folder)
-                ? 'bg-accent/10 text-ink'
-                : 'text-muted hover:bg-bg-hi hover:text-ink'"
+                ? 'bg-[#2f3540] text-white'
+                : 'text-[#d4d4d4] hover:bg-[#252628]'"
               @click="selectedPath = folderPath(folder)"
               @dblclick="enterFolder(folder)"
             >
               <span class="text-[14px]">📁</span>
               <span class="min-w-0 flex-1 truncate">{{ folder.name }}</span>
-              <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">打开</span>
+              <span class="text-[10px] uppercase tracking-[0.12em] text-[#6a737d]">打开</span>
             </button>
           </div>
         </div>
 
-        <div class="flex items-center justify-between border-t border-line px-4 py-3">
+        <div class="flex items-center justify-between border-t border-[#2d2d30] px-4 py-3">
           <button
             type="button"
-            class="rounded px-3 py-1.5 text-[12px] text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+            class="rounded px-3 py-1.5 text-[12px] text-[#9da2a6] transition-colors hover:bg-[#252628] hover:text-white"
             @click="openParent"
           >上一级</button>
           <div class="flex items-center gap-2">
             <button
               type="button"
-              class="rounded border border-line px-3 py-1.5 text-[12px] text-muted transition-colors hover:bg-bg-hi hover:text-ink"
+              class="rounded border border-[#3d4044] px-3 py-1.5 text-[12px] text-[#c9d1d9] transition-colors hover:bg-[#252628]"
               @click="emit('close')"
             >取消</button>
             <button
               type="button"
-              class="rounded bg-accent px-3 py-1.5 text-[12px] font-bold text-bg-elev transition-colors hover:bg-accent-hi"
+              class="rounded bg-[#2f6feb] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#3b82f6]"
               @click="selectCurrent"
             >选择</button>
           </div>

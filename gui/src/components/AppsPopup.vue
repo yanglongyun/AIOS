@@ -46,6 +46,7 @@ onBeforeUnmount(() => {
 <template>
   <Transition name="apps-fade">
     <div v-if="view.appsOpen" class="apps-popup">
+      <!-- 内嵌白色面板 -->
       <div class="inner-card">
         <header class="head">
           <div class="title">应用中心</div>
@@ -59,7 +60,7 @@ onBeforeUnmount(() => {
             :class="{ active: isActive(app.id) }"
             @click="go(app.id)">
             <span class="ic" :style="{ background: app.color }">
-              <span class="msi text-bg-elev">{{ app.icon }}</span>
+              <span class="msi" style="color:#fff">{{ app.icon }}</span>
             </span>
             <span class="name">{{ app.name }}</span>
           </button>
@@ -74,12 +75,14 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 60px; right: 12px;
   width: 360px; max-width: calc(100vw - 24px);
+  /* 100vh 在移动端是"大视口"(URL bar 折叠后),会比可视区高,导致面板
+     从屏幕底部溢出。100dvh 跟着实际可视高度走。 */
   max-height: calc(100dvh - 80px);
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: #ebeef5;
+  border-radius: 28px;
+  box-shadow: var(--shadow-3);
   z-index: 60;
-  padding: 4px;
+  padding: 8px;
   display: flex; flex-direction: column;
   transform-origin: top right;
 }
@@ -90,11 +93,11 @@ onBeforeUnmount(() => {
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* 白色卡 */
 .inner-card {
   flex: 1; min-height: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  background: #fff;
+  border-radius: 22px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -105,23 +108,21 @@ onBeforeUnmount(() => {
   flex: none;
 }
 .head .title {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 .edit-btn {
   width: 36px; height: 36px;
   display: grid; place-items: center;
-  border: 1px solid var(--line); background: var(--bg-hover);
-  color: var(--accent);
-  border-radius: 4px;
+  border: 0; background: var(--accent-soft);
+  color: var(--accent-fg);
+  border-radius: 50%;
   cursor: pointer;
   transition: background .15s;
 }
-.edit-btn:hover { background: var(--bg-hover); }
+.edit-btn:hover { background: #d2e3fc; }
 
 .grid {
   flex: 1; min-height: 0;
@@ -135,24 +136,23 @@ onBeforeUnmount(() => {
   display: flex; flex-direction: column; align-items: center;
   gap: 8px;
   padding: 14px 4px 10px;
-  border: 1px solid transparent; background: transparent;
-  border-radius: 4px;
+  border: 0; background: transparent;
+  border-radius: 12px;
   color: var(--text);
   text-align: center;
   cursor: pointer;
   transition: background .15s;
 }
 .tile:hover { background: var(--bg-hover); }
-.tile.active { background: var(--accent-soft); border-color: var(--accent); }
+.tile.active { background: var(--accent-soft); }
 .tile .ic {
   width: 44px; height: 44px;
   display: grid; place-items: center;
-  border-radius: 4px;
+  border-radius: 12px;
 }
 .tile .ic .msi { font-size: 24px; }
 .tile .name {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.2;
   color: var(--text);
 }
@@ -160,9 +160,10 @@ onBeforeUnmount(() => {
 @media (max-width: 720px) {
   .apps-popup {
     top: 56px; left: 8px; right: 8px; width: auto;
+    /* 移动端再为底部 home indicator 留出 env safe-area-inset-bottom */
     max-height: calc(100dvh - 72px - env(safe-area-inset-bottom));
-    border-radius: 6px;
+    border-radius: 24px;
   }
-  .inner-card { border-radius: 4px; }
+  .inner-card { border-radius: 18px; }
 }
 </style>

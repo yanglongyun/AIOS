@@ -121,14 +121,12 @@ onBeforeUnmount(() => unlisten?.());
   background: var(--bg);
 }
 .topbar {
-  height: 56px;
+  height: 64px;
   flex: none;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-card-sub);
 }
 .title {
   min-width: 0;
@@ -136,11 +134,8 @@ onBeforeUnmount(() => unlisten?.());
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--text);
 }
 .actions {
@@ -171,22 +166,21 @@ onBeforeUnmount(() => unlisten?.());
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
+  border-radius: 50%;
+  background: #eef3f7;
   color: var(--text-2);
 }
 .state.active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: #e8f0fe;
+  color: #174ea6;
 }
 .state.fired {
-  background: rgba(0, 230, 118, .10);
-  color: var(--good);
+  background: #e6f4ea;
+  color: #137333;
 }
 .state.paused {
-  background: rgba(255, 214, 0, .10);
-  color: var(--warn);
+  background: #fff7df;
+  color: #9a5f00;
 }
 .main {
   min-width: 0;
@@ -203,26 +197,25 @@ onBeforeUnmount(() => unlisten?.());
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text);
 }
 .badge {
   flex: none;
-  border-radius: 4px;
+  border-radius: 999px;
   padding: 3px 8px;
   font-size: 11px;
   font-weight: 600;
-  background: var(--bg-elev);
+  background: #eef3f7;
   color: var(--text-2);
 }
 .badge.active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: #e8f0fe;
+  color: #174ea6;
 }
 .badge.fired {
-  background: rgba(0, 230, 118, .10);
-  color: var(--good);
+  background: #e6f4ea;
+  color: #137333;
 }
 .sub {
   display: flex;
@@ -246,15 +239,15 @@ onBeforeUnmount(() => unlisten?.());
 .empty, .err {
   max-width: 920px;
   margin: 0 auto;
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 16px;
   color: var(--text-2);
-  background: var(--bg-card);
+  background: #fff;
   border: 1px solid var(--line);
 }
 .err {
   color: var(--bad);
-  background: rgba(255, 23, 68, .10);
+  background: #fce8e6;
 }
 @media (max-width: 720px) {
   .topbar {

@@ -22,7 +22,7 @@ function relTime(ts) {
     <!-- 顶部「新对话」按钮 -->
     <div class="flex flex-none items-center gap-2 pl-3 pr-3 pt-3.5 pb-2">
       <button
-        class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-line bg-card py-2 pl-4 pr-[18px] font-mono text-[12px] font-semibold uppercase tracking-[0.04em] text-ink transition-[background,border-color] hover:border-accent/40 hover:bg-card-hi"
+        class="inline-flex items-center gap-2 rounded-[22px] border border-line bg-white py-2.5 pl-4 pr-[18px] text-[13.5px] font-medium text-ink shadow-1 transition-[background,box-shadow] hover:bg-[#fafbfc] hover:shadow-2"
         @click="emit('new-chat')">
         <span class="msi sm text-accent">edit_square</span>
         <span>新对话</span>
@@ -36,16 +36,16 @@ function relTime(ts) {
         还没有对话,点上方 ✎ 新建一个
       </div>
       <div v-for="c in conversations" :key="c.conversation_id"
-        class="my-1 cursor-pointer rounded-md border border-transparent px-3.5 py-2 transition-colors hover:bg-card-hi"
-        :class="c.conversation_id === activeId ? 'is-active bg-card-hi !border-line' : ''"
+        class="my-px cursor-pointer rounded-[22px] px-3.5 py-2.5 transition-colors hover:bg-black/5"
+        :class="c.conversation_id === activeId ? 'is-active bg-blue-bg' : ''"
         @click="emit('pick', c.conversation_id)">
         <div class="flex items-center gap-1.5">
           <span v-if="c.pinned" class="msi xxs flex-none text-accent">push_pin</span>
-          <span class="flex-1 min-w-0 truncate font-mono text-[12px] font-medium text-ink">
+          <span class="flex-1 min-w-0 truncate text-[13.5px] font-medium text-ink">
             {{ c.title || '未命名' }}
           </span>
         </div>
-        <div class="conv-time mt-1 font-mono text-[10.5px] tabular-nums text-faint">
+        <div class="conv-time mt-0.5 text-[11.5px] tabular-nums text-faint">
           {{ relTime(c.created_at) }}
         </div>
       </div>

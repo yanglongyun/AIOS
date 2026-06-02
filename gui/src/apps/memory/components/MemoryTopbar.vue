@@ -32,11 +32,11 @@ defineEmits(['toggle-drawer', 'create', 'refresh']);
 <style scoped>
 .topbar {
   display: flex;
-  height: 56px;
+  height: 64px;
   flex: none;
   align-items: center;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-card-sub);
+  border-bottom: 1px solid #e4e8ed;
+  background: #fff;
   padding: 0 16px;
 }
 .topbar-title {
@@ -44,12 +44,9 @@ defineEmits(['toggle-drawer', 'create', 'refresh']);
   flex: 1;
   margin: 0 4px 0 12px;
   overflow: hidden;
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  color: #202124;
+  font-size: 20px;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -59,9 +56,9 @@ defineEmits(['toggle-drawer', 'create', 'refresh']);
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: var(--bg-elev);
+  border-radius: 999px;
+  background: #1a73e8;
+  color: #fff;
   font-size: 13px;
   font-weight: 650;
   padding: 0 14px;
@@ -73,7 +70,7 @@ defineEmits(['toggle-drawer', 'create', 'refresh']);
 }
 @media (max-width: 768px) {
   .topbar {
-    height: 48px;
+    height: 56px;
     padding: 0 8px;
   }
   .topbar-title {

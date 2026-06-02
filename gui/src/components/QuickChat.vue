@@ -99,9 +99,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
       <div class="inner-card">
         <header class="head">
           <span class="bot">
-            <span class="msi sm">memory</span>
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <circle cx="12" cy="12" r="10" fill="#1a73e8"/>
+              <circle cx="9" cy="11" r="1.6" fill="#fff"/>
+              <circle cx="15" cy="11" r="1.6" fill="#fff"/>
+              <path d="M8.5 14.5c1 1.2 2.2 1.7 3.5 1.7s2.5-.5 3.5-1.7" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+            </svg>
           </span>
-          <span class="title">AI CHANNEL</span>
+          <span class="title">问 AI</span>
           <span class="ws-dot" :class="wsStatus" :title="'WS: ' + wsStatus"></span>
           <button class="icon-btn close-btn" @click="view.closeChat()" title="关闭">
             <span class="msi sm">close</span>
@@ -137,9 +142,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   top: 60px; right: 12px;
   width: 400px; max-width: calc(100vw - 24px);
   height: min(580px, calc(100vh - 80px));
-  background: var(--bg-elev);
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  background: #ebeef5;
+  border-radius: 28px;
   box-shadow: var(--shadow-3);
   z-index: 60;
   padding: 8px;
@@ -153,35 +157,27 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* 内嵌暗色工作站面板 */
+/* 内嵌白色面板 */
 .inner-card {
   flex: 1; min-height: 0;
-  background: var(--bg-card);
-  border-radius: 6px;
-  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 22px;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
 
-.head { flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 12px 12px 18px; border-bottom: 1px solid var(--line); }
+.head { flex: none; display: flex; align-items: center; gap: 10px; padding: 14px 12px 12px 18px; }
 .head .bot { display: grid; place-items: center; }
-.head .bot {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(0, 229, 255, .28);
-  border-radius: 4px;
-  color: var(--accent);
-}
-.head .title { flex: 1; font-family: var(--font-mono); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.head .title { flex: 1; font-weight: 500; font-size: 15px; letter-spacing: -0.005em; }
 .ws-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
-.ws-dot.connected { background: var(--good); box-shadow: 0 0 6px var(--good); }
+.ws-dot.connected { background: var(--good); }
 .ws-dot.connecting { background: var(--warn); }
 .ws-dot.disconnected { background: var(--bad); }
 
 .body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
-.msg { max-width: 85%; padding: 10px 14px; border-radius: 6px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-.msg.ai { background: var(--bg-elev); color: var(--text); border: 1px solid var(--line); border-top-left-radius: 2px; align-self: flex-start; }
-.msg.user { background: var(--accent-soft); color: var(--text); border: 1px solid rgba(0, 229, 255, 0.25); border-top-right-radius: 2px; align-self: flex-end; }
+.msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.msg.ai { background: #f0f4f9; color: var(--text); border-top-left-radius: 4px; align-self: flex-start; }
+.msg.user { background: var(--accent); color: #fff; border-top-right-radius: 4px; align-self: flex-end; }
 
 .chips {
   flex: none;
@@ -194,52 +190,49 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onEsc));
 .chips::-webkit-scrollbar { display: none; }
 .chip {
   flex: none;
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  border: 0;
   background: var(--accent-soft);
   color: var(--accent-fg);
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12.5px;
   line-height: 1.2;
   cursor: pointer;
-  transition: all .15s;
+  transition: background .15s;
   white-space: nowrap;
 }
-.chip:hover:not(:disabled) { background: rgba(0, 229, 255, 0.15); border-color: var(--accent); }
+.chip:hover:not(:disabled) { background: #d2e3fc; }
 .chip:disabled { opacity: .5; cursor: default; }
 
 .foot {
   flex: none; display: flex; align-items: center; gap: 4px;
-  padding: 4px 6px 4px 12px;
+  padding: 6px 6px 6px 14px;
   margin: 4px 12px 12px;
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  transition: all .15s;
+  background: #f0f4f9;
+  border-radius: 26px;
+  transition: background .15s, box-shadow .15s;
 }
 .foot:focus-within {
-  background: var(--bg-card);
-  border-color: var(--accent);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(60,64,67,0.08);
 }
 .foot textarea {
   flex: 1; min-width: 0;
   border: 0; outline: 0;
   background: transparent;
-  padding: 6px 4px;
-  font-size: 13.5px;
+  padding: 9px 4px;
+  font-size: 14px;
   resize: none;
   max-height: 120px;
   line-height: 1.4;
 }
-.send { width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: var(--accent); color: var(--bg-elev); border-radius: 4px; transition: all .15s; flex: none; }
+.send { width: 36px; height: 36px; display: grid; place-items: center; border: 0; background: var(--accent); color: #fff; border-radius: 50%; transition: background .15s; flex: none; }
 .send:hover:not(:disabled) { background: var(--accent-hi); }
-.send:disabled { opacity: .4; cursor: default; background: var(--line); color: var(--text-3); }
-.send.stop { background: var(--bad); color: var(--text); }
+.send:disabled { opacity: .4; cursor: default; }
+.send.stop { background: var(--bad); }
 
 @media (max-width: 720px) {
-  .chat-popup { top: 56px; left: 8px; right: 8px; width: auto; height: calc(100vh - 70px); border-radius: 8px; }
-  .inner-card { border-radius: 6px; }
+  .chat-popup { top: 56px; left: 8px; right: 8px; width: auto; height: calc(100vh - 70px); border-radius: 24px; }
+  .inner-card { border-radius: 18px; }
 }
 </style>

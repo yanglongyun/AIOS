@@ -80,7 +80,7 @@ const items = [
     <Teleport to="body">
         <div v-if="visible" class="fixed inset-0 z-[9999] flex items-center justify-center"
              style="background: rgba(0,0,0,0.4); backdrop-filter: blur(4px)">
-            <div class="w-full max-w-[460px] rounded-md border border-line bg-bg-elev p-6 shadow-3 mx-4">
+            <div class="rounded-2xl border border-line bg-bg-elev p-6 shadow-xl max-w-[460px] w-full mx-4">
 
                 <!-- 等待重启 -->
                 <template v-if="done">
@@ -98,8 +98,8 @@ const items = [
 
                     <div class="mb-5 flex flex-col gap-3">
                         <label v-for="item in items" :key="item.key"
-                            class="flex cursor-pointer items-start gap-3 rounded-md border border-line p-3 transition-colors"
-                            :class="options[item.key] ? 'border-[var(--color-accent)]' : 'hover:border-line-hi'"
+                            class="flex items-start gap-3 rounded-xl border border-line p-3 cursor-pointer transition-colors"
+                            :class="options[item.key] ? 'border-[var(--color-accent)]' : 'hover:border-soft'"
                             style="background:color-mix(in srgb, var(--color-accent) 4%, transparent)">
                             <input type="checkbox" v-model="options[item.key]"
                                 class="mt-0.5 h-4 w-4 rounded accent-[var(--color-accent)]" />
@@ -120,11 +120,11 @@ const items = [
 
                     <div class="flex justify-end gap-2">
                         <button @click="cancel"
-                            class="rounded-md border border-line bg-bg px-4 py-2 text-[13px] font-medium text-muted hover:bg-bg-hi">
+                            class="rounded-full border border-line bg-bg px-4 py-2 text-[13px] font-medium text-muted hover:bg-bg-hi">
                             取消
                         </button>
                         <button @click="confirm" :disabled="sending || (!options.build && !options.restartApps && !options.restartServer)"
-                            class="rounded-md border-0 px-5 py-2 text-[13px] font-bold text-bg-elev transition-opacity"
+                            class="rounded-full border-0 px-5 py-2 text-[13px] font-medium text-white transition-opacity"
                             style="background:var(--color-accent)"
                             :style="{ opacity: sending ? 0.6 : 1 }">
                             {{ sending ? '重启中…' : '确认重启' }}

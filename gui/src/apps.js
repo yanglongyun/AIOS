@@ -36,6 +36,62 @@ const apps = [
     load: () => import('./apps/memory/index.vue')
   },
   {
+    id: 'terminal',
+    name: '终端',
+    icon: 'terminal',
+    color: '#202124',
+    hasDrawer: true,
+    load: () => import('./apps/terminal/index.vue')
+  },
+  {
+    id: 'files',
+    name: '文件',
+    icon: 'folder',
+    color: '#fbbc04',
+    hasDrawer: true,
+    load: () => import('./apps/files/index.vue')
+  },
+  {
+    id: 'sysinfo',
+    name: '系统状态',
+    icon: 'monitoring',
+    color: '#9334e6',
+    hasDrawer: false,
+    load: () => import('./apps/sysinfo/index.vue')
+  },
+  {
+    id: 'cryptobot',
+    name: '炒币机',
+    icon: 'currency_bitcoin',
+    color: '#f9ab00',
+    hasDrawer: false,
+    load: () => import('./apps/cryptobot/index.vue')
+  },
+  {
+    id: 'demogen',
+    name: 'Demo 生成器',
+    icon: 'view_carousel',
+    color: '#e8710a',
+    hasDrawer: false,
+    load: () => import('./apps/demogen/index.vue')
+  },
+  {
+    id: 'codex',
+    name: 'Codex',
+    icon: 'terminal',
+    color: '#276ef1',
+    hasDrawer: false,
+    load: () => import('./apps/codex/index.vue')
+  },
+  {
+    id: 'longvideo',
+    name: '视频工坊',
+    icon: 'movie',
+    color: '#276ef1',
+    hasDrawer: false,
+    load: () => import('./apps/longvideo/index.vue')
+  },
+  {
     id: 'settings',
     name: '设置',
     icon: 'settings',

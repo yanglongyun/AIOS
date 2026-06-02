@@ -88,11 +88,11 @@ const visibilityOptions = [
   place-items: center;
   align-content: center;
   gap: 10px;
-  color: var(--text-2);
+  color: #7a838d;
   text-align: center;
 }
 .empty .msi {
-  color: var(--text-3);
+  color: #9aa7b5;
   font-size: 40px;
 }
 .head {
@@ -100,20 +100,18 @@ const visibilityOptions = [
   align-items: start;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid #e4e8ed;
   padding-bottom: 14px;
 }
 .eyebrow {
-  color: var(--accent);
-  font-family: var(--font-mono);
+  color: #68737d;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 h2 {
-  color: var(--text);
-  font-family: var(--font-mono);
+  color: #202124;
   font-size: 22px;
   font-weight: 650;
   margin-top: 3px;
@@ -127,13 +125,13 @@ h2 {
   padding-top: 18px;
 }
 .description {
-  color: var(--text-2);
+  color: #5f6368;
   font-size: 14px;
   line-height: 1.7;
   margin-bottom: 16px;
 }
 pre {
-  color: var(--text);
+  color: #202124;
   font: inherit;
   font-size: 14px;
   line-height: 1.8;
@@ -151,17 +149,17 @@ label,
 }
 label span,
 .field > span {
-  color: var(--text-2);
+  color: #68737d;
   font-size: 12px;
   font-weight: 650;
 }
 input,
 textarea {
   width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--bg-elev);
-  color: var(--text);
+  border: 1px solid #d8e0e7;
+  border-radius: 10px;
+  background: #fff;
+  color: #202124;
   font-size: 14px;
   outline: none;
   padding: 10px 12px;
@@ -173,8 +171,8 @@ textarea {
 }
 input:focus,
 textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 18px rgba(0, 229, 255, 0.12);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 .visibility {
   display: flex;
@@ -186,17 +184,17 @@ textarea:focus {
   min-height: 34px;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text-2);
+  border: 1px solid #d8e0e7;
+  border-radius: 999px;
+  color: #53616e;
   font-size: 13px;
   font-weight: 650;
   padding: 0 12px;
 }
 .visibility button.active {
-  border-color: rgba(0, 229, 255, .34);
-  background: var(--accent-soft);
-  color: var(--accent);
+  border-color: #c6dafc;
+  background: #e8f0fe;
+  color: #174ea6;
 }
 .primary-btn,
 .secondary-btn {
@@ -204,23 +202,23 @@ textarea:focus {
   min-height: 36px;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 650;
   padding: 0 14px;
 }
 .primary-btn {
-  background: var(--accent);
-  color: var(--bg-elev);
+  background: #1a73e8;
+  color: #fff;
 }
 .primary-btn:disabled {
   cursor: not-allowed;
   opacity: 0.48;
 }
 .secondary-btn {
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text-2);
+  border: 1px solid #d8e0e7;
+  background: #fff;
+  color: #53616e;
 }
 @media (max-width: 980px) {
   .detail {

@@ -17,7 +17,7 @@ const view = useViewStore();
   display: grid; place-items: center;
   border: 0; background: transparent;
   color: inherit;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
   transition: background .12s;
 }

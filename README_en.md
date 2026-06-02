@@ -25,7 +25,7 @@ Build native apps tailored to your needs through dialogue. A unified AI kernel t
 AIOS is a **fully local-first** AI workstation:
 
 - 🗣 **Conversation as command** — drive your computer in natural language
-- 🧩 **Framework apps** — chat, tasks, memory, monitors, and settings as the system skeleton
+- 🧩 **12 built-in apps** — chat, tasks, memory, files, terminal, Codex, system status, video studio, and more
 - 🤖 **Agent task system** — apps can dispatch Tasks to the system; AI orchestrates context and tools
 - 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
 - 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
@@ -40,7 +40,7 @@ AIOS is a **fully local-first** AI workstation:
 - [Install](#-install)
 - [First Run](#-first-run)
 - [Supported Models](#-supported-models)
-- [Framework Apps](#-framework-apps)
+- [Built-in Apps](#-built-in-apps)
 - [Architecture](#-architecture)
 - [Design Philosophy](#-design-philosophy)
 - [Development & Contributing](#-development--contributing)
@@ -122,16 +122,16 @@ Streaming, tool calling, and reasoning content are all supported.
 
 ---
 
-## 📦 Framework Apps
-
-AIOS is now intentionally closer to a pure framework. The default system keeps only Chat, Tasks, Memory, Monitors, and Settings. They are not a pile of preloaded features; they are the skeleton: Chat captures intent, Tasks run work, Memory carries long-term context, Monitors observe the runtime, and Settings configure the system.
+## 📦 Built-in Apps
 
 | Group | Apps |
 |---|---|
 | System | Chat · Tasks · Memory · Settings |
-| Runtime | Monitors |
+| Work | Files · Terminal · Codex · System Status · Monitors |
+| Creation | Demo Generator · Video Studio |
+| Experiments | CryptoBot |
 
-AIOS is not defined by how many apps it preinstalls. It expresses a framework idea: apps should grow around the user and AI. When you need more capability, AI builds a new app on top of this skeleton, and that app can continue to dispatch Tasks back to the system.
+Apps can dispatch Tasks back to the system, letting AI take over complex flows instead of being stuck behind one-off API calls.
 
 ---
 
@@ -152,7 +152,7 @@ AIOS/
 └── skills/          # Local skills
 ```
 
-**Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws
+**Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
 
 Storage: a single local SQLite file (`database/aios.db`), fully backup-able and portable.
 
@@ -242,5 +242,5 @@ AIOS is a general kernel that can be tailored into themed editions for different
 
 | Edition | Audience | Main differences |
 |---|---|---|
-| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, framework skeleton apps |
+| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, full set of 12 built-in apps |
 | [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |

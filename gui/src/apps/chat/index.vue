@@ -240,7 +240,8 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-1 flex-col min-w-0 min-h-0 bg-bg">
 
-    <header class="flex h-14 flex-none items-center border-b border-line bg-card-sub px-4 max-md:h-12 max-md:px-2">
+    <!-- ─── 顶栏 ─── -->
+    <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
       <button
         class="icon-btn lg"
         :class="{ active: view.appDrawerOpen }"
@@ -248,7 +249,7 @@ onBeforeUnmount(() => {
         @click="view.toggleAppDrawer()">
         <span class="msi">menu</span>
       </button>
-      <div class="ml-3 mr-1 min-w-0 flex-1 truncate font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-ink max-md:text-[12px]">
+      <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
         {{ activeTitle }}
       </div>
       <div class="ml-auto flex items-center gap-1">
@@ -263,17 +264,18 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <div class="relative flex flex-1 min-w-0 min-h-0 bg-bg-elev">
+    <!-- ─── 侧栏 + 主区 ─── -->
+    <div class="relative flex flex-1 min-w-0 min-h-0 bg-[#f0f4f9]">
 
       <!-- 移动端 drawer 展开时的遮罩(只覆盖 chat-shell 内部, 不挡 topbar) -->
       <Transition name="backdrop">
         <div v-if="view.appDrawerOpen"
-          class="absolute inset-0 z-40 hidden bg-black/60 max-[720px]:block"
+          class="absolute inset-0 z-40 hidden bg-black/40 max-[720px]:block"
           @click="view.closeAppDrawer()"></div>
       </Transition>
 
       <!-- 侧栏 -->
-      <aside class="app-side !bg-bg-elev !border-r !border-line"
+      <aside class="app-side !bg-[#f0f4f9] !border-r-0"
         :class="{ collapsed: !view.appDrawerOpen }">
         <Sidebar
           :conversations="conversations"
@@ -282,7 +284,8 @@ onBeforeUnmount(() => {
           @new-chat="newChat" />
       </aside>
 
-      <section class="relative m-2 ml-0 flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-md border border-line bg-card shadow-1 max-md:m-0 max-md:rounded-none max-md:border-0"
+      <!-- 主区(白卡) -->
+      <section class="relative flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden rounded-2xl m-2 ml-0 bg-white max-md:m-0 max-md:rounded-none"
         @dragenter="onDragEnter"
         @dragover="onDragOver"
         @dragleave="onDragLeave"
@@ -290,7 +293,7 @@ onBeforeUnmount(() => {
 
         <!-- 错误条 -->
         <div v-if="errMsg"
-          class="mx-6 mt-3 flex-none rounded border border-bad/25 bg-bad/10 px-3 py-2 font-mono text-[12px] text-bad">
+          class="mx-6 mb-2 flex-none rounded-lg bg-[#fce8e6] px-3 py-2 text-[12.5px] text-bad">
           {{ errMsg }}
         </div>
 
@@ -316,7 +319,7 @@ onBeforeUnmount(() => {
         <!-- 拖拽到主区时的浮层提示 -->
         <Transition name="backdrop">
           <div v-if="dragActive"
-            class="pointer-events-none absolute inset-2 z-50 flex items-center justify-center rounded-md border-2 border-dashed border-accent bg-accent/10 font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-fg">
+            class="pointer-events-none absolute inset-2 z-50 flex items-center justify-center rounded-2xl border-2 border-dashed border-accent bg-accent/5 text-[14px] font-medium text-accent-fg">
             松开即可作为附件加入对话
           </div>
         </Transition>

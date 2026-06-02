@@ -44,13 +44,13 @@ const visibilityMeta = computed(() => VIS_OPTS.find((item) => item.value === pro
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid #e4e8ed;
   min-height: 68px;
   padding: 10px 4px;
 }
 .memory-row:hover,
 .memory-row.active {
-  background: var(--bg-hover);
+  background: #f1f5fa;
 }
 .main {
   display: grid;
@@ -60,16 +60,15 @@ const visibilityMeta = computed(() => VIS_OPTS.find((item) => item.value === pro
 }
 .title {
   overflow: hidden;
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 13px;
+  color: #202124;
+  font-size: 14px;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .desc {
   overflow: hidden;
-  color: var(--text-2);
+  color: #69737d;
   font-size: 12.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -78,30 +77,30 @@ const visibilityMeta = computed(() => VIS_OPTS.find((item) => item.value === pro
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-radius: 4px;
-  color: var(--text-2);
+  border-radius: 999px;
+  color: #5f6368;
   font-size: 12px;
   font-weight: 650;
   padding: 4px 8px;
 }
-.chip.full { background: rgba(0, 230, 118, .10); color: var(--good); }
-.chip.summary { background: rgba(255, 214, 0, .10); color: var(--warn); }
-.chip.count { background: var(--bg-elev); color: var(--text-2); }
+.chip.full { background: #e6f4ea; color: #137333; }
+.chip.summary { background: #fff7e0; color: #9a5f00; }
+.chip.count { background: #eef3f7; color: #69737d; }
 .actions {
   display: flex;
   align-items: center;
   gap: 2px;
 }
 .icon-btn.sm.active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: #e8f0fe;
+  color: #174ea6;
 }
 .icon-btn.sm.active .msi {
   font-variation-settings: 'FILL' 1;
 }
 .icon-btn.sm.danger:hover {
-  background: rgba(255, 23, 68, .10);
-  color: var(--bad);
+  background: #fce8e6;
+  color: #b3261e;
 }
 @media (max-width: 768px) {
   .memory-row {

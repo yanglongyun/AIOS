@@ -11,7 +11,7 @@
         <div v-if="view.appDrawerOpen" class="app-side-mask" @click="view.closeAppDrawer()" />
       </Transition>
 
-      <aside class="app-side !bg-bg-elev" :class="{ collapsed: !view.appDrawerOpen }">
+      <aside class="app-side !bg-bg" :class="{ collapsed: !view.appDrawerOpen }">
         <div class="app-side-inner">
           <MemorySidebar :filters="filters" :current="tab" :counts="counts" @pick="pickFilter" />
         </div>
@@ -137,8 +137,8 @@ const pickFilter = (id) => {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
-  background: var(--bg);
-  color: var(--text);
+  background: #f7f9fc;
+  color: #202124;
   padding: 0 24px 24px;
 }
 .memory-shell {
@@ -156,40 +156,35 @@ const pickFilter = (id) => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: var(--bg);
+  background: #f7f9fc;
   padding: 18px 0 12px;
 }
 .eyebrow {
-  color: var(--accent);
-  font-family: var(--font-mono);
+  color: #68737d;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .memory-head h1 {
-  color: var(--text);
-  font-family: var(--font-mono);
+  color: #202124;
   font-size: 24px;
   font-weight: 650;
   margin-top: 2px;
 }
 .total {
   flex: none;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text-2);
-  font-family: var(--font-mono);
+  border-radius: 999px;
+  background: #eef3f7;
+  color: #68737d;
   font-size: 12px;
   font-weight: 650;
   padding: 5px 10px;
 }
 .memory-error {
-  border-radius: 4px;
-  border: 1px solid rgba(255, 23, 68, .25);
-  background: rgba(255, 23, 68, .10);
-  color: var(--bad);
+  border-radius: 12px;
+  background: #fce8e6;
+  color: #b3261e;
   font-size: 13px;
   padding: 10px 14px;
 }
@@ -205,18 +200,18 @@ const pickFilter = (id) => {
   min-height: 36px;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--bg-elev);
-  color: var(--text-2);
+  border: 1px solid #d8e0e7;
+  border-radius: 999px;
+  background: #fff;
+  color: #53616e;
   font-size: 13px;
   font-weight: 650;
   margin-bottom: 12px;
   padding: 0 14px;
 }
 .back-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text);
+  background: #eef3f7;
+  color: #202124;
 }
 @media (max-width: 768px) {
   .memory-main {

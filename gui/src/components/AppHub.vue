@@ -5,8 +5,8 @@ const view = useViewStore();
 </script>
 
 <template>
-  <button class="apps-trigger trigger-btn" :class="{ active: view.appsOpen }"
-    @click="view.toggleApps()" title="所有应用">
+  <button class="apps-trigger trigger-btn" :class="{ active: view.globalNavOpen }"
+    @click="view.toggleGlobalNav()" title="应用导航">
     <span class="material-symbols-outlined trigger-icon">apps</span>
   </button>
 </template>

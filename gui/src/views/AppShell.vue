@@ -1,14 +1,14 @@
 <template>
   <div class="stage">
+    <GlobalSidebar />
+
     <main class="main">
       <Suspense>
         <component :is="currentComponent" v-if="currentComponent" :key="activeAppId" />
       </Suspense>
     </main>
 
-    <AppsPopup />
     <QuickChat />
-    <ConnectionGate />
     <ToastHost />
     <ReloadDialog />
   </div>
@@ -17,17 +17,14 @@
 <script setup>
 import { ref, shallowRef, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import AppsPopup from '../components/AppsPopup.vue';
+import GlobalSidebar from '../components/GlobalSidebar.vue';
 import QuickChat from '../components/QuickChat.vue';
-import ConnectionGate from '../components/ConnectionGate.vue';
 import ToastHost from '../components/ToastHost.vue';
 import ReloadDialog from '../components/ReloadDialog.vue';
 import { apps, getApp } from '../apps.js';
-import { useAuthStore } from '@/stores/auth';
-import { connect, disconnect } from '@/system/ws.js';
+import { connect } from '@/system/ws.js';
 
 const route = useRoute();
-const auth = useAuthStore();
 const activeAppId = ref(null);
 const currentComponent = shallowRef(null);
 
@@ -48,24 +45,15 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => auth.authenticated,
-  (authenticated) => {
-    if (authenticated) connect();
-    else disconnect();
-  }
-);
-
-onMounted(async () => {
-  await auth.init();
-  if (auth.authenticated) connect();
+onMounted(() => {
+  connect();
 });
 </script>
 
 <style scoped>
 .stage {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
@@ -86,4 +74,6 @@ onMounted(async () => {
   background: rgba(2, 7, 20, 0.72);
   overflow: hidden;
 }
+/* 移动端侧边栏改为常驻窄图标栏(展开时悬浮覆盖),stage 始终横向:
+   窄栏占左列,主区占右侧;不再纵向堆叠把内容挤出屏幕。 */
 </style>

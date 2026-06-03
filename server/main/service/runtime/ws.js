@@ -2,8 +2,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createChatSession } from "../chat/session.js";
-import { isAuthenticated } from "../auth/session.js";
-import { redact } from "./redact.js";
 
 const require = createRequire(import.meta.url);
 
@@ -16,7 +14,7 @@ const wsApps = [
 const clients = new Set();
 const clientById = new Map(); // clientId → ws
 
-const safeStringify = (msg) => redact(JSON.stringify(msg));
+const safeStringify = (msg) => JSON.stringify(msg);
 
 const sendOne = (ws, payload) => {
   if (ws.readyState === WebSocket.OPEN) ws.send(payload);
@@ -92,12 +90,6 @@ export const setupWebSocket = (httpServer) => {
   initWsAppsOnce().catch((err) => console.error("[ws-app-init]", err));
   httpServer.on("upgrade", (req, socket, head) => {
     try {
-      if (!isAuthenticated(req, { allowQueryToken: true })) {
-        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-        socket.destroy();
-        return;
-      }
-
       const url = new URL(req.url, `http://${req.headers.host}`);
       if (url.pathname === "/ws") {
         chatWss.handleUpgrade(req, socket, head, (ws) => {

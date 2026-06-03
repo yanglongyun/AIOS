@@ -1,11 +1,7 @@
 <script setup>
 import { computed, onActivated, onMounted, ref, watch } from 'vue';
 import * as api from '@/utils/api.js';
-import { useAuthStore } from '@/stores/auth.js';
-import AppHub from '@/components/AppHub.vue';
-import AskAI from '@/components/AskAI.vue';
-
-const auth = useAuthStore();
+import AppTopbar from '@/components/AppTopbar.vue';
 
 // ───────── 全局状态 ─────────
 const settings = ref(null);
@@ -31,7 +27,6 @@ function flash(kind, text) {
 }
 
 const sections = [
-  { key: 'account',  label: '账户', icon: 'person' },
   { key: 'model',    label: '模型', icon: 'smart_toy' },
   { key: 'prompt',   label: '提示词', icon: 'edit_note' },
   { key: 'context',  label: '上下文', icon: 'history' },
@@ -39,7 +34,7 @@ const sections = [
   { key: 'skills',   label: '技能', icon: 'extension' },
   { key: 'about',    label: '关于', icon: 'info' }
 ];
-const active = ref('account');
+const active = ref('model');
 const activeSection = computed(() => sections.find((s) => s.key === active.value));
 const contextRoundLabels = {
   100: '精简',
@@ -154,23 +149,6 @@ async function saveTools() {
   } catch (e) { flash('err', '保存失败: ' + (e.message || e)); }
 }
 
-// ───────── 修改密码 ─────────
-const pwd = ref({ old: '', n1: '', n2: '' });
-const pwdNotice = ref({ kind: '', text: '' });
-const canChangePwd = computed(() => pwd.value.old && pwd.value.n1.length >= 6 && pwd.value.n1 === pwd.value.n2);
-async function changePwd() {
-  pwdNotice.value = { kind: '', text: '' };
-  if (!canChangePwd.value) {
-    pwdNotice.value = { kind: 'err', text: '请检查输入(新密码至少 6 位且两次一致)' };
-    return;
-  }
-  try {
-    await api.post('/api/auth/change-password', { oldPassword: pwd.value.old, newPassword: pwd.value.n1 });
-    pwdNotice.value = { kind: 'ok', text: '密码已更新' };
-    pwd.value = { old: '', n1: '', n2: '' };
-  } catch (e) { pwdNotice.value = { kind: 'err', text: e?.body?.message || e.message || '修改失败' }; }
-}
-
 // ───────── 切换 section 时按需加载 ─────────
 watch(active, (k) => {
   if (k === 'about' && !sysSnap.value) loadSys();
@@ -188,14 +166,7 @@ onActivated(() => loadAll());
 
 <template>
   <div class="app-frame">
-    <header class="topbar">
-      <span class="left-spacer"></span>
-      <div class="brand"><span class="name">设置</span></div>
-      <div class="right">
-        <AskAI />
-        <AppHub />
-      </div>
-    </header>
+    <AppTopbar title="设置" />
     <div class="settings-shell">
     <!-- ───── 左导航 rail ───── -->
     <aside class="nav-rail">
@@ -226,58 +197,8 @@ onActivated(() => loadAll());
       <div v-if="loading || !settings" class="placeholder">加载中...</div>
 
       <template v-else>
-        <!-- ━━━━━ 账户 ━━━━━ -->
-        <template v-if="active === 'account'">
-          <section class="card">
-            <header class="sec-head">
-              <div>
-                <div class="sec-title">修改密码</div>
-                <div class="sec-sub">用于本地 Web 登录;AI / 命令行走的是 API Token,不受影响。</div>
-              </div>
-            </header>
-            <div class="form">
-              <div class="row">
-                <label>当前密码</label>
-                <input class="text-input" type="password" v-model="pwd.old" autocomplete="current-password" />
-              </div>
-              <div class="row">
-                <label>新密码 <span class="hint">至少 6 位</span></label>
-                <input class="text-input" type="password" v-model="pwd.n1" autocomplete="new-password" />
-              </div>
-              <div class="row">
-                <label>再次输入新密码</label>
-                <input class="text-input" type="password" v-model="pwd.n2" autocomplete="new-password" />
-              </div>
-              <div v-if="pwdNotice.text" class="inline-msg" :class="pwdNotice.kind">{{ pwdNotice.text }}</div>
-              <div class="actions">
-                <button class="btn solid" :disabled="!canChangePwd" @click="changePwd">更新密码</button>
-              </div>
-            </div>
-          </section>
-
-          <section class="card">
-            <header class="sec-head">
-              <div>
-                <div class="sec-title">退出登录</div>
-                <div class="sec-sub">登出后会清除本浏览器的会话,下次访问需要重新输入密码。</div>
-              </div>
-              <button class="btn outline danger" @click="auth.logout()">退出</button>
-            </header>
-          </section>
-
-          <section class="card">
-            <header class="sec-head">
-              <div>
-                <div class="sec-title">忘记密码</div>
-                <div class="sec-sub">忘记密码时只能通过命令行强制重置 (会同时清除所有登录会话):</div>
-              </div>
-            </header>
-            <pre class="code-block">sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"</pre>
-          </section>
-        </template>
-
         <!-- ━━━━━ 模型 ━━━━━ -->
-        <template v-else-if="active === 'model'">
+        <template v-if="active === 'model'">
           <section class="card">
             <header class="sec-head">
               <div>
@@ -476,21 +397,6 @@ onActivated(() => loadAll());
 </template>
 
 <style scoped>
-/* ─── 顶栏(自有,不依赖任何共享组件) ─── */
-.topbar {
-  flex: none; height: 64px;
-  display: flex; align-items: center;
-  padding: 8px 16px;
-  background: var(--bg);
-}
-.left-spacer { width: 8px; }
-.topbar .brand { flex: 1; min-width: 0; margin: 0 4px 0 12px; }
-.topbar .brand .name { font-size: 20px; font-weight: 500; letter-spacing: -0.01em; }
-.topbar .right { display: flex; align-items: center; gap: 4px; margin-left: auto; }
-@media (max-width: 720px) {
-  .topbar { padding: 8px; height: 56px; }
-  .topbar .brand .name { font-size: 17px; }
-}
 
 /* ─────────── 整体壳 ─────────── */
 .settings-shell {

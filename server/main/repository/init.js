@@ -70,21 +70,6 @@ const createTables = () => {
     CREATE INDEX IF NOT EXISTS idx_monitors_conversation
       ON monitors(conversation_id, status, id DESC);
 
-    CREATE TABLE IF NOT EXISTS auth (
-      id            INTEGER PRIMARY KEY,
-      password_hash TEXT NOT NULL,
-      password_salt TEXT NOT NULL,
-      api_token     TEXT NOT NULL,
-      created_at    TEXT DEFAULT (datetime('now')),
-      updated_at    TEXT DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id         TEXT PRIMARY KEY,
-      created_at INTEGER NOT NULL,
-      expires_at INTEGER NOT NULL
-    );
-
     CREATE TABLE IF NOT EXISTS memories (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       title       TEXT NOT NULL DEFAULT '',

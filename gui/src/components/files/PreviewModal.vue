@@ -27,7 +27,7 @@ const files = useFilesStore();
                     <img :src="files.preview.url" />
                 </div>
                 <div v-else class="state empty">
-                    <span class="msi" style="font-size:36px;color:var(--color-faint)">description</span>
+                    <span class="msi" style="font-size:36px;color:var(--text-3)">description</span>
                     <div>无法预览此文件类型</div>
                     <button class="dl-btn-primary" @click="files.downloadPreview">下载查看</button>
                 </div>
@@ -40,7 +40,7 @@ const files = useFilesStore();
 .scrim {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: flex-end; justify-content: center;
-    background: rgba(31, 31, 31, 0.55);
+    background: rgba(1, 5, 12, 0.62);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
@@ -52,13 +52,13 @@ const files = useFilesStore();
     width: 100%;
     max-width: 48rem;
     height: 100%;
-    background: var(--color-bg-elev);
-    border: 1px solid var(--color-line);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
     display: flex; flex-direction: column;
     overflow: hidden;
 }
 @media (min-width: 640px) {
-    .modal { height: 85vh; border-radius: 18px; box-shadow: var(--shadow-lg); }
+    .modal { height: 85vh; border-radius: 12px; box-shadow: var(--shadow-3); }
 }
 
 .head {
@@ -66,17 +66,17 @@ const files = useFilesStore();
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--line);
 }
 .title-block { min-width: 0; }
 .title {
     font-size: 13.5px;
-    color: var(--color-ink);
+    color: var(--text);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .meta {
     font-size: 11px;
-    color: var(--color-faint);
+    color: var(--text-3);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .actions { flex: none; display: flex; align-items: center; gap: 4px; }
@@ -85,25 +85,25 @@ const files = useFilesStore();
     padding: 0 12px;
     height: 30px;
     border-radius: 8px;
-    border: 1px solid var(--color-line-hi);
-    background: var(--color-bg);
-    color: var(--color-ink);
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    color: var(--text-2);
     font-size: 12px;
     cursor: pointer;
-    transition: background .12s;
+    transition: background .12s, border-color .12s, color .12s;
 }
-.dl-btn:hover { background: var(--color-bg-hi); }
+.dl-btn:hover { background: var(--bg-hover); border-color: var(--accent); color: var(--accent-hi); }
 
 .close-btn {
     width: 30px; height: 30px;
     display: inline-flex; align-items: center; justify-content: center;
     border: 0; background: transparent;
-    color: var(--color-muted);
+    color: var(--text-3);
     border-radius: 8px;
     cursor: pointer;
     transition: background .12s, color .12s;
 }
-.close-btn:hover { background: var(--color-bg-hi); color: var(--color-ink); }
+.close-btn:hover { background: var(--bg-hover); color: var(--text); }
 
 .body { flex: 1; min-height: 0; overflow: auto; }
 
@@ -111,18 +111,18 @@ const files = useFilesStore();
     height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 12px;
-    padding: 24px;
-    color: var(--color-muted);
+    padding: 16px;
+    color: var(--text-2);
     font-size: 13px;
 }
-.state.error { color: var(--color-bad); }
+.state.error { color: var(--bad); }
 
 .text-view {
     margin: 0;
     padding: 16px;
     font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--color-ink);
+    color: var(--text);
     white-space: pre-wrap; word-break: break-all;
 }
 .image-view {
@@ -141,11 +141,11 @@ const files = useFilesStore();
     height: 36px;
     border: 0;
     border-radius: 999px;
-    background: var(--color-blue-bg);
-    color: var(--color-blue-fg);
-    font-size: 13px; font-weight: 500;
+    background: var(--accent);
+    color: #001019;
+    font-size: 13px; font-weight: 700;
     cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, box-shadow .15s;
 }
-.dl-btn-primary:hover { background: var(--color-blue-soft); }
+.dl-btn-primary:hover { background: var(--accent-hi); box-shadow: 0 0 18px rgba(0, 215, 255, 0.35); }
 </style>

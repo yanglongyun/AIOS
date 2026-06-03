@@ -3,10 +3,10 @@ import { ref } from 'vue';
 
 export const useViewStore = defineStore('view', () => {
   // 当前 app 内部侧栏开关.桌面默认开,手机默认关.
-  // 全局 app 切换走右上角 ⚏(appsOpen),不再有"全局抽屉".
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const appDrawerOpen = ref(!isMobile);
-  const appsOpen = ref(false);
+  // 系统级全局导航.桌面可在图标栏/展开栏之间切换;移动端展开为悬浮抽屉。
+  const globalNavOpen = ref(!isMobile);
   const chatOpen = ref(false);
   // 一次性的 Chat 输入草稿:其他入口(例如应用面板的「+」)
   // 想把一段话塞进 Chat 的输入框时往这里写,Chat 挂载时读一次并清空。
@@ -16,15 +16,19 @@ export const useViewStore = defineStore('view', () => {
   function closeAppDrawer()   { appDrawerOpen.value = false; }
   function openAppDrawer()    { appDrawerOpen.value = true; }
 
-  function toggleApps() {
-    appsOpen.value = !appsOpen.value;
-    if (appsOpen.value) chatOpen.value = false;
+  function toggleGlobalNav() {
+    globalNavOpen.value = !globalNavOpen.value;
   }
-  function closeApps() { appsOpen.value = false; }
+  function closeGlobalNav() {
+    globalNavOpen.value = false;
+  }
+  function openGlobalNav()  {
+    globalNavOpen.value = true;
+  }
 
   function toggleChat() {
     chatOpen.value = !chatOpen.value;
-    if (chatOpen.value) appsOpen.value = false;
+    if (chatOpen.value) closeGlobalNav();
   }
   function closeChat() { chatOpen.value = false; }
 
@@ -36,9 +40,9 @@ export const useViewStore = defineStore('view', () => {
   }
 
   return {
-    appDrawerOpen, appsOpen, chatOpen, chatDraft,
+    appDrawerOpen, globalNavOpen, chatOpen, chatDraft,
     toggleAppDrawer, closeAppDrawer, openAppDrawer,
-    toggleApps, closeApps,
+    toggleGlobalNav, closeGlobalNav, openGlobalNav,
     toggleChat, closeChat,
     setChatDraft, consumeChatDraft
   };

@@ -14,14 +14,14 @@ let activeId = '';
 
 // ── 主题 ────────────────────────────
 const TERM_THEME = {
-    background: '#1e1e1e', foreground: '#e8eaed',
-    cursor: '#34a853', cursorAccent: '#1e1e1e',
-    selectionBackground: '#3a3a3a',
-    black: '#1e1e1e', red: '#f28b82', green: '#34a853', yellow: '#fbbc04',
-    blue: '#5e97ff', magenta: '#c58af9', cyan: '#78d4fa', white: '#e8eaed',
-    brightBlack: '#5f6368', brightRed: '#ff7a72', brightGreen: '#5dca80',
-    brightYellow: '#fde293', brightBlue: '#8ab4f8', brightMagenta: '#d7aefb',
-    brightCyan: '#a1f0fa', brightWhite: '#ffffff'
+    background: '#020714', foreground: '#e8f8ff',
+    cursor: '#00d7ff', cursorAccent: '#020714',
+    selectionBackground: 'rgba(0,215,255,0.25)',
+    black: '#0b2138', red: '#ff3f6e', green: '#00ffa3', yellow: '#ffe66d',
+    blue: '#00d7ff', magenta: '#c77dff', cyan: '#7cf4ff', white: '#8db8d9',
+    brightBlack: '#527da0', brightRed: '#ff6b8e', brightGreen: '#5cffc0',
+    brightYellow: '#fff3a0', brightBlue: '#7cf4ff', brightMagenta: '#e0aaff',
+    brightCyan: '#aefbff', brightWhite: '#e8f8ff'
 };
 
 // ── 实例 ────────────────────────────
@@ -119,11 +119,11 @@ defineExpose({ setActive, write, resize, dispose, pruneExcept, fitActive, getDim
 </script>
 
 <template>
-    <section class="flex flex-1 min-w-0 min-h-0 bg-[#1e1e1e]">
+    <section class="flex flex-1 min-w-0 min-h-0 bg-bg">
         <div ref="wrapEl" class="term-host flex-1 min-w-0 min-h-0 px-1 pb-1 pl-2 pt-2"></div>
     </section>
 </template>
 
 <style scoped>
-.term-host :deep(.xterm-viewport) { background: #1e1e1e !important; }
+.term-host :deep(.xterm-viewport) { background: var(--bg) !important; }
 </style>

@@ -1,10 +1,4 @@
-// 最小 HTTP 客户端 —— 浏览器走 cookie session (credentials: 'same-origin' 默认就带).
-// AI / curl 走 Authorization: Bearer $AIOS_API_TOKEN,不通过这里.
-// 401 统一拦截,跳转 /login.
-
-// 401 处理钩子,由 router 注册;避免环依赖.
-let on401 = null;
-export function setOn401(fn) { on401 = typeof fn === 'function' ? fn : null; }
+// 最小 HTTP 客户端 —— 本地无鉴权,直接同域请求.
 
 async function handle(res) {
     if (res.ok) {
@@ -14,7 +8,6 @@ async function handle(res) {
     const err = new Error(`${res.status} ${res.statusText}`);
     err.status = res.status;
     try { err.body = await res.json(); } catch { try { err.body = await res.text(); } catch {} }
-    if (res.status === 401 && on401) on401();
     throw err;
 }
 
@@ -89,7 +82,6 @@ export function stream(url, body, handlers) {
         if (!res.ok) {
             let body = '';
             try { body = await res.text(); } catch {}
-            if (res.status === 401 && on401) on401();
             handlers.error?.(new Error(`${res.status}: ${body}`));
             return;
         }

@@ -2,8 +2,7 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
-import AppHub from '@/components/AppHub.vue';
-import AskAI from '@/components/AskAI.vue';
+import AppTopbar from '@/components/AppTopbar.vue';
 
 import Sidebar from './Sidebar.vue';
 import AddBar from './AddBar.vue';
@@ -188,7 +187,7 @@ function pickFilter(id) {
   filter.value = id;
   selectedId.value = null;
   detailFor.value = null;
-  if (window.innerWidth < 720) view.closeAppDrawer();
+  if (window.innerWidth < 768) view.closeAppDrawer();
 }
 
 onMounted(load);
@@ -202,21 +201,15 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 
     <!-- ═══════════ 详情模式 ═══════════ -->
     <template v-if="selectedId && detailFor">
-      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
-        <button class="icon-btn lg" title="返回列表" @click="backToList">
-          <span class="msi">arrow_back</span>
-        </button>
-        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-          {{ detailFor.title || payloadText(detailFor.payload).slice(0, 40) || '任务详情' }}
-        </div>
-        <div class="ml-auto flex items-center gap-1">
+      <AppTopbar
+        :title="detailFor.title || payloadText(detailFor.payload).slice(0, 40) || '任务详情'"
+        back @back="backToList">
+        <template #actions>
           <button class="icon-btn" title="刷新" @click="openDetail(detailFor)">
-            <span class="msi">refresh</span>
+            <span class="msi sm">refresh</span>
           </button>
-          <AskAI />
-          <AppHub />
-        </div>
-      </header>
+        </template>
+      </AppTopbar>
 
       <section class="flex-1 min-w-0 min-h-0 overflow-y-auto bg-bg px-6 pb-4 max-md:px-3">
         <TaskDetail
@@ -231,19 +224,7 @@ onBeforeUnmount(() => { clearInterval(pollTimer); pollTimer = null; });
 
     <!-- ═══════════ 列表模式 ═══════════ -->
     <template v-else>
-      <header class="flex h-16 flex-none items-center px-4 bg-bg max-md:h-14 max-md:px-2">
-        <button class="icon-btn lg" :class="{ active: view.appDrawerOpen }"
-          @click="view.toggleAppDrawer()" title="侧栏">
-          <span class="msi">menu</span>
-        </button>
-        <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-          任务
-        </div>
-        <div class="ml-auto flex items-center gap-1">
-          <AskAI />
-          <AppHub />
-        </div>
-      </header>
+      <AppTopbar title="任务" :has-drawer="true" />
 
       <div class="app-body">
         <Transition name="mask">

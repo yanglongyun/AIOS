@@ -1,10 +1,16 @@
 <template>
   <div class="app-frame">
-    <MemoryTopbar
-      :drawer-open="view.appDrawerOpen"
-      @toggle-drawer="view.toggleAppDrawer()"
-      @create="openCreate"
-      @refresh="loadItems" />
+    <AppTopbar title="记忆" :has-drawer="true">
+      <template #actions>
+        <button class="btn solid h-9" title="新建" @click="openCreate">
+          <span class="msi xxs">add</span>
+          <span class="max-md:hidden">新建</span>
+        </button>
+        <button class="icon-btn" title="刷新" @click="loadItems">
+          <span class="msi sm">refresh</span>
+        </button>
+      </template>
+    </AppTopbar>
 
     <div class="app-body">
       <Transition name="mask">
@@ -89,7 +95,7 @@ import MemoryDetail from './components/MemoryDetail.vue';
 import MemoryEmpty from './components/MemoryEmpty.vue';
 import MemoryRow from './components/MemoryRow.vue';
 import MemorySidebar from './components/MemorySidebar.vue';
-import MemoryTopbar from './components/MemoryTopbar.vue';
+import AppTopbar from '@/components/AppTopbar.vue';
 import { useMemoryItems } from './composables/useMemoryItems.js';
 
 const view = useViewStore();
@@ -128,7 +134,7 @@ const showDetail = computed(() => detailMode.value !== 'empty');
 
 const pickFilter = (id) => {
   tab.value = id;
-  if (window.innerWidth < 720) view.closeAppDrawer();
+  if (window.innerWidth < 768) view.closeAppDrawer();
 };
 </script>
 

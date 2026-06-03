@@ -10,10 +10,7 @@ let reconnectBlocked = false;
 const wsStatus = ref("disconnected");
 
 const getDefaultWsUrl = () => {
-  const params = new URLSearchParams(location.search);
-  const token = params.get("token");
-  const base = `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws`;
-  return token ? `${base}?token=${token}` : base;
+  return `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/ws`;
 };
 
 const wsUrl = ref(getDefaultWsUrl());

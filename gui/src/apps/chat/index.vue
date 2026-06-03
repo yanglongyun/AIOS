@@ -10,16 +10,16 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useViewStore } from '@/stores/view.js';
 import * as api from '@/utils/api.js';
 import { on, send } from '@/system/ws.js';
-import AppHub from '@/components/AppHub.vue';
 
 import Sidebar from './Sidebar.vue';
 import Header from './Header.vue';
 import Messages from './Messages.vue';
 import Composer from './Composer.vue';
+import AppTopbar from '@/components/AppTopbar.vue';
 import { setupChatStream, parseMessages, mkKey } from './stream.js';
 
 const view = useViewStore();
-const MOBILE_BREAK = 720;
+const MOBILE_BREAK = 768;
 
 // ─── state ─────────────────────────────────────────
 const conversations = ref([]);
@@ -241,18 +241,8 @@ onBeforeUnmount(() => {
   <div class="flex flex-1 flex-col min-w-0 min-h-0 bg-bg text-ink">
 
     <!-- ─── 顶栏 ─── -->
-    <header class="flex h-16 flex-none items-center border-b border-line bg-card-sub px-4 max-md:h-14 max-md:px-2">
-      <button
-        class="icon-btn lg"
-        :class="{ active: view.appDrawerOpen }"
-        title="侧栏"
-        @click="view.toggleAppDrawer()">
-        <span class="msi">menu</span>
-      </button>
-      <div class="ml-3 mr-1 min-w-0 flex-1 truncate text-[20px] font-medium tracking-[-0.01em] text-ink max-md:text-[17px]">
-        {{ activeTitle }}
-      </div>
-      <div class="ml-auto flex items-center gap-1">
+    <AppTopbar :title="activeTitle" :has-drawer="true">
+      <template #actions>
         <Header
           :has-active="!!activeId"
           :remarks="remarks"
@@ -260,9 +250,8 @@ onBeforeUnmount(() => {
           @rename="renameCurrent"
           @delete="deleteCurrent"
           @load-remarks="loadRemarks" />
-        <AppHub />
-      </div>
-    </header>
+      </template>
+    </AppTopbar>
 
     <!-- ─── 侧栏 + 主区 ─── -->
     <div class="relative flex flex-1 min-w-0 min-h-0 bg-bg">
@@ -270,7 +259,7 @@ onBeforeUnmount(() => {
       <!-- 移动端 drawer 展开时的遮罩(只覆盖聊天主体, 不挡 topbar) -->
       <Transition name="backdrop">
         <div v-if="view.appDrawerOpen"
-          class="absolute inset-0 z-40 hidden bg-black/40 max-[720px]:block"
+          class="absolute inset-0 z-40 hidden bg-black/40 max-md:block"
           @click="view.closeAppDrawer()"></div>
       </Transition>
 

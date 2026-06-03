@@ -3,7 +3,6 @@ import { readFileSync, existsSync, statSync } from "fs";
 import { join, extname } from "path";
 import { handleApiRequest } from "../../api/index.js";
 import { json } from "../../../shared/http/json.js";
-import { isAuthenticated, isPublicApiPath, isStaticAssetPath } from "../auth/session.js";
 const ROOT_DIR = process.cwd();
 const PUBLIC_DIR = join(ROOT_DIR, "gui", "dist");
 const MIME = {
@@ -74,20 +73,6 @@ const proxyAppsRequest = async (req, res, url) => {
 };
 const httpServer = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-
-  // === 鉴权门 ===
-  // 静态资源 + 公开 API (/api/auth/state, /api/auth/setup, /api/auth/login,
-  // /api/health) 直接放行;其余一律要求 Bearer token (AI/curl) 或 cookie session.
-  // 未鉴权统一返回 401 JSON,前端拦截 401 后跳 /login.
-  const path = url.pathname;
-  const isApi = path.startsWith("/api/");
-  const isApps = path.startsWith("/apps/");
-  const isFiles = path.startsWith("/files/");
-  const needsAuth = (isApi && !isPublicApiPath(path)) || isApps || isFiles;
-  if (needsAuth && !isAuthenticated(req)) {
-    json(res, { success: false, message: "未鉴权", code: "UNAUTHENTICATED" }, 401);
-    return;
-  }
 
   if (url.pathname.startsWith("/files/")) {
     const filePath2 = join(ROOT_DIR, url.pathname);

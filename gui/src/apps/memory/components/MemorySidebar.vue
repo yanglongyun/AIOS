@@ -36,7 +36,7 @@ defineEmits(['pick']);
   align-items: center;
   gap: 14px;
   border-radius: 0 20px 20px 0;
-  color: var(--color-ink, #202124);
+  color: var(--color-ink);
   font-size: 14px;
   font-weight: 500;
   margin-right: 12px;
@@ -44,17 +44,17 @@ defineEmits(['pick']);
   transition: background 0.15s ease, color 0.15s ease;
 }
 .memory-filter:hover {
-  background: var(--color-bg-hi, #f1f4f8);
+  background: var(--bg-hover);
 }
 .memory-filter.active {
-  background: var(--color-blue-bg, #e8f0fe);
-  color: var(--color-blue-fg, #174ea6);
+  background: var(--color-blue-bg);
+  color: var(--color-blue-fg);
 }
 .memory-filter .msi {
-  color: var(--color-muted, #69737d);
+  color: var(--color-muted);
 }
 .memory-filter.active .msi {
-  color: var(--color-blue-fg, #174ea6);
+  color: var(--color-blue-fg);
 }
 .label {
   min-width: 0;
@@ -66,14 +66,14 @@ defineEmits(['pick']);
 }
 .count {
   border-radius: 999px;
-  background: var(--color-bg-elev, #fff);
-  color: var(--color-faint, #8a9099);
+  background: var(--color-bg-elev);
+  color: var(--color-faint);
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   padding: 1px 8px;
 }
 .active .count {
-  background: rgba(255, 255, 255, 0.55);
-  color: var(--color-blue-fg, #174ea6);
+  background: var(--accent-soft);
+  color: var(--color-blue-fg);
 }
 </style>

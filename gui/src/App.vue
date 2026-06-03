@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!ready" class="h-[100dvh] w-screen bg-[#1a1410]"></div>
+  <div v-if="!ready" class="h-[100dvh] w-screen bg-bg"></div>
   <RouterView v-else />
 </template>
 

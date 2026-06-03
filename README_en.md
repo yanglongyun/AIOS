@@ -25,7 +25,7 @@ Build native apps tailored to your needs through dialogue. A unified AI kernel t
 AIOS is a **fully local-first** AI workstation:
 
 - 🗣 **Conversation as command** — drive your computer in natural language
-- 🧩 **12 built-in apps** — chat, tasks, memory, files, terminal, Codex, system status, video studio, and more
+- 🧩 **Core built-in apps** — chat, tasks, memory, settings, files, terminal, system status, and monitors
 - 🤖 **Agent task system** — apps can dispatch Tasks to the system; AI orchestrates context and tools
 - 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
 - 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
@@ -56,30 +56,11 @@ AIOS is a **fully local-first** AI workstation:
 | Item | Required |
 |---|---|
 | OS | macOS 12+ / mainstream Linux / Windows 10 1809+ |
-| Node.js | 22.5 or newer (the script auto-installs it) |
+| Node.js | 22.5 or newer |
 | Ports | `9502` (main), `9503` (apps), `5173` (Vite dev) |
 | Disk | ≥ 1 GB |
 
-### One-line Install
-
-> ⚠️ The installer uses your package manager to install Node, git, rsync, then clones and builds AIOS. Read the [script](https://github.com/realuckyang/AIOS/blob/main/install-macos.sh) before running.
-
-**macOS** (auto-installs Homebrew + Node@22)
-```bash
-curl -fsSL https://raw.githubusercontent.com/realuckyang/AIOS/main/install-macos.sh | sh
-```
-
-**Linux** (apt / dnf / yum / apk / pacman + NodeSource)
-```bash
-curl -fsSL https://raw.githubusercontent.com/realuckyang/AIOS/main/install-linux.sh | sh
-```
-
-**Windows** (requires winget; bundled with Win10 1809+ / Win11)
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/realuckyang/AIOS/main/install-windows.ps1 | iex"
-```
-
-### Manual Install
+### Run from Source
 
 ```bash
 git clone https://github.com/realuckyang/AIOS.git
@@ -90,18 +71,20 @@ npm run start:main &
 npm run start:apps
 ```
 
-### Uninstall
+Production mode is available at `http://localhost:9502`.
 
-The default install directory is `~/.aios`. Just delete it:
+Development mode:
 ```bash
-rm -rf ~/.aios
+npm run dev
 ```
+
+Development mode is available at `http://localhost:5173`.
 
 ---
 
 ## 🎬 First Run
 
-1. Open `http://localhost:9502`
+1. Open `http://localhost:9502` in production mode, or `http://localhost:5173` in development mode
 2. Set an access password (used only on this machine)
 3. Go to **Settings → Model**, fill in an API key for any provider
 4. Back in **Chat**, just say "build me an app that does X" — the AI will write code, start services, and hand the app over to you through its shell
@@ -127,9 +110,8 @@ Streaming, tool calling, and reasoning content are all supported.
 | Group | Apps |
 |---|---|
 | System | Chat · Tasks · Memory · Settings |
-| Work | Files · Terminal · Codex · System Status · Monitors |
-| Creation | Demo Generator · Video Studio |
-| Experiments | CryptoBot |
+| Computer | Files · Terminal · System Status |
+| Runtime | Monitors |
 
 Apps can dispatch Tasks back to the system, letting AI take over complex flows instead of being stuck behind one-off API calls.
 
@@ -215,7 +197,7 @@ Set environment variables: `AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`.
 Delete the `auth` row in `database/aios.db`, or reset the whole DB and go through onboarding again.
 
 **Q: Where is my data stored?**
-Default `~/.aios/app/database/aios.db` (one-line install) or `database/` in the cloned repo (manual install).
+Data is stored under `database/` in the cloned repo.
 
 **Q: How is AIOS different from Open WebUI / LibreChat / LobeChat?**
 Those are mainly LLM chat frontends. AIOS is a **local operating system** with AI-native apps and an agent task system — Chat is just one entry point.
@@ -242,5 +224,5 @@ AIOS is a general kernel that can be tailored into themed editions for different
 
 | Edition | Audience | Main differences |
 |---|---|---|
-| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, full set of 12 built-in apps |
+| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, core system app framework |
 | [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |

@@ -29,7 +29,7 @@ function pickTab(id) {
     if (!id || id === activeId.value) return;
     activeId.value = id;
     send({ type: 'terminal.activate', to: 'desktop', data: { terminalId: id } });
-    if (window.innerWidth < 720) view.closeAppDrawer();
+    if (window.innerWidth < 768) view.closeAppDrawer();
     paneRef.value?.setActive(id);
 }
 

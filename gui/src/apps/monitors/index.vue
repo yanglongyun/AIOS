@@ -2,8 +2,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import * as api from '@/utils/api.js';
 import { on } from '@/system/ws.js';
-import AppHub from '@/components/AppHub.vue';
-import AskAI from '@/components/AskAI.vue';
+import AppTopbar from '@/components/AppTopbar.vue';
 
 const items = ref([]);
 const loading = ref(false);
@@ -68,18 +67,13 @@ onBeforeUnmount(() => unlisten?.());
 
 <template>
   <div class="monitor-app">
-    <header class="topbar">
-      <div class="title">
-        <span>监视器</span>
-      </div>
-      <div class="actions">
+    <AppTopbar title="监视器">
+      <template #actions>
         <button class="icon-btn" title="刷新" @click="load">
-          <span class="msi">refresh</span>
+          <span class="msi sm">refresh</span>
         </button>
-        <AskAI />
-        <AppHub />
-      </div>
-    </header>
+      </template>
+    </AppTopbar>
 
     <main class="content">
       <div v-if="errMsg" class="err">{{ errMsg }}</div>
@@ -119,29 +113,6 @@ onBeforeUnmount(() => unlisten?.());
   display: flex;
   flex-direction: column;
   background: var(--bg);
-}
-.topbar {
-  height: 64px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-}
-.title {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-}
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 .content {
   flex: 1;
@@ -250,11 +221,7 @@ onBeforeUnmount(() => unlisten?.());
   border-color: rgba(255, 63, 110, 0.25);
   background: rgba(255, 63, 110, 0.10);
 }
-@media (max-width: 720px) {
-  .topbar {
-    height: 56px;
-    padding: 0 10px;
-  }
+@media (max-width: 768px) {
   .content {
     padding: 14px 16px 24px;
   }

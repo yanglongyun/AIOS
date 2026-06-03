@@ -17,7 +17,7 @@ defineEmits(['pick']);
       <span class="flex-1 min-w-0 truncate text-left">{{ f.name }}</span>
       <span v-if="counts[f.id]"
         class="px-2 py-px rounded-[10px] text-[11.5px] tabular-nums"
-        :class="f.id === current ? 'bg-white/50 text-blue-fg' : 'bg-bg-elev text-faint'">
+        :class="f.id === current ? 'bg-accent-soft text-blue-fg' : 'bg-bg-elev text-faint'">
         {{ counts[f.id] }}
       </span>
     </button>

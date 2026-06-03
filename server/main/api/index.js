@@ -4,7 +4,6 @@ import { handleSettingsApi } from "./settings/index.js";
 import { handleFsApi } from "./fs/index.js";
 import { handleTaskApi } from "./task/index.js";
 import { handleRuntimeApi } from "./runtime/index.js";
-import { handleAuthApi } from "./auth/index.js";
 import { handleMemoryApi } from "./memory/index.js";
 import { handleMonitorsApi } from "./monitors/index.js";
 
@@ -13,10 +12,6 @@ const handleApiRequest = async (req, res, url) => {
   try {
     if (path === "/api/health") {
       json(res, { success: true });
-      return true;
-    }
-    if (path.startsWith("/api/auth/")) {
-      await handleAuthApi(req, res, path);
       return true;
     }
     if (path.startsWith("/api/runtime/")) {

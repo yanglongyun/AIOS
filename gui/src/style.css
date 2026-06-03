@@ -97,7 +97,7 @@
   background: rgba(0, 0, 0, 0.4);
   z-index: 40;
 }
-@media (min-width: 721px) {
+@media (min-width: 769px) {
   .app-side-mask { display: none; }
 }
 .mask-enter-active, .mask-leave-active { transition: opacity .18s ease; }
@@ -187,6 +187,99 @@
   margin: 0 0 10px;
 }
 
+/* ───────── 统一顶栏(AppTopbar 共享样式) ───────── */
+.app-topbar {
+  flex: none;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, rgba(6, 17, 31, 0.72), rgba(2, 7, 20, 0.55));
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(8px);
+}
+.app-topbar__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.app-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+@media (max-width: 768px) {
+  .app-topbar { height: 54px; padding: 0 6px; }
+  .app-topbar__title { font-size: 16.5px; }
+}
+
+/* ───────── 通用按钮(赛博电光蓝) ───────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* 实心霓虹 */
+.btn.solid {
+  background: var(--accent);
+  color: #001019;
+  font-weight: 700;
+}
+.btn.solid:not(:disabled):hover {
+  background: var(--accent-hi);
+  box-shadow: 0 0 18px rgba(0, 215, 255, 0.35);
+}
+/* 描边 */
+.btn.outline {
+  border-color: var(--line);
+  color: var(--text-2);
+}
+.btn.outline:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent-hi);
+  box-shadow: 0 0 14px rgba(0, 215, 255, 0.18);
+}
+/* 弱色调 */
+.btn.tonal {
+  background: var(--accent-soft);
+  color: var(--accent-fg);
+}
+.btn.tonal:not(:disabled):hover {
+  background: var(--bg-hover);
+  box-shadow: var(--shadow-1);
+}
+/* 危险 */
+.btn.danger {
+  border-color: rgba(255, 63, 110, 0.4);
+  color: var(--bad);
+}
+.btn.danger:not(:disabled):hover {
+  background: rgba(255, 63, 110, 0.12);
+  border-color: var(--bad);
+  box-shadow: 0 0 14px rgba(255, 63, 110, 0.2);
+}
+
 /* 应用内侧栏(由顶栏 ☰ 控制).桌面收起 = 宽度 0,展开 = 280;手机收起 = 隐藏,展开 = fixed overlay. */
 .app-side {
   flex: none;
@@ -206,7 +299,7 @@
   overflow: hidden;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   /* 移动端 drawer 走 absolute,锚在父级 .app-body / .chat-shell 等容器上,
      不再硬编码 top:56px。父容器记得加 position: relative。 */
   .app-side {

@@ -1,78 +1,35 @@
----
-name: 电脑操作
-description: 通过本机 Computer Use 服务操作电脑；支持 shell/API 调用查看状态、截图、移动鼠标、点击、滚动、输入文本、按键和快捷键。
----
+# computer-use
 
-# 电脑操作
+## Description
 
-这个 skill 提供一个本机 HTTP 服务，让 AIOS 可以用统一 API 操作当前电脑。
+Use this skill when the user asks the Agent to inspect or operate the local desktop: screenshots, mouse movement, clicks, scrolling, typing, keyboard shortcuts, or checking local computer automation status.
 
-## 启动服务
+## When To Use
 
-```bash
-bash skills/computer-use/scripts/start-service.sh
-```
+- The task requires visual inspection of the current desktop.
+- The task requires controlling the mouse or keyboard.
+- The task needs a screenshot of the local screen.
+- The user explicitly asks to use the computer, desktop, mouse, keyboard, or screen.
 
-默认监听：
+## Workflow
 
-```text
-http://127.0.0.1:9521
-```
+Use the existing `shell` tool to inspect or run the connector code under `skills/computer-use/` when desktop automation is required. The connector exposes these local capability names internally:
 
-## Shell 调用
+- `computer_status`: get service status, available tools, and local drivers.
+- `computer_shell`: execute a shell command through the computer-use connector.
+- `computer_screenshot`: capture the current screen to an image file.
+- `computer_mouse_move`: move pointer to screen coordinates.
+- `computer_click`: click at screen coordinates.
+- `computer_double_click`: double-click at screen coordinates.
+- `computer_right_click`: right-click at screen coordinates.
+- `computer_scroll`: scroll the active desktop application.
+- `computer_type`: type text into the active application.
+- `computer_key`: press one key with optional modifiers.
+- `computer_hotkey`: press a shortcut such as `["command", "l"]`.
 
-```bash
-bash skills/computer-use/scripts/computer-use.sh computer_status
-bash skills/computer-use/scripts/computer-use.sh computer_screenshot '{"outputPath":"/tmp/computer-use.png"}'
-bash skills/computer-use/scripts/computer-use.sh computer_mouse_move '{"x":500,"y":300}'
-bash skills/computer-use/scripts/computer-use.sh computer_click '{"x":500,"y":300,"button":"left"}'
-bash skills/computer-use/scripts/computer-use.sh computer_type '{"text":"hello"}'
-bash skills/computer-use/scripts/computer-use.sh computer_key '{"key":"enter"}'
-bash skills/computer-use/scripts/computer-use.sh computer_hotkey '{"keys":["command","l"]}'
-bash skills/computer-use/scripts/computer-use.sh computer_scroll '{"direction":"down","amount":3}'
-```
+## Notes
 
-## HTTP API
-
-```bash
-curl -s http://127.0.0.1:9521/status
-curl -s http://127.0.0.1:9521/tools
-curl -s -X POST http://127.0.0.1:9521/call \
-  -H 'Content-Type: application/json' \
-  -d '{"tool":"computer_status","args":{}}'
-```
-
-## 自测
-
-```bash
-bash skills/computer-use/scripts/test-service.sh
-```
-
-自测会启动服务、读取状态、列出工具，并保存一张截图到 `/tmp/computer-use-test.png`。
-
-## 工具
-
-- `computer_status`
-- `computer_screenshot`
-- `computer_mouse_move`
-- `computer_click`
-- `computer_double_click`
-- `computer_right_click`
-- `computer_scroll`
-- `computer_type`
-- `computer_key`
-- `computer_hotkey`
-
-## 平台依赖
-
-- macOS：
-  - 截图使用系统 `screencapture`。
-  - 键盘输入使用系统 `osascript` / System Events。
-  - 鼠标移动、滚动优先使用 `cliclick`；未安装时，点击会尝试 System Events 的 `click at`。
-- Linux：
-  - 鼠标和键盘需要 `xdotool`。
-  - 截图使用 `gnome-screenshot`、`scrot` 或 ImageMagick `import`。
-- Windows：
-  - 使用 PowerShell 调用系统 API。
-
-首次执行截图、键盘或鼠标操作时，系统可能要求给 Terminal / Codex 授予屏幕录制或辅助功能权限。
+- Prefer `computer_screenshot` before clicking when the UI state is unknown.
+- Use coordinates only when they come from a recent screenshot or user-provided location.
+- Ask before destructive desktop operations such as deleting files, closing unsaved work, changing system settings, or submitting forms with external effects.
+- Use `dryRun: true` when checking an action plan without executing pointer or keyboard input.

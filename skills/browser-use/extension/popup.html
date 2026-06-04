@@ -1,61 +1,29 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AIOS Browser Use</title>
-    <link rel="stylesheet" href="popup.css">
-  </head>
-  <body>
-    <main class="panel">
-      <header class="hero">
-        <div class="orb" aria-hidden="true">
-          <span></span>
-        </div>
-        <div class="hero-main">
-          <p class="eyebrow">Local Browser Bridge</p>
-          <div class="hero-title">
-            <h1>AIOS Browser Use</h1>
-            <span id="stateBadge" class="badge">检查中</span>
-          </div>
-          <p id="serviceUrl" class="service-url">读取状态中</p>
-        </div>
-      </header>
+<head>
+<meta charset="utf-8" />
+<title>AGENT Browser</title>
+<link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+<div id="app">
+  <div class="brand">
+    <div class="logo">A</div>
+    <div>
+      <div class="brand-name">AGENT Browser</div>
+      <div class="brand-sub">浏览器技能连接器</div>
+    </div>
+  </div>
 
-      <section id="setupPanel" class="setup-panel" hidden>
-        <div class="setup-head">
-          <span class="material-like">run</span>
-          <div>
-            <h2>启动本机服务</h2>
-            <p>服务启动后，插件会自动建立连接。</p>
-          </div>
-        </div>
-        <div class="copy-block">
-          <label>终端命令</label>
-          <code id="startCommand"></code>
-          <button id="copyCommandButton" type="button">复制</button>
-        </div>
-        <div class="copy-block">
-          <label>给 AI 的提示</label>
-          <code id="aiPrompt"></code>
-          <button id="copyPromptButton" type="button">复制</button>
-        </div>
-        <p id="copyNotice" class="copy-notice"></p>
-      </section>
+  <div class="status">
+    <span class="dot" id="dot"></span>
+    <span id="state-text">…</span>
+  </div>
+  <div class="info" id="info"></div>
 
-      <section class="active-tab">
-        <div class="section-label">
-          <span>当前标签页</span>
-          <small id="updatedAt"></small>
-        </div>
-        <strong id="activeTitle">-</strong>
-        <p id="activeUrl">-</p>
-      </section>
-
-      <footer>
-        <button id="refreshButton" type="button">刷新状态</button>
-      </footer>
-    </main>
-    <script src="popup.js"></script>
-  </body>
+  <button id="btn-reconnect" class="btn" type="button">重新连接</button>
+  <div class="footer">v<span id="ver">0.0</span></div>
+</div>
+<script src="popup.js"></script>
+</body>
 </html>

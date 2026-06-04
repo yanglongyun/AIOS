@@ -1,13 +1,16 @@
 node_modules/
-gui/dist/
-/CLAUDE.md
-.aios/
-.DS_Store
+.env
 *.log
-/database/
-/files/
-
-# Source docs and app prompts are part of the product source.
-!/AGENTS.md
-!/apps/
-!/apps/**
+.DS_Store
+config.json
+/data/
+.qwen/
+src/web/dist/
+*.db
+*.db-shm
+*.db-wal
+.tmp_codex/
+database/
+gui/dist/
+skills/browser-use/extension/config.js
+skills/computer-use/config.js

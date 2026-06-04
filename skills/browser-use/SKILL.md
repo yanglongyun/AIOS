@@ -1,78 +1,41 @@
----
-name: 浏览器操作
-description: 通过本机 Browser Use 服务和 Chrome 插件操作浏览器；支持 shell/API 调用打开标签、列出标签、切换、关闭、导航、执行页面 JavaScript 和截图。
----
+# browser-use
 
-# 浏览器操作
+## Description
 
-这个 skill 由两部分组成：
+Use this skill when the user asks the Agent to inspect or operate Chrome through the browser connector: list tabs, open or activate tabs, navigate pages, evaluate JavaScript, or capture browser screenshots.
 
-- `extension/`：Chrome 插件，连接本机服务并执行 `chrome.*` 浏览器操作。
-- `service/`：本机 HTTP/WebSocket 服务，对 shell 暴露 API。
+## When To Use
 
-## 启动服务
+- The task requires controlling Chrome tabs or pages.
+- The task needs page state from the user browser rather than a generic HTTP request.
+- The task requires running JavaScript in an open Chrome tab.
+- The task requires a browser screenshot through the Chrome extension.
 
-```bash
-bash skills/browser-use/scripts/start-service.sh
-```
+## Setup
 
-默认监听：
+The browser connector has two parts:
 
-```text
-http://127.0.0.1:9522
-```
+- Local service: `node skills/browser-use/server/index.js` starts the HTTP/WebSocket bridge on port `9522` by default.
+- Chrome extension: load `skills/browser-use/extension` in Chrome and keep it connected to the local service.
 
-## 加载插件
+If the connector is not running or the extension is not connected, inspect service status first and tell the user the connector needs to be running.
 
-在 Chrome 打开 `chrome://extensions`，开启开发者模式，加载目录：
+## Workflow
 
-```text
-/Users/woodchange/Desktop/AIOS/skills/browser-use/extension
-```
+Use the existing `shell` tool to inspect or run the connector code under `skills/browser-use/` when browser automation is required. The connector exposes these local capability names internally:
 
-插件会连接：
+- `browser_status`: get bridge status and active tab information.
+- `browser_open_tab`: open a new Chrome tab.
+- `browser_tabs`: list Chrome tabs.
+- `browser_activate_tab`: focus a Chrome tab.
+- `browser_close_tab`: close a Chrome tab.
+- `browser_navigate`: navigate a tab to a URL.
+- `browser_evaluate`: run JavaScript in a tab.
+- `browser_screenshot`: capture the visible area of a tab.
 
-```text
-ws://127.0.0.1:9522/extension
-```
+## Notes
 
-点击 Chrome 工具栏里的插件图标，会打开状态面板，显示本机服务地址、连接状态、标签页数量、当前标签页和插件版本。
-
-## Shell 调用
-
-```bash
-bash skills/browser-use/scripts/browser-use.sh browser_status
-bash skills/browser-use/scripts/browser-use.sh browser_tabs '{"currentWindow":true}'
-bash skills/browser-use/scripts/browser-use.sh browser_open_tab '{"url":"https://example.com"}'
-bash skills/browser-use/scripts/browser-use.sh browser_navigate '{"url":"https://example.com"}'
-bash skills/browser-use/scripts/browser-use.sh browser_evaluate '{"script":"return document.title"}'
-```
-
-截图保存到本地：
-
-```bash
-bash skills/browser-use/scripts/browser-use.sh browser_screenshot '{"format":"png","outputPath":"/tmp/browser-use.png"}'
-```
-
-## HTTP API
-
-```bash
-curl -s http://127.0.0.1:9522/status
-curl -s http://127.0.0.1:9522/tools
-curl -s -X POST http://127.0.0.1:9522/call \
-  -H 'Content-Type: application/json' \
-  -d '{"tool":"browser_tabs","args":{"currentWindow":true}}'
-```
-
-## 工具
-
-- `browser_status`
-- `browser_open_tab`
-- `browser_tabs`
-- `browser_activate_tab`
-- `browser_close_tab`
-- `browser_navigate`
-- `browser_evaluate`
-- `browser_screenshot`
-
-`browser_evaluate` 使用 Chrome DevTools `Runtime.evaluate`，可以读写 DOM、点击元素、填表、触发事件和滚动页面。
+- Prefer `browser_tabs` or `browser_status` before acting when the target tab is unclear.
+- Use `tabId` whenever operating on a specific tab.
+- Avoid executing destructive JavaScript or submitting external forms without user confirmation.
+- Use `browser_screenshot` when visual layout matters.

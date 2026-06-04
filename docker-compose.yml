@@ -1,0 +1,11 @@
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-kernel
+    ports:
+      - "9502:9502"
+    volumes:
+      - ./database:/app/database
+    restart: unless-stopped

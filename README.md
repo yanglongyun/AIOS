@@ -47,7 +47,7 @@ database/     SQLite(主库 agent.db + apps/<id>.db,各自独立)
 
 ## ✨ 能做什么
 
-- 💬 **流式多 provider 对话** —— OpenAI / DeepSeek / Kimi / Gemini / Claude / OpenRouter 等 OpenAI 兼容接口,逐字流式,DeepSeek/Kimi 思维链自动收集。
+- 💬 **流式多 provider 对话** —— 任意 **OpenAI 兼容**接口,逐字流式。OpenAI / DeepSeek / Kimi / Qwen / GLM / OpenRouter 等原生兼容(DeepSeek/Kimi 思维链自动收集);Gemini / Claude 走各自的 OpenAI 兼容端点或网关。
 - 🛠 **一个 `shell` 工具** —— 模型用真实命令解决问题,tool_call ↔ tool_result 自动闭环。
 - 🧩 **应用(apps)** —— 内置记事本 / 待办 / 记账本三个样板;每个独立后端 + 独立库 + 前端 + `APP.md`。
 - 🌱 **创建应用** —— 侧边栏「应用」右上角 `+` → 描述需求 → AI 按 `skills/create-app` 指南用 shell 把全栈应用写进系统。
@@ -62,12 +62,14 @@ database/     SQLite(主库 agent.db + apps/<id>.db,各自独立)
 环境:Node.js ≥ 22.5(用到内置 `node:sqlite`)。
 
 ```bash
-git clone https://github.com/realuckyang/AIOS.git
+git clone https://github.com/realuckyang/AIOS.git   # 或 git clone git@gitee.com:realuckyang/aios.git
 cd AIOS
 npm install
 
 npm run gui          # 起主服务 + 应用服务 + Vite 前端(开发模式)
 ```
+
+> 仓库同步两个远端:GitHub `realuckyang/AIOS` 与 Gitee `realuckyang/aios`,`main` 指向同一提交。
 
 打开 **http://127.0.0.1:5173/**,进「设置 → 模型接入」填好 API URL / Key / 模型(可选 Provider),回到「对话」即可。
 
@@ -92,6 +94,14 @@ npm run typecheck    # tsc --noEmit
 | 监视器 | `GET / POST /api/monitors` |
 | 记忆 / 技能 / 设置 | `/api/memories` · `/api/skills` · `/api/settings` |
 | 应用(独立服务) | `/apps/<id>/*`(如 `/apps/notepad/notes`) |
+
+---
+
+## 对话与监视器
+
+一段对话连同它的上下文,本身就是一个可被调度的 agent。监视器是这些对话之间的传递通道:一个对话派出的后台任务在独立会话里运行,完成后其结果经监视器投回目标对话,并唤醒该对话的模型继续处理。
+
+因此触发并不只来自用户输入,也可以来自另一段对话的产出——两种来源汇到同一个唤醒入口(`wakeConversation`)。沿这条路往下,是让模型主动召唤其它对话、并用嵌套空间组织它们。
 
 ---
 

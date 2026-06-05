@@ -2,14 +2,14 @@
 name: notepad
 description: 记事本应用，创建 / 编辑 / 删除纯文本笔记，按更新时间倒序排列。
 backend: server/apps/notepad
-frontend: gui/src/apps/notepad
+frontend: ui/src/apps/notepad
 database: database/apps/notepad.db
 ---
 
 # notepad 记事本
 
 - 定位：最简单的纯文本笔记应用，跑在应用服务(:9503)上，数据完全隔离。
-- 前端：`gui/src/apps/notepad/index.tsx`(React)
+- 前端：`ui/src/apps/notepad/index.tsx`(React)
 - 后端：`server/apps/notepad/index.ts`
 - 数据：独立库 `database/apps/notepad.db`,只一张表 `notes`
 

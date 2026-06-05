@@ -28,7 +28,7 @@ AIOS 不是传统管理硬件的 OS,而是**产生应用、使用应用、管理
 主服务  :9502   系统内核 — chat / tasks / memories / skills / settings + ai + 监视器 + 托管 GUI
 应用服务 :9503   应用后端 — 每个 app 自带后端 + 独立库
 
-server/                      gui/src/
+server/                      ui/src/
   system/   系统服务            system/   系统侧(外壳 + 内置功能 + 状态 + api)
     ai/     无状态执行器          components/ state/ lib/ views/ api.ts
     ai/llm/ 多 provider 流式      apps/     应用侧
@@ -66,7 +66,7 @@ git clone https://github.com/realuckyang/AIOS.git   # 或 git clone git@gitee.co
 cd AIOS
 npm install
 
-npm run gui          # 起主服务 + 应用服务 + Vite 前端(开发模式)
+npm run ui          # 起主服务 + 应用服务 + Vite 前端(开发模式)
 ```
 
 > 仓库同步两个远端:GitHub `realuckyang/AIOS` 与 Gitee `realuckyang/aios`,`main` 指向同一提交。
@@ -77,7 +77,7 @@ npm run gui          # 起主服务 + 应用服务 + Vite 前端(开发模式)
 
 ```bash
 npm start            # 只起后端两个服务(主 9502 / 应用 9503)
-npm run gui:build    # 构建前端到 gui/dist(生产由主服务托管)
+npm run ui:build    # 构建前端到 ui/dist(生产由主服务托管)
 npm run typecheck    # tsc --noEmit
 ```
 

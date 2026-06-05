@@ -9,8 +9,8 @@
 
 1. **后端**:`server/apps/<id>/index.ts` —— 自带后端 + 独立 SQLite 库
 2. **后端注册**:在 `server/apps/registry.ts` 加一行 loader
-3. **前端**:`gui/src/apps/<id>/index.tsx` —— 一个 React 组件(默认导出)
-4. **前端注册**:在 `gui/src/apps/registry.ts` 的 `apps` 数组加一项;若用新图标,在 `gui/src/system/components/MainNav.tsx` 的 `appIconMap` 加一条
+3. **前端**:`ui/src/apps/<id>/index.tsx` —— 一个 React 组件(默认导出)
+4. **前端注册**:在 `ui/src/apps/registry.ts` 的 `apps` 数组加一项;若用新图标,在 `ui/src/system/components/MainNav.tsx` 的 `appIconMap` 加一条
 5. **说明书**:`apps/<id>/APP.md`
 
 约定:`<id>` 用小写英文(如 `habit`);ESM,导入路径写 `.js` 后缀;服务端文件首行 `// @ts-nocheck`;每个 app **只能**碰自己的 `/apps/<id>/*` 路由和自己的库,不准动别的 app 或主服务。
@@ -67,7 +67,7 @@ export default { name: "<id>", match, handleApi, initDb };
 () => import("./<id>/index.js"),
 ```
 
-## 前端模板 `gui/src/apps/<id>/index.tsx`
+## 前端模板 `ui/src/apps/<id>/index.tsx`
 
 ```tsx
 import { useEffect, useState } from "react";
@@ -88,11 +88,11 @@ export default function Xapp() {
 }
 ```
 
-前端注册——编辑 `gui/src/apps/registry.ts`,往 `apps` 数组加一项:
+前端注册——编辑 `ui/src/apps/registry.ts`,往 `apps` 数组加一项:
 ```ts
 { id: "<id>", name: "中文名", icon: "<id>", color: "#60a5fa", load: () => import("./<id>") },
 ```
-图标——编辑 `gui/src/system/components/MainNav.tsx` 的 `appIconMap`,从 `lucide-react` 选一个图标加一条 `<id>: SomeIcon`(并在文件顶部 import 它)。没加则自动用 Bot 兜底。
+图标——编辑 `ui/src/system/components/MainNav.tsx` 的 `appIconMap`,从 `lucide-react` 选一个图标加一条 `<id>: SomeIcon`(并在文件顶部 import 它)。没加则自动用 Bot 兜底。
 
 ## 说明书 `apps/<id>/APP.md`
 
@@ -101,7 +101,7 @@ export default function Xapp() {
 name: <id>
 description: 一句话说明这个 app 做什么。
 backend: server/apps/<id>
-frontend: gui/src/apps/<id>
+frontend: ui/src/apps/<id>
 database: database/apps/<id>.db
 ---
 
@@ -114,8 +114,8 @@ database: database/apps/<id>.db
 
 1. 起一个简短小写 `<id>`。
 2. 按上面 5 部分写文件 + 改两个 registry(+ 图标)。
-3. 验证后端:`npx tsc --noEmit`;验证前端:`npm run gui:build`。
-4. **生效**:前端经 Vite HMR 立即出现在侧边栏「应用」里;**后端是启动时加载的,新增 app 需要重启一次服务**(让用户重跑 `npm run gui`,或重启进程)才能让 `/apps/<id>/*` 生效。
-5. 可参考三个现成样板:`server/apps/{notepad,todo,ledger}` 与 `gui/src/apps/{notepad,todo,ledger}`,照着抄最稳。
+3. 验证后端:`npx tsc --noEmit`;验证前端:`npm run ui:build`。
+4. **生效**:前端经 Vite HMR 立即出现在侧边栏「应用」里;**后端是启动时加载的,新增 app 需要重启一次服务**(让用户重跑 `npm run ui`,或重启进程)才能让 `/apps/<id>/*` 生效。
+5. 可参考三个现成样板:`server/apps/{notepad,todo,ledger}` 与 `ui/src/apps/{notepad,todo,ledger}`,照着抄最稳。
 
 完成后,简要告诉用户:建了哪个 app、文件清单、以及"重启服务后即可在侧边栏使用"。

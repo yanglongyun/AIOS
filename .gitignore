@@ -11,6 +11,6 @@ src/web/dist/
 *.db-wal
 .tmp_codex/
 database/
-gui/dist/
+ui/dist/
 skills/browser-use/extension/config.js
 skills/computer-use/config.js

@@ -1010,7 +1010,7 @@
 
                 <div class="terminal-trace">
                   <div class="terminal-trace-header" onclick="toggleConsole(this)">
-                    <span>$ shell | mkdir -p gui/src/apps/tomato-timer</span>
+                    <span>$ shell | mkdir -p ui/src/apps/tomato-timer</span>
                     <span>EXPAND</span>
                   </div>
                   <div class="terminal-trace-body">
@@ -1098,13 +1098,13 @@
               <span>PID: 84392</span>
             </div>
             <div class="terminal-c-body" id="task-terminal-logs">
-              <div class="term-line cmd">vite build --config gui/vite.config.js gui</div>
+              <div class="term-line cmd">vite build --config ui/vite.config.js gui</div>
               <div class="term-line">vite v7.3.1 building for production...</div>
               <div class="term-line">✓ 56 modules transformed.</div>
               <div class="term-line">dist/index.html                     0.45 kB</div>
               <div class="term-line">dist/assets/index-D78s92.js         385.20 kB</div>
               <div class="term-line">✓ built in 1.48s</div>
-              <div class="term-line cmd" style="margin-top: 10px;">cp -r gui/dist/ ~/.aios/app/gui_build/</div>
+              <div class="term-line cmd" style="margin-top: 10px;">cp -r ui/dist/ ~/.aios/app/ui_build/</div>
               <div class="term-line">Syncing assets to dynamic runtime folder...</div>
               <div class="term-line" style="color:var(--text-gray);">[DAEMON] Waiting for local file mutations...</div>
             </div>
@@ -1220,7 +1220,7 @@
 
               <div class="form-group">
                 <label class="form-lbl">EXECUTION WHITE-LIST REGEX</label>
-                <input type="text" class="form-val-input" value="^(npm|git|node|cp|mkdir|rm -rf gui/dist).*">
+                <input type="text" class="form-val-input" value="^(npm|git|node|cp|mkdir|rm -rf ui/dist).*">
               </div>
             </div>
           </div>
@@ -1382,7 +1382,7 @@ Command complete. Success.
         idNode.innerText = '#1088';
         abortBtn.style.display = 'block';
         logBody.innerHTML = `
-          <div class="term-line cmd">vite build --config gui/vite.config.js gui</div>
+          <div class="term-line cmd">vite build --config ui/vite.config.js gui</div>
           <div class="term-line">vite v7.3.1 building for production...</div>
           <div class="term-line">✓ 56 modules transformed.</div>
           <div class="term-line">dist/index.html                     0.45 kB</div>

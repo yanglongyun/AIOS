@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const GUI_DIST = path.resolve(__dirname, "../../../gui/dist");
+const GUI_DIST = path.resolve(__dirname, "../../../ui/dist");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -50,13 +50,13 @@ const isFile = (p) => {
   }
 };
 
-// 服务构建后的 GUI(gui/dist),非资源路径回退到 index.html(SPA)
+// 服务构建后的 GUI(ui/dist),非资源路径回退到 index.html(SPA)
 const serveGui = (req, res, pathname) => {
   const indexHtml = path.join(GUI_DIST, "index.html");
 
   if (!isFile(indexHtml)) {
     res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end("GUI 尚未构建。请先运行: npm run gui:build\n");
+    res.end("GUI 尚未构建。请先运行: npm run ui:build\n");
     return true;
   }
 

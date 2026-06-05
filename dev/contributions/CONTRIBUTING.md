@@ -68,13 +68,13 @@ rm -rf database/aios.db .aios
 这是 AIOS 最常见的 PR 类型。一个最小 app 涉及:
 
 ```
-gui/src/apps/<your-app>/
+ui/src/apps/<your-app>/
   index.vue            # 入口组件
 server/apps/<your-app>/   # 可选,如果需要后端
 apps/<your-app>/APP.md    # 描述这个 app 是什么
 ```
 
-最后在 `gui/src/apps.js` 注册:
+最后在 `ui/src/apps.js` 注册:
 
 ```js
 {
@@ -93,7 +93,7 @@ apps/<your-app>/APP.md    # 描述这个 app 是什么
 
 - 用 Material Symbols 图标,不要换图标库
 - 主题色用单色,不要渐变 / logo 拼贴
-- 复用 `gui/src/apps/_shared/` 里的通用组件(头部栏、空状态、loading)
+- 复用 `ui/src/apps/_shared/` 里的通用组件(头部栏、空状态、loading)
 - 字号 / 圆角 / 间距跟随现有 app,不另起一套设计语言
 - 数据走 `server/apps/<app>/` 自带后端,不直接在 `server/main/` 加业务路由
 

@@ -2,14 +2,14 @@
 name: todo
 description: 待办应用，添加 / 勾选完成 / 删除待办项，未完成项排在前面。
 backend: server/apps/todo
-frontend: gui/src/apps/todo
+frontend: ui/src/apps/todo
 database: database/apps/todo.db
 ---
 
 # todo 待办
 
 - 定位：极简待办清单,跑在应用服务(:9503)上,数据完全隔离。
-- 前端：`gui/src/apps/todo/index.tsx`(React)
+- 前端：`ui/src/apps/todo/index.tsx`(React)
 - 后端：`server/apps/todo/index.ts`
 - 数据：独立库 `database/apps/todo.db`,只一张表 `todos`
 

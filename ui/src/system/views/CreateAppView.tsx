@@ -19,7 +19,7 @@ const STEPS = [
   {
     icon: Boxes,
     title: "3 · 自动注册热加载",
-    desc: "写入 server/apps 与 gui/src/apps 并登记进注册表,侧边栏「应用」里立即出现,无需重启。",
+    desc: "写入 server/apps 与 ui/src/apps 并登记进注册表,侧边栏「应用」里立即出现,无需重启。",
   },
 ];
 
@@ -36,8 +36,8 @@ export function CreateAppView({ setRoute }: { setRoute: (route: RouteName) => vo
       `请按 create-app 指南在本系统(AIOS)创建一个应用。\n\n` +
       `需求:${text}\n\n` +
       `步骤:先读 skills/create-app/SKILL.md,然后用 shell 按规范写「后端 + 前端 + APP.md」并注册到 ` +
-      `server/apps/registry.ts 与 gui/src/apps/registry.ts(如需新图标改 MainNav 的 appIconMap)。` +
-      `写完跑 npm run gui:build 自检,最后给我文件清单,并提醒我重启服务后即可在侧边栏使用。`;
+      `server/apps/registry.ts 与 ui/src/apps/registry.ts(如需新图标改 MainNav 的 appIconMap)。` +
+      `写完跑 npm run ui:build 自检,最后给我文件清单,并提醒我重启服务后即可在侧边栏使用。`;
     try {
       setHint("");
       const result = await api.createConversation(`创建应用:${text.slice(0, 16)}`);
@@ -106,7 +106,7 @@ export function CreateAppView({ setRoute }: { setRoute: (route: RouteName) => vo
 
         <p className="text-xxs text-text-faint leading-relaxed">
           提示:现有应用(记事本 / 待办 / 记账本)就是按这套结构手写的样板——
-          每个应用 = 一个独立后端(<code>server/apps/&lt;id&gt;</code>)+ 一个独立库 + 一个 React 前端(<code>gui/src/apps/&lt;id&gt;</code>)+ 一份 <code>APP.md</code>。
+          每个应用 = 一个独立后端(<code>server/apps/&lt;id&gt;</code>)+ 一个独立库 + 一个 React 前端(<code>ui/src/apps/&lt;id&gt;</code>)+ 一份 <code>APP.md</code>。
         </p>
       </div>
     </div>

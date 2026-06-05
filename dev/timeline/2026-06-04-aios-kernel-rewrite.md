@@ -22,7 +22,7 @@
 
 ### 目录主轴:system | apps(server 与 gui 对称)
 ```
-server/                       gui/src/
+server/                       ui/src/
   system/   系统服务(内核)      system/   系统侧(外壳 + 内置功能 + 状态 + api)
     ai/     无状态执行器          components/ state/ lib/ views/ api.ts
     ai/llm/ 多 provider 流式      apps/     应用侧
@@ -40,7 +40,7 @@ server/                       gui/src/
 - **记事本 notepad**:flomo 结构(顶部输入 + 下方笔记流,行内编辑)
 - **待办 todo**:加/勾选/删,未完成置顶
 - **记账本 ledger**:收入/支出流水 + 自动汇总
-- 每个 app 五件套:独立后端(`server/apps/<id>`,`{name,match,handleApi,initDb}` 契约)+ 独立库(`database/apps/<id>.db`)+ React 前端(`gui/src/apps/<id>`)+ 前后端各一行 registry + `apps/<id>/APP.md`。
+- 每个 app 五件套:独立后端(`server/apps/<id>`,`{name,match,handleApi,initDb}` 契约)+ 独立库(`database/apps/<id>.db`)+ React 前端(`ui/src/apps/<id>`)+ 前后端各一行 registry + `apps/<id>/APP.md`。
 
 ---
 

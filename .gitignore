@@ -5,6 +5,7 @@ node_modules/
 config.json
 /data/
 .qwen/
+.claude/
 src/web/dist/
 *.db
 *.db-shm

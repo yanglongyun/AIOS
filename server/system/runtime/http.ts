@@ -1,6 +1,7 @@
 // @ts-nocheck
 import http from "http";
 import { createApiHandler } from "../api/index.js";
+import { initDb } from "../repository/db.js";
 import { attachRealtimeWebSocketServer } from "../ws/index.js";
 
 let serverInstance = null;
@@ -24,6 +25,7 @@ const handleRequest = createApiHandler({
 });
 
 const startServer = async (port = 9502) => {
+  initDb();
   return new Promise((resolve, reject) => {
     serverInstance = http.createServer(async (req, res) => {
       try {

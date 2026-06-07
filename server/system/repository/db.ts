@@ -66,15 +66,19 @@ const createSchema = (database) => {
   `);
 };
 
+const hasSchema = (database) =>
+  !!database
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'settings'")
+    .get();
+
 const initDb = () => {
   if (db) return db;
 
   fs.mkdirSync(DB_DIR, { recursive: true });
-  const shouldCreateSchema = !fs.existsSync(DB_PATH);
   db = new DatabaseSync(DB_PATH);
   db.exec("PRAGMA foreign_keys = ON");
   db.exec("PRAGMA journal_mode = WAL");
-  if (shouldCreateSchema) createSchema(db);
+  if (!hasSchema(db)) createSchema(db);
 
   return db;
 };

@@ -8,7 +8,7 @@ import {
   markTaskError,
   markTaskRunning,
 } from "../../repository/tasks/index.js";
-import { sendChatMessage } from "../chat/index.js";
+import { createChat, sendChatMessage } from "../chat/index.js";
 import { createSubscription, fireTaskSubscriptions } from "../subscriptions/index.js";
 import {
   registerTaskExecution,
@@ -57,6 +57,11 @@ const createTask = ({ taskName, detail, messages, inputOverrides = {}, subscript
   }
 
   const chatId = randomUUID();
+  createChat({
+    id: chatId,
+    title: name,
+    scene: "task",
+  });
   saveMessageBatch(chatId, "user", initialMessages);
   const taskId = createTaskRow({
     chatId,

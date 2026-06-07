@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tsx ./index.ts",
     "server": "tsx ./server/system/index.ts",
-    "ui": "tsx ./ui/start.ts",
+    "ui": "npm run ui:dev",
     "ui:dev": "vite --config ui/vite.config.ts ui",
     "ui:build": "vite --config ui/vite.config.ts build ui",
     "typecheck": "tsc --noEmit"

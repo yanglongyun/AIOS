@@ -1,17 +1,13 @@
 // @ts-nocheck
-import { parseJson } from "../../utils.js";
-import {
-  createTask,
-  sanitizeTaskName,
-} from "../../services/tasks/index.js";
+import { parseJson } from "../shared/json.js";
+import { createTask } from "../../services/tasks/index.js";
 
 const handleTaskPost = async (req, res, { readBody, sendJson }) => {
   const raw = await readBody(req);
   const body = parseJson(raw || "{}", "server.task.body");
-  const taskName = sanitizeTaskName(body.name || body.taskName);
 
   const result = createTask({
-    taskName,
+    taskName: body.name || body.taskName,
     detail: body.detail,
     messages: body.messages,
     inputOverrides: {
@@ -20,7 +16,7 @@ const handleTaskPost = async (req, res, { readBody, sendJson }) => {
       model: body.model,
       system: body.system,
     },
-    monitor: body.monitor || null,
+    subscription: body.subscription || null,
   });
 
   sendJson(res, 202, {

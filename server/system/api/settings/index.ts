@@ -1,9 +1,14 @@
 // @ts-nocheck
 import { handleSettingsGet } from "./get.js";
+import { handleSettingsModelsGet } from "./models.js";
 import { handleSettingsPost } from "./post.js";
 
 const handleSettingsApi = async (req, res, deps, path, method) => {
   const { sendJson } = deps;
+  if (path === "/api/settings/models" && method === "GET") {
+    await handleSettingsModelsGet(req, res, deps);
+    return;
+  }
   if (path !== "/api/settings") {
     sendJson(res, 404, { ok: false, error: "Not found" });
     return;

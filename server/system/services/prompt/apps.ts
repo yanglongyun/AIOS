@@ -24,7 +24,7 @@ const parseAppMd = (file) => {
 
 const apps = () => {
   const head =
-    "\n\n## 应用目录\n你可以帮用户使用 / 操作 / 新建应用。每个 app 自带后端 + 独立 SQLite 库,只通过 `/apps/<id>/*` 暴露;需要时可直接 sqlite3 只读查库或 curl 调它的接口。新建应用见 create-app 技能。";
+    "\n\n## 应用目录\n你可以帮用户使用 / 操作 / 新建应用。每个 app 自带后端 + 独立 SQLite 库,只通过 `/apps/<id>/*` 暴露;需要时可直接 sqlite3 只读查库或 curl 调它的接口。新建应用时参考现有 app 的后端、前端、APP.md 与注册表结构。";
 
   if (!fs.existsSync(APPS_ROOT)) return head;
 

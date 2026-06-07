@@ -48,7 +48,7 @@ server/                       ui/src/
 
 - **监视器(monitor)保留为「对话间传递通道」**:不再当任务专属回调;后端机制 + 表 + 任务回传全留,仅去掉导航/浏览界面。事件 → 投递 `[MONITOR]` 消息进目标会话 → 唤醒其 AI。实测投递链路通过。
 - **应用生成不做流水线**:就是 AI 用 shell 按预置指南(`skills/create-app/SKILL.md`)自己建;`+` 引导页会开一个对话并让 AI 照指南建 app。
-- **多 provider 流式 LLM**(从 AIOS 港入 `server/system/ai/llm/`):common(provider 感知头)+ stream(SSE 解析)+ parsers(openai/deepseek/kimi/gemini)。agent 循环改流式 emit delta → WS `chat.delta` → 前端流式气泡。设置加 `provider` 选择。单测覆盖 content 增量 / tool_calls 增量重组 / usage。
+- **多 provider 流式 LLM**(从 AIOS 港入 `server/system/ai/llm/`):common(provider 感知头)+ stream(SSE 解析)+ parsers(openai/deepseek/kimi/gemini)。agent 循环改流式 emit delta → WS `delta` → 前端流式气泡。设置加 `provider` 选择。单测覆盖 content 增量 / tool_calls 增量重组 / usage。
 - **prompt 对齐 AIOS**:新增「应用目录」段(注入各 APP.md 摘要)、tools 段补「后台任务 + 监视器」用法(按本仓真实 `/api/tasks` + monitor)、默认指令补严(不编造 / 风险确认)。`<summary>` 会话摘要保留。
 - **砍掉**:目标(objectives)+ 心跳、便签(memos)+ `<memo>`/remarks 长程记忆机制(前后端 + 表)。
 

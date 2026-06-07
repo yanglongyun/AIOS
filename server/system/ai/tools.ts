@@ -12,9 +12,9 @@ const tools = [
             type: "string",
             description: "要执行的 shell 命令。",
           },
-          reason: {
+          summary: {
             type: "string",
-            description: "简要说明执行此命令的原因。",
+            description: "本次工具调用的一句话摘要，面向用户展示。",
           },
           timeout: {
             type: "number",
@@ -26,7 +26,7 @@ const tools = [
             description: "可选工作目录，默认使用当前进程工作目录。",
           },
         },
-        required: ["command", "reason"],
+        required: ["command", "summary"],
       },
     },
   },

@@ -1,5 +1,5 @@
 // @ts-nocheck
-// 流式调用:按 provider 选解析器,逐 SSE 块解析,content 增量经 onDelta 回调。
+// 流式调用:按 provider 选解析器,逐 SSE 块解析,content 经 onMessage 回调。
 // 返回完整 message(可能含 tool_calls / reasoning_content)与 usage(若服务端在流里给了)。
 import { buildLlmHeaders } from "./common.js";
 import { deepseekParser } from "./parsers/deepseek.js";
@@ -16,9 +16,16 @@ const pickParser = (provider, apiUrl) => {
   return openaiParser;
 };
 
-const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelta } = {}) => {
+const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onMessage } = {}) => {
   const parser = pickParser(provider, apiUrl);
-  const streamPayload = { ...payload, stream: true };
+  const streamPayload = {
+    ...payload,
+    stream: true,
+    stream_options: {
+      ...(payload.stream_options || {}),
+      include_usage: true,
+    },
+  };
   const state = parser.createState();
   let usage = null;
 
@@ -58,7 +65,7 @@ const callLlmStream = async (provider, apiUrl, apiKey, payload, { signal, onDelt
         continue;
       }
       if (json && json.usage) usage = json.usage;
-      parser.parseChunk(json, state, onDelta);
+      parser.parseChunk(json, state, onMessage);
     }
   }
 

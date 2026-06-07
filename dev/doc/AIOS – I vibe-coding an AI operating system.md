@@ -6,7 +6,7 @@ Now, we can build the applications we want through conversation. We can also use
 
 That's AIOS.
 
-Over the past month, I built (mostly via vibe coding, honestly) this early-stage AIOS prototype. It has a Windows-like desktop interface — nothing groundbreaking there — but inside it, you can have AI generate your own applications based entirely on your needs, habits, and preferences. These apps aren't just single-page frontends. They come with a backend and database, and can directly call the system-level unified AI kernel to handle intelligent tasks.
+Over the past month, I built (mostly via vibe coding, honestly) this early-stage AIOS prototype. It has a Windows-like desktop interface — nothing groundbreaking there — but inside it, you can have AI generate your own applications based entirely on your needs, habits, and preferences. These apps aren't just single-page frontends. They come with a backend and database, and can directly call the system-level unified AI kernel to handle intelligent activities.
 
 ---
 

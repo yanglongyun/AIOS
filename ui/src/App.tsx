@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 import { AppShell, type RouteName } from "./system/components/AppShell";
-import { ConversationProvider } from "./system/state/conversation";
+import { ChatProvider } from "./system/state/chat";
 import { LayoutProvider } from "./system/state/layout";
-import { SocketProvider } from "./system/state/socket";
-import { TaskProvider } from "./system/state/task";
 import { ThemeProvider } from "./system/state/theme";
-import { ChatView } from "./system/views/ChatView";
-import { MemoriesView } from "./system/views/MemoriesView";
-import { SettingsView } from "./system/views/SettingsView";
-import { SkillsView } from "./system/views/SkillsView";
-import { TasksView } from "./system/views/TasksView";
+import ChatApp from "./apps/chat";
+import { SettingsView } from "./system/views/settings";
+import { TaskView } from "./system/views/tasks";
 import { CreateAppView } from "./system/views/CreateAppView";
 import { AppHost } from "./system/components/AppHost";
 
 const workspaceRoutes = new Set<RouteName>([
-  "chat", "tasks", "memories", "skills", "settings",
+  "chat", "tasks", "settings",
 ]);
 
 const readRoute = (): RouteName => {
@@ -42,21 +38,15 @@ export function App() {
   return (
     <ThemeProvider>
       <LayoutProvider>
-        <SocketProvider>
-          <ConversationProvider>
-            <TaskProvider>
-              <AppShell route={route} setRoute={setRoute}>
-                {route === "chat" ? <ChatView /> : null}
-                {route === "tasks" ? <TasksView setRoute={setRoute} /> : null}
-                {route === "memories" ? <MemoriesView /> : null}
-                {route === "skills" ? <SkillsView /> : null}
-                {route === "settings" ? <SettingsView /> : null}
-                {route === "create-app" ? <CreateAppView setRoute={setRoute} /> : null}
-                {route.startsWith("app/") ? <AppHost id={route.slice(4)} /> : null}
-              </AppShell>
-            </TaskProvider>
-          </ConversationProvider>
-        </SocketProvider>
+        <ChatProvider>
+          <AppShell route={route} setRoute={setRoute}>
+            {route === "chat" ? <ChatApp /> : null}
+            {route === "tasks" ? <TaskView /> : null}
+            {route === "settings" ? <SettingsView /> : null}
+            {route === "create-app" ? <CreateAppView setRoute={setRoute} /> : null}
+            {route.startsWith("app/") ? <AppHost id={route.slice(4)} /> : null}
+          </AppShell>
+        </ChatProvider>
       </LayoutProvider>
     </ThemeProvider>
   );

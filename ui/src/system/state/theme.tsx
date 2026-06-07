@@ -11,23 +11,16 @@ const STORAGE_KEY = "theme.mode";
 const ThemeContext = createContext<ThemeState | null>(null);
 
 const readTheme = (): ThemeMode => {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "light" ? "light" : "dark";
-  } catch {
-    return "dark";
-  }
+  return localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
 };
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>(readTheme);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = mode;
-    try {
-      localStorage.setItem(STORAGE_KEY, mode);
-    } catch {
-      /* ignore */
-    }
+    document.documentElement.classList.toggle("dark", mode === "dark");
+    document.documentElement.style.colorScheme = mode;
+    localStorage.setItem(STORAGE_KEY, mode);
   }, [mode]);
 
   const value = useMemo<ThemeState>(

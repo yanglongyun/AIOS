@@ -7,8 +7,15 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     port: 5173,
+    headers: {
+      "Cache-Control": "no-store",
+    },
     proxy: {
       "/api": {
+        target: "http://127.0.0.1:9502",
+        ws: true,
+      },
+      "/ws": {
         target: "http://127.0.0.1:9502",
         ws: true,
       },

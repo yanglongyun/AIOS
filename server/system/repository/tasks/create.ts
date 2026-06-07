@@ -1,14 +1,14 @@
 // @ts-nocheck
 import { getDb } from "../db.js";
 
-const createTaskRow = ({ conversationId, name, prompt }) => {
+const createTaskRow = ({ chatId, name, prompt }) => {
   const row = getDb()
     .prepare(
-      `INSERT INTO tasks (conversation_id, name, prompt, status)
+      `INSERT INTO tasks (chat_id, name, prompt, status)
        VALUES (?, ?, ?, 'pending')
        RETURNING id`
     )
-    .get(conversationId, name, prompt);
+    .get(chatId, name, prompt);
   return row.id;
 };
 

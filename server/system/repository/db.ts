@@ -5,91 +5,76 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, "../../../database/agent.db");
+const DB_PATH = path.join(__dirname, "../../../database/system.db");
 const DB_DIR = path.dirname(DB_PATH);
 
 let db;
 
-const initDb = () => {
-  if (db) return db;
-
-  fs.mkdirSync(DB_DIR, { recursive: true });
-  db = new DatabaseSync(DB_PATH);
-  db.exec("PRAGMA journal_mode = WAL");
-
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS settings (
+const createSchema = (database) => {
+  database.exec(`
+    CREATE TABLE settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS chats (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      conversation_id TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      summary TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE chats (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      description TEXT NOT NULL DEFAULT '',
+      scene TEXT NOT NULL DEFAULT 'chat',
+      meta TEXT,
+      state TEXT NOT NULL DEFAULT 'idle',
+      pinned INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
-    CREATE TABLE IF NOT EXISTS messages (
+    CREATE TABLE messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      conversation_id TEXT NOT NULL,
+      chat_id TEXT NOT NULL,
+      source TEXT NOT NULL CHECK (source IN ('user', 'ai', 'tool', 'subscription')),
       message TEXT NOT NULL,
       usage TEXT,
-      meta TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
-    CREATE TABLE IF NOT EXISTS tasks (
+    CREATE TABLE tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      conversation_id TEXT NOT NULL,
+      chat_id TEXT NOT NULL,
       name TEXT NOT NULL,
       prompt TEXT,
       response TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
       error TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      finished_at DATETIME
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      finished_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS memories (
+    CREATE TABLE subscriptions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL DEFAULT '',
-      content TEXT NOT NULL,
-      creator TEXT NOT NULL DEFAULT 'user',
-      visibility TEXT NOT NULL DEFAULT 'hidden',
-      enabled INTEGER NOT NULL DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS monitors (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
+      task_id INTEGER NOT NULL,
+      chat_id TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'active',
-      kind TEXT NOT NULL DEFAULT 'task',
-      source_id TEXT,
-      event TEXT NOT NULL DEFAULT 'done',
-      target_mode TEXT NOT NULL DEFAULT 'existing_chat',
-      conversation_id TEXT,
-      chat_title TEXT,
-      prompt TEXT,
-      created_by_type TEXT,
-      created_by_ref TEXT,
-      delivered_message_id INTEGER,
-      error TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      fired_at DATETIME
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      fired_at TEXT
     );
 
-    CREATE INDEX IF NOT EXISTS idx_chats_conversation ON chats(conversation_id);
-    CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
-    CREATE INDEX IF NOT EXISTS idx_tasks_conversation ON tasks(conversation_id);
-    CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-    CREATE INDEX IF NOT EXISTS idx_memories_enabled_visibility ON memories(enabled, visibility);
-    CREATE INDEX IF NOT EXISTS idx_monitors_source ON monitors(kind, source_id, event, status);
-    CREATE INDEX IF NOT EXISTS idx_monitors_conversation ON monitors(conversation_id, status, id DESC);
+    CREATE INDEX idx_messages_chat ON messages(chat_id, id);
+    CREATE INDEX idx_tasks_chat ON tasks(chat_id, id);
+    CREATE INDEX idx_tasks_status ON tasks(status, id);
+    CREATE INDEX idx_subscriptions_task ON subscriptions(task_id, status, id);
+    CREATE INDEX idx_subscriptions_chat ON subscriptions(chat_id, status, id);
   `);
+};
+
+const initDb = () => {
+  if (db) return db;
+
+  fs.mkdirSync(DB_DIR, { recursive: true });
+  const shouldCreateSchema = !fs.existsSync(DB_PATH);
+  db = new DatabaseSync(DB_PATH);
+  db.exec("PRAGMA foreign_keys = ON");
+  db.exec("PRAGMA journal_mode = WAL");
+  if (shouldCreateSchema) createSchema(db);
 
   return db;
 };

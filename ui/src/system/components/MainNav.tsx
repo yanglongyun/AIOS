@@ -1,23 +1,33 @@
-import { Bot, CheckSquare, MessageSquare, NotebookPen, Plus, Settings, Sparkles, Star, Wallet } from "lucide-react";
+import { Bot, CheckSquare, ListChecks, MessageSquare, NotebookPen, Plus, Settings, Wallet } from "lucide-react";
 import { apps } from "../../apps/registry";
 import { useLayout } from "../state/layout";
-import { useTheme } from "../state/theme";
 import { Logo } from "./Icon";
-import { navItems, type RouteName } from "./AppShell";
-
-const iconMap = {
-  chat: MessageSquare,
-  tasks: CheckSquare,
-  memories: Star,
-  skills: Sparkles,
-  settings: Settings,
-};
+import type { RouteName } from "./AppShell";
 
 const appIconMap: Record<string, typeof MessageSquare> = {
   notepad: NotebookPen,
   todo: CheckSquare,
   ledger: Wallet,
 };
+
+const iconTone: Record<string, string> = {
+  chat: "text-amber-600 dark:text-amber-400",
+  notepad: "text-amber-500 dark:text-amber-300",
+  todo: "text-emerald-500 dark:text-emerald-400",
+  ledger: "text-sky-500 dark:text-sky-400",
+};
+
+const navButtonClass = (active: boolean, center = false) =>
+  [
+    "flex w-full items-center gap-2.5 rounded-md border-l-2 px-3 text-left text-sm transition",
+    center ? "justify-center" : "",
+    active
+      ? "border-amber-500 bg-slate-200 font-semibold text-slate-950 dark:bg-neutral-800 dark:text-neutral-100"
+      : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-neutral-100",
+  ].join(" ");
+
+const iconButtonClass =
+  "inline-flex h-8 w-8 items-center justify-center rounded-md border border-transparent text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-neutral-100";
 
 export function MainNav({
   route,
@@ -27,113 +37,87 @@ export function MainNav({
   setRoute: (route: RouteName) => void;
 }) {
   const layout = useLayout();
-  const theme = useTheme();
-  const collapsed = layout.mainNavCollapsed;
+  const appEntries = [
+    { id: "chat", name: "对话", route: "chat", icon: MessageSquare },
+    ...apps.map((app) => ({
+      id: app.id,
+      name: app.name,
+      route: `app/${app.id}`,
+      icon: appIconMap[app.icon] || Bot,
+    })),
+  ];
 
   return (
     <aside
       className={[
         "flex flex-col shrink-0 transition-[width,transform] duration-300 ease-out",
         "max-md:fixed max-md:top-0 max-md:left-0 max-md:bottom-0 max-md:w-[260px] max-md:z-50",
-        "max-md:rounded-r-2xl max-md:border-r max-md:border-border-soft max-md:shadow-2xl md:static",
+        "max-md:rounded-r-2xl max-md:border-r max-md:border-slate-200 max-md:shadow-2xl md:static dark:border-neutral-800",
         layout.mobileNavOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full",
-        collapsed ? "md:w-[64px]" : "md:w-[260px]",
+        "w-[260px] bg-white dark:bg-neutral-950",
       ].join(" ")}
-      style={{ background: "linear-gradient(to right, var(--nav-from), var(--nav-to)), var(--color-bg)" }}
     >
-      <div className={["flex items-center gap-2.5 pt-4 pb-4 select-none px-4", collapsed ? "md:px-3 md:justify-center" : ""].join(" ")}>
+      <div className="flex items-center gap-2.5 pt-4 pb-4 select-none px-4">
         <Logo />
-        <div className={["flex flex-col leading-tight min-w-0", collapsed ? "md:hidden" : ""].join(" ")}>
-          <strong className="text-base font-semibold tracking-tight text-text truncate">AIOS</strong>
-          <span className="text-xxs text-text-mute truncate">人工智能操作系统</span>
+        <div className="flex flex-col leading-tight min-w-0 flex-1">
+          <strong className="truncate text-base font-semibold tracking-tight text-slate-950 dark:text-neutral-100">AIOS</strong>
+          <span className="truncate text-[10px] text-slate-500 dark:text-neutral-400">人工智能操作系统</span>
         </div>
-        <button className="md:hidden btn btn-sm btn-ghost ml-auto !px-2" title="关闭" onClick={layout.closeMobileNav}>
-          <Bot size={16} className="hidden" />
-          <span className="text-lg leading-none">×</span>
+        <button
+          className={iconButtonClass}
+          title="创建应用"
+          onClick={() => {
+            setRoute("create-app");
+            layout.closeMobileNav();
+          }}
+        >
+          <Plus size={16} />
         </button>
       </div>
 
-      <div className={["flex flex-col px-2 flex-1 min-h-0 overflow-y-auto pt-2", collapsed ? "gap-2 md:items-center" : "gap-0.5"].join(" ")}>
-        {navItems.map((item) => {
-          const Icon = iconMap[item.icon];
+      <div className="flex flex-col px-2 flex-1 min-h-0 overflow-y-auto pt-1 gap-0.5">
+        {appEntries.map((item) => {
+          const Icon = item.icon;
           return (
             <button
-              key={item.name}
-              className={["nav-item", route === item.name ? "active" : "", collapsed ? "md:justify-center md:px-0 md:h-11 md:w-11 md:rounded-xl" : ""].join(" ")}
-              title={collapsed ? item.label : ""}
+              key={item.id}
+              className={`${navButtonClass(route === item.route)} py-2.5`}
               onClick={() => {
-                setRoute(item.name);
+                setRoute(item.route);
                 layout.closeMobileNav();
               }}
             >
-              <span className={["grid place-items-center shrink-0", collapsed ? "md:w-5 md:h-5 w-4 h-4" : "w-4 h-4"].join(" ")} aria-hidden="true">
-                <Icon size={collapsed ? 18 : 16} strokeWidth={1.8} />
+              <span className={`grid h-4 w-4 shrink-0 place-items-center ${iconTone[item.id] || "text-slate-500 dark:text-neutral-400"}`} aria-hidden="true">
+                <Icon size={16} strokeWidth={1.8} />
               </span>
-              <span className={["flex-1 min-w-0 truncate", collapsed ? "md:hidden" : ""].join(" ")}>{item.label}</span>
-            </button>
-          );
-        })}
-
-        <div className={["flex items-center justify-between px-3 pt-4 pb-1.5", collapsed ? "md:hidden" : ""].join(" ")}>
-          <span className="text-xxs uppercase tracking-wider text-text-faint font-semibold">应用</span>
-          <button
-            className="text-text-faint hover:text-text transition-colors grid place-items-center"
-            title="创建应用"
-            onClick={() => {
-              setRoute("create-app");
-              layout.closeMobileNav();
-            }}
-          >
-            <Plus size={14} strokeWidth={2.4} />
-          </button>
-        </div>
-        {apps.map((app) => {
-          const Icon = appIconMap[app.icon] || Bot;
-          const appRoute = `app/${app.id}`;
-          return (
-            <button
-              key={app.id}
-              className={["nav-item", route === appRoute ? "active" : "", collapsed ? "md:justify-center md:px-0 md:h-11 md:w-11 md:rounded-xl" : ""].join(" ")}
-              title={collapsed ? app.name : ""}
-              onClick={() => {
-                setRoute(appRoute);
-                layout.closeMobileNav();
-              }}
-            >
-              <span className={["grid place-items-center shrink-0", collapsed ? "md:w-5 md:h-5 w-4 h-4" : "w-4 h-4"].join(" ")} aria-hidden="true" style={{ color: app.color }}>
-                <Icon size={collapsed ? 18 : 16} strokeWidth={1.8} />
-              </span>
-              <span className={["flex-1 min-w-0 truncate", collapsed ? "md:hidden" : ""].join(" ")}>{app.name}</span>
+              <span className="flex-1 min-w-0 truncate">{item.name}</span>
             </button>
           );
         })}
       </div>
 
-      <div className={["hidden md:flex items-center px-2 py-2.5 border-t border-border-soft gap-1", collapsed ? "justify-center flex-col gap-1" : "justify-between"].join(" ")}>
-        <button className="btn btn-sm btn-ghost !px-2 !h-8 !w-8" title={theme.mode === "dark" ? "切换到浅色主题" : "切换到深色主题"} onClick={theme.toggleTheme}>
-          {theme.mode === "dark" ? <span className="i-sun"><SunIcon /></span> : <MoonIcon />}
+      <div className="grid grid-cols-2 gap-1.5 border-t border-slate-200 px-2 py-2.5 dark:border-neutral-800">
+        <button
+          className={`${navButtonClass(route === "tasks", true)} py-2`}
+          onClick={() => {
+            setRoute("tasks");
+            layout.closeMobileNav();
+          }}
+        >
+          <ListChecks size={16} />
+          <span>任务</span>
         </button>
-        <button className="btn btn-sm btn-ghost !px-2 !h-8 !w-8" title={collapsed ? "展开导航" : "收起导航"} onClick={layout.toggleMainNav}>
-          <span className={["transition-transform", collapsed ? "" : "rotate-180"].join(" ")}>›</span>
+        <button
+          className={`${navButtonClass(route === "settings", true)} py-2`}
+          onClick={() => {
+            setRoute("settings");
+            layout.closeMobileNav();
+          }}
+        >
+          <Settings size={16} />
+          <span>设置</span>
         </button>
       </div>
     </aside>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3a6 6 0 1 0 9 9 9 9 0 1 1-9-9z" />
-    </svg>
   );
 }

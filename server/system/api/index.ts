@@ -1,22 +1,14 @@
 // @ts-nocheck
-import { handleChatsApi } from "./chats/index.js";
+import { handleChatApi } from "./chat/index.js";
 import { handleHealthApi } from "./health/index.js";
-import { handleMemoriesApi } from "./memories/index.js";
-import { handleMonitorsApi } from "./monitors/index.js";
-import { handleMessagesApi } from "./messages/index.js";
 import { handleSettingsApi } from "./settings/index.js";
-import { handleSkillsApi } from "./skills/index.js";
 import { handleTasksApi } from "./tasks/index.js";
 import { serveGui } from "../runtime/static.js";
-import { proxyToApps } from "../runtime/appsProxy.js";
+import { proxyApps } from "../runtime/apps.js";
 
 const ROUTES = [
-  { prefix: "/api/chats", handler: handleChatsApi },
-  { prefix: "/api/memories", handler: handleMemoriesApi },
-  { prefix: "/api/monitors", handler: handleMonitorsApi },
-  { prefix: "/api/messages", handler: handleMessagesApi },
+  { prefix: "/api/chat", handler: handleChatApi },
   { prefix: "/api/settings", handler: handleSettingsApi },
-  { prefix: "/api/skills", handler: handleSkillsApi },
   { prefix: "/api/tasks", handler: handleTasksApi },
 ];
 
@@ -32,7 +24,7 @@ const handleApiRequest = async (req, res, deps, context = {}) => {
     }
     // /apps/* 转发到应用服务(生产模式;开发模式由 Vite 代理)
     if (path === "/apps" || path.startsWith("/apps/")) {
-      return proxyToApps(req, res);
+      return proxyApps(req, res);
     }
     for (const route of ROUTES) {
       if (path === route.prefix || path.startsWith(`${route.prefix}/`)) {

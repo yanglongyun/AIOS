@@ -1,7 +1,7 @@
 // @ts-nocheck
 import http from "http";
 import { createApiHandler } from "../api/index.js";
-import { attachRealtimeWebSocketServer } from "./ws.js";
+import { attachRealtimeWebSocketServer } from "../ws/index.js";
 
 let serverInstance = null;
 

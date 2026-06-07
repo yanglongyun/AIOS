@@ -1,5 +1,5 @@
 // @ts-nocheck
-// OpenAI 兼容流式增量解析:累积 content 与 tool_calls(增量拼接),逐块回调 onDelta。
+// OpenAI 兼容流式解析:累积 content 与 tool_calls,逐块回调 onMessage。
 const ensureToolCall = (toolCalls, index) => {
   if (!toolCalls[index]) {
     toolCalls[index] = { id: "", type: "function", function: { name: "", arguments: "" } };
@@ -43,14 +43,14 @@ const openaiParser = {
     return { content: "", toolCalls: [] };
   },
 
-  parseChunk(json, state, onDelta) {
+  parseChunk(json, state, onMessage) {
     const choice = json?.choices?.[0];
     if (!choice) return;
     const delta = choice.delta || {};
     const text = typeof delta.content === "string" ? delta.content : "";
     if (text) {
       state.content += text;
-      onDelta?.(text);
+      onMessage?.(text);
     }
     if (Array.isArray(delta.tool_calls)) {
       for (const tc of delta.tool_calls) {

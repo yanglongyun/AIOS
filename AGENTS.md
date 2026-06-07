@@ -25,8 +25,8 @@ server/
     ai/          无状态执行器:agent loop(ai/index.ts)、runner、tools(单一 shell)
     ai/llm/      多 provider 流式:common + stream + parsers/{openai,deepseek,kimi,gemini}
     api/         路由入口(api/services/repository 三层对称)
-    services/    chat / tasks / monitors / memories / settings / prompt(分段拼 system prompt)
-    repository/  SQLite 数据访问(主库 database/agent.db)
+    services/    chat / tasks / monitors / settings / prompt(分段拼 system prompt)
+    repository/  SQLite 数据访问(主库 database/system.db)
     runtime/     http / ws / realtime(wakeConversation) / static / appsProxy
     index.ts     startServer
   apps/          应用服务(第二个服务)
@@ -39,17 +39,16 @@ ui/src/
   apps/          应用侧:<id>/index.tsx(默认导出 React 组件) + registry.ts + lib.ts
   App.tsx        路由:工作区路由 + #/app/:id + #/create-app
 apps/<id>/APP.md 每个 app 的说明书(AI 读它来操作/重建)
-skills/<id>/SKILL.md  本地技能(create-app = 建应用指南)
-database/        主库 agent.db + apps/<id>.db(全部 gitignore)
+database/        主库 system.db + apps/<id>.db(全部 gitignore)
 dev/             文档 / 贡献 / demo / 行业资讯 / timeline(归档,勿动结构)
 ```
 
 ## 关键约定
 
-- **新建一个 app**:照 `skills/create-app/SKILL.md`。五件套 = 后端(`server/apps/<id>`)+ 后端注册(`server/apps/registry.ts`)+ 前端(`ui/src/apps/<id>`)+ 前端注册(`ui/src/apps/registry.ts`,新图标改 MainNav 的 `appIconMap`)+ `apps/<id>/APP.md`。app 只碰自己的 `/apps/<id>/*` 与自己的库。
-- **system prompt** 在 `server/system/services/prompt/` 分段拼:default / environment / model / tools / skills / apps / chats / memory。改提示词在这里。
+- **新建一个 app**:参考现有 app 样板。五件套 = 后端(`server/apps/<id>`)+ 后端注册(`server/apps/registry.ts`)+ 前端(`ui/src/apps/<id>`)+ 前端注册(`ui/src/apps/registry.ts`,新图标改 MainNav 的 `appIconMap`)+ `apps/<id>/APP.md`。app 只碰自己的 `/apps/<id>/*` 与自己的库。
+- **system prompt** 在 `server/system/services/prompt/` 分段拼:default / environment / model / tools / apps / chats。改提示词在这里。
 - **监视器**是「对话间传递通道」:任务完成 → `publishMonitorEvent` → 投递 `[MONITOR]` 消息进目标会话 → `wakeConversation` 唤醒其 AI。后端保留、无独立 UI。
-- **流式**:`ai/index.ts` 默认走 `callLlmStream` emit `delta` → WS `chat.delta` → 前端流式气泡;`stream:false` 回退非流式。
+- **流式**:`ai/index.ts` 默认走 `callLlmStream` emit `delta` → WS `delta` → 前端流式气泡;`stream:false` 回退非流式。聊天 REST 对齐 `/api/chat/*`。
 - 服务端 `.ts` 文件首行 `// @ts-nocheck`(`strict:false`);导入写 `.js` 后缀。
 
 ## 提交注意

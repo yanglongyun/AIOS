@@ -1,6 +1,5 @@
 // @ts-nocheck
-import { getTask } from "../../repository/tasks/index.js";
-import { markTaskAborted } from "../../repository/tasks/index.js";
+import { getTask, markTaskAborted } from "../../repository/tasks/index.js";
 import { getTaskExecution } from "./execution.js";
 
 const abortTask = (taskId) => {

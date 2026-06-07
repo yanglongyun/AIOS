@@ -1,15 +1,15 @@
 // @ts-nocheck
-import { getChat } from "../../repository/chats/index.js";
+import { getChat } from "../../repository/chat/chats/index.js";
 
-const chats = (conversationId) => {
-  const chat = getChat(conversationId);
+const chats = (chatId) => {
+  const chat = getChat(chatId);
   if (!chat) return "";
 
-  const lines = ["", "## 当前会话", `<conversation>`];
-  lines.push(`conversationId: ${chat.id || conversationId || ""}`);
+  const lines = ["", "## 当前对话", `<chat>`];
+  lines.push(`chatId: ${chat.id || chatId || ""}`);
   lines.push(`title: ${chat.title || ""}`);
-  lines.push(`summary: ${chat.summary || ""}`);
-  lines.push("</conversation>");
+  lines.push(`description: ${chat.description || ""}`);
+  lines.push("</chat>");
   return lines.join("\n");
 };
 

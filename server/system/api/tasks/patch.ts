@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { parseJson } from "../../utils.js";
+import { parseJson } from "../shared/json.js";
 import { abortTask } from "../../services/tasks/index.js";
 
 const handleTasksPatch = async (req, res, { readBody, sendJson }, url) => {

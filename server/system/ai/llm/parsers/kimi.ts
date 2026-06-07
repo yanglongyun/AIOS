@@ -6,8 +6,8 @@ const kimiParser = {
   createState() {
     return { ...openaiParser.createState(), reasoningContent: "" };
   },
-  parseChunk(json, state, onDelta) {
-    openaiParser.parseChunk(json, state, onDelta);
+  parseChunk(json, state, onMessage) {
+    openaiParser.parseChunk(json, state, onMessage);
     const delta = json?.choices?.[0]?.delta || {};
     const reasoningText =
       typeof delta.reasoning_content === "string"

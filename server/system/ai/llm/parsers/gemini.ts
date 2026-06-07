@@ -6,8 +6,8 @@ const geminiParser = {
   createState() {
     return openaiParser.createState();
   },
-  parseChunk(json, state, onDelta) {
-    openaiParser.parseChunk(json, state, onDelta);
+  parseChunk(json, state, onMessage) {
+    openaiParser.parseChunk(json, state, onMessage);
   },
   toMessage(state) {
     return openaiParser.toMessage(state);

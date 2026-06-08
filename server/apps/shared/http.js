@@ -11,14 +11,20 @@ const sendJson = (res, statusCode, payload) => {
   res.end(`${JSON.stringify(payload)}\n`);
 };
 
-const parseJson = (raw, fallback = {}) => {
+const badRequest = (message) => {
+  const error = new Error(message);
+  error.statusCode = 400;
+  return error;
+};
+
+const parseJson = (raw, label = "json") => {
   const input = String(raw ?? "").trim();
-  if (!input) return fallback;
+  if (!input) throw badRequest(`Invalid JSON in ${label}: empty input`);
   try {
     return JSON.parse(input);
-  } catch {
-    return fallback;
+  } catch (error) {
+    throw badRequest(`Invalid JSON in ${label}: ${error.message}`);
   }
 };
 
-export { readBody, sendJson, parseJson };
+export { readBody, sendJson, parseJson, badRequest };

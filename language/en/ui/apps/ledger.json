@@ -7,7 +7,7 @@
   "ledger_amount": "Amount",
   "ledger_note": "Note",
   "ledger_record": "Record",
-  "ledger_ai_hint": "AI input is handled by task capability",
+  "ledger_ai_hint": "Smart input creates a draft entry first and saves only after confirmation",
   "ledger_empty": "No entries yet",
   "ledger_delete_short": "Del"
 }

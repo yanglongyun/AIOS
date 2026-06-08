@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import { uploadChatFile } from './api.js';
+import { t } from '../../../system/locale.js';
 
 defineProps({
   modelValue: { type: String, default: '' },
@@ -47,7 +48,7 @@ const appendFiles = async (files = []) => {
   if (!files.length) return;
   uploadError.value = '';
   if (pendingFiles.value.length >= MAX_FILES) {
-    uploadError.value = '最多只能添加 10 个文件';
+    uploadError.value = t('chat_upload_limit', '最多只能添加 10 个文件');
     return;
   }
   uploading.value = true;
@@ -56,7 +57,7 @@ const appendFiles = async (files = []) => {
     const seenUploaded = new Set(pendingFiles.value.map(pendingFileKey));
     for (const f of files) {
       if (pendingFiles.value.length >= MAX_FILES) {
-        uploadError.value = '最多只能添加 10 个文件';
+        uploadError.value = t('chat_upload_limit', '最多只能添加 10 个文件');
         break;
       }
       const localKey = localFileKey(f);
@@ -70,7 +71,7 @@ const appendFiles = async (files = []) => {
       }
     }
   } catch (err) {
-    uploadError.value = err.message || '上传失败';
+    uploadError.value = err.message || t('chat_upload_failed', '上传失败');
   } finally {
     uploading.value = false;
   }
@@ -110,7 +111,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         </div>
         <div class="min-w-0 flex-1">
           <div class="truncate text-[12px] font-bold leading-tight text-[#4a321d]">{{ f.name }}</div>
-          <div class="mt-0.5 truncate font-mono text-[9.5px] text-[#9a7850]">{{ formatSize(f.size) || f.type || 'file' }}</div>
+        <div class="mt-0.5 truncate font-mono text-[9.5px] text-[#9a7850]">{{ formatSize(f.size) || f.type || t('server_attachment_file', 'file') }}</div>
         </div>
         <button
           type="button"
@@ -135,7 +136,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         @keydown.enter.exact="onEnter"
         @compositionstart="composing = true"
         @compositionend="composing = false"
-        :placeholder="busy ? '进行中...' : '输入消息...'"
+        :placeholder="busy ? t('chat_placeholder_busy', '进行中...') : t('chat_placeholder_input', '输入消息...')"
         rows="1"
         :disabled="busy"
         class="max-h-24 min-h-8 flex-1 resize-none border-none bg-transparent py-[6px] font-[inherit] text-[14px] leading-[1.5] text-[#3a2415] outline-none placeholder:text-[#b09870] disabled:opacity-50"

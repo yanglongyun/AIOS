@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full min-h-0 flex-col overflow-y-auto px-3 py-3 [scrollbar-width:none]" :style="bgStyle">
     <section class="rounded-[14px] px-3.5 py-3" :style="panelStyle">
-      <div class="mb-3 grid grid-cols-4 gap-1.5 rounded-[12px] bg-[rgba(120,90,40,0.08)] p-1 shadow-[inset_0_1px_3px_rgba(90,60,20,0.12)]">
+      <div class="mb-3 grid grid-cols-5 gap-1.5 rounded-[12px] bg-[rgba(120,90,40,0.08)] p-1 shadow-[inset_0_1px_3px_rgba(90,60,20,0.12)]">
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -95,6 +95,34 @@
         <div v-else class="rounded-[12px] px-3 py-8 text-center text-[12px] text-[#8a7356]">暂无技能</div>
       </div>
 
+      <div v-else-if="activeTab === 'theme'">
+        <div class="mb-3">
+          <div class="text-[15px] font-bold text-[#3a2415]">主题</div>
+          <div class="mt-0.5 text-[11px] text-[#9a8060]">切换界面的明暗显示。</div>
+        </div>
+        <div class="grid gap-2">
+          <button
+            v-for="option in themeOptions"
+            :key="option.id"
+            class="flex items-center justify-between rounded-[12px] border px-3 py-3 text-left active:translate-y-[1px]"
+            :class="theme.mode === option.id ? 'border-[rgba(200,148,28,0.45)]' : 'border-[rgba(180,150,80,0.18)]'"
+            :style="theme.mode === option.id ? activeTabStyle : softPanelStyle"
+            @click="theme.setMode(option.id)"
+          >
+            <span>
+              <span class="block text-[13px] font-bold text-[#3a2415]">{{ option.label }}</span>
+              <span class="mt-0.5 block text-[11px] text-[#8a7356]">{{ option.desc }}</span>
+            </span>
+            <span class="grid h-6 w-6 place-items-center rounded-full text-[12px] font-bold" :style="theme.mode === option.id ? buttonStyle : mutedDotStyle">
+              {{ theme.mode === option.id ? '✓' : '' }}
+            </span>
+          </button>
+        </div>
+        <div class="mt-3 rounded-[12px] border border-[rgba(180,150,80,0.18)] bg-[rgba(255,252,244,0.58)] px-3 py-2 text-[11px] leading-[1.6] text-[#7a6040]">
+          当前生效: {{ resolvedThemeLabel }}
+        </div>
+      </div>
+
       <div v-else>
         <div class="mb-3">
           <div class="text-[15px] font-bold text-[#3a2415]">关于</div>
@@ -111,6 +139,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
+import { useThemeStore } from '../../stores/theme.js';
 
 const groups = ref([]);
 const providers = ref([]);
@@ -120,11 +149,18 @@ const error = ref(false);
 const activeTab = ref('model');
 const promptPreview = ref('');
 const skills = ref([]);
+const theme = useThemeStore();
 const tabs = [
   { id: 'model', label: '模型' },
   { id: 'prompt', label: '提示词' },
   { id: 'skills', label: '技能' },
+  { id: 'theme', label: '主题' },
   { id: 'about', label: '关于' },
+];
+const themeOptions = [
+  { id: 'system', label: '跟随系统', desc: '根据设备明暗偏好自动切换' },
+  { id: 'light', label: '明亮', desc: '羊皮纸与黄铜质感' },
+  { id: 'dark', label: '暗色', desc: '深色木纹与暖金高光' },
 ];
 const form = reactive({
   provider: '',
@@ -155,6 +191,7 @@ const groupedProviders = computed(() => {
   if (other.providers.length) list.push(other);
   return list;
 });
+const resolvedThemeLabel = computed(() => theme.resolved === 'dark' ? '暗色' : '明亮');
 
 const applyProviderDefaults = () => {
   const provider = activeProvider.value;
@@ -224,6 +261,14 @@ const buttonStyle = {
 const activeTabStyle = {
   background: 'linear-gradient(160deg,#faf5e8 0%,#e7d8b8 100%)',
   boxShadow: '0 2px 6px rgba(90,60,20,0.16),inset 0 1px 0 rgba(255,255,255,0.85)',
+};
+const softPanelStyle = {
+  background: 'rgba(255,252,244,0.58)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.75)',
+};
+const mutedDotStyle = {
+  background: 'rgba(120,90,40,0.12)',
+  color: '#8a7356',
 };
 </script>
 

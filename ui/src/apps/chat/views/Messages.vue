@@ -5,6 +5,7 @@ import BubbleSubscription from './bubbles/Subscription.vue';
 import BubbleUser from './bubbles/User.vue';
 import ToolCall from './bubbles/ToolCall.vue';
 import ToolResult from './bubbles/ToolResult.vue';
+import { t } from '../../../system/locale.js';
 
 defineProps({
   messages: { type: Array, default: () => [] },
@@ -37,7 +38,7 @@ defineExpose({ msgBox, scrollToBottom });
   <div ref="msgBox" class="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-5 [scrollbar-width:none]" @scroll="onScroll">
     <div v-if="!messages.length && !busy" class="flex h-full flex-col items-center justify-center px-5">
       <p class="mb-1 text-[20px] font-bold text-[#3a2415]">AIOS</p>
-      <p class="mb-5 text-[12px] text-[#9a7860]">你的本地 AI 系统，对话即操作</p>
+      <p class="mb-5 text-[12px] text-[#9a7860]">{{ t('chat_tagline', '你的本地 AI 系统，对话即操作') }}</p>
       <div class="flex w-full max-w-[300px] flex-col gap-2">
         <div
           v-for="hint in emptyHints"
@@ -55,8 +56,8 @@ defineExpose({ msgBox, scrollToBottom });
     </div>
 
     <template v-else>
-      <div v-if="hasMore" class="py-2 text-center text-[11px] text-[#9a8060]">加载更多...</div>
-      <div class="date-sep mb-4">今天</div>
+      <div v-if="hasMore" class="py-2 text-center text-[11px] text-[#9a8060]">{{ t('chat_load_more', '加载更多...') }}</div>
+      <div class="date-sep mb-4">{{ t('chat_today', '今天') }}</div>
 
       <template v-for="(m, i) in messages" :key="m._key || i">
         <BubbleUser v-if="m.role === 'user'" :content="m.content" :attachments="m.attachments" />

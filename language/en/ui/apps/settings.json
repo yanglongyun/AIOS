@@ -13,5 +13,10 @@
   "settings_saved": "Saved",
   "settings_save_failed": "Save failed",
   "settings_group_default": "Default",
-  "settings_group_other": "Other"
+  "settings_group_other": "Other",
+  "settings_theme_title": "Theme",
+  "settings_theme_hint": "Switch the interface appearance.",
+  "settings_theme_system": "System",
+  "settings_theme_light": "Light",
+  "settings_theme_dark": "Dark"
 }

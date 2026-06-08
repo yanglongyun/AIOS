@@ -39,6 +39,7 @@ import ChatPanelView from './apps/chat/views/index.vue';
 import AppsView      from './system/views/apps/AppsView.vue';
 import TasksView     from './system/views/tasks/index.vue';
 import { getApp } from './apps.js';
+import { t } from './system/locale.js';
 
 // ─── 二级页面顶栏注入 (provide('pageNav')) ───
 // 子页面调用 setPageNav(title, back, leftAction, rightAction) 来定制顶栏.
@@ -59,7 +60,7 @@ const navForTopBar = computed(() => {
 
 // ─── Tab 状态 ───
 const activeTab = ref('chat');
-const tabTitleMap = { apps: '应用', tasks: '任务' };
+const tabTitleMap = { apps: t('app_tab_apps', '应用'), tasks: t('app_tab_tasks', '任务') };
 function onTabChange(tab) { activeTab.value = tab; }
 
 function onOpenChatEvent() {

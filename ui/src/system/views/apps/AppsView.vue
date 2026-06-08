@@ -7,7 +7,7 @@
         v-model="search"
         type="text"
         class="text-input w-full !pl-10"
-        placeholder="搜索应用..."
+        :placeholder="t('apps_search_placeholder', '搜索应用...')"
       />
     </div>
 
@@ -36,7 +36,7 @@
 
     <div v-if="!filtered.length" class="mt-12 flex flex-col items-center gap-2 text-[#9a8060]">
       <SearchX :size="38" :stroke-width="1.5" />
-      <span class="text-[13px]">没有匹配的应用</span>
+      <span class="text-[13px]">{{ t('apps_empty', '没有匹配的应用') }}</span>
     </div>
   </div>
 </template>
@@ -45,6 +45,7 @@
 import { ref, computed } from 'vue';
 import { Search, SearchX } from 'lucide-vue-next';
 import { apps as appRegistry } from '../../../apps.js';
+import { t } from '../../locale.js';
 
 defineEmits(['open']);
 
@@ -72,9 +73,9 @@ const bgStyle = {
 // App icon gradients tuned to match the warm tactile visual style.
 const iconGradients = {
   notepad: 'linear-gradient(145deg, #e0b35c, #a87312)',
-  todo:    'linear-gradient(145deg, #7fcf95, #26704a)',
-  ledger:  'linear-gradient(145deg, #4a8a5a, #1c4624)',
-  settings:'linear-gradient(145deg, #9aa5b1, #45515f)',
+  todo: 'linear-gradient(145deg, #7fcf95, #26704a)',
+  ledger: 'linear-gradient(145deg, #4a8a5a, #1c4624)',
+  settings: 'linear-gradient(145deg, #9aa5b1, #45515f)',
 };
 
 const iconWrapStyle = (id) => ({

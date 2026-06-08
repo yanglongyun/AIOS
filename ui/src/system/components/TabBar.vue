@@ -26,13 +26,15 @@
 </template>
 
 <script setup>
+import { t } from '../locale.js';
+
 defineProps({ modelValue: { type: String, required: true } });
 defineEmits(['update:modelValue']);
 
 const tabs = [
-  { id: 'chat',  icon: '💬', label: '对话' },
-  { id: 'apps',  icon: '🧩', label: '应用' },
-  { id: 'tasks', icon: '⏱️', label: '任务' },
+  { id: 'chat',  icon: '💬', label: t('chat_title', '对话') },
+  { id: 'apps',  icon: '🧩', label: t('app_tab_apps', '应用') },
+  { id: 'tasks', icon: '⏱️', label: t('app_tab_tasks', '任务') },
 ];
 
 // Direct gradient values (not via tokens) — bottom bar is dark wood,

@@ -5,7 +5,7 @@
       <!-- Back button mode -->
       <template v-if="nav.back">
         <button class="top-btn" :style="btnStyle" @click="nav.back" v-html="backSvg"></button>
-        <div class="flex-1 truncate text-[15px] font-bold" :style="titleStyle">{{ nav.title }}</div>
+        <div class="flex-1 truncate text-center text-[15px] font-bold" :style="titleStyle">{{ nav.title }}</div>
         <button
           v-if="nav.rightAction"
           class="top-btn"
@@ -39,8 +39,8 @@
 
       <!-- App open mode -->
       <template v-else-if="app">
-        <span class="mr-1 shrink-0 text-[22px] leading-none">{{ appIcon }}</span>
-        <div class="flex-1 truncate text-[15px] font-bold" :style="titleStyle">{{ appTitle }}</div>
+        <span class="grid w-[34px] shrink-0 place-items-center text-[22px] leading-none">{{ appIcon }}</span>
+        <div class="flex-1 truncate text-center text-[15px] font-bold" :style="titleStyle">{{ appTitle }}</div>
         <button class="top-btn" :style="btnStyle" @click="$emit('close')" v-html="closeSvg"></button>
       </template>
 

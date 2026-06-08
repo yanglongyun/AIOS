@@ -1,3 +1,5 @@
+import { t } from '../../../system/locale.js';
+
 export const mkKey = (kind) => `ws:${Date.now()}:${kind}`;
 
 const parseToolArgs = (raw) => {
@@ -22,7 +24,7 @@ export const mapToolCall = (toolCall, _key) => {
   return {
     type: 'tool_call',
     toolCall,
-    title: name || '工具调用',
+    title: name || t('chat_tool_call', '工具调用'),
     detail: args ? JSON.stringify(args, null, 2) : '',
     expanded: false,
     _key

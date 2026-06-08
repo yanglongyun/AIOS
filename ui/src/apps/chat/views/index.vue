@@ -31,12 +31,13 @@ import Messages from './Messages.vue';
 import { createConversation, listConversations, loadMessages } from './api.js';
 import { parseMessages } from './messages.js';
 import { setupChatStream } from './stream.js';
+import { t } from '../../../system/locale.js';
 
 const setPageNav = inject('pageNav');
 
 const showHistory = ref(false);
 const currentChatId = ref(null);
-const currentTitle = ref('对话');
+const currentTitle = ref(t('chat_title', '对话'));
 const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
@@ -49,28 +50,33 @@ const composerRef = ref(null);
 let unsubs = [];
 
 const emptyHints = [
-  { icon: '🛠️', label: '帮我做个应用', desc: '描述需求，AI 自动写代码上线', text: '帮我做一个旅行清单应用' },
-  { icon: '💻', label: '执行命令', desc: '在本机终端运行任意 shell 操作', text: '查看当前系统磁盘使用情况' },
-  { icon: '📄', label: '处理文件', desc: '上传附件让 AI 分析、整理、转换', text: '我想上传一个文件让你帮我分析' },
-  { icon: '🤖', label: '自动化任务', desc: '设置定时任务，AI 定期执行', text: '帮我创建一个每天早上推送新闻摘要的任务' },
+  { icon: '🛠️', label: t('chat_hint_app_label', '帮我做个应用'), desc: t('chat_hint_app_desc', '描述需求，AI 自动写代码上线'), text: t('chat_hint_app_text', '帮我做一个旅行清单应用') },
+  { icon: '💻', label: t('chat_hint_shell_label', '执行命令'), desc: t('chat_hint_shell_desc', '在本机终端运行任意 shell 操作'), text: t('chat_hint_shell_text', '查看当前系统磁盘使用情况') },
+  { icon: '📄', label: t('chat_hint_file_label', '处理文件'), desc: t('chat_hint_file_desc', '上传附件让 AI 分析、整理、转换'), text: t('chat_hint_file_text', '我想上传一个文件让你帮我分析') },
+  { icon: '🤖', label: t('chat_hint_task_label', '自动化任务'), desc: t('chat_hint_task_desc', '设置定时任务，AI 定期执行'), text: t('chat_hint_task_text', '帮我创建一个每天早上推送新闻摘要的任务') },
 ];
 
 function setDefaultNav() {
   setPageNav(currentTitle.value, null,
-    { icon: 'history', title: '对话历史', fn: openHistory },
-    currentChatId.value ? { icon: 'add', title: '新对话', fn: onNewChat } : null
+    { icon: 'history', title: t('chat_history_title', '对话历史'), fn: openHistory },
+    currentChatId.value ? { icon: 'add', title: t('chat_new_title', '新对话'), fn: onNewChat } : null
   );
 }
 
 function openHistory() {
   showHistory.value = true;
-  setPageNav('对话历史', () => { showHistory.value = false; setDefaultNav(); }, null, null);
+  setPageNav(
+    t('chat_history_title', '对话历史'),
+    () => { showHistory.value = false; setDefaultNav(); },
+    null,
+    { icon: 'add', title: t('chat_new_title', '新对话'), fn: onNewChat },
+  );
 }
 
 async function onHistorySelect(c) {
   showHistory.value = false;
   currentChatId.value = c.id;
-  currentTitle.value = c.title || '对话';
+  currentTitle.value = c.title || t('chat_title', '对话');
   setDefaultNav();
   await loadPage(c.id);
   scrollToBottom(false);
@@ -79,7 +85,7 @@ async function onHistorySelect(c) {
 function onNewChat() {
   showHistory.value = false;
   currentChatId.value = null;
-  currentTitle.value = '新对话';
+  currentTitle.value = t('chat_new_title', '新对话');
   messages.value = [];
   seenKeys.value = new Set();
   streamingKey.value = '';
@@ -138,7 +144,7 @@ watch(() => messages.value.length, (n, o) => {
 
 async function ensureConversation(text, files) {
   if (currentChatId.value) return;
-  const title = (text || files[0]?.name || '文件').slice(0, 20);
+  const title = (text || files[0]?.name || t('chat_file_title', '文件')).slice(0, 20);
   const data = await createConversation(title);
   currentChatId.value = data.chatId || data.chat?.id;
   currentTitle.value = title;
@@ -154,7 +160,7 @@ async function handleSend() {
   try {
     await ensureConnected();
   } catch {
-    messages.value.push({ role: 'assistant', content: '错误: WebSocket 未连接，请检查服务是否启动' });
+    messages.value.push({ role: 'assistant', content: t('chat_ws_disconnected', '错误: WebSocket 未连接，请检查服务是否启动') });
     busy.value = false;
     return;
   }
@@ -162,7 +168,7 @@ async function handleSend() {
   await ensureConversation(text, files);
 
   const attachments = files.map((f) => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
-  const content = text || '请先阅读附件并总结关键信息';
+  const content = text || t('chat_attachment_default_prompt', '请先阅读附件并总结关键信息');
   send({ type: 'chat.message', chatId: currentChatId.value, prompt: content, source: 'user', attachments });
   input.value = '';
   composerRef.value?.clearFiles();
@@ -201,7 +207,7 @@ onMounted(async () => {
     if (list.length) {
       const last = list[0];
       currentChatId.value = last.id;
-      currentTitle.value = last.title || '对话';
+      currentTitle.value = last.title || t('chat_title', '对话');
       setDefaultNav();
       await loadPage(last.id);
       scrollToBottom(false);

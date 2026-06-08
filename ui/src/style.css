@@ -11,7 +11,7 @@
    Token names match AIOS so the UI keeps the same palette.
    ================================================================ */
 
-:root, :root.light, :root.dark {
+:root, :root.light {
     /* Page surfaces — parchment / paper */
     --color-bg:        #f0e8d5;       /* parchment page */
     --color-bg-elev:   #faf5e8;       /* lighter paper (cards, popovers) */
@@ -68,6 +68,54 @@
     --brass-glow:      #e8b840;
     --brass-deep:      #6a4800;
     --brass-shine:     rgba(255,215,80,0.35);
+}
+
+:root.dark {
+    --color-bg:        #17130d;
+    --color-bg-elev:   #241d14;
+    --color-bg-hi:     #2e2518;
+    --color-line:      rgba(220,185,110,0.16);
+    --color-line-hi:   rgba(230,190,120,0.25);
+
+    --color-ink:       #f2e6cf;
+    --color-muted:     #c7ac78;
+    --color-faint:     #9a815d;
+
+    --color-accent:    #d7a12a;
+    --color-accent-hi: #f0c15a;
+    --color-good:      #91b46f;
+    --color-bad:       #d07058;
+    --color-shadow:    rgba(0,0,0,0.55);
+
+    --color-card:      #2b2115;
+    --color-card-hi:   #382a19;
+    --color-card-sub:  #211910;
+
+    --color-blue-bg:   color-mix(in srgb, #d7a12a 20%, transparent);
+    --color-blue-soft: color-mix(in srgb, #d7a12a 32%, transparent);
+    --color-blue-fg:   #f4d17a;
+
+    --gem-1: #d7a12a;
+    --gem-2: #8c6413;
+    --gem-3: #f0c15a;
+    --gem-4: #91b46f;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25);
+    --shadow:    0 2px 10px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.28);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35);
+
+    --bar-bg-top:        linear-gradient(180deg, #1d1208 0%, #0e0905 100%);
+    --bar-bg-bottom:     linear-gradient(180deg, #150d05 0%, #090603 100%);
+    --bar-text:          rgba(255,230,170,0.92);
+    --bar-text-faint:    rgba(210,190,150,0.42);
+    --bar-divider:       rgba(255,255,255,0.05);
+    --bar-shadow-top:    0 3px 14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.55);
+    --bar-shadow-bottom: 0 -4px 22px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.04);
+
+    --brass:           #d7a12a;
+    --brass-glow:      #f0c15a;
+    --brass-deep:      #5a3900;
+    --brass-shine:     rgba(255,220,105,0.32);
 }
 
 @theme {

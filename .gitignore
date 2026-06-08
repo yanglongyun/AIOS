@@ -15,6 +15,7 @@ src/web/dist/
 database/
 /apps/
 /skills/
+dev/test/aios/
 ui/dist/
 skills/browser-use/extension/config.js
 skills/computer-use/config.js

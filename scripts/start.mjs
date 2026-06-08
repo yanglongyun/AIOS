@@ -119,6 +119,38 @@ console.log(`[start] ${tokenMap.size} tokens loaded from ${path.relative(project
 
 const sortedTokens = [...tokenMap.entries()].sort((a, b) => b[0].length - a[0].length);
 
+const localeFull = tokenMap.get("__T__LOCALE_FULL__") || (locale === "en" ? "en-US" : "zh-CN");
+const localeShort = tokenMap.get("__T__LOCALE__") || locale;
+const uiLocaleFile = path.join(projectRoot, "ui/src/system/locale.js");
+const uiMessages = {};
+for (const [token, value] of tokenMap.entries()) {
+  const key = token.slice("__T_".length, -"__".length).toLowerCase();
+  uiMessages[key] = value;
+}
+fs.mkdirSync(path.dirname(uiLocaleFile), { recursive: true });
+fs.writeFileSync(uiLocaleFile, [
+  `const LOCALE = ${JSON.stringify(localeShort)};`,
+  `const LOCALE_FULL = ${JSON.stringify(localeFull)};`,
+  `const T = ${JSON.stringify(uiMessages, null, 2)};`,
+  "",
+  "const t = (key, fallback = key, vars = {}) => {",
+  "  let value = T[key] || fallback;",
+  "  for (const [name, replacement] of Object.entries(vars)) {",
+  "    value = value.replace(`{${name}}`, String(replacement));",
+  "  }",
+  "  return value;",
+  "};",
+  "",
+  "export {",
+  "  LOCALE,",
+  "  LOCALE_FULL,",
+  "  T,",
+  "  t",
+  "};",
+  "",
+].join("\n"));
+console.log(`[start] wrote ui/src/system/locale.js (${Object.keys(uiMessages).length} messages)`);
+
 const escapeForDoubleQuote = (s) => JSON.stringify(s).slice(1, -1);
 const escapeForSingleQuote = (s) => s
   .replace(/\\/g, '\\\\')

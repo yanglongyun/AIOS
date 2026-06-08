@@ -13,5 +13,10 @@
   "settings_saved": "已保存",
   "settings_save_failed": "保存失败",
   "settings_group_default": "默认",
-  "settings_group_other": "其他"
+  "settings_group_other": "其他",
+  "settings_theme_title": "主题",
+  "settings_theme_hint": "切换界面的明暗显示。",
+  "settings_theme_system": "跟随系统",
+  "settings_theme_light": "明亮",
+  "settings_theme_dark": "暗色"
 }

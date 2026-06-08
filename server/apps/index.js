@@ -42,7 +42,7 @@ const handleAppsRequest = async (req, res) => {
     const handled = await app.handleApi(req, res, path, url);
     if (handled === false) sendJson(res, 404, { ok: false, error: "not found" });
   } catch (error) {
-    if (!res.headersSent) sendJson(res, 500, { ok: false, error: error.message });
+    if (!res.headersSent) sendJson(res, error.statusCode || 500, { ok: false, error: error.message });
     else res.end();
   }
 };

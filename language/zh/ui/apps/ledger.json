@@ -7,7 +7,7 @@
   "ledger_amount": "金额",
   "ledger_note": "备注",
   "ledger_record": "记录",
-  "ledger_ai_hint": "智能输入由任务能力处理",
+  "ledger_ai_hint": "一句话智能输入会先生成账目草稿,确认后才保存",
   "ledger_empty": "还没有账目",
   "ledger_delete_short": "删"
 }

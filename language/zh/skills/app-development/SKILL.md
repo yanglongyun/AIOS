@@ -29,18 +29,10 @@ shell 默认 cwd 是 AIOS 项目根目录。常用路径:
 
 ```
 server/apps/<appname>/
-├── index.js              # 默认导出 { name, match, handleApi, initDb? }
-├── api/
-│   ├── index.js          # 路由分发,只转发,不写业务
-│   └── <action>.js       # 每个端点一个文件
-├── service/              # 业务逻辑
-│   └── <action>.js
-└── repository/           # SQLite 查询
-    ├── init.js           # 建表
-    └── <action>.js
+└── index.js              # 默认导出 { name, match, handleApi, initDb? }
 ```
 
-职责要分清:api 只处理 HTTP,service 处理业务,repository 只处理数据库。不要把 SQL 写进 api,也不要把业务塞进 repository。
+基础应用保持轻量,可以先放在一个 `index.js` 里,但要把 DDL、查询、业务、HTTP 分发用清晰函数隔开。应用明显变复杂后,再按 `api/`、`service/`、`repository/` 拆分,不要提前制造空目录。
 
 新应用需要注册:
 
@@ -50,26 +42,26 @@ server/apps/<appname>/
 验证注册:
 
 ```sh
-curl http://127.0.0.1:9503/apps/registry
+curl http://127.0.0.1:9503/apps/health
 ```
 
 ## API 约定
 
 - 路由: `/apps/<appname>/<action>`
-- 查询用 GET,变更用 POST + JSON body
+- 查询用 GET,创建用 POST + JSON body,修改用 PATCH + JSON body,删除用 DELETE
 - `readBody(req)` 读取 body
-- `json(res, data, status?)` 返回 JSON
+- `sendJson(res, statusCode, payload)` 返回 JSON
 - 未命中的路由返回 `false`
+- 用户请求协议错误返回 400;模型/服务内部错误不要伪装成 400
 
 ## 数据库
 
 - 应用数据库使用 `createAppDb("<appname>.db")`
 - 系统数据库不要混入应用表
-- DDL 放在 `repository/init.js`
-- 查询按动作拆到独立文件
-- `info.lastInsertRowid` 返回前转成 `Number(...)`
+- 轻量应用的 DDL 放在 app 后端入口里的 `initDb` / `createSchema` 函数
+- 查询用专门函数封装,不要散在 HTTP 分支里
 
-新表要干净定义。修改既有数据结构时,先明确是否允许重建数据库;不允许时再写迁移。不要为了兼容旧设计把无用字段长期留在新结构里。
+新表要干净定义。不要为了兼容旧设计把无用字段长期留在新结构里;不要在 app 初始化里写旧结构探测、自动迁移或自动 drop。
 
 ## 前端结构
 
@@ -82,7 +74,7 @@ ui/src/apps/<appname>/
 └── api.js
 ```
 
-应用入口保持薄。视图、组件、请求、状态逻辑分别放到自己的文件里。不要把一个应用堆成几百行单文件。
+应用入口优先保持清晰。简单应用可以先是单文件;复杂后再拆 views / components / composables / api.js,不要为了形式拆空壳。
 
 ## 本机验证
 

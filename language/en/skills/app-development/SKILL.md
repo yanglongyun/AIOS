@@ -29,18 +29,10 @@ The main server proxies `/apps/*` to the apps server. During development, use th
 
 ```
 server/apps/<appname>/
-├── index.js              # default export { name, match, handleApi, initDb? }
-├── api/
-│   ├── index.js          # route dispatch only
-│   └── <action>.js       # one endpoint per file
-├── service/              # business logic
-│   └── <action>.js
-└── repository/           # SQLite queries
-    ├── init.js           # schema
-    └── <action>.js
+└── index.js              # default export { name, match, handleApi, initDb? }
 ```
 
-Keep responsibilities separate: api handles HTTP, service handles business behavior, repository handles database access. Do not put SQL in api files, and do not put business policy in repository files.
+Keep basic apps lightweight. A small app can stay in one `index.js` as long as schema, queries, business behavior, and HTTP dispatch are separated into clear functions. Split into `api/`, `service/`, and `repository/` only when the app becomes large enough to need it; do not create empty layers early.
 
 New apps must be registered in:
 
@@ -50,26 +42,26 @@ New apps must be registered in:
 Verify registration:
 
 ```sh
-curl http://127.0.0.1:9503/apps/registry
+curl http://127.0.0.1:9503/apps/health
 ```
 
 ## API Rules
 
 - Route: `/apps/<appname>/<action>`
-- GET for reads, POST + JSON body for changes
+- GET for reads, POST + JSON body for creation, PATCH + JSON body for updates, DELETE for deletion
 - Use `readBody(req)` for request bodies
-- Use `json(res, data, status?)` for JSON responses
+- Use `sendJson(res, statusCode, payload)` for JSON responses
 - Return `false` for unmatched routes
+- User request protocol errors return 400; model or internal service errors must not be disguised as 400
 
 ## Database
 
 - App databases use `createAppDb("<appname>.db")`
 - Do not mix app tables into the system database
-- Put DDL in `repository/init.js`
-- Split queries by action
-- Convert `info.lastInsertRowid` with `Number(...)` before returning
+- For lightweight apps, put DDL in the app backend entry's `initDb` / `createSchema` function
+- Keep queries in dedicated functions instead of scattering SQL inside HTTP branches
 
-Define new schemas cleanly. When changing existing data structures, first decide whether rebuilding the database is allowed; only write migrations when old data must be preserved. Do not keep dead compatibility fields in a new clean schema.
+Define new schemas cleanly. Do not keep dead compatibility fields in a new clean schema; do not put old-schema detection, automatic migrations, or automatic drops in app initialization.
 
 ## Frontend Layout
 
@@ -82,7 +74,7 @@ ui/src/apps/<appname>/
 └── api.js
 ```
 
-Keep the app entry thin. Views, components, requests, and stateful logic should live in their own files. Do not grow a whole app into one large `.vue` file.
+Keep the app entry clear. Simple apps can start as a single file; split into views / components / composables / api.js when complexity justifies it, not as empty scaffolding.
 
 ## Local Verification
 

@@ -1,6 +1,6 @@
 {
   "app_name_todo": "待办",
   "todo_placeholder": "添加待办...",
-  "todo_ai_hint": "智能分解由任务能力处理",
+  "todo_ai_hint": "智能分解会为当前待办生成可勾选子任务",
   "todo_empty": "还没有待办"
 }

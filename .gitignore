@@ -1,4 +1,5 @@
 node_modules/
+.aios/
 .env
 *.log
 .DS_Store
@@ -12,6 +13,8 @@ src/web/dist/
 *.db-wal
 .tmp_codex/
 database/
+/apps/
+/skills/
 ui/dist/
 skills/browser-use/extension/config.js
 skills/computer-use/config.js

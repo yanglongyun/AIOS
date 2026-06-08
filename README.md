@@ -4,111 +4,128 @@
 
 ### 让 AI 成为你的操作系统。
 
-一个本地运行的 AI 操作系统内核:**应用即入口,对话是应用之一**。
-干净的 system / apps 双轴架构,跑在你自己的机器上。
+一个本地运行的 AI 操作系统内核: 对话、任务、应用和技能都在本机完成。
 
 </div>
 
 ---
 
-## 🧭 这是什么
+## 这是什么
 
-AIOS 不是传统管理硬件的 OS,而是**产生应用、使用应用、管理应用**的地方。
+AIOS 不是传统管理硬件的 OS,而是一个本地 Agent 系统:
 
-- **系统(system)**:一个本地 Agent 内核 —— 大脑(可流式、多 provider 的模型)+ 一个 `shell` 工具 + SQLite 持久化,接口收口到 HTTP + WebSocket。
-- **应用(apps)**:每个 app 自带后端 + 独立 SQLite 库,彼此隔离,只通过 `/apps/<id>/*` 暴露。应用不是装出来的,是你在对话里**让 AI 用 shell 现场建出来的**。
+- **system**: 对话、任务、设置、WebSocket、LLM、工具调用和系统数据库。
+- **apps**: 每个应用有自己的后端接口和独立 SQLite 数据库,统一挂在 `/apps/<id>/*`。
+- **ui**: Vue + JS 前端,包含对话、应用、任务和设置。
+- **language**: 出厂语言包。启动前烘焙成运行时文案、APP.md 和 SKILL.md。
 
-> 关于「为什么是 OS」「理念是什么」,见 [`dev/doc/`](./dev/doc) 下的长文。
+核心原则是干净、本地、可被 AI 修改。代码使用 JavaScript 和 Vue,不再使用 TypeScript / React。
 
 ---
 
-## 🧱 架构(双服务 · system | apps 两条对称轴)
+## 架构
 
+```text
+server/
+  system/        系统服务: chat / tasks / settings / ai / ws / repository
+  apps/          应用服务: notepad / todo / ledger + registry
+ui/
+  src/           Vue 前端
+language/
+  zh|en/
+    ui/          前端 token
+    server/      后端与提示词 token
+    apps/        APP.md 源
+    skills/      SKILL.md 源
+scripts/
+  start.mjs      烘焙 language/<locale> 到运行时
+  run.mjs        同时启动 system + apps
 ```
-主服务  :9502   系统内核 — chat / tasks / settings + ai + 订阅 + 托管 GUI
-应用服务 :9503   应用后端 — 每个 app 自带后端 + 独立库
 
-server/                      ui/src/
-  system/   系统服务            system/   系统侧(外壳 + 内置功能 + 状态 + api)
-    ai/     无状态执行器          components/ state/ lib/ views/ api.ts
-    ai/llm/ 多 provider 流式      apps/     应用侧
-    api/ services/ repository/   apps/     notepad / todo / ledger + registry
-    runtime/ + index.ts
-  apps/     应用服务
-    _shared/ notepad/ todo/ ledger/
-apps/         各 app 的 APP.md(AI 读它来操作/重建应用)
-database/     SQLite(主库 system.db + apps/<id>.db,各自独立)
+运行时生成目录:
+
+```text
+apps/            由 language/<locale>/apps 烘焙生成
+skills/          由 language/<locale>/skills 烘焙生成
+.aios/           记录当前已烘焙 locale
+database/        SQLite 数据
+ui/dist/         Vite 构建产物
 ```
 
-- 同进程启动两个服务;开发模式 Vite 代理 `/api → 9502`、`/apps → 9503`,生产模式主服务反代 `/apps`。
+这些运行时目录不作为源码维护。
 
 ---
 
-## ✨ 能做什么
+## 安装与运行
 
-- 💬 **流式多 provider 对话** —— 任意 **OpenAI 兼容**接口,逐字流式。OpenAI / DeepSeek / Kimi / Qwen / GLM / OpenRouter 等原生兼容(DeepSeek/Kimi 思维链自动收集);Gemini / Claude 走各自的 OpenAI 兼容端点或网关。
-- 🛠 **一个 `shell` 工具** —— 模型用真实命令解决问题,`tool_calls` ↔ `tool_results` 自动闭环。
-- 🧩 **应用(apps)** —— 内置记事本 / 待办 / 记账本三个样板;每个独立后端 + 独立库 + 前端 + `APP.md`。
-- 🌱 **创建应用** —— 侧边栏品牌区 `+` → 描述需求 → AI 参考现有样板用 shell 把全栈应用写进系统。
-- 📋 **后台任务 + 订阅** —— 起异步任务;任务完成后订阅把结果回传到目标对话。
-- ⚙️ **设置** —— `/api/settings` 管理模型接入与 system prompt。
-- 💾 **数据 100% 本地** —— 全部落在本机 SQLite,断网可用。
-
----
-
-## 🚀 安装与运行
-
-环境:Node.js ≥ 22.5(用到内置 `node:sqlite`)。
+环境: Node.js >= 22.5,需要内置 `node:sqlite`。
 
 ```bash
-git clone https://github.com/realuckyang/AIOS.git   # 或 git clone git@gitee.com:realuckyang/aios.git
+git clone https://github.com/realuckyang/AIOS.git
 cd AIOS
 npm install
 
-npm start           # 起后端两个服务(主 9502 / 应用 9503)
-npm run ui          # 另开终端起 Vite 前端(开发模式)
+npm start      # 启动 system(:9502) + apps(:9503)
+npm run ui     # 另开终端启动 Vite(:5173)
 ```
 
-> 仓库同步两个远端:GitHub `realuckyang/AIOS` 与 Gitee `realuckyang/aios`,`main` 指向同一提交。
+打开:
 
-打开 **http://127.0.0.1:5173/**,进「设置 → 模型接入」填好 API URL / Key / 模型(可选 Provider),回到「对话」即可。
+```text
+http://127.0.0.1:5173/
+```
 
-其它脚本:
+常用脚本:
 
 ```bash
-npm run server       # 同 npm start,只起后端两个服务(主 9502 / 应用 9503)
-npm run ui           # 只起 Vite 前端(5173)
-npm run ui:build    # 构建前端到 ui/dist(生产由主服务托管)
-npm run typecheck    # tsc --noEmit
+npm run build       # 烘焙语言包并构建 ui/dist
+npm run lang:apply  # 强制按当前语言重新烘焙
+npm run check       # JS 语法检查
 ```
+
+语言选择:
+
+```bash
+AIOS_LANG=en npm start
+AIOS_LANG=zh npm start
+```
+
+默认语言是 `zh`。
 
 ---
 
-## 📡 API
+## 烘焙机制
 
-| 资源 | 方法 + 路径 |
+`scripts/start.mjs` 会在 `prestart` / `prebuild` / `predev` 阶段执行:
+
+1. 读取 `language/<locale>/**/*.json`。
+2. 把源码里的 token 占位符替换成当前语言文案。
+3. 把 `language/<locale>/apps/<id>/APP.md` 镜像到 `apps/<id>/APP.md`。
+4. 把 `language/<locale>/skills/<id>/SKILL.md` 镜像到 `skills/<id>/SKILL.md`。
+5. 写入 `.aios/settings.json` 记录当前 locale。
+
+切换语言时重新运行 `AIOS_LANG=<locale> npm run lang:apply`。
+
+---
+
+## API
+
+| 资源 | 路径 |
 |---|---|
-| 心跳 | `GET /health` |
-| 实时事件 | `WS /ws`(`start` / `message` / `tool_calls` / `tool_results` / `done` / `aborted` / `error`) |
+| 心跳 | `GET /api/health` |
+| 实时事件 | `WS /ws` |
 | 对话 | `/api/chat/list` · `/api/chat/create` · `/api/chat/messages` · `/api/chat/rename` · `/api/chat/delete` |
 | 任务 | `GET / POST / PATCH /api/tasks` |
 | 设置 | `/api/settings` · `/api/settings/models` |
-| 应用(独立服务) | `/apps/<id>/*`(如 `/apps/notepad/notes`) |
+| 文件 | `/api/fs/*` |
+| 应用 | `/apps/<id>/*` |
 
 ---
 
-## 对话与订阅
+## 技术栈
 
-一段对话连同它的上下文,本身就是一个可被调度的 agent。订阅是任务和对话之间的回传关系:一个对话派出的后台任务在独立 chat 里运行,完成后其结果按订阅投回目标对话。
+Node.js · JavaScript · Vue 3 · Pinia · Vite · Tailwind v4 · `node:sqlite` · ws · OpenAI-compatible streaming LLM.
 
-因此触发并不只来自用户输入,也可以来自任务完成后的结果回传。沿这条路往下,是让模型主动发起任务,再把结构化结果带回当前对话继续处理。
-
----
-
-## 🛠 技术栈
-
-Node.js 22+ · TypeScript · React 19 · Vite · Tailwind v4 · `node:sqlite` · ws · 单一 `shell` 工具 · 流式多 provider LLM。
-
-## 📜 License
+## License
 
 [MIT](./LICENSE)

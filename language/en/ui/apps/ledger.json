@@ -1,0 +1,13 @@
+{
+  "app_name_ledger": "Ledger",
+  "ledger_balance": "BALANCE",
+  "ledger_income": "Income",
+  "ledger_expense": "Expense",
+  "ledger_category": "Category",
+  "ledger_amount": "Amount",
+  "ledger_note": "Note",
+  "ledger_record": "Record",
+  "ledger_ai_hint": "AI input is handled by task capability",
+  "ledger_empty": "No entries yet",
+  "ledger_delete_short": "Del"
+}

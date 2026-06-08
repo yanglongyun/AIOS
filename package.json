@@ -3,30 +3,32 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
+  "main": "server/system/index.js",
   "scripts": {
-    "start": "tsx ./index.ts",
-    "server": "tsx ./server/system/index.ts",
-    "ui": "npm run ui:dev",
-    "ui:dev": "vite --config ui/vite.config.ts ui",
-    "ui:build": "vite --config ui/vite.config.ts build ui",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.2.0",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3",
-    "vite": "^6.3.5"
+    "predev": "node scripts/start.mjs",
+    "dev": "AGENT_PORT=9502 AGENT_APPS_PORT=9503 node scripts/run.mjs",
+    "prestart": "node scripts/start.mjs",
+    "start": "AGENT_PORT=9502 AGENT_APPS_PORT=9503 node scripts/run.mjs",
+    "server": "AGENT_PORT=9502 AGENT_APPS_PORT=9503 node scripts/run.mjs",
+    "start:main": "AGENT_PORT=9502 AGENT_APPS_PORT=9503 node server/system/index.js",
+    "start:apps": "AGENT_APPS_PORT=9503 node server/apps/index.js",
+    "prebuild": "node scripts/start.mjs",
+    "build": "node node_modules/vite/bin/vite.js build --config ui/vite.config.js ui",
+    "ui": "node node_modules/vite/bin/vite.js --config ui/vite.config.js ui",
+    "ui:dev": "node node_modules/vite/bin/vite.js --config ui/vite.config.js ui",
+    "ui:build": "npm run build",
+    "lang:apply": "node scripts/start.mjs --force",
+    "check": "find server ui/src scripts -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n 1 node --check"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
-    "lucide-react": "^1.16.0",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "lucide-vue-next": "^1.0.0",
     "marked": "^18.0.4",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "pinia": "^3.0.4",
     "tailwindcss": "^4.2.4",
+    "vite": "^6.3.5",
+    "vue": "^3.5.28",
     "ws": "^8.21.0"
   }
 }

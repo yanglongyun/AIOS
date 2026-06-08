@@ -1,0 +1,17 @@
+{
+  "app_name_settings": "设置",
+  "settings_model_title": "模型设置",
+  "settings_model_hint": "配置对话使用的大模型。",
+  "settings_provider": "供应商",
+  "settings_model": "模型",
+  "settings_model_placeholder": "输入模型名称",
+  "settings_api_url": "请求地址",
+  "settings_api_key": "API Key",
+  "settings_context_turns": "上下文轮数",
+  "settings_save": "保存设置",
+  "settings_saving": "保存中...",
+  "settings_saved": "已保存",
+  "settings_save_failed": "保存失败",
+  "settings_group_default": "默认",
+  "settings_group_other": "其他"
+}

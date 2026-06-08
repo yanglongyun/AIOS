@@ -1,0 +1,6 @@
+{
+  "app_name_todo": "Todo",
+  "todo_placeholder": "Add a todo...",
+  "todo_ai_hint": "AI decomposition is handled by task capability",
+  "todo_empty": "No todos yet"
+}

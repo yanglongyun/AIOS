@@ -7,14 +7,15 @@ const props = defineProps({
 });
 
 const displayContent = computed(() => String(props.content || '').replace(/[\r\n]+$/g, ''));
+const htmlContent = computed(() => renderMd(displayContent.value).trim());
 </script>
 
 <template>
   <div class="mb-4 flex items-end">
     <div class="min-w-0 max-w-full">
       <div
-        class="ai-bubble relative max-w-[min(78vw,720px)] overflow-hidden whitespace-pre-wrap break-words rounded-2xl border border-[rgba(180,150,80,0.2)] bg-[linear-gradient(160deg,#faf5e8_0%,#f2ebd8_100%)] px-3.5 py-[11px] text-[14.5px] leading-[1.55] text-[#3a2415] shadow-[0_3px_12px_rgba(90,60,20,0.15),0_1px_3px_rgba(90,60,20,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] [overflow-wrap:anywhere]"
-        v-html="renderMd(displayContent)"
+        class="ai-bubble relative max-w-[min(78vw,720px)] overflow-hidden break-words rounded-2xl border border-[rgba(180,150,80,0.2)] bg-[linear-gradient(160deg,#faf5e8_0%,#f2ebd8_100%)] px-3.5 py-[11px] text-[14.5px] leading-[1.55] text-[#3a2415] shadow-[0_3px_12px_rgba(90,60,20,0.15),0_1px_3px_rgba(90,60,20,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] [overflow-wrap:anywhere]"
+        v-html="htmlContent"
       ></div>
     </div>
   </div>

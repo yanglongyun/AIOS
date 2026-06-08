@@ -152,14 +152,15 @@ const sendChatMessage = async (chatId, input = {}, options = {}) => {
   const emit = options.emit || (() => {});
   const responseFormat = options.responseFormat || null;
   const throwOnError = options.throwOnError !== false;
-  const prepared = prepareChatInput({ chatId: id, input });
-  const controller = new AbortController();
-  const signal = options.signal || controller.signal;
-
-  chatControllers.set(id, controller);
-  setChatState({ chatId: id, state: "running" });
 
   try {
+    const prepared = prepareChatInput({ chatId: id, input });
+    const controller = new AbortController();
+    const signal = options.signal || controller.signal;
+
+    chatControllers.set(id, controller);
+    setChatState({ chatId: id, state: "running" });
+
     if (prepared.userMessage) {
       const messageId = appendChatMessage({
         chatId: id,
@@ -189,7 +190,7 @@ const sendChatMessage = async (chatId, input = {}, options = {}) => {
     if (error?.name === "AbortError") {
       emit({ type: "aborted", chatId: id });
     } else {
-      emit({ type: "error", chatId: id, content: error.message });
+      emit({ type: "error", chatId: id, code: error.code || "", content: error.message });
     }
     if (!throwOnError) return { result: null, chatId: id, error };
     throw error;

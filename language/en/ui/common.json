@@ -17,6 +17,8 @@
   "chat_history_recent": "Recent",
   "chat_new_title": "New Chat",
   "chat_ws_disconnected": "Error: WebSocket is not connected. Check whether the service is running.",
+  "chat_error_missing_settings": "No model is configured yet. Open Settings and fill in the provider, model name, and API key before sending messages.",
+  "chat_error_prefix": "Error",
   "chat_file_title": "File",
   "chat_attachment_default_prompt": "Please read the attachments first and summarize the key points.",
   "chat_upload_failed": "Upload failed",

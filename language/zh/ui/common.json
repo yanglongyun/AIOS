@@ -17,6 +17,8 @@
   "chat_history_recent": "最近",
   "chat_new_title": "新对话",
   "chat_ws_disconnected": "错误: WebSocket 未连接，请检查服务是否启动",
+  "chat_error_missing_settings": "还没有配置模型。请先打开设置，填写模型供应方、模型名称和 API Key，然后再发送消息。",
+  "chat_error_prefix": "错误",
   "chat_file_title": "文件",
   "chat_attachment_default_prompt": "请先阅读附件并总结关键信息",
   "chat_upload_failed": "上传失败",

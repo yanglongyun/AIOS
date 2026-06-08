@@ -16,7 +16,12 @@ const getChatRunConfig = (input = {}) => {
   if (!config.apiUrl) missing.push("apiUrl");
   if (!config.apiKey) missing.push("apiKey");
   if (!config.model) missing.push("model");
-  if (missing.length > 0) throw new Error(`Missing required settings: ${missing.join(", ")}`);
+  if (missing.length > 0) {
+    const error = new Error("还没有配置模型。请先到设置里填写模型供应方、模型名称和 API Key，然后再发送消息。");
+    error.code = "model_settings_missing";
+    error.missing = missing;
+    throw error;
+  }
 
   return config;
 };

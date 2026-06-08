@@ -8,6 +8,7 @@
   "server_tool_missing_result": "The tool call has no recorded result. The system may have been interrupted, restarted, timed out, or failed before saving it.",
   "server_tool_unknown": "Unknown tool",
   "server_tool_error": "tool error",
+  "server_model_settings_missing": "No model is configured yet. Open Settings and fill in the provider, model name, and API key before sending messages.",
   "server_max_rounds_reached": "(maximum rounds reached)",
   "prompt_identity_default": "You are AIOS, a personal AI operating system running on the user's local machine.",
   "prompt_identity_title": "Identity",

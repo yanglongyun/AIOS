@@ -406,11 +406,4 @@ sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"
 
 ---
 
-## 发行版
 
-AIOS 作为通用内核,可以被定制成主题化的发行版,服务不同用户群体:
-
-| 发行版 | 面向 | 主要差异 |
-|---|---|---|
-| **AIOS**(本仓库) | 全球开发者、多语言用户 | 多语言、23+ 模型 Provider、基础系统应用框架 |
-| [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | 中文 DeepSeek 用户 | 只支持中文、DeepSeek 默认、精简到 6 核心应用 |

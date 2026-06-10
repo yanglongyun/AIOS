@@ -6,7 +6,6 @@ const setServerSettings = (settings) => {
     apiUrl: settings.apiUrl || "",
     apiKey: settings.apiKey || "",
     model: settings.model || "",
-    provider: settings.provider || "",
     system: settings.system || "",
     contextTurns: Math.max(0, Number.parseInt(settings.contextTurns, 10) || 0),
   });

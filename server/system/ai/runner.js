@@ -1,6 +1,5 @@
 // @ts-nocheck
 import * as functions from "./functions.js";
-import { truncateToolResult } from "./utils.js";
 
 const createAbortError = () => {
   if (typeof DOMException === "function") {
@@ -11,10 +10,7 @@ const createAbortError = () => {
   return error;
 };
 
-const runTools = async (
-  toolCalls,
-  { signal, enableToolResultTruncate = true, toolResultMaxChars = 12000 } = {}
-) => {
+const runTools = async (toolCalls, { signal } = {}) => {
   const results = await Promise.all(toolCalls.map(async (tc) => {
     if (signal?.aborted) {
       throw createAbortError();
@@ -32,15 +28,10 @@ const runTools = async (
       }
       content = `tool error: ${error.message}`;
     }
-    const text = typeof content === "string" ? content : JSON.stringify(content);
-    const trimmed = truncateToolResult(text, {
-      enabled: enableToolResultTruncate,
-      maxChars: toolResultMaxChars
-    });
     return {
       role: "tool",
       tool_call_id: tc.id,
-      content: trimmed.content
+      content: typeof content === "string" ? content : JSON.stringify(content),
     };
   }));
 

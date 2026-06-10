@@ -1,12 +1,57 @@
 // @ts-nocheck
-// 待办 app 后端。独立库 database/apps/todo.db,只暴露 /apps/todo/*。
-import { createAppDb } from "../shared/db.js";
-import { readBody, sendJson, parseJson, badRequest } from "../shared/http.js";
-import { callLlmStream } from "../../system/ai/llm/stream.js";
-import { getServerSettings } from "../../system/services/settings/index.js";
+// 待办 app 后端。应用自治:独立库、独立迁移、AI 统一创建 AIOS task。
+import fs from "fs";
+import path from "path";
 import { randomUUID } from "node:crypto";
+import { DatabaseSync } from "node:sqlite";
+import { fileURLToPath } from "url";
+import { createTask, getTask } from "../../system/services/tasks/index.js";
 
 let db;
+const DAY = 86400000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const APPS_DB_DIR = path.resolve(__dirname, "../../../database/apps");
+
+const createAppDb = (filename) => {
+  fs.mkdirSync(APPS_DB_DIR, { recursive: true });
+  const appDb = new DatabaseSync(path.join(APPS_DB_DIR, filename));
+  appDb.exec("PRAGMA journal_mode = WAL");
+  return appDb;
+};
+
+const readBody = async (req) => {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  return Buffer.concat(chunks).toString("utf8");
+};
+
+const sendJson = (res, statusCode, payload) => {
+  res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+  res.end(`${JSON.stringify(payload)}\n`);
+};
+
+const badRequest = (message) => {
+  const error = new Error(message);
+  error.statusCode = 400;
+  return error;
+};
+
+const parseJson = (raw, label = "json") => {
+  const input = String(raw ?? "").trim();
+  if (!input) throw badRequest(`Invalid JSON in ${label}: empty input`);
+  try {
+    return JSON.parse(input);
+  } catch (error) {
+    throw badRequest(`Invalid JSON in ${label}: ${error.message}`);
+  }
+};
+
+const dateKey = (date = new Date()) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const todayKey = () => dateKey(new Date());
+
+const hasColumn = (table, name) =>
+  db.prepare(`PRAGMA table_info(${table})`).all().some((row) => row.name === name);
 
 const createSchema = () => {
   db.exec(`
@@ -21,6 +66,8 @@ const createSchema = () => {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  if (!hasColumn("todos", "due")) db.exec("ALTER TABLE todos ADD COLUMN due TEXT");
+  if (!hasColumn("todos", "done_at")) db.exec("ALTER TABLE todos ADD COLUMN done_at DATETIME");
 };
 
 const initDb = () => {
@@ -33,9 +80,7 @@ const initDb = () => {
 const normalizeSubtasks = (value) => {
   if (!Array.isArray(value)) throw badRequest("subtasks must be an array");
   return value.map((item) => {
-    if (!item || typeof item !== "object" || Array.isArray(item)) {
-      throw badRequest("subtask must be an object");
-    }
+    if (!item || typeof item !== "object" || Array.isArray(item)) throw badRequest("subtask must be an object");
     const id = String(item.id || "").trim();
     const text = String(item.text || "").trim();
     if (!id) throw badRequest("subtask.id is required");
@@ -45,10 +90,12 @@ const normalizeSubtasks = (value) => {
 };
 
 const parseStoredSubtasks = (value) => {
-  const parsed = JSON.parse(String(value || "[]"));
-  return normalizeSubtasks(parsed);
+  try {
+    return normalizeSubtasks(JSON.parse(String(value || "[]")));
+  } catch {
+    return [];
+  }
 };
-
 const normalizeSection = (value) => {
   if (value === "today" || value === "later") return value;
   throw badRequest("section must be today or later");
@@ -57,49 +104,69 @@ const normalizePriority = (value) => {
   if (value === "" || value == null || value === "high") return value || "";
   throw badRequest("priority must be high or empty");
 };
+const normalizeDue = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) throw badRequest("due must be YYYY-MM-DD");
+  return text;
+};
 const encodeSubtasks = (value) => JSON.stringify(normalizeSubtasks(value || []));
 const mapTodo = (row) => ({
   ...row,
   done: !!row.done,
   priority: row.priority || "",
+  due: row.due || "",
+  doneAt: row.done_at || "",
   subtasks: parseStoredSubtasks(row.subtasks),
 });
 
-const listTodos = () =>
-  db.prepare(`
-    SELECT * FROM todos
-    ORDER BY
-      CASE section WHEN 'today' THEN 0 ELSE 1 END,
-      done ASC,
-      id DESC
-  `).all().map(mapTodo);
-const getTodo = (id) => db.prepare("SELECT * FROM todos WHERE id = ?").get(Number(id)) || null;
+const listTodos = () => db.prepare(`
+  SELECT * FROM todos
+  ORDER BY
+    done ASC,
+    CASE section WHEN 'today' THEN 0 ELSE 1 END,
+    CASE priority WHEN 'high' THEN 0 ELSE 1 END,
+    COALESCE(due, '9999-99-99') ASC,
+    id DESC
+`).all().map(mapTodo);
+const getTodo = (id) => {
+  const row = db.prepare("SELECT * FROM todos WHERE id = ?").get(Number(id));
+  return row ? mapTodo(row) : null;
+};
 
-const createTodo = ({ text, section = "today", priority = "", subtasks = [] }) => {
+const createTodo = ({ text, section = "today", priority = "", subtasks = [], due = "" }) => {
   const value = String(text || "").trim();
   if (!value) throw badRequest("text is required");
+  const dueValue = normalizeDue(due);
   const row = db.prepare(`
-    INSERT INTO todos (text, section, priority, subtasks)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO todos (text, section, priority, subtasks, due)
+    VALUES (?, ?, ?, ?, ?)
     RETURNING *
-  `).get(value, normalizeSection(section), normalizePriority(priority), encodeSubtasks(subtasks));
+  `).get(value, normalizeSection(section), normalizePriority(priority), encodeSubtasks(subtasks), dueValue);
   return mapTodo(row);
 };
 
-const updateTodo = (id, { text, done, section, priority, subtasks }) => {
+const updateTodo = (id, input = {}) => {
   const todo = getTodo(id);
   if (!todo) return null;
-  const row = db.prepare(
-    `UPDATE todos
-     SET text = ?, done = ?, section = ?, priority = ?, subtasks = ?, updated_at = CURRENT_TIMESTAMP
-     WHERE id = ?
-     RETURNING *`,
-  ).get(
-    text == null ? todo.text : String(text),
-    done == null ? todo.done : done ? 1 : 0,
-    section == null ? todo.section : normalizeSection(section),
-    priority == null ? todo.priority : normalizePriority(priority),
-    subtasks == null ? todo.subtasks : encodeSubtasks(subtasks),
+  const done = input.done == null ? todo.done : !!input.done;
+  const doneAt = done
+    ? (todo.doneAt || new Date().toISOString())
+    : null;
+  const row = db.prepare(`
+    UPDATE todos
+    SET text = ?, done = ?, section = ?, priority = ?, subtasks = ?, due = ?,
+        done_at = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+    RETURNING *
+  `).get(
+    input.text == null ? todo.text : String(input.text),
+    done ? 1 : 0,
+    input.section == null ? todo.section : normalizeSection(input.section),
+    input.priority == null ? todo.priority : normalizePriority(input.priority),
+    input.subtasks == null ? JSON.stringify(todo.subtasks) : encodeSubtasks(input.subtasks),
+    input.due == null ? (todo.due || null) : normalizeDue(input.due),
+    doneAt,
     Number(id),
   );
   return mapTodo(row);
@@ -107,75 +174,132 @@ const updateTodo = (id, { text, done, section, priority, subtasks }) => {
 
 const deleteTodo = (id) => db.prepare("DELETE FROM todos WHERE id = ?").run(Number(id));
 
-const getLlmConfig = () => {
-  const settings = getServerSettings();
-  const missing = [];
-  if (!settings.apiUrl) missing.push("apiUrl");
-  if (!settings.apiKey) missing.push("apiKey");
-  if (!settings.model) missing.push("model");
-  if (missing.length) throw new Error(`Missing required settings: ${missing.join(", ")}`);
-  return settings;
+const waitTask = async (taskId, timeoutMs = 45000) => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const task = getTask(taskId);
+    if (task?.status === "done") return task.response || "";
+    if (task?.status === "error") throw new Error(task.error || "task failed");
+    if (task?.status === "aborted") throw new Error("task aborted");
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error("task timeout");
+};
+const parseTaskJson = (content) => JSON.parse(String(content || "{}"));
+const runJsonTask = async ({ name, detail }) => {
+  const task = createTask({ taskName: name, detail });
+  return { taskId: task.taskId, data: parseTaskJson(await waitTask(task.taskId)) };
 };
 
-const parseDecomposeResult = (content) => {
-  const text = String(content || "").trim();
-  const parsed = JSON.parse(text);
-  const items = parsed?.subtasks;
-  if (!Array.isArray(items)) throw new Error("LLM response must include subtasks array");
-  const subtasks = items.map((item) => {
-    if (typeof item !== "string") throw new Error("LLM subtasks must be strings");
-    return item.trim();
-  }).filter(Boolean);
-  if (!subtasks.length) throw new Error("LLM response contains no subtasks");
-  return subtasks;
+const parseTodo = async ({ text = "" }) => {
+  const value = String(text || "").trim();
+  if (!value) throw badRequest("text is required");
+  const { taskId, data } = await runJsonTask({
+    name: "todo-parse",
+    detail: [
+      "你是 AIOS 待办应用的自然语言解析任务。不要调用工具。只输出 JSON。",
+      `今天日期: ${todayKey()}`,
+      "输出字段固定: text, due, priority, section。",
+      "due 为空字符串或 YYYY-MM-DD。priority 为 high 或空字符串。section 为 today 或 later。",
+      "理解今天/明天/后天/周X/下周X/X月X日/之前/前/重要/紧急。",
+      "规则: due <= 今天则 section=today; 未来 due 则 section=later; 无 due 则 section=today。",
+      "",
+      `用户输入: ${value}`,
+    ].join("\n"),
+  });
+  return {
+    taskId,
+    result: {
+      text: String(data.text || value).trim(),
+      due: normalizeDue(data.due || "") || "",
+      priority: normalizePriority(data.priority || ""),
+      section: normalizeSection(data.section || "today"),
+    },
+  };
 };
 
 const decomposeTodo = async ({ text = "" }) => {
   const value = String(text || "").trim();
   if (!value) throw badRequest("text is required");
-  const settings = getLlmConfig();
-  const result = await callLlmStream(settings.provider, settings.apiUrl, settings.apiKey, {
-    model: settings.model,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: "你是 AIOS 待办应用的任务拆解助手。只输出 JSON,不要解释。" },
-      { role: "user", content: `把这个待办拆成 3 到 6 个可执行子任务。输出格式: {"subtasks":["子任务1","子任务2"]}\n\n${value}` },
-    ],
+  const { taskId, data } = await runJsonTask({
+    name: "todo-decompose",
+    detail: [
+      "你是 AIOS 待办应用的任务拆解任务。不要调用工具。只输出 JSON。",
+      "把待办拆成 3 到 6 个可执行子任务。",
+      "输出格式: {\"subtasks\":[\"子任务1\",\"子任务2\"]}",
+      "",
+      value,
+    ].join("\n"),
   });
-  return parseDecomposeResult(result.message?.content).map((item) => ({
-    id: randomUUID(),
-    text: item,
-    done: false,
-  }));
+  const items = Array.isArray(data.subtasks) ? data.subtasks : [];
+  return {
+    taskId,
+    subtasks: items.map((item) => String(item).trim()).filter(Boolean).map((item) => ({
+      id: randomUUID(),
+      text: item,
+      done: false,
+    })),
+  };
 };
 
-const match = (path) => path === "/apps/todo/todos" || path === "/apps/todo/decompose";
+const planToday = async () => {
+  const candidates = listTodos().filter((item) => !item.done && item.section === "later").slice(0, 30);
+  const { taskId, data } = await runJsonTask({
+    name: "todo-plan",
+    detail: [
+      "你是 AIOS 待办应用的今日安排任务。不要调用工具。只输出 JSON。",
+      "从稍后未完成项里选最多 3 件建议移到今天。",
+      "优先级: 期限临近 > 高优先 > 搁置最久。",
+      "输出格式: {\"picks\":[{\"id\":1,\"reason\":\"理由\"}],\"note\":\"一句鼓励\"}",
+      "",
+      JSON.stringify(candidates.map(({ id, text, due, priority, created_at }) => ({ id, text, due, priority, created_at }))),
+    ].join("\n"),
+  });
+  const ids = new Set(candidates.map((item) => Number(item.id)));
+  const picks = (Array.isArray(data.picks) ? data.picks : [])
+    .map((item) => ({ id: Number(item.id), reason: String(item.reason || "").trim() }))
+    .filter((item) => ids.has(item.id))
+    .slice(0, 3);
+  return { taskId, picks, note: String(data.note || "") };
+};
+
+const match = (path) =>
+  path === "/apps/todo/todos" ||
+  path === "/apps/todo/parse" ||
+  path === "/apps/todo/decompose" ||
+  path === "/apps/todo/plan";
 
 const handleApi = async (req, res, path, url) => {
   initDb();
+  if (path === "/apps/todo/parse") {
+    if (req.method !== "POST") return false;
+    sendJson(res, 200, { ok: true, ...(await parseTodo(parseJson(await readBody(req)))) });
+    return true;
+  }
   if (path === "/apps/todo/decompose") {
     if (req.method !== "POST") return false;
-    const body = parseJson(await readBody(req));
-    sendJson(res, 200, { ok: true, subtasks: await decomposeTodo(body) });
+    sendJson(res, 200, { ok: true, ...(await decomposeTodo(parseJson(await readBody(req)))) });
+    return true;
+  }
+  if (path === "/apps/todo/plan") {
+    if (req.method !== "POST") return false;
+    sendJson(res, 200, { ok: true, ...(await planToday()) });
     return true;
   }
 
   if (path !== "/apps/todo/todos") return false;
   const id = url.searchParams.get("id");
-
   if (req.method === "GET") {
     sendJson(res, 200, { ok: true, todos: listTodos() });
     return true;
   }
   if (req.method === "POST") {
-    const body = parseJson(await readBody(req));
-    sendJson(res, 201, { ok: true, todo: createTodo(body) });
+    sendJson(res, 201, { ok: true, todo: createTodo(parseJson(await readBody(req))) });
     return true;
   }
   if (req.method === "PATCH") {
     if (!id) return sendJson(res, 400, { ok: false, error: "id is required" });
-    const body = parseJson(await readBody(req));
-    const todo = updateTodo(id, body);
+    const todo = updateTodo(id, parseJson(await readBody(req)));
     if (!todo) return sendJson(res, 404, { ok: false, error: "todo not found" });
     sendJson(res, 200, { ok: true, todo });
     return true;

@@ -1,189 +1,154 @@
 <template>
-  <div class="relative flex h-full min-h-0 flex-col overflow-hidden" :style="bgStyle">
-    <div v-if="!editing" class="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 pb-24 [scrollbar-width:none]">
-      <div class="mb-3 flex items-center justify-end">
-        <span class="font-mono text-[10.5px] tracking-[0.08em] text-[#7a5e40]">{{ notes.length }} 篇笔记</span>
+  <div class="np-app" :data-theme="themeName">
+    <section v-if="!active" class="np-home">
+      <header class="np-head">
+        <div>
+          <div class="greet">{{ greeting }} · {{ todayLabel }}</div>
+          <h1 class="serif">笔记 <span>{{ notes.length }} 篇 · 本周 {{ weekCount }} 篇</span></h1>
+        </div>
+        <button class="icon" title="新建笔记" @click="newNote">+</button>
+      </header>
+
+      <label class="search">
+        <span>⌕</span>
+        <input v-model="query" placeholder="搜索标题、正文、标签" />
+      </label>
+
+      <div class="chips">
+        <button v-for="chip in folderChips" :key="chip.key" class="chip" :class="{ on: activeFolder === chip.key }" @click="activeFolder = chip.key">
+          <i v-if="chip.color" :style="{ background: chip.color }"></i>{{ chip.label }}<b>{{ chip.count }}</b>
+        </button>
+        <button class="chip add" @click="addFolder">+ 文件夹</button>
+      </div>
+      <div v-if="tagChips.length" class="chips tags">
+        <button v-for="tag in tagChips" :key="tag" class="chip" :class="{ on: activeTag === tag }" @click="activeTag = activeTag === tag ? '' : tag"># {{ tag }}</button>
       </div>
 
-      <div class="relative mb-3">
-        <Search :size="17" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9a7850]" />
-        <input
-          v-model="search"
-          class="w-full rounded-[12px] border border-[rgba(120,90,40,0.28)] bg-[#e4dcc8] py-2.5 pl-10 pr-3 text-[13.5px] text-[#3a2415] shadow-[inset_0_2px_6px_rgba(0,0,0,0.10),0_1px_0_rgba(255,255,255,0.5)] outline-none placeholder:text-[#b09870]"
-          placeholder="搜索笔记..."
-        />
-      </div>
-
-      <div v-if="!filteredNotes.length" class="flex flex-col items-center gap-2 py-16 text-center text-[#9a8060]">
-        <div class="grid h-14 w-14 place-items-center rounded-[16px] text-[28px]" :style="emptyIconStyle">📝</div>
-        <div class="text-[14px] font-bold text-[#5a4030]">{{ search.trim() ? '没有匹配的笔记' : '还没有笔记' }}</div>
-        <div class="text-[12px]">{{ search.trim() ? '换个关键词试试' : '点右下角写下第一篇' }}</div>
-      </div>
-
-      <div v-else class="flex flex-col gap-2.5">
-        <button
-          v-for="note in filteredNotes"
-          :key="note.id"
-          type="button"
-          class="w-full rounded-[14px] px-3.5 py-3 text-left active:translate-y-[1px]"
-          :style="panelStyle"
-          @click="openEditor(note)"
-        >
-          <div class="line-clamp-1 text-[15px] font-extrabold leading-snug text-[#3a2415]">
-            {{ note.title || firstLine(note.content) || '无标题' }}
-          </div>
-          <div
-            v-if="note.content"
-            class="mt-1.5 line-clamp-2 whitespace-pre-wrap text-[12.5px] leading-relaxed text-[#7a5e40]"
+      <div class="scroll">
+        <div v-if="filteredNotes.length" class="masonry">
+          <article
+            v-for="(note, index) in filteredNotes"
+            :key="note.id"
+            class="note-card"
+            :class="{ pinned: note.pinned }"
+            :style="{ animationDelay: `${index * 35}ms` }"
+            @click="openNote(note)"
           >
-            {{ note.content }}
-          </div>
-          <div class="mt-2 flex items-center gap-2">
-            <span class="rounded-full bg-[rgba(200,148,28,0.14)] px-2 py-0.5 text-[10px] font-bold text-[#a07010]">笔记</span>
-            <span class="font-mono text-[10px] text-[#9a8060]">{{ note.updated_at || note.created_at }}</span>
-          </div>
-        </button>
+            <div v-if="note.pinned" class="tape"></div>
+            <div v-if="note.emoji" class="emoji">{{ note.emoji }}</div>
+            <h2 class="serif">{{ note.title || '无标题' }}</h2>
+            <div class="snippet" v-html="snippet(note.content)"></div>
+            <footer>
+              <span v-for="tag in note.tags.slice(0, 2)" :key="tag">#{{ tag }}</span>
+              <time>{{ timeAgo(note.updated_at) }}</time>
+            </footer>
+          </article>
+        </div>
+        <div v-else class="empty">
+          <strong>没有匹配的笔记</strong>
+          <p>点右上角 + 写一篇</p>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <button
-      v-if="!editing"
-      type="button"
-      class="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-[14px] px-4 py-3 text-[14px] font-bold text-[rgba(255,245,200,0.96)] active:translate-y-[2px]"
-      :style="fabStyle"
-      @click="openEditor()"
-    >
-      <Plus :size="19" :stroke-width="2.6" />
-      新笔记
-    </button>
+    <section v-else class="np-editor">
+      <header class="edit-top">
+        <button class="back" @click="closeEditor">完成</button>
+        <span class="save"><i :class="{ hot: saving }"></i>{{ saving ? '输入中...' : '已保存' }}</span>
+        <button class="icon" :class="{ on: active.pinned }" title="置顶" @click="patchActive({ pinned: !active.pinned })">★</button>
+        <button class="icon" title="预览" @click="preview = !preview">{{ preview ? '✎' : '◐' }}</button>
+        <button class="icon danger" title="删除" @click="removeActive">⌫</button>
+      </header>
 
-    <div
-      v-if="editing"
-      class="flex min-h-0 flex-1 flex-col overflow-hidden"
-      :style="detailStyle"
-    >
-      <div class="flex h-[50px] shrink-0 items-center gap-2 border-b border-[rgba(120,90,40,0.16)] px-3">
-        <button class="grid h-9 w-9 place-items-center rounded-[10px] text-[#7a5e40] active:bg-[rgba(120,90,40,0.08)]" type="button" aria-label="返回笔记列表" @click="closeEditor">
-          <ChevronLeft :size="21" />
-        </button>
-        <div class="min-w-0 flex-1 truncate text-[17px] font-extrabold text-[#3a2415]">{{ editing.id ? '编辑笔记' : '新笔记' }}</div>
-      </div>
-
-      <div class="min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5 pb-28 [scrollbar-width:none]">
-        <input
-          v-model="form.title"
-          class="mb-3 w-full rounded-[12px] border-0 bg-white/45 px-3 py-3 text-[18px] font-extrabold text-[#3a2415] outline-none placeholder:text-[#b09870]"
-          placeholder="标题"
-        />
-        <textarea
-          v-model="form.content"
-          rows="7"
-          class="w-full resize-none rounded-[12px] border border-[rgba(120,90,40,0.28)] bg-[#e4dcc8] px-3 py-3 text-[14px] leading-relaxed text-[#3a2415] shadow-[inset_0_2px_6px_rgba(0,0,0,0.10),0_1px_0_rgba(255,255,255,0.5)] outline-none placeholder:text-[#b09870]"
-          placeholder="写点什么..."
-        />
-
-        <div class="mt-4 rounded-[14px] px-3.5 py-3" :style="aiCardStyle">
-          <div class="mb-2 flex items-center gap-1.5 font-mono text-[10.5px] font-bold uppercase tracking-[0.12em] text-[#a07010]">
-            <Sparkles :size="14" />
-            AI 润色
-          </div>
-          <div class="mb-3 grid grid-cols-3 gap-2">
-            <button
-              v-for="mode in aiModes"
-              :key="mode.id"
-              type="button"
-              class="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-[12px] px-2.5 py-2 text-[12.5px] font-bold text-[rgba(255,245,200,0.96)] disabled:opacity-45"
-              :style="buttonStyle"
-              :disabled="aiBusy || !form.content.trim()"
-              @click="runAi(mode.id)"
-            >
-              <component :is="mode.icon" :size="14" />
-              <span class="truncate">{{ aiBusy && aiMode === mode.id ? '处理中' : mode.label }}</span>
-            </button>
-          </div>
-
-          <div v-if="aiBusy" class="mb-3 flex items-center gap-2 rounded-[13px] border border-[rgba(200,148,28,0.30)] px-3.5 py-3" :style="aiPanelStyle">
-            <Sparkles :size="18" class="animate-spin text-[#a07010]" />
-            <span class="text-[13px] font-bold text-[#a07010]">{{ activeAiLabel }}中...</span>
-          </div>
-
-          <div v-if="aiResult && !aiBusy" class="mb-3 overflow-hidden rounded-[14px] border border-[rgba(200,148,28,0.35)]" :style="aiPanelStyle">
-            <div class="flex items-center gap-1.5 border-b border-[rgba(200,148,28,0.22)] px-3 py-2 font-mono text-[10.5px] font-bold uppercase tracking-[0.1em] text-[#a07010]">
-              <Sparkles :size="14" />
-              AI {{ activeAiLabel }}结果
-            </div>
-            <div class="whitespace-pre-wrap px-3.5 py-3 text-[13.5px] leading-relaxed text-[#3a2415]">{{ aiResult }}</div>
-            <div class="flex gap-2 px-3.5 pb-3">
-              <button class="flex-1 rounded-[11px] py-2 text-[13px] font-bold text-[rgba(255,245,200,0.96)] active:translate-y-[1px]" type="button" :style="buttonStyle" @click="acceptAi">采纳</button>
-              <button class="rounded-[11px] border border-[rgba(120,90,40,0.30)] bg-white/45 px-4 py-2 text-[13px] font-bold text-[#7a5e40]" type="button" @click="aiResult = ''">放弃</button>
-            </div>
-          </div>
-
-          <div v-if="error" class="mb-3 rounded-[12px] border border-[rgba(168,58,40,0.28)] bg-[rgba(168,58,40,0.08)] px-3 py-2 text-[12px] leading-relaxed text-[#9a3a2a]">
-            {{ error }}
+      <div class="edit-scroll">
+        <input v-model="active.title" class="title serif" placeholder="无标题" @input="scheduleSave" />
+        <div class="docline">
+          <span>{{ docDate }}</span><span>·</span><span>{{ charCount }} 字</span><span>·</span><span>约 {{ readMinutes }} 分钟</span>
+        </div>
+        <div class="meta">
+          <select v-model="active.folder" @change="scheduleSave">
+            <option value="">无文件夹</option>
+            <option v-for="folder in folders" :key="folder.id" :value="folder.name">{{ folder.name }}</option>
+          </select>
+          <div class="tag-edit">
+            <button v-for="tag in active.tags" :key="tag" @click="removeTag(tag)">#{{ tag }} ×</button>
+            <button @click="addTag">+ 标签</button>
           </div>
         </div>
-
+        <textarea
+          v-show="!preview"
+          ref="textarea"
+          v-model="active.content"
+          class="body"
+          placeholder="写点什么… 支持 Markdown,试试下方工具栏"
+          @input="scheduleSave"
+        ></textarea>
+        <div v-show="preview" class="md" v-html="renderMd(active.content)"></div>
       </div>
 
-      <div class="absolute inset-x-0 bottom-0 z-10 border-t border-[rgba(120,90,40,0.16)] px-3.5 py-3" :style="actionBarStyle">
-        <div class="flex gap-2">
-            <button
-              v-if="editing.id"
-              class="grid h-11 w-11 place-items-center rounded-[12px] border border-[rgba(168,58,40,0.30)] bg-white/40 text-[#9a3a2a]"
-              type="button"
-              aria-label="删除笔记"
-              @click="remove(editing.id)"
-            >
-              <Trash2 :size="18" />
-            </button>
-            <button
-              class="h-11 flex-1 rounded-[12px] text-[14px] font-bold text-[rgba(255,245,200,0.96)] disabled:opacity-45"
-              type="button"
-              :style="buttonStyle"
-              :disabled="saving || (!form.title.trim() && !form.content.trim())"
-              @click="save"
-            >
-              {{ saving ? '保存中...' : editing.id ? '保存' : '创建' }}
-            </button>
-          </div>
+      <div class="toolbar" v-show="!preview">
+        <button @click="insert('# ')">H1</button>
+        <button @click="insert('## ')">H2</button>
+        <button @click="wrap('**')">B</button>
+        <button @click="wrap('*')"><i>I</i></button>
+        <button @click="insert('- ')">•</button>
+        <button @click="insert('- [ ] ')">☑</button>
+        <button @click="insert('> ')">❝</button>
+        <button @click="wrap('`')">‹/›</button>
+        <button @click="insert('---\n')">—</button>
       </div>
-    </div>
+
+      <div class="ai-dock">
+        <span>AI</span>
+        <button v-for="item in aiModes" :key="item.mode" @click="runAi(item.mode)">{{ item.label }}</button>
+      </div>
+    </section>
+
+    <div class="mask" :class="{ show: sheetOpen }" @click="closeSheet"></div>
+    <aside class="sheet" :class="{ show: sheetOpen }">
+      <div class="grip"></div>
+      <header><b>{{ sheetTitle }}</b><button @click="closeSheet">×</button></header>
+      <div class="out">{{ aiResult || '处理中...' }}</div>
+      <footer>
+        <button class="primary" :disabled="!aiResult" @click="applyAi">应用到笔记</button>
+        <button :disabled="!aiResult" @click="copyAi">复制</button>
+        <button @click="closeSheet">放弃</button>
+      </footer>
+    </aside>
+    <div class="toast" :class="{ show: toastText }">{{ toastText }}</div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
-import { ChevronLeft, Expand, Plus, Scissors, Search, Sparkles, Trash2, WandSparkles } from 'lucide-vue-next';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { useThemeStore } from '../../stores/theme.js';
 
+const theme = useThemeStore();
+const themeName = computed(() => theme.resolved === 'dark' ? 'dark' : 'light');
 const notes = ref([]);
-const search = ref('');
-const editing = ref(null);
+const folders = ref([]);
+const query = ref('');
+const activeFolder = ref('all');
+const activeTag = ref('');
+const active = ref(null);
+const preview = ref(false);
 const saving = ref(false);
-const aiBusy = ref(false);
-const aiMode = ref('polish');
+const textarea = ref(null);
+const sheetOpen = ref(false);
+const sheetTitle = ref('AI');
 const aiResult = ref('');
-const error = ref('');
-
-const form = reactive({
-  title: '',
-  content: '',
-});
+const aiMode = ref('');
+const toastText = ref('');
+let saveTimer = null;
+let toastTimer = null;
 
 const aiModes = [
-  { id: 'polish', label: '润色', icon: WandSparkles },
-  { id: 'condense', label: '精简', icon: Scissors },
-  { id: 'expand', label: '扩写', icon: Expand },
+  { mode: 'polish', label: '润色' },
+  { mode: 'condense', label: '精简' },
+  { mode: 'expand', label: '扩写' },
+  { mode: 'title', label: '起标题' },
+  { mode: 'format', label: '排版' },
 ];
-
-const activeAiLabel = computed(() => aiModes.find((mode) => mode.id === aiMode.value)?.label || '润色');
-const filteredNotes = computed(() => {
-  const q = search.value.trim().toLowerCase();
-  if (!q) return notes.value;
-  return notes.value.filter((note) => `${note.title || ''}\n${note.content || ''}`.toLowerCase().includes(q));
-});
-
-const firstLine = (text = '') => String(text).trim().split(/\r?\n/)[0] || '';
 
 const request = async (url, options = {}) => {
   const res = await fetch(url, options);
@@ -195,155 +160,213 @@ const request = async (url, options = {}) => {
 const load = async () => {
   const data = await request('/apps/notepad/notes');
   notes.value = data.notes || [];
+  folders.value = data.folders || [];
+  if (active.value) {
+    const fresh = notes.value.find((item) => item.id === active.value.id);
+    if (fresh) active.value = { ...fresh, tags: [...fresh.tags] };
+  }
 };
 
-const resetAi = () => {
-  aiBusy.value = false;
-  aiResult.value = '';
-  error.value = '';
-  aiMode.value = 'polish';
+const greeting = computed(() => {
+  const h = new Date().getHours();
+  return h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+});
+const todayLabel = computed(() => new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }));
+const weekCount = computed(() => notes.value.filter((n) => Date.now() - new Date(n.updated_at).getTime() < 7 * 86400000).length);
+const folderChips = computed(() => {
+  const base = [
+    { key: 'all', label: '全部', count: notes.value.length },
+    { key: 'pinned', label: '置顶', count: notes.value.filter((n) => n.pinned).length },
+  ];
+  return base.concat(folders.value.map((folder) => ({
+    key: folder.name,
+    label: folder.name,
+    color: folder.color,
+    count: notes.value.filter((n) => n.folder === folder.name).length,
+  })));
+});
+const tagChips = computed(() => [...new Set(notes.value.flatMap((n) => n.tags || []))]);
+const filteredNotes = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  return notes.value.filter((note) => {
+    if (activeFolder.value === 'pinned' && !note.pinned) return false;
+    if (activeFolder.value !== 'all' && activeFolder.value !== 'pinned' && note.folder !== activeFolder.value) return false;
+    if (activeTag.value && !note.tags.includes(activeTag.value)) return false;
+    if (!q) return true;
+    return [note.title, note.content, ...(note.tags || [])].join(' ').toLowerCase().includes(q);
+  });
+});
+const charCount = computed(() => active.value ? active.value.content.replace(/\s/g, '').length : 0);
+const readMinutes = computed(() => Math.max(1, Math.ceil(charCount.value / 450)));
+const docDate = computed(() => active.value ? new Date(active.value.updated_at || Date.now()).toLocaleDateString('zh-CN') : '');
+
+const showToast = (text) => {
+  toastText.value = text;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastText.value = ''; }, 1800);
 };
 
-const openEditor = (note = null) => {
-  editing.value = note ? { ...note } : {};
-  form.title = note?.title || '';
-  form.content = note?.content || '';
-  resetAi();
+const openNote = (note) => {
+  active.value = { ...note, tags: [...(note.tags || [])] };
+  preview.value = false;
+};
+const closeEditor = async () => {
+  await saveNow();
+  active.value = null;
+  await load();
+};
+const newNote = async () => {
+  const emojis = ['📝', '✨', '🌿', '🔖', '🫧', '🍞'];
+  const data = await request('/apps/notepad/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: '', content: '', emoji: emojis[Math.floor(Math.random() * emojis.length)] }),
+  });
+  await load();
+  openNote(data.note);
+};
+const patchActive = async (patch) => {
+  if (!active.value) return;
+  active.value = { ...active.value, ...patch };
+  await saveNow();
+};
+const scheduleSave = () => {
+  saving.value = true;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 450);
+};
+const saveNow = async () => {
+  if (!active.value) return;
+  clearTimeout(saveTimer);
+  await request(`/apps/notepad/notes?id=${active.value.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(active.value),
+  });
+  saving.value = false;
+};
+const removeActive = async () => {
+  if (!active.value || !confirm('删除这篇笔记?')) return;
+  await request(`/apps/notepad/notes?id=${active.value.id}`, { method: 'DELETE' });
+  active.value = null;
+  await load();
+  showToast('已删除');
+};
+const addFolder = async () => {
+  const name = prompt('新文件夹名称');
+  if (!name?.trim()) return;
+  await request('/apps/notepad/folders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name.trim() }),
+  });
+  await load();
+};
+const addTag = () => {
+  if (!active.value) return;
+  const tag = prompt('标签名称');
+  if (!tag?.trim()) return;
+  active.value.tags = [...new Set([...(active.value.tags || []), tag.trim().replace(/^#/, '')])];
+  scheduleSave();
+};
+const removeTag = (tag) => {
+  active.value.tags = active.value.tags.filter((item) => item !== tag);
+  scheduleSave();
 };
 
-const closeEditor = () => {
-  if (aiBusy.value || saving.value) return;
-  editing.value = null;
-  resetAi();
+const insert = (text) => {
+  const ta = textarea.value;
+  if (!ta || !active.value) return;
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  active.value.content = active.value.content.slice(0, s) + text + active.value.content.slice(e);
+  nextTick(() => {
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+  });
+  scheduleSave();
+};
+const wrap = (mark) => {
+  const ta = textarea.value;
+  if (!ta || !active.value) return;
+  const s = ta.selectionStart;
+  const e = ta.selectionEnd;
+  const selected = active.value.content.slice(s, e);
+  active.value.content = active.value.content.slice(0, s) + mark + selected + mark + active.value.content.slice(e);
+  nextTick(() => {
+    ta.focus();
+    ta.selectionStart = s + mark.length;
+    ta.selectionEnd = e + mark.length;
+  });
+  scheduleSave();
 };
 
-const runAi = async (mode = 'polish') => {
-  const content = form.content.trim();
-  if (!content || aiBusy.value) return;
+const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const inlineMd = (s) => escapeHtml(s)
+  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  .replace(/\*(.*?)\*/g, '<em>$1</em>')
+  .replace(/`(.*?)`/g, '<code>$1</code>')
+  .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+const renderMd = (src) => String(src || '').split('\n').map((line) => {
+  if (/^###\s+/.test(line)) return `<h3>${inlineMd(line.replace(/^###\s+/, ''))}</h3>`;
+  if (/^##\s+/.test(line)) return `<h2>${inlineMd(line.replace(/^##\s+/, ''))}</h2>`;
+  if (/^#\s+/.test(line)) return `<h1>${inlineMd(line.replace(/^#\s+/, ''))}</h1>`;
+  if (/^>\s?/.test(line)) return `<blockquote>${inlineMd(line.replace(/^>\s?/, ''))}</blockquote>`;
+  if (/^---+$/.test(line.trim())) return '<hr>';
+  const task = line.match(/^[-*]\s+\[( |x)\]\s+(.*)$/i);
+  if (task) return `<p class="task ${task[1].toLowerCase() === 'x' ? 'done' : ''}"><span>${task[1].toLowerCase() === 'x' ? '✓' : ''}</span>${inlineMd(task[2])}</p>`;
+  if (/^[-*]\s+/.test(line)) return `<p class="li">• ${inlineMd(line.replace(/^[-*]\s+/, ''))}</p>`;
+  if (/^\d+\.\s+/.test(line)) return `<p class="li">${inlineMd(line)}</p>`;
+  return line.trim() ? `<p>${inlineMd(line)}</p>` : '<br>';
+}).join('');
+const snippet = (content) => String(content || '').split('\n').filter(Boolean).slice(0, 5).map((line) => {
+  const task = line.match(/^[-*]\s+\[( |x)\]\s+(.*)$/i);
+  return task ? `<div>${task[1].toLowerCase() === 'x' ? '☑' : '☐'} ${escapeHtml(task[2])}</div>` : `<div>${escapeHtml(line.replace(/^#+\s*/, ''))}</div>`;
+}).join('');
+const timeAgo = (value) => {
+  const diff = Date.now() - new Date(value).getTime();
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
+  return `${Math.floor(diff / 86400000)} 天前`;
+};
+
+const runAi = async (mode) => {
+  if (!active.value) return;
   aiMode.value = mode;
-  aiBusy.value = true;
   aiResult.value = '';
-  error.value = '';
+  sheetTitle.value = aiModes.find((item) => item.mode === mode)?.label || 'AI';
+  sheetOpen.value = true;
   try {
     const data = await request('/apps/notepad/polish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode, content }),
+      body: JSON.stringify({ mode, content: active.value.content }),
     });
     aiResult.value = data.result?.content || '';
-    if (!aiResult.value) error.value = '没有生成可用结果';
   } catch (err) {
-    error.value = err.message || 'AI 处理失败';
-  } finally {
-    aiBusy.value = false;
+    aiResult.value = `错误: ${err.message}`;
   }
 };
-
-const acceptAi = () => {
-  if (!aiResult.value) return;
-  form.content = aiResult.value;
-  aiResult.value = '';
+const closeSheet = () => { sheetOpen.value = false; };
+const applyAi = () => {
+  if (!active.value || !aiResult.value) return;
+  if (aiMode.value === 'title') active.value.title = aiResult.value.slice(0, 30);
+  else active.value.content = aiResult.value;
+  scheduleSave();
+  closeSheet();
+  showToast('已应用');
 };
-
-const save = async () => {
-  if (saving.value) return;
-  const content = form.content.trim();
-  const title = form.title.trim() || firstLine(content).slice(0, 24) || '无标题';
-  if (!title && !content) return;
-  saving.value = true;
-  error.value = '';
-  try {
-    const payload = { title, content };
-    if (editing.value?.id) {
-      await request(`/apps/notepad/notes?id=${encodeURIComponent(editing.value.id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await request('/apps/notepad/notes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-    editing.value = null;
-    resetAi();
-    await load();
-  } catch (err) {
-    error.value = err.message || '保存失败';
-  } finally {
-    saving.value = false;
-  }
-};
-
-const remove = async (id) => {
-  if (saving.value) return;
-  saving.value = true;
-  error.value = '';
-  try {
-    await request(`/apps/notepad/notes?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-    editing.value = null;
-    resetAi();
-    await load();
-  } catch (err) {
-    error.value = err.message || '删除失败';
-  } finally {
-    saving.value = false;
-  }
+const copyAi = async () => {
+  await navigator.clipboard?.writeText(aiResult.value);
+  showToast('已复制');
 };
 
 onMounted(load);
-
-const bgStyle = {
-  background:
-    'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'>' +
-      '<filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.75\' numOctaves=\'4\' stitchTiles=\'stitch\'/>' +
-      '<feColorMatrix type=\'saturate\' values=\'0\'/></filter>' +
-      '<rect width=\'200\' height=\'200\' filter=\'url(%23n)\' opacity=\'0.04\'/></svg>"), ' +
-    'linear-gradient(180deg,#f0e8d5 0%,#e8dfca 100%)',
-};
-const panelStyle = {
-  background: 'linear-gradient(160deg,#faf5e8 0%,#f2ebd8 100%)',
-  boxShadow: '0 3px 12px rgba(90,60,20,0.13),0 1px 3px rgba(90,60,20,0.10),inset 0 1px 0 rgba(255,255,255,0.8)',
-  border: '1px solid rgba(180,150,80,0.20)',
-};
-const buttonStyle = {
-  background: 'linear-gradient(180deg,#d4981e 0%,#a07010 100%)',
-  boxShadow: '0 2px 6px rgba(160,112,16,0.30),inset 0 1px 0 rgba(255,215,80,0.40)',
-};
-const fabStyle = {
-  background: 'linear-gradient(180deg,#d4981e 0%,#a07010 100%)',
-  boxShadow: '0 4px 0 #6a4800,0 6px 14px rgba(0,0,0,0.30),inset 0 1px 0 rgba(255,215,80,0.40)',
-};
-const detailStyle = {
-  background:
-    'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'>' +
-      '<filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.75\' numOctaves=\'4\' stitchTiles=\'stitch\'/>' +
-      '<feColorMatrix type=\'saturate\' values=\'0\'/></filter>' +
-      '<rect width=\'200\' height=\'200\' filter=\'url(%23n)\' opacity=\'0.04\'/></svg>"), ' +
-    'linear-gradient(180deg,#f4ecd8 0%,#ece2c8 100%)',
-};
-const aiPanelStyle = {
-  background: 'linear-gradient(160deg,#fdf6e3 0%,#f5ebd0 100%)',
-  boxShadow: '0 4px 14px rgba(160,112,16,0.16),inset 0 1px 0 rgba(255,255,255,0.70)',
-};
-const aiCardStyle = {
-  background: 'linear-gradient(160deg,rgba(253,246,227,0.72) 0%,rgba(245,235,208,0.72) 100%)',
-  border: '1px solid rgba(200,148,28,0.24)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.62)',
-};
-const actionBarStyle = {
-  background:
-    'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'>' +
-      '<filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.75\' numOctaves=\'4\' stitchTiles=\'stitch\'/>' +
-      '<feColorMatrix type=\'saturate\' values=\'0\'/></filter>' +
-      '<rect width=\'200\' height=\'200\' filter=\'url(%23n)\' opacity=\'0.04\'/></svg>"), ' +
-    'linear-gradient(180deg,rgba(244,236,216,0.94) 0%,rgba(236,226,200,0.98) 100%)',
-  boxShadow: '0 -8px 20px rgba(90,60,20,0.12)',
-};
-const emptyIconStyle = {
-  background: 'linear-gradient(160deg,#e0b35c,#a87312)',
-  boxShadow: '0 4px 12px rgba(90,60,20,0.22),inset 0 1px 0 rgba(255,255,255,0.85)',
-};
 </script>
+
+<style scoped>
+.np-app{--bg0:#f4eddc;--bg1:#e6dabc;--panel:#fbf7ec;--panel2:#fffaf0;--ink:#33241a;--ink2:#6b5742;--muted:#9a8468;--line:rgba(140,110,60,.18);--line2:rgba(140,110,60,.32);--accent:#a06c3a;--gold:#b8860b;--shadow:0 4px 18px rgba(90,60,20,.12);height:100%;position:relative;overflow:hidden;background:linear-gradient(160deg,var(--bg0),var(--bg1));background-image:radial-gradient(rgba(140,100,40,.05) 1px,transparent 1px);background-size:7px 7px;color:var(--ink)}
+.np-app[data-theme=dark]{--bg0:#201811;--bg1:#302416;--panel:#2b2118;--panel2:#35281c;--ink:#f3eadb;--ink2:#d0bea2;--muted:#9f8968;--line:rgba(230,200,150,.12);--line2:rgba(230,200,150,.24);--accent:#c98b50;--gold:#d9b25c;--shadow:0 4px 18px rgba(0,0,0,.28)}
+.serif{font-family:"Songti SC","Noto Serif SC",serif}.np-home,.np-editor{height:100%;display:flex;flex-direction:column;min-height:0}.np-head,.edit-top{display:flex;align-items:center;gap:10px;padding:14px 18px 10px}.np-head h1{font-size:28px;font-weight:900}.np-head h1 span{font-family:inherit;font-size:11px;color:var(--muted)}.greet,.docline{font-size:11px;color:var(--muted)}.icon,.back{border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.65);border-radius:13px;color:var(--ink);font-weight:900;min-width:38px;height:38px}.icon{margin-left:auto}.icon+.icon{margin-left:0}.icon.on{color:var(--gold)}.danger{color:#b34a35}.search{margin:0 18px 4px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(255,252,244,.72);border-radius:15px;padding:10px 12px}.search input{flex:1;outline:0;background:transparent;color:var(--ink);font-size:13px}.chips{display:flex;gap:7px;padding:8px 18px 0;overflow-x:auto;scrollbar-width:none}.chip{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,252,244,.62);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;color:var(--ink2)}.chip i{width:7px;height:7px;border-radius:50%}.chip b{font-size:10px;color:var(--muted)}.chip.on{background:var(--ink);color:var(--bg0);transform:translateY(-1px)}.chip.add{border-style:dashed;color:var(--muted)}.scroll,.edit-scroll{min-height:0;flex:1;overflow:auto;padding:12px 18px 90px}.masonry{column-count:2;column-gap:11px}.note-card{position:relative;break-inside:avoid;margin-bottom:11px;padding:14px;border-radius:17px;border:1px solid var(--line);background:linear-gradient(160deg,var(--panel2),var(--panel));box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.72);animation:pop .35s both}.note-card:active{transform:scale(.97)}.tape{position:absolute;left:30%;top:-7px;width:42px;height:14px;border-radius:3px;background:rgba(210,170,100,.36);transform:rotate(-2deg)}.emoji{font-size:22px;margin-bottom:7px}.note-card h2{font-size:15px;line-height:1.45}.snippet{font-size:12px;color:var(--ink2);line-height:1.7;margin-top:6px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}.note-card footer{display:flex;align-items:center;gap:5px;margin-top:10px;flex-wrap:wrap}.note-card footer span,.tag-edit button{font-size:10px;border-radius:999px;background:rgba(160,108,58,.12);color:var(--accent);padding:3px 7px;font-weight:800}.note-card time{margin-left:auto;font-size:10px;color:var(--muted)}.empty{text-align:center;color:var(--muted);padding:14vh 20px}.empty strong{display:block;color:var(--ink);font-size:18px}.edit-top{border-bottom:1px solid var(--line)}.back{padding:0 12px}.save{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}.save i{width:7px;height:7px;border-radius:50%;background:#6eaa5d}.save i.hot{background:var(--gold)}.title{width:100%;border:0;background:transparent;outline:0;color:var(--ink);font-size:29px;font-weight:900}.meta{display:flex;gap:8px;align-items:center;margin:12px 0}.meta select{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:7px}.tag-edit{display:flex;gap:6px;overflow:auto}.body,.md{width:100%;min-height:54vh;border:0;border-top:1px dashed var(--line2);background:transparent;color:var(--ink);outline:0;padding-top:16px;font-size:15px;line-height:1.85;resize:none}.md :deep(h1){font-size:23px;border-bottom:1px dashed var(--line2);padding-bottom:6px}.md :deep(h2){font-size:19px}.md :deep(blockquote){border-left:3px solid var(--accent);padding-left:10px;color:var(--ink2)}.md :deep(code){background:rgba(160,108,58,.13);border-radius:5px;padding:1px 5px}.md :deep(.task span){display:inline-grid;place-items:center;width:16px;height:16px;border:1px solid var(--line2);border-radius:5px;margin-right:7px}.md :deep(.task.done){color:var(--muted);text-decoration:line-through}.toolbar,.ai-dock{position:absolute;left:14px;right:14px;bottom:74px;display:flex;gap:6px;overflow:auto;border:1px solid var(--line);background:rgba(251,247,236,.92);backdrop-filter:blur(10px);border-radius:15px;padding:8px;box-shadow:var(--shadow)}.toolbar button,.ai-dock button{flex:none;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:900;color:var(--ink2)}.ai-dock{bottom:14px}.ai-dock span{align-self:center;font-size:10px;font-weight:900;color:var(--gold);letter-spacing:2px}.mask{position:absolute;inset:0;background:rgba(20,12,2,.45);opacity:0;pointer-events:none;transition:.22s;z-index:20}.mask.show{opacity:1;pointer-events:auto}.sheet{position:absolute;left:0;right:0;bottom:0;max-height:74%;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.9,.2,1);z-index:21;background:var(--panel);border-radius:22px 22px 0 0;border-top:1px solid var(--line2);box-shadow:0 -18px 50px rgba(0,0,0,.22);display:flex;flex-direction:column}.sheet.show{transform:translateY(0)}.grip{width:40px;height:5px;border-radius:99px;background:var(--line2);margin:10px auto}.sheet header,.sheet footer{display:flex;gap:9px;align-items:center;padding:10px 18px}.sheet header button{margin-left:auto}.out{min-height:150px;overflow:auto;padding:8px 22px 16px;white-space:pre-wrap;line-height:1.9}.sheet footer{border-top:1px solid var(--line)}.sheet button{border:1px solid var(--line);background:var(--panel2);border-radius:11px;padding:9px 12px;font-weight:900;color:var(--ink)}.sheet .primary{background:var(--accent);color:white}.toast{position:absolute;top:12px;left:50%;transform:translate(-50%,-140%);transition:.25s;z-index:30;background:var(--ink);color:var(--bg0);border-radius:999px;padding:9px 14px;font-size:12px;font-weight:900}.toast.show{transform:translate(-50%,0)}@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+</style>

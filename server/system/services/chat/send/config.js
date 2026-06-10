@@ -7,7 +7,6 @@ const getChatRunConfig = (input = {}) => {
     apiUrl: input.apiUrl || settings.apiUrl || "",
     apiKey: input.apiKey || settings.apiKey || "",
     model: input.model || settings.model || "",
-    provider: input.provider || settings.provider || "",
     system: input.system || settings.system || "",
     contextTurns: input.contextTurns ?? settings.contextTurns ?? 100,
   };
@@ -17,7 +16,7 @@ const getChatRunConfig = (input = {}) => {
   if (!config.apiKey) missing.push("apiKey");
   if (!config.model) missing.push("model");
   if (missing.length > 0) {
-    const error = new Error("还没有配置模型。请先到设置里填写模型供应方、模型名称和 API Key，然后再发送消息。");
+    const error = new Error("还没有配置模型。请先到设置里填写请求地址、模型名称和 API Key，然后再发送消息。");
     error.code = "model_settings_missing";
     error.missing = missing;
     throw error;

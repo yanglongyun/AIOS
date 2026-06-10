@@ -21,27 +21,8 @@
         </div>
 
         <label class="field">
-          <span>供应商</span>
-          <select v-model="form.provider" class="text-input" @change="applyProviderDefaults">
-            <optgroup v-for="group in groupedProviders" :key="group.id" :label="group.name">
-              <option v-for="provider in group.providers" :key="provider.id" :value="provider.id">
-                {{ provider.name }}
-              </option>
-            </optgroup>
-          </select>
-        </label>
-
-        <label class="field">
           <span>模型</span>
-          <input
-            v-if="!activeProvider?.models?.length"
-            v-model="form.model"
-            class="text-input"
-            placeholder="输入模型名称"
-          />
-          <select v-else v-model="form.model" class="text-input">
-            <option v-for="model in activeProvider.models" :key="model" :value="model">{{ model }}</option>
-          </select>
+          <input v-model="form.model" class="text-input font-mono text-[12px]" placeholder="gpt-5.2 / deepseek-v4-pro / ..." />
         </label>
 
         <label class="field">
@@ -129,8 +110,25 @@
           <div class="mt-0.5 text-[11px] text-[#9a8060]">AIOS</div>
         </div>
         <div class="rounded-[12px] border border-[rgba(180,150,80,0.18)] bg-[rgba(255,252,244,0.58)] px-3 py-3 text-[12px] leading-[1.7] text-[#5f482d]">
-          <div>本机运行的个人 AI 操作系统。</div>
-          <div class="mt-1 font-mono text-[11px] text-[#8a7356]">system 9502 · apps 9503</div>
+          <div>AI 时代的操作系统。</div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <a
+              class="rounded-[9px] border border-[rgba(180,150,80,0.22)] bg-[rgba(255,248,232,0.72)] px-2.5 py-1.5 text-[11px] font-bold text-[#7a5315] active:translate-y-[1px]"
+              href="https://github.com/realuckyang/AIOS"
+              target="_blank"
+              rel="noreferrer"
+            >
+              开源仓库
+            </a>
+            <a
+              class="rounded-[9px] border border-[rgba(180,150,80,0.22)] bg-[rgba(255,248,232,0.72)] px-2.5 py-1.5 text-[11px] font-bold text-[#7a5315] active:translate-y-[1px]"
+              href="https://iimos.ai"
+              target="_blank"
+              rel="noreferrer"
+            >
+              官网 iimos.ai
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -141,8 +139,6 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useThemeStore } from '../../stores/theme.js';
 
-const groups = ref([]);
-const providers = ref([]);
 const saving = ref(false);
 const message = ref('');
 const error = ref(false);
@@ -163,7 +159,6 @@ const themeOptions = [
   { id: 'dark', label: '暗色', desc: '深色木纹与暖金高光' },
 ];
 const form = reactive({
-  provider: '',
   model: '',
   apiUrl: '',
   apiKey: '',
@@ -177,40 +172,13 @@ const request = async (url, options = {}) => {
   return data;
 };
 
-const activeProvider = computed(() => providers.value.find((item) => item.id === form.provider) || null);
-const groupedProviders = computed(() => {
-  const knownGroups = groups.value.length ? groups.value : [{ id: 'default', name: '默认' }];
-  const buckets = new Map(knownGroups.map((group) => [group.id, { ...group, providers: [] }]));
-  const other = { id: 'other', name: '其他', providers: [] };
-  for (const provider of providers.value) {
-    const group = buckets.get(provider.group);
-    if (group) group.providers.push(provider);
-    else other.providers.push(provider);
-  }
-  const list = [...buckets.values()].filter((group) => group.providers.length);
-  if (other.providers.length) list.push(other);
-  return list;
-});
 const resolvedThemeLabel = computed(() => theme.resolved === 'dark' ? '暗色' : '明亮');
 
-const applyProviderDefaults = () => {
-  const provider = activeProvider.value;
-  if (!provider) return;
-  form.apiUrl = provider.apiUrl || '';
-  form.model = provider.defaultModel || '';
-};
-
 const load = async () => {
-  const [settingsData, modelsData] = await Promise.all([
-    request('/api/settings'),
-    request('/api/settings/models'),
-  ]);
-  groups.value = modelsData.groups || [];
-  providers.value = modelsData.providers || [];
+  const settingsData = await request('/api/settings');
   const settings = settingsData.settings || {};
-  form.provider = settings.provider || providers.value[0]?.id || '';
-  form.model = settings.model || activeProvider.value?.defaultModel || '';
-  form.apiUrl = settings.apiUrl || activeProvider.value?.apiUrl || '';
+  form.model = settings.model || '';
+  form.apiUrl = settings.apiUrl || '';
   form.apiKey = settings.apiKey || '';
   form.contextTurns = Number.isFinite(Number(settings.contextTurns)) ? Number(settings.contextTurns) : 100;
   promptPreview.value = settingsData.promptPreview || '';
@@ -226,7 +194,6 @@ const save = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        provider: form.provider,
         model: form.model,
         apiUrl: form.apiUrl,
         apiKey: form.apiKey,

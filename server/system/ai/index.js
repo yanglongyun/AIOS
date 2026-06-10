@@ -1,60 +1,38 @@
 // @ts-nocheck
+// 工具调用循环。
+// 与 1-agent 对齐:不对历史消息做加工,传入什么就发给模型;模型返回的
+// assistant / tool 消息也原样塞回 workMessages,继续下一轮。
 import { tools } from "./tools.js";
 import { runTools } from "./runner.js";
-import { callLlmStream } from "./llm/stream.js";
-import {
-  normalizeAgentMessages,
-  normalizeChatOptions,
-  shouldReplayReasoning,
-} from "./utils.js";
+import { callLlmStream } from "./llm.js";
 
 const chat = async (messages, {
   apiUrl,
   apiKey,
   model,
-  provider = "",
   onEvent = () => {},
   signal,
   maxRounds = 50,
-  enableToolResultTruncate = true,
-  toolResultMaxChars = 12000,
   responseFormat = null
 } = {}) => {
-  const opts = normalizeChatOptions({ maxRounds, enableToolResultTruncate, toolResultMaxChars });
-  const workMessages = normalizeAgentMessages(messages, { model, apiUrl });
-  const replayReasoning = shouldReplayReasoning(model, apiUrl);
+  const workMessages = Array.isArray(messages) ? [...messages] : [];
   let round = 0;
 
-  while (round++ < opts.maxRounds) {
+  while (round++ < maxRounds) {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    // responseFormat(如任务强制 { type: "json_object" })只约束最终回答那一轮;
-    // 需要调工具的中间轮 DeepSeek 仍正常返回 tool_calls(实测验证)。
     const payload = { model, messages: workMessages, tools };
     if (responseFormat) payload.response_format = responseFormat;
 
-    let message;
-    const result = await callLlmStream(provider, apiUrl, apiKey, payload, {
+    const result = await callLlmStream(apiUrl, apiKey, payload, {
       signal,
       onMessage: (content) => onEvent({ type: "message", content }),
     });
-    message = result.message;
+    const message = result.message;
 
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-      const assistantMsg = {
-        ...message,
-        role: "assistant",
-        content: message.content ?? null,
-      };
-      if (!replayReasoning) {
-        delete assistantMsg.reasoning_content;
-      }
-      workMessages.push(assistantMsg);
-      onEvent({ type: "tool_calls", message: assistantMsg });
-      const toolMessages = await runTools(message.tool_calls, {
-        signal,
-        enableToolResultTruncate: opts.enableToolResultTruncate,
-        toolResultMaxChars: opts.toolResultMaxChars
-      });
+      workMessages.push(message);
+      onEvent({ type: "tool_calls", message });
+      const toolMessages = await runTools(message.tool_calls, { signal });
       for (const toolMessage of toolMessages) {
         workMessages.push(toolMessage);
       }
@@ -63,17 +41,9 @@ const chat = async (messages, {
     }
 
     const text = message.content ?? "";
-    const replyMsg = {
-      ...message,
-      role: "assistant",
-      content: text,
-    };
-    if (!replayReasoning) {
-      delete replyMsg.reasoning_content;
-    }
-    workMessages.push(replyMsg);
+    workMessages.push(message);
     if (result.usage) onEvent({ type: "usage", usage: result.usage });
-    onEvent({ type: "done", message: replyMsg, text, usage: result.usage || null });
+    onEvent({ type: "done", message, text, usage: result.usage || null });
     return { text, messages: workMessages };
   }
 

@@ -9,7 +9,6 @@ const getServerSettings = () => {
       apiUrl: settings.apiUrl || "",
       apiKey: settings.apiKey || "",
       model: settings.model || "",
-      provider: settings.provider || "",
       system: settings.system || DEFAULT_SYSTEM_PROMPT,
       contextTurns: Number.isInteger(Number(settings.contextTurns)) ? Number(settings.contextTurns) : 100,
     };
@@ -18,7 +17,6 @@ const getServerSettings = () => {
       apiUrl: "",
       apiKey: "",
       model: "",
-      provider: "",
       system: DEFAULT_SYSTEM_PROMPT,
       contextTurns: 100
     };

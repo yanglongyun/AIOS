@@ -4,118 +4,114 @@
    Material Symbols replaced by lucide-vue-next SVG components. */
 
 /* ================================================================
-   AIOS theme — warm parchment + brass + dark-wood bars.
-   Skeuomorphic: paper textures, embossed buttons, soft drop shadows.
-   Single-mode warm tactile shell.
-
-   Token names match AIOS so the UI keeps the same palette.
+   AIOS theme — minimal flat (framework baseline).
+   CF-dash gray/white surfaces, neutral ink, single blue accent,
+   1px hairline borders, restrained shadows. No textures/gradients.
    ================================================================ */
 
 :root, :root.light {
-    /* Page surfaces — parchment / paper */
-    --color-bg:        #f0e8d5;       /* parchment page */
-    --color-bg-elev:   #faf5e8;       /* lighter paper (cards, popovers) */
-    --color-bg-hi:     #e8dfca;       /* hover, slightly darker paper */
-    --color-line:      rgba(160,130,70,0.20);
-    --color-line-hi:   rgba(120,90,40,0.28);
+    /* Page surfaces — light gray page, white cards */
+    --color-bg:        #f6f6f7;
+    --color-bg-elev:   #ffffff;       /* cards, popovers */
+    --color-bg-hi:     #f0f0f1;       /* hover */
+    --color-line:      #e8e8ea;
+    --color-line-hi:   #dededf;
 
-    /* Ink — warm espresso text three-tier */
-    --color-ink:       #3a2415;
-    --color-muted:     #7a5e40;
-    --color-faint:     #9a8060;
+    /* Ink — neutral gray three-tier */
+    --color-ink:       #1d1d20;
+    --color-muted:     #55555c;
+    --color-faint:     #8e8e96;
 
-    /* Accent — antique brass */
-    --color-accent:    #c8941c;       /* brass */
-    --color-accent-hi: #a07010;       /* deep brass */
-    --color-good:      #6a8a50;       /* moss */
-    --color-bad:       #b04030;       /* terracotta */
-    --color-shadow:    rgba(90,60,20,0.25);
+    /* Accent — blue (v6 / CF dash) */
+    --color-accent:    #3b82f6;
+    --color-accent-hi: #2f6fd0;
+    --color-good:      #2e9e5b;
+    --color-bad:       #d6493e;
+    --color-shadow:    rgba(0,0,0,0.10);
 
-    /* List card tones (rows pop slightly off page) */
-    --color-card:      #f5ead8;
-    --color-card-hi:   #ede0c8;
-    --color-card-sub:  #faf5e8;
+    /* List card tones */
+    --color-card:      #ffffff;
+    --color-card-hi:   #f0f0f1;
+    --color-card-sub:  #fafafa;
 
-    /* Soft pill / active state — brass-tinted (replaces blue family,
-       same role as AIOS's blue-bg/soft/fg trio). */
-    --color-blue-bg:   color-mix(in srgb, #d4981e 18%, transparent);
-    --color-blue-soft: color-mix(in srgb, #d4981e 28%, transparent);
-    --color-blue-fg:   #7a5800;
+    /* Soft pill / active state */
+    --color-blue-bg:   #eef4fe;
+    --color-blue-soft: #dbe8fc;
+    --color-blue-fg:   #3b82f6;
 
-    /* Brand sparkle gradient stops */
-    --gem-1: #d4981e;
-    --gem-2: #a07010;
-    --gem-3: #c8941c;
-    --gem-4: #6a8a50;
+    /* Brand gradient stops (kept flat-blue) */
+    --gem-1: #62a5f4;
+    --gem-2: #3b82f6;
+    --gem-3: #8ec1f8;
+    --gem-4: #448361;
 
-    /* Elevation — deeper warm shadows for skeuomorphic feel */
-    --shadow-sm: 0 1px 2px rgba(90,60,20,0.10), 0 1px 3px rgba(90,60,20,0.08);
-    --shadow:    0 2px 8px rgba(90,60,20,0.16), 0 1px 3px rgba(90,60,20,0.10);
-    --shadow-lg: 0 6px 20px rgba(90,60,20,0.24), 0 2px 6px rgba(90,60,20,0.12);
+    /* Elevation — restrained neutral shadows */
+    --shadow-sm: 0 1px 2px rgba(20,20,25,0.04);
+    --shadow:    0 1px 2px rgba(20,20,25,0.04), 0 10px 30px rgba(20,20,25,0.05);
+    --shadow-lg: 0 14px 40px rgba(20,20,25,0.14);
 
-    /* === Wood-bar surfaces (TopBar / TabBar) — direct values,
-       used inline in components, not exposed as Tailwind classes. === */
-    --bar-bg-top:        linear-gradient(180deg, #3d2810 0%, #241608 100%);
-    --bar-bg-bottom:     linear-gradient(180deg, #2a1a08 0%, #180e04 100%);
-    --bar-text:          rgba(255,230,170,0.92);
-    --bar-text-faint:    rgba(200,180,140,0.45);
-    --bar-divider:       rgba(255,255,255,0.04);
-    --bar-shadow-top:    0 3px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.4);
-    --bar-shadow-bottom: 0 -4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    /* === Bar surfaces — flat white with hairline divider === */
+    --bar-bg-top:        #ffffff;
+    --bar-bg-bottom:     #ffffff;
+    --bar-text:          #1d1d20;
+    --bar-text-faint:    #8e8e96;
+    --bar-divider:       #e8e8ea;
+    --bar-shadow-top:    none;
+    --bar-shadow-bottom: none;
 
-    /* Brass — accent on dark wood bars (gold glow) */
-    --brass:           #c8941c;
-    --brass-glow:      #e8b840;
-    --brass-deep:      #6a4800;
-    --brass-shine:     rgba(255,215,80,0.35);
+    /* Legacy brass aliases → accent blue */
+    --brass:           #3b82f6;
+    --brass-glow:      #62a5f4;
+    --brass-deep:      #2f6fd0;
+    --brass-shine:     rgba(98,165,244,0.30);
 }
 
 :root.dark {
-    --color-bg:        #17130d;
-    --color-bg-elev:   #241d14;
-    --color-bg-hi:     #2e2518;
-    --color-line:      rgba(220,185,110,0.16);
-    --color-line-hi:   rgba(230,190,120,0.25);
+    --color-bg:        #191919;
+    --color-bg-elev:   #202020;
+    --color-bg-hi:     #2a2a2a;
+    --color-line:      rgba(255,255,255,0.09);
+    --color-line-hi:   rgba(255,255,255,0.16);
 
-    --color-ink:       #f2e6cf;
-    --color-muted:     #c7ac78;
-    --color-faint:     #9a815d;
+    --color-ink:       #e8e8e6;
+    --color-muted:     rgba(232,232,230,0.62);
+    --color-faint:     rgba(232,232,230,0.42);
 
-    --color-accent:    #d7a12a;
-    --color-accent-hi: #f0c15a;
-    --color-good:      #91b46f;
-    --color-bad:       #d07058;
-    --color-shadow:    rgba(0,0,0,0.55);
+    --color-accent:    #62a5f4;
+    --color-accent-hi: #8ec1f8;
+    --color-good:      #6fae8d;
+    --color-bad:       #e06661;
+    --color-shadow:    rgba(0,0,0,0.45);
 
-    --color-card:      #2b2115;
-    --color-card-hi:   #382a19;
-    --color-card-sub:  #211910;
+    --color-card:      #202020;
+    --color-card-hi:   #2a2a2a;
+    --color-card-sub:  #1d1d1d;
 
-    --color-blue-bg:   color-mix(in srgb, #d7a12a 20%, transparent);
-    --color-blue-soft: color-mix(in srgb, #d7a12a 32%, transparent);
-    --color-blue-fg:   #f4d17a;
+    --color-blue-bg:   rgba(98,165,244,0.14);
+    --color-blue-soft: rgba(98,165,244,0.24);
+    --color-blue-fg:   #8ec1f8;
 
-    --gem-1: #d7a12a;
-    --gem-2: #8c6413;
-    --gem-3: #f0c15a;
-    --gem-4: #91b46f;
+    --gem-1: #62a5f4;
+    --gem-2: #3b82f6;
+    --gem-3: #8ec1f8;
+    --gem-4: #6fae8d;
 
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25);
-    --shadow:    0 2px 10px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.28);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.60), 0 2px 8px rgba(0,0,0,0.35);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.30);
+    --shadow:    0 1px 4px rgba(0,0,0,0.35);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.50);
 
-    --bar-bg-top:        linear-gradient(180deg, #1d1208 0%, #0e0905 100%);
-    --bar-bg-bottom:     linear-gradient(180deg, #150d05 0%, #090603 100%);
-    --bar-text:          rgba(255,230,170,0.92);
-    --bar-text-faint:    rgba(210,190,150,0.42);
-    --bar-divider:       rgba(255,255,255,0.05);
-    --bar-shadow-top:    0 3px 14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.55);
-    --bar-shadow-bottom: 0 -4px 22px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.04);
+    --bar-bg-top:        rgba(25,25,25,0.95);
+    --bar-bg-bottom:     rgba(25,25,25,0.95);
+    --bar-text:          #e8e8e6;
+    --bar-text-faint:    rgba(232,232,230,0.42);
+    --bar-divider:       rgba(255,255,255,0.09);
+    --bar-shadow-top:    none;
+    --bar-shadow-bottom: none;
 
-    --brass:           #d7a12a;
-    --brass-glow:      #f0c15a;
-    --brass-deep:      #5a3900;
-    --brass-shine:     rgba(255,220,105,0.32);
+    --brass:           #62a5f4;
+    --brass-glow:      #8ec1f8;
+    --brass-deep:      #3b82f6;
+    --brass-shine:     rgba(98,165,244,0.25);
 }
 
 @theme {
@@ -189,61 +185,42 @@ body {
 .shadow-card-sm { box-shadow: var(--shadow-sm); }
 .shadow-card-lg { box-shadow: var(--shadow-lg); }
 
-/* Embossed brass primary button — skeuomorphic. Use class="save-btn". */
+/* Primary button — flat accent. Use class="save-btn". */
 .save-btn {
-    padding: 9px 20px;
-    border-radius: 12px;
+    padding: 8px 18px;
+    border-radius: 8px;
     border: 0;
-    background: linear-gradient(180deg, #d4981e 0%, #a07010 100%);
-    color: rgba(255, 245, 200, 0.96);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    background: var(--color-accent);
+    color: #ffffff;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow:
-        0 3px 0 #6a4800,
-        0 5px 12px rgba(90, 60, 0, 0.25),
-        inset 0 1px 0 rgba(255, 215, 80, 0.40);
-    transition: transform .08s ease, box-shadow .08s ease, filter .15s;
+    transition: background-color .15s, opacity .15s;
 }
-.save-btn:hover:not(:disabled) { filter: brightness(1.04); }
-.save-btn:active:not(:disabled) {
-    transform: translateY(2px);
-    box-shadow:
-        0 1px 0 #6a4800,
-        0 2px 6px rgba(90, 60, 0, 0.20),
-        inset 0 1px 0 rgba(255, 215, 80, 0.40);
-}
+.save-btn:hover:not(:disabled) { background: var(--color-accent-hi); }
+.save-btn:active:not(:disabled) { opacity: .8; }
 .save-btn:disabled {
-    background: rgba(120, 90, 40, 0.18);
-    color: rgba(120, 90, 40, 0.55);
-    box-shadow: none;
-    text-shadow: none;
+    background: var(--color-bg-hi);
+    color: var(--color-faint);
     cursor: default;
 }
 
-/* Embossed text input — paper inset (skeuomorphic depression). */
+/* Text input — flat hairline. */
 :where(.text-input) {
     width: 100%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(120, 90, 40, 0.25);
-    background: linear-gradient(180deg, #d8d0b8 0%, #e4dcc8 100%);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-line-hi);
+    background: var(--color-bg);
     color: var(--color-ink);
     font-size: 13.5px;
     outline: 0;
-    box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.10),
-        inset 0 1px 3px rgba(0, 0, 0, 0.06),
-        0 1px 0 rgba(255, 255, 255, 0.5);
     transition: border-color .15s, box-shadow .15s;
 }
-.text-input::placeholder { color: #b09870; }
+.text-input::placeholder { color: var(--color-faint); }
 .text-input:focus {
     border-color: var(--color-accent);
-    box-shadow:
-        inset 0 2px 6px rgba(0, 0, 0, 0.10),
-        0 0 0 2px color-mix(in srgb, var(--color-accent) 30%, transparent);
+    box-shadow: 0 0 0 2px var(--color-blue-bg);
 }
 
 input, textarea, button, select { font: inherit; }
@@ -452,3 +429,48 @@ header, footer, section, button, [role="tab"] {
 .border-amber-900\/40 { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
 .border-amber-900\/60 { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent) !important; }
 .bg-amber-400 { background-color: var(--color-accent) !important; }
+
+/* ================================================================
+   Texture kit — CF-dash-like airy feel (dot grid + soft cards)
+   ================================================================ */
+
+/* Dotted-grid page background (very subtle) */
+.dot-grid {
+    background-color: var(--color-bg);
+    background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 8%, transparent) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+/* Soft floating card — big radius, hairline border, feather shadow */
+.soft-card {
+    background: var(--color-bg-elev);
+    border: 1px solid var(--color-line-hi);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+/* Input focus halo — amber feather ring */
+.halo-focus:focus-within {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent),
+        var(--shadow);
+}
+
+/* Suggestion chip — white pill with icon */
+.chip-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    background: var(--color-bg-elev);
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.chip-card:hover {
+    border-color: var(--color-line-hi);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}

@@ -2,7 +2,6 @@
 import { nextTick, ref } from 'vue';
 import { Paperclip, ArrowUp, Square } from 'lucide-vue-next';
 import { uploadChatFile } from '../lib/api.js';
-import { t } from '../../../system/locale.js';
 
 defineProps({
   modelValue: { type: String, default: '' },
@@ -49,7 +48,7 @@ const appendFiles = async (files = []) => {
   if (!files.length) return;
   uploadError.value = '';
   if (pendingFiles.value.length >= MAX_FILES) {
-    uploadError.value = t('chat_upload_limit', '最多只能添加 10 个文件');
+    uploadError.value = '最多只能添加 10 个文件';
     return;
   }
   uploading.value = true;
@@ -58,7 +57,7 @@ const appendFiles = async (files = []) => {
     const seenUploaded = new Set(pendingFiles.value.map(pendingFileKey));
     for (const f of files) {
       if (pendingFiles.value.length >= MAX_FILES) {
-        uploadError.value = t('chat_upload_limit', '最多只能添加 10 个文件');
+        uploadError.value = '最多只能添加 10 个文件';
         break;
       }
       const localKey = localFileKey(f);
@@ -72,7 +71,7 @@ const appendFiles = async (files = []) => {
       }
     }
   } catch (err) {
-    uploadError.value = err.message || t('chat_upload_failed', '上传失败');
+    uploadError.value = err.message || '上传失败';
   } finally {
     uploading.value = false;
   }
@@ -113,7 +112,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         </div>
         <div class="min-w-0 flex-1">
           <div class="truncate text-[12px] font-semibold leading-tight text-ink">{{ f.name }}</div>
-        <div class="mt-0.5 truncate font-mono text-[9.5px] text-muted">{{ formatSize(f.size) || f.type || t('server_attachment_file', 'file') }}</div>
+        <div class="mt-0.5 truncate font-mono text-[9.5px] text-muted">{{ formatSize(f.size) || f.type || 'file' }}</div>
         </div>
         <button
           type="button"
@@ -128,7 +127,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         type="button"
         :disabled="busy || uploading"
-        :title="t('chat_attach', '附件')"
+        :title="'附件'"
         @click="openFilePicker"
         class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full bg-transparent text-muted hover:bg-bg-hi disabled:opacity-40"
       >
@@ -142,7 +141,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         @keydown.enter.exact="onEnter"
         @compositionstart="composing = true"
         @compositionend="composing = false"
-        :placeholder="busy ? t('chat_placeholder_busy', '进行中...') : t('chat_placeholder_ask', '问点什么...')"
+        :placeholder="busy ? '进行中...' : '问点什么...'"
         rows="1"
         :disabled="busy"
         class="block max-h-[180px] min-h-[34px] flex-1 resize-none border-none bg-transparent py-[6px] font-[inherit] text-[15px] leading-[22px] text-ink outline-none placeholder:text-[var(--color-faint)] disabled:opacity-50"
@@ -150,7 +149,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         v-if="busy"
         type="button"
-        :title="t('chat_stop', '停止')"
+        :title="'停止'"
         @click="emit('abort')"
         class="composer-send grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-white"
       >
@@ -159,7 +158,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         v-else
         type="button"
-        :title="t('chat_send', '发送')"
+        :title="'发送'"
         :disabled="!modelValue.trim() && !pendingFiles.length"
         @click="emit('send')"
         class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full transition-colors"

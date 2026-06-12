@@ -5,7 +5,6 @@ import BubbleAi from './bubbles/Ai.vue';
 import BubbleSubscription from './bubbles/Subscription.vue';
 import BubbleUser from './bubbles/User.vue';
 import ToolGroup from './bubbles/ToolGroup.vue';
-import { t } from '../../../system/locale.js';
 
 const props = defineProps({
   messages: { type: Array, default: () => [] },
@@ -96,7 +95,7 @@ defineExpose({ msgBox, scrollToBottom });
       <div class="hero-logo mb-6 grid h-14 w-14 place-items-center rounded-2xl">
         <MessageCircle :size="28" :stroke-width="1.9" />
       </div>
-      <p class="mb-7 text-[32px] font-bold tracking-[-0.5px] text-ink">{{ t('chat_empty_title', '今天想做点什么?') }}</p>
+      <p class="mb-7 text-[32px] font-bold tracking-[-0.5px] text-ink">{{ '今天想做点什么?' }}</p>
       <div class="flex w-full max-w-[560px] flex-wrap justify-center gap-2.5">
         <div
           v-for="hint in heroHints"
@@ -112,7 +111,7 @@ defineExpose({ msgBox, scrollToBottom });
     </div>
 
     <template v-else>
-      <div v-if="hasMore" class="py-2 text-center text-[11px] text-faint">{{ t('chat_load_more', '加载更多...') }}</div>
+      <div v-if="hasMore" class="py-2 text-center text-[11px] text-faint">{{ '加载更多...' }}</div>
 
       <template v-for="block in blocks" :key="block.key">
         <ToolGroup v-if="block.kind === 'tools'" :items="block.items" :busy="busy" />
@@ -122,17 +121,17 @@ defineExpose({ msgBox, scrollToBottom });
             <BubbleAi :content="block.m.content" />
           </div>
           <div class="msg-feedback">
-            <button type="button" class="fb-btn" :title="t('chat_copy', '复制')" @click="copyMsg(block)">
+            <button type="button" class="fb-btn" :title="'复制'" @click="copyMsg(block)">
               <Copy v-if="copiedKey !== block.key" :size="15" :stroke-width="1.8" />
               <Check v-else :size="15" :stroke-width="2.2" style="color: var(--color-good, #2e9e5b)" />
             </button>
-            <button type="button" class="fb-btn" :title="t('chat_usage', '用量')" @click.stop="togglePop(block)">
+            <button type="button" class="fb-btn" :title="'用量'" @click.stop="togglePop(block)">
               <Info :size="15" :stroke-width="1.8" />
             </button>
             <div v-if="activePop === block.key" class="token-pop">
-              <div class="row"><span>{{ t('chat_tokens_in', '输入 tokens') }}</span><b>{{ usageOf(block.m).input }}</b></div>
-              <div class="row"><span>{{ t('chat_tokens_out', '输出 tokens') }}</span><b>{{ usageOf(block.m).output }}</b></div>
-              <div class="row"><span>{{ t('chat_tokens_total', '合计') }}</span><b>{{ usageOf(block.m).total }}</b></div>
+              <div class="row"><span>{{ '输入 tokens' }}</span><b>{{ usageOf(block.m).input }}</b></div>
+              <div class="row"><span>{{ '输出 tokens' }}</span><b>{{ usageOf(block.m).output }}</b></div>
+              <div class="row"><span>{{ '合计' }}</span><b>{{ usageOf(block.m).total }}</b></div>
             </div>
           </div>
         </template>

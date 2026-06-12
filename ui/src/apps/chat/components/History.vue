@@ -4,14 +4,14 @@
     <div class="flex shrink-0 flex-col gap-0.5 px-2.5 pt-3">
       <button class="side-item" @click="$emit('new')">
         <Plus :size="15" :stroke-width="1.8" />
-        {{ t('chat_history_new', '新对话') }}
+        {{ '新对话' }}
       </button>
       <div class="side-search">
         <Search :size="15" :stroke-width="1.8" />
         <input
           v-model="keyword"
           type="text"
-          :placeholder="t('chat_history_search', '搜索')"
+          :placeholder="'搜索'"
         />
       </div>
     </div>
@@ -19,7 +19,7 @@
     <!-- 列表（按时间分组） -->
     <div class="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4 [scrollbar-width:none]">
       <div v-if="!filtered.length" class="py-14 text-center text-[12.5px] text-faint">
-        {{ t('chat_history_empty', '暂无对话记录') }}
+        {{ '暂无对话记录' }}
       </div>
       <template v-for="group in groups" :key="group.label">
         <div class="side-group">{{ group.label }}</div>
@@ -28,9 +28,9 @@
           :key="c.id"
           class="chat-item"
           :class="{ on: c.id === currentId }"
-          :title="c.title || t('chat_new_title', '新对话')"
+          :title="c.title || '新对话'"
           @click="$emit('open', c)"
-        >{{ c.title || t('chat_new_title', '新对话') }}</button>
+        >{{ c.title || '新对话' }}</button>
       </template>
     </div>
   </aside>
@@ -39,7 +39,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { Plus, Search } from 'lucide-vue-next';
-import { t } from '../../../system/locale.js';
 
 defineProps({
   currentId: { type: [String, Number], default: null }
@@ -60,9 +59,9 @@ const groups = computed(() => {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const dayMs = 86400000;
   const buckets = [
-    { label: t('chat_group_today', '今天'), items: [] },
-    { label: t('chat_group_week', '最近 7 天'), items: [] },
-    { label: t('chat_group_earlier', '更早'), items: [] },
+    { label: '今天', items: [] },
+    { label: '最近 7 天', items: [] },
+    { label: '更早', items: [] },
   ];
   for (const c of filtered.value) {
     const ts = new Date(c.updated_at || c.created_at || 0).getTime();

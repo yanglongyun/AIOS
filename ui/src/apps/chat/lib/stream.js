@@ -1,6 +1,5 @@
 import { on } from '@/system/ws.js';
 import { mapToolCall, mkKey } from './messages.js';
-import { t } from '../../../system/locale.js';
 
 export function setupChatStream({ messages, currentChatId, busy, streamingKey, seenKeys, scrollToBottom }) {
   const isCurrent = (data) => data.chatId === currentChatId.value;
@@ -93,8 +92,8 @@ export function setupChatStream({ messages, currentChatId, busy, streamingKey, s
       if (data.chatId && !isCurrent(data)) return;
       closeStreaming();
       const content = data.code === 'model_settings_missing'
-        ? t('chat_error_missing_settings', '还没有配置模型。请先打开设置，填写模型供应方、模型名称和 API Key，然后再发送消息。')
-        : `${t('chat_error_prefix', '错误')}: ${data.content || ''}`;
+        ? '还没有配置模型。请先打开设置，填写模型供应方、模型名称和 API Key，然后再发送消息。'
+        : `${'错误'}: ${data.content || ''}`;
       messages.value.push({ role: 'assistant', content, _key: mkKey('error') });
       busy.value = false;
       scrollToBottom?.(true);

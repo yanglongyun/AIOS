@@ -9,7 +9,7 @@
       v-if="!todo.subtasks.length && !todo.done"
       class="row-dec-btn"
       :class="{ busy: decomposing }"
-      title="AI 分解"
+      title="__T_TODO_AI_DECOMPOSE__"
       :disabled="decomposeDisabled"
       @click.stop="$emit('decompose')"
     >

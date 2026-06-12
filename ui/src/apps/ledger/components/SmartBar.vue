@@ -3,10 +3,10 @@
       <input
         v-model="text"
         :disabled="busy"
-        placeholder="随手记一笔,如「午餐 32」「昨天打车 18.5」"
+        placeholder="__T_LEDGER_SMART_PLACEHOLDER__"
         @keyup.enter="$emit('send')"
       />
-      <button class="send" :disabled="busy" :class="{ busy }" @click="$emit('send')" aria-label="发送">
+      <button class="send" :disabled="busy" :class="{ busy }" @click="$emit('send')" aria-label="__T_COMMON_SEND__">
         <span v-if="busy" class="spin"></span>
         <ArrowUp v-else :size="14" :stroke-width="2" />
       </button>

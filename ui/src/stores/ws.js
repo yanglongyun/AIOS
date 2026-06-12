@@ -5,7 +5,7 @@ import { computed, ref } from 'vue';
 
 export const useWsStore = defineStore('ws', () => {
     const state = ref('ready');
-    const statusText = ref('已连接');
+    const statusText = ref('__T_WS_CONNECTED__');
 
     const configured = ref(true);
 

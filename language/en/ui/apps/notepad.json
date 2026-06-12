@@ -1,0 +1,22 @@
+{
+  "app_name_notepad": "Notepad",
+  "notepad_placeholder": "Write something...",
+  "notepad_body_placeholder": "Write something…",
+  "notepad_ai_hint": "AI polishing generates a draft first and writes only when accepted",
+  "notepad_ai_placeholder": "Ask AI: polish, expand, brainstorm…",
+  "notepad_ai_generating": "Generating...",
+  "notepad_adopt": "Adopt",
+  "notepad_adopted": "Adopted",
+  "notepad_empty": "No notes yet",
+  "notepad_empty_title": "No matching notes",
+  "notepad_empty_hint": "Tap “+ New Note” at the top right to write one",
+  "notepad_new_note": "+ New Note",
+  "notepad_search_placeholder": "Search title, content, tags",
+  "notepad_edit_title": "Edit Note",
+  "notepad_delete_note": "Delete note",
+  "notepad_untitled": "Untitled",
+  "notepad_pinned": "Pinned",
+  "notepad_confirm_delete": "Delete this note?",
+  "notepad_new_folder_prompt": "New folder name",
+  "notepad_new_tag_prompt": "Tag name"
+}

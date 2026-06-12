@@ -1,7 +1,7 @@
 <template>
   <div class="note" :style="noteStyle(note)" @click="$emit('open', note)">
     <span class="tape" :style="{ background: accentOf(note.color) + '4d' }"></span>
-    <h3>{{ note.title || '无标题' }}</h3>
+    <h3>{{ note.title || '__T_NOTEPAD_UNTITLED__' }}</h3>
     <p v-html="snippet(note.content)"></p>
     <div class="ft">
       <i v-for="tag in note.tags.slice(0, 2)" :key="tag" :style="{ color: accentOf(note.color), background: 'transparent', border: '1px solid ' + accentOf(note.color) + '55' }">#{{ tag }}</i>

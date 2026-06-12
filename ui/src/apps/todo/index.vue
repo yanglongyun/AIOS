@@ -56,7 +56,7 @@ const sorted = computed(() => [
 ]);
 
 const toggleOpen = (todo) => { openId.value = openId.value === todo.id ? null : todo.id; };
-const toggleDone = async (todo) => { await patch(todo, { done: !todo.done }); showToast(!todo.done ? '完成 ✓ 干得好' : '已取消完成'); };
+const toggleDone = async (todo) => { await patch(todo, { done: !todo.done }); showToast(!todo.done ? '__T_TODO_DONE_TOAST__' : '__T_TODO_UNDONE_TOAST__'); };
 const toggleSub = async (todo, sub) => {
   const subtasks = todo.subtasks.map((s) => s.id === sub.id ? { ...s, done: !s.done } : s);
   await patch(todo, { subtasks, done: subtasks.length > 0 && subtasks.every((s) => s.done) });
@@ -69,7 +69,7 @@ const addTodo = async () => {
   await postJson('/apps/todo/todos', parsed);
   input.value = '';
   await load();
-  showToast(`已添加到「${parsed.section === 'today' ? '今天' : '稍后'}」`);
+  showToast(`__T_TODO_ADDED_TO__`.replace('{section}', parsed.section === 'today' ? '__T_TIME_TODAY__' : '__T_TODO_SECTION_LATER__'));
 };
 const decomposeRow = async (todo) => {
   if (decomposingId.value !== null) return;
@@ -77,12 +77,12 @@ const decomposeRow = async (todo) => {
   try {
     const subtasks = ((await postJson('/apps/todo/decompose', { text: todo.text })).subtasks || [])
       .map(({ id, text, done }) => ({ id, text, done: !!done }));
-    if (!subtasks.length) { showRowError(todo.id, 'AI 没有给出子任务,换个说法试试'); return; }
+    if (!subtasks.length) { showRowError(todo.id, '__T_TODO_AI_NO_SUBTASKS__'); return; }
     await patch(todo, { subtasks });
     openId.value = todo.id;
-    showToast(`已分解为 ${subtasks.length} 个子任务`);
+    showToast(`__T_TODO_DECOMPOSED__`.replace('{n}', String(subtasks.length)));
   } catch (error) {
-    showRowError(todo.id, error.message || '分解失败,请重试');
+    showRowError(todo.id, error.message || '__T_TODO_DECOMPOSE_FAILED__');
   } finally {
     decomposingId.value = null;
   }

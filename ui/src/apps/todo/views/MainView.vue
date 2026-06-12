@@ -1,12 +1,12 @@
 <template>
   <div class="page">
     <div class="h-row">
-      <h2>待办</h2>
+      <h2>__T_APP_NAME_TODO__</h2>
     </div>
 
     <div class="input-bar">
-      <input v-model="input" placeholder="输入待办,回车添加" @keydown.enter="$emit('add')" />
-      <button class="blue-btn" @click="$emit('add')">添加</button>
+      <input v-model="input" placeholder="__T_TODO_INPUT_PLACEHOLDER__" @keydown.enter="$emit('add')" />
+      <button class="blue-btn" @click="$emit('add')">__T_TODO_ADD__</button>
     </div>
 
     <template v-if="sorted.length">
@@ -29,7 +29,7 @@
         </template>
       </template>
     </template>
-    <div v-else class="empty"><b>这里很干净</b><p>在上方输入一条待办</p></div>
+    <div v-else class="empty"><b>__T_TODO_EMPTY_TITLE__</b><p>__T_TODO_EMPTY_HINT__</p></div>
   </div>
 </template>
 

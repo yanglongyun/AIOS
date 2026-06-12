@@ -1,21 +1,21 @@
 <template>
   <div class="page">
-    <div class="h-row"><h2>设置</h2></div>
+    <div class="h-row"><h2>__T_APP_NAME_SETTINGS__</h2></div>
 
     <TabBar v-model:active="activeTab" :tabs="tabs" />
 
     <div class="card">
       <div v-if="activeTab === 'model'">
-        <Field label="模型" hint="对话与任务默认使用的大模型。">
+        <Field label="__T_SETTINGS_MODEL__" hint="__T_SETTINGS_MODEL_FIELD_HINT__">
           <input v-model="form.model" placeholder="gpt-5.2 / deepseek-v4-pro / ..." />
         </Field>
-        <Field label="API 地址">
+        <Field label="__T_SETTINGS_API_URL__">
           <input v-model="form.apiUrl" placeholder="https://..." />
         </Field>
         <Field label="API Key">
           <input v-model="form.apiKey" type="password" autocomplete="off" placeholder="sk-..." />
         </Field>
-        <Field label="上下文轮数">
+        <Field label="__T_SETTINGS_CONTEXT_TURNS__">
           <input v-model.number="form.contextTurns" type="number" min="0" step="1" />
         </Field>
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:18px">
@@ -23,19 +23,19 @@
             {{ message }}
           </span>
           <button class="blue-btn" :disabled="saving" @click="$emit('save')">
-            {{ saving ? '保存中...' : '保存' }}
+            {{ saving ? '__T_SETTINGS_SAVING__' : '__T_COMMON_SAVE__' }}
           </button>
         </div>
       </div>
 
       <div v-else-if="activeTab === 'prompt'">
-        <Field label="提示词" hint="当前发给模型的完整系统提示词。">
-          <pre class="prompt-box">{{ promptPreview || '加载中...' }}</pre>
+        <Field label="__T_SETTINGS_TAB_PROMPT__" hint="__T_SETTINGS_PROMPT_HINT__">
+          <pre class="prompt-box">{{ promptPreview || '__T_COMMON_LOADING__' }}</pre>
         </Field>
       </div>
 
       <div v-else-if="activeTab === 'skills'">
-        <Field label="技能" hint="系统当前可用的能力说明。">
+        <Field label="__T_SETTINGS_TAB_SKILLS__" hint="__T_SETTINGS_SKILLS_HINT__">
           <template v-if="skills.length">
             <div v-for="skill in skills" :key="skill.name" class="opt">
               <span class="opt-main">
@@ -44,12 +44,12 @@
               </span>
             </div>
           </template>
-          <div v-else class="opt"><span class="opt-main"><span class="opt-desc">暂无技能</span></span></div>
+          <div v-else class="opt"><span class="opt-main"><span class="opt-desc">__T_SETTINGS_SKILLS_EMPTY__</span></span></div>
         </Field>
       </div>
 
       <div v-else-if="activeTab === 'theme'">
-        <Field label="主题" :hint="`当前生效: ${resolvedThemeLabel}`">
+        <Field label="__T_SETTINGS_THEME_TITLE__" :hint="`__T_SETTINGS_THEME_ACTIVE__`.replace('{t}', resolvedThemeLabel)">
           <button
             v-for="option in themeOptions"
             :key="option.id"
@@ -67,14 +67,14 @@
       </div>
 
       <div v-else>
-        <Field label="关于">
+        <Field label="__T_SETTINGS_TAB_ABOUT__">
           <div class="opt">
             <span class="opt-main">
               <span class="opt-title">AIOS</span>
-              <span class="opt-desc">AI 时代的操作系统。</span>
+              <span class="opt-desc">__T_SETTINGS_ABOUT_DESC__</span>
               <span class="about-links">
-                <a href="https://github.com/realuckyang/AIOS" target="_blank" rel="noreferrer">开源仓库</a>
-                <a href="https://iimos.ai" target="_blank" rel="noreferrer">官网 iimos.ai</a>
+                <a href="https://github.com/realuckyang/AIOS" target="_blank" rel="noreferrer">__T_SETTINGS_ABOUT_REPO__</a>
+                <a href="https://iimos.ai" target="_blank" rel="noreferrer">__T_SETTINGS_ABOUT_SITE__</a>
               </span>
             </span>
           </div>
@@ -104,11 +104,11 @@ const activeTab = defineModel('activeTab', { type: String, default: 'model' });
 
 const theme = useThemeStore();
 const themeOptions = [
-  { id: 'system', label: '跟随系统', desc: '根据设备明暗偏好自动切换' },
-  { id: 'light', label: '明亮', desc: '暖白平面风格' },
-  { id: 'dark', label: '暗色', desc: '深色平面风格' },
+  { id: 'system', label: '__T_SETTINGS_THEME_SYSTEM__', desc: '__T_SETTINGS_THEME_SYSTEM_DESC__' },
+  { id: 'light', label: '__T_SETTINGS_THEME_LIGHT__', desc: '__T_SETTINGS_THEME_LIGHT_DESC__' },
+  { id: 'dark', label: '__T_SETTINGS_THEME_DARK__', desc: '__T_SETTINGS_THEME_DARK_DESC__' },
 ];
-const resolvedThemeLabel = computed(() => theme.resolved === 'dark' ? '暗色' : '明亮');
+const resolvedThemeLabel = computed(() => theme.resolved === 'dark' ? '__T_SETTINGS_THEME_DARK__' : '__T_SETTINGS_THEME_LIGHT__');
 </script>
 
 <style scoped>

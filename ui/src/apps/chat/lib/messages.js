@@ -23,7 +23,7 @@ export const mapToolCall = (toolCall, _key) => {
   return {
     type: 'tool_call',
     toolCall,
-    title: name || '工具调用',
+    title: name || '__T_CHAT_TOOL_CALL__',
     detail: args ? JSON.stringify(args, null, 2) : '',
     expanded: false,
     _key

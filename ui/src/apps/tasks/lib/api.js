@@ -51,8 +51,8 @@ export const relTime = (s) => {
   const d = parseTime(s);
   if (!d) return '';
   const diff = Date.now() - d.getTime();
-  if (diff < 60000) return '刚刚';
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
+  if (diff < 60000) return '__T_TIME_JUST_NOW__';
+  if (diff < 3600000) return `__T_TIME_MINUTES_AGO__`.replace('{n}', String(Math.floor(diff / 60000)));
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   const sameDay = dayKey(d) === 'today';

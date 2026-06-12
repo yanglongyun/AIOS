@@ -47,7 +47,7 @@ import { setupChatStream } from './lib/stream.js';
 
 const sidebarOpen = ref(false);
 const currentChatId = ref(null);
-const currentTitle = ref('对话');
+const currentTitle = ref('__T_CHAT_TITLE__');
 const messages = ref([]);
 const busy = ref(false);
 const hasMore = ref(false);
@@ -61,13 +61,13 @@ const historyRef = ref(null);
 let unsubs = [];
 
 const emptyHints = [
-  { icon: '🛠️', label: '帮我做个应用', desc: '描述需求，AI 自动写代码上线', text: '帮我做一个旅行清单应用' },
-  { icon: '💻', label: '执行命令', desc: '在本机终端运行任意 shell 操作', text: '查看当前系统磁盘使用情况' },
-  { icon: '📄', label: '处理文件', desc: '上传附件让 AI 分析、整理、转换', text: '我想上传一个文件让你帮我分析' },
-  { icon: '🤖', label: '自动化任务', desc: '设置定时任务，AI 定期执行', text: '帮我创建一个每天早上推送新闻摘要的任务' },
+  { icon: '🛠️', label: '__T_CHAT_HINT_APP_LABEL__', desc: '__T_CHAT_HINT_APP_DESC__', text: '__T_CHAT_HINT_APP_TEXT__' },
+  { icon: '💻', label: '__T_CHAT_HINT_SHELL_LABEL__', desc: '__T_CHAT_HINT_SHELL_DESC__', text: '__T_CHAT_HINT_SHELL_TEXT__' },
+  { icon: '📄', label: '__T_CHAT_HINT_FILE_LABEL__', desc: '__T_CHAT_HINT_FILE_DESC__', text: '__T_CHAT_HINT_FILE_TEXT__' },
+  { icon: '🤖', label: '__T_CHAT_HINT_TASK_LABEL__', desc: '__T_CHAT_HINT_TASK_DESC__', text: '__T_CHAT_HINT_TASK_TEXT__' },
 ];
 
-watch(currentTitle, (v) => { topTitle.value = v || '对话'; });
+watch(currentTitle, (v) => { topTitle.value = v || '__T_CHAT_TITLE__'; });
 
 watch(sidebarOpen, (open) => {
   if (open) historyRef.value?.reload();
@@ -78,7 +78,7 @@ const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 async function onHistorySelect(c) {
   if (isMobile()) sidebarOpen.value = false;
   currentChatId.value = c.id;
-  currentTitle.value = c.title || '对话';
+  currentTitle.value = c.title || '__T_CHAT_TITLE__';
   await loadPage(c.id);
   scrollToBottom(false);
 }
@@ -86,7 +86,7 @@ async function onHistorySelect(c) {
 function onNewChat() {
   if (isMobile()) sidebarOpen.value = false;
   currentChatId.value = null;
-  currentTitle.value = '新对话';
+  currentTitle.value = '__T_CHAT_NEW_TITLE__';
   messages.value = [];
   seenKeys.value = new Set();
   streamingKey.value = '';
@@ -144,7 +144,7 @@ watch(() => messages.value.length, (n, o) => {
 
 async function ensureConversation(text, files) {
   if (currentChatId.value) return;
-  const title = (text || files[0]?.name || '文件').slice(0, 20);
+  const title = (text || files[0]?.name || '__T_CHAT_FILE_TITLE__').slice(0, 20);
   const data = await createConversation(title);
   currentChatId.value = data.chatId || data.chat?.id;
   currentTitle.value = title;
@@ -159,7 +159,7 @@ async function handleSend() {
   try {
     await ensureConnected();
   } catch {
-    messages.value.push({ role: 'assistant', content: '错误: WebSocket 未连接，请检查服务是否启动' });
+    messages.value.push({ role: 'assistant', content: `__T_CHAT_WS_DISCONNECTED__` });
     busy.value = false;
     return;
   }
@@ -167,7 +167,7 @@ async function handleSend() {
   await ensureConversation(text, files);
 
   const attachments = files.map((f) => ({ type: 'file', name: f.name, path: f.path, size: f.size }));
-  const content = text || '请先阅读附件并总结关键信息';
+  const content = text || `__T_CHAT_ATTACHMENT_DEFAULT_PROMPT__`;
   send({ type: 'chat.message', chatId: currentChatId.value, prompt: content, source: 'user', attachments });
   input.value = '';
   composerRef.value?.clearFiles();
@@ -199,7 +199,7 @@ onMounted(async () => {
   topTitle.value = currentTitle.value;
   topLeftAction.value = {
     icon: 'menu',
-    title: '对话历史',
+    title: '__T_CHAT_HISTORY_TITLE__',
     fn: () => { sidebarOpen.value = !sidebarOpen.value; }
   };
 
@@ -212,7 +212,7 @@ onMounted(async () => {
     if (list.length) {
       const last = list[0];
       currentChatId.value = last.id;
-      currentTitle.value = last.title || '对话';
+      currentTitle.value = last.title || '__T_CHAT_TITLE__';
       await loadPage(last.id);
       scrollToBottom(false);
     }

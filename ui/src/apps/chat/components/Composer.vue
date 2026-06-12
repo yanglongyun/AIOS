@@ -48,7 +48,7 @@ const appendFiles = async (files = []) => {
   if (!files.length) return;
   uploadError.value = '';
   if (pendingFiles.value.length >= MAX_FILES) {
-    uploadError.value = '最多只能添加 10 个文件';
+    uploadError.value = '__T_CHAT_UPLOAD_LIMIT__';
     return;
   }
   uploading.value = true;
@@ -57,7 +57,7 @@ const appendFiles = async (files = []) => {
     const seenUploaded = new Set(pendingFiles.value.map(pendingFileKey));
     for (const f of files) {
       if (pendingFiles.value.length >= MAX_FILES) {
-        uploadError.value = '最多只能添加 10 个文件';
+        uploadError.value = '__T_CHAT_UPLOAD_LIMIT__';
         break;
       }
       const localKey = localFileKey(f);
@@ -71,7 +71,7 @@ const appendFiles = async (files = []) => {
       }
     }
   } catch (err) {
-    uploadError.value = err.message || '上传失败';
+    uploadError.value = err.message || '__T_CHAT_UPLOAD_FAILED__';
   } finally {
     uploading.value = false;
   }
@@ -127,7 +127,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         type="button"
         :disabled="busy || uploading"
-        :title="'附件'"
+        :title="'__T_CHAT_ATTACH__'"
         @click="openFilePicker"
         class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full bg-transparent text-muted hover:bg-bg-hi disabled:opacity-40"
       >
@@ -141,7 +141,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         @keydown.enter.exact="onEnter"
         @compositionstart="composing = true"
         @compositionend="composing = false"
-        :placeholder="busy ? '进行中...' : '问点什么...'"
+        :placeholder="busy ? '__T_CHAT_PLACEHOLDER_BUSY__' : '__T_CHAT_PLACEHOLDER_INPUT__'"
         rows="1"
         :disabled="busy"
         class="block max-h-[180px] min-h-[34px] flex-1 resize-none border-none bg-transparent py-[6px] font-[inherit] text-[15px] leading-[22px] text-ink outline-none placeholder:text-[var(--color-faint)] disabled:opacity-50"
@@ -149,7 +149,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         v-if="busy"
         type="button"
-        :title="'停止'"
+        :title="'__T_COMMON_STOP__'"
         @click="emit('abort')"
         class="composer-send grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-white"
       >
@@ -158,7 +158,7 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
       <button
         v-else
         type="button"
-        :title="'发送'"
+        :title="'__T_COMMON_SEND__'"
         :disabled="!modelValue.trim() && !pendingFiles.length"
         @click="emit('send')"
         class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full transition-colors"

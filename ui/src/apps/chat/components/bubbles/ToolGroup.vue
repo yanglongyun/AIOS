@@ -15,7 +15,7 @@ const calls = computed(() => props.items.filter((m) => m.type === 'tool_call'));
 const allDone = computed(() => calls.value.every((m) => m.result != null));
 const running = computed(() => props.busy && !allDone.value);
 
-const toolName = (m) => m.toolCall?.function?.name || (m.shell ? 'shell' : '工具');
+const toolName = (m) => m.toolCall?.function?.name || (m.shell ? 'shell' : '__T_CHAT_TOOL__');
 const toolDesc = (m) => m.shell ? (m.title || m.command || '') : (m.title || '');
 const toolInput = (m) => m.shell ? `$ ${m.command || ''}` : (m.detail || '');
 const toolOutput = (m) => {
@@ -40,7 +40,7 @@ const toggleRow = (m) => { m.expanded = !m.expanded; };
     <button type="button" class="tg-head" @click="open = !open">
       <span v-if="running" class="spin" aria-hidden="true"></span>
       <span v-else class="ok"><Check :size="11" :stroke-width="2.5" /></span>
-      <span class="count">{{ `${calls.length} 个活动` }}</span>
+      <span class="count">{{ `__T_CHAT_ACTIVITY_COUNT__`.replace('{n}', String(calls.length)) }}</span>
       <span class="latest">{{ latest }}</span>
       <ChevronDown class="chev" :size="14" :stroke-width="2" />
     </button>
@@ -55,11 +55,11 @@ const toggleRow = (m) => { m.expanded = !m.expanded; };
         </button>
         <div v-if="m.expanded" class="tr-detail">
           <template v-if="toolInput(m)">
-            <label>{{ '输入' }}</label>
+            <label>{{ '__T_CHAT_TOOL_INPUT__' }}</label>
             <pre>{{ toolInput(m) }}</pre>
           </template>
           <template v-if="toolOutput(m)">
-            <label>{{ '输出' }}</label>
+            <label>{{ '__T_CHAT_TOOL_OUTPUT__' }}</label>
             <pre>{{ toolOutput(m) }}</pre>
           </template>
         </div>

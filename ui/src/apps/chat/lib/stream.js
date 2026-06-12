@@ -92,8 +92,8 @@ export function setupChatStream({ messages, currentChatId, busy, streamingKey, s
       if (data.chatId && !isCurrent(data)) return;
       closeStreaming();
       const content = data.code === 'model_settings_missing'
-        ? '还没有配置模型。请先打开设置，填写模型供应方、模型名称和 API Key，然后再发送消息。'
-        : `${'错误'}: ${data.content || ''}`;
+        ? `__T_CHAT_ERROR_MISSING_SETTINGS__`
+        : `${'__T_CHAT_ERROR_PREFIX__'}: ${data.content || ''}`;
       messages.value.push({ role: 'assistant', content, _key: mkKey('error') });
       busy.value = false;
       scrollToBottom?.(true);

@@ -47,8 +47,8 @@ export const snippet = (content) => String(content || '').split('\n').filter(Boo
 }).join('');
 export const timeAgo = (value) => {
   const diff = Date.now() - new Date(value).getTime();
-  if (diff < 60000) return '刚刚';
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
-  return `${Math.floor(diff / 86400000)} 天前`;
+  if (diff < 60000) return '__T_TIME_JUST_NOW__';
+  if (diff < 3600000) return `__T_TIME_MINUTES_AGO__`.replace('{n}', String(Math.floor(diff / 60000)));
+  if (diff < 86400000) return `__T_TIME_HOURS_AGO__`.replace('{n}', String(Math.floor(diff / 3600000)));
+  return `__T_TIME_DAYS_AGO__`.replace('{n}', String(Math.floor(diff / 86400000)));
 };

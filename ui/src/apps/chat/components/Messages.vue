@@ -95,7 +95,7 @@ defineExpose({ msgBox, scrollToBottom });
       <div class="hero-logo mb-6 grid h-14 w-14 place-items-center rounded-2xl">
         <MessageCircle :size="28" :stroke-width="1.9" />
       </div>
-      <p class="mb-7 text-[32px] font-bold tracking-[-0.5px] text-ink">{{ '今天想做点什么?' }}</p>
+      <p class="mb-7 text-[32px] font-bold tracking-[-0.5px] text-ink">{{ '__T_CHAT_EMPTY_HERO__' }}</p>
       <div class="flex w-full max-w-[560px] flex-wrap justify-center gap-2.5">
         <div
           v-for="hint in heroHints"
@@ -111,7 +111,7 @@ defineExpose({ msgBox, scrollToBottom });
     </div>
 
     <template v-else>
-      <div v-if="hasMore" class="py-2 text-center text-[11px] text-faint">{{ '加载更多...' }}</div>
+      <div v-if="hasMore" class="py-2 text-center text-[11px] text-faint">{{ '__T_CHAT_LOAD_MORE__' }}</div>
 
       <template v-for="block in blocks" :key="block.key">
         <ToolGroup v-if="block.kind === 'tools'" :items="block.items" :busy="busy" />
@@ -121,17 +121,17 @@ defineExpose({ msgBox, scrollToBottom });
             <BubbleAi :content="block.m.content" />
           </div>
           <div class="msg-feedback">
-            <button type="button" class="fb-btn" :title="'复制'" @click="copyMsg(block)">
+            <button type="button" class="fb-btn" :title="'__T_COMMON_COPY__'" @click="copyMsg(block)">
               <Copy v-if="copiedKey !== block.key" :size="15" :stroke-width="1.8" />
               <Check v-else :size="15" :stroke-width="2.2" style="color: var(--color-good, #2e9e5b)" />
             </button>
-            <button type="button" class="fb-btn" :title="'用量'" @click.stop="togglePop(block)">
+            <button type="button" class="fb-btn" :title="'__T_CHAT_USAGE__'" @click.stop="togglePop(block)">
               <Info :size="15" :stroke-width="1.8" />
             </button>
             <div v-if="activePop === block.key" class="token-pop">
-              <div class="row"><span>{{ '输入 tokens' }}</span><b>{{ usageOf(block.m).input }}</b></div>
-              <div class="row"><span>{{ '输出 tokens' }}</span><b>{{ usageOf(block.m).output }}</b></div>
-              <div class="row"><span>{{ '合计' }}</span><b>{{ usageOf(block.m).total }}</b></div>
+              <div class="row"><span>{{ '__T_CHAT_TOKENS_IN__' }}</span><b>{{ usageOf(block.m).input }}</b></div>
+              <div class="row"><span>{{ '__T_CHAT_TOKENS_OUT__' }}</span><b>{{ usageOf(block.m).output }}</b></div>
+              <div class="row"><span>{{ '__T_CHAT_TOKENS_TOTAL__' }}</span><b>{{ usageOf(block.m).total }}</b></div>
             </div>
           </div>
         </template>

@@ -1,0 +1,19 @@
+{
+  "app_name_todo": "Todo",
+  "todo_placeholder": "Add a todo...",
+  "todo_input_placeholder": "Type a todo, press Enter to add",
+  "todo_add": "Add",
+  "todo_ai_hint": "AI decomposition creates checkable subtasks for the selected todo",
+  "todo_ai_decompose": "AI breakdown",
+  "todo_ai_no_subtasks": "AI returned no subtasks, try rephrasing",
+  "todo_decomposed": "Split into {n} subtasks",
+  "todo_decompose_failed": "Failed to decompose, please retry",
+  "todo_empty": "No todos yet",
+  "todo_empty_title": "All clear here",
+  "todo_empty_hint": "Add a todo above",
+  "todo_done_toast": "Done ✓ nice work",
+  "todo_undone_toast": "Marked as not done",
+  "todo_added_to": "Added to “{section}”",
+  "todo_section_later": "Later",
+  "todo_overdue_days": "Overdue by {n} days"
+}

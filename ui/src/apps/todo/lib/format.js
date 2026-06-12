@@ -5,10 +5,10 @@ export const sortTodos = (a, b) => (b.priority === 'high') - (a.priority === 'hi
 export function dueLabel(due) {
   if (!due) return { text: '', cls: '' };
   const diff = Math.round((new Date(due) - new Date(today())) / 86400000);
-  if (diff < 0) return { text: `已逾期 ${Math.abs(diff)} 天`, cls: 'late' };
-  if (diff === 0) return { text: '今天', cls: 'soon' };
-  if (diff === 1) return { text: '明天', cls: 'soon' };
-  return { text: new Date(due).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }), cls: '' };
+  if (diff < 0) return { text: `__T_TODO_OVERDUE_DAYS__`.replace('{n}', String(Math.abs(diff))), cls: 'late' };
+  if (diff === 0) return { text: '__T_TIME_TODAY__', cls: 'soon' };
+  if (diff === 1) return { text: '__T_TIME_TOMORROW__', cls: 'soon' };
+  return { text: new Date(due).toLocaleDateString('__T__LOCALE_FULL__', { month: 'numeric', day: 'numeric' }), cls: '' };
 }
 
 export function parseLocal(raw) {

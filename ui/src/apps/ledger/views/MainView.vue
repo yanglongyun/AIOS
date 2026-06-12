@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <div class="h-row">
-      <h2>记账本</h2>
+      <h2>__T_APP_NAME_LEDGER__</h2>
       <div class="pill-btn month">
         <button class="nav" @click="$emit('shift-month', -1)">‹</button>
         <b>{{ monthLabel }}</b>
@@ -10,9 +10,9 @@
     </div>
 
     <div class="card bal" style="margin-bottom:16px">
-      <small>月结余 · BALANCE</small>
+      <small>__T_LEDGER_BALANCE_LABEL__</small>
       <div class="num" :class="{ neg: summary.balance < 0 }">¥ {{ money(summary.balance) }}</div>
-      <div class="io"><span class="in">↘ 收入 ¥{{ money(summary.income) }}</span><span class="out">↗ 支出 ¥{{ money(summary.expense) }}</span></div>
+      <div class="io"><span class="in">↘ __T_LEDGER_INCOME__ ¥{{ money(summary.income) }}</span><span class="out">↗ __T_LEDGER_EXPENSE__ ¥{{ money(summary.expense) }}</span></div>
     </div>
 
     <SmartBar v-model:text="smartText" :busy="smartBusy" :error="smartError" @send="$emit('smart-send')" />
@@ -20,7 +20,7 @@
     <template v-if="entries.length">
       <EntryRow v-for="entry in entries" :key="entry.id" :entry="entry" :category="cat(entry.category)" @open="$emit('open', $event)" />
     </template>
-    <div v-else class="empty"><b>这个月还没有账目</b><p>在上方输入框随手记一笔</p></div>
+    <div v-else class="empty"><b>__T_LEDGER_EMPTY_TITLE__</b><p>__T_LEDGER_EMPTY_HINT__</p></div>
   </div>
 </template>
 

@@ -4,14 +4,14 @@
     <div class="flex shrink-0 flex-col gap-0.5 px-2.5 pt-3">
       <button class="side-item" @click="$emit('new')">
         <Plus :size="15" :stroke-width="1.8" />
-        {{ '新对话' }}
+        {{ '__T_CHAT_NEW_TITLE__' }}
       </button>
       <div class="side-search">
         <Search :size="15" :stroke-width="1.8" />
         <input
           v-model="keyword"
           type="text"
-          :placeholder="'搜索'"
+          :placeholder="'__T_CHAT_SEARCH__'"
         />
       </div>
     </div>
@@ -19,7 +19,7 @@
     <!-- 列表（按时间分组） -->
     <div class="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4 [scrollbar-width:none]">
       <div v-if="!filtered.length" class="py-14 text-center text-[12.5px] text-faint">
-        {{ '暂无对话记录' }}
+        {{ '__T_CHAT_HISTORY_EMPTY__' }}
       </div>
       <template v-for="group in groups" :key="group.label">
         <div class="side-group">{{ group.label }}</div>
@@ -28,9 +28,9 @@
           :key="c.id"
           class="chat-item"
           :class="{ on: c.id === currentId }"
-          :title="c.title || '新对话'"
+          :title="c.title || '__T_CHAT_NEW_TITLE__'"
           @click="$emit('open', c)"
-        >{{ c.title || '新对话' }}</button>
+        >{{ c.title || '__T_CHAT_NEW_TITLE__' }}</button>
       </template>
     </div>
   </aside>
@@ -59,9 +59,9 @@ const groups = computed(() => {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const dayMs = 86400000;
   const buckets = [
-    { label: '今天', items: [] },
-    { label: '最近 7 天', items: [] },
-    { label: '更早', items: [] },
+    { label: '__T_CHAT_TODAY__', items: [] },
+    { label: '__T_CHAT_GROUP_RECENT_7D__', items: [] },
+    { label: '__T_CHAT_GROUP_EARLIER__', items: [] },
   ];
   for (const c of filtered.value) {
     const ts = new Date(c.updated_at || c.created_at || 0).getTime();

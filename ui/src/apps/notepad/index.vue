@@ -67,14 +67,14 @@ const load = async () => {
 
 const greeting = computed(() => {
   const h = new Date().getHours();
-  return h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+  return h < 5 ? '__T_COMMON_GREETING_NIGHT__' : h < 11 ? '__T_COMMON_GREETING_MORNING__' : h < 13 ? '__T_COMMON_GREETING_NOON__' : h < 18 ? '__T_COMMON_GREETING_AFTERNOON__' : '__T_COMMON_GREETING_EVENING__';
 });
-const todayLabel = computed(() => new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }));
+const todayLabel = computed(() => new Date().toLocaleDateString('__T__LOCALE_FULL__', { month: 'long', day: 'numeric' }));
 const weekCount = computed(() => notes.value.filter((n) => Date.now() - new Date(n.updated_at).getTime() < 7 * 86400000).length);
 const folderChips = computed(() => {
   const base = [
-    { key: 'all', label: '全部', count: notes.value.length },
-    { key: 'pinned', label: '置顶', count: notes.value.filter((n) => n.pinned).length },
+    { key: 'all', label: '__T_COMMON_ALL__', count: notes.value.length },
+    { key: 'pinned', label: '__T_NOTEPAD_PINNED__', count: notes.value.filter((n) => n.pinned).length },
   ];
   return base.concat(folders.value.map((folder) => ({
     key: folder.name,
@@ -96,7 +96,7 @@ const filteredNotes = computed(() => {
 });
 const charCount = computed(() => active.value ? active.value.content.replace(/\s/g, '').length : 0);
 const readMinutes = computed(() => Math.max(1, Math.ceil(charCount.value / 450)));
-const docDate = computed(() => active.value ? new Date(active.value.updated_at || Date.now()).toLocaleDateString('zh-CN') : '');
+const docDate = computed(() => active.value ? new Date(active.value.updated_at || Date.now()).toLocaleDateString('__T__LOCALE_FULL__') : '');
 
 const showToast = (text) => {
   toastText.value = text;
@@ -153,14 +153,14 @@ const saveNow = async () => {
   saving.value = false;
 };
 const removeActive = async () => {
-  if (!active.value || !confirm('删除这篇笔记?')) return;
+  if (!active.value || !confirm('__T_NOTEPAD_CONFIRM_DELETE__')) return;
   await request(`/apps/notepad/notes?id=${active.value.id}`, { method: 'DELETE' });
   active.value = null;
   await load();
-  showToast('已删除');
+  showToast('__T_COMMON_DELETED__');
 };
 const addFolder = async () => {
-  const name = prompt('新文件夹名称');
+  const name = prompt('__T_NOTEPAD_NEW_FOLDER_PROMPT__');
   if (!name?.trim()) return;
   await request('/apps/notepad/folders', {
     method: 'POST',
@@ -171,7 +171,7 @@ const addFolder = async () => {
 };
 const addTag = () => {
   if (!active.value) return;
-  const tag = prompt('标签名称');
+  const tag = prompt('__T_NOTEPAD_NEW_TAG_PROMPT__');
   if (!tag?.trim()) return;
   active.value.tags = [...new Set([...(active.value.tags || []), tag.trim().replace(/^#/, '')])];
   scheduleSave();
@@ -204,7 +204,7 @@ const askAi = async () => {
     aiResult.value = data.result?.content || '';
     aiPrompt.value = '';
   } catch (err) {
-    aiError.value = `错误: ${err.message}`;
+    aiError.value = `${'__T_COMMON_ERROR__'}: ${err.message}`;
   } finally {
     aiLoading.value = false;
     aiOpen.value = true;
@@ -216,7 +216,7 @@ const adoptAi = () => {
   scheduleSave();
   aiOpen.value = false;
   aiResult.value = '';
-  showToast('已采用');
+  showToast('__T_NOTEPAD_ADOPTED__');
 };
 const dismissAi = () => {
   aiOpen.value = false;

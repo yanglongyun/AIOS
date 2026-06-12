@@ -11,7 +11,7 @@
     <div class="tb-gap"></div>
 
     <!-- 宫格:应用面板 -->
-    <button class="tb-btn" :title="'应用'" @click.stop="toggle">
+    <button class="tb-btn" :title="'__T_APP_TAB_APPS__'" @click.stop="toggle">
       <LayoutGrid :size="16" :stroke-width="1.8" />
     </button>
 

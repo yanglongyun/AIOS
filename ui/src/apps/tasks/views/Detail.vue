@@ -10,13 +10,13 @@
         </span>
         <button v-if="active" class="stop-btn" :disabled="stopping" @click="stopTask">
           <Square :size="11" fill="currentColor" :stroke-width="0" />
-          {{ stopping ? '停止中…' : '停止' }}
+          {{ stopping ? '__T_TASK_STOP_BUSY__' : '__T_COMMON_STOP__' }}
         </button>
       </div>
-      <h1 class="hero-name">{{ task.name || '未命名任务' }}</h1>
+      <h1 class="hero-name">{{ task.name || '__T_TASK_DETAIL_UNTITLED__' }}</h1>
       <div class="hero-meta">
-        <span v-if="task.created_at">创建于 {{ fmtTime(task.created_at) }}</span>
-        <span v-if="duration">· 耗时 {{ duration }}</span>
+        <span v-if="task.created_at">{{ '__T_TASK_DETAIL_CREATED_PREFIX__' }} {{ fmtTime(task.created_at) }}</span>
+        <span v-if="duration">{{ '__T_TASK_DETAIL_DURATION_PREFIX__' }} {{ duration }}</span>
       </div>
     </section>
 
@@ -25,13 +25,13 @@
 
     <!-- 指令 -->
     <section v-if="task.prompt" class="v6-card block">
-      <div class="block-title">指令</div>
+      <div class="block-title">__T_TASK_DETAIL_PROMPT__</div>
       <div class="prompt-text">{{ task.prompt }}</div>
     </section>
 
     <!-- 执行过程 -->
     <section v-if="segments.length" class="process">
-      <div class="block-title standalone">执行过程</div>
+      <div class="block-title standalone">__T_TASK_DETAIL_PROCESS__</div>
       <template v-for="(seg, i) in segments" :key="i">
         <ToolGroup v-if="seg.type === 'tools'" :items="seg.items" :busy="active" />
         <div v-else class="v6-card text-seg">{{ seg.text }}</div>
@@ -40,13 +40,13 @@
 
     <!-- 结果 -->
     <section v-if="task.response" class="v6-card block">
-      <div class="block-title">结果</div>
+      <div class="block-title">__T_TASK_DETAIL_RESULT__</div>
       <div class="result-text">{{ task.response }}</div>
     </section>
 
     <!-- 失败 -->
     <section v-if="task.error" class="v6-card block error-card">
-      <div class="block-title bad">失败原因</div>
+      <div class="block-title bad">__T_TASK_DETAIL_ERROR_TITLE__</div>
       <pre class="error-pre">{{ task.error }}</pre>
     </section>
 
@@ -70,9 +70,9 @@ const stopping = ref(false);
 const active = computed(() => isActive(task.value.status));
 
 const statusLabel = computed(() => ({
-  pending: '运行中', running: '运行中',
-  done: '已完成', completed: '已完成',
-  error: '失败', aborted: '已中止', stopped: '已停止',
+  pending: '__T_TASK_STATUS_RUNNING__', running: '__T_TASK_STATUS_RUNNING__',
+  done: '__T_TASK_STATUS_DONE__', completed: '__T_TASK_STATUS_DONE__',
+  error: '__T_TASK_STATUS_FAILED__', aborted: '__T_TASK_STATUS_ABORTED__', stopped: '__T_TASK_STATUS_STOPPED__',
 }[task.value.status] || task.value.status || '-'));
 
 const badgeClass = computed(() => {
@@ -88,9 +88,9 @@ const duration = computed(() => {
   const end = active.value ? new Date() : parseTime(task.value.finished_at);
   if (!end) return '';
   const sec = Math.max(0, Math.round((end - start) / 1000));
-  if (sec < 60) return `${sec} 秒`;
-  if (sec < 3600) return `${Math.floor(sec / 60)} 分 ${sec % 60} 秒`;
-  return `${Math.floor(sec / 3600)} 小时 ${Math.floor((sec % 3600) / 60)} 分`;
+  if (sec < 60) return `__T_TASK_DURATION_SEC__`.replace('{n}', String(sec));
+  if (sec < 3600) return `__T_TASK_DURATION_MIN_SEC__`.replace('{m}', String(Math.floor(sec / 60))).replace('{s}', String(sec % 60));
+  return `__T_TASK_DURATION_HOUR_MIN__`.replace('{h}', String(Math.floor(sec / 3600))).replace('{m}', String(Math.floor((sec % 3600) / 60)));
 });
 
 // --- Map raw task messages into ToolGroup-shaped segments ---
@@ -174,7 +174,7 @@ const loadAll = async () => {
     task.value = td.task || {};
     segments.value = buildSegments(Array.isArray(td.messages) ? td.messages : []);
     loadError.value = '';
-  } catch (e) { loadError.value = e.message || '加载失败'; }
+  } catch (e) { loadError.value = e.message || '__T_TASK_LOAD_FAILED__'; }
 };
 
 const stopTask = async () => {
@@ -183,7 +183,7 @@ const stopTask = async () => {
   try {
     await abortTask(taskId.value);
     await loadAll();
-  } catch (e) { loadError.value = e.message || '停止失败'; }
+  } catch (e) { loadError.value = e.message || '__T_TASK_STOP_FAILED__'; }
   finally { stopping.value = false; }
 };
 

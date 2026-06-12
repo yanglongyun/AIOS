@@ -69,10 +69,10 @@ const summary = computed(() => {
   const expense = entries.value.filter((x) => x.type === 'expense').reduce((s, x) => s + Number(x.amount), 0);
   return { income, expense, balance: income - expense };
 });
-const greeting = computed(() => new Date().getHours() < 12 ? '早上好' : new Date().getHours() < 18 ? '下午好' : '晚上好');
+const greeting = computed(() => new Date().getHours() < 12 ? '__T_COMMON_GREETING_MORNING__' : new Date().getHours() < 18 ? '__T_COMMON_GREETING_AFTERNOON__' : '__T_COMMON_GREETING_EVENING__');
 const monthLabel = computed(() => {
   const [y, m] = curMonth.value.split('-');
-  return `${y}年${Number(m)}月`;
+  return `__T_LEDGER_MONTH_LABEL__`.replace('{y}', String(y)).replace('{m}', String(Number(m)));
 });
 const budgetPct = computed(() => Math.min(1, budget.value ? summary.value.expense / budget.value : 0));
 const budgetState = computed(() => summary.value.expense > budget.value ? 'over' : budgetPct.value >= 0.8 ? 'warn' : '');
@@ -121,10 +121,10 @@ const goThisMonth = async () => { curMonth.value = new Date().toISOString().slic
 const daySum = (items) => {
   const out = items.filter((x) => x.type === 'expense').reduce((s, x) => s + Number(x.amount), 0);
   const inc = items.filter((x) => x.type === 'income').reduce((s, x) => s + Number(x.amount), 0);
-  return [out ? `支出 ¥${money(out)}` : '', inc ? `收入 ¥${money(inc)}` : ''].filter(Boolean).join(' · ');
+  return [out ? `${'__T_LEDGER_EXPENSE__'} ¥${money(out)}` : '', inc ? `${'__T_LEDGER_INCOME__'} ¥${money(inc)}` : ''].filter(Boolean).join(' · ');
 };
 const editBudget = async () => {
-  const value = prompt('设置月预算(元)', String(budget.value));
+  const value = prompt('__T_LEDGER_BUDGET_PROMPT__', String(budget.value));
   if (!value) return;
   await request('/apps/ledger/budget', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: Number(value) }) });
   await load();
@@ -148,12 +148,12 @@ const openSheet = (entry = null, ai = false) => {
 const closeSheet = () => { sheetOpen.value = false; };
 const parseInput = async () => {
   const text = nlInput.value.trim();
-  if (!text) return showToast('先说一句,比如:午餐面馆 38');
+  if (!text) return showToast('__T_LEDGER_SMART_EMPTY_HINT__');
   try {
     const data = await request('/apps/ledger/parse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
     openSheet(data.entry, true);
   } catch (err) {
-    showToast(err.message || '没识别出来');
+    showToast(err.message || '__T_LEDGER_PARSE_FAILED__');
   }
 };
 const showSmartError = (text) => {
@@ -169,41 +169,41 @@ const smartSend = async () => {
   try {
     const data = await request('/apps/ledger/smart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
     const list = data.entries || [];
-    if (!list.length) { showSmartError('没解析出账目,换个说法试试'); return; }
+    if (!list.length) { showSmartError('__T_LEDGER_SMART_NO_RESULT__'); return; }
     smartText.value = '';
     await load();
-    showToast(list.length > 1 ? `已记录 ${list.length} 笔` : `已记录:${list[0].note || list[0].category} ¥${money(list[0].amount)}`);
+    showToast(list.length > 1 ? `__T_LEDGER_RECORDED_COUNT__`.replace('{n}', String(list.length)) : `__T_LEDGER_RECORDED_ONE__`.replace('{note}', String(list[0].note || list[0].category)).replace('{amount}', money(list[0].amount)));
   } catch (err) {
-    showSmartError(err.message || '记录失败,稍后再试');
+    showSmartError(err.message || '__T_LEDGER_RECORD_FAILED__');
   } finally {
     smartBusy.value = false;
   }
 };
 const saveEntry = async () => {
-  if (!Number(form.amount)) return showToast('金额要大于 0');
+  if (!Number(form.amount)) return showToast('__T_LEDGER_AMOUNT_INVALID__');
   const body = { ...form, amount: Number(form.amount) };
   const url = editingId.value ? `/apps/ledger/entries?id=${editingId.value}&month=${curMonth.value}` : `/apps/ledger/entries?month=${curMonth.value}`;
   await request(url, { method: editingId.value ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   nlInput.value = '';
   closeSheet();
   await load();
-  showToast(editingId.value ? '已保存修改' : '已记一笔');
+  showToast(editingId.value ? '__T_LEDGER_SAVED_EDIT__' : '__T_LEDGER_SAVED_NEW__');
 };
 const deleteCurrent = async () => {
   if (!editingId.value) return;
   await request(`/apps/ledger/entries?id=${editingId.value}&month=${curMonth.value}`, { method: 'DELETE' });
   closeSheet();
   await load();
-  showToast('已删除');
+  showToast('__T_COMMON_DELETED__');
 };
 const exportCsv = () => {
-  if (!entries.value.length) return showToast('本月没有数据');
-  const head = '日期,类型,分类,金额,备注\n';
-  const body = entries.value.map((x) => [x.occurredOn || x.occurred_on, x.type === 'income' ? '收入' : '支出', x.category, x.amount, `"${String(x.note || '').replace(/"/g, '""')}"`].join(',')).join('\n');
+  if (!entries.value.length) return showToast('__T_LEDGER_NO_DATA_MONTH__');
+  const head = '__T_LEDGER_CSV_HEAD__' + '\n';
+  const body = entries.value.map((x) => [x.occurredOn || x.occurred_on, x.type === 'income' ? '__T_LEDGER_INCOME__' : '__T_LEDGER_EXPENSE__', x.category, x.amount, `"${String(x.note || '').replace(/"/g, '""')}"`].join(',')).join('\n');
   const blob = new Blob(['\ufeff' + head + body], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `账本-${curMonth.value}.csv`;
+  a.download = `__T_LEDGER_CSV_PREFIX__-${curMonth.value}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
 };

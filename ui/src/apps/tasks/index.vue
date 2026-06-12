@@ -7,7 +7,7 @@
     <!-- Task list -->
     <div v-else class="page">
       <div class="h-row">
-        <h2>任务</h2>
+        <h2>__T_APP_NAME_TASKS__</h2>
       </div>
 
       <!-- Stats -->
@@ -37,7 +37,7 @@
       </div>
 
       <div v-if="!filteredTasks.length" class="py-16 text-center text-[13px] text-faint">
-        {{ tasks.length ? '没有符合条件的任务' : '暂无任务' }}
+        {{ tasks.length ? '__T_TASKS_EMPTY_FILTERED__' : '__T_TASKS_EMPTY__' }}
       </div>
 
       <template v-else>
@@ -52,7 +52,7 @@
           >
             <span class="dot" :class="dotClass(item.status)"></span>
             <div class="min-w-0 flex-1">
-              <b>{{ item.name || preview(item.prompt) || '未命名' }}</b>
+              <b>{{ item.name || preview(item.prompt) || '__T_TASK_UNTITLED__' }}</b>
               <div class="sub" :class="{ blue: isActive(item.status) }">
                 {{ subline(item) }}
               </div>
@@ -78,16 +78,16 @@ const filter = ref('all');
 const dotClass = (status) => (isActive(status) ? 'run' : isDone(status) ? 'ok' : 'bad');
 
 const statCards = computed(() => [
-  { key: 'running', label: '运行中', color: 'var(--color-accent)', count: tasks.value.filter((t) => isActive(t.status)).length },
-  { key: 'done', label: '已完成', color: 'var(--color-good, #2e9e5b)', count: tasks.value.filter((t) => isDone(t.status)).length },
-  { key: 'failed', label: '失败', color: 'var(--color-bad, #d6493e)', count: tasks.value.filter((t) => isFailed(t.status)).length },
+  { key: 'running', label: '__T_TASK_STATUS_RUNNING__', color: 'var(--color-accent)', count: tasks.value.filter((t) => isActive(t.status)).length },
+  { key: 'done', label: '__T_TASK_STATUS_DONE__', color: 'var(--color-good, #2e9e5b)', count: tasks.value.filter((t) => isDone(t.status)).length },
+  { key: 'failed', label: '__T_TASK_STATUS_FAILED__', color: 'var(--color-bad, #d6493e)', count: tasks.value.filter((t) => isFailed(t.status)).length },
 ]);
 
 const pills = [
-  { key: 'all', label: '全部' },
-  { key: 'running', label: '运行中' },
-  { key: 'done', label: '已完成' },
-  { key: 'failed', label: '失败' },
+  { key: 'all', label: '__T_COMMON_ALL__' },
+  { key: 'running', label: '__T_TASK_STATUS_RUNNING__' },
+  { key: 'done', label: '__T_TASK_STATUS_DONE__' },
+  { key: 'failed', label: '__T_TASK_STATUS_FAILED__' },
 ];
 
 const filteredTasks = computed(() => {
@@ -103,7 +103,7 @@ const groupedTasks = computed(() => {
     const d = parseTime(t.created_at);
     buckets[d ? dayKey(d) : 'earlier'].push(t);
   }
-  const labels = { today: '今天', yesterday: '昨天', earlier: '更早' };
+  const labels = { today: '__T_TIME_TODAY__', yesterday: '__T_TIME_YESTERDAY__', earlier: '__T_TIME_EARLIER__' };
   return ['today', 'yesterday', 'earlier']
     .filter((k) => buckets[k].length)
     .map((k) => ({ label: labels[k], items: buckets[k] }));
@@ -115,9 +115,9 @@ const preview = (text) => {
 };
 
 const subline = (t) => {
-  if (isActive(t.status)) return '正在执行…';
-  if (isFailed(t.status)) return preview(t.error) || '执行失败';
-  return preview(t.response) || '已完成';
+  if (isActive(t.status)) return '__T_TASKS_SUBLINE_RUNNING__';
+  if (isFailed(t.status)) return preview(t.error) || '__T_TASKS_SUBLINE_FAILED__';
+  return preview(t.response) || '__T_TASK_STATUS_DONE__';
 };
 
 const loadTasks = async () => {
@@ -139,14 +139,14 @@ const closeDetail = () => { currentTaskId.value = null; };
 
 const resetTopBar = () => {
   topLeftAction.value = null;
-  topTitle.value = '任务';
+  topTitle.value = '__T_APP_NAME_TASKS__';
 };
 
 watch(currentTaskId, (id) => {
   if (id) {
     const cur = tasks.value.find((item) => item.id === id);
     topTitle.value = cur?.name || `#${id}`;
-    topLeftAction.value = { icon: 'back', title: '返回', fn: closeDetail };
+    topLeftAction.value = { icon: 'back', title: '__T_COMMON_BACK__', fn: closeDetail };
   } else {
     resetTopBar();
     loadTasks();

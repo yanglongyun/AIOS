@@ -2,17 +2,17 @@
   <div class="mask" :class="{ show: open }" @click="$emit('close')"></div>
   <aside class="sheet" :class="{ show: open }">
     <div class="grip"></div>
-    <header><b>{{ editingId ? '编辑账目' : '记一笔' }}</b><span v-if="fromAi">AI 识别</span><button @click="$emit('close')">×</button></header>
+    <header><b>{{ editingId ? '__T_LEDGER_SHEET_EDIT__' : '__T_LEDGER_SHEET_NEW__' }}</b><span v-if="fromAi">__T_LEDGER_AI_BADGE__</span><button @click="$emit('close')">×</button></header>
     <div class="form">
-      <div class="seg"><button :class="{ on: form.type === 'expense' }" @click="form.type = 'expense'; $emit('normalize')">支出</button><button :class="{ on: form.type === 'income' }" @click="form.type = 'income'; $emit('normalize')">收入</button></div>
+      <div class="seg"><button :class="{ on: form.type === 'expense' }" @click="form.type = 'expense'; $emit('normalize')">__T_LEDGER_EXPENSE__</button><button :class="{ on: form.type === 'income' }" @click="form.type = 'income'; $emit('normalize')">__T_LEDGER_INCOME__</button></div>
       <label class="amount"><span class="mono">¥</span><input v-model.number="form.amount" class="mono" type="number" inputmode="decimal" placeholder="0.00" /></label>
-      <div class="label">分类</div>
+      <div class="label">__T_LEDGER_CATEGORY__</div>
       <div class="cat-grid">
         <button v-for="c in categories" :key="c.name" :class="{ on: form.category === c.name }" @click="form.category = c.name"><span>{{ c.emoji }}</span>{{ c.name }}</button>
       </div>
-      <div class="row"><input v-model="form.note" placeholder="备注(选填)" /><input v-model="form.occurredOn" type="date" /></div>
+      <div class="row"><input v-model="form.note" placeholder="__T_LEDGER_NOTE_PLACEHOLDER__" /><input v-model="form.occurredOn" type="date" /></div>
     </div>
-    <footer><button v-if="editingId" class="danger" @click="$emit('delete')">删除</button><button class="primary" @click="$emit('save')">确认记账</button></footer>
+    <footer><button v-if="editingId" class="danger" @click="$emit('delete')">__T_COMMON_DELETE__</button><button class="primary" @click="$emit('save')">__T_LEDGER_CONFIRM_SAVE__</button></footer>
   </aside>
 </template>
 

@@ -1,31 +1,31 @@
 <template>
   <section class="page">
     <div class="h-row">
-      <h2>编辑笔记</h2>
-      <button class="del-btn" title="删除笔记" @click="$emit('remove')">
+      <h2>__T_NOTEPAD_EDIT_TITLE__</h2>
+      <button class="del-btn" title="__T_NOTEPAD_DELETE_NOTE__" @click="$emit('remove')">
         <Trash2 :size="15" :stroke-width="1.7" />
       </button>
-      <button class="blue-btn" @click="$emit('close')">完成</button>
+      <button class="blue-btn" @click="$emit('close')">__T_COMMON_DONE__</button>
     </div>
 
     <div class="ecard" :style="{ background: note.color || '#ffffff' }">
-      <input v-model="note.title" class="title" placeholder="无标题" @input="$emit('schedule-save')" />
+      <input v-model="note.title" class="title" placeholder="__T_NOTEPAD_UNTITLED__" @input="$emit('schedule-save')" />
       <ColorSwatches :color="note.color || '#ffffff'" @pick="$emit('pick-color', $event)" />
       <textarea
         ref="textarea"
         v-model="note.content"
         class="body"
-        placeholder="写点什么…"
+        placeholder="__T_NOTEPAD_BODY_PLACEHOLDER__"
         @input="$emit('schedule-save')"
       ></textarea>
     </div>
 
-    <div v-if="aiLoading" class="ai-card pending">生成中...</div>
+    <div v-if="aiLoading" class="ai-card pending">__T_NOTEPAD_AI_GENERATING__</div>
     <div v-else-if="aiOpen" class="ai-card">
       <div class="ai-out" :class="{ err: aiError }">{{ aiError || aiResult }}</div>
       <div class="ai-acts">
-        <button class="primary" :disabled="!aiResult" @click="$emit('adopt')">采用</button>
-        <button @click="$emit('dismiss')">关闭</button>
+        <button class="primary" :disabled="!aiResult" @click="$emit('adopt')">__T_NOTEPAD_ADOPT__</button>
+        <button @click="$emit('dismiss')">__T_COMMON_CLOSE__</button>
       </div>
     </div>
 

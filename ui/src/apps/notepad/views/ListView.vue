@@ -1,21 +1,21 @@
 <template>
   <section class="page">
     <div class="h-row">
-      <h2>记事本</h2>
-      <button class="blue-btn" @click="$emit('new')">+ 新笔记</button>
+      <h2>__T_APP_NAME_NOTEPAD__</h2>
+      <button class="blue-btn" @click="$emit('new')">__T_NOTEPAD_NEW_NOTE__</button>
     </div>
 
     <label class="search">
       <Search :size="15" :stroke-width="1.8" />
-      <input v-model="query" placeholder="搜索标题、正文、标签" />
+      <input v-model="query" placeholder="__T_NOTEPAD_SEARCH_PLACEHOLDER__" />
     </label>
 
     <div v-if="notes.length" class="notes">
       <NoteCard v-for="note in notes" :key="note.id" :note="note" @open="$emit('open', $event)" />
     </div>
     <div v-else class="empty">
-      <strong>没有匹配的笔记</strong>
-      <p>点右上角「+ 新笔记」写一篇</p>
+      <strong>__T_NOTEPAD_EMPTY_TITLE__</strong>
+      <p>__T_NOTEPAD_EMPTY_HINT__</p>
     </div>
   </section>
 </template>

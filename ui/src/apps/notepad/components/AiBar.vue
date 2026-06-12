@@ -1,7 +1,7 @@
 <template>
   <form class="ai-bar" @submit.prevent="$emit('submit')">
-    <input v-model="prompt" placeholder="问问 AI：润色、扩写、帮我想想…" />
-    <button type="submit" class="send" :disabled="loading || !prompt.trim()" title="发送">
+    <input v-model="prompt" placeholder="__T_NOTEPAD_AI_PLACEHOLDER__" />
+    <button type="submit" class="send" :disabled="loading || !prompt.trim()" title="__T_COMMON_SEND__">
       <ArrowUp :size="14" :stroke-width="2" />
     </button>
   </form>

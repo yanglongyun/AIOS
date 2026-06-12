@@ -26,11 +26,11 @@ const activeTab = ref('model');
 const promptPreview = ref('');
 const skills = ref([]);
 const tabs = [
-  { id: 'model', label: '模型' },
-  { id: 'prompt', label: '提示词' },
-  { id: 'skills', label: '技能' },
-  { id: 'theme', label: '主题' },
-  { id: 'about', label: '关于' },
+  { id: 'model', label: '__T_SETTINGS_MODEL__' },
+  { id: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__' },
+  { id: 'skills', label: '__T_SETTINGS_TAB_SKILLS__' },
+  { id: 'theme', label: '__T_SETTINGS_THEME_TITLE__' },
+  { id: 'about', label: '__T_SETTINGS_TAB_ABOUT__' },
 ];
 const form = reactive({
   model: '',
@@ -61,11 +61,11 @@ const save = async () => {
       apiKey: form.apiKey,
       contextTurns: form.contextTurns,
     });
-    message.value = '已保存';
+    message.value = '__T_SETTINGS_SAVED__';
     await load();
   } catch (err) {
     error.value = true;
-    message.value = err.message || '保存失败';
+    message.value = err.message || '__T_SETTINGS_SAVE_FAILED__';
   } finally {
     saving.value = false;
   }

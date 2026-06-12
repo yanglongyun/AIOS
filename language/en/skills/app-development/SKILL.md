@@ -1,100 +1,89 @@
 ---
 name: app-development
-description: AIOS app development guide. Covers the main OSS project structure, API rules, database layout, frontend placement, and local verification flow.
+description: AIOS app development guide. Covers the latest contracts for frontend/backend/docs, layered structure, registries, per-app SQLite, the v6 design language, AI integration patterns, and a full step-by-step checklist for creating a new app.
 ---
 
 # App Development Guide
 
-You are working in the main AIOS project. This is a local OSS runtime. You can edit frontend code, backend code, schemas, packages, services, and files. Keep changes in the right layer and keep the code readable.
+You are working in the main AIOS project (runs locally; ESM JavaScript, Vue 3 + Vite + Tailwind v4, `node:sqlite`, lucide-vue-next; no TypeScript / React / component libraries). A new app must satisfy all three contracts: **frontend, backend, docs**. **Do not invent new structure — copy an existing app (notepad is the most complete).**
 
-## Working Directory
-
-The shell cwd is the AIOS project root. Common paths:
-
-- Backend app: `server/apps/<appname>/`
-- Frontend app: `ui/src/apps/<appname>/`
-- App doc source: `language/<locale>/apps/<appname>/APP.md`
-- Baked app doc: `apps/<appname>/APP.md`
-- `ui/dist/` is Vite output; do not edit it directly
-
-## Ports
-
-- Main server: `http://127.0.0.1:9502`
-- Apps server: `http://127.0.0.1:9503`
-- Frontend dev server: `http://127.0.0.1:5173`
-
-The main server proxies `/apps/*` to the apps server. During development, use the frontend first, then curl `/api/health` and `/apps/health` when you need backend confirmation.
-
-## Backend Layout
-
-```
-server/apps/<appname>/
-└── index.js              # default export { name, match, handleApi, initDb? }
-```
-
-Keep basic apps lightweight. A small app can stay in one `index.js` as long as schema, queries, business behavior, and HTTP dispatch are separated into clear functions. Split into `api/`, `service/`, and `repository/` only when the app becomes large enough to need it; do not create empty layers early.
-
-New apps must be registered in:
-
-- `server/apps/registry.js` for the backend entry
-- `ui/src/apps.js` for the frontend entry
-
-Verify registration:
+## Commands and Ports
 
 ```sh
-curl http://127.0.0.1:9503/apps/health
+npm start          # bake + start system(:9502) + apps(:9503)
+npm run ui         # Vite frontend dev server(:5173)
+npm run check      # full JS syntax check
+npm run build      # bake + build ui/dist
 ```
 
-## API Rules
+The system server proxies `/apps/*` to the apps server. Health checks: `curl http://127.0.0.1:9502/api/health` and `curl http://127.0.0.1:9503/apps/health`.
 
-- Route: `/apps/<appname>/<action>`
-- GET for reads, POST + JSON body for creation, PATCH + JSON body for updates, DELETE for deletion
-- Use `readBody(req)` for request bodies
-- Use `sendJson(res, statusCode, payload)` for JSON responses
-- Return `false` for unmatched routes
-- User request protocol errors return 400; model or internal service errors must not be disguised as 400
-
-## Database
-
-- App databases use `createAppDb("<appname>.db")`
-- Do not mix app tables into the system database
-- For lightweight apps, put DDL in the app backend entry's `initDb` / `createSchema` function
-- Keep queries in dedicated functions instead of scattering SQL inside HTTP branches
-
-Define new schemas cleanly. Do not keep dead compatibility fields in a new clean schema; do not put old-schema detection, automatic migrations, or automatic drops in app initialization.
-
-## Frontend Layout
+## Frontend Contract: `ui/src/apps/<id>/`
 
 ```
-ui/src/apps/<appname>/
-├── index.vue
-├── components/
-├── views/
-├── composables/
-└── api.js
+index.vue       entry: holds app state and actions, composes views; keep it thin
+views/          screen-level views (ListView/EditorView/MainView...)
+components/     reusable in-app pieces (cards/input bars/form shells...)
+lib/            api.js (fetch wrapper) + format.js (pure functions: formatting/constants)
 ```
 
-Keep the app entry clear. Simple apps can start as a single file; split into views / components / composables / api.js when complexity justifies it, not as empty scaffolding.
+- Register: add one line `{ id, name, icon, load }` to `ui/src/apps.js`. `icon` is a **lucide-vue-next component reference** (not an emoji, not a string); `load` is `() => import('./apps/<id>/index.vue')`.
+- The app root container manages its own layout; the standard page skeleton:
 
-## Local Verification
-
-Common commands:
-
-```sh
-npm run check
-npm start
-npm run ui
+```html
+<div class="absolute inset-0 overflow-y-auto dot-grid">
+  <div class="page"><!-- max-width 860px centered --> ... </div>
+</div>
 ```
 
-After startup:
+- Pass state with props/emits/defineModel; do not introduce a store for a single app.
+- Top bar interaction: to change the title or register a left action, use `import { topTitle, topLeftAction } from '@/system/shell.js'`; you must clean up with `topLeftAction.value = null` in `onUnmounted`.
 
-```sh
-curl http://127.0.0.1:9502/api/health
-curl http://127.0.0.1:9503/apps/health
+## Backend Contract: `server/apps/<id>/`
+
+```
+index.js            thin entry: exports only { name, match, handleApi, initDb }
+api/index.js        HTTP layer: method/path dispatch, validation, uses shared/http.js
+service/index.js    business layer: domain rules + all AI tasks (createTask/waitTask/prompts live only here)
+repository/index.js data layer: DB setup (createAppDb from shared/db.js), migrations, all SQL
 ```
 
-Backend changes need the relevant service restarted. Frontend changes hot-reload through Vite; run `npm run build` before shipping.
+- Dependencies point downward only: index → api → service → repository. repository must not import service/api.
+- Shared pieces: `createAppDb("<id>.db")` from `shared/db.js`; `readBody / sendJson / parseJson / badRequest` from `shared/http.js`.
+- Register: add `() => import("./<id>/index.js")` to `appLoaders` in `server/apps/registry.js`.
+- One SQLite per app: `database/apps/<id>.db`, DDL in the app's own repository; **never touch system.db or another app's database**.
+- Endpoints mount under `/apps/<id>/*`; GET for reads, POST/PATCH/DELETE + JSON body for writes; return `false` for unmatched routes; protocol errors return an explicit `400`; do not disguise model/internal errors as user errors.
+
+## Docs Contract: `language/<locale>/apps/<id>/APP.md`
+
+Every app must have an APP.md (baked and mirrored to the root `apps/<id>/APP.md`; the runtime AI relies on it to understand the app). Frontmatter has name/title/description/backend/database; the body lists every endpoint and behavior. zh and en must be isomorphic and in sync. **Any API change must update APP.md.**
+
+## AI Integration
+
+Always go through the system task service: in the **service layer**, `createTask({ taskName, detail })` + poll `getTask(taskId)` until done (copy the waitTask pattern from an existing app); prompts must require JSON-only output. Two proven patterns, pick by scenario:
+
+1. **Propose-adopt** (content creation, e.g. notepad): show the AI output first; write only after the user clicks "Adopt".
+2. **Validate-then-direct-write** (structured entry, e.g. ledger smart recording, todo inline decomposition): AI outputs JSON → service strictly validates (types/numbers/dates, skip invalid items) → write to the database directly → immediate UI feedback.
+
+`createTask` / prompts may only appear in the service layer; the api layer and frontend never touch them.
+
+## Design Language (v6)
+
+Gray-white-blue, restrained, generous whitespace. All colors go through tokens in `ui/src/style.css` (`--color-bg / --color-bg-elev / --color-ink / --color-accent / --color-blue-bg / good / bad / --shadow`); no hardcoded color values. Global utilities: `.dot-grid` dotted background, `.soft-card` large-radius white card, `.halo-focus`, `.chip-card`, `.save-btn`, `.text-input`. Standard page = full-bleed dot-grid background + 860px centered `.page` + title row (h2 17px/700 + right-side actions) + white card lists/forms (10-16px radius + 1px hairline border + `--shadow`).
+
+Forbidden: gradients, textures, embossed/inset shadows, serif, emoji as icons. **Icons are lucide-vue-next only.** On mobile, overlay panels use a floating layer + scrim (see the chat history sidebar's `@media (max-width: 768px)`). Apps may have a signature layer (like notepad's macaron palette) but it must sit on the token skeleton and stay light and fresh.
+
+## Full Checklist for Creating a New App
+
+1. **Read the sample**: read through `server/apps/notepad/` and `ui/src/apps/notepad/` to confirm the layering and idioms.
+2. **Build the backend**: `server/apps/<id>/{index.js,api/index.js,service/index.js,repository/index.js}`. repository creates tables via `createAppDb("<id>.db")`; api dispatches via shared/http.js; index.js exports only `{ name, match, handleApi, initDb }`.
+3. **Register the backend**: add one line to `appLoaders` in `server/apps/registry.js`.
+4. **Build the frontend**: `ui/src/apps/<id>/{index.vue,views/,components/,lib/api.js,lib/format.js}` with the standard page skeleton and v6 tokens.
+5. **Register the frontend**: add one line to `ui/src/apps.js`, icon as a lucide component reference.
+6. **Wire AI (if needed)**: createTask in the service layer; pick propose-adopt or validate-then-direct-write by scenario.
+7. **Write APP.md**: `language/zh/apps/<id>/APP.md` and `language/en/apps/<id>/APP.md` — frontmatter + every endpoint + behavior, isomorphic across both languages.
+8. **Verify**: `npm run check` passes; after `npm start`, curl `/apps/health` to confirm registration; walk through CRUD and AI flows in the UI; confirm `apps/<id>/APP.md` was baked and mirrored.
 
 ## System Apps
 
-`chat`, `settings`, and `tasks` are system capabilities, not ordinary apps under `server/apps/`. Read their current layers before changing them, and keep naming and event semantics consistent.
+`chat`, `tasks`, and `settings` are system-capability apps (settings uses the system `/api/settings`, with no dedicated backend directory). Read their current layers before changing them, and keep naming and event semantics consistent.

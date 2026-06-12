@@ -1,68 +1,64 @@
 ---
 name: frontend-design
-description: AIOS main frontend design language. Defines the Vue Web UI's skeuomorphic visuals, responsive layout, chat, tasks, and app interfaces.
+description: AIOS frontend design language (v6). Gray-white-blue, restrained, generous whitespace; token-driven colors, global utilities, standard page skeleton, lucide-only icons, and mobile overlay rules.
 ---
 
-# AIOS Frontend Design Language
+# AIOS Frontend Design Language (v6)
 
-The main AIOS project is a local Web UI. Keep the visual direction warm, restrained, and tactile: paper surfaces, glass buttons, soft shadows, and gold highlights. It is not a desktop admin dashboard.
+AIOS is a local Web UI. Visual direction: **gray-white-blue, restrained, generous whitespace**. Clean light-gray background + white cards + a touch of blue. No skeuomorphism, no heavy dark textures, no marketing pages.
 
-## Core Character
+## Colors and Tokens
 
-- Warm paper, light leather texture, glass buttons, and gold accents.
-- Controls should feel pressable, inputs should feel inset, and app icons should feel like standalone objects.
-- Do not use Material 3 / Gemini blue-gray styling or flat SaaS styling.
-- Stay responsive, but do not introduce complex window systems, desktop rails, or hover-dependent interactions.
+All colors go through tokens in `ui/src/style.css`; hardcoded color values are forbidden:
 
-## Color
+- Page background `--color-bg` #f6f6f7; white cards `--color-bg-elev`; ink text `--color-ink` #1d1d20; secondary `--color-muted` / `--color-faint`; hairlines `--color-line` / `--color-line-hi`.
+- Accent blue `--color-accent` #3b82f6, light blue fill `--color-blue-bg`; status colors `--color-good` green, `--color-bad` red.
+- Shadows use the three `--shadow` tiers; do not invent shadows.
 
-Prefer tokens from `ui/src/style.css`:
+## Global Utilities
 
-- Background: warm cream, paper surfaces, subtle gradients.
-- Top and bottom bars: deep warm brown, wood-like or glass-like materials.
-- Accents: gold, amber, and soft teal.
-- Text: deep warm ink for primary text, muted warm tones for secondary text.
-- Status colors may use red/green, but keep them muted.
+- `.dot-grid` dotted background texture (full-bleed app background)
+- `.page` max-width 860px centered content container
+- `.soft-card` large-radius white card
+- `.halo-focus` focus halo
+- `.chip-card` suggestion chip
+- `.save-btn` primary button (flat blue), `.text-input` input field
 
-## Material And Depth
+## Standard Page Skeleton
 
-- Use subtle inset shadows, outer shadows, and edge highlights to express depth.
-- Inputs, search fields, and the bottom composer should feel inset into a base.
-- Send buttons, app icons, and top buttons should feel slightly raised.
-- Keep content clear; do not turn every list item into a heavy card.
+```html
+<div class="absolute inset-0 overflow-y-auto dot-grid">
+  <div class="page"> ... </div>
+</div>
+```
 
-## Layout
+Standard page = full-bleed dot-grid background + 860px centered `.page` + title row (h2 17px/700 + right-side actions) + white card lists/forms (10-16px radius + 1px hairline border + `--shadow`).
 
-- Keep the main navigation focused on Chat, Apps, and Tasks.
-- On small screens, preserve comfortable touch targets; on large screens, preserve reading width and information density.
-- The chat composer stays at the bottom, the message area scrolls vertically, and content must not create horizontal scrolling.
-- App grids and task lists need stable loading, empty, and error states.
+## Forbidden
 
-## Chat
+- No gradients, textures, embossed/inset shadows, or serif fonts.
+- No emoji as icons. **Icons are lucide-vue-next only**, imported per component; the app icon is declared as a component reference in the `ui/src/apps.js` registry.
+- No component libraries; no store for a single app.
 
-- Chat is the core experience. User messages, AI messages, subscription messages, and tool calls need distinct visual treatment.
-- Once AI content starts streaming, the thinking placeholder should disappear or become the real message; it must not coexist with the final content.
-- Tool calls and results are shown as groups, with summaries first and details expandable.
-- Code blocks and long text must wrap safely and never force horizontal page scrolling.
+## Layout and Shell
 
-## Apps
+- The system owns only the global top bar (`ui/src/system/panel/TopBar.vue`): the left side holds the current app's registered action + title; the right grid button opens the app panel (3-column grid). Everything below the top bar belongs to the app.
+- Apps interact with the top bar via `topTitle` / `topLeftAction` (`ui/src/system/shell.js`) and must clean up in `onUnmounted`.
+- Mobile: overlay panels use a floating layer + scrim (see the chat history sidebar's `@media (max-width: 768px)`) instead of squeezing content; messages and long text wrap, never causing horizontal scroll.
 
-- App entries use skeuomorphic square icons with short labels underneath.
-- App internals may split into `views/`, `components/`, `composables/`, and `api.js`.
-- Do not build app landing pages; the first screen should be the usable feature.
+## Chat and Tool Calls
 
-## Tasks
+- User messages, AI messages, and tool calls must be visually distinct.
+- Tool calls render as a three-level collapsible "activity group" (header = N activities + latest summary → all summaries → per-call input/output): component `ui/src/apps/chat/components/bubbles/ToolGroup.vue`, reusable across apps.
 
-- Tasks are system work records. Split list and detail views; details show input, process, output, and errors.
-- Use small badges, hairlines, and muted blocks for status.
-- When subscription results return to chat, render them as subscription messages, not fake user messages.
+## App Signature Layers
+
+Apps may have their own signature layer (like notepad's macaron sticky-note palette), but it must sit on the token skeleton, stay light and fresh, and not break the overall language. Loading, empty, and error states are required.
 
 ## Reference Files
 
-- `ui/src/style.css` — global visual tokens and skeuomorphic foundations
-- `ui/src/App.vue` — main shell and primary navigation
-- `ui/src/system/components/TopBar.vue` — top bar
-- `ui/src/system/components/TabBar.vue` — bottom navigation
-- `ui/src/apps/chat/views/index.vue` — chat experience
-- `ui/src/system/views/apps/AppsView.vue` — apps grid
-- `ui/src/system/views/tasks/index.vue` — task list and detail
+- `ui/src/style.css` — design tokens and global utilities
+- `ui/src/App.vue` — shell: global top bar + current app filling the rest
+- `ui/src/system/panel/TopBar.vue` — top bar and app panel
+- `ui/src/apps/notepad/` — the most complete app sample (with a signature layer)
+- `ui/src/apps/chat/components/bubbles/ToolGroup.vue` — tool-call activity group

@@ -1,68 +1,64 @@
 ---
 name: frontend-design
-description: AIOS 主项目前端设计语言。约束 Vue Web UI 的拟物视觉、响应式布局、对话、任务和应用界面风格。
+description: AIOS 前端设计语言(v6)。灰白蓝、克制、留白;token 驱动配色、全局工具类、标准页面骨架、lucide-only 图标与移动端浮层规范。
 ---
 
-# AIOS 前端设计语言
+# AIOS 前端设计语言(v6)
 
-AIOS 主项目是本机运行的 Web UI。视觉方向保持温暖、克制、可触摸的拟物风:纸面、玻璃按钮、柔和阴影、金色高光。它不是桌面后台。
+AIOS 是本机运行的 Web UI。视觉方向:**灰白蓝、克制、留白**。干净的浅灰底 + 白卡 + 一点蓝。不做拟物、不做暗色重质感、不做营销页。
 
-## 核心气质
+## 颜色与 token
 
-- 温暖纸面、浅皮革质感、玻璃按钮和金色强调。
-- 控件要有可按压感,输入框要有嵌入感,应用图标要像独立实体。
-- 不做 Material 3 / Gemini 蓝灰风,不做扁平 SaaS 风。
-- 保持响应式,但不要引入复杂窗口系统、桌面 rail 或 hover 依赖的交互。
+所有颜色一律走 `ui/src/style.css` 的 token,禁止硬编码色值:
 
-## 颜色
+- 页面底 `--color-bg` #f6f6f7;白卡 `--color-bg-elev`;墨色文字 `--color-ink` #1d1d20;次级 `--color-muted` / `--color-faint`;细线 `--color-line` / `--color-line-hi`。
+- 强调蓝 `--color-accent` #3b82f6,浅蓝底 `--color-blue-bg`;状态色 `--color-good` 绿、`--color-bad` 红。
+- 阴影用 `--shadow` 三档,不自造阴影。
 
-优先使用 `ui/src/style.css` 里的 token:
+## 全局工具类
 
-- 背景:暖米色、浅纸面、柔和渐变。
-- 顶栏 / 底栏:深暖棕、木质或玻璃质感。
-- 强调色:金色、琥珀、柔和青绿。
-- 文本:深棕黑为主,次级文字用低对比暖色。
-- 状态色可以用红绿,但降低饱和度。
+- `.dot-grid` 点阵底纹(应用全幅背景)
+- `.page` max-width 860px 居中内容容器
+- `.soft-card` 大圆角白卡
+- `.halo-focus` 聚焦光圈
+- `.chip-card` 建议胶囊
+- `.save-btn` 主按钮(扁平蓝)、`.text-input` 输入框
 
-## 材质与层级
+## 标准页面骨架
 
-- 使用轻微内阴影、外阴影、边缘高光表达凹凸。
-- 输入框、搜索框、底部输入栏要像嵌入底座。
-- 发送按钮、应用图标、顶部按钮要有轻微凸起。
-- 内容保持清楚,不要把每个列表项都做成很重的卡片。
+```html
+<div class="absolute inset-0 overflow-y-auto dot-grid">
+  <div class="page"> ... </div>
+</div>
+```
 
-## 布局
+标准页面 = 点阵全幅背景 + 860px 居中 `.page` + 标题行(h2 17px/700 + 右侧动作)+ 白卡列表/表单(圆角 10-16px + 1px 细边线 + `--shadow`)。
 
-- 主导航保持对话、应用、任务三大入口。
-- 小屏优先保证触摸舒适,大屏保持阅读宽度和信息密度。
-- 输入栏固定在对话底部,消息区域只纵向滚动,不要触发横向滚动。
-- 应用网格和任务列表都要稳定,加载、空态、错误态都要有。
+## 禁令
 
-## 对话
+- 禁止渐变、纹理、浮雕/内凹阴影、serif 字体。
+- 禁止 emoji 当图标。**图标只用 lucide-vue-next**,按需 import 组件;应用图标在 `ui/src/apps.js` 注册表里声明为组件引用。
+- 不引入组件库,不为单应用引入 store。
 
-- 对话是核心体验。用户消息、AI 消息、订阅消息、工具调用要有明确视觉区分。
-- AI 输出开始后,思考占位应消失或转为真实消息,不能和正式内容并存。
-- 工具调用和结果成组展示,摘要优先,详情可展开。
-- 代码块和长文本必须自动换行,不能撑出横向滚动。
+## 布局与外壳
 
-## 应用
+- 系统只有全局顶栏(`ui/src/system/panel/TopBar.vue`):左侧为当前应用注册的动作 + 标题,右侧宫格按钮弹出应用面板(3 列网格)。顶栏以下一切归应用自管。
+- 应用通过 `topTitle` / `topLeftAction`(`ui/src/system/shell.js`)与顶栏交互,`onUnmounted` 必须清理。
+- 移动端:覆盖类面板用浮层 + 遮罩(参考 chat 历史侧栏的 `@media (max-width: 768px)`),不挤压内容;消息与长文本自动换行,不出横向滚动。
 
-- 应用入口使用拟物方形图标,图标下方只放短标题。
-- 应用内部可以拆 `views/`、`components/`、`composables/`、`api.js`。
-- 不要把应用做成营销页,第一屏就是可用功能。
+## 对话与工具调用
 
-## 任务
+- 用户消息、AI 消息、工具调用要有明确视觉区分。
+- 工具调用用「活动组」三层折叠呈现(组头=N 个活动+最新摘要 → 全部摘要 → 单条输入输出),组件 `ui/src/apps/chat/components/bubbles/ToolGroup.vue`,可跨应用复用。
 
-- 任务是系统工作记录。列表和详情分开,详情展示输入、过程、输出、错误。
-- 状态用小徽标、细线、淡色块表达,避免高饱和大色块。
-- 订阅任务返回对话时,前端应使用订阅消息样式,不要伪装成用户消息。
+## 应用特色层
+
+应用允许有自己的特色层(如记事本的马卡龙贴纸色板),但必须建立在 token 骨架之上、保持淡色系小清新,不破坏整体语言。加载、空态、错误态都要有。
 
 ## 参考文件
 
-- `ui/src/style.css` — 全局视觉 token 和拟物基础
-- `ui/src/App.vue` — 主壳和一级导航
-- `ui/src/system/components/TopBar.vue` — 顶栏
-- `ui/src/system/components/TabBar.vue` — 底部导航
-- `ui/src/apps/chat/views/index.vue` — 对话体验
-- `ui/src/system/views/apps/AppsView.vue` — 应用网格
-- `ui/src/system/views/tasks/index.vue` — 任务列表与详情
+- `ui/src/style.css` — 设计 token 与全局工具类
+- `ui/src/App.vue` — 外壳:全局顶栏 + 当前应用铺满
+- `ui/src/system/panel/TopBar.vue` — 顶栏与应用面板
+- `ui/src/apps/notepad/` — 最完整的应用样例(含特色层)
+- `ui/src/apps/chat/components/bubbles/ToolGroup.vue` — 工具调用活动组

@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, ref } from 'vue';
-import { uploadChatFile } from './api.js';
+import { Paperclip, ArrowUp, Square } from 'lucide-vue-next';
+import { uploadChatFile } from '../lib/api.js';
 import { t } from '../../../system/locale.js';
 
 defineProps({
@@ -23,7 +24,7 @@ const autoResize = () => {
   const el = textarea.value;
   if (!el) return;
   el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
+  el.style.height = Math.min(el.scrollHeight, 180) + 'px';
 };
 
 const resetTextarea = () => nextTick(() => {
@@ -96,39 +97,44 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
 </script>
 
 <template>
-  <div class="shrink-0 border-t border-[rgba(160,130,70,0.25)] bg-[linear-gradient(180deg,#e8dfca_0%,#dfd6bc_100%)] px-3.5 pb-3 pt-2.5 shadow-[0_-3px_10px_rgba(90,60,20,0.08)]">
+  <div class="shrink-0 pb-3.5 pt-1">
+    <div class="composer-col">
     <input ref="fileInput" type="file" class="hidden" multiple @change="onPickFiles" />
 
     <div v-if="pendingFiles.length" class="mb-2 flex gap-2 overflow-x-auto pt-2 pb-1 pr-1 [scrollbar-width:none]">
       <div
         v-for="(f, idx) in pendingFiles"
         :key="f.path"
-        class="relative flex h-[54px] w-[168px] shrink-0 items-center gap-2.5 rounded-[13px] border border-[rgba(125,95,45,0.20)] bg-[linear-gradient(160deg,#f7f0df_0%,#ded1b4_100%)] px-2.5 shadow-[0_3px_9px_rgba(92,62,22,0.16),inset_0_1px_0_rgba(255,255,255,0.75),inset_0_-1px_0_rgba(110,80,30,0.08)]"
+        class="relative flex h-[54px] w-[168px] shrink-0 items-center gap-2.5 rounded-xl border border-line bg-bg-elev px-2.5 shadow-[var(--shadow-sm)]"
       >
-        <div class="file-icon relative grid h-[34px] w-[28px] shrink-0 place-items-center rounded-[4px] border border-[rgba(130,96,45,0.22)] bg-[linear-gradient(180deg,#fff8e8_0%,#e7d4a9_100%)] shadow-[0_1px_3px_rgba(90,60,20,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]">
-          <span class="mt-1 h-[2px] w-3 rounded-full bg-[#b88a34]"></span>
-          <span class="absolute bottom-[9px] h-[2px] w-3.5 rounded-full bg-[rgba(120,90,40,0.28)]"></span>
+        <div class="relative grid h-[34px] w-[28px] shrink-0 place-items-center rounded-[4px] border border-line bg-bg-hi">
+          <span class="mt-1 h-[2px] w-3 rounded-full bg-[var(--color-faint)]"></span>
+          <span class="absolute bottom-[9px] h-[2px] w-3.5 rounded-full bg-[var(--color-line-hi)]"></span>
         </div>
         <div class="min-w-0 flex-1">
-          <div class="truncate text-[12px] font-bold leading-tight text-[#4a321d]">{{ f.name }}</div>
-        <div class="mt-0.5 truncate font-mono text-[9.5px] text-[#9a7850]">{{ formatSize(f.size) || f.type || t('server_attachment_file', 'file') }}</div>
+          <div class="truncate text-[12px] font-semibold leading-tight text-ink">{{ f.name }}</div>
+        <div class="mt-0.5 truncate font-mono text-[9.5px] text-muted">{{ formatSize(f.size) || f.type || t('server_attachment_file', 'file') }}</div>
         </div>
         <button
           type="button"
-          class="absolute -right-[6px] -top-[6px] grid h-[20px] w-[20px] place-items-center rounded-full border border-[rgba(255,220,160,0.35)] bg-[linear-gradient(180deg,#9a3a18_0%,#68220d_100%)] text-[12px] font-bold leading-none text-[#fff3dc] shadow-[0_2px_5px_rgba(70,30,0,0.30),inset_0_1px_0_rgba(255,190,120,0.32)]"
+          class="absolute -right-[6px] -top-[6px] grid h-[20px] w-[20px] place-items-center rounded-full border border-line bg-bg-elev text-[12px] font-bold leading-none text-muted shadow-[var(--shadow-sm)]"
           @click="pendingFiles.splice(idx,1)"
         >×</button>
       </div>
     </div>
-    <div v-if="uploadError" class="mb-1 text-[11px] text-[#c04040]">{{ uploadError }}</div>
+    <div v-if="uploadError" class="mb-1 text-[11px] text-[var(--color-bad)]">{{ uploadError }}</div>
 
-    <div class="flex items-end gap-2 rounded-2xl border border-[rgba(120,90,40,0.2)] bg-[linear-gradient(180deg,#d8d0b8_0%,#e0d8c0_100%)] py-1.5 pl-2.5 pr-1.5 shadow-[inset_0_2px_6px_rgba(0,0,0,0.12),inset_0_1px_3px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.5)]">
+    <div class="soft-card halo-focus flex items-end gap-2.5 rounded-2xl py-2.5 pl-2.5 pr-2.5 transition-shadow">
       <button
         type="button"
         :disabled="busy || uploading"
+        :title="t('chat_attach', '附件')"
         @click="openFilePicker"
-        class="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[8px] text-[18px] text-[#8b6840] active:bg-[rgba(0,0,0,0.08)] disabled:opacity-40"
-      >{{ uploading ? '⏳' : '📎' }}</button>
+        class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full bg-transparent text-muted hover:bg-bg-hi disabled:opacity-40"
+      >
+        <span v-if="uploading" class="text-[15px]">⏳</span>
+        <Paperclip v-else :size="16" :stroke-width="1.8" />
+      </button>
       <textarea
         ref="textarea"
         :value="modelValue"
@@ -136,45 +142,47 @@ defineExpose({ pendingFiles, clearFiles, resetTextarea, appendFiles });
         @keydown.enter.exact="onEnter"
         @compositionstart="composing = true"
         @compositionend="composing = false"
-        :placeholder="busy ? t('chat_placeholder_busy', '进行中...') : t('chat_placeholder_input', '输入消息...')"
+        :placeholder="busy ? t('chat_placeholder_busy', '进行中...') : t('chat_placeholder_ask', '问点什么...')"
         rows="1"
         :disabled="busy"
-        class="max-h-24 min-h-8 flex-1 resize-none border-none bg-transparent py-[6px] font-[inherit] text-[14px] leading-[1.5] text-[#3a2415] outline-none placeholder:text-[#b09870] disabled:opacity-50"
+        class="block max-h-[180px] min-h-[34px] flex-1 resize-none border-none bg-transparent py-[6px] font-[inherit] text-[15px] leading-[22px] text-ink outline-none placeholder:text-[var(--color-faint)] disabled:opacity-50"
       />
       <button
         v-if="busy"
         type="button"
+        :title="t('chat_stop', '停止')"
         @click="emit('abort')"
-        class="mb-1 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[linear-gradient(180deg,#d4981e_0%,#a07010_100%)] text-[14px] font-bold text-[rgba(255,245,200,0.95)] shadow-[0_3px_0_rgba(106,72,0,1),0_4px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,215,80,0.35)]"
-      >■</button>
+        class="composer-send grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-white"
+      >
+        <Square :size="12" fill="currentColor" :stroke-width="0" />
+      </button>
       <button
         v-else
         type="button"
+        :title="t('chat_send', '发送')"
         :disabled="!modelValue.trim() && !pendingFiles.length"
         @click="emit('send')"
-        class="mb-1 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] transition-all"
-        :class="(modelValue.trim() || pendingFiles.length)
-          ? 'bg-[linear-gradient(180deg,#d4981e_0%,#a07010_100%)] text-[rgba(255,245,200,0.95)] shadow-[0_3px_0_rgba(106,72,0,1),0_4px_8px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,215,80,0.35)]'
-          : 'bg-[rgba(120,90,40,0.1)] text-[rgba(120,90,40,0.3)]'"
+        class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full transition-colors"
+        :class="(modelValue.trim() || pendingFiles.length) ? 'composer-send text-white' : 'bg-bg-hi text-faint'"
       >
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+        <ArrowUp :size="15" :stroke-width="2.2" />
       </button>
+    </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.file-icon::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: -1px;
-  width: 10px;
-  height: 10px;
-  border-left: 1px solid rgba(130,96,45,0.20);
-  border-bottom: 1px solid rgba(130,96,45,0.20);
-  border-bottom-left-radius: 3px;
-  background: linear-gradient(135deg,#d7bd78 0%,#fff4d8 100%);
-  clip-path: polygon(0 0, 100% 100%, 100% 0);
+.composer-col {
+  width: min(860px, 100%);
+  margin: 0 auto;
+  padding: 0 24px;
 }
+.composer-send {
+  background: #62a5f4;
+  transition: background 0.12s, transform 0.12s;
+}
+.composer-send:hover { background: #3b82f6; }
+.composer-send:active { transform: scale(0.94); }
 </style>
+

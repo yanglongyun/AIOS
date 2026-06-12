@@ -15,7 +15,7 @@ export const mapToolCall = (toolCall, _key) => {
       type: 'tool_call',
       shell: true,
       toolCall,
-      title: args.reason || 'shell',
+      title: args.summary || args.reason || 'shell',
       command: args.command || '',
       expanded: false,
       _key

@@ -1,41 +1,52 @@
 <template>
-  <History v-if="showHistory" class="absolute inset-0" @open="onHistorySelect" @new="onNewChat" />
-
-  <div v-else class="absolute inset-0 flex flex-col overflow-hidden chat-panel">
-    <Messages
-      ref="messagesRef"
-      :messages="messages"
-      :busy="busy"
-      :has-more="hasMore"
-      :empty-hints="emptyHints"
-      @pick-hint="sendHint"
-      @top-reached="loadMore"
+  <div class="absolute inset-0 flex overflow-hidden chat-panel">
+    <!-- 左侧历史面板（应用内部侧栏，可收合） -->
+    <History
+      ref="historyRef"
+      class="chat-side"
+      :class="{ collapsed: !sidebarOpen }"
+      :current-id="currentChatId"
+      @open="onHistorySelect"
+      @new="onNewChat"
     />
+    <div v-if="sidebarOpen" class="chat-side-mask" @click="sidebarOpen = false"></div>
 
-    <Composer
-      ref="composerRef"
-      v-model="input"
-      :busy="busy"
-      @send="handleSend"
-      @abort="stopBusy"
-    />
+    <!-- 右侧主区：消息流 + 输入 -->
+    <div class="flex min-w-0 flex-1 flex-col">
+      <Messages
+        ref="messagesRef"
+        :messages="messages"
+        :busy="busy"
+        :has-more="hasMore"
+        :empty-hints="emptyHints"
+        @pick-hint="sendHint"
+        @top-reached="loadMore"
+      />
+
+      <Composer
+        ref="composerRef"
+        v-model="input"
+        :busy="busy"
+        @send="handleSend"
+        @abort="stopBusy"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { connect, ensureConnected, send, wsStatus } from '@/system/ws.js';
-import Composer from './Composer.vue';
-import History from './History.vue';
-import Messages from './Messages.vue';
-import { createConversation, listConversations, loadMessages } from './api.js';
-import { parseMessages } from './messages.js';
-import { setupChatStream } from './stream.js';
-import { t } from '../../../system/locale.js';
+import { topTitle, topLeftAction } from '@/system/shell.js';
+import Composer from './components/Composer.vue';
+import History from './components/History.vue';
+import Messages from './components/Messages.vue';
+import { createConversation, listConversations, loadMessages } from './lib/api.js';
+import { parseMessages } from './lib/messages.js';
+import { setupChatStream } from './lib/stream.js';
+import { t } from '../../system/locale.js';
 
-const setPageNav = inject('pageNav');
-
-const showHistory = ref(false);
+const sidebarOpen = ref(false);
 const currentChatId = ref(null);
 const currentTitle = ref(t('chat_title', '对话'));
 const messages = ref([]);
@@ -47,6 +58,7 @@ const streamingKey = ref('');
 const seenKeys = ref(new Set());
 const messagesRef = ref(null);
 const composerRef = ref(null);
+const historyRef = ref(null);
 let unsubs = [];
 
 const emptyHints = [
@@ -56,34 +68,24 @@ const emptyHints = [
   { icon: '🤖', label: t('chat_hint_task_label', '自动化任务'), desc: t('chat_hint_task_desc', '设置定时任务，AI 定期执行'), text: t('chat_hint_task_text', '帮我创建一个每天早上推送新闻摘要的任务') },
 ];
 
-function setDefaultNav() {
-  setPageNav(currentTitle.value, null,
-    { icon: 'history', title: t('chat_history_title', '对话历史'), fn: openHistory },
-    currentChatId.value ? { icon: 'add', title: t('chat_new_title', '新对话'), fn: onNewChat } : null
-  );
-}
+watch(currentTitle, (v) => { topTitle.value = v || t('chat_title', '对话'); });
 
-function openHistory() {
-  showHistory.value = true;
-  setPageNav(
-    t('chat_history_title', '对话历史'),
-    () => { showHistory.value = false; setDefaultNav(); },
-    null,
-    { icon: 'add', title: t('chat_new_title', '新对话'), fn: onNewChat },
-  );
-}
+watch(sidebarOpen, (open) => {
+  if (open) historyRef.value?.reload();
+});
+
+const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
 async function onHistorySelect(c) {
-  showHistory.value = false;
+  if (isMobile()) sidebarOpen.value = false;
   currentChatId.value = c.id;
   currentTitle.value = c.title || t('chat_title', '对话');
-  setDefaultNav();
   await loadPage(c.id);
   scrollToBottom(false);
 }
 
 function onNewChat() {
-  showHistory.value = false;
+  if (isMobile()) sidebarOpen.value = false;
   currentChatId.value = null;
   currentTitle.value = t('chat_new_title', '新对话');
   messages.value = [];
@@ -93,7 +95,6 @@ function onNewChat() {
   hasMore.value = false;
   loadedOffset.value = 0;
   composerRef.value?.clearFiles();
-  setDefaultNav();
 }
 
 function addMessages(items, prepend = false) {
@@ -148,7 +149,6 @@ async function ensureConversation(text, files) {
   const data = await createConversation(title);
   currentChatId.value = data.chatId || data.chat?.id;
   currentTitle.value = title;
-  setDefaultNav();
 }
 
 async function handleSend() {
@@ -197,7 +197,13 @@ function stopBusy() {
 }
 
 onMounted(async () => {
-  setDefaultNav();
+  topTitle.value = currentTitle.value;
+  topLeftAction.value = {
+    icon: 'menu',
+    title: t('chat_history_title', '对话历史'),
+    fn: () => { sidebarOpen.value = !sidebarOpen.value; }
+  };
+
   if (wsStatus.value === 'disconnected') connect();
   window.addEventListener('aios:send-chat-message', sendExternalMessage);
   unsubs = setupChatStream({ messages, currentChatId, busy, streamingKey, seenKeys, scrollToBottom });
@@ -208,7 +214,6 @@ onMounted(async () => {
       const last = list[0];
       currentChatId.value = last.id;
       currentTitle.value = last.title || t('chat_title', '对话');
-      setDefaultNav();
       await loadPage(last.id);
       scrollToBottom(false);
     }
@@ -216,6 +221,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  topLeftAction.value = null;
   window.removeEventListener('aios:send-chat-message', sendExternalMessage);
   unsubs.forEach((fn) => fn?.());
 });
@@ -223,8 +229,38 @@ onUnmounted(() => {
 
 <style scoped>
 .chat-panel {
-  background:
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.04'/></svg>"),
-    linear-gradient(180deg,#f0e8d5 0%,#e8dfc8 40%,#ede5cc 100%);
+  background: var(--color-bg);
+}
+.chat-side {
+  width: 295px;
+  flex-shrink: 0;
+  transition: margin-left 0.22s ease;
+}
+.chat-side.collapsed {
+  margin-left: -295px;
+}
+.chat-side-mask { display: none; }
+
+/* 移动端:侧栏浮层覆盖,不挤压消息区 */
+@media (max-width: 768px) {
+  .chat-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    margin-left: 0 !important;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 0 0 40px rgba(20, 20, 25, 0.18);
+  }
+  .chat-side:not(.collapsed) { transform: translateX(0); }
+  .chat-side-mask {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    background: rgba(20, 20, 25, 0.28);
+  }
 }
 </style>

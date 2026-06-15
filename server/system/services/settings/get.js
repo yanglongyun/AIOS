@@ -10,7 +10,9 @@ const getServerSettings = () => {
       apiKey: settings.apiKey || "",
       model: settings.model || "",
       system: settings.system || DEFAULT_SYSTEM_PROMPT,
-      contextTurns: Number.isInteger(Number(settings.contextTurns)) ? Number(settings.contextTurns) : 100,
+      compressThreshold: Number.isFinite(Number(settings.compressThreshold)) ? Number(settings.compressThreshold) : 12000,
+      compactPrompt: settings.compactPrompt || "",
+      toolResultMaxChars: Number.isFinite(Number(settings.toolResultMaxChars)) ? Number(settings.toolResultMaxChars) : 12000,
     };
   } catch {
     return {
@@ -18,7 +20,9 @@ const getServerSettings = () => {
       apiKey: "",
       model: "",
       system: DEFAULT_SYSTEM_PROMPT,
-      contextTurns: 100
+      compressThreshold: 12000,
+      compactPrompt: "",
+      toolResultMaxChars: 12000,
     };
   }
 };

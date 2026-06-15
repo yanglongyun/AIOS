@@ -2,8 +2,6 @@
 const tools = ({
   enableToolResultTruncate = true,
   toolResultMaxChars = 12000,
-  enableToolLoopLimit = true,
-  toolMaxRounds = 50,
 } = {}) => `
 
 ## 工具
@@ -15,8 +13,6 @@ const tools = ({
 - 读文件优先用 rg/sed/head/tail；避免一次输出过多内容。
 - 不要使用工具做纯聊天、常识回答或无需本机验证的事情。
 - 工具结果截断: ${enableToolResultTruncate ? "开启" : "关闭"}
-- 工具结果最大长度: ${toolResultMaxChars}
-- 工具循环限制: ${enableToolLoopLimit ? "开启" : "关闭"}
-- 工具最大循环轮次: ${toolMaxRounds}`;
+- 工具结果最大长度: ${toolResultMaxChars}`;
 
 export { tools };

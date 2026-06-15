@@ -15,9 +15,8 @@ const appendChatMessage = ({ chatId, source, message, usage = null, meta = null 
   const nextMeta = {
     ...(meta || {}),
     source: normalizeSource(source),
-    ...(usage ? { usage } : {}),
   };
-  return appendMessage(id, message, nextMeta);
+  return appendMessage(id, message, nextMeta, usage);
 };
 
 export { appendChatMessage };

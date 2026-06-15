@@ -15,8 +15,8 @@
         <Field label="API Key">
           <input v-model="form.apiKey" type="password" autocomplete="off" placeholder="sk-..." />
         </Field>
-        <Field label="__T_SETTINGS_CONTEXT_TURNS__">
-          <input v-model.number="form.contextTurns" type="number" min="0" step="1" />
+        <Field label="__T_SETTINGS_TOOL_RESULT_MAX_CHARS__">
+          <input v-model.number="form.toolResultMaxChars" type="number" min="1000" max="50000" step="1000" />
         </Field>
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:18px">
           <span v-if="message" style="font-size:11.5px" :style="{ color: error ? 'var(--color-bad)' : 'var(--color-good)' }">
@@ -31,6 +31,15 @@
       <div v-else-if="activeTab === 'prompt'">
         <Field label="__T_SETTINGS_TAB_PROMPT__" hint="__T_SETTINGS_PROMPT_HINT__">
           <pre class="prompt-box">{{ promptPreview || '__T_COMMON_LOADING__' }}</pre>
+        </Field>
+      </div>
+
+      <div v-else-if="activeTab === 'compaction'">
+        <Field label="__T_SETTINGS_COMPRESS_THRESHOLD__">
+          <input v-model.number="form.compressThreshold" type="number" min="0" step="100" />
+        </Field>
+        <Field label="__T_SETTINGS_COMPACT_PROMPT__">
+          <textarea v-model="form.compactPrompt" rows="8" placeholder="你负责压缩聊天上下文..."></textarea>
         </Field>
       </div>
 

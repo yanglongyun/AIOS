@@ -24,11 +24,13 @@ export function setupChatStream({ messages, currentChatId, busy, streamingKey, s
       if (!seenKeys.value.has(_key)) {
         seenKeys.value.add(_key);
         const source = data.meta?.source || '';
+        const kind = data.kind || data.meta?.kind || (source === 'subscription' ? 'task' : 'message');
         messages.value.push({
-          role: source === 'subscription' ? 'subscription' : 'user',
+          role: kind === 'compaction' ? 'compaction' : (kind === 'task' ? 'task' : 'user'),
           content: msg.content || '',
           attachments: data.meta?.attachments || [],
           source,
+          kind,
           _key
         });
         scrollToBottom?.(true);
@@ -36,6 +38,11 @@ export function setupChatStream({ messages, currentChatId, busy, streamingKey, s
     }),
 
     on('start', (data) => {
+      if (!isCurrent(data)) return;
+      busy.value = true;
+    }),
+
+    on('compact_start', (data) => {
       if (!isCurrent(data)) return;
       busy.value = true;
     }),

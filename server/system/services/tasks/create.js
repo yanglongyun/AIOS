@@ -9,12 +9,13 @@ import {
 } from "../../repository/tasks/index.js";
 import { buildSystemPrompt } from "../prompt/index.js";
 import { createSubscription, fireTaskSubscriptions } from "../subscriptions/index.js";
+import { maybeCompactBeforeRun } from "../chat/compactions.js";
 import { getChatRunConfig } from "../chat/send/config.js";
 import {
   registerTaskExecution,
   unregisterTaskExecution,
 } from "./execution.js";
-import { saveTaskMessages } from "./messages/index.js";
+import { listTaskMessages, saveTaskMessages } from "./messages/index.js";
 
 const sanitizeTaskName = (taskName) => {
   const value = String(taskName || "").trim();
@@ -37,7 +38,7 @@ const getLastAssistantMessage = (messages = []) => {
 
 const handleTaskAiEvent = ({ taskId, event }) => {
   if (event.type === "tool_calls") {
-    if (event.message) saveTaskMessages({ taskId, source: "ai", messages: [event.message] });
+    if (event.message) saveTaskMessages({ taskId, source: "ai", messages: [event.message], usage: event.usage || null });
     return;
   }
 
@@ -67,6 +68,16 @@ const runTaskAi = async ({ taskId, initialMessages, input, signal }) => {
     ...settings,
     signal,
     responseFormat: { type: "json_object" },
+    beforeModelCall: async ({ lastUsage, round }) => {
+      if (!lastUsage || round <= 1) return null;
+      const compacted = await maybeCompactBeforeRun({ chatId: taskId, usage: lastUsage, settings, signal });
+      if (!compacted) return null;
+      const latestEnd = Number(compacted.end_message_id || 0);
+      const rows = listTaskMessages({ taskId, limit: 10000, order: "asc" }).messages
+        .filter((row) => Number(row.id || 0) > latestEnd)
+        .map((row) => row.message);
+      return [systemMessage, ...rows];
+    },
     onEvent: (event) => handleTaskAiEvent({ taskId, event }),
   });
   const lastAssistant = getLastAssistantMessage(result.messages);

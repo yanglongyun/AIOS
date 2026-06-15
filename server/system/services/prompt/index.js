@@ -23,8 +23,6 @@ const buildSystemPrompt = (chatId, contextMessages = [], settings = {}) => {
   prompt += toolsSection({
     enableToolResultTruncate: settings.enableToolResultTruncate,
     toolResultMaxChars: settings.toolResultMaxChars,
-    enableToolLoopLimit: settings.enableToolLoopLimit,
-    toolMaxRounds: settings.toolMaxRounds,
   });
   prompt += tasksSection();
   prompt += appsSection();

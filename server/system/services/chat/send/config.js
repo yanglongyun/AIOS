@@ -8,7 +8,9 @@ const getChatRunConfig = (input = {}) => {
     apiKey: input.apiKey || settings.apiKey || "",
     model: input.model || settings.model || "",
     system: input.system || settings.system || "",
-    contextTurns: input.contextTurns ?? settings.contextTurns ?? 100,
+    compressThreshold: input.compressThreshold ?? settings.compressThreshold ?? 12000,
+    compactPrompt: input.compactPrompt ?? settings.compactPrompt ?? "",
+    toolResultMaxChars: input.toolResultMaxChars ?? settings.toolResultMaxChars ?? 12000,
   };
 
   const missing = [];

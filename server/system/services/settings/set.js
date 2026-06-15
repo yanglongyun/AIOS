@@ -7,7 +7,9 @@ const setServerSettings = (settings) => {
     apiKey: settings.apiKey || "",
     model: settings.model || "",
     system: settings.system || "",
-    contextTurns: Math.max(0, Number.parseInt(settings.contextTurns, 10) || 0),
+    compressThreshold: Math.max(0, Number(settings.compressThreshold) || 0),
+    compactPrompt: settings.compactPrompt || "",
+    toolResultMaxChars: Math.max(1000, Math.min(50000, Number(settings.toolResultMaxChars) || 12000)),
   });
 };
 

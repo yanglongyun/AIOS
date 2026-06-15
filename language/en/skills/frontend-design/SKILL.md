@@ -49,7 +49,7 @@ Standard page = full-bleed dot-grid background + 860px centered `.page` + title 
 ## Chat and Tool Calls
 
 - User messages, AI messages, and tool calls must be visually distinct.
-- Tool calls render as a three-level collapsible "activity group" (header = N activities + latest summary → all summaries → per-call input/output): component `ui/src/apps/chat/components/bubbles/ToolGroup.vue`, reusable across apps.
+- Tool calls render as independent single-tool cards. Each tool call is its own collapsed card and expands to show input/output. Component: `ui/src/apps/chat/components/bubbles/ToolCall.vue`, reusable across apps.
 
 ## App Signature Layers
 
@@ -61,4 +61,4 @@ Apps may have their own signature layer (like notepad's macaron sticky-note pale
 - `ui/src/App.vue` — shell: global top bar + current app filling the rest
 - `ui/src/system/panel/TopBar.vue` — top bar and app panel
 - `ui/src/apps/notepad/` — the most complete app sample (with a signature layer)
-- `ui/src/apps/chat/components/bubbles/ToolGroup.vue` — tool-call activity group
+- `ui/src/apps/chat/components/bubbles/ToolCall.vue` — single tool-call card

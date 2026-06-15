@@ -49,7 +49,7 @@ AIOS 是本机运行的 Web UI。视觉方向:**灰白蓝、克制、留白**。
 ## 对话与工具调用
 
 - 用户消息、AI 消息、工具调用要有明确视觉区分。
-- 工具调用用「活动组」三层折叠呈现(组头=N 个活动+最新摘要 → 全部摘要 → 单条输入输出),组件 `ui/src/apps/chat/components/bubbles/ToolGroup.vue`,可跨应用复用。
+- 工具调用用单工具卡片呈现,每个工具独立一张,默认收起,展开后显示输入输出。组件 `ui/src/apps/chat/components/bubbles/ToolCall.vue`,可跨应用复用。
 
 ## 应用特色层
 
@@ -61,4 +61,4 @@ AIOS 是本机运行的 Web UI。视觉方向:**灰白蓝、克制、留白**。
 - `ui/src/App.vue` — 外壳:全局顶栏 + 当前应用铺满
 - `ui/src/system/panel/TopBar.vue` — 顶栏与应用面板
 - `ui/src/apps/notepad/` — 最完整的应用样例(含特色层)
-- `ui/src/apps/chat/components/bubbles/ToolGroup.vue` — 工具调用活动组
+- `ui/src/apps/chat/components/bubbles/ToolCall.vue` — 单工具调用卡片

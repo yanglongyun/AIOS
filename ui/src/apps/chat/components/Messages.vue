@@ -2,9 +2,9 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { MessageCircle, Copy, Check, Info } from 'lucide-vue-next';
 import BubbleAi from './bubbles/Ai.vue';
-import BubbleSubscription from './bubbles/Subscription.vue';
 import BubbleUser from './bubbles/User.vue';
-import ToolGroup from './bubbles/ToolGroup.vue';
+import BubbleSubscription from './bubbles/Subscription.vue';
+import ToolCall from './bubbles/ToolCall.vue';
 
 const props = defineProps({
   messages: { type: Array, default: () => [] },
@@ -16,18 +16,12 @@ const props = defineProps({
 const emit = defineEmits(['pick-hint', 'top-reached']);
 const msgBox = ref(null);
 
-// 把相邻的工具消息聚合成组，其余消息按原样成块
 const isToolMsg = (m) => m.type === 'tool_call' || m.type === 'tool_result';
 const blocks = computed(() => {
   const out = [];
   for (const m of props.messages) {
     if (isToolMsg(m)) {
-      const last = out[out.length - 1];
-      if (last?.kind === 'tools') {
-        last.items.push(m);
-        continue;
-      }
-      out.push({ kind: 'tools', items: [m], key: `tg:${m._key || out.length}` });
+      out.push({ kind: 'tool', item: m, key: `tool:${m._key || out.length}` });
     } else {
       out.push({ kind: 'msg', m, key: m._key || `m:${out.length}` });
     }
@@ -114,7 +108,7 @@ defineExpose({ msgBox, scrollToBottom });
       <div v-if="hasMore" class="py-2 text-center text-[11px] text-faint">{{ '__T_CHAT_LOAD_MORE__' }}</div>
 
       <template v-for="block in blocks" :key="block.key">
-        <ToolGroup v-if="block.kind === 'tools'" :items="block.items" :busy="busy" />
+        <ToolCall v-if="block.kind === 'tool'" :msg="block.item" :busy="busy" />
 
         <template v-else-if="block.m.role === 'assistant'">
           <div class="msg-card soft-card">
@@ -137,7 +131,7 @@ defineExpose({ msgBox, scrollToBottom });
         </template>
 
         <BubbleUser v-else-if="block.m.role === 'user'" :content="block.m.content" :attachments="block.m.attachments" />
-        <BubbleSubscription v-else-if="block.m.role === 'subscription'" :content="block.m.content" />
+        <BubbleSubscription v-else-if="block.m.role === 'task' || block.m.role === 'compaction'" :content="block.m.content" />
       </template>
 
       <div v-if="busy" class="mb-4 flex items-end">

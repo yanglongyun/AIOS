@@ -33,7 +33,7 @@
     <section v-if="segments.length" class="process">
       <div class="block-title standalone">__T_TASK_DETAIL_PROCESS__</div>
       <template v-for="(seg, i) in segments" :key="i">
-        <ToolGroup v-if="seg.type === 'tools'" :items="seg.items" :busy="active" />
+        <ToolCall v-if="seg.type === 'tool'" :msg="seg.item" :busy="active" />
         <div v-else class="v6-card text-seg">{{ seg.text }}</div>
       </template>
     </section>
@@ -56,7 +56,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { Square } from 'lucide-vue-next';
-import ToolGroup from '../../chat/components/bubbles/ToolGroup.vue';
+import ToolCall from '../../chat/components/bubbles/ToolCall.vue';
 import { fetchTaskDetail, abortTask, isActive, parseTime, fmtTime } from '../lib/api.js';
 
 const props = defineProps({ id: { type: [String, Number], required: true } });
@@ -93,8 +93,8 @@ const duration = computed(() => {
   return `__T_TASK_DURATION_HOUR_MIN__`.replace('{h}', String(Math.floor(sec / 3600))).replace('{m}', String(Math.floor((sec % 3600) / 60)));
 });
 
-// --- Map raw task messages into ToolGroup-shaped segments ---
-// segments = [{type:'tools', items:[{type:'tool_call', toolCall, title, detail, command, shell, result, expanded, _key}]}, {type:'text', text}]
+// --- Map raw task messages into single-tool segments ---
+// segments = [{type:'tool', item:{type:'tool_call', toolCall, title, detail, command, shell, result, expanded, _key}}, {type:'text', text}]
 const expandedKeys = new Set();
 
 const argTitle = (args) => {
@@ -130,13 +130,11 @@ const buildSegments = (rawMessages) => {
     if (msg.role === 'tool' && msg.tool_call_id) results.set(msg.tool_call_id, contentText(msg.content));
   }
   const segs = [];
-  let currentTools = null;
   for (const item of rawMessages) {
     const msg = item?.message || {};
     if (msg.role === 'assistant' && Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
-      if (!currentTools) { currentTools = { type: 'tools', items: [] }; segs.push(currentTools); }
       for (const tc of msg.tool_calls) {
-        const key = tc.id || `tc-${segs.length}-${currentTools.items.length}`;
+        const key = tc.id || `tc-${segs.length}`;
         const args = tc.function?.arguments;
         const name = tc.function?.name || '';
         const command = argCommand(args);
@@ -158,11 +156,11 @@ const buildSegments = (rawMessages) => {
           set: (v) => { v ? expandedKeys.add(key) : expandedKeys.delete(key); },
           enumerable: true,
         });
-        currentTools.items.push(itemObj);
+        segs.push({ type: 'tool', item: itemObj });
       }
     } else if (msg.role === 'assistant') {
       const text = contentText(msg.content).trim();
-      if (text) { currentTools = null; segs.push({ type: 'text', text }); }
+      if (text) segs.push({ type: 'text', text });
     }
   }
   return segs;

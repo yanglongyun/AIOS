@@ -15,9 +15,8 @@ const saveChatMessages = ({ chatId, source, messages, usage = null, meta = null 
   const nextMeta = {
     ...(meta || {}),
     source: normalizeSource(source),
-    ...(usage ? { usage } : {}),
   };
-  saveMessageBatch(id, Array.isArray(messages) ? messages : [], nextMeta);
+  saveMessageBatch(id, Array.isArray(messages) ? messages : [], nextMeta, usage);
   return { ok: true };
 };
 

@@ -28,6 +28,7 @@ const skills = ref([]);
 const tabs = [
   { id: 'model', label: '__T_SETTINGS_MODEL__' },
   { id: 'prompt', label: '__T_SETTINGS_TAB_PROMPT__' },
+  { id: 'compaction', label: '__T_SETTINGS_TAB_COMPACTION__' },
   { id: 'skills', label: '__T_SETTINGS_TAB_SKILLS__' },
   { id: 'theme', label: '__T_SETTINGS_THEME_TITLE__' },
   { id: 'about', label: '__T_SETTINGS_TAB_ABOUT__' },
@@ -36,7 +37,9 @@ const form = reactive({
   model: '',
   apiUrl: '',
   apiKey: '',
-  contextTurns: 100,
+  compressThreshold: 12000,
+  compactPrompt: '',
+  toolResultMaxChars: 12000,
 });
 
 const load = async () => {
@@ -45,7 +48,9 @@ const load = async () => {
   form.model = settings.model || '';
   form.apiUrl = settings.apiUrl || '';
   form.apiKey = settings.apiKey || '';
-  form.contextTurns = Number.isFinite(Number(settings.contextTurns)) ? Number(settings.contextTurns) : 100;
+  form.compressThreshold = Number.isFinite(Number(settings.compressThreshold)) ? Number(settings.compressThreshold) : 12000;
+  form.compactPrompt = settings.compactPrompt || '';
+  form.toolResultMaxChars = Number.isFinite(Number(settings.toolResultMaxChars)) ? Number(settings.toolResultMaxChars) : 12000;
   promptPreview.value = settingsData.promptPreview || '';
   skills.value = settingsData.skills || [];
 };
@@ -59,7 +64,9 @@ const save = async () => {
       model: form.model,
       apiUrl: form.apiUrl,
       apiKey: form.apiKey,
-      contextTurns: form.contextTurns,
+      compressThreshold: form.compressThreshold,
+      compactPrompt: form.compactPrompt,
+      toolResultMaxChars: form.toolResultMaxChars,
     });
     message.value = '__T_SETTINGS_SAVED__';
     await load();

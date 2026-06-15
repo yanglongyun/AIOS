@@ -66,13 +66,19 @@ export const parseMessages = (raw = []) => {
     }
 
     const source = row?.meta?.source || '';
-    if (source === 'subscription' && (m.content || attachments.length)) {
-      list.push({ role: 'subscription', content: m.content || '', attachments, source, _key: base ? `${base}:subscription` : undefined });
+    const kind = row?.meta?.kind || (source === 'subscription' ? 'task' : 'message');
+    if (kind === 'compaction' && (m.content || attachments.length)) {
+      list.push({ role: 'compaction', content: m.content || '', attachments, source, kind, _key: base ? `${base}:compaction` : undefined });
+      continue;
+    }
+
+    if (kind === 'task' && (m.content || attachments.length)) {
+      list.push({ role: 'task', content: m.content || '', attachments, source, kind, _key: base ? `${base}:task` : undefined });
       continue;
     }
 
     if (m.role === 'user' && (m.content || attachments.length)) {
-      list.push({ role: 'user', content: m.content || '', attachments, source, _key: base ? `${base}:user` : undefined });
+      list.push({ role: 'user', content: m.content || '', attachments, source, kind, _key: base ? `${base}:user` : undefined });
     }
   }
   return list;

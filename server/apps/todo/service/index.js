@@ -1,7 +1,8 @@
 // @ts-nocheck
 // 待办业务逻辑层:领域规则、AI 任务、数据规整。
 import { randomUUID } from "node:crypto";
-import { createTask, getTask } from "../../../system/services/tasks/index.js";
+import { createTask } from "../../../system/services/tasks/index.js";
+import { waitTask, parseTaskJson } from "../../shared/ai.js";
 import { badRequest } from "../../shared/http.js";
 import {
   initDb,
@@ -102,18 +103,6 @@ const updateTodo = (id, input = {}) => {
 
 const deleteTodo = (id) => deleteTodoRow(id);
 
-const waitTask = async (taskId, timeoutMs = 45000) => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const task = getTask(taskId);
-    if (task?.status === "done") return task.response || "";
-    if (task?.status === "error") throw new Error(task.error || "task failed");
-    if (task?.status === "aborted") throw new Error("task aborted");
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  throw new Error("task timeout");
-};
-const parseTaskJson = (content) => JSON.parse(String(content || "{}"));
 const runJsonTask = async ({ name, detail }) => {
   const task = createTask({ taskName: name, detail });
   return { taskId: task.taskId, data: parseTaskJson(await waitTask(task.taskId)) };

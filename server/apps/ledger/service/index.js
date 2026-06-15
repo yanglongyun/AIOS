@@ -1,6 +1,7 @@
 // @ts-nocheck
 // 记账本业务逻辑层:领域规则、AI 任务、数据规整。
-import { createTask, getTask } from "../../../system/services/tasks/index.js";
+import { createTask } from "../../../system/services/tasks/index.js";
+import { waitTask, parseTaskJson } from "../../shared/ai.js";
 import { badRequest } from "../../shared/http.js";
 import {
   initDb,
@@ -85,18 +86,6 @@ const updateEntry = (id, input = {}) => {
 
 const deleteEntry = (id) => deleteEntryRow(id);
 
-const waitTask = async (taskId, timeoutMs = 45000) => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const task = getTask(taskId);
-    if (task?.status === "done") return task.response || "";
-    if (task?.status === "error") throw new Error(task.error || "task failed");
-    if (task?.status === "aborted") throw new Error("task aborted");
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  throw new Error("task timeout");
-};
-
 const parseEntry = async ({ text = "" }) => {
   const value = String(text || "").trim();
   if (!value) throw badRequest("text is required");
@@ -114,7 +103,7 @@ const parseEntry = async ({ text = "" }) => {
       `用户输入: ${value}`,
     ].join("\n"),
   });
-  const parsed = JSON.parse(await waitTask(task.taskId));
+  const parsed = parseTaskJson(await waitTask(task.taskId));
   return { taskId: task.taskId, entry: normalizeEntry(parsed) };
 };
 
@@ -142,7 +131,7 @@ const smartRecord = async ({ text = "" }) => {
   });
   let parsed;
   try {
-    parsed = JSON.parse(await waitTask(task.taskId));
+    parsed = parseTaskJson(await waitTask(task.taskId));
   } catch {
     throw badRequest("AI 输出无法解析");
   }

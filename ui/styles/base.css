@@ -1,0 +1,114 @@
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  :root {
+    --bg: #f6f6f7;
+    --panel: #ffffff;
+    --ink: #1d1d20;
+    --ink2: #55555c;
+    --muted: #8e8e96;
+    --line: #e8e8ea;
+    --line2: #dededf;
+    --accent: #62a5f4;
+    --accent-d: #3b82f6;
+    --accent-soft: #eef4fe;
+    --focus: rgba(98, 165, 244, 0.45);
+    --win: #5ba86b;
+    --win-soft: #e7f3e9;
+    --fix: #d9982b;
+    --fix-soft: #fbf0d6;
+    --sans: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #15161a;
+    --panel: #1f2025;
+    --ink: #f1f3f7;
+    --ink2: #d5d8df;
+    --muted: #9aa0aa;
+    --line: #2b2d33;
+    --line2: #3a3d45;
+    --accent: #7bb6ff;
+    --accent-d: #9cc8ff;
+    --accent-soft: #1f2d42;
+    --focus: rgba(123, 182, 255, 0.35);
+    --win: #6fbd7d;
+    --win-soft: #1e3526;
+    --fix: #e0a43b;
+    --fix-soft: #3a2d17;
+  }
+
+  html,
+  body,
+  #app {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  button,
+  input,
+  textarea {
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d9d9dc;
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9c9ce;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(10px);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .dotgrid {
+    background-image: radial-gradient(rgba(20, 20, 25, 0.06) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  .shadow-card {
+    box-shadow: 0 1px 2px rgba(20, 20, 25, 0.04), 0 10px 30px rgba(20, 20, 25, 0.05);
+  }
+}

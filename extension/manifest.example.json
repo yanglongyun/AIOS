@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Agent Browser Connector",
+  "version": "0.2.0",
+  "description": "把浏览器能力接入本地 AGENT,供 AI 通过 browser-use 控制。",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "Agent Browser Connector",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "debugger",
+    "scripting",
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' ws://127.0.0.1:9500 ws://localhost:9500 http://127.0.0.1:9500 http://localhost:9500"
+  }
+}

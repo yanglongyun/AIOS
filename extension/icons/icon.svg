@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Meem">
+  <defs>
+    <linearGradient id="tile" x1="16" y1="10" x2="112" y2="118">
+      <stop offset="0" stop-color="#0c1626"/>
+      <stop offset="1" stop-color="#05080f"/>
+    </linearGradient>
+    <linearGradient id="m" x1="38" y1="40" x2="90" y2="88">
+      <stop offset="0" stop-color="#5cf0ff"/>
+      <stop offset="1" stop-color="#27e8ff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0.15  0 0 0 0 0.91  0 0 0 0 1  0 0 0 0.7 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#tile)"/>
+  <rect x="9.5" y="9.5" width="109" height="109" rx="26.5" fill="none" stroke="#27e8ff" stroke-opacity="0.45" stroke-width="1.5"/>
+  <rect x="8" y="8" width="112" height="56" rx="28" fill="#ffffff" fill-opacity="0.03"/>
+
+  <g filter="url(#glow)">
+    <path transform="scale(2)" fill="url(#m)"
+      d="M19 44V20h6.1l6.9 13.2L38.9 20H45v24h-5.5V29.8l-5.3 10h-4.4l-5.3-10V44H19Z"/>
+  </g>
+</svg>

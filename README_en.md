@@ -129,7 +129,7 @@ AIOS/
 │   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
 │   │   └── repository/  # SQLite access
 │   └── apps/        # Apps service :9503  each app brings its own backend
-├── gui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
+├── ui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
 ├── apps/            # Per-app APP.md and shared assets
 └── skills/          # Local skills
 ```

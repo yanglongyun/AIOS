@@ -292,7 +292,7 @@ AIOS/
 │   │   ├── service/    # Auth / Chat / Activity / Prompt / Runtime / Settings
 │   │   └── repository/ # SQLite 数据访问
 │   └── apps/           # 应用服务 :9503  各 app 自带后端
-├── gui/                # Vue 3 + Vite + Pinia + Tailwind v4 前端
+├── ui/                # Vue 3 + Vite + Pinia + Tailwind v4 前端
 ├── apps/               # 每个 app 的 APP.md 与共享资源
 └── skills/             # 本地技能
 ```

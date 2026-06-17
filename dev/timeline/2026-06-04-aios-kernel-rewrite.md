@@ -20,7 +20,7 @@
 - 两个服务同进程启动(`index.ts` 先 `startServer` 再 `startAppsServer`),端口/API 仍是分开的两套。
 - 生产:主服务把 `/apps/*` 反代到 9503;开发:Vite 代理 `/apps → 9503`、`/api → 9502`。
 
-### 目录主轴:system | apps(server 与 gui 对称)
+### 目录主轴:system | apps(server 与 ui 对称)
 ```
 server/                       ui/src/
   system/   系统服务(内核)      system/   系统侧(外壳 + 内置功能 + 状态 + api)

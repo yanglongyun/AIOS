@@ -11,7 +11,7 @@
 
 同时完成了这些整理:
 
-- 前端目录从 `gui/` 改名为 `ui/`;
+- 前端源码目录统一命名为 `ui/`;
 - 恢复此前指定的中英文 README;
 - 恢复丰富的 `dev/` 资料目录;
 - 删除重复的顶层 `doc/`,保留 `dev/doc`;
@@ -91,8 +91,8 @@ settings
 所以最终采用:
 
 - 代码主体: `a6d1953`
-- 欢迎页与路由接线: `3cd8f3a:gui/src/views/WelcomeView.vue`
-  和 `3cd8f3a:gui/src/system/router.js`
+- 欢迎页与路由接线来自 `3cd8f3a` 当时的前端视图与路由文件,
+  落到当前 `ui/src/views/WelcomeView.vue` 和 `ui/src/system/router.js`
 
 ## 实施记录
 
@@ -108,8 +108,8 @@ settings
 - `3cd8f3a`: `9602 / 9603 / 9604`
 - `a6d1953`: `9702 / 9703 / 9704`
 
-发现 `a6d1953` 的语言烘焙如果绕过 `npm run dev` 会显示
-`__T_APP_CHAT__` 这类 token,因此确认了当时的语言方案:
+发现 `a6d1953` 的语言烘焙如果绕过 `npm run dev` 会显示未替换的文案
+token,因此确认了当时的语言方案:
 
 ```
 language/<locale>/**/*.json 作为文案源
@@ -146,20 +146,20 @@ d52c800 Restore a6d1953 app set with 3cd8f3a welcome
 - 欢迎页文案包含「AI 时代的操作系统」「未来留于物形」;
 - `AIOS_ALLOW_SOURCE_BAKE=1 npm run build` 通过。
 
-### 3. gui 改名为 ui
+### 3. 前端目录统一为 ui
 
-历史版本使用 `gui/`,但当前项目命名已经更倾向 `ui/`。随后整体改名:
+历史版本里的前端目录名与当前约定不一致。随后整体统一为 `ui/`:
 
-- `gui/` -> `ui/`;
+- 前端源码目录统一为 `ui/`;
 - `package.json` 中 Vite 命令改为 `ui/vite.config.js ui`;
 - `server/main/service/runtime/http.js` 静态目录改为 `ui/dist`;
-- language APP.md / contexts 中的 `gui/src/...` 改为 `ui/src/...`;
+- language APP.md / contexts 中的前端路径统一改为 `ui/src/...`;
 - reload 弹窗文案改为 `ui/`。
 
 形成提交:
 
 ```
-708e634 Rename gui directory to ui
+708e634 Rename frontend directory to ui
 ```
 
 构建验证:
@@ -255,14 +255,14 @@ b57990c Replace AIOS with refreshed agent workspace
 cc4ceb1 移除重复文档
 bd91d5f Restore earlier README files
 18740e7 Restore rich dev directory
-708e634 Rename gui directory to ui
+708e634 Rename frontend directory to ui
 d52c800 Restore a6d1953 app set with 3cd8f3a welcome
 ```
 
 远端当时停在:
 
 ```
-708e634 Rename gui directory to ui
+708e634 Rename frontend directory to ui
 ```
 
 本地还有 3 个提交待推:

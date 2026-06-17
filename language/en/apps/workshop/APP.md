@@ -2,7 +2,7 @@
 name: workshop
 description: Workshop app that starts from a topic, generates multiple UI directions, and asynchronously produces previewable single-file HTML demos.
 backend: server/apps/workshop
-frontend: gui/src/apps/workshop
+frontend: ui/src/apps/workshop
 database: database/apps/workshop.db
 ---
 

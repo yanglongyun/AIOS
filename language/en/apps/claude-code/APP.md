@@ -2,14 +2,14 @@
 name: claude-code
 description: Claude Code app that wraps the local claude CLI in an AIOS chat interface.
 backend: server/apps/claude-code
-frontend: gui/src/apps/claude-code
+frontend: ui/src/apps/claude-code
 database: database/apps/claude-code.db
 ---
 
 # claude-code
 
 - Role: runs local Claude Code sessions through the AIOS app shell, and surfaces local Claude Code account, history, projects, skills, plugins, MCP, plans, and memory files.
-- Frontend: `gui/src/apps/claude-code`
+- Frontend: `ui/src/apps/claude-code`
 - Backend: `server/apps/claude-code`
 - Data: `database/apps/claude-code.db`
 - Runtime dependency: local `claude` CLI.

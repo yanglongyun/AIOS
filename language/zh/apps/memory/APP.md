@@ -2,7 +2,7 @@
 name: memory
 description: 记忆 - 让用户管理 AI 的"长期记忆"。启用的记忆会拼进主 AI 的 system prompt。底层数据写到 contexts 表 (source='memory')。
 backend: server/main/api/memory
-frontend: gui/src/apps/memory
+frontend: ui/src/apps/memory
 database: database/aios.db (contexts where source='memory')
 ---
 
@@ -12,7 +12,7 @@ database: database/aios.db (contexts where source='memory')
 
 ## 位置
 
-- 前端:`gui/src/apps/memory`
+- 前端:`ui/src/apps/memory`
 - 后端:`server/main/api/memory/`(主进程,跟着 main server 一起跑,不是独立 app)
 - 数据库:`database/aios.db` 里 `contexts` 表中 `source = 'memory'` 的行
 

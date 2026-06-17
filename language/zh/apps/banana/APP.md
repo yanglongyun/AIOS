@@ -2,7 +2,7 @@
 name: banana
 description: 老手机 - AI 驱动的复古手机模拟器。用户选择选项,AI 生成新的 HTML 界面。
 backend: server/apps/banana
-frontend: gui/src/apps/banana
+frontend: ui/src/apps/banana
 database: database/apps/banana.db
 ---
 
@@ -12,7 +12,7 @@ database: database/apps/banana.db
 
 ## 位置
 
-- 前端:`gui/src/apps/banana`
+- 前端:`ui/src/apps/banana`
 - 后端:`server/apps/banana`
 - 数据库:`database/apps/banana.db`
 

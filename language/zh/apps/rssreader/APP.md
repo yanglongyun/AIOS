@@ -2,7 +2,7 @@
 name: rssreader
 description: RSS 阅读器 - 订阅源管理 + 文章列表 + AI 一键摘要 + 收藏。
 backend: server/apps/rssreader
-frontend: gui/src/apps/rssreader
+frontend: ui/src/apps/rssreader
 database: database/apps/rssreader.db
 ---
 
@@ -12,7 +12,7 @@ database: database/apps/rssreader.db
 
 ## 位置
 
-- 前端:`gui/src/apps/rssreader`
+- 前端:`ui/src/apps/rssreader`
 - 后端:`server/apps/rssreader`
 - 数据库:`database/apps/rssreader.db`
 

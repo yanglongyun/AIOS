@@ -2,7 +2,7 @@
 name: sysinfo
 description: System Status app for inspecting host, CPU, memory, disk, and process snapshots.
 backend: server/apps/sysinfo
-frontend: gui/src/apps/sysinfo
+frontend: ui/src/apps/sysinfo
 database: none
 ---
 
@@ -12,7 +12,7 @@ System Status app. It shows local machine health through a polling HTTP snapshot
 
 ## Location
 
-- Frontend: `gui/src/apps/sysinfo`
+- Frontend: `ui/src/apps/sysinfo`
 - Backend: `server/apps/sysinfo`
 - Database: none
 

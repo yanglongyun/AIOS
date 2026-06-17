@@ -2,7 +2,7 @@
 name: lovehouse
 description: Virtual Companion — every AI reply ships with the character's inner thought
 backend: server/apps/lovehouse
-frontend: gui/src/apps/lovehouse
+frontend: ui/src/apps/lovehouse
 database: database/apps/lovehouse.db
 ---
 
@@ -17,7 +17,7 @@ Plus an optional short mood tag.
 
 ## Locations
 
-- Frontend: `gui/src/apps/lovehouse`
+- Frontend: `ui/src/apps/lovehouse`
 - Backend: `server/apps/lovehouse`
 - Database: `database/apps/lovehouse.db`
 

@@ -2,7 +2,7 @@
 name: workshop
 description: 工坊应用，从一个主题出发生成多个 UI 设计方向，并异步产出可预览的单文件 HTML demo。
 backend: server/apps/workshop
-frontend: gui/src/apps/workshop
+frontend: ui/src/apps/workshop
 database: database/apps/workshop.db
 ---
 

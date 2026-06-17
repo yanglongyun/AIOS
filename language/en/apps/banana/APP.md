@@ -2,7 +2,7 @@
 name: banana
 description: Old-phone simulator. The user picks a choice, AI generates the next HTML screen.
 backend: server/apps/banana
-frontend: gui/src/apps/banana
+frontend: ui/src/apps/banana
 database: database/apps/banana.db
 ---
 
@@ -12,7 +12,7 @@ Retro phone interactive game. AI dynamically generates the next screen's HTML an
 
 ## Locations
 
-- Frontend: `gui/src/apps/banana`
+- Frontend: `ui/src/apps/banana`
 - Backend: `server/apps/banana`
 - Database: `database/apps/banana.db`
 

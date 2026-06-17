@@ -2,7 +2,7 @@
 name: claude-code
 description: Claude Code 应用，把本地 claude CLI 包成 AIOS 对话式 app，并查看本机 Claude Code 的账户、历史、项目、技能、插件、MCP、计划和记忆文件。
 backend: server/apps/claude-code
-frontend: gui/src/apps/claude-code
+frontend: ui/src/apps/claude-code
 database: database/apps/claude-code.db
 ---
 

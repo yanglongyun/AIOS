@@ -2,7 +2,7 @@
 name: ghtrending
 description: GitHub 趋势发现应用，拉取 GitHub Search API 数据并缓存 AI 分析结果。
 backend: server/apps/ghtrending
-frontend: gui/src/apps/ghtrending
+frontend: ui/src/apps/ghtrending
 database: database/apps/ghtrending.db
 ---
 

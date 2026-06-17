@@ -2,7 +2,7 @@
 name: terminal
 description: 终端应用，通过 WebSocket 管理本地 shell 会话，支持创建、切换、输入、调整尺寸和关闭终端。
 backend: server/apps/terminal
-frontend: gui/src/apps/terminal
+frontend: ui/src/apps/terminal
 database: none
 ---
 
@@ -12,7 +12,7 @@ database: none
 
 ## 位置
 
-- 前端：`gui/src/apps/terminal`
+- 前端：`ui/src/apps/terminal`
 - 后端：`server/apps/terminal`
 - 数据库：无
 

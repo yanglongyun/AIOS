@@ -2,7 +2,7 @@
 name: hackernews
 description: Hacker News 阅读器 - 浏览 HN 热门/最新/精选榜单,看故事详情和评论树,AI 摘要单篇文章或一键生成整页速读。支持收藏。数据在 hackernews_bookmarks。
 backend: server/apps/hackernews
-frontend: gui/src/apps/hackernews
+frontend: ui/src/apps/hackernews
 database: database/apps/hackernews.db
 ---
 

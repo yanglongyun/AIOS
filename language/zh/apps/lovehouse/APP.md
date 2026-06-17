@@ -2,7 +2,7 @@
 name: lovehouse
 description: 虚拟伴侣 - 每条 AI 回复同时附带角色的内心想法
 backend: server/apps/lovehouse
-frontend: gui/src/apps/lovehouse
+frontend: ui/src/apps/lovehouse
 database: database/apps/lovehouse.db
 ---
 
@@ -17,7 +17,7 @@ database: database/apps/lovehouse.db
 
 ## 位置
 
-- 前端: `gui/src/apps/lovehouse`
+- 前端: `ui/src/apps/lovehouse`
 - 后端: `server/apps/lovehouse`
 - 数据库: `database/apps/lovehouse.db`
 

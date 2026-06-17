@@ -2,7 +2,7 @@
 name: fortune
 description: 算一卦 - 周易摇铜钱起卦,AI 解卦给出签名 / 签诗 / 宜 / 忌 / 建议。
 backend: server/apps/fortune
-frontend: gui/src/apps/fortune
+frontend: ui/src/apps/fortune
 database: database/apps/fortune.db
 ---
 
@@ -12,7 +12,7 @@ database: database/apps/fortune.db
 
 ## 位置
 
-- 前端:`gui/src/apps/fortune`
+- 前端:`ui/src/apps/fortune`
 - 后端:`server/apps/fortune`
 - 数据库:`database/apps/fortune.db`
 

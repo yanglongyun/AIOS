@@ -2,7 +2,7 @@
 name: finance
 description: 记账本 - 拟物存折式月度收支账本,记一笔/编辑/删除,行内编辑日期/摘要/金额。数据在 finance_transactions。
 backend: server/apps/finance
-frontend: gui/src/apps/finance
+frontend: ui/src/apps/finance
 database: database/apps/finance.db
 ---
 

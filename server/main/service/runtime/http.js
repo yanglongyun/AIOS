@@ -5,7 +5,7 @@ import { handleApiRequest } from "../../api/index.js";
 import { json } from "../../../shared/http/json.js";
 import { isAuthenticated, isPublicApiPath, isStaticAssetPath } from "../auth/session.js";
 const ROOT_DIR = process.cwd();
-const PUBLIC_DIR = join(ROOT_DIR, "gui", "dist");
+const PUBLIC_DIR = join(ROOT_DIR, "ui", "dist");
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",

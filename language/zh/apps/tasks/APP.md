@@ -2,14 +2,14 @@
 name: tasks
 description: 任务应用，列出后台 AI 任务（即时 / agent）的运行状态、消息流和结果，可在线终止。
 backend: server/main/api/task, server/main/service/task, server/main/repository/task
-frontend: gui/src/apps/tasks
+frontend: ui/src/apps/tasks
 database: database/aios.db (tasks)
 ---
 
 # tasks
 
 - 定位：AIOS 核心任务应用，不走 `server/apps/`，直接挂在主服务上。展示「后台 AI 任务」的列表 / 详情 / 消息流，可在线终止。
-- 前端：`gui/src/apps/tasks`
+- 前端：`ui/src/apps/tasks`
 - 后端：`server/main/api/task/`、`server/main/service/task/`、`server/main/repository/task/`
 - 数据：`database/aios.db` 中的 `tasks`
 
@@ -49,7 +49,7 @@ finished_at     TEXT     结束时间
 ## 在 AIOS 里的位置
 
 - 前端在侧栏 `top` 组（与 `chat` 同组），轮询 `/api/task` 获取列表，进入详情后轮询 `/api/task/detail` 与 `/api/task/messages`
-- 注册：`gui/src/apps.js`，状态在 `gui/src/stores/tasks.js`
+- 注册：`ui/src/apps.js`，状态在 `ui/src/stores/tasks.js`
 - 任务由其它应用或核心服务通过 `createInstantTask` / `createAgentTask` 创建；本应用只读 + 终止，不直接发起任务
 
 ## 后续可扩展

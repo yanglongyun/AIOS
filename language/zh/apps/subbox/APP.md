@@ -2,7 +2,7 @@
 name: subbox
 description: 订阅箱 - 用户配置一份每日订阅(主题 + 时间),后台 ticker 到点触发 AI agent 任务,生成早报式总结。单行配置 subbox_config + 历史 subbox_reports。
 backend: server/apps/subbox
-frontend: gui/src/apps/subbox
+frontend: ui/src/apps/subbox
 database: database/apps/subbox.db
 ---
 
@@ -17,7 +17,7 @@ database: database/apps/subbox.db
 
 ## 位置
 
-- 前端: `gui/src/apps/subbox`
+- 前端: `ui/src/apps/subbox`
 - 后端: `server/apps/subbox`
 - 数据库: `database/apps/subbox.db`
 

@@ -2,7 +2,7 @@
 name: cryptobot
 description: 炒币机应用，用于配置交易所、查看行情/仓位/订单，并周期性运行本地交易 Agent。
 backend: server/apps/cryptobot
-frontend: gui/src/apps/cryptobot
+frontend: ui/src/apps/cryptobot
 database: database/apps/cryptobot.db
 ---
 
@@ -12,7 +12,7 @@ database: database/apps/cryptobot.db
 
 ## 位置
 
-- 前端：`gui/src/apps/cryptobot`
+- 前端：`ui/src/apps/cryptobot`
 - 后端：`server/apps/cryptobot`
 - 数据库：`database/apps/cryptobot.db`
 

@@ -2,7 +2,7 @@
 name: fortune
 description: I Ching reading. The user shakes coins to cast one of 64 hexagrams; AI interprets it.
 backend: server/apps/fortune
-frontend: gui/src/apps/fortune
+frontend: ui/src/apps/fortune
 database: database/apps/fortune.db
 ---
 
@@ -12,7 +12,7 @@ Write your question, shake the coins six times to cast one of the 64 hexagrams. 
 
 ## Locations
 
-- Frontend: `gui/src/apps/fortune`
+- Frontend: `ui/src/apps/fortune`
 - Backend: `server/apps/fortune`
 - Database: `database/apps/fortune.db`
 

@@ -2,7 +2,7 @@
 name: terminal
 description: Terminal app for managing local shell sessions over WebSocket, including create, switch, input, resize, and close.
 backend: server/apps/terminal
-frontend: gui/src/apps/terminal
+frontend: ui/src/apps/terminal
 database: none
 ---
 
@@ -12,7 +12,7 @@ Terminal app. The backend owns local shell sessions; the frontend provides input
 
 ## Location
 
-- Frontend: `gui/src/apps/terminal`
+- Frontend: `ui/src/apps/terminal`
 - Backend: `server/apps/terminal`
 - Database: none
 

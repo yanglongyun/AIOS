@@ -2,7 +2,7 @@
 name: files
 description: 文件应用，通过 WebSocket 文件协议浏览、读取、上传、删除、重命名和新建本机文件。
 backend: server/apps/files
-frontend: gui/src/apps/files
+frontend: ui/src/apps/files
 database: none
 ---
 
@@ -12,7 +12,7 @@ database: none
 
 ## 位置
 
-- 前端：`gui/src/apps/files`
+- 前端：`ui/src/apps/files`
 - 后端：`server/apps/files`
 - 数据库：无
 

@@ -2,7 +2,7 @@
 name: files
 description: Files app for browsing, reading, uploading, deleting, renaming, and creating local files through the WebSocket file protocol.
 backend: server/apps/files
-frontend: gui/src/apps/files
+frontend: ui/src/apps/files
 database: none
 ---
 
@@ -12,7 +12,7 @@ Files app. It browses the local filesystem inside AIOS and performs file operati
 
 ## Location
 
-- Frontend: `gui/src/apps/files`
+- Frontend: `ui/src/apps/files`
 - Backend: `server/apps/files`
 - Database: none
 

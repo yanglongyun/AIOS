@@ -2,7 +2,7 @@
 name: rssreader
 description: RSS reader — subscribe feeds, list entries, AI Quick Look summary, bookmarks.
 backend: server/apps/rssreader
-frontend: gui/src/apps/rssreader
+frontend: ui/src/apps/rssreader
 database: database/apps/rssreader.db
 ---
 
@@ -12,7 +12,7 @@ Minimal RSS reader. Manage feeds, fetch entries, AI Quick Look produces a concis
 
 ## Locations
 
-- Frontend: `gui/src/apps/rssreader`
+- Frontend: `ui/src/apps/rssreader`
 - Backend: `server/apps/rssreader`
 - Database: `database/apps/rssreader.db`
 

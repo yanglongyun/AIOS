@@ -5,12 +5,12 @@ This is the built-in system memory for creating and modifying AIOS apps.
 ## Basics
 
 - App backend code goes in `server/apps/<appname>/`
-- App frontend code goes in `gui/src/apps/<appname>/`
+- App frontend code goes in `ui/src/apps/<appname>/`
 - App documentation goes in `apps/<appname>/APP.md`
 - `language/` is only a bake source for install/runtime copies. Do not create or edit `language/<lang>/apps/<appname>/` when building an app at runtime
 - Do not put app service code in the top-level `apps/` directory; top-level `apps/<appname>/APP.md` is documentation only
-- New apps must be registered in `gui/src/apps.js`
-- Never edit `gui/dist/` or built/minified assets directly; edit source and build
+- New apps must be registered in `ui/src/apps.js`
+- Never edit `ui/dist/` or built/minified assets directly; edit source and build
 
 ## Backend
 
@@ -39,16 +39,16 @@ This is the built-in system memory for creating and modifying AIOS apps.
 
 ## Frontend
 
-- App UI lives in `gui/src/apps/<appname>/`
+- App UI lives in `ui/src/apps/<appname>/`
 - Follow existing app structure and visual language
-- If `gui/` source changes, reload with `build: true`
-- Do not hand-edit or patch `gui/dist/assets/*.js`; those files are generated only by Vite build
+- If `ui/` source changes, reload with `build: true`
+- Do not hand-edit or patch `ui/dist/assets/*.js`; those files are generated only by Vite build
 
 ## Reload
 
 - Changes under `server/apps/`: `restartApps: true`
 - Changes under `server/main/`, `server/shared/`, `server/ai/`, `server/llm/`, or `server/main/service/prompt/`: `restartServer: true`
-- Changes under `gui/`: `build: true`
+- Changes under `ui/`: `build: true`
 - Verify with real APIs and the app entry after changes; file existence alone is not enough
 
 ## Notes

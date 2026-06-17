@@ -2,14 +2,14 @@
 name: tasks
 description: Tasks app — lists background AI tasks (instant / agent) with status, message stream, and result. Supports stop.
 backend: server/main/api/task, server/main/service/task, server/main/repository/task
-frontend: gui/src/apps/tasks
+frontend: ui/src/apps/tasks
 database: database/aios.db (tasks)
 ---
 
 # tasks
 
 - Role: AIOS's core tasks app. It does not go through `server/apps/`; it is mounted directly on the main service. Shows the list / detail / message stream of "background AI tasks" and lets you stop a running one.
-- Frontend: `gui/src/apps/tasks`
+- Frontend: `ui/src/apps/tasks`
 - Backend: `server/main/api/task/`, `server/main/service/task/`, `server/main/repository/task/`
 - Data: `tasks` in `database/aios.db`
 
@@ -49,7 +49,7 @@ The task's LLM message stream lives in the `messages` table, linked by `conversa
 ## Where it lives in AIOS
 
 - Frontend sits in the rail's `top` group (same group as `chat`). It polls `/api/task` for the list, and once a task is opened, polls `/api/task/detail` and `/api/task/messages`.
-- Registration: `gui/src/apps.js`; state lives in `gui/src/stores/tasks.js`
+- Registration: `ui/src/apps.js`; state lives in `ui/src/stores/tasks.js`
 - Tasks are created by other apps or by core services via `createInstantTask` / `createAgentTask`. This app only reads and stops — it does not start tasks itself.
 
 ## Future extensions

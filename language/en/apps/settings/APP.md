@@ -2,14 +2,14 @@
 name: settings
 description: System settings app for account, model, instructions, messages, tools, and about information.
 backend: server/main/api/settings, server/main/service/settings, server/main/repository/settings
-frontend: gui/src/apps/settings
+frontend: ui/src/apps/settings
 database: database/aios.db (settings)
 ---
 
 # settings
 
 - Role: a core AIOS settings app. It does not go through `server/apps/`; it is mounted directly on the main service.
-- Frontend: `gui/src/apps/settings`
+- Frontend: `ui/src/apps/settings`
 - Backend: `server/main/api/settings/`, `server/main/service/settings/`, `server/main/repository/settings/`
 - Data: `settings` in `database/aios.db`
 - Tabs: Account, Model, Instructions, Messages, Tools, About

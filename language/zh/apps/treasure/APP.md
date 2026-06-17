@@ -2,7 +2,7 @@
 name: treasure
 description: 藏宝阁 - 上传图片让 AI 鉴宝(物品/类别/成色/估值/点评)入库,主页展示藏品清单和总财富。数据在 apps_treasures,图片落 files/uploads/treasure/。
 backend: server/apps/treasure
-frontend: gui/src/apps/treasure
+frontend: ui/src/apps/treasure
 database: database/apps/treasure.db
 ---
 

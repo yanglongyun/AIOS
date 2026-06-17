@@ -2,7 +2,7 @@
 name: memory
 description: Memory — manage long-term context for the AIOS AI. Active memories are merged into the system prompt. Stored in the contexts table (source='memory').
 backend: server/main/api/memory
-frontend: gui/src/apps/memory
+frontend: ui/src/apps/memory
 database: database/aios.db (contexts where source='memory')
 ---
 
@@ -12,7 +12,7 @@ User-facing "long-term context" manager. Reuses the existing `contexts` table un
 
 ## Locations
 
-- Frontend: `gui/src/apps/memory`
+- Frontend: `ui/src/apps/memory`
 - Backend: `server/main/api/memory/` (lives inside the main server, not a standalone app)
 - Database: `database/aios.db`, rows in `contexts` where `source = 'memory'`
 

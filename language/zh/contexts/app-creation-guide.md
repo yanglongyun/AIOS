@@ -5,12 +5,12 @@
 ## 基本原则
 
 - 应用后端代码放在 `server/apps/<appname>/`
-- 应用前端代码放在 `gui/src/apps/<appname>/`
+- 应用前端代码放在 `ui/src/apps/<appname>/`
 - 应用说明文档放在 `apps/<appname>/APP.md`
 - `language/` 只是安装和运行副本烘焙源,AI 创建应用时不要创建或修改 `language/<lang>/apps/<appname>/`
 - 不要把应用服务代码写到顶层 `apps/` 目录;顶层 `apps/<appname>/APP.md` 只放应用说明
-- 新应用必须注册到 `gui/src/apps.js`,显示在应用入口中
-- 禁止直接修改 `gui/dist/` 或任何构建后的压缩产物;必须修改源码后构建
+- 新应用必须注册到 `ui/src/apps.js`,显示在应用入口中
+- 禁止直接修改 `ui/dist/` 或任何构建后的压缩产物;必须修改源码后构建
 
 ## 后端约定
 
@@ -39,16 +39,16 @@
 
 ## 前端约定
 
-- 应用界面放在 `gui/src/apps/<appname>/`
+- 应用界面放在 `ui/src/apps/<appname>/`
 - 参考现有应用结构和视觉语言,不要照搬 Express、Electron 或桌面后台风格
-- 改了 `gui/` 下源码后,reload 时必须带上 `build: true`
-- 不要手写或 patch `gui/dist/assets/*.js`;这些文件只由 Vite build 生成
+- 改了 `ui/` 下源码后,reload 时必须带上 `build: true`
+- 不要手写或 patch `ui/dist/assets/*.js`;这些文件只由 Vite build 生成
 
 ## 重载约定
 
 - 改 `server/apps/`: `restartApps: true`
 - 改 `server/main/`、`server/shared/`、`server/ai/`、`server/llm/`、`server/main/service/prompt/`: `restartServer: true`
-- 改 `gui/`: `build: true`
+- 改 `ui/`: `build: true`
 - 改完后必须用真实接口和前端入口验证,不能只检查文件存在
 
 ## 补充

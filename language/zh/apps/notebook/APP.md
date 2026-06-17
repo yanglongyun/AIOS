@@ -2,7 +2,7 @@
 name: notebook
 description: 笔记本 - 拟物风格,软木板上钉便签 + 夹板纸张编辑 + 12 种纸样 + AI 润色。替代旧 notes 应用。数据在 apps DB notes 表。
 backend: server/apps/notebook
-frontend: gui/src/apps/notebook
+frontend: ui/src/apps/notebook
 database: database/apps/notebook.db
 ---
 

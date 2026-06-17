@@ -17,6 +17,52 @@
 - 删除重复的顶层 `doc/`,保留 `dev/doc`;
 - 保留为一组新的正常提交,而不是改写历史。
 
+## 前史:先用 AGENT 覆盖过 AIOS
+
+在回到 MD3 / Google 风格之前,曾经先把桌面的 AGENT 项目拿来覆盖 AIOS,
+目标是把当前 AGENT 作为 AIOS 的新版本提交进去。
+
+当时操作原则是:
+
+- 从 `/Users/woodchange/Desktop/AGENT/` 同步到
+  `/Users/woodchange/Desktop/AIOS/AIOS/`;
+- 不带 `.git/`;
+- 不带依赖与运行产物,例如 `node_modules/`, `dist/`, `ui/dist/`,
+  `data/`, `.env`;
+- 覆盖后在 AIOS 里安装依赖、构建、检查;
+- 构建验证完成后再删除依赖和产物,保持仓库干净。
+
+形成提交:
+
+```
+b57990c Replace AIOS with refreshed agent workspace
+```
+
+随后发现原来的 `dev` 目录和 README 资料不应该被覆盖删除,于是又从旧历史里
+恢复了这些材料:
+
+- `dev/`
+- `AGENTS.md`
+- `LICENSE`
+- `README.md`
+- `README_en.md`
+
+形成提交:
+
+```
+ff8dcad Restore AIOS dev and readme materials
+```
+
+这两步是后来继续追溯 README、MD3/Google 风格、`a6d1953` 和 `3cd8f3a`
+的背景。也就是说,本轮不是单纯从最新代码小修,而是经历了:
+
+```
+当前 AGENT 覆盖 AIOS
+→ 恢复旧 dev/readme 材料
+→ 发现当前方向不对
+→ 回到 MD3/Google 风格历史基线
+```
+
 ## 为什么选 a6d1953
 
 查历史后确认,MD3 / Google 风格里内置应用最多的时候是 `a6d1953`
@@ -204,6 +250,8 @@ fatal: the remote end hung up unexpectedly
 本轮关键提交:
 
 ```
+ff8dcad Restore AIOS dev and readme materials
+b57990c Replace AIOS with refreshed agent workspace
 cc4ceb1 移除重复文档
 bd91d5f Restore earlier README files
 18740e7 Restore rich dev directory

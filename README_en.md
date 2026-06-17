@@ -2,146 +2,227 @@
 
 # AIOS
 
-### A personal operating system framework for the AI era
+**The Operating System for the AI Era**
 
-Open source · Local-first · Everything is an app · AI-native
-
-<br />
+Build native apps tailored to your needs through dialogue. A unified AI kernel that lets your apps talk to AI, too.
 
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522.5-43853d.svg)](https://nodejs.org)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#quick-start)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-install)
+[![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/YfCbV3m9Q)
 [![Stars](https://img.shields.io/github/stars/realuckyang/AIOS?style=social)](https://github.com/realuckyang/AIOS)
 
-[简体中文](./README.md) · [English](./README_en.md)
+[简体中文](./README.md) · **English**
 
-<!-- Screenshot slot: update once the framework UI is finalized -->
 <img src="https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp" alt="AIOS Screenshot" width="100%" />
 
 </div>
 
 ---
 
-AIOS is an open-source framework that hosts full-stack apps you build together with AI, on top of a minimal set of system conventions. Every app has its own frontend, backend, and dedicated database; all data stays on your machine; AI can write apps for you, and apps can call AI as a service.
+## ✨ What is it
 
-## Core idea: everything is an app
+AIOS is a **fully local-first** AI workstation:
 
-AIOS has no "system UI" in the traditional sense. **Chat, tasks, and settings are all apps**, listed in the same registry as notepad, todo, and ledger. The system layer owns exactly two things:
+- 🗣 **Conversation as command** — drive your computer in natural language
+- 🧩 **Core built-in apps** — chat, tasks, memory, settings, files, terminal, system status, and monitors
+- 🤖 **Agent task system** — apps can dispatch Tasks to the system; AI orchestrates context and tools
+- 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
+- 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
+- 🎨 **Building apps is a native capability** — AIOS's AI carries a full shell, can write code, start services, debug, and ship apps to you. No "workshop" needed — that's just what it does.
 
-1. **A global top bar**: the current app's registered action and title on the left, a grid button on the right that opens the app panel for switching apps.
-2. **Shell state**: the current app and a hash route (`#/app/:id`).
+> Not just another LLM frontend — AIOS's AI carries a full shell and system-level tools. It can drive apps, and write apps for you.
 
-Everything below the top bar belongs to the app — layout, style, and interaction are fully its own. The system is shrunk to a minimum; the freedom goes to the apps.
+---
 
-Three consequences follow:
+## 📑 Table of Contents
 
-- **Chat is not special.** It is just the default app. The kernel (agent loop, tasks, memory) is fully decoupled from the UI — you can skip our chat interface and use only the kernel.
-- **Settings follows the standard contract.** Its own backend, its own database, its own APP.md — the kernel opens no backdoor for it.
-- **The framework fits in three phrases**: kernel services + app contract + one top bar/panel.
+- [Install](#-install)
+- [First Run](#-first-run)
+- [Supported Models](#-supported-models)
+- [Built-in Apps](#-built-in-apps)
+- [Architecture](#-architecture)
+- [Design Philosophy](#-design-philosophy)
+- [Development & Contributing](#-development--contributing)
+- [FAQ](#-faq)
+- [License](#-license)
 
-## Quick start
+---
 
-Requires Node.js >= 22.5.
+## 🚀 Install
+
+### Requirements
+
+| Item | Required |
+|---|---|
+| OS | macOS 12+ / mainstream Linux / Windows 10 1809+ |
+| Node.js | 22.5 or newer |
+| Ports | `9502` (main), `9503` (apps), `5173` (Vite dev) |
+| Disk | ≥ 1 GB |
+
+### Run from Source
 
 ```bash
 git clone https://github.com/realuckyang/AIOS.git
 cd AIOS
 npm install
-npm start
+npm run build
+npm run start:main &
+npm run start:apps
 ```
 
-Open **`http://localhost:9502`**, go to Settings, and add an API key for any OpenAI-compatible endpoint.
+Production mode is available at `http://localhost:9502`.
 
-Frontend dev with hot reload: `npm run ui` (Vite, `http://localhost:5173`). Ports are configurable via `AGENT_PORT` (default 9502) and `AGENT_APPS_PORT` (default 9503).
-
-## Writing an app
-
-An app = a frontend directory + a layered backend + one APP.md. Don't invent new structure — copy an existing app (notepad is the most complete).
-
-**Frontend** `ui/src/apps/<id>/`:
-
-```text
-index.vue       Entry: holds app state and actions, assembles views
-views/          Screen-level views
-components/     Small reusable pieces within the app
-lib/            api.js (fetch wrapper) + format.js (pure functions)
+Development mode:
+```bash
+npm run dev
 ```
 
-Register one line `{ id, name, icon, load }` in `ui/src/apps.js` (icon is a lucide-vue-next component reference).
+Development mode is available at `http://localhost:5173`.
 
-**Backend** `server/apps/<id>/`, dependencies flow strictly downward:
+---
 
-```text
-index.js     → api/index.js → service/index.js → repository/index.js
-thin entry      HTTP dispatch    domain + AI tasks    schema/migrations/all SQL
-```
+## 🎬 First Run
 
-Each app gets its own SQLite database (`database/apps/<id>.db`); routes mount under `/apps/<id>/*`; register in `server/apps/registry.js`.
+1. Open `http://localhost:9502` in production mode, or `http://localhost:5173` in development mode
+2. Set an access password (used only on this machine)
+3. Go to **Settings → Model**, fill in an API key for any provider
+4. Back in **Chat**, just say "build me an app that does X" — the AI will write code, start services, and hand the app over to you through its shell
 
-**Docs** `language/<locale>/apps/<id>/APP.md`: frontmatter with name/title/description/backend/database, body listing every endpoint — at runtime the AI relies on it to understand the app, so it must change whenever the API changes.
+---
 
-Full contract in [AGENTS.md](./AGENTS.md).
+## 🧠 Supported Models
 
-## AI integration patterns
-
-Apps reach AI only through the system task service — `createTask + waitTask` in the service layer, where all prompts must live. Two proven interaction patterns:
-
-1. **Propose-and-adopt** (content creation): AI output is shown first; nothing is saved until the user adopts it — e.g. notepad's AI continuation.
-2. **Smart direct-write** (structured entry): AI outputs JSON → service validates strictly → write to the database — e.g. ledger's one-sentence bookkeeping, todo's inline breakdown.
-
-## Baking philosophy (not i18n)
-
-**Bake once at startup; the result is final.** Both runtime and source are single-language — no key lookup, no runtime dictionary. The text the AI reads and edits in code is the final copy. Language sources live in `language/zh|en/`, kept structurally identical; switch with `AIOS_LANG=en npm run lang:apply`.
-
-## Built-in apps
-
-| App | One line |
+| Group | Providers |
 |---|---|
-| Chat | Talk to AI; also the entry point for creating new apps |
-| Tasks | Watch AI task progress, intermediate output, and results |
-| Notepad | Notes, with propose-and-adopt AI continuation |
-| Todo | Task list with AI inline breakdown |
-| Ledger | Income/expense tracking with one-sentence smart entry |
-| Settings | Model providers and system configuration |
-
-## Supported models
-
-| Category | Provider |
-|---|---|
-| Major | OpenAI · Claude · Gemini · Mistral · xAI |
+| Mainstream | OpenAI · Claude · Gemini · Mistral · xAI |
 | China | DeepSeek · Kimi · Qwen · GLM · Z.ai · Stepfun · Minimax · Doubao |
 | Aggregators | OpenRouter · Together · Fireworks |
-| Coding plans | GLM-Coding · Alibaba Bailian · Volcengine Ark · Tencent Hunyuan · JD Cloud · Kimi-Coding |
+| Coding Plans | GLM-Coding · Aliyun Bailian · Volcano Ark · Tencent Hunyuan · JD Cloud · Kimi-Coding |
 | Custom | Any OpenAI-compatible endpoint |
 
-Streaming, tool calling, and reasoning content work across providers.
+Streaming, tool calling, and reasoning content are all supported.
 
-## Ecosystem
+---
 
-| Project | Role |
+## 📦 Built-in Apps
+
+| Group | Apps |
 |---|---|
-| **AIOS** (this repo) | Local Node version — the framework itself |
-| [AIOS-android](https://github.com/realuckyang/AIOS-android) | Mobile runtime — the same kernel on your phone |
-| [wandesk](https://github.com/Sider-ai/wandesk) | Desktop semantic version |
-| Cloud version | Cloudflare-native multi-tenant version, in preparation |
+| System | Chat · Tasks · Memory · Settings |
+| Computer | Files · Terminal · System Status |
+| Runtime | Monitors |
 
-## Contributing
+Apps can dispatch Tasks back to the system, letting AI take over complex flows instead of being stuck behind one-off API calls.
 
-The development contract is in [AGENTS.md](./AGENTS.md); commit conventions and contribution records in [dev/contributions](./dev/contributions/). Issues and PRs welcome.
+---
 
-The repo is mirrored on two remotes:
+## 🏗 Architecture
+
+```text
+AIOS/
+├── server/
+│   ├── main/        # Main service :9502  HTTP / WS / Auth / Chat / Task / LLM
+│   │   ├── api/     # Route entry
+│   │   ├── ai/      # Agent loop + tool calling
+│   │   ├── llm/     # Provider / Input / Requester / Output pipelines
+│   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
+│   │   └── repository/  # SQLite access
+│   └── apps/        # Apps service :9503  each app brings its own backend
+├── gui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
+├── apps/            # Per-app APP.md and shared assets
+└── skills/          # Local skills
+```
+
+**Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
+
+Storage: a single local SQLite file (`database/aios.db`), fully backup-able and portable.
+
+---
+
+## 💡 Design Philosophy
+
+> **The future will not dissolve into formlessness; it will remain in concrete form.**
+
+AIOS believes four things:
+
+1. **Conversation** is the new paradigm of human-computer interaction — simple, efficient, with built-in context.
+2. **Interfaces** remain indispensable — form is function. A chat window can't hold a calendar, a ledger, or a reader.
+3. **Everyone deserves their own software** — when AI writes the code, software no longer belongs to developers; it belongs to the people who use it.
+4. **AI and apps call each other** — apps are not just AI's display layer. They can also dispatch tasks back to the underlying AI, letting the system take over complex logic.
+
+Full version: [Read on iimos.ai →](https://iimos.ai/philosophy) (Chinese)
+
+More AIOS product writing on iimos.ai:
+
+- [AIOS — The Operating System for the AI Era](https://iimos.ai/blog/aios-open-source-launch)
+- [Agent OS kernel + Agent-native Apps = AIOS](https://iimos.ai/blog/agent-os-kernel-and-apps)
+- [Everything Is a Command](https://iimos.ai/blog/everything-is-a-command)
+- [AIOS — I Vibe-Coded an AI Operating System](https://iimos.ai/blog/vibe-coding-aios)
+- [More articles →](https://iimos.ai/blog)
+
+---
+
+## 🛠 Development & Contributing
+
+```bash
+# Dev mode (main + apps + Vite dev)
+npm run dev
+
+# Backend only
+npm run start:main &
+npm run start:apps
+
+```
+
+Issues and PRs welcome. Please read [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md) (WIP) before submitting.
+
+### Repository Sync
+
+AIOS is maintained in two synchronized remotes:
 
 - GitHub: `https://github.com/realuckyang/AIOS.git`
 - Gitee: `https://gitee.com/realuckyang/aios.git`
 
-## Community
+Maintainers should keep `main` pointing to the same commit on both remotes. Before publishing, verify `git status` and `git remote -v`, then push `origin main` and `gitee main`.
 
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
-[![Issues](https://img.shields.io/badge/Feedback-GitHub%20Issues-181717?logo=github&logoColor=white)](https://github.com/realuckyang/AIOS/issues)
+---
 
-Further reading: [AIOS — an OS for the AI era](https://iimos.ai/blog/aios-open-source-launch) · [Full philosophy](https://iimos.ai/philosophy) · [More posts](https://iimos.ai/blog)
+## ❓ FAQ
 
-## License
+**Q: Ports 9502 / 9503 are taken — how do I change them?**
+Set environment variables: `AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`.
+
+**Q: I forgot the access password.**
+Delete the `auth` row in `database/aios.db`, or reset the whole DB and go through onboarding again.
+
+**Q: Where is my data stored?**
+Data is stored under `database/` in the cloned repo.
+
+**Q: How is AIOS different from Open WebUI / LibreChat / LobeChat?**
+Those are mainly LLM chat frontends. AIOS is a **local operating system** with AI-native apps and an agent task system — Chat is just one entry point.
+
+---
+
+## 📄 License
 
 [ISC](./LICENSE) © realuckyang
+
+---
+
+## 💬 Community
+
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
+
+Ideas, bugs, AI-native app showcases — come hang out.
+
+---
+
+## Editions
+
+AIOS is a general kernel that can be tailored into themed editions for different user groups:
+
+| Edition | Audience | Main differences |
+|---|---|---|
+| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, core system app framework |
+| [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |

@@ -1,73 +1,93 @@
-#!/usr/bin/env node
-// @ts-nocheck
-import http from "node:http";
+import { createServer } from "http";
+import { json } from "../shared/http/json.js";
 import { appLoaders } from "./registry.js";
-import { sendJson } from "./shared/http.js";
-
-let appsServerInstance = null;
-const loadedApps = [];
-
-const loadApps = async () => {
-  if (loadedApps.length) return loadedApps;
-  for (const load of appLoaders) {
-    const mod = await load();
-    const app = mod?.default;
-    if (!app || typeof app.match !== "function" || typeof app.handleApi !== "function") {
-      throw new Error(`Invalid app module: ${app?.name || "(unknown)"}`);
-    }
-    if (typeof app.initDb === "function") app.initDb();
-    loadedApps.push(app);
-  }
-  return loadedApps;
-};
-
-const handleAppsRequest = async (req, res) => {
-  await loadApps();
-  const url = new URL(req.url || "/", "http://127.0.0.1");
-  const path = url.pathname;
-
-  if (path === "/apps/health") {
-    sendJson(res, 200, { ok: true, apps: loadedApps.map((app) => app.name) });
-    return;
-  }
-
-  const app = loadedApps.find((item) => item.match(path));
-  if (!app) {
-    sendJson(res, 404, { ok: false, error: "app endpoint not found" });
-    return;
-  }
-
-  try {
-    const handled = await app.handleApi(req, res, path, url);
-    if (handled === false && !res.headersSent) sendJson(res, 404, { ok: false, error: "not found" });
-  } catch (error) {
-    if (!res.headersSent) sendJson(res, error.statusCode || 500, { ok: false, error: error.message });
-    else res.end();
-  }
-};
-
-const startAppsServer = async (port = Number(process.env.AGENT_APPS_PORT || 9501)) => {
-  await loadApps();
-  return new Promise((resolve, reject) => {
-    appsServerInstance = http.createServer(handleAppsRequest);
-    appsServerInstance.listen(port, "127.0.0.1", () => {
-      console.log(`Agent apps server running on http://127.0.0.1:${port}`);
-      resolve(appsServerInstance);
-    });
-    appsServerInstance.on("error", reject);
-  });
-};
-
-const stopAppsServer = async () => {
-  if (!appsServerInstance) return undefined;
-  return new Promise((resolve) => appsServerInstance.close(() => resolve()));
-};
-
-if (process.argv[1] && process.argv[1].includes("server/apps/index.js")) {
-  startAppsServer().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
+import { initDatabase } from "../main/repository/init.js";
+const portArg = process.argv.find((arg) => arg.startsWith("--port="));
+if (portArg && !/^\-\-port=\d+$/.test(portArg)) {
+  throw new Error("Invalid port argument");
 }
-
-export { handleAppsRequest, startAppsServer, stopAppsServer };
+const APPS_PORT = portArg ? Number(portArg.slice("--port=".length)) : 9502;
+const APPS_HOST = "127.0.0.1";
+const moduleCache = /* @__PURE__ */ new Map();
+const appModules = [];
+const dbInitCache = /* @__PURE__ */ new Set();
+const loadAppModule = async (load) => {
+  if (moduleCache.has(load)) return moduleCache.get(load);
+  const mod = await load();
+  const app = mod?.default;
+  if (!app || typeof app !== "object") {
+    throw new Error("Invalid app module: missing default export object");
+  }
+  if (typeof app.name !== "string" || !app.name.trim()) {
+    throw new Error("Invalid app module: missing name");
+  }
+  if (typeof app.match !== "function") {
+    throw new Error(`Invalid app module "${app.name}": missing match(path)`);
+  }
+  if (typeof app.handleApi !== "function") {
+    throw new Error(`Invalid app module "${app.name}": missing handleApi(req,res,path)`);
+  }
+  moduleCache.set(load, app);
+  return app;
+};
+const loadRegisteredApps = async () => {
+  for (const load of appLoaders) {
+    const app = await loadAppModule(load);
+    appModules.push(app);
+  }
+};
+const initDbForApp = async (app) => {
+  if (dbInitCache.has(app.name)) return;
+  if (typeof app.initDb === "function") {
+    await app.initDb();
+  }
+  dbInitCache.add(app.name);
+};
+const bootAppRuntimes = async () => {
+  for (const app of appModules) {
+    await initDbForApp(app);
+    if (typeof app.initRuntime === "function") {
+      await app.initRuntime();
+    }
+  }
+};
+const appsServer = createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const path = url.pathname;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    if (path === "/apps/health") {
+      json(res, { success: true });
+      return;
+    }
+    const app = appModules.find((item) => item.match(path));
+    if (!app) {
+      json(res, { success: false, message: "Apps endpoint not found" }, 404);
+      return;
+    }
+    await initDbForApp(app);
+    const handled = await app.handleApi(req, res, path);
+    if (handled === false) {
+      json(res, { success: false, message: "Apps endpoint not found" }, 404);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    if (!res.headersSent) {
+      json(res, { success: false, message }, 500);
+    } else {
+      res.end();
+    }
+    console.error("[apps]", error);
+  }
+});
+initDatabase();
+await loadRegisteredApps();
+await bootAppRuntimes();
+appsServer.listen(APPS_PORT, APPS_HOST);

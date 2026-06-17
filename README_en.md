@@ -1,69 +1,52 @@
-<div align="center">
-
 # AIOS
 
-**The Operating System for the AI Era**
+[简体中文](./README.md) | **English**
 
-Build native apps tailored to your needs through dialogue. A unified AI kernel that lets your apps talk to AI, too.
+> The Operating System for the AI Era
 
-[![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A522.5-43853d.svg)](https://nodejs.org)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#-install)
-[![Discord](https://img.shields.io/discord/0?label=Discord&logo=discord&color=5865F2)](https://discord.gg/YfCbV3m9Q)
-[![Stars](https://img.shields.io/github/stars/realuckyang/AIOS?style=social)](https://github.com/realuckyang/AIOS)
+## Screenshots
 
-[简体中文](./README.md) · **English**
+![Welcome setup](https://iimos.ai/blog/iimos-screenshots/images/welcome-setup.webp)
 
-<img src="https://iimos.ai/blog/iimos-screenshots/images/readme-overview.webp" alt="AIOS Screenshot" width="100%" />
+![Chat home](https://iimos.ai/blog/iimos-screenshots/images/chat-home.webp)
 
-</div>
+![Notes app](https://iimos.ai/blog/iimos-screenshots/images/notes-board.webp)
 
----
+![GitHub Trending app](https://iimos.ai/blog/iimos-screenshots/images/github-trending-dark.webp)
 
-## ✨ What is it
+![Hacker News app](https://iimos.ai/blog/iimos-screenshots/images/hacker-news.webp)
 
-AIOS is a **fully local-first** AI workstation:
+![Crypto Bot app](https://iimos.ai/blog/iimos-screenshots/images/cryptobot.webp)
 
-- 🗣 **Conversation as command** — drive your computer in natural language
-- 🧩 **Core built-in apps** — chat, tasks, memory, settings, files, terminal, system status, and monitors
-- 🤖 **Agent task system** — apps can dispatch Tasks to the system; AI orchestrates context and tools
-- 🏠 **Your data is yours** — all chats, notes, and configuration stay in local SQLite
-- 🔌 **23+ model providers** — OpenAI / Claude / Gemini / DeepSeek / Kimi / Qwen / GLM …
-- 🎨 **Building apps is a native capability** — AIOS's AI carries a full shell, can write code, start services, debug, and ship apps to you. No "workshop" needed — that's just what it does.
+More screenshots: [Screenshots](https://iimos.ai/blog/iimos-screenshots)
 
-> Not just another LLM frontend — AIOS's AI carries a full shell and system-level tools. It can drive apps, and write apps for you.
+## Install
 
----
+One-line install. The script auto-checks and installs Node.js 20+, git, rsync, then clones, builds, and starts.
 
-## 📑 Table of Contents
+macOS (auto-installs Homebrew + Node@20)
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-macos.sh | sh
+```
 
-- [Install](#-install)
-- [First Run](#-first-run)
-- [Supported Models](#-supported-models)
-- [Built-in Apps](#-built-in-apps)
-- [Architecture](#-architecture)
-- [Design Philosophy](#-design-philosophy)
-- [Development & Contributing](#-development--contributing)
-- [FAQ](#-faq)
-- [License](#-license)
+Linux (auto-uses apt / dnf / yum / apk / pacman + NodeSource)
+```bash
+curl -fsSL https://raw.githubusercontent.com/valueriver/AIOS/main/install-linux.sh | sh
+```
 
----
+Windows (requires winget; bundled with Win10 1809+ / Win11)
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/valueriver/AIOS/main/install-windows.ps1 | iex"
+```
 
-## 🚀 Install
+After installation, open: `http://localhost:9501`. On first visit you'll be guided through setting an access password.
 
-### Requirements
+## Manual Start
 
-| Item | Required |
-|---|---|
-| OS | macOS 12+ / mainstream Linux / Windows 10 1809+ |
-| Node.js | 22.5 or newer |
-| Ports | `9502` (main), `9503` (apps), `5173` (Vite dev) |
-| Disk | ≥ 1 GB |
-
-### Run from Source
+If you'd rather control the flow yourself, skip the installer:
 
 ```bash
-git clone https://github.com/realuckyang/AIOS.git
+git clone https://github.com/valueriver/AIOS.git
 cd AIOS
 npm install
 npm run build
@@ -71,158 +54,56 @@ npm run start:main &
 npm run start:apps
 ```
 
-Production mode is available at `http://localhost:9502`.
+Open: `http://localhost:9501`
 
-Development mode:
-```bash
-npm run dev
-```
+## Community & Feedback
 
-Development mode is available at `http://localhost:5173`.
+**💬 [Join our Discord Community](https://discord.gg/7YnDeKE8)**
 
----
+## Core Philosophy
 
-## 🎬 First Run
+### Dialogue, a New Paradigm for Human-Computer Interaction
 
-1. Open `http://localhost:9502` in production mode, or `http://localhost:5173` in development mode
-2. Set an access password (used only on this machine)
-3. Go to **Settings → Model**, fill in an API key for any provider
-4. Back in **Chat**, just say "build me an app that does X" — the AI will write code, start services, and hand the app over to you through its shell
+AIOS, as the name suggests, is an operating system driven by AI. In AIOS, you can issue instructions to your computer or server in natural language. Dialogue is a natural mode of expression — simple, efficient, and highly personal. You can convey multiple complex needs within a single continuous conversation, one that naturally carries context, situational continuity, and memory.
+
+Dialogue is becoming a new paradigm for human-computer interaction, further closing the distance between people and computers.
 
 ---
 
-## 🧠 Supported Models
+### UI is Still Indispensable
 
-| Group | Providers |
-|---|---|
-| Mainstream | OpenAI · Claude · Gemini · Mistral · xAI |
-| China | DeepSeek · Kimi · Qwen · GLM · Z.ai · Stepfun · Minimax · Doubao |
-| Aggregators | OpenRouter · Together · Fireworks |
-| Coding Plans | GLM-Coding · Aliyun Bailian · Volcano Ark · Tencent Hunyuan · JD Cloud · Kimi-Coding |
-| Custom | Any OpenAI-compatible endpoint |
+Although dialogue is a natural way of interacting, it cannot replace Graphical User Interfaces (GUI).
 
-Streaming, tool calling, and reasoning content are all supported.
+Language is inherently abstract, and sometimes even laborious. When you try to describe a complex interface layout in words, or precisely specify a color or typography, language becomes an obstacle — far less direct and efficient than a mouse click or a finger touch. More importantly, dialogue is linear and fluid — it excels at expressing intent, but struggles to present results.
 
----
+Imagine a system with only a chat window. When you want to jot down a note, it gets buried in scrolling conversation history: no collection, no folders, impossible to organize, hard to search, impossible to pin, and completely unformatted. Without the concrete form of a "notes app," you wouldn't even think to take a note there.
 
-## 📦 Built-in Apps
+Dialogue often comes with uncertainty. To get a good result, you need to craft a high-quality prompt — and even with the same prompt, the outcome may differ each time. But a calendar, a ledger, a reader, a sketchpad — every definite need demands a matching functional form. Form is not decoration; form is function, form is value itself.
 
-| Group | Apps |
-|---|---|
-| System | Chat · Tasks · Memory · Settings |
-| Computer | Files · Terminal · System Status |
-| Runtime | Monitors |
-
-Apps can dispatch Tasks back to the system, letting AI take over complex flows instead of being stuck behind one-off API calls.
+**The future will not dissolve into formlessness; it will remain in concrete form.** Dialogue and interface are not competing or replacing each other — they are complementary and both indispensable. In a true AI operating system, GUI applications remain an essential core hub.
 
 ---
 
-## 🏗 Architecture
+### Everyone Can Have Their Own Dedicated Software
 
-```text
-AIOS/
-├── server/
-│   ├── main/        # Main service :9502  HTTP / WS / Auth / Chat / Task / LLM
-│   │   ├── api/     # Route entry
-│   │   ├── ai/      # Agent loop + tool calling
-│   │   ├── llm/     # Provider / Input / Requester / Output pipelines
-│   │   ├── service/ # Auth / Chat / Task / Prompt / Runtime / Settings
-│   │   └── repository/  # SQLite access
-│   └── apps/        # Apps service :9503  each app brings its own backend
-├── gui/             # Vue 3 frontend (Vite, Pinia, Tailwind v4)
-├── apps/            # Per-app APP.md and shared assets
-└── skills/          # Local skills
-```
+We are on the verge of the biggest paradigm shift in software engineering history: soon, almost all code will be written by AI.
 
-**Stack**: Node.js 22.5+ · Vue 3 · Vite 7 · node:sqlite · Tailwind v4 · ws · node-pty · xterm.js
+This means you can build software exclusively for you, tailored to your own needs, habits, and preferences. You don't need to learn any programming language, hire a developer, or wait for a product team to schedule your feature request into a long roadmap. You simply tell the AI your idea.
 
-Storage: a single local SQLite file (`database/aios.db`), fully backup-able and portable.
+In the traditional software world, most people can only accept products defined by a small group of people with programming skills: accepting their design language, their functional boundaries, and their idea of how you "should" use it. Software used to belong to developers — in AIOS, all of this will be completely overturned.
+
+Software will truly belong to the people who use it. It will have no ads, no subscriptions, and its data belongs to the people who use it. It will become an extension and realization of people's needs, preferences, and will — truly reaching every individual.
 
 ---
 
-## 💡 Design Philosophy
+### AI Makes Applications Themselves More Powerful
 
-> **The future will not dissolve into formlessness; it will remain in concrete form.**
+In AIOS, an unprecedented bidirectional relationship is established between AI and applications: **AI can understand and operate applications, and applications can in turn dispatch the AI**.
 
-AIOS believes four things:
+On one hand, because these applications are generated by AI, the AI can understand their underlying structure — enabling it to use, schedule, and update them more directly and efficiently. Through applications, AI also gains a multi-dimensional understanding of the user. Applications are not only your workspace for collaborating with AI, but also the window through which AI better understands your context.
 
-1. **Conversation** is the new paradigm of human-computer interaction — simple, efficient, with built-in context.
-2. **Interfaces** remain indispensable — form is function. A chat window can't hold a calendar, a ledger, or a reader.
-3. **Everyone deserves their own software** — when AI writes the code, software no longer belongs to developers; it belongs to the people who use it.
-4. **AI and apps call each other** — apps are not just AI's display layer. They can also dispatch tasks back to the underlying AI, letting the system take over complex logic.
+On the other hand, applications themselves are evolving. In traditional applications, functionality is determined by code, workflows are fixed, and boundaries are constrained — you simply get what the developer wrote, nothing more, nothing less. In AIOS, an application can directly issue tasks to the AI. This means applications are no longer bound by fixed pre-written logic; they can tap into the underlying AI's general capabilities at any time.
 
-Full version: [Read on iimos.ai →](https://iimos.ai/philosophy) (Chinese)
+Take an "Interactive Fiction App" as an example: in traditional development, to keep AI-generated new chapters coherent with previous text — without forgetting earlier plot and settings — you must account for all kinds of situations and write complex logic to manually orchestrate, truncate, and compress context. Even then, constrained by rigid code logic, the results often fall short.
 
-More AIOS product writing on iimos.ai:
-
-- [AIOS — The Operating System for the AI Era](https://iimos.ai/blog/aios-open-source-launch)
-- [Agent OS kernel + Agent-native Apps = AIOS](https://iimos.ai/blog/agent-os-kernel-and-apps)
-- [Everything Is a Command](https://iimos.ai/blog/everything-is-a-command)
-- [AIOS — I Vibe-Coded an AI Operating System](https://iimos.ai/blog/vibe-coding-aios)
-- [More articles →](https://iimos.ai/blog)
-
----
-
-## 🛠 Development & Contributing
-
-```bash
-# Dev mode (main + apps + Vite dev)
-npm run dev
-
-# Backend only
-npm run start:main &
-npm run start:apps
-
-```
-
-Issues and PRs welcome. Please read [CONTRIBUTING.md](./dev/contributions/CONTRIBUTING.md) (WIP) before submitting.
-
-### Repository Sync
-
-AIOS is maintained in two synchronized remotes:
-
-- GitHub: `https://github.com/realuckyang/AIOS.git`
-- Gitee: `https://gitee.com/realuckyang/aios.git`
-
-Maintainers should keep `main` pointing to the same commit on both remotes. Before publishing, verify `git status` and `git remote -v`, then push `origin main` and `gitee main`.
-
----
-
-## ❓ FAQ
-
-**Q: Ports 9502 / 9503 are taken — how do I change them?**
-Set environment variables: `AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 ...`.
-
-**Q: I forgot the access password.**
-Delete the `auth` row in `database/aios.db`, or reset the whole DB and go through onboarding again.
-
-**Q: Where is my data stored?**
-Data is stored under `database/` in the cloned repo.
-
-**Q: How is AIOS different from Open WebUI / LibreChat / LobeChat?**
-Those are mainly LLM chat frontends. AIOS is a **local operating system** with AI-native apps and an agent task system — Chat is just one entry point.
-
----
-
-## 📄 License
-
-[ISC](./LICENSE) © realuckyang
-
----
-
-## 💬 Community
-
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/YfCbV3m9Q)
-
-Ideas, bugs, AI-native app showcases — come hang out.
-
----
-
-## Editions
-
-AIOS is a general kernel that can be tailored into themed editions for different user groups:
-
-| Edition | Audience | Main differences |
-|---|---|---|
-| **AIOS** (this repo) | Global developers and multilingual users | Multilingual, 23+ model providers, core system app framework |
-| [**DeepSeek OS**](https://gitee.com/realuckyang/deepseek-os) | Chinese DeepSeek users | Chinese only, DeepSeek by default, reduced to 6 core apps |
+But in AIOS, "generate the next chapter" is no longer a passive API call requiring complex context orchestration. It becomes a Task dispatched by the application to the underlying system. The AI engine takes over autonomously: it actively queries the database, reviews vast historical records, dynamically extracts and integrates relevant settings, and ultimately generates a new chapter far more consistent with the story's logic.

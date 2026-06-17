@@ -1,17 +1,17 @@
 node_modules/
-dist/
-data/
-uploads/
-
-.env
-.env.*
-!.env.example
-
+gui/dist/
+gui2/dist/
+.aios/
 .DS_Store
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+*.log
+/database/
+/files/
 
-# local editor/tooling
-.claude/
+# Baked AGENTS.md (runtime; baked from language/<locale>/AGENTS.md)
+/AGENTS.md
+
+# Baked CLAUDE.md (runtime; baked from language/<locale>/CLAUDE.md)
+/CLAUDE.md
+
+# Baked APP.md tree (runtime; baked from language/<locale>/apps/<name>/APP.md)
+/apps/

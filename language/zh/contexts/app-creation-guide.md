@@ -23,7 +23,7 @@
 
 - 应用 API 统一走 `/apps/<appname>/<action>`
 - 前端请求必须使用 `/apps/<appname>/<action>`,不要加 `/aios` 前缀
-- shell 验证用 `http://127.0.0.1:9501/apps/<appname>/<action>`
+- shell 验证用 `http://127.0.0.1:9502/apps/<appname>/<action>`
 - 查询类接口用 `GET`
 - 变更类接口用 `POST + JSON body`
 - 读取 body 使用 `readBody(req)`

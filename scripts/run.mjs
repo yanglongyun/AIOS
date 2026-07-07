@@ -7,6 +7,8 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(__dirname);
+const MAIN_PORT = process.env.AIOS_MAIN_PORT || process.env.AIOS_SERVER_PORT || "9502";
+const APPS_PORT = process.env.AIOS_APPS_PORT || "9503";
 
 const procs = [];
 
@@ -39,9 +41,11 @@ const shutdown = (code = 0) => {
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));
 
-start("main", [join(ROOT, "server/main/index.js"), "--port=9501"], {
-  AIOS_APPS_PORT: "9502"
+start("main", [join(ROOT, "server/main/index.js"), `--port=${MAIN_PORT}`], {
+  AIOS_MAIN_PORT: MAIN_PORT,
+  AIOS_APPS_PORT: APPS_PORT
 });
-start("apps", [join(ROOT, "server/apps/index.js"), "--port=9502"], {
-  AIOS_MAIN_PORT: "9501"
+start("apps", [join(ROOT, "server/apps/index.js"), `--port=${APPS_PORT}`], {
+  AIOS_MAIN_PORT: MAIN_PORT,
+  AIOS_APPS_PORT: APPS_PORT
 });

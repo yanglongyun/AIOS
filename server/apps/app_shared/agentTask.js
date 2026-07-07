@@ -7,7 +7,7 @@ const requestTask = async (body = {}) => {
     const token = getApiToken();
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    resp = await fetch(`http://localhost:${process.env.AIOS_MAIN_PORT || 9501}/api/task/create/agent`, {
+    resp = await fetch(`http://localhost:${process.env.AIOS_MAIN_PORT || 9502}/api/task/create/agent`, {
       method: "POST",
       headers,
       body: JSON.stringify(body)

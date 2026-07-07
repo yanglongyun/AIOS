@@ -142,7 +142,7 @@ const start = (label, command, args, env = {}) => {
 
 const startServices = () => {
   console.log("[aios-test] start services");
-  start("system", process.execPath, ["server/system/index.js"], {
+  start("main", process.execPath, ["server/main/index.js", `--port=${mainPort}`], {
     AGENT_PORT: mainPort,
     AIOS_MAIN_PORT: mainPort,
     AGENT_APPS_PORT: appsPort,

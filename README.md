@@ -348,7 +348,7 @@ AIOS 同步维护两个远端仓库:
 <summary><b>端口 9502 / 9503 被占用怎么办?</b></summary>
 
 ```bash
-AIOS_MAIN_PORT=9601 AIOS_APPS_PORT=9602 npm start
+AIOS_SERVER_PORT=9601 AIOS_APPS_PORT=9602 npm start
 ```
 </details>
 
@@ -405,5 +405,4 @@ sqlite3 database/aios.db "DELETE FROM auth; DELETE FROM sessions;"
 </div>
 
 ---
-
 

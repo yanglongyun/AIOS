@@ -103,7 +103,7 @@ const startDetachedNode = (entry) => {
 const restartAppsProcess = async () => {
   await probeProcess(APPS_ENTRY, 9511, "/apps/health");
   try {
-    const appsPort = process.env.AIOS_APPS_PORT || "9502";
+    const appsPort = process.env.AIOS_APPS_PORT || "9503";
     execSync(`lsof -ti:${appsPort} | xargs kill 2>/dev/null || true`, { stdio: "pipe" });
   } catch {
   }

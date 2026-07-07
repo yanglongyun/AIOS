@@ -23,7 +23,7 @@ This is the built-in system memory for creating and modifying AIOS apps.
 
 - App APIs use `/apps/<appname>/<action>`
 - Frontend requests must use `/apps/<appname>/<action>` with no `/aios` prefix
-- Shell verification should call `http://127.0.0.1:9501/apps/<appname>/<action>`
+- Shell verification should call `http://127.0.0.1:9502/apps/<appname>/<action>`
 - Read endpoints use `GET`
 - Mutating endpoints use `POST + JSON body`
 - Read request bodies with `readBody(req)`

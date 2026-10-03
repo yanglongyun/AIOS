@@ -167,8 +167,8 @@ const runChat = async (chatId) => {
     const ctx = {
       leftoverGroups: ctxLeftovers,
       selfChatId: chatId,
-      chatId,        // confirm 要用它把提醒卡投到这段对话里
-      signal,        // 整轮被停时,悬着的提醒卡跟着收掉
+      chatId,
+      signal,
       cwd,
       outputDir: outputDirectory(chatId),
       emit,
@@ -187,9 +187,6 @@ const runChat = async (chatId) => {
       ledger.record(type, data); // item 落库 / 压缩记账;循环自己的 done/error 不落,终局由本层广播
     };
 
-    // 规则开关:开着 confirm 工具在;关着连它也不在(描述一个调不到的工具,模型只会去调然后撞空)
-    const rulesOn = (settings.rulesEnabled || "on") !== "off";
-
     const result = await runAi({
       runId: crypto.randomUUID(),
       responsesUrl: settings.apiUrl,
@@ -197,7 +194,7 @@ const runChat = async (chatId) => {
       model: settings.model,
       instructions: buildSystem(chat, settings),
       input: rows.map((row) => row.item),
-      tools: rulesOn ? tools : tools.filter((t) => t.name !== "confirm"),
+      tools,
       run: createRunner(ctx),
       maxRounds: toolRoundsOf(settings),
       errorMaxChars: ERROR_MAX_CHARS,

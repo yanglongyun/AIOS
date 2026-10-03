@@ -2,20 +2,23 @@
 // 循环(agent/)只认 tools 数组 + run(call),不知道 AIOS 是什么;
 // AIOS 的外部能力(文件、进程、浏览器)全部通过 ctx 闭包进执行器。
 //
-// 五个工具:
+// 六个工具:
 //   bash(background?)  — 命令与后台进程(读日志用 read 日志文件,停止用 kill)
 //   read / edit / write — 文件三件套
-//   confirm            — 主动提醒(助手自己的判断;规则是用户定的闸,两者互补)
+//   browser            — 操作 AIOS 管的 Chrome(服务端 CDP,登录态保留)
+//   computer           — 操作图形桌面(xdotool 截屏/鼠标/键盘)
 import { bash, bashDef } from "./functions/bash.js";
 import { edit, editDef, read, readDef, write, writeDef } from "./functions/files.js";
-import { confirm, confirmDef } from "./functions/confirm.js";
+import { browser, browserDef } from "./functions/browser.js";
+import { computer, computerDef } from "./functions/computer.js";
 
 export const tools = [
   bashDef,
   readDef,
   editDef,
   writeDef,
-  confirmDef,
+  browserDef,
+  computerDef,
 ];
 
 const IMPLS = {
@@ -23,7 +26,8 @@ const IMPLS = {
   read,
   edit,
   write,
-  confirm,
+  browser,
+  computer,
 };
 
 /**

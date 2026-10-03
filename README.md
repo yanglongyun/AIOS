@@ -14,6 +14,19 @@
 | 状态 | CPU / 内存 / 磁盘、应用进程、AI 起的后台进程 |
 | 设置 | 模型连接、助手指令、规则、技能、登录密码 |
 
+## AI 的工具
+
+| 工具 | 做什么 |
+| --- | --- |
+| `bash` | 执行命令;长驻进程可以放后台,日志落文件 |
+| `read` / `write` / `edit` | 读文件(图片会直接交给模型看)/ 新建或重写 / 精确替换 |
+| `browser` | 操作这台机器上的 Chrome:按无障碍树快照里的 ref 点击、填写、选择,读正文、执行 JS、截图。登录态保存在 `~/.aios/browser` |
+| `computer` | 操作图形桌面上的任意软件:截屏给模型看,按截图坐标点击、输入、按键、滚动(xdotool) |
+
+`browser` 需要机器上装有 Chrome 或 Chromium(一键脚本默认会装);没有图形桌面时以无头模式运行。
+`computer` 需要图形桌面:一键脚本加 `AIOS_DESKTOP=1` 会装好 Xfce 桌面和网页远程桌面(noVNC,端口 6080),
+浏览器也会开在这个桌面上 —— 在远程桌面里能看着 AI 操作。
+
 ## 应用机制
 
 除了内置应用,其余能力都是「应用」:`~/.aios/apps/<id>/` 下的一个目录。
@@ -59,6 +72,8 @@ Linux 服务器可以用一键脚本(装 Node、构建、注册成开机自启�
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo bash
+# 带图形桌面(computer 工具 + 网页远程桌面):
+curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo AIOS_DESKTOP=1 AIOS_PASSWORD='你的密码' bash
 ```
 
 ### 环境变量
@@ -70,6 +85,9 @@ curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | 
 | `AIOS_HOME` | `~/.aios` | 数据目录(数据库、应用、技能) |
 | `AIOS_PASSWORD` | — | 登录密码。不设时首次启动随机生成,打印在日志里并写入 `~/.aios/initial-password.txt` |
 | `AIOS_APP_DOMAIN` | — | 应用子域名的根域名,见上文 |
+| `AIOS_DISPLAY` | `$DISPLAY` | `computer` 工具和浏览器使用的 X 显示器,如 `:1` |
+| `AIOS_CHROME` | 自动查找 | Chrome/Chromium 可执行文件路径 |
+| `AIOS_BROWSER_PORT` | `9222` | 浏览器调试端口(只监听 127.0.0.1) |
 
 ## 开发
 

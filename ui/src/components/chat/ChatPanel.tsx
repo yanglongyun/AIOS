@@ -1,4 +1,4 @@
-import { type ApprovalCard as Card, type Chat, chatsApi } from "../../api/chats";
+import { type Chat, chatsApi } from "../../api/chats";
 import { type Attachment, filesApi } from "../../api/files";
 import { settingsApi } from "../../api/settings";
 // 对话面板:一个对话的邮箱 + 输入器。
@@ -6,7 +6,6 @@ import { settingsApi } from "../../api/settings";
 // 同一面板体系下,几个对话各开各的标签互不干扰,切走的运行在服务端继续转。
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, FileText, Folder, LayoutGrid, Paperclip, Pencil, Plug, Send, Square, X } from "../ui/icons";
-import { ApprovalCard } from "./ApprovalCard";
 import { RulesControl } from "./RulesControl";
 import { ModelSetupDialog } from "./ModelSetupDialog";
 import type { ChatStartTab } from "./types";
@@ -209,23 +208,6 @@ export function ChatPanel({
     void send();
   }, [configured, prompt]);
 
-  // ── 审批:卡片跟着这段对话走 ──────────────────────────────────────────
-  // 刷新页面要把还悬着的卡捞回来,否则用户永远等不到那张卡(轮次还挂在那儿等表态)
-  const [approvals, setApprovals] = useState<Card[]>([]);
-  useEffect(() => {
-    setApprovals([]);
-    if (isStart) return;
-    void chatsApi.listApprovals(node.id).then(setApprovals).catch(() => {});
-  }, [node.id]);
-  useEffect(() => socket.on("approval_ask", (p: any) => {
-    if (String(p?.chatId) !== node.id) return;
-    setApprovals((list) => (list.some((c) => c.id === p.id) ? list : [...list, p as Card]));
-  }), [socket, node.id]);
-  useEffect(() => socket.on("approval_done", (p: any) => {
-    setApprovals((list) => list.filter((c) => c.id !== p.id));
-  }), [socket]);
-  const dismiss = (id: string) => setApprovals((list) => list.filter((c) => c.id !== id));
-
   const [rulesOn, setRulesOn] = useState(true);
   useEffect(() => { void settingsApi.getSettings().then((r: any) => setRulesOn((r.settings?.rulesEnabled || "on") !== "off")).catch(() => {}); }, []);
   const changeRules = (next: boolean) => {
@@ -236,7 +218,7 @@ export function ChatPanel({
       .catch(() => {});
   };
 
-  const empty = messagesLoaded && rowsRef.current.length === 0 && !busy && approvals.length === 0;
+  const empty = messagesLoaded && rowsRef.current.length === 0 && !busy;
   const chooseSuggestion = (value: string) => {
     setPrompt(value);
     persistDraft(value);
@@ -246,15 +228,6 @@ export function ChatPanel({
   return (
     <div className="flex-1 min-h-0 flex flex-col min-w-0 bg-bg">
       {!empty && <MessageStream rows={rowsRef.current} busy={busy} tick={tick} viewSeq={viewSeq} />}
-
-      {/* 审批卡:贴着消息流的末尾,和输入区之间 —— 它属于这一轮,不是浮层 */}
-      {approvals.length > 0 && (
-        <div className="shrink-0 max-h-[45vh] overflow-y-auto px-4 md:px-8 pb-3 flex flex-col items-center gap-2">
-          {approvals.map((card) => (
-            <ApprovalCard key={card.id} card={card} onDone={dismiss} />
-          ))}
-        </div>
-      )}
 
       {/* 同一个输入器:首条消息前居中,开始对话后回到底部,保留草稿与附件状态。 */}
       <div className={empty ? "flex-1 min-h-0 overflow-y-auto flex flex-col" : "shrink-0"}>

@@ -54,14 +54,7 @@ export const buildSystem = (
   const base = (chat.system && chat.system.trim()) || settings.system || "";
   const cwd = executionDirectory(opts.cwd);
 
-  // 规则关掉时 confirm 工具不存在,提示词里也不能提它。
   const rulesOn = (settings?.rulesEnabled || "on") !== "off";
-  const confirmDoc = rulesOn
-    ? `- confirm(summary, detail, risk) — 动手前先提醒用户并等确认。用在你自己觉得该问一句的时候:
-  操作不可逆、影响面比你被交代的更大、要动没被明确授权的东西。得到允许前不要执行。
-  规则说要先问的必须问;规则没说到但你拿不准的,也问。
-`
-    : "";
   const rulesBlock = opts.rules === false ? "" : rulesSection(listRules(), rulesOn);
 
   return `${base}
@@ -80,14 +73,17 @@ export const buildSystem = (
   截断的输出不可找回。
 - read / edit / write — 文件三件套:有界读(带行号)/ 精确替换 / 新建或整体重写。改文件首选 edit,别用 bash sed。
   read 读到图片时会把图像直接交给你查看。
-${confirmDoc}
+- browser(action, ...) — 操作这台机器上的 Chrome(登录态保留,有图形桌面时用户看得见)。
+  先 snapshot 拿页面元素清单,再用 ref 点击、填写、选择;read 读正文;screenshot 看页面长什么样。
+- computer(action, ...) — 操作图形桌面上的任意软件:screenshot 看屏幕,按截图坐标 click / type / key / scroll。
+  网页优先用 browser(更准、更省);computer 用于浏览器以外的软件,或 browser 搞不定的情况。
 每个工具都必须带 summary:一句话说明这次调用的目的,用户会在界面上看到。
 文件工具优先使用绝对路径,也支持 ~/。相对路径从本轮默认起点解析。每次 bash 调用独立;一次命令中的 cd 不会改变后续调用的起点。
 
 # 约定
 - 用户的消息可能带附件:图片你能直接看到;其他文件会给出本地路径,用 read/bash 去碰。
 - 改文件前先 read 看清现状,再 edit;不要凭空猜内容。操作具体项目时,先检查并阅读项目适用的 AGENTS.md / CLAUDE.md 和相关技能,按任务范围遵守。
-- 要查资料可以用 bash 调 curl;机器上装了浏览器自动化工具时(如 aios-browser),也可以通过 bash 调用。
+- 要看网页、查资料、操作站点,用 browser;只是取一个接口的数据,bash 里 curl 更快。
 
 # 你在哪
 AIOS 是跑在用户自己机器(常见是一台云服务器)上的 AI 操作系统,用户通过浏览器访问。

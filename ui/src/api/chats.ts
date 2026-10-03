@@ -35,15 +35,6 @@ export type StoredItem = {
   attachments?: Attachment[];
 };
 
-export type ApprovalCard = {
-  id: string;
-  chatId: string;
-  summary: string;
-  detail: string;
-  risk: string;
-  at: string;
-};
-
 export const chatsApi = {
   listChats: () => request<{ chats: Chat[] }>("/api/chats"),
   getChat: (id: string) =>
@@ -59,8 +50,4 @@ export const chatsApi = {
   listMessages: (chatId: string) =>
     request<{ rows: MessageRow[] }>(`/api/chats/messages?chatId=${encodeURIComponent(chatId)}`),
   listRuns: () => request<{ ids: string[] }>("/api/chats/runs"),
-  listApprovals: (chatId: string) =>
-    request<{ approvals: ApprovalCard[] }>(`/api/chats/approvals?chatId=${encodeURIComponent(chatId)}`).then((r) => r.approvals),
-  respondApproval: (id: string, answer: "allow" | "deny") =>
-    request("/api/chats/approvals", { method: "POST", ...jsonBody({ id, answer }) }),
 };

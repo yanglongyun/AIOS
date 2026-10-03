@@ -4,7 +4,7 @@ import { getDb } from "../database/connection.js";
 //
 // 没有硬闸。正则和词表只能看命令字面,覆盖面小却要养一套编译器;
 // 与其给人「拦得住」的错觉,不如把赌注明白地押在模型遵守规则上。
-// 规则要求先问的,模型调 confirm 等用户答复;规则关掉时 confirm 也不在,提示词里明说没有任何拦截。
+// 规则要求先问的,模型先用一句话问用户、停下来等回复;规则关掉时提示词里明说没有任何拦截。
 type Rule = {
   id: string;
   text: string;
@@ -18,7 +18,7 @@ export const rulesSection = (rules: Rule[], on: boolean) => {
   if (!on) {
     lines.push(
       "## 规则",
-      "用户关掉了规则:没有任何拦截,也没有 confirm 工具。",
+      "用户关掉了规则:没有任何拦截。",
       "不要问「要不要继续」,用户选择了让你直接做。只做被交代的事;交代之外的不可逆操作留着不做,用一句话说明即可。",
     );
     return lines.join("\n");
@@ -29,8 +29,8 @@ export const rulesSection = (rules: Rule[], on: boolean) => {
   if (!live.length) lines.push("(还没有规则)");
   lines.push(
     "",
-    "凡是规则说要先问的,动手之前必须调用 confirm 工具,得到允许才做。",
-    "规则没说到、但你自己觉得不可逆或拿不准的,也用 confirm 先问。",
+    "凡是规则说要先问的,动手之前先用一句话说明要做什么、为什么,然后结束这一轮等用户回复,得到允许才做。",
+    "规则没说到、但你自己觉得不可逆或拿不准的,也先这样问。",
     "普通的可逆步骤不要问,用户已经交代了的事直接做。",
   );
   return lines.join("\n");

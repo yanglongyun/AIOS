@@ -1,6 +1,5 @@
 // 会话:列表 / 建 / 改 / 删 / 单个 / 已读,某个会话的消息流,谁在跑。
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { listApprovals, respondApproval } from "../../chats/approvals.js";
 import * as chats from "../../chats/service.js";
 import { listRows } from "../../chats/messages.js";
 import { runningIds } from "../../chats/turn.js";
@@ -33,14 +32,5 @@ export const handleChatsRoutes = async (req: IncomingMessage, res: ServerRespons
   // 谁在跑(界面初始化对账;实时靠 conversation.* 事件)
   if (path === "/api/chats/runs" && method === "GET") { json(res, 200, { ok: true, ids: runningIds() }); return true; }
   // 刷新页面后把还悬着的卡捞回来,否则用户永远等不到那张卡
-  if (path === "/api/chats/approvals" && method === "GET") {
-    json(res, 200, { approvals: listApprovals(String(url.searchParams.get("chatId") || "")) });
-    return true;
-  }
-  if (path === "/api/chats/approvals" && method === "POST") {
-    const body = await parseBody(req);
-    json(res, 200, { ok: respondApproval(String(body.id), String(body.answer)) });
-    return true;
-  }
   return false;
 };

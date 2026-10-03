@@ -260,3 +260,8 @@ body.wt-dragging iframe { pointer-events: none !important; }
 .ProseMirror ul[data-type="taskList"] { list-style: none; padding-left: 0.4em; }
 .ProseMirror ul[data-type="taskList"] li { display: flex; gap: 0.4em; }
 .ProseMirror ul[data-type="taskList"] li > label { margin-top: 0.3em; }
+
+/* iOS Safari:输入框字号 < 16px 时,一聚焦就自动放大页面。触屏设备上统一 16px,不再放大。 */
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable="true"] { font-size: 16px !important; }
+}

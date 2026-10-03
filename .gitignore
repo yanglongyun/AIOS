@@ -1,17 +1,62 @@
+# ─── 依赖 ───
 node_modules/
-gui/dist/
-gui2/dist/
-.aios/
-.DS_Store
+.pnpm-store/
+
+# ─── 构建产物 ───
+ui/dist/
+dist/
+release/
+*.tsbuildinfo
+
+# ─── 本地数据 ───
+# 任何位置的 sqlite 文件(避免根目录意外生成 db 时漏拦)
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+data/
+
+# ─── 运行时 ───
 *.log
-/database/
-/files/
+logs/
+*.pid
+.cache/
+.tmp/
+tmp/
 
-# Baked AGENTS.md (runtime; baked from language/<locale>/AGENTS.md)
-/AGENTS.md
+# ─── 环境变量 / 密钥 ───
+.env
+.env.*
+!.env.example
+*.pem
+*.key
 
-# Baked CLAUDE.md (runtime; baked from language/<locale>/CLAUDE.md)
-/CLAUDE.md
+# ─── 编辑器 / 系统 ───
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
 
-# Baked APP.md tree (runtime; baked from language/<locale>/apps/<name>/APP.md)
-/apps/
+# ─── Vite / esbuild ───
+.vite/
+
+# ─── 测试覆盖率 ───
+coverage/
+.nyc_output/
+
+# ─── 其它 ───
+*.bak
+
+# agent 工作区(app 托管的真实目录)
+.claude/launch.json
+
+# esbuild 产物(build:updater)
+desktop/updater.mjs
+electron-builder-unsigned.json
+
+# ─── 不开源:内部文档 ───
+.dev/
+CLAUDE.md

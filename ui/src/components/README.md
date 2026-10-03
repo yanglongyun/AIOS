@@ -1,13 +1,12 @@
 # Components
 
-Components are grouped by product area, not by widget shape.
+按产品区域分组:
 
-- `chat/`: agent message UI, message grouping, tool-call rendering.
-- `command/`: global overlays such as quick open, command palette.
-- `sidebar/`: activity bar, file tree, conversations, sites, apps, and widgets.
-- `files/`: file preview/editing surfaces and code editor wrappers.
-- `settings/`: settings tabs and skill management.
-- `ui/`: small reusable UI primitives that are not tied to a product area.
-- `workspace/`: tab bars, document and process panels, and tab-group layout.
+- `apps/`:外部应用的 iframe 容器(应用机制)。
+- `chat/`:对话消息流、工具调用展示、审批卡片。
+- `files/`:文件预览与编辑(CodeMirror)。
+- `settings/`:设置面板与技能管理。
+- `sidebar/panels/`:对话列表、文件树,被内置应用放在左栏。
+- `ui/`:与业务无关的小组件(对话框、菜单、图标、提示)。
 
-Prefer importing from each folder's `index.ts` at feature boundaries. Keep leaf-to-leaf imports inside the same folder local.
+壳与内置应用在 `src/shell/` 和 `src/apps/`。

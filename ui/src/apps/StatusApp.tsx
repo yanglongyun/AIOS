@@ -31,7 +31,7 @@ function Meter({ label, used, total, text }: { label: string; used: number; tota
 }
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-3xl border border-border bg-bg p-5"><h2 className="mb-4 text-[14px] font-medium text-text">{title}</h2>{children}</section>;
+  return <section className="rounded-3xl bg-bg p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:bg-bg-inset dark:shadow-none"><h2 className="mb-4 text-[14px] font-medium text-text">{title}</h2>{children}</section>;
 }
 
 const STATUS_LABEL: Record<string, [string, string]> = {

@@ -8,7 +8,7 @@ import { FileText, Folder } from "../components/ui/icons";
 import { SideRail } from "./SideRail";
 import type { AppProps } from "./types";
 
-export function FilesApp({ socket, active, navOpen, onCloseNav, openRequest }: AppProps & { openRequest: { path: string; seq: number } | null }) {
+export function FilesApp({ socket, active, navOpen, railCollapsed, onCloseNav, openRequest }: AppProps & { openRequest: { path: string; seq: number } | null }) {
   const [node, setNode] = useState<FileNode | null>(null);
   const [treeRefresh, setTreeRefresh] = useState(0);
   const [fileRefresh, setFileRefresh] = useState(0);
@@ -48,7 +48,7 @@ export function FilesApp({ socket, active, navOpen, onCloseNav, openRequest }: A
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
-      <SideRail open={navOpen} onClose={onCloseNav}>
+      <SideRail open={navOpen} collapsed={railCollapsed} onClose={onCloseNav}>
         <FilesPanel active={active} selectedId={node?.id || ""} onSelect={(n) => void select(n)}
           refreshKey={treeRefresh} onChanged={() => setTreeRefresh((n) => n + 1)} />
       </SideRail>

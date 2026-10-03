@@ -1,68 +1,72 @@
 @import "tailwindcss";
 
+/* dark: 变体跟着 AIOS 自己的主题开关(data-theme),而不是系统设置 */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ───────────────────────────────────────────────
-   Notion-inspired theme
+   Google 风格(Material 3 / Gemini 配色)
    ─────────────────────────────────────────────── */
 @theme {
-  /* 背景:全白 + 几档浅灰 */
+  /* 背景:白底 + 几档冷调浅灰(surface container) */
   --color-bg:        #ffffff;
-  --color-bg-raised: #fbfbfa;        /* Notion 侧边栏底色 */
-  --color-bg-panel:  #f7f7f5;        /* 卡片/code 块底 */
-  --color-bg-inset:  #f1f1ef;        /* 更深一档 */
-  --color-bg-hover:  #efefed;        /* hover 灰 */
+  --color-bg-raised: #f8fafd;        /* 侧栏、次级面 */
+  --color-bg-panel:  #f0f4f9;        /* 输入框、用户气泡、代码块 */
+  --color-bg-inset:  #e9eef6;        /* 更深一档:轨道、分组底 */
+  --color-bg-hover:  #e9eef6;        /* hover */
 
-  /* 边线极细极淡 */
-  --color-border:        #ebebea;
-  --color-border-strong: #d3d3d1;
+  --color-border:        #e3e3e3;
+  --color-border-strong: #c4c7c5;
 
-  /* 文字 — Notion 招牌灰 #37352f */
-  --color-text:       #37352f;
-  --color-text-dim:   #5f5e5b;
-  --color-text-faint: #9b9a97;
+  --color-text:       #1f1f1f;
+  --color-text-dim:   #444746;
+  --color-text-faint: #747775;
 
-  /* 主色:Notion 蓝。注意 soft 用极淡的色,避免重色块感 */
-  --color-accent:        #2383e2;
-  --color-accent-soft:   #e7f0f9;
+  /* 主色:Google 蓝;soft 是选中态的浅蓝胶囊 */
+  --color-accent:        #0b57d0;
+  --color-accent-soft:   #d3e3fd;
 
-  /* 角色色:克制版本 */
-  --color-success: #0f7b6c;
-  --color-warning: #cb6b16;
-  --color-danger:  #e03e3e;
+  --color-success: #146c2e;
+  --color-warning: #b06000;
+  --color-danger:  #b3261e;
 
-  /* 白色面(输入框/卡片/弹层):深色模式下是抬升的深灰,别直接用 bg-white */
   --color-surface: #ffffff;
 
-  /* 字体:Inter / 系统 */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
-               "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+  /* 圆角整体放大:Material 3 的胶囊和大圆角 */
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+
+  --font-sans: "Google Sans", "Google Sans Text", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-mono: "Roboto Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
 }
 
 /* ───────────────────────────────────────────────
-   深色模式:变量整体翻转(Notion 暗色系)。
-   入口脚本在 index.html 里于首帧前写好 data-theme,避免闪白。
+   深色模式(Gemini 暗色)。入口脚本在 index.html 里于首帧前写好 data-theme,避免闪白。
    ─────────────────────────────────────────────── */
-:root { color-scheme: light; --scrollbar-thumb: #d9d8d4; --scrollbar-thumb-hover: #b9b8b3; }
+:root { color-scheme: light; --scrollbar-thumb: #c4c7c5; --scrollbar-thumb-hover: #a8abaa; }
 [data-theme="dark"] {
   color-scheme: dark;
-  --color-bg:        #191919;
-  --color-bg-raised: #202020;
-  --color-bg-panel:  #262626;
-  --color-bg-inset:  #2e2e2e;
-  --color-bg-hover:  #2b2b2b;
-  --color-border:        #2f2f2f;
-  --color-border-strong: #4a4a4a;
-  --color-text:       #d4d4d1;
-  --color-text-dim:   #a5a5a2;
-  --color-text-faint: #767672;
-  --color-accent:      #4a9de8;
-  --color-accent-soft: #1d3247;
-  --color-success: #4dab9a;
-  --color-warning: #d9862f;
-  --color-danger:  #eb5757;
-  --color-surface: #262626;
-  --scrollbar-thumb: #3f3f3f;
-  --scrollbar-thumb-hover: #545454;
+  --color-bg:        #131314;
+  --color-bg-raised: #1b1b1c;
+  --color-bg-panel:  #1e1f20;
+  --color-bg-inset:  #282a2c;
+  --color-bg-hover:  #2a2b2e;
+  --color-border:        #333537;
+  --color-border-strong: #444746;
+  --color-text:       #e3e3e3;
+  --color-text-dim:   #c4c7c5;
+  --color-text-faint: #8e918f;
+  --color-accent:      #a8c7fa;
+  --color-accent-soft: #004a77;
+  --color-success: #6dd58c;
+  --color-warning: #ffb95e;
+  --color-danger:  #f2b8b5;
+  --color-surface: #1e1f20;
+  --scrollbar-thumb: #444746;
+  --scrollbar-thumb-hover: #5e6061;
 }
 
 html, body, #app {
@@ -73,7 +77,6 @@ html, body, #app {
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "cv02", "cv03", "cv11";    /* Inter 调字形 */
   color: var(--color-text);
   background: var(--color-bg);
   font-size: 15px;
@@ -96,7 +99,7 @@ body {
 *:hover { scrollbar-color: var(--scrollbar-thumb) transparent; }
 
 ::selection {
-  background: rgba(35, 131, 226, 0.18);
+  background: rgba(11, 87, 208, 0.18);
 }
 
 /* ── diff 对照视图(@codemirror/merge):变更配色跟主题 ── */
@@ -169,17 +172,17 @@ body.wt-dragging iframe { pointer-events: none !important; }
   font-family: var(--font-mono);
   font-size: 0.86em;
   background: var(--color-bg-panel);
-  color: #eb5757;
-  padding: 0.1em 0.35em;
-  border-radius: 3px;
+  color: var(--color-text);
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
 }
 .prose pre {
   max-width: 100%;
   overflow-wrap: normal;   /* 代码块不折行,在块内横向滚 */
   background: var(--color-bg-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 14px 16px;
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 18px;
   overflow-x: auto;
   font-size: 13.5px;
   line-height: 1.6;
@@ -275,3 +278,15 @@ body.wt-dragging iframe { pointer-events: none !important; }
 @media (pointer: coarse) {
   input, textarea, select, [contenteditable="true"] { font-size: 16px !important; }
 }
+
+/* Gemini 式渐变问候语 */
+.aios-gradient-text {
+  background: linear-gradient(74deg, #4285f4 0%, #9b72cb 35%, #d96570 70%, #d96570 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 深色模式下主色是浅蓝,压在上面的白字看不清:实心主色按钮统一换成深蓝字(Material 3 的 on-primary) */
+[data-theme="dark"] .bg-accent.text-white,
+[data-theme="dark"] .bg-accent .text-white { color: #062e6f; }

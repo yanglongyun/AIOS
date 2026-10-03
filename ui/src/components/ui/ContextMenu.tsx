@@ -54,7 +54,7 @@ export function ContextMenu({
     />
     <div
       ref={ref}
-      className="fixed z-50 min-w-[180px] rounded-md border border-border bg-surface shadow-[0_6px_20px_rgba(15,15,15,0.12),0_2px_4px_rgba(15,15,15,0.08)] py-1"
+      className="fixed z-50 min-w-[200px] rounded-2xl bg-surface shadow-[0_4px_16px_rgba(0,0,0,0.14),0_1px_3px_rgba(0,0,0,0.1)] py-2"
       style={{ left: safeX, top: safeY }}
     >
       {/* 有勾选项时,所有行统一让出左侧勾位 —— 否则勾上/取消会让文字左右跳 */}
@@ -68,7 +68,7 @@ export function ContextMenu({
             disabled={item.disabled}
             onClick={() => { item.onClick(); if (!item.keepOpen) onClose(); }}
             className={[
-              "w-full flex items-center gap-2.5 px-3 py-2 text-[14px] text-left transition-colors",
+              "w-full flex items-center gap-3 px-4 py-2.5 text-[14px] text-left transition-colors",
               item.disabled
                 ? "text-text-faint cursor-not-allowed"
                 : item.danger

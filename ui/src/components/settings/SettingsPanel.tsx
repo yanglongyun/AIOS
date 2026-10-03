@@ -22,7 +22,7 @@ const categories = [
 type Category = typeof categories[number]["id"];
 type SaveGroup = "connection" | "system" | "advanced";
 type SaveState = { busy?: boolean; error?: string; saved?: boolean };
-const secondaryButton = "shrink-0 border border-border px-3 py-1.5 text-[12px] font-medium text-text transition-colors hover:bg-bg-hover disabled:opacity-40";
+const secondaryButton = "shrink-0 rounded-full border border-border-strong px-4 py-2 text-[13px] font-medium text-accent transition-colors hover:bg-accent-soft/40 disabled:opacity-40";
 
 export function SettingsPanel({ onSaved, onOpenSkill }: { onSaved?: (settings: Settings) => void; onOpenSkill: (skill: SkillInfo) => void }) {
   const tabId = useId();
@@ -75,7 +75,7 @@ export function SettingsPanel({ onSaved, onOpenSkill }: { onSaved?: (settings: S
 
   return <div className="@container flex min-h-0 flex-1 flex-col bg-bg">
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 border-b border-border bg-surface">
+      <div className="shrink-0 border-b border-border bg-bg">
         <nav role="tablist" aria-label="设置分类" className="mx-auto flex max-w-4xl overflow-x-auto px-8 @max-[640px]:px-3">
           {categories.map(({ id, label, icon: Icon }, index) => <button key={id} type="button"
             role="tab" id={`${tabId}-${id}`} aria-selected={category === id} aria-controls={`${tabId}-panel`} tabIndex={category === id ? 0 : -1}
@@ -89,7 +89,7 @@ export function SettingsPanel({ onSaved, onOpenSkill }: { onSaved?: (settings: S
               setCategory(categories[next].id);
               e.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("button")[next]?.focus();
             }}
-            className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-[13px] transition-colors @max-[640px]:px-3 ${category === id ? "border-accent font-medium text-text" : "border-transparent text-text-dim hover:bg-bg-hover hover:text-text"}`}>
+            className={`flex shrink-0 items-center gap-2 border-b-[3px] px-4 py-3.5 text-[14px] transition-colors @max-[640px]:px-3 ${category === id ? "border-accent font-medium text-accent" : "border-transparent text-text-dim hover:bg-bg-hover hover:text-text"}`}>
             <Icon size={14} /><span>{label}</span>
           </button>)}
         </nav>
@@ -195,7 +195,7 @@ function SaveFeedback({ state }: { state?: SaveState }) {
 function SaveFooter({ dirty, state, disabled }: { dirty: boolean; state?: SaveState; disabled?: boolean }) {
   return <><SaveFeedback state={state} />{dirty && <div className="mt-4 flex items-center justify-between gap-3">
     <span className="text-[12px] text-text-faint">有未保存的更改</span>
-    <button type="submit" disabled={state?.busy || disabled} className="inline-flex items-center gap-1.5 bg-accent px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 disabled:opacity-40">
+    <button type="submit" disabled={state?.busy || disabled} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-40">
       {state?.busy && <Loader size={13} className="animate-spin" />}{state?.busy ? "保存中…" : "保存更改"}
     </button>
   </div>}</>;
@@ -222,7 +222,7 @@ function PasswordSettings() {
       <Field label="新密码" description="至少 8 位。"><input type="password" autoComplete="new-password" minLength={8} className={inputClass} required value={next} onChange={(e) => setNext(e.target.value)} /></Field>
       <Field label="确认新密码"><input type="password" autoComplete="new-password" minLength={8} className={inputClass} required value={confirm} onChange={(e) => setConfirm(e.target.value)} /></Field>
       <SaveFeedback state={state} />
-      <div className="flex justify-end"><button type="submit" disabled={state.busy} className="bg-accent px-3 py-1.5 text-[12px] font-medium text-white hover:opacity-90 disabled:opacity-40">修改密码</button></div>
+      <div className="flex justify-end"><button type="submit" disabled={state.busy} className="rounded-full bg-accent px-5 py-2 text-[13px] font-medium text-white hover:opacity-90 disabled:opacity-40">修改密码</button></div>
     </form>
   </Section>;
 }

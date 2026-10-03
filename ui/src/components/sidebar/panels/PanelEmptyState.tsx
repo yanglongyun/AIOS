@@ -13,7 +13,7 @@ export function PanelEmptyState({ title, description, action, icon, onAction }: 
       <div className="mt-1 min-h-[3.25em] text-[11.5px] text-text-faint leading-relaxed">{description}</div>
       <button
         onClick={onAction}
-        className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-accent text-white text-[13px] hover:opacity-90 transition-opacity"
+        className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white text-[14px] font-medium hover:opacity-90 transition-opacity"
       >
         {icon} {action}
       </button>

@@ -25,7 +25,7 @@ export function DesktopApp({ active }: AppProps) {
         <Monitor size={30} className="text-text-faint" />
         <p className="text-[14px] text-text">这台机器还没有图形桌面</p>
         <p className="w-full max-w-md text-[12.5px] leading-relaxed text-text-faint">
-          在服务器上重新运行安装脚本并加上 <code className="rounded bg-bg-inset px-1">AIOS_DESKTOP=1</code>,
+          在服务器上重新运行安装脚本并加上 <code className="rounded-md bg-bg-inset px-1">AIOS_DESKTOP=1</code>,
           会装好桌面和远程桌面服务。装好后 AI 的 computer 工具也能用了。
         </p>
         <pre className="w-full max-w-md whitespace-pre-wrap break-all rounded-xl bg-bg-inset px-4 py-3 text-left text-[11.5px] text-text-dim select-all">curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo AIOS_DESKTOP=1 bash</pre>

@@ -5,10 +5,10 @@ export function PanelCreateAction({ label, onClick }: { label: string; onClick: 
     <button
       type="button"
       onClick={onClick}
-      className="shrink-0 h-8 flex items-center gap-1.5 pl-3 pr-2 border-b border-border cursor-pointer select-none text-text hover:bg-bg-hover"
+      className="shrink-0 m-3 mb-2 h-11 self-start inline-flex items-center gap-2.5 rounded-full bg-bg-panel pl-4 pr-5 cursor-pointer select-none text-text-dim hover:bg-bg-hover"
     >
-      <Plus size={13} className="shrink-0" />
-      <span className="text-[12.5px] leading-[18px]">{label}</span>
+      <Plus size={18} className="shrink-0" />
+      <span className="text-[14px]">{label}</span>
     </button>
   );
 }

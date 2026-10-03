@@ -27,7 +27,7 @@ export function Favicon({ url, override, size = 14, className = "" }: {
       onError={() => setIdx((i) => i + 1)}
       draggable={false}
       alt=""
-      className={`shrink-0 rounded-[3px] object-contain ${className}`}
+      className={`shrink-0 rounded-md object-contain ${className}`}
       style={{ width: size, height: size }}
     />
   );

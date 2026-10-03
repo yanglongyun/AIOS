@@ -103,8 +103,8 @@ export function ChatRail({
         onClick={() => { if (!isRenaming) onSelect(agent); }}
         onContextMenu={(e) => onContext(e, agent)}
         className={[
-          "group flex items-start gap-1.5 py-[4px] pl-3 pr-2 cursor-pointer select-none text-text",
-          isSelected && !isRenaming ? "bg-bg-inset" : "hover:bg-bg-hover",
+          "group mx-2 flex items-start gap-1.5 rounded-2xl py-2 pl-4 pr-2 cursor-pointer select-none text-text",
+          isSelected && !isRenaming ? "bg-accent-soft text-[#041e49] dark:text-[#d3e3fd]" : "hover:bg-bg-hover",
         ].join(" ")}
       >
         {isRenaming ? (
@@ -118,7 +118,7 @@ export function ChatRail({
             }}
             onBlur={commitRename}
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 min-w-0 bg-surface border border-accent rounded px-1 -mx-1 py-px text-[14px] text-text outline-none"
+            className="flex-1 min-w-0 bg-surface border border-accent rounded-md px-1 -mx-1 py-px text-[14px] text-text outline-none"
           />
         ) : (
           <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export function ChatRail({
             : null}
         <button
           onClick={(e) => { e.stopPropagation(); onContext(e, agent); }}
-          className="shrink-0 self-center w-5 h-5 rounded flex items-center justify-center text-text-faint hover:text-text hover:bg-bg-inset opacity-0 group-hover:opacity-100 max-md:opacity-60"
+          className="shrink-0 self-center w-7 h-7 rounded-full flex items-center justify-center text-text-faint hover:text-text hover:bg-bg-inset opacity-0 group-hover:opacity-100 max-md:opacity-60"
           title="更多操作"
         >
           <MoreVertical size={14} />
@@ -165,11 +165,11 @@ export function ChatRail({
       )}
       <div className="flex-1 min-h-0 overflow-y-auto">
       {pinned.length > 0 && (<>
-        <div className="px-3 pt-2 pb-1 text-[11px] font-medium text-text-faint select-none">置顶</div>
+        <div className="px-5 pt-3 pb-1.5 text-[12.5px] font-medium text-text-dim select-none">置顶</div>
         {pinned.map(row)}
       </>)}
       {recent.length > 0 && (<>
-        <div className="flex items-center gap-1 pl-3 pr-2 pt-2 pb-1 text-[11px] font-medium text-text-faint select-none">
+        <div className="flex items-center gap-1 pl-5 pr-3 pt-3 pb-1.5 text-[12.5px] font-medium text-text-dim select-none">
           <span className="flex-1">最近</span>
           {/* 显示项:控制点就在这一行右端,不占额外空间、也不必进设置页 */}
           <button
@@ -179,7 +179,7 @@ export function ChatRail({
               setFieldsMenuAt((open) => (open ? null : { x: r.right - 176, y: r.bottom + 4 }));
             }}
             title="每行显示哪些信息"
-            className="shrink-0 w-5 h-5 rounded flex items-center justify-center hover:text-text hover:bg-bg-hover transition-colors"
+            className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center hover:text-text hover:bg-bg-hover transition-colors"
           >
             <SlidersHorizontal size={12} />
           </button>

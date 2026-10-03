@@ -35,7 +35,7 @@ export function AddRootDialog({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded text-text-faint hover:bg-bg-hover hover:text-text"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-text-faint hover:bg-bg-hover hover:text-text"
             title="关闭"
           >
             <X size={14} />
@@ -59,14 +59,14 @@ export function AddRootDialog({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded px-3 py-1.5 text-[13px] text-text-dim hover:bg-bg-hover disabled:opacity-50"
+            className="rounded-md px-3 py-1.5 text-[13px] text-text-dim hover:bg-bg-hover disabled:opacity-50"
           >
             取消
           </button>
           <button
             type="submit"
             disabled={submitting || !value.trim()}
-            className="rounded bg-accent px-3 py-1.5 text-[13px] text-white hover:opacity-90 disabled:opacity-50"
+            className="rounded-md bg-accent px-3 py-1.5 text-[13px] text-white hover:opacity-90 disabled:opacity-50"
           >
             添加
           </button>

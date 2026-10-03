@@ -1,6 +1,6 @@
 import { type Settings } from "../../api/settings";
 export type ModelConnection = Pick<Settings, "apiUrl" | "apiKey" | "model">;
-export const settingsInputClass = "w-full border border-border bg-bg px-3 py-2 text-[13px] font-normal text-text outline-none transition-colors placeholder:text-text-faint focus:border-accent disabled:opacity-50";
+export const settingsInputClass = "w-full rounded-xl border border-border-strong bg-bg px-4 py-2.5 text-[14px] font-normal text-text outline-none transition-colors placeholder:text-text-faint focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-50";
 
 export function ModelConnectionFields({ value, onChange, disabled = false, autoFocus = false, rows = false }: {
   value: ModelConnection;

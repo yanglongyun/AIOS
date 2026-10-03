@@ -125,8 +125,8 @@ export function NodeRow({
         }}
         onContextMenu={(e) => onContextMenu(e, node)}
         className={[
-          "group relative flex items-center gap-1.5 py-[3px] pr-2 cursor-pointer select-none text-text touch-none",
-          isSelected && !isRenaming ? "bg-bg-inset" : controls.contextMenuId === node.id ? "bg-bg-hover" : "hover:bg-bg-hover",
+          "group relative mx-2 flex items-center gap-1.5 rounded-full py-[5px] pr-2 cursor-pointer select-none text-text touch-none",
+          isSelected && !isRenaming ? "bg-accent-soft text-[#041e49] dark:text-[#d3e3fd]" : controls.contextMenuId === node.id ? "bg-bg-hover" : "hover:bg-bg-hover",
           isDragging ? "opacity-40" : "",
           controls.cutIds.has(node.id) ? "opacity-50" : "", // 剪切待移动
           isDropTarget ? "drop-target" : "",
@@ -136,7 +136,7 @@ export function NodeRow({
         <span
           onClick={toggle}
           className={[
-            "w-4 h-4 flex items-center justify-center shrink-0 transition-transform duration-150 rounded hover:bg-bg-inset",
+            "w-4 h-4 flex items-center justify-center shrink-0 transition-transform duration-150 rounded-md hover:bg-bg-inset",
             expanded ? "rotate-90" : "",
             isContainer ? "" : "invisible",
           ].join(" ")}
@@ -166,7 +166,7 @@ export function NodeRow({
             onBlur={controls.commitRename}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex-1 min-w-0 bg-surface border border-accent rounded px-1 -mx-1 py-px text-[14px] text-text outline-none"
+            className="flex-1 min-w-0 bg-surface border border-accent rounded-md px-1 -mx-1 py-px text-[14px] text-text outline-none"
           />
         ) : (
           <span className={`flex-1 min-w-0 truncate text-[14.5px] ${badge?.color || ""}`}>{node.title}</span>
@@ -179,7 +179,7 @@ export function NodeRow({
         <button
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); onContextMenu(e, node); }}
-          className="shrink-0 w-5 h-5 rounded flex items-center justify-center text-text-faint hover:text-text hover:bg-bg-inset opacity-0 group-hover:opacity-100 max-md:opacity-60"
+          className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-text-faint hover:text-text hover:bg-bg-inset opacity-0 group-hover:opacity-100 max-md:opacity-60"
           title="更多操作"
         >
           <span className="text-[15px] leading-none -mt-1">⋯</span>
@@ -239,7 +239,7 @@ export function InlineCreateRow({ depth, controls }: { depth: number; controls: 
         }}
         onBlur={controls.commitCreate}
         placeholder={controls.creatingKind === "file" ? "文件名…" : "文件夹名…"}
-        className="flex-1 min-w-0 bg-surface border border-accent rounded px-1 -mx-1 py-px text-[14px] text-text outline-none placeholder:text-text-faint"
+        className="flex-1 min-w-0 bg-surface border border-accent rounded-md px-1 -mx-1 py-px text-[14px] text-text outline-none placeholder:text-text-faint"
       />
     </div>
   );

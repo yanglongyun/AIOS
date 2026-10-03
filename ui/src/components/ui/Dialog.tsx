@@ -81,12 +81,12 @@ export function DialogHost() {
       }}
     >
       <div
-        className="w-[400px] max-w-[90vw] rounded-xl border border-border bg-surface shadow-2xl shadow-black/20 p-4 flex flex-col gap-3"
+        className="w-[400px] max-w-[90vw] rounded-[28px] bg-surface shadow-2xl shadow-black/20 p-6 flex flex-col gap-4"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        {current.title && <div className="text-[14px] font-semibold text-text">{current.title}</div>}
+        {current.title && <div className="text-[20px] text-text">{current.title}</div>}
         {current.message && (
-          <div className="text-[13px] leading-relaxed text-text-dim whitespace-pre-wrap break-words">{current.message}</div>
+          <div className="text-[14px] leading-relaxed text-text-dim whitespace-pre-wrap break-words">{current.message}</div>
         )}
         {current.kind === "prompt" && (
           <input
@@ -95,14 +95,14 @@ export function DialogHost() {
             onChange={(e) => setValue(e.target.value)}
             placeholder={current.placeholder || ""}
             spellCheck={false}
-            className="w-full h-8 px-2.5 rounded-md border border-border bg-surface text-[13.5px] text-text outline-none focus:border-accent transition-colors placeholder:text-text-faint"
+            className="w-full h-11 px-4 rounded-xl border border-border-strong bg-surface text-[14px] text-text outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors placeholder:text-text-faint"
           />
         )}
         <div className="flex items-center justify-end gap-2 pt-1">
           {current.kind !== "alert" && (
             <button
               onClick={cancel}
-              className="px-3 h-7 rounded-md text-[13px] text-text-dim hover:bg-bg-hover hover:text-text transition-colors"
+              className="px-4 h-10 rounded-full text-[14px] font-medium text-accent hover:bg-accent-soft/40 transition-colors"
             >
               {current.cancelText || "取消"}
             </button>
@@ -111,7 +111,7 @@ export function DialogHost() {
             ref={okRef}
             onClick={ok}
             className={[
-              "px-3.5 h-7 rounded-md text-[13px] text-white transition-opacity hover:opacity-90",
+              "px-5 h-10 rounded-full text-[14px] font-medium text-white transition-opacity hover:opacity-90",
               current.danger ? "bg-danger" : "bg-accent",
             ].join(" ")}
           >

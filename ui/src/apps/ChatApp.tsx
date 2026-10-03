@@ -9,7 +9,7 @@ import { navigate } from "../lib/nav";
 import { SideRail } from "./SideRail";
 import type { AppProps } from "./types";
 
-export function ChatApp({ socket, navOpen, onCloseNav }: AppProps) {
+export function ChatApp({ socket, navOpen, railCollapsed, onCloseNav }: AppProps) {
   const [node, setNode] = useState<Chat | ChatStartTab>(() => chatStartTab());
   const [railRefresh, setRailRefresh] = useState(0);
 
@@ -31,7 +31,7 @@ export function ChatApp({ socket, navOpen, onCloseNav }: AppProps) {
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1">
-      <SideRail open={navOpen} onClose={onCloseNav}>
+      <SideRail open={navOpen} collapsed={railCollapsed} onClose={onCloseNav}>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ChatRail selectedId={node.id} onSelect={select} refreshKey={railRefresh} socket={socket} />
         </div>

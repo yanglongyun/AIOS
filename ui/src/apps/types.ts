@@ -5,5 +5,7 @@ export type AppProps = {
   socket: Socket;
   active: boolean;
   navOpen: boolean;
+  /** 宽屏上左栏是否收起(汉堡切换) */
+  railCollapsed: boolean;
   onCloseNav: () => void;
 };

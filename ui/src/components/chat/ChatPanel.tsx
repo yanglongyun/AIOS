@@ -223,15 +223,15 @@ export function ChatPanel({
       <div className={`mx-auto w-full max-w-3xl px-4 md:px-8 ${empty ? "my-auto py-10" : "pt-2 pb-4"}`}>
         {empty && configured !== null && (
           <div className={`mb-7 ${configured ? "text-center" : "mx-auto max-w-md text-center"}`}>
-            {!configured && <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/15 bg-accent/5 text-accent"><Plug size={23} strokeWidth={1.6} /></div>}
-            <h1 className="text-[26px] md:text-[30px] font-semibold tracking-tight text-text">
+            {!configured && <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-accent-soft text-accent"><Plug size={24} strokeWidth={1.6} /></div>}
+            <h1 className={`text-[28px] md:text-[36px] font-normal tracking-tight ${configured ? "aios-gradient-text" : "text-text"}`}>
               {configured ? "今天想做什么？" : "连接模型，开始工作"}
             </h1>
             <p className="mt-3 text-[13.5px] leading-7 text-text-dim">
               {configured ? "从一个想法、一份文件，或一件想完成的事开始。" : "配置模型后，就可以让 AI 处理文件、编写内容和执行任务。"}
             </p>
             {!configured && <>
-              <button onClick={() => setModelSetupOpen(true)} className="mx-auto mt-7 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-[13px] font-medium text-white hover:opacity-90">
+              <button onClick={() => setModelSetupOpen(true)} className="mx-auto mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-[14px] font-medium text-white hover:opacity-90 dark:text-[#062e6f]">
                 配置模型<ArrowRight size={15} />
               </button>
               <p className="mt-4 text-[11.5px] text-text-faint">准备好接口地址、密钥和模型名称即可</p>
@@ -239,13 +239,13 @@ export function ChatPanel({
           </div>
         )}
         {configured === null && <div className="py-4 text-center text-[12px] text-text-faint">正在读取模型配置…</div>}
-        {configured === false && !empty && <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-[12px] text-text-dim">
+        {configured === false && !empty && <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-bg-panel px-4 py-2.5 text-[12.5px] text-text-dim">
           <span>配置模型后，继续这段对话。</span>
           <button onClick={() => setModelSetupOpen(true)} className="shrink-0 text-accent">配置模型 →</button>
         </div>}
         <div hidden={configured !== true && !busy}>
         <div
-          className={`flex flex-col rounded-2xl border border-border bg-surface cursor-text focus-within:border-accent transition-colors ${empty ? "shadow-[0_4px_24px_rgba(0,0,0,0.035)]" : ""}`}
+          className="flex flex-col rounded-[28px] bg-bg-panel cursor-text transition-colors focus-within:bg-bg-inset"
           onClick={(e) => { if (e.target === e.currentTarget) inputRef.current?.focus(); }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files?.length) void upload(e.dataTransfer.files); }}
@@ -254,17 +254,17 @@ export function ChatPanel({
 
           {/* 附件托盘:发送前可见可移除 */}
           {(attachments.length > 0 || uploading) && (
-            <div className="flex flex-wrap items-center gap-1.5 px-3 pt-2.5">
+            <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
               {attachments.map((file) => (
-                <span key={file.id} className="inline-flex items-center gap-1.5 pl-1.5 pr-1 py-1 rounded-md bg-bg-panel text-[12px] text-text-dim max-w-[220px]">
+                <span key={file.id} className="inline-flex items-center gap-1.5 pl-1.5 pr-1 py-1 rounded-full bg-bg text-[12px] text-text-dim max-w-[220px]">
                   {file.mimeType.startsWith("image/")
-                    ? <img src={file.url} alt="" className="w-5 h-5 rounded object-cover shrink-0" />
+                    ? <img src={file.url} alt="" className="w-5 h-5 rounded-md object-cover shrink-0" />
                     : <FileText size={13} className="shrink-0 text-accent" />}
                   <span className="truncate">{file.name}</span>
                   <button
                     title="移除"
                     onClick={() => setAttachments((items) => items.filter((item) => item.id !== file.id))}
-                    className="shrink-0 w-4 h-4 rounded flex items-center justify-center hover:bg-bg-hover hover:text-text"
+                    className="shrink-0 w-4 h-4 rounded-md flex items-center justify-center hover:bg-bg-hover hover:text-text"
                   >
                     <X size={11} />
                   </button>
@@ -278,7 +278,7 @@ export function ChatPanel({
           <textarea
             ref={inputRef}
             rows={2}
-            className="w-full min-h-[62px] max-h-60 bg-transparent px-3.5 pt-3 text-[15px] text-text placeholder:text-text-faint outline-none resize-none leading-relaxed overflow-y-auto"
+            className="w-full min-h-[56px] max-h-60 bg-transparent px-5 pt-4 text-[16px] text-text placeholder:text-text-faint outline-none resize-none leading-relaxed overflow-y-auto"
             // 跑着的时候输入框是禁用的,再摆一句「发送消息…」等于叫人做一件做不了的事
             placeholder={busy ? "正在运行中…" : empty ? "描述你想完成的事，或添加文件…" : "发送消息…"}
             aria-label="消息"
@@ -302,22 +302,22 @@ export function ChatPanel({
           />
 
           {/* 工具行:左边附件,右边发送/停止。独立一行,不与正文抢横向空间 */}
-          <div className="flex items-center gap-2 px-2 pb-2">
+          <div className="flex items-center gap-1 px-2.5 pb-2.5">
             <button
               title="添加图片或文件(也可拖拽 / 粘贴)"
               onClick={() => fileRef.current?.click()}
               disabled={busy || creating || uploading}
-              className="w-8 h-8 rounded-md flex items-center justify-center text-text-faint hover:text-text hover:bg-bg-hover disabled:opacity-40 transition-colors shrink-0"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-text-dim hover:text-text hover:bg-bg-hover disabled:opacity-40 transition-colors shrink-0"
             >
               <Paperclip size={16} />
             </button>
             <div className="flex-1" />
-            {modelName && <button onClick={() => onOpenSettings?.()} title={`当前模型：${modelName}`} className="max-w-[40%] truncate px-1 text-[11px] text-text-faint hover:text-text-dim">{modelName}</button>}
+            {modelName && <button onClick={() => onOpenSettings?.()} title={`当前模型：${modelName}`} className="max-w-[40%] truncate rounded-full px-3 py-1.5 text-[12px] text-text-dim hover:bg-bg-hover">{modelName}</button>}
             {busy ? (
               <button
                 title="停止"
                 onClick={() => socket.send({ type: "stop", chatId: node.id })}
-                className="w-8 h-8 rounded-md flex items-center justify-center text-text-faint hover:text-danger hover:bg-bg-hover transition-colors shrink-0"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-bg text-text hover:text-danger transition-colors shrink-0"
               >
                 <Square size={14} />
               </button>
@@ -326,7 +326,7 @@ export function ChatPanel({
                 title={creating ? "正在创建对话…" : "发送"}
                 onClick={send}
                 disabled={(!prompt.trim() && !attachments.length) || uploading || creating}
-                className="w-8 h-8 rounded-md flex items-center justify-center bg-accent text-white hover:opacity-85 disabled:opacity-30 disabled:cursor-not-allowed transition-all shrink-0"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-accent text-white dark:text-[#062e6f] hover:opacity-90 disabled:bg-transparent disabled:text-text-faint disabled:cursor-not-allowed transition-all shrink-0"
               >
                 <Send size={14} />
               </button>
@@ -339,8 +339,8 @@ export function ChatPanel({
             { label: "写点东西", icon: Pencil, prompt: "帮我写一份内容。先和我确认主题、用途和读者，再一起完成初稿。" },
             { label: "做个小工具", icon: LayoutGrid, prompt: "我想做一个日常使用的小工具。先和我确认需求，再做一个可以使用的版本。" },
           ].map((suggestion) => <button key={suggestion.label} onClick={() => chooseSuggestion(suggestion.prompt)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[12px] text-text-dim hover:border-border-strong hover:bg-bg-hover">
-            <suggestion.icon size={13} className="text-text-faint" />{suggestion.label}
+            className="inline-flex items-center gap-2 rounded-full bg-bg-panel px-4 py-2 text-[13px] text-text-dim hover:bg-bg-hover">
+            <suggestion.icon size={15} className="text-accent" />{suggestion.label}
           </button>)}
         </div>}
 

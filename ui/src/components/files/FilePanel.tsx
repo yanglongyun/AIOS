@@ -71,7 +71,7 @@ export function FilePanel({
   if (isImage) {
     return (
       <div className="flex-1 min-h-0 overflow-auto bg-bg-inset flex items-center justify-center p-6">
-        <img src={rawUrl} alt={node.title} className="max-w-full max-h-full object-contain rounded shadow-lg shadow-black/10" />
+        <img src={rawUrl} alt={node.title} className="max-w-full max-h-full object-contain rounded-md shadow-lg shadow-black/10" />
       </div>
     );
   }

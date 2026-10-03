@@ -21,7 +21,7 @@ export function ToastHost() {
   }, []);
   if (!message) return null;
   return (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-none rounded-full bg-text text-bg text-[12.5px] px-4 py-1.5 shadow-lg shadow-black/20">
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-none rounded-xl bg-[#303030] text-[#f2f2f2] text-[14px] px-5 py-3 shadow-lg shadow-black/20">
       {message}
     </div>
   );

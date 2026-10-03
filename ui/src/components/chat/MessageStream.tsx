@@ -196,7 +196,7 @@ function CopyButton({ text, always }: { text: string; always: boolean }) {
           setCopied(true);
           setTimeout(() => setCopied(false), 1600);
         }}
-        className="w-7 h-7 rounded flex items-center justify-center text-text-faint hover:bg-bg-hover hover:text-text-dim transition-colors"
+        className="w-7 h-7 rounded-md flex items-center justify-center text-text-faint hover:bg-bg-hover hover:text-text-dim transition-colors"
       >
         {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
       </button>
@@ -274,7 +274,7 @@ function ChatRow({ row, always }: { row: Row; always: boolean }) {
           </div>
         )}
         {!!row.content && (
-          <div className="max-w-[85%] rounded-[14px] rounded-br-[4px] px-4 py-2.5 text-[15px] bg-bg-panel text-text leading-relaxed whitespace-pre-wrap break-words select-text cursor-text">
+          <div className="max-w-[85%] rounded-3xl rounded-tr-md px-5 py-3 text-[16px] bg-bg-panel text-text leading-relaxed whitespace-pre-wrap break-words select-text cursor-text">
             {row.content}
           </div>
         )}

@@ -9,7 +9,7 @@ import { SettingsApp } from "../apps/SettingsApp";
 import { StatusApp } from "../apps/StatusApp";
 import { AppPanel } from "../components/apps/AppPanel";
 import { DialogHost, ToastHost, showToast } from "../components/ui";
-import { AppWindow, LayoutGrid, PanelLeft } from "../components/ui/icons";
+import { AppWindow, LayoutGrid, Menu } from "../components/ui/icons";
 import { currentAppId, navigate, onNavigate, openPath } from "../lib/nav";
 import { useSocket } from "../ws";
 import { BUILTIN_APPS, DEFAULT_APP } from "./builtins";
@@ -23,6 +23,13 @@ export function Shell() {
   const [visited, setVisited] = useState<Set<string>>(() => new Set([currentAppId() || DEFAULT_APP]));
   const [popupOpen, setPopupOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  // 宽屏上左栏收起/展开(汉堡切换),记在本机
+  const [railCollapsed, setRailCollapsed] = useState(() => { try { return localStorage.getItem("aios.railCollapsed") === "1"; } catch { return false; } });
+  const toggleNav = () => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setRailCollapsed((v) => { try { localStorage.setItem("aios.railCollapsed", v ? "0" : "1"); } catch { /* 存不了就算了 */ } return !v; });
+    } else setNavOpen((v) => !v);
+  };
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [openRequest, setOpenRequest] = useState<{ path: string; seq: number } | null>(null);
 
@@ -73,21 +80,21 @@ export function Shell() {
   const title = builtin?.name || ext?.name || "AIOS";
   const Icon = builtin?.icon || AppWindow;
   const closeNav = useCallback(() => setNavOpen(false), []);
-  const common = (id: string) => ({ socket, active: appId === id, navOpen: navOpen && appId === id, onCloseNav: closeNav });
+  const common = (id: string) => ({ socket, active: appId === id, navOpen: navOpen && appId === id, railCollapsed, onCloseNav: closeNav });
   const view = (id: string, node: React.ReactNode) =>
     visited.has(id) ? <div key={id} className={appId === id ? "flex min-h-0 min-w-0 flex-1" : "hidden"}>{node}</div> : null;
 
   return (
     <div className="flex h-dvh w-screen flex-col overflow-hidden bg-bg text-text">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3">
+      <header className="flex h-14 shrink-0 items-center gap-1 bg-bg px-2">
         {WITH_NAV.has(appId) && (
-          <button type="button" onClick={() => setNavOpen((v) => !v)} title="侧栏"
-            className="rounded-full p-2 text-text-dim hover:bg-bg-hover md:hidden"><PanelLeft size={18} /></button>
+          <button type="button" onClick={toggleNav} title="菜单" aria-label="菜单"
+            className="grid size-10 place-items-center rounded-full text-text-dim transition-colors hover:bg-bg-hover"><Menu size={22} /></button>
         )}
-        <span className="grid size-8 place-items-center rounded-xl text-white" style={{ background: builtin?.color || "#7b61ff" }}>
+        <span className={`grid size-8 place-items-center rounded-full text-white ${WITH_NAV.has(appId) ? "ml-1" : "ml-2"}`} style={{ background: builtin?.color || "#7b61ff" }}>
           <Icon size={17} />
         </span>
-        <span className="truncate text-[16px] font-medium">{title}</span>
+        <span className="ml-2 truncate text-[18px] text-text">{title}</span>
         <div className="flex-1" />
         <button type="button" data-apps-trigger onClick={() => setPopupOpen((v) => !v)} title="所有应用"
           className={`grid size-10 place-items-center rounded-full text-text-dim transition-colors hover:bg-bg-hover ${popupOpen ? "bg-bg-hover text-text" : ""}`}>

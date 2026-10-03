@@ -1,7 +1,7 @@
 import { startServer } from "./server/index.js";
 import { stopAllApps } from "./server/apps/supervisor.js";
 
-const port = Number(process.env.AIOS_PORT) || 9500;
+const port = Number(process.env.AIOS_PORT) || 80;
 process.env.AIOS_PORT = String(port);
 await startServer(port, process.env.AIOS_HOST || "0.0.0.0");
 

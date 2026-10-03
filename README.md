@@ -49,12 +49,17 @@
 AIOS_APP_DOMAIN=47-236-196-138.sslip.io
 ```
 
-然后从 `http://47-236-196-138.sslip.io:9500` 打开 AIOS,应用在 `http://<id>.47-236-196-138.sslip.io:9500`。
+然后从 `http://47-236-196-138.sslip.io` 打开 AIOS,应用在 `http://<id>.47-236-196-138.sslip.io`。
 
 ## 模型
 
-只接 OpenAI Responses API(`/v1/responses`)。在「设置 → 模型」里填接口地址、API Key、模型名,
-例如 `https://api.openai.com/v1/responses`。不支持 Responses API 的服务商可以通过 OpenRouter 等中转接入。
+只接 Responses API(`/responses`)。在「设置 → 模型」里填接口地址、API Key、模型名,例如:
+
+| 服务商 | 接口地址 | 模型 |
+| --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1/responses` | `gpt-5` 等 |
+| Kimi(Coding) | `https://api.kimi.com/coding/v1/responses` | `k3-256k` |
+不支持 Responses API 的服务商可以通过 OpenRouter 等中转接入。
 
 ## 安装
 
@@ -66,7 +71,8 @@ npm install && npm run build
 AIOS_PASSWORD='你的密码' npm start
 ```
 
-浏览器打开 `http://<机器IP>:9500`。云服务器记得在安全组放行 9500 端口。
+浏览器打开 `http://<机器IP>`。云服务器记得在安全组放行 80 端口。
+监听 80 端口需要 root(一键脚本以 root 跑服务);普通用户本地开发时设 `AIOS_PORT=9500` 之类的高位端口。
 
 Linux 服务器可以用一键脚本(装 Node、构建、注册成开机自启的 systemd 服务):
 
@@ -80,7 +86,7 @@ curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | 
 
 | 变量 | 默认 | 说明 |
 | --- | --- | --- |
-| `AIOS_PORT` | `9500` | 端口 |
+| `AIOS_PORT` | `80` | 端口 |
 | `AIOS_HOST` | `0.0.0.0` | 监听地址 |
 | `AIOS_HOME` | `~/.aios` | 数据目录(数据库、应用、技能) |
 | `AIOS_PASSWORD` | — | 登录密码。不设时首次启动随机生成,打印在日志里并写入 `~/.aios/initial-password.txt` |
@@ -93,7 +99,7 @@ curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | 
 
 ```bash
 npm run dev   # 服务端(改动自动重启)
-npm run ui    # 前端 Vite 开发服务器,代理到 9500
+npm run ui    # 前端 Vite 开发服务器,代理到 80
 npm run typecheck && npm test
 ```
 

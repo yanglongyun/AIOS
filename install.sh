@@ -12,7 +12,7 @@ set -euo pipefail
 
 REF="${AIOS_REF:-main}"
 DIR="${AIOS_DIR:-/opt/aios}"
-PORT="${AIOS_PORT:-9500}"
+PORT="${AIOS_PORT:-80}"
 NODE_VERSION="v22.22.0"
 
 [ "$(id -u)" = 0 ] || { echo "请用 root 或 sudo 运行" >&2; exit 1; }
@@ -40,6 +40,8 @@ if [ "${AIOS_BROWSER:-1}" != 0 ] && ! command -v google-chrome >/dev/null && ! c
   fi
   apt_install fonts-noto-cjk || true
 fi
+# 发给模型的图片要先压缩(ImageMagick)
+command -v convert >/dev/null || command -v magick >/dev/null || { command -v apt-get >/dev/null && apt_install imagemagick || true; }
 
 DESKTOP_ENV=""
 if [ "${AIOS_DESKTOP:-0}" = 1 ] && command -v apt-get >/dev/null; then

@@ -14,7 +14,7 @@ const forbidden = (res: http.ServerResponse, code: number, error: string) => {
   res.end(JSON.stringify({ ok: false, error }));
 };
 
-const startServer = async (port = 9500, host = "0.0.0.0") =>
+const startServer = async (port = 80, host = "0.0.0.0") =>
   new Promise((resolve, reject) => {
     initAuth();
     const server = http.createServer(async (req, res) => {

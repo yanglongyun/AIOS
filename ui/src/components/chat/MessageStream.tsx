@@ -1,3 +1,4 @@
+import { copyText } from "../../lib/secure";
 // 消息流 —— 按轮收纳:
 //   · 一条进邮箱的消息(用户消息 / agent 来信 / 回信)起一轮;
 //     轮内的思考 / 工具 / 中间文本是过程,最后那条正文是结果。
@@ -191,7 +192,7 @@ function CopyButton({ text, always }: { text: string; always: boolean }) {
       <button
         title="复制"
         onClick={() => {
-          void navigator.clipboard.writeText(text);
+          void copyText(text);
           setCopied(true);
           setTimeout(() => setCopied(false), 1600);
         }}

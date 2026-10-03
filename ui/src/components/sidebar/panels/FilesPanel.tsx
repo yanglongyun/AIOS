@@ -1,3 +1,4 @@
+import { copyText as copyToClipboard } from "../../../lib/secure";
 import { fileIconFor, fileColorFor } from "../../files/icons";
 import { type FileNode, filesApi } from "../../../api/files";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -438,7 +439,7 @@ export function FilesPanel({
             { label: `复制路径(${count} 项)`, icon: <Copy size={13} />,
               onClick: async () => {
                 const text = [...multiSel].join("\n");
-                try { await navigator.clipboard.writeText(text); } catch { /* 剪贴板不可用就算了 */ }
+                await copyToClipboard(text);
               } },
             "divider",
             { label: `删除选中的 ${count} 项`, icon: <Trash size={13} />, danger: true,
@@ -486,12 +487,7 @@ export function FilesPanel({
       { label: "重命名", icon: <Pencil size={13} />, onClick: () => startRename(node) },
       { label: "复制路径", icon: <Copy size={13} />,
         onClick: async () => {
-          try { await navigator.clipboard.writeText(copyText); }
-          catch {
-            const ta = document.createElement("textarea");
-            ta.value = copyText; document.body.appendChild(ta);
-            ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-          }
+          await copyToClipboard(copyText);
         },
       },
     );

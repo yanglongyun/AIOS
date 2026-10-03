@@ -6,7 +6,6 @@ import { settingsApi } from "../../api/settings";
 // 同一面板体系下,几个对话各开各的标签互不干扰,切走的运行在服务端继续转。
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, FileText, Folder, LayoutGrid, Paperclip, Pencil, Plug, Send, Square, X } from "../ui/icons";
-import { RulesControl } from "./RulesControl";
 import { ModelSetupDialog } from "./ModelSetupDialog";
 import type { ChatStartTab } from "./types";
 import { dialog } from "../ui";
@@ -208,16 +207,6 @@ export function ChatPanel({
     void send();
   }, [configured, prompt]);
 
-  const [rulesOn, setRulesOn] = useState(true);
-  useEffect(() => { void settingsApi.getSettings().then((r: any) => setRulesOn((r.settings?.rulesEnabled || "on") !== "off")).catch(() => {}); }, []);
-  const changeRules = (next: boolean) => {
-    setRulesOn(next);
-    // 只改这一项:先取回整份再合并,免得把别的设置抹成默认值
-    void settingsApi.getSettings()
-      .then((r: any) => settingsApi.saveSettings({ ...(r.settings || {}), rulesEnabled: next ? "on" : "off" }))
-      .catch(() => {});
-  };
-
   const empty = messagesLoaded && rowsRef.current.length === 0 && !busy;
   const chooseSuggestion = (value: string) => {
     setPrompt(value);
@@ -322,7 +311,6 @@ export function ChatPanel({
             >
               <Paperclip size={16} />
             </button>
-            <RulesControl on={rulesOn} onChange={changeRules} quiet={empty} />
             <div className="flex-1" />
             {modelName && <button onClick={() => onOpenSettings?.()} title={`当前模型：${modelName}`} className="max-w-[40%] truncate px-1 text-[11px] text-text-faint hover:text-text-dim">{modelName}</button>}
             {busy ? (

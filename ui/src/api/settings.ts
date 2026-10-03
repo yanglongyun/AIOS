@@ -11,15 +11,6 @@ export type Settings = {
   /** 工具循环:limit on/off;on 时每轮最多 maxToolRounds 轮。 */
   toolRoundsLimit?: string;
   maxToolRounds?: string;
-  /** 规则开关:on / off。 */
-  rulesEnabled?: string;
-};
-
-export type Rule = {
-  id: string;
-  text: string;
-  enabled: boolean;
-  position: number;
 };
 
 export const settingsApi = {
@@ -29,12 +20,4 @@ export const settingsApi = {
       window.dispatchEvent(new Event("aios:settings-saved"));
       return result;
     }),
-  listRules: () => request<{ rules: Rule[] }>("/api/settings/rules").then((r) => r.rules),
-  createRule: (text: string) =>
-    request<{ rule: Rule }>("/api/settings/rules", { method: "POST", ...jsonBody({ text }) }),
-  updateRule: (id: string, patch: { text?: string; enabled?: boolean }) =>
-    request<{ rule: Rule }>(`/api/settings/rules?id=${encodeURIComponent(id)}`, { method: "PATCH", ...jsonBody(patch) }),
-  deleteRule: (id: string) => request(`/api/settings/rules?id=${encodeURIComponent(id)}`, { method: "DELETE" }),
-  reorderRules: (ids: string[]) =>
-    request<{ rules: Rule[] }>("/api/settings/rules/order", { method: "POST", ...jsonBody({ ids }) }).then((r) => r.rules),
 };

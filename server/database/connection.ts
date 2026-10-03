@@ -12,7 +12,7 @@ let db: DatabaseSync | undefined;
 const initDb = () => {
   if (db) return db;
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  const fresh = !fs.existsSync(DB_PATH); // 只有新库才种规则,之后这张表归用户
+  const fresh = !fs.existsSync(DB_PATH); // 只有新库才做首次初始化
   db = new DatabaseSync(DB_PATH);
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");

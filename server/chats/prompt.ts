@@ -1,11 +1,10 @@
-// system prompt 拼装:个人助手身份 + 运行环境 + 技能清单 + 应用清单 + 工具规则。
+// system prompt 拼装:个人助手身份 + 运行环境 + 技能清单 + 应用清单 + 工具说明。
 // 每次运行现拼,不落库 —— 目录、文档、技能、应用都可能变。
 //
 // 渐进披露:技能和应用在常驻提示词里都只占一行(名称 / 描述 / 去哪 read),
 // 细节全在各自的 SKILL.md / APP.md 里,模型要用时自己读。教程不进提示词。
 import path from "path";
 import { appDataHome, appsHome, listApps } from "../apps/registry.js";
-import { listRules, rulesSection } from "../settings/rules.js";
 import os from "node:os";
 import { executionDirectory, outputDirectory } from "../agent/paths.js";
 import { listProductSkills } from "../skills/registry.js";
@@ -48,14 +47,12 @@ ${product.join("\n")}`;
 
 export const buildSystem = (
   chat: { id: string; system?: string | null },
-  settings: { system?: string; rulesEnabled?: string },
-  opts: { rules?: boolean; cwd?: string } = {},
+  settings: { system?: string },
+  opts: { cwd?: string } = {},
 ) => {
   const base = (chat.system && chat.system.trim()) || settings.system || "";
   const cwd = executionDirectory(opts.cwd);
 
-  const rulesOn = (settings?.rulesEnabled || "on") !== "off";
-  const rulesBlock = opts.rules === false ? "" : rulesSection(listRules(), rulesOn);
 
   return `${base}
 
@@ -88,6 +85,6 @@ export const buildSystem = (
 # 你在哪
 AIOS 是跑在用户自己机器(常见是一台云服务器)上的 AI 操作系统,用户通过浏览器访问。
 内置应用:聊天、文件、状态、设置;其余能力由「应用」提供,在标签页中打开,支持分屏并排查看。
-需要交付文件时,生成用户能在「文件」里打开的真实文件。${workspaceSection(chat.id)}${appsSection()}${rulesBlock ? "\n\n" + rulesBlock : ""}
+需要交付文件时,生成用户能在「文件」里打开的真实文件。${workspaceSection(chat.id)}${appsSection()}
 `;
 };

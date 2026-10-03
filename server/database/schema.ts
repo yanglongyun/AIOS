@@ -62,50 +62,11 @@ export const SCHEMA = `
       last_opened_at TEXT
     );
 
-    -- 权限规则:一条规则 = 一个「命中就停下来问」的触发条件。
-    -- 规则:用户写给助手的一句话,只进提示词。
-    CREATE TABLE IF NOT EXISTS settings_rules (
-      id         TEXT PRIMARY KEY,
-      text       TEXT NOT NULL,
-      enabled    INTEGER NOT NULL DEFAULT 1,
-      position   INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    -- 密码:按网站存的账号密码。password_enc 是 AES-256-GCM 密文(密钥在钥匙串),库里没有明文。
-    CREATE TABLE IF NOT EXISTS browser_passwords (
-      id           TEXT PRIMARY KEY,
-      host         TEXT NOT NULL DEFAULT '',
-      url          TEXT NOT NULL DEFAULT '',
-      username     TEXT NOT NULL DEFAULT '',
-      password_enc TEXT NOT NULL,
-      note         TEXT NOT NULL DEFAULT '',
-      created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_browser_passwords_host ON browser_passwords(host, username);
-
-    -- 收藏树:文件夹与网址按 parent_id 组织，position 决定同级顺序。
-    CREATE TABLE IF NOT EXISTS browser_bookmarks (
-      id         TEXT PRIMARY KEY,
-      title      TEXT NOT NULL,
-      url        TEXT NOT NULL,
-      kind       TEXT NOT NULL DEFAULT 'site',   -- site | folder
-      parent_id  TEXT,                            -- NULL = 根层
-      position   INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    -- 浏览记录。一个 url 一行,重复访问只更新时间与次数 ——
-    -- 逐次追加会让「最近」被同一个站刷屏,而用户想看的是「去过哪些地方」。
-    CREATE TABLE IF NOT EXISTS browser_history (
-      url        TEXT PRIMARY KEY,
-      title      TEXT NOT NULL DEFAULT '',
-      visits     INTEGER NOT NULL DEFAULT 1,
-      visited_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_browser_history_time ON browser_history(visited_at DESC);
+    -- 旧版本留下的表:规则(已取消)、桌面版浏览器的密码/收藏/历史(服务器版不用)
+    DROP TABLE IF EXISTS settings_rules;
+    DROP TABLE IF EXISTS browser_passwords;
+    DROP TABLE IF EXISTS browser_bookmarks;
+    DROP TABLE IF EXISTS browser_history;
 
     CREATE INDEX IF NOT EXISTS idx_messages_chat    ON messages(chat_id, id);
     CREATE INDEX IF NOT EXISTS idx_compactions_chat ON compactions(chat_id, id);

@@ -9,7 +9,7 @@
 // 因此它不进会话列表,在「任务」里看。这样详情页能完整回放它到底干了什么。
 //
 // 与用户会话的两点不同:
-//   1. **不过规则**:任务没有人守在旁边,confirm 也不在工具表里 —— 直接按 skip 跑;
+//   1. 没有人守在旁边:提示词里说明不要提问、不要等确认,直接把事做完;
 //   2. 结果以 SSE 流回给发起的应用:tool(进度)/ error / done。应用只认 error 和 done。
 import { runAgent as runAi } from "../agent/index.js";
 import { createRunner, tools } from "../agent/tools.js";
@@ -88,11 +88,11 @@ export const runAppTask = async (
       responsesUrl: settings.apiUrl,
       apiKey: settings.apiKey,
       model: settings.model,
-      instructions: buildSystem({ id: taskId, system: null }, settings, { rules: false, cwd })
+      instructions: buildSystem({ id: taskId, system: null }, settings, { cwd })
         + `\n\n# 本轮是应用触发的任务\n\n发起方:应用「${appName}」(${appId})。没有用户守在旁边,不要提问、不要等确认;`
         + `按提示把事做完,做不了就直说失败原因。`,
       input: [userRow.item],
-      tools: tools.filter((t) => t.name !== "confirm"), // 没人守着,不能问
+      tools,
       run: createRunner(ctx),
       maxRounds: toolRoundsOf(settings),
       errorMaxChars: ERROR_MAX_CHARS,

@@ -120,8 +120,22 @@ const reply = (res: ServerResponse, code: number, data: unknown) => {
   res.end(JSON.stringify(data));
 };
 
-// 简单的登录失败节流:同一 IP 连续失败越多,等得越久
-const failures = new Map<string, { count: number; until: number }>();
+// 登录次数限制:全局(不分 IP —— 换 IP 就能绕过的限制等于没有)连续输错 MAX_ATTEMPTS 次即锁定,
+// 之后正确密码也不收。状态落盘,重启不会解锁;解锁要到服务器上删掉锁文件。登录成功一次计数清零。
+const MAX_ATTEMPTS = 5;
+const LOCK_FILE = path.join(DATA_HOME, "login-lock.json");
+type LockState = { failures: number; locked: boolean; lockedAt?: string; lastIp?: string };
+
+const readLock = (): LockState => {
+  try { return { failures: 0, locked: false, ...JSON.parse(fs.readFileSync(LOCK_FILE, "utf8")) }; }
+  catch { return { failures: 0, locked: false }; }
+};
+const writeLock = (lock: LockState) => {
+  fs.mkdirSync(DATA_HOME, { recursive: true });
+  fs.writeFileSync(LOCK_FILE, JSON.stringify(lock), { mode: 0o600 });
+};
+const lockedMessage = () => `登录已锁定(连续输错 ${MAX_ATTEMPTS} 次)。到服务器上执行 rm ${LOCK_FILE} 解锁。`;
+
 const clientIp = (req: IncomingMessage) =>
   String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket.remoteAddress || "";
 
@@ -130,25 +144,33 @@ export const handleAuthRoutes = async (req: IncomingMessage, res: ServerResponse
   if (!pathname.startsWith("/api/auth/")) return false;
 
   if (pathname === "/api/auth/state" && method === "GET") {
-    reply(res, 200, { authenticated: isAuthenticated(req) });
+    const lock = readLock();
+    reply(res, 200, {
+      authenticated: isAuthenticated(req),
+      locked: lock.locked,
+      remaining: Math.max(0, MAX_ATTEMPTS - lock.failures),
+      ...(lock.locked ? { message: lockedMessage() } : {}),
+    });
     return true;
   }
 
   if (pathname === "/api/auth/login" && method === "POST") {
-    const ip = clientIp(req);
-    const record = failures.get(ip);
-    if (record && record.until > Date.now()) {
-      reply(res, 429, { error: "尝试太频繁,请稍后再试" });
-      return true;
-    }
+    const lock = readLock();
+    if (lock.locked) { reply(res, 423, { error: lockedMessage(), locked: true }); return true; }
     const { password } = await readBody(req);
     if (!verifyPassword(String(password || ""))) {
-      const count = (record?.count || 0) + 1;
-      failures.set(ip, { count, until: count >= 5 ? Date.now() + Math.min(2 ** (count - 5), 60) * 60_000 : 0 });
-      reply(res, 401, { error: "密码不对" });
+      const failures = lock.failures + 1;
+      const locked = failures >= MAX_ATTEMPTS;
+      writeLock({ failures, locked, lastIp: clientIp(req), ...(locked ? { lockedAt: new Date().toISOString() } : {}) });
+      if (locked) {
+        console.warn(`[auth] 连续输错 ${MAX_ATTEMPTS} 次,登录已锁定(最后一次来自 ${clientIp(req)})。解锁:rm ${LOCK_FILE}`);
+        reply(res, 423, { error: lockedMessage(), locked: true });
+      } else {
+        reply(res, 401, { error: `密码不对,还能再试 ${MAX_ATTEMPTS - failures} 次`, remaining: MAX_ATTEMPTS - failures });
+      }
       return true;
     }
-    failures.delete(ip);
+    if (lock.failures) fs.rmSync(LOCK_FILE, { force: true });
     setCookie(req, res, issueToken(), SESSION_DAYS * 86400);
     reply(res, 200, { ok: true });
     return true;

@@ -84,6 +84,11 @@ curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | 
 curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo AIOS_DESKTOP=1 AIOS_PASSWORD='你的密码' bash
 ```
 
+### 登录
+
+连续输错 5 次密码会锁定登录(不分 IP,重启也不解锁),之后正确密码也进不去。
+解锁:在服务器上执行 `rm ~/.aios/login-lock.json`(一键脚本装的是 `/root/.aios/login-lock.json`)。登录成功一次计数清零。
+
 ### 环境变量
 
 | 变量 | 默认 | 说明 |

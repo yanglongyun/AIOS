@@ -3,11 +3,13 @@ import { authApi } from "./api/auth";
 import { Login } from "./shell/Login";
 import { Shell } from "./shell/Shell";
 
+type AuthState = Awaited<ReturnType<typeof authApi.state>>;
+
 export function App() {
-  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [auth, setAuth] = useState<AuthState | null>(null);
   useEffect(() => {
-    authApi.state().then((s) => setAuthed(s.authenticated)).catch(() => setAuthed(false));
+    authApi.state().then(setAuth).catch(() => setAuth({ authenticated: false, locked: false, remaining: 5 }));
   }, []);
-  if (authed === null) return <div className="h-dvh bg-bg" />;
-  return authed ? <Shell /> : <Login onDone={() => setAuthed(true)} />;
+  if (!auth) return <div className="h-dvh bg-bg" />;
+  return auth.authenticated ? <Shell /> : <Login initial={auth} onDone={() => setAuth({ ...auth, authenticated: true })} />;
 }

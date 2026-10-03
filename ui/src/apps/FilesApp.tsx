@@ -47,7 +47,7 @@ export function FilesApp({ socket, active, navOpen, onCloseNav, openRequest }: A
   }, [socket]);
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex min-h-0 min-w-0 flex-1">
       <SideRail open={navOpen} onClose={onCloseNav}>
         <FilesPanel active={active} selectedId={node?.id || ""} onSelect={(n) => void select(n)}
           refreshKey={treeRefresh} onChanged={() => setTreeRefresh((n) => n + 1)} />

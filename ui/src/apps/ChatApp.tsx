@@ -30,7 +30,7 @@ export function ChatApp({ socket, navOpen, onCloseNav }: AppProps) {
   }, [onCloseNav]);
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex min-h-0 min-w-0 flex-1">
       <SideRail open={navOpen} onClose={onCloseNav}>
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ChatRail selectedId={node.id} onSelect={select} refreshKey={railRefresh} socket={socket} />

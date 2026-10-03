@@ -138,7 +138,12 @@ body.wt-dragging iframe { pointer-events: none !important; }
   color: var(--color-text);
   font-size: 16px;
   line-height: 1.75;
+  /* 长链接、长路径、没有空格的长串:到边就折行,不把消息撑出屏幕 */
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
 }
+.prose img { max-width: 100%; height: auto; }
 .prose > * + * { margin-top: 0.6em; }
 .prose p { margin: 0; }
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
@@ -169,6 +174,8 @@ body.wt-dragging iframe { pointer-events: none !important; }
   border-radius: 3px;
 }
 .prose pre {
+  max-width: 100%;
+  overflow-wrap: normal;   /* 代码块不折行,在块内横向滚 */
   background: var(--color-bg-panel);
   border: 1px solid var(--color-border);
   border-radius: 4px;
@@ -211,8 +218,11 @@ body.wt-dragging iframe { pointer-events: none !important; }
   font-size: 0.95em;
   display: block;
   overflow-x: auto;
+  max-width: 100%;
+  overflow-wrap: normal;   /* 表格在块内横向滚,单元格不逐字折 */
 }
 .prose th, .prose td {
+  min-width: 7em;          /* 窄屏上列不被挤成一两个字一行,宽表在块内横向滚 */
   border: 1px solid var(--color-border);
   padding: 6px 10px;
   text-align: left;

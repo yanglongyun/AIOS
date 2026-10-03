@@ -156,7 +156,7 @@ export function MessageStream({ rows, busy, tick, viewSeq }: {
   }, [viewSeq]);
 
   return (
-    <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto" onScroll={onScroll}>
+    <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" onScroll={onScroll}>
       <div ref={innerRef} className="mx-auto w-full max-w-3xl px-4 md:px-8 pt-5 pb-3 flex flex-col overflow-x-hidden">
         {blocks.map((block) => {
           if (block.kind === "day") {

@@ -75,7 +75,7 @@ export function Shell() {
   const closeNav = useCallback(() => setNavOpen(false), []);
   const common = (id: string) => ({ socket, active: appId === id, navOpen: navOpen && appId === id, onCloseNav: closeNav });
   const view = (id: string, node: React.ReactNode) =>
-    visited.has(id) ? <div key={id} className={appId === id ? "flex min-h-0 flex-1" : "hidden"}>{node}</div> : null;
+    visited.has(id) ? <div key={id} className={appId === id ? "flex min-h-0 min-w-0 flex-1" : "hidden"}>{node}</div> : null;
 
   return (
     <div className="flex h-dvh w-screen flex-col overflow-hidden bg-bg text-text">
@@ -95,13 +95,13 @@ export function Shell() {
         </button>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1">
         {view("chat", <ChatApp {...common("chat")} />)}
         {view("files", <FilesApp {...common("files")} openRequest={openRequest} />)}
         {view("desktop", <DesktopApp {...common("desktop")} />)}
         {view("status", <StatusApp {...common("status")} />)}
         {view("settings", <SettingsApp {...common("settings")} />)}
-        {ext && <div key={appId} className="flex min-h-0 flex-1"><AppPanel tab={{ appId: ext.id, title: ext.name }} socket={socket} /></div>}
+        {ext && <div key={appId} className="flex min-h-0 min-w-0 flex-1"><AppPanel tab={{ appId: ext.id, title: ext.name }} socket={socket} /></div>}
         {appId.startsWith("ext:") && !ext && <div className="flex flex-1 items-center justify-center text-[13px] text-text-faint">应用不存在或已删除</div>}
         {!builtin && !appId.startsWith("ext:") && <div className="flex flex-1 items-center justify-center text-[13px] text-text-faint">没有这个应用</div>}
       </div>

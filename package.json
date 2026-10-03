@@ -14,7 +14,7 @@
     "ui": "vite --config ui/vite.config.ts ui",
     "build": "vite --config ui/vite.config.ts build ui",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/agent-compaction.test.mjs"
+    "test": "node --test tests/agent-compaction.test.mjs && tsx --test tests/tool-pairing.test.ts"
   },
   "dependencies": {
     "tsx": "^4.22.3",

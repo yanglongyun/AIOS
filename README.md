@@ -11,6 +11,7 @@
 | --- | --- |
 | 聊天 | 和 AI 对话。AI 能执行命令、读写文件、调用已安装应用的接口;长对话自动压缩上下文 |
 | 文件 | 浏览、预览、编辑这台机器上的文件 |
+| 桌面 | 这台机器的远程桌面(需要安装时加 `AIOS_DESKTOP=1`),看着 AI 操作浏览器和软件,也能自己上手 |
 | 状态 | CPU / 内存 / 磁盘、应用进程、AI 起的后台进程 |
 | 设置 | 模型连接、助手指令、规则、技能、登录密码 |
 
@@ -24,8 +25,9 @@
 | `computer` | 操作图形桌面上的任意软件:截屏给模型看,按截图坐标点击、输入、按键、滚动(xdotool) |
 
 `browser` 需要机器上装有 Chrome 或 Chromium(一键脚本默认会装);没有图形桌面时以无头模式运行。
-`computer` 需要图形桌面:一键脚本加 `AIOS_DESKTOP=1` 会装好 Xfce 桌面和网页远程桌面(noVNC,端口 6080),
-浏览器也会开在这个桌面上 —— 在远程桌面里能看着 AI 操作。
+`computer` 需要图形桌面:一键脚本加 `AIOS_DESKTOP=1` 会装好 Xfce 桌面和远程桌面,
+在 AIOS 的「桌面」应用里打开。远程桌面经 AIOS 的 80 端口 `/desktop/` 转发、走 AIOS 的登录,不另开端口;
+浏览器也会开在这个桌面上 —— 能看着 AI 操作。
 
 ## 应用机制
 
@@ -78,7 +80,7 @@ Linux 服务器可以用一键脚本(装 Node、构建、注册成开机自启�
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo bash
-# 带图形桌面(computer 工具 + 网页远程桌面):
+# 带图形桌面(「桌面」应用 + computer 工具):
 curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | sudo AIOS_DESKTOP=1 AIOS_PASSWORD='你的密码' bash
 ```
 
@@ -94,6 +96,7 @@ curl -fsSL https://raw.githubusercontent.com/yanglongyun/AIOS/main/install.sh | 
 | `AIOS_DISPLAY` | `$DISPLAY` | `computer` 工具和浏览器使用的 X 显示器,如 `:1` |
 | `AIOS_CHROME` | 自动查找 | Chrome/Chromium 可执行文件路径 |
 | `AIOS_BROWSER_PORT` | `9222` | 浏览器调试端口(只监听 127.0.0.1) |
+| `AIOS_DESKTOP_PORT` | `6080` | 本机 noVNC/websockify 端口,AIOS 把 `/desktop/` 转给它 |
 
 ## 开发
 

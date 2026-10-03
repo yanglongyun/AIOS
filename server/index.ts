@@ -1,10 +1,11 @@
 import http from "http";
 import { handleApi } from "./http/api/index.js";
-import { attachWs } from "./http/ws.js";
+import { handleApiWsUpgrade } from "./http/ws.js";
 import { serve } from "./http/static.js";
 import { startWatcher } from "./files/watcher.js";
 import { handleAuthRoutes, initAuth, isAuthenticated, isSameOrigin } from "./http/auth.js";
 import { handleAppProxy, handleAppProxyUpgrade } from "./http/appProxy.js";
+import { handleDesktopProxy, handleDesktopUpgrade } from "./http/desktopProxy.js";
 import { seedPresetSkills } from "./skills/registry.js";
 import { seedPresetApps, watchApps } from "./apps/registry.js";
 import { startAlwaysApps } from "./apps/supervisor.js";
@@ -26,16 +27,22 @@ const startServer = async (port = 80, host = "0.0.0.0") =>
       // 跨站写保护:带副作用的方法必须同源
       if (method !== "GET" && method !== "HEAD" && !isSameOrigin(req)) return forbidden(res, 403, "forbidden origin");
       if (await handleAuthRoutes(req, res, url.pathname, method)) return;
+      // 远程桌面(/desktop/*):转给本机 noVNC,自己会查登录
+      if (handleDesktopProxy(req, res)) return;
       // /api/*(登录接口除外)都要登录;/apps/* 是应用回调宿主,走应用自己的 token;静态页面放行(界面里有登录页)
       if (url.pathname.startsWith("/api/") && !isAuthenticated(req)) return forbidden(res, 401, "未登录");
 
       const result = await handleApi(req, res);
       if (result === null) serve(res, url.pathname);
     });
+    // WebSocket 升级统一在这里分发:应用子域名 → 远程桌面 → AIOS 自己的 /api/ws,都不是就断开
     server.on("upgrade", (req, socket, head) => {
-      if (!handleAppProxyUpgrade(req, socket, head)) return;
+      if (handleAppProxyUpgrade(req, socket, head)) return;
+      if (!isSameOrigin(req)) { socket.write("HTTP/1.1 403 Forbidden\r\n\r\n"); socket.destroy(); return; }
+      if (handleDesktopUpgrade(req, socket, head)) return;
+      if (handleApiWsUpgrade(req, socket, head)) return;
+      socket.destroy();
     });
-    attachWs(server);
     server.listen(port, host, () => {
       startWatcher();          // 常用目录文件监听:磁盘上的任何变化 → 树自动刷新
       seedPresetApps();        // 出厂应用落地到应用的家 —— 之后就是用户自己的 app

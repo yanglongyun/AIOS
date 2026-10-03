@@ -57,6 +57,7 @@ export const Globe = /* @__PURE__ */ createIcon("Globe", <><circle cx="12" cy="1
 export const LayoutGrid = /* @__PURE__ */ createIcon("LayoutGrid", <><rect x="3" y="3" width="7" height="7" rx=".5" /><rect x="14" y="3" width="7" height="7" rx=".5" /><rect x="3" y="14" width="7" height="7" rx=".5" /><rect x="14" y="14" width="7" height="7" rx=".5" /></>);
 export const Terminal = /* @__PURE__ */ createIcon("Terminal", <path d="m4 5 6 6-6 6 M13 18h7" />);
 export const AppWindow = /* @__PURE__ */ createIcon("AppWindow", <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M3 9h18" /><circle cx="6" cy="6.5" r=".6" fill="currentColor" stroke="none" /><circle cx="9" cy="6.5" r=".6" fill="currentColor" stroke="none" /></>);
+export const Monitor = /* @__PURE__ */ createIcon("Monitor", <><rect x="2.5" y="4" width="19" height="13" rx="1.5" /><path d="M8.5 21h7 M12 17v4" /></>);
 export const PanelLeft = /* @__PURE__ */ createIcon("PanelLeft", <><rect x="3" y="4" width="18" height="16" rx=".5" /><path d="M9 4v16" /></>);
 export const PanelRight = /* @__PURE__ */ createIcon("PanelRight", <><rect x="3" y="4" width="18" height="16" rx=".5" /><path d="M15 4v16" /></>);
 export const Columns = /* @__PURE__ */ createIcon("Columns", <><rect x="3" y="4" width="18" height="16" rx=".5" /><path d="M12 4v16" /></>);

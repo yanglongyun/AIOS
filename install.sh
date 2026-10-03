@@ -6,8 +6,7 @@
 #   AIOS_REF      分支,默认 main
 #   AIOS_DIR      代码目录,默认 /opt/aios
 #   AIOS_BROWSER  0 = 不装 Chrome(browser 工具需要它),默认装
-#   AIOS_DESKTOP  1 = 装图形桌面 + 网页远程桌面(computer 工具需要它,浏览器也变成看得见的)
-#   VNC_PASSWORD  远程桌面密码(只认前 8 位),默认与 AIOS_PASSWORD 相同
+#   AIOS_DESKTOP  1 = 装图形桌面 + 远程桌面(AIOS 里的「桌面」应用;computer 工具需要它,浏览器也变成看得见的)
 set -euo pipefail
 
 REF="${AIOS_REF:-main}"
@@ -49,16 +48,14 @@ if [ "${AIOS_DESKTOP:-0}" = 1 ] && command -v apt-get >/dev/null; then
   apt-get update -y >/dev/null
   apt_install xfce4 xfce4-terminal dbus-x11 x11-xserver-utils tigervnc-standalone-server tigervnc-tools \
     novnc websockify xdotool imagemagick fonts-noto-cjk
-  VNC_PW="${VNC_PASSWORD:-${AIOS_PASSWORD:-}}"
-  [ -n "$VNC_PW" ] || VNC_PW=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 8)
-  mkdir -p /root/.vnc && printf '%s\n' "$VNC_PW" | tigervncpasswd -f > /root/.vnc/passwd && chmod 600 /root/.vnc/passwd
+  # VNC 和 websockify 都只听本机;对外由 AIOS 在 80 端口的 /desktop/ 转发,走 AIOS 的登录,所以 VNC 不设密码
   cat > /etc/systemd/system/aios-vnc.service <<UNIT
 [Unit]
 Description=AIOS 虚拟显示器 (:1)
 After=network.target
 [Service]
 ExecStartPre=-/bin/rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
-ExecStart=/usr/bin/Xtigervnc :1 -geometry 1600x900 -depth 24 -rfbport 5901 -localhost yes -SecurityTypes VncAuth -PasswordFile /root/.vnc/passwd -AlwaysShared
+ExecStart=/usr/bin/Xtigervnc :1 -geometry 1600x900 -depth 24 -rfbport 5901 -localhost yes -SecurityTypes None -AlwaysShared
 Restart=always
 [Install]
 WantedBy=multi-user.target
@@ -78,10 +75,10 @@ WantedBy=multi-user.target
 UNIT
   cat > /etc/systemd/system/aios-novnc.service <<UNIT
 [Unit]
-Description=AIOS 网页远程桌面 (:6080)
+Description=AIOS 远程桌面网关 (127.0.0.1:6080)
 After=aios-vnc.service
 [Service]
-ExecStart=/usr/bin/websockify --web /usr/share/novnc 6080 127.0.0.1:5901
+ExecStart=/usr/bin/websockify --web /usr/share/novnc 127.0.0.1:6080 127.0.0.1:5901
 Restart=always
 [Install]
 WantedBy=multi-user.target
@@ -135,7 +132,7 @@ if [ -z "${AIOS_PASSWORD:-}" ] && [ -f /root/.aios/initial-password.txt ]; then
   echo "   初始密码: $(cat /root/.aios/initial-password.txt)"
 fi
 if [ -n "$DESKTOP_ENV" ]; then
-  echo "   远程桌面: http://$IP:6080/vnc.html  (密码: $VNC_PW,只认前 8 位)"
+  echo "   远程桌面: 在 AIOS 右上角应用中心打开「桌面」"
 fi
 echo "   日志: journalctl -u aios -f    配置: $ENV_FILE"
-echo "   云服务器记得在安全组放行 $PORT 端口${DESKTOP_ENV:+ 和 6080 端口}"
+echo "   云服务器记得在安全组放行 $PORT 端口"

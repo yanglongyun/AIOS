@@ -19,5 +19,6 @@ export type SystemStatus = {
 
 export const systemApi = {
   status: () => request<SystemStatus>("/api/system/status"),
+  desktop: () => request<{ available: boolean }>("/api/system/desktop").then((r) => r.available),
   killProcess: (id: string) => request<{ ok: boolean }>("/api/system/processes/kill", { method: "POST", ...jsonBody({ id }) }),
 };

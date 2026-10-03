@@ -79,20 +79,21 @@ const handleConnection = (ws) => {
   });
 };
 
-const attachWs = (server) => {
-  const wss = new WebSocketServer({ noServer: true });
-  wss.on("connection", handleConnection);
-  server.on("upgrade", (req, socket, head) => {
-    const url = new URL(req.url || "/", "http://127.0.0.1");
-    if (url.pathname !== "/api/ws") { socket.destroy(); return; }
-    // ws 是执行 bash / 读写磁盘的通道:必须已登录,且只放行同源发起的升级。
-    if (!isAuthenticated(req) || !isSameOrigin(req)) {
-      socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
-      socket.destroy();
-      return;
-    }
-    wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
-  });
+const wss = new WebSocketServer({ noServer: true });
+wss.on("connection", handleConnection);
+
+/** /api/ws 的升级。返回 true = 已处理;别的路径交给调用方(应用子域名、远程桌面)。 */
+const handleApiWsUpgrade = (req, socket, head) => {
+  const url = new URL(req.url || "/", "http://127.0.0.1");
+  if (url.pathname !== "/api/ws") return false;
+  // ws 是执行 bash / 读写磁盘的通道:必须已登录,且只放行同源发起的升级。
+  if (!isAuthenticated(req) || !isSameOrigin(req)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return true;
+  }
+  wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
+  return true;
 };
 
-export { attachWs };
+export { handleApiWsUpgrade };

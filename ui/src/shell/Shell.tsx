@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { type AppInfo, appsApi } from "../api/apps";
 import { ChatApp } from "../apps/ChatApp";
+import { DesktopApp } from "../apps/DesktopApp";
 import { FilesApp } from "../apps/FilesApp";
 import { SettingsApp } from "../apps/SettingsApp";
 import { StatusApp } from "../apps/StatusApp";
@@ -97,6 +98,7 @@ export function Shell() {
       <div className="flex min-h-0 flex-1">
         {view("chat", <ChatApp {...common("chat")} />)}
         {view("files", <FilesApp {...common("files")} openRequest={openRequest} />)}
+        {view("desktop", <DesktopApp {...common("desktop")} />)}
         {view("status", <StatusApp {...common("status")} />)}
         {view("settings", <SettingsApp {...common("settings")} />)}
         {ext && <div key={appId} className="flex min-h-0 flex-1"><AppPanel tab={{ appId: ext.id, title: ext.name }} socket={socket} /></div>}

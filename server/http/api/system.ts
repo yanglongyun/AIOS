@@ -8,6 +8,7 @@ import { appStatus } from "../../apps/supervisor.js";
 import { killProcess, listProcesses } from "../../terminals/jobs.js";
 import { runningIds } from "../../chats/turn.js";
 import { json, parseBody } from "./helpers.js";
+import { desktopAvailable } from "../desktopProxy.js";
 
 const VERSION = (() => {
   try { return JSON.parse(fs.readFileSync(`${REPO_ROOT}/package.json`, "utf8")).version || ""; } catch { return ""; }
@@ -52,6 +53,7 @@ const status = () => ({
 export const handleSystemRoutes = async (req: IncomingMessage, res: ServerResponse, url: URL, method: string): Promise<boolean> => {
   const path = url.pathname;
   if (path === "/api/system/status" && method === "GET") { json(res, 200, { ok: true, ...status() }); return true; }
+  if (path === "/api/system/desktop" && method === "GET") { json(res, 200, { ok: true, available: await desktopAvailable() }); return true; }
   if (path === "/api/system/processes/kill" && method === "POST") {
     json(res, 200, { ok: killProcess(String((await parseBody(req)).id || "")) });
     return true;
